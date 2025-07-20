@@ -16,7 +16,7 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBiCGSTABCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructBiCGSTABCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -52,7 +52,7 @@ HYPRE_StructBiCGSTABDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver s
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -70,7 +70,7 @@ HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -88,7 +88,7 @@ HYPRE_StructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Struc
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void ** residual )
+HYPRE_StructBiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void **residual )
 {
    switch (precision)
    {
@@ -250,7 +250,7 @@ HYPRE_StructBiCGSTABSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructCycRedCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructCycRedCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -286,7 +286,7 @@ HYPRE_StructCycRedDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructCycRedSetBase_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int ndim, HYPRE_Int * base_index, HYPRE_Int * base_stride )
+HYPRE_StructCycRedSetBase_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int ndim, HYPRE_Int *base_index, HYPRE_Int *base_stride )
 {
    switch (precision)
    {
@@ -394,7 +394,7 @@ HYPRE_StructDiagScaleSetup_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructFlexGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructFlexGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -430,7 +430,7 @@ HYPRE_StructFlexGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -448,7 +448,7 @@ HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -646,7 +646,7 @@ HYPRE_StructFlexGMRESSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -682,7 +682,7 @@ HYPRE_StructGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -700,7 +700,7 @@ HYPRE_StructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -880,7 +880,7 @@ HYPRE_StructGMRESSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructHybridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -916,7 +916,7 @@ HYPRE_StructHybridDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetDSCGNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * ds_num_its )
+HYPRE_StructHybridGetDSCGNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *ds_num_its )
 {
    switch (precision)
    {
@@ -934,7 +934,7 @@ HYPRE_StructHybridGetDSCGNumIterations_pre( HYPRE_Precision precision, HYPRE_Str
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -952,7 +952,7 @@ HYPRE_StructHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_its )
+HYPRE_StructHybridGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_its )
 {
    switch (precision)
    {
@@ -970,7 +970,7 @@ HYPRE_StructHybridGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructS
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetPCGNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * pre_num_its )
+HYPRE_StructHybridGetPCGNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *pre_num_its )
 {
    switch (precision)
    {
@@ -988,7 +988,7 @@ HYPRE_StructHybridGetPCGNumIterations_pre( HYPRE_Precision precision, HYPRE_Stru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetRecomputeResidual_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * recompute_residual )
+HYPRE_StructHybridGetRecomputeResidual_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *recompute_residual )
 {
    switch (precision)
    {
@@ -1006,7 +1006,7 @@ HYPRE_StructHybridGetRecomputeResidual_pre( HYPRE_Precision precision, HYPRE_Str
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructHybridGetRecomputeResidualP_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * recompute_residual_p )
+HYPRE_StructHybridGetRecomputeResidualP_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *recompute_residual_p )
 {
    switch (precision)
    {
@@ -1330,7 +1330,7 @@ HYPRE_StructHybridSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructJacobiCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -1366,7 +1366,7 @@ HYPRE_StructJacobiDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructJacobiGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -1384,7 +1384,7 @@ HYPRE_StructJacobiGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * max_iter )
+HYPRE_StructJacobiGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -1402,7 +1402,7 @@ HYPRE_StructJacobiGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructJacobiGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -1420,7 +1420,7 @@ HYPRE_StructJacobiGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructS
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * tol )
+HYPRE_StructJacobiGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *tol )
 {
    switch (precision)
    {
@@ -1438,7 +1438,7 @@ HYPRE_StructJacobiGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructJacobiGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * zeroguess )
+HYPRE_StructJacobiGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *zeroguess )
 {
    switch (precision)
    {
@@ -1564,7 +1564,7 @@ HYPRE_StructJacobiSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructLGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructLGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -1600,7 +1600,7 @@ HYPRE_StructLGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -1618,7 +1618,7 @@ HYPRE_StructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -1816,7 +1816,7 @@ HYPRE_StructLGMRESSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPCGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructPCGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -1852,7 +1852,7 @@ HYPRE_StructPCGDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -1870,7 +1870,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -2068,7 +2068,7 @@ HYPRE_StructPCGSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructPFMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -2104,7 +2104,7 @@ HYPRE_StructPFMGDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructPFMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -2122,7 +2122,7 @@ HYPRE_StructPFMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetJacobiWeight_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * weight )
+HYPRE_StructPFMGGetJacobiWeight_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *weight )
 {
    switch (precision)
    {
@@ -2140,7 +2140,7 @@ HYPRE_StructPFMGGetJacobiWeight_pre( HYPRE_Precision precision, HYPRE_StructSolv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * logging )
+HYPRE_StructPFMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *logging )
 {
    switch (precision)
    {
@@ -2158,7 +2158,7 @@ HYPRE_StructPFMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * max_iter )
+HYPRE_StructPFMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -2176,7 +2176,7 @@ HYPRE_StructPFMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetMaxLevels_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * max_levels )
+HYPRE_StructPFMGGetMaxLevels_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_levels )
 {
    switch (precision)
    {
@@ -2194,7 +2194,7 @@ HYPRE_StructPFMGGetMaxLevels_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructPFMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -2212,7 +2212,7 @@ HYPRE_StructPFMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_post_relax )
+HYPRE_StructPFMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_post_relax )
 {
    switch (precision)
    {
@@ -2230,7 +2230,7 @@ HYPRE_StructPFMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_pre_relax )
+HYPRE_StructPFMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_pre_relax )
 {
    switch (precision)
    {
@@ -2248,7 +2248,7 @@ HYPRE_StructPFMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * print_level )
+HYPRE_StructPFMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *print_level )
 {
    switch (precision)
    {
@@ -2266,7 +2266,7 @@ HYPRE_StructPFMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetRAPType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * rap_type )
+HYPRE_StructPFMGGetRAPType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *rap_type )
 {
    switch (precision)
    {
@@ -2284,7 +2284,7 @@ HYPRE_StructPFMGGetRAPType_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * rel_change )
+HYPRE_StructPFMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *rel_change )
 {
    switch (precision)
    {
@@ -2302,7 +2302,7 @@ HYPRE_StructPFMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetRelaxType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * relax_type )
+HYPRE_StructPFMGGetRelaxType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *relax_type )
 {
    switch (precision)
    {
@@ -2320,7 +2320,7 @@ HYPRE_StructPFMGGetRelaxType_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetSkipRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * skip_relax )
+HYPRE_StructPFMGGetSkipRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *skip_relax )
 {
    switch (precision)
    {
@@ -2338,7 +2338,7 @@ HYPRE_StructPFMGGetSkipRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * tol )
+HYPRE_StructPFMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *tol )
 {
    switch (precision)
    {
@@ -2356,7 +2356,7 @@ HYPRE_StructPFMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * zeroguess )
+HYPRE_StructPFMGGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *zeroguess )
 {
    switch (precision)
    {
@@ -2374,7 +2374,7 @@ HYPRE_StructPFMGGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructPFMGSetDxyz_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * dxyz )
+HYPRE_StructPFMGSetDxyz_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *dxyz )
 {
    switch (precision)
    {
@@ -2680,7 +2680,7 @@ HYPRE_StructPFMGSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver * solver )
+HYPRE_StructSMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)
    {
@@ -2716,7 +2716,7 @@ HYPRE_StructSMGDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * norm )
+HYPRE_StructSMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
 {
    switch (precision)
    {
@@ -2734,7 +2734,7 @@ HYPRE_StructSMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * logging )
+HYPRE_StructSMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *logging )
 {
    switch (precision)
    {
@@ -2752,7 +2752,7 @@ HYPRE_StructSMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * max_iter )
+HYPRE_StructSMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -2770,7 +2770,7 @@ HYPRE_StructSMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetMemoryUse_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * memory_use )
+HYPRE_StructSMGGetMemoryUse_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *memory_use )
 {
    switch (precision)
    {
@@ -2788,7 +2788,7 @@ HYPRE_StructSMGGetMemoryUse_pre( HYPRE_Precision precision, HYPRE_StructSolver s
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_StructSMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -2806,7 +2806,7 @@ HYPRE_StructSMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_post_relax )
+HYPRE_StructSMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_post_relax )
 {
    switch (precision)
    {
@@ -2824,7 +2824,7 @@ HYPRE_StructSMGGetNumPostRelax_pre( HYPRE_Precision precision, HYPRE_StructSolve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * num_pre_relax )
+HYPRE_StructSMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_pre_relax )
 {
    switch (precision)
    {
@@ -2842,7 +2842,7 @@ HYPRE_StructSMGGetNumPreRelax_pre( HYPRE_Precision precision, HYPRE_StructSolver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * print_level )
+HYPRE_StructSMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *print_level )
 {
    switch (precision)
    {
@@ -2860,7 +2860,7 @@ HYPRE_StructSMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_StructSolver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * rel_change )
+HYPRE_StructSMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *rel_change )
 {
    switch (precision)
    {
@@ -2878,7 +2878,7 @@ HYPRE_StructSMGGetRelChange_pre( HYPRE_Precision precision, HYPRE_StructSolver s
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void * tol )
+HYPRE_StructSMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *tol )
 {
    switch (precision)
    {
@@ -2896,7 +2896,7 @@ HYPRE_StructSMGGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSMGGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int * zeroguess )
+HYPRE_StructSMGGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *zeroguess )
 {
    switch (precision)
    {
@@ -3130,7 +3130,7 @@ HYPRE_StructSMGSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpreter * i )
+HYPRE_StructSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpreter *i )
 {
    switch (precision)
    {
@@ -3148,7 +3148,7 @@ HYPRE_StructSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions * mv )
+HYPRE_StructSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions *mv )
 {
    switch (precision)
    {

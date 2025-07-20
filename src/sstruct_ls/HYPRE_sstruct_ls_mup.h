@@ -32,13 +32,13 @@ extern "C" {
 
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructBiCGSTABCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructBiCGSTABCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructBiCGSTABCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructBiCGSTABCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABDestroy_flt( HYPRE_SStructSolver solver );
@@ -50,31 +50,31 @@ HYPRE_Int
 HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructBiCGSTABGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructBiCGSTABGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructBiCGSTABGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual_flt( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructBiCGSTABGetResidual_flt( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructBiCGSTABGetResidual_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual_long_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructBiCGSTABGetResidual_long_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetAbsoluteTol_flt( HYPRE_SStructSolver solver, hypre_float tol );
@@ -113,13 +113,13 @@ HYPRE_Int
 HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructBiCGSTABSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructBiCGSTABSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructBiCGSTABSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetPrintLevel_flt( HYPRE_SStructSolver solver, HYPRE_Int level );
@@ -185,13 +185,13 @@ HYPRE_Int
 HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector y, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructFlexGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructFlexGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructFlexGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructFlexGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESDestroy_flt( HYPRE_SStructSolver solver );
@@ -203,31 +203,31 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructFlexGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructFlexGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructFlexGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual_flt( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructFlexGMRESGetResidual_flt( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructFlexGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructFlexGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetAbsoluteTol_flt( HYPRE_SStructSolver solver, hypre_float tol );
@@ -284,13 +284,13 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver solver, HYPRE_PtrToModifyPCFcn modify_pc );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructFlexGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructFlexGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructFlexGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetPrintLevel_flt( HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -329,13 +329,13 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructGMRESDestroy_flt( HYPRE_SStructSolver solver );
@@ -347,31 +347,31 @@ HYPRE_Int
 HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual_flt( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructGMRESGetResidual_flt( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructGMRESSetAbsoluteTol_flt( HYPRE_SStructSolver solver, hypre_float tol );
@@ -419,13 +419,13 @@ HYPRE_Int
 HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructGMRESSetPrintLevel_flt( HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -473,13 +473,13 @@ HYPRE_Int
 HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructLGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructLGMRESCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructLGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructLGMRESCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructLGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructLGMRESCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructLGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructLGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructLGMRESDestroy_flt( HYPRE_SStructSolver solver );
@@ -491,31 +491,31 @@ HYPRE_Int
 HYPRE_SStructLGMRESDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructLGMRESGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructLGMRESGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructLGMRESGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual_flt( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructLGMRESGetResidual_flt( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructLGMRESGetResidual_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructLGMRESGetResidual_long_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructLGMRESGetResidual( HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetAbsoluteTol_flt( HYPRE_SStructSolver solver, hypre_float tol );
@@ -572,13 +572,13 @@ HYPRE_Int
 HYPRE_SStructLGMRESSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructLGMRESSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructLGMRESSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructLGMRESSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructLGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetPrintLevel_flt( HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -617,13 +617,13 @@ HYPRE_Int
 HYPRE_SStructLGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructPCGCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructPCGCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructPCGCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructPCGCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructPCGCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructPCGCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructPCGCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructPCGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructPCGDestroy_flt( HYPRE_SStructSolver solver );
@@ -635,31 +635,31 @@ HYPRE_Int
 HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructPCGGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructPCGGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructPCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructPCGGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructPCGGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructPCGGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructPCGGetResidual_flt( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructPCGGetResidual_flt( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructPCGGetResidual_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructPCGGetResidual_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructPCGGetResidual_long_dbl( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructPCGGetResidual_long_dbl( HYPRE_SStructSolver solver, void **residual );
 HYPRE_Int
-HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructPCGSetAbsoluteTol_flt( HYPRE_SStructSolver solver, hypre_float tol );
@@ -689,13 +689,13 @@ HYPRE_Int
 HYPRE_SStructPCGSetMaxIter( HYPRE_SStructSolver solver, HYPRE_Int max_iter );
 
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructPCGSetPrecond_flt( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructPCGSetPrecond_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructPCGSetPrecond_long_dbl( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructPCGSetPrintLevel_flt( HYPRE_SStructSolver solver, HYPRE_Int level );
@@ -752,31 +752,31 @@ HYPRE_Int
 HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructSetupInterpreter_flt( mv_InterfaceInterpreter * i );
+HYPRE_SStructSetupInterpreter_flt( mv_InterfaceInterpreter *i );
 HYPRE_Int
-HYPRE_SStructSetupInterpreter_dbl( mv_InterfaceInterpreter * i );
+HYPRE_SStructSetupInterpreter_dbl( mv_InterfaceInterpreter *i );
 HYPRE_Int
-HYPRE_SStructSetupInterpreter_long_dbl( mv_InterfaceInterpreter * i );
+HYPRE_SStructSetupInterpreter_long_dbl( mv_InterfaceInterpreter *i );
 HYPRE_Int
-HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter * i );
+HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i );
 
 HYPRE_Int
-HYPRE_SStructSetupMatvec_flt( HYPRE_MatvecFunctions * mv );
+HYPRE_SStructSetupMatvec_flt( HYPRE_MatvecFunctions *mv );
 HYPRE_Int
-HYPRE_SStructSetupMatvec_dbl( HYPRE_MatvecFunctions * mv );
+HYPRE_SStructSetupMatvec_dbl( HYPRE_MatvecFunctions *mv );
 HYPRE_Int
-HYPRE_SStructSetupMatvec_long_dbl( HYPRE_MatvecFunctions * mv );
+HYPRE_SStructSetupMatvec_long_dbl( HYPRE_MatvecFunctions *mv );
 HYPRE_Int
-HYPRE_SStructSetupMatvec( HYPRE_MatvecFunctions * mv );
+HYPRE_SStructSetupMatvec( HYPRE_MatvecFunctions *mv );
 
 HYPRE_Int
-HYPRE_SStructSplitCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSplitCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSplitCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSplitCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSplitCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSplitCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSplitCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSplitCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructSplitDestroy_flt( HYPRE_SStructSolver solver );
@@ -788,22 +788,22 @@ HYPRE_Int
 HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructSplitGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructSplitGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructSplitGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSplitGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSplitGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSplitGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
 HYPRE_SStructSplitSetMaxIter_flt( HYPRE_SStructSolver solver, HYPRE_Int max_iter );
@@ -869,13 +869,13 @@ HYPRE_Int
 HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate_flt( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSysPFMGCreate_flt( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSysPFMGCreate_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSysPFMGCreate_long_dbl( MPI_Comm comm, HYPRE_SStructSolver *solver );
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructSysPFMGDestroy_flt( HYPRE_SStructSolver solver );
@@ -887,31 +887,31 @@ HYPRE_Int
 HYPRE_SStructSysPFMGDestroy( HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float * norm );
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_flt( HYPRE_SStructSolver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double * norm );
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_dbl( HYPRE_SStructSolver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * norm );
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSysPFMGGetNumIterations_flt( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSysPFMGGetNumIterations_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSysPFMGGetNumIterations_long_dbl( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz_flt( HYPRE_SStructSolver solver, hypre_float * dxyz );
+HYPRE_SStructSysPFMGSetDxyz_flt( HYPRE_SStructSolver solver, hypre_float *dxyz );
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz_dbl( HYPRE_SStructSolver solver, hypre_double * dxyz );
+HYPRE_SStructSysPFMGSetDxyz_dbl( HYPRE_SStructSolver solver, hypre_double *dxyz );
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz_long_dbl( HYPRE_SStructSolver solver, hypre_long_double * dxyz );
+HYPRE_SStructSysPFMGSetDxyz_long_dbl( HYPRE_SStructSolver solver, hypre_long_double *dxyz );
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver solver, void * dxyz );
+HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver solver, void *dxyz );
 
 HYPRE_Int
 HYPRE_SStructSysPFMGSetJacobiWeight_flt( HYPRE_SStructSolver solver, hypre_float weight );
@@ -1051,19 +1051,19 @@ HYPRE_SStructSysPFMGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HY
 
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructBiCGSTABCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructBiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double tol );
@@ -1078,7 +1078,7 @@ HYPRE_Int
 HYPRE_SStructBiCGSTABSetMinIter_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructBiCGSTABSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int level );
@@ -1102,19 +1102,19 @@ HYPRE_Int
 HYPRE_SStructDiagScaleSetup_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector y, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructFlexGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructFlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double tol );
@@ -1135,7 +1135,7 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSetModifyPC_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToModifyPCFcn modify_pc );
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructFlexGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -1150,19 +1150,19 @@ HYPRE_Int
 HYPRE_SStructFlexGMRESSolve_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double tol );
@@ -1180,7 +1180,7 @@ HYPRE_Int
 HYPRE_SStructGMRESSetMinIter_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructGMRESSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -1198,19 +1198,19 @@ HYPRE_Int
 HYPRE_SStructGMRESSolve_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructLGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructLGMRESCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructLGMRESDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructLGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double tol );
@@ -1231,7 +1231,7 @@ HYPRE_Int
 HYPRE_SStructLGMRESSetMinIter_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int min_iter );
 
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructLGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int print_level );
@@ -1246,19 +1246,19 @@ HYPRE_Int
 HYPRE_SStructLGMRESSolve_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructPCGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructPCGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructPCGDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructPCGGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void ** residual );
+HYPRE_SStructPCGGetResidual_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void **residual );
 
 HYPRE_Int
 HYPRE_SStructPCGSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double tol );
@@ -1270,7 +1270,7 @@ HYPRE_Int
 HYPRE_SStructPCGSetMaxIter_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int max_iter );
 
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver );
+HYPRE_SStructPCGSetPrecond_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver );
 
 HYPRE_Int
 HYPRE_SStructPCGSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int level );
@@ -1291,22 +1291,22 @@ HYPRE_Int
 HYPRE_SStructPCGSolve_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpreter * i );
+HYPRE_SStructSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpreter *i );
 
 HYPRE_Int
-HYPRE_SStructSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions * mv );
+HYPRE_SStructSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions *mv );
 
 HYPRE_Int
-HYPRE_SStructSplitCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSplitCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructSplitDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructSplitGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSplitGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
 HYPRE_SStructSplitSetMaxIter_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int max_iter );
@@ -1330,19 +1330,19 @@ HYPRE_Int
 HYPRE_SStructSplitSolve_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver * solver );
+HYPRE_SStructSysPFMGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructSolver *solver );
 
 HYPRE_Int
 HYPRE_SStructSysPFMGDestroy_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * norm );
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int * num_iterations );
+HYPRE_SStructSysPFMGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void * dxyz );
+HYPRE_SStructSysPFMGSetDxyz_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *dxyz );
 
 HYPRE_Int
 HYPRE_SStructSysPFMGSetJacobiWeight_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, hypre_long_double weight );

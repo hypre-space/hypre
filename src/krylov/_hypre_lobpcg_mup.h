@@ -21,25 +21,25 @@ extern "C" {
 
 
 HYPRE_Int
-hypre_LOBPCGDestroy_flt( void * pcg_vdata );
+hypre_LOBPCGDestroy_flt( void *pcg_vdata );
 HYPRE_Int
-hypre_LOBPCGDestroy_dbl( void * pcg_vdata );
+hypre_LOBPCGDestroy_dbl( void *pcg_vdata );
 HYPRE_Int
-hypre_LOBPCGDestroy_long_dbl( void * pcg_vdata );
+hypre_LOBPCGDestroy_long_dbl( void *pcg_vdata );
 
 utilities_FortranMatrix*
-hypre_LOBPCGEigenvaluesHistory_flt( void * vdata );
+hypre_LOBPCGEigenvaluesHistory_flt( void *vdata );
 utilities_FortranMatrix*
-hypre_LOBPCGEigenvaluesHistory_dbl( void * vdata );
+hypre_LOBPCGEigenvaluesHistory_dbl( void *vdata );
 utilities_FortranMatrix*
-hypre_LOBPCGEigenvaluesHistory_long_dbl( void * vdata );
+hypre_LOBPCGEigenvaluesHistory_long_dbl( void *vdata );
 
 HYPRE_Int
-hypre_LOBPCGGetPrecond_flt( void * pcg_vdata, HYPRE_Solver * precond_data_ptr );
+hypre_LOBPCGGetPrecond_flt( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-hypre_LOBPCGGetPrecond_dbl( void * pcg_vdata, HYPRE_Solver * precond_data_ptr );
+hypre_LOBPCGGetPrecond_dbl( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-hypre_LOBPCGGetPrecond_long_dbl( void * pcg_vdata, HYPRE_Solver * precond_data_ptr );
+hypre_LOBPCGGetPrecond_long_dbl( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
 hypre_LOBPCGIterations_flt( void* vdata );
@@ -49,60 +49,60 @@ HYPRE_Int
 hypre_LOBPCGIterations_long_dbl( void* vdata );
 
 void
-hypre_LOBPCGMultiOperatorA_flt( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorA_flt( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiOperatorA_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorA_dbl( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiOperatorA_long_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorA_long_dbl( void *data, void * x, void* y );
 
 void
-hypre_LOBPCGMultiOperatorB_flt( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorB_flt( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiOperatorB_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorB_dbl( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiOperatorB_long_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiOperatorB_long_dbl( void *data, void * x, void* y );
 
 void
-hypre_LOBPCGMultiPreconditioner_flt( void * data, void * x, void* y );
+hypre_LOBPCGMultiPreconditioner_flt( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiPreconditioner_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiPreconditioner_dbl( void *data, void * x, void* y );
 void
-hypre_LOBPCGMultiPreconditioner_long_dbl( void * data, void * x, void* y );
+hypre_LOBPCGMultiPreconditioner_long_dbl( void *data, void * x, void* y );
 
 void
-hypre_LOBPCGOperatorA_flt( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorA_flt( void *pcg_vdata, void* x, void* y );
 void
-hypre_LOBPCGOperatorA_dbl( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorA_dbl( void *pcg_vdata, void* x, void* y );
 void
-hypre_LOBPCGOperatorA_long_dbl( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorA_long_dbl( void *pcg_vdata, void* x, void* y );
 
 void
-hypre_LOBPCGOperatorB_flt( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorB_flt( void *pcg_vdata, void* x, void* y );
 void
-hypre_LOBPCGOperatorB_dbl( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorB_dbl( void *pcg_vdata, void* x, void* y );
 void
-hypre_LOBPCGOperatorB_long_dbl( void * pcg_vdata, void* x, void* y );
+hypre_LOBPCGOperatorB_long_dbl( void *pcg_vdata, void* x, void* y );
 
 void
-hypre_LOBPCGPreconditioner_flt( void * vdata, void* x, void* y );
+hypre_LOBPCGPreconditioner_flt( void *vdata, void* x, void* y );
 void
-hypre_LOBPCGPreconditioner_dbl( void * vdata, void* x, void* y );
+hypre_LOBPCGPreconditioner_dbl( void *vdata, void* x, void* y );
 void
-hypre_LOBPCGPreconditioner_long_dbl( void * vdata, void* x, void* y );
-
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNorms_flt( void * vdata );
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNorms_dbl( void * vdata );
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNorms_long_dbl( void * vdata );
+hypre_LOBPCGPreconditioner_long_dbl( void *vdata, void* x, void* y );
 
 utilities_FortranMatrix*
-hypre_LOBPCGResidualNormsHistory_flt( void * vdata );
+hypre_LOBPCGResidualNorms_flt( void *vdata );
 utilities_FortranMatrix*
-hypre_LOBPCGResidualNormsHistory_dbl( void * vdata );
+hypre_LOBPCGResidualNorms_dbl( void *vdata );
 utilities_FortranMatrix*
-hypre_LOBPCGResidualNormsHistory_long_dbl( void * vdata );
+hypre_LOBPCGResidualNorms_long_dbl( void *vdata );
+
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNormsHistory_flt( void *vdata );
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNormsHistory_dbl( void *vdata );
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNormsHistory_long_dbl( void *vdata );
 
 HYPRE_Int
 hypre_LOBPCGSetMaxIter_flt( void* pcg_vdata, HYPRE_Int max_iter );
@@ -112,11 +112,11 @@ HYPRE_Int
 hypre_LOBPCGSetMaxIter_long_dbl( void* pcg_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_LOBPCGSetPrecond_flt( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
+hypre_LOBPCGSetPrecond_flt( void *pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data );
 HYPRE_Int
-hypre_LOBPCGSetPrecond_dbl( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
+hypre_LOBPCGSetPrecond_dbl( void *pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data );
 HYPRE_Int
-hypre_LOBPCGSetPrecond_long_dbl( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
+hypre_LOBPCGSetPrecond_long_dbl( void *pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data );
 
 HYPRE_Int
 hypre_LOBPCGSetPrecondUsageMode_flt( void* pcg_vdata, HYPRE_Int mode );
@@ -126,11 +126,11 @@ HYPRE_Int
 hypre_LOBPCGSetPrecondUsageMode_long_dbl( void* pcg_vdata, HYPRE_Int mode );
 
 HYPRE_Int
-hypre_LOBPCGSetPrintLevel_flt( void * pcg_vdata, HYPRE_Int level );
+hypre_LOBPCGSetPrintLevel_flt( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int
-hypre_LOBPCGSetPrintLevel_dbl( void * pcg_vdata, HYPRE_Int level );
+hypre_LOBPCGSetPrintLevel_dbl( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int
-hypre_LOBPCGSetPrintLevel_long_dbl( void * pcg_vdata, HYPRE_Int level );
+hypre_LOBPCGSetPrintLevel_long_dbl( void *pcg_vdata, HYPRE_Int level );
 
 HYPRE_Int
 hypre_LOBPCGSetRTol_flt( void* pcg_vdata, hypre_float tol );
@@ -147,39 +147,39 @@ HYPRE_Int
 hypre_LOBPCGSetTol_long_dbl( void* pcg_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_LOBPCGSetup_flt( void * pcg_vdata, void * A, void * b, void * x );
+hypre_LOBPCGSetup_flt( void *pcg_vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_LOBPCGSetup_dbl( void * pcg_vdata, void * A, void * b, void * x );
+hypre_LOBPCGSetup_dbl( void *pcg_vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_LOBPCGSetup_long_dbl( void * pcg_vdata, void * A, void * b, void * x );
+hypre_LOBPCGSetup_long_dbl( void *pcg_vdata, void *A, void *b, void *x );
 
 HYPRE_Int
-hypre_LOBPCGSetupB_flt( void * pcg_vdata, void * B, void * x );
+hypre_LOBPCGSetupB_flt( void *pcg_vdata, void *B, void *x );
 HYPRE_Int
-hypre_LOBPCGSetupB_dbl( void * pcg_vdata, void * B, void * x );
+hypre_LOBPCGSetupB_dbl( void *pcg_vdata, void *B, void *x );
 HYPRE_Int
-hypre_LOBPCGSetupB_long_dbl( void * pcg_vdata, void * B, void * x );
+hypre_LOBPCGSetupB_long_dbl( void *pcg_vdata, void *B, void *x );
 
 HYPRE_Int
-hypre_LOBPCGSetupT_flt( void * pcg_vdata, void * T, void * x );
+hypre_LOBPCGSetupT_flt( void *pcg_vdata, void *T, void *x );
 HYPRE_Int
-hypre_LOBPCGSetupT_dbl( void * pcg_vdata, void * T, void * x );
+hypre_LOBPCGSetupT_dbl( void *pcg_vdata, void *T, void *x );
 HYPRE_Int
-hypre_LOBPCGSetupT_long_dbl( void * pcg_vdata, void * T, void * x );
+hypre_LOBPCGSetupT_long_dbl( void *pcg_vdata, void *T, void *x );
 
 HYPRE_Int
-hypre_LOBPCGSolve_flt( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_float* val );
+hypre_LOBPCGSolve_flt( void *vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_float* val );
 HYPRE_Int
-hypre_LOBPCGSolve_dbl( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_double* val );
+hypre_LOBPCGSolve_dbl( void *vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_double* val );
 HYPRE_Int
-hypre_LOBPCGSolve_long_dbl( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_long_double* val );
+hypre_LOBPCGSolve_long_dbl( void *vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, hypre_long_double* val );
 
 void
-lobpcg_MultiVectorByMultiVector_flt( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+lobpcg_MultiVectorByMultiVector_flt( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix *xy );
 void
-lobpcg_MultiVectorByMultiVector_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+lobpcg_MultiVectorByMultiVector_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix *xy );
 void
-lobpcg_MultiVectorByMultiVector_long_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+lobpcg_MultiVectorByMultiVector_long_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix *xy );
 
 HYPRE_Int
 lobpcg_clean_flt( lobpcg_Data* data );

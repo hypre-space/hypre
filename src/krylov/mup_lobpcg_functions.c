@@ -16,7 +16,7 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGCreate( mv_InterfaceInterpreter * interpreter, HYPRE_MatvecFunctions * mvfunctions, HYPRE_Solver * solver )
+HYPRE_LOBPCGCreate( mv_InterfaceInterpreter *interpreter, HYPRE_MatvecFunctions *mvfunctions, HYPRE_Solver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LOBPCGCreate_pre( precision, interpreter, mvfunctions, solver );
@@ -43,7 +43,7 @@ HYPRE_LOBPCGEigenvaluesHistory( HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_LOBPCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LOBPCGGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -160,7 +160,7 @@ HYPRE_LOBPCGSetupT( HYPRE_Solver solver, HYPRE_Matrix T, HYPRE_Vector x )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGSolve( HYPRE_Solver solver, mv_MultiVectorPtr y, mv_MultiVectorPtr x, void * lambda )
+HYPRE_LOBPCGSolve( HYPRE_Solver solver, mv_MultiVectorPtr y, mv_MultiVectorPtr x, void *lambda )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LOBPCGSolve_pre( precision, solver, y, x, lambda );

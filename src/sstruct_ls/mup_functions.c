@@ -16,7 +16,7 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructBiCGSTABCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructBiCGSTABCreate_pre( precision, comm, solver );
@@ -34,7 +34,7 @@ HYPRE_SStructBiCGSTABDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -43,7 +43,7 @@ HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, v
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructBiCGSTABGetNumIterations_pre( precision, solver, num_iterations );
@@ -52,7 +52,7 @@ HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * n
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver solver, void ** residual )
+HYPRE_SStructBiCGSTABGetResidual( HYPRE_SStructSolver solver, void **residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructBiCGSTABGetResidual_pre( precision, solver, residual );
@@ -97,7 +97,7 @@ HYPRE_SStructBiCGSTABSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver )
+HYPRE_SStructBiCGSTABSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructBiCGSTABSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
@@ -169,7 +169,7 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructFlexGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructFlexGMRESCreate_pre( precision, comm, solver );
@@ -187,7 +187,7 @@ HYPRE_SStructFlexGMRESDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -196,7 +196,7 @@ HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructFlexGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -205,7 +205,7 @@ HYPRE_SStructFlexGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual )
+HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver solver, void **residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructFlexGMRESGetResidual_pre( precision, solver, residual );
@@ -268,7 +268,7 @@ HYPRE_SStructFlexGMRESSetModifyPC( HYPRE_SStructSolver solver, HYPRE_PtrToModify
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver )
+HYPRE_SStructFlexGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructFlexGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
@@ -313,7 +313,7 @@ HYPRE_SStructFlexGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGMRESCreate_pre( precision, comm, solver );
@@ -331,7 +331,7 @@ HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -340,7 +340,7 @@ HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -349,7 +349,7 @@ HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual )
+HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver solver, void **residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGMRESGetResidual_pre( precision, solver, residual );
@@ -403,7 +403,7 @@ HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver )
+HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
@@ -457,7 +457,7 @@ HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructLGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructLGMRESCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructLGMRESCreate_pre( precision, comm, solver );
@@ -475,7 +475,7 @@ HYPRE_SStructLGMRESDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -484,7 +484,7 @@ HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, voi
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructLGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -493,7 +493,7 @@ HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructLGMRESGetResidual( HYPRE_SStructSolver solver, void ** residual )
+HYPRE_SStructLGMRESGetResidual( HYPRE_SStructSolver solver, void **residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructLGMRESGetResidual_pre( precision, solver, residual );
@@ -556,7 +556,7 @@ HYPRE_SStructLGMRESSetMinIter( HYPRE_SStructSolver solver, HYPRE_Int min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructLGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver )
+HYPRE_SStructLGMRESSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructLGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
@@ -601,7 +601,7 @@ HYPRE_SStructLGMRESSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructPCGCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructPCGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructPCGCreate_pre( precision, comm, solver );
@@ -619,7 +619,7 @@ HYPRE_SStructPCGDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructPCGGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -628,7 +628,7 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructPCGGetNumIterations_pre( precision, solver, num_iterations );
@@ -637,7 +637,7 @@ HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_it
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver solver, void ** residual )
+HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver solver, void **residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructPCGGetResidual_pre( precision, solver, residual );
@@ -673,7 +673,7 @@ HYPRE_SStructPCGSetMaxIter( HYPRE_SStructSolver solver, HYPRE_Int max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void * precond_solver )
+HYPRE_SStructPCGSetPrecond( HYPRE_SStructSolver solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructPCGSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
@@ -736,7 +736,7 @@ HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter * i )
+HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSetupInterpreter_pre( precision, i );
@@ -745,7 +745,7 @@ HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter * i )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSetupMatvec( HYPRE_MatvecFunctions * mv )
+HYPRE_SStructSetupMatvec( HYPRE_MatvecFunctions *mv )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSetupMatvec_pre( precision, mv );
@@ -754,7 +754,7 @@ HYPRE_SStructSetupMatvec( HYPRE_MatvecFunctions * mv )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSplitCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructSplitCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSplitCreate_pre( precision, comm, solver );
@@ -772,7 +772,7 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSplitGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -781,7 +781,7 @@ HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSplitGetNumIterations_pre( precision, solver, num_iterations );
@@ -853,7 +853,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver * solver )
+HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSysPFMGCreate_pre( precision, comm, solver );
@@ -871,7 +871,7 @@ HYPRE_SStructSysPFMGDestroy( HYPRE_SStructSolver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void * norm )
+HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -880,7 +880,7 @@ HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, vo
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * num_iterations )
+HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSysPFMGGetNumIterations_pre( precision, solver, num_iterations );
@@ -889,7 +889,7 @@ HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int * nu
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver solver, void * dxyz )
+HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver solver, void *dxyz )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSysPFMGSetDxyz_pre( precision, solver, dxyz );

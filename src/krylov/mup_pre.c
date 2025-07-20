@@ -34,7 +34,7 @@ HYPRE_BiCGSTABDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -52,7 +52,7 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -70,7 +70,7 @@ HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_BiCGSTABGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -88,7 +88,7 @@ HYPRE_BiCGSTABGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_BiCGSTABGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    switch (precision)
    {
@@ -106,7 +106,7 @@ HYPRE_BiCGSTABGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_BiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -358,7 +358,7 @@ HYPRE_CGNRDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_CGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -376,7 +376,7 @@ HYPRE_CGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_CGNRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -394,7 +394,7 @@ HYPRE_CGNRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_CGNRGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -556,7 +556,7 @@ HYPRE_CGNRSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matri
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetCGS_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * cgs )
+HYPRE_COGMRESGetCGS_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cgs )
 {
    switch (precision)
    {
@@ -574,7 +574,7 @@ HYPRE_COGMRESGetCGS_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_I
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_COGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged )
 {
    switch (precision)
    {
@@ -592,7 +592,7 @@ HYPRE_COGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol )
+HYPRE_COGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol )
 {
    switch (precision)
    {
@@ -610,7 +610,7 @@ HYPRE_COGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -628,7 +628,7 @@ HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_COGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    switch (precision)
    {
@@ -646,7 +646,7 @@ HYPRE_COGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_COGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -664,7 +664,7 @@ HYPRE_COGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_COGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -682,7 +682,7 @@ HYPRE_COGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_COGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    switch (precision)
    {
@@ -700,7 +700,7 @@ HYPRE_COGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_COGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -718,7 +718,7 @@ HYPRE_COGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_COGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -736,7 +736,7 @@ HYPRE_COGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_COGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -754,7 +754,7 @@ HYPRE_COGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_COGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -772,7 +772,7 @@ HYPRE_COGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, vo
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_COGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -790,7 +790,7 @@ HYPRE_COGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetUnroll_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * unroll )
+HYPRE_COGMRESGetUnroll_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *unroll )
 {
    switch (precision)
    {
@@ -1060,7 +1060,7 @@ HYPRE_COGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Ma
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_FlexGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged )
 {
    switch (precision)
    {
@@ -1078,7 +1078,7 @@ HYPRE_FlexGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol )
+HYPRE_FlexGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol )
 {
    switch (precision)
    {
@@ -1096,7 +1096,7 @@ HYPRE_FlexGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -1114,7 +1114,7 @@ HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_FlexGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    switch (precision)
    {
@@ -1132,7 +1132,7 @@ HYPRE_FlexGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_FlexGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -1150,7 +1150,7 @@ HYPRE_FlexGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_FlexGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -1168,7 +1168,7 @@ HYPRE_FlexGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_FlexGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    switch (precision)
    {
@@ -1186,7 +1186,7 @@ HYPRE_FlexGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_FlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -1204,7 +1204,7 @@ HYPRE_FlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -1222,7 +1222,7 @@ HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -1240,7 +1240,7 @@ HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_FlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -1258,7 +1258,7 @@ HYPRE_FlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_FlexGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -1492,7 +1492,7 @@ HYPRE_FlexGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_GMRESGetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -1510,7 +1510,7 @@ HYPRE_GMRESGetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, v
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_GMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged )
 {
    switch (precision)
    {
@@ -1528,7 +1528,7 @@ HYPRE_GMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol )
+HYPRE_GMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol )
 {
    switch (precision)
    {
@@ -1546,7 +1546,7 @@ HYPRE_GMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -1564,7 +1564,7 @@ HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_So
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    switch (precision)
    {
@@ -1582,7 +1582,7 @@ HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_In
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_GMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -1600,7 +1600,7 @@ HYPRE_GMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_GMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -1618,7 +1618,7 @@ HYPRE_GMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_GMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    switch (precision)
    {
@@ -1636,7 +1636,7 @@ HYPRE_GMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_GMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -1654,7 +1654,7 @@ HYPRE_GMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_GMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -1672,7 +1672,7 @@ HYPRE_GMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_GMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    switch (precision)
    {
@@ -1690,7 +1690,7 @@ HYPRE_GMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -1708,7 +1708,7 @@ HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector * xref )
+HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector *xref )
 {
    switch (precision)
    {
@@ -1726,7 +1726,7 @@ HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * rel_change )
+HYPRE_GMRESGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *rel_change )
 {
    switch (precision)
    {
@@ -1744,7 +1744,7 @@ HYPRE_GMRESGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_GMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -1762,7 +1762,7 @@ HYPRE_GMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * skip_real_r_check )
+HYPRE_GMRESGetSkipRealResidualCheck_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *skip_real_r_check )
 {
    switch (precision)
    {
@@ -1780,7 +1780,7 @@ HYPRE_GMRESGetSkipRealResidualCheck_pre( HYPRE_Precision precision, HYPRE_Solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * stop_crit )
+HYPRE_GMRESGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *stop_crit )
 {
    switch (precision)
    {
@@ -1798,7 +1798,7 @@ HYPRE_GMRESGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_GMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -2104,7 +2104,7 @@ HYPRE_GMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetAugDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_LGMRESGetAugDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    switch (precision)
    {
@@ -2122,7 +2122,7 @@ HYPRE_LGMRESGetAugDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_LGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged )
 {
    switch (precision)
    {
@@ -2140,7 +2140,7 @@ HYPRE_LGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol )
+HYPRE_LGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol )
 {
    switch (precision)
    {
@@ -2158,7 +2158,7 @@ HYPRE_LGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -2176,7 +2176,7 @@ HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_S
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_LGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    switch (precision)
    {
@@ -2194,7 +2194,7 @@ HYPRE_LGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_I
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_LGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -2212,7 +2212,7 @@ HYPRE_LGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_LGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -2230,7 +2230,7 @@ HYPRE_LGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_LGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    switch (precision)
    {
@@ -2248,7 +2248,7 @@ HYPRE_LGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_LGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -2266,7 +2266,7 @@ HYPRE_LGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_LGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -2284,7 +2284,7 @@ HYPRE_LGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_LGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -2302,7 +2302,7 @@ HYPRE_LGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_LGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -2320,7 +2320,7 @@ HYPRE_LGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, voi
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_LGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -2554,7 +2554,7 @@ HYPRE_LGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Mat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * abstolf )
+HYPRE_PCGGetAbsoluteTolFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *abstolf )
 {
    switch (precision)
    {
@@ -2572,7 +2572,7 @@ HYPRE_PCGGetAbsoluteTolFactor_pre( HYPRE_Precision precision, HYPRE_Solver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_PCGGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged )
 {
    switch (precision)
    {
@@ -2590,7 +2590,7 @@ HYPRE_PCGGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol )
+HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol )
 {
    switch (precision)
    {
@@ -2608,7 +2608,7 @@ HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm )
+HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm )
 {
    switch (precision)
    {
@@ -2626,7 +2626,7 @@ HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * flex )
+HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *flex )
 {
    switch (precision)
    {
@@ -2644,7 +2644,7 @@ HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * logging )
+HYPRE_PCGGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *logging )
 {
    switch (precision)
    {
@@ -2662,7 +2662,7 @@ HYPRE_PCGGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_I
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_PCGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
    {
@@ -2680,7 +2680,7 @@ HYPRE_PCGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_I
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_PCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
    {
@@ -2698,7 +2698,7 @@ HYPRE_PCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_PCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -2716,7 +2716,7 @@ HYPRE_PCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_S
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_PCGGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    switch (precision)
    {
@@ -2734,7 +2734,7 @@ HYPRE_PCGGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_PCGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
    {
@@ -2752,7 +2752,7 @@ HYPRE_PCGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * rel_change )
+HYPRE_PCGGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *rel_change )
 {
    switch (precision)
    {
@@ -2770,7 +2770,7 @@ HYPRE_PCGGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual )
+HYPRE_PCGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual )
 {
    switch (precision)
    {
@@ -2788,7 +2788,7 @@ HYPRE_PCGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetResidualTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * rtol )
+HYPRE_PCGGetResidualTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *rtol )
 {
    switch (precision)
    {
@@ -2806,7 +2806,7 @@ HYPRE_PCGGetResidualTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, voi
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetSkipBreak_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * skip_break )
+HYPRE_PCGGetSkipBreak_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *skip_break )
 {
    switch (precision)
    {
@@ -2824,7 +2824,7 @@ HYPRE_PCGGetSkipBreak_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * stop_crit )
+HYPRE_PCGGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *stop_crit )
 {
    switch (precision)
    {
@@ -2842,7 +2842,7 @@ HYPRE_PCGGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol )
+HYPRE_PCGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol )
 {
    switch (precision)
    {
@@ -2860,7 +2860,7 @@ HYPRE_PCGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetTwoNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * two_norm )
+HYPRE_PCGGetTwoNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *two_norm )
 {
    switch (precision)
    {

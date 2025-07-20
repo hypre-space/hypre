@@ -21,25 +21,25 @@ extern "C" {
 
 
 hypre_StructMatrix *
-hypre_CycRedCreateCoarseOp_flt( hypre_StructMatrix * A, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_CycRedCreateCoarseOp_flt( hypre_StructMatrix *A, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_CycRedCreateCoarseOp_dbl( hypre_StructMatrix * A, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_CycRedCreateCoarseOp_dbl( hypre_StructMatrix *A, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_CycRedCreateCoarseOp_long_dbl( hypre_StructMatrix * A, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_CycRedCreateCoarseOp_long_dbl( hypre_StructMatrix *A, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 
 HYPRE_Int
-hypre_CycRedSetupCoarseOp_flt( hypre_StructMatrix * A, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
+hypre_CycRedSetupCoarseOp_flt( hypre_StructMatrix *A, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
 HYPRE_Int
-hypre_CycRedSetupCoarseOp_dbl( hypre_StructMatrix * A, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
+hypre_CycRedSetupCoarseOp_dbl( hypre_StructMatrix *A, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
 HYPRE_Int
-hypre_CycRedSetupCoarseOp_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
+hypre_CycRedSetupCoarseOp_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride, HYPRE_Int cdir );
 
 HYPRE_Int
-hypre_CyclicReduction_flt( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReduction_flt( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_CyclicReduction_dbl( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReduction_dbl( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_CyclicReduction_long_dbl( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReduction_long_dbl( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_CyclicReductionCreate_flt( MPI_Comm comm );
@@ -49,39 +49,39 @@ void *
 hypre_CyclicReductionCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_CyclicReductionDestroy_flt( void * cyc_red_vdata );
+hypre_CyclicReductionDestroy_flt( void *cyc_red_vdata );
 HYPRE_Int
-hypre_CyclicReductionDestroy_dbl( void * cyc_red_vdata );
+hypre_CyclicReductionDestroy_dbl( void *cyc_red_vdata );
 HYPRE_Int
-hypre_CyclicReductionDestroy_long_dbl( void * cyc_red_vdata );
+hypre_CyclicReductionDestroy_long_dbl( void *cyc_red_vdata );
 
 HYPRE_Int
-hypre_CyclicReductionSetBase_flt( void * cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_CyclicReductionSetBase_flt( void *cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_CyclicReductionSetBase_dbl( void * cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_CyclicReductionSetBase_dbl( void *cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_CyclicReductionSetBase_long_dbl( void * cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_CyclicReductionSetBase_long_dbl( void *cyc_red_vdata, hypre_Index base_index, hypre_Index base_stride );
 
 HYPRE_Int
-hypre_CyclicReductionSetCDir_flt( void * cyc_red_vdata, HYPRE_Int cdir );
+hypre_CyclicReductionSetCDir_flt( void *cyc_red_vdata, HYPRE_Int cdir );
 HYPRE_Int
-hypre_CyclicReductionSetCDir_dbl( void * cyc_red_vdata, HYPRE_Int cdir );
+hypre_CyclicReductionSetCDir_dbl( void *cyc_red_vdata, HYPRE_Int cdir );
 HYPRE_Int
-hypre_CyclicReductionSetCDir_long_dbl( void * cyc_red_vdata, HYPRE_Int cdir );
+hypre_CyclicReductionSetCDir_long_dbl( void *cyc_red_vdata, HYPRE_Int cdir );
 
 HYPRE_Int
-hypre_CyclicReductionSetMaxLevel_flt( void * cyc_red_vdata, HYPRE_Int max_level );
+hypre_CyclicReductionSetMaxLevel_flt( void *cyc_red_vdata, HYPRE_Int max_level );
 HYPRE_Int
-hypre_CyclicReductionSetMaxLevel_dbl( void * cyc_red_vdata, HYPRE_Int max_level );
+hypre_CyclicReductionSetMaxLevel_dbl( void *cyc_red_vdata, HYPRE_Int max_level );
 HYPRE_Int
-hypre_CyclicReductionSetMaxLevel_long_dbl( void * cyc_red_vdata, HYPRE_Int max_level );
+hypre_CyclicReductionSetMaxLevel_long_dbl( void *cyc_red_vdata, HYPRE_Int max_level );
 
 HYPRE_Int
-hypre_CyclicReductionSetup_flt( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReductionSetup_flt( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_CyclicReductionSetup_dbl( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReductionSetup_dbl( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_CyclicReductionSetup_long_dbl( void * cyc_red_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_CyclicReductionSetup_long_dbl( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_HybridCreate_flt( MPI_Comm comm );
@@ -91,165 +91,165 @@ void *
 hypre_HybridCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_HybridDestroy_flt( void * hybrid_vdata );
+hypre_HybridDestroy_flt( void *hybrid_vdata );
 HYPRE_Int
-hypre_HybridDestroy_dbl( void * hybrid_vdata );
+hypre_HybridDestroy_dbl( void *hybrid_vdata );
 HYPRE_Int
-hypre_HybridDestroy_long_dbl( void * hybrid_vdata );
+hypre_HybridDestroy_long_dbl( void *hybrid_vdata );
 
 HYPRE_Int
-hypre_HybridGetDSCGNumIterations_flt( void * hybrid_vdata, HYPRE_Int * dscg_num_its );
+hypre_HybridGetDSCGNumIterations_flt( void *hybrid_vdata, HYPRE_Int *dscg_num_its );
 HYPRE_Int
-hypre_HybridGetDSCGNumIterations_dbl( void * hybrid_vdata, HYPRE_Int * dscg_num_its );
+hypre_HybridGetDSCGNumIterations_dbl( void *hybrid_vdata, HYPRE_Int *dscg_num_its );
 HYPRE_Int
-hypre_HybridGetDSCGNumIterations_long_dbl( void * hybrid_vdata, HYPRE_Int * dscg_num_its );
+hypre_HybridGetDSCGNumIterations_long_dbl( void *hybrid_vdata, HYPRE_Int *dscg_num_its );
 
 HYPRE_Int
-hypre_HybridGetFinalRelativeResidualNorm_flt( void * hybrid_vdata, hypre_float * final_rel_res_norm );
+hypre_HybridGetFinalRelativeResidualNorm_flt( void *hybrid_vdata, hypre_float *final_rel_res_norm );
 HYPRE_Int
-hypre_HybridGetFinalRelativeResidualNorm_dbl( void * hybrid_vdata, hypre_double * final_rel_res_norm );
+hypre_HybridGetFinalRelativeResidualNorm_dbl( void *hybrid_vdata, hypre_double *final_rel_res_norm );
 HYPRE_Int
-hypre_HybridGetFinalRelativeResidualNorm_long_dbl( void * hybrid_vdata, hypre_long_double * final_rel_res_norm );
+hypre_HybridGetFinalRelativeResidualNorm_long_dbl( void *hybrid_vdata, hypre_long_double *final_rel_res_norm );
 
 HYPRE_Int
-hypre_HybridGetNumIterations_flt( void * hybrid_vdata, HYPRE_Int * num_its );
+hypre_HybridGetNumIterations_flt( void *hybrid_vdata, HYPRE_Int *num_its );
 HYPRE_Int
-hypre_HybridGetNumIterations_dbl( void * hybrid_vdata, HYPRE_Int * num_its );
+hypre_HybridGetNumIterations_dbl( void *hybrid_vdata, HYPRE_Int *num_its );
 HYPRE_Int
-hypre_HybridGetNumIterations_long_dbl( void * hybrid_vdata, HYPRE_Int * num_its );
+hypre_HybridGetNumIterations_long_dbl( void *hybrid_vdata, HYPRE_Int *num_its );
 
 HYPRE_Int
-hypre_HybridGetPCGNumIterations_flt( void * hybrid_vdata, HYPRE_Int * pcg_num_its );
+hypre_HybridGetPCGNumIterations_flt( void *hybrid_vdata, HYPRE_Int *pcg_num_its );
 HYPRE_Int
-hypre_HybridGetPCGNumIterations_dbl( void * hybrid_vdata, HYPRE_Int * pcg_num_its );
+hypre_HybridGetPCGNumIterations_dbl( void *hybrid_vdata, HYPRE_Int *pcg_num_its );
 HYPRE_Int
-hypre_HybridGetPCGNumIterations_long_dbl( void * hybrid_vdata, HYPRE_Int * pcg_num_its );
+hypre_HybridGetPCGNumIterations_long_dbl( void *hybrid_vdata, HYPRE_Int *pcg_num_its );
 
 HYPRE_Int
-hypre_HybridGetRecomputeResidual_flt( void * hybrid_vdata, HYPRE_Int * recompute_residual );
+hypre_HybridGetRecomputeResidual_flt( void *hybrid_vdata, HYPRE_Int *recompute_residual );
 HYPRE_Int
-hypre_HybridGetRecomputeResidual_dbl( void * hybrid_vdata, HYPRE_Int * recompute_residual );
+hypre_HybridGetRecomputeResidual_dbl( void *hybrid_vdata, HYPRE_Int *recompute_residual );
 HYPRE_Int
-hypre_HybridGetRecomputeResidual_long_dbl( void * hybrid_vdata, HYPRE_Int * recompute_residual );
+hypre_HybridGetRecomputeResidual_long_dbl( void *hybrid_vdata, HYPRE_Int *recompute_residual );
 
 HYPRE_Int
-hypre_HybridGetRecomputeResidualP_flt( void * hybrid_vdata, HYPRE_Int * recompute_residual_p );
+hypre_HybridGetRecomputeResidualP_flt( void *hybrid_vdata, HYPRE_Int *recompute_residual_p );
 HYPRE_Int
-hypre_HybridGetRecomputeResidualP_dbl( void * hybrid_vdata, HYPRE_Int * recompute_residual_p );
+hypre_HybridGetRecomputeResidualP_dbl( void *hybrid_vdata, HYPRE_Int *recompute_residual_p );
 HYPRE_Int
-hypre_HybridGetRecomputeResidualP_long_dbl( void * hybrid_vdata, HYPRE_Int * recompute_residual_p );
+hypre_HybridGetRecomputeResidualP_long_dbl( void *hybrid_vdata, HYPRE_Int *recompute_residual_p );
 
 HYPRE_Int
-hypre_HybridSetConvergenceTol_flt( void * hybrid_vdata, hypre_float cf_tol );
+hypre_HybridSetConvergenceTol_flt( void *hybrid_vdata, hypre_float cf_tol );
 HYPRE_Int
-hypre_HybridSetConvergenceTol_dbl( void * hybrid_vdata, hypre_double cf_tol );
+hypre_HybridSetConvergenceTol_dbl( void *hybrid_vdata, hypre_double cf_tol );
 HYPRE_Int
-hypre_HybridSetConvergenceTol_long_dbl( void * hybrid_vdata, hypre_long_double cf_tol );
+hypre_HybridSetConvergenceTol_long_dbl( void *hybrid_vdata, hypre_long_double cf_tol );
 
 HYPRE_Int
-hypre_HybridSetDSCGMaxIter_flt( void * hybrid_vdata, HYPRE_Int dscg_max_its );
+hypre_HybridSetDSCGMaxIter_flt( void *hybrid_vdata, HYPRE_Int dscg_max_its );
 HYPRE_Int
-hypre_HybridSetDSCGMaxIter_dbl( void * hybrid_vdata, HYPRE_Int dscg_max_its );
+hypre_HybridSetDSCGMaxIter_dbl( void *hybrid_vdata, HYPRE_Int dscg_max_its );
 HYPRE_Int
-hypre_HybridSetDSCGMaxIter_long_dbl( void * hybrid_vdata, HYPRE_Int dscg_max_its );
+hypre_HybridSetDSCGMaxIter_long_dbl( void *hybrid_vdata, HYPRE_Int dscg_max_its );
 
 HYPRE_Int
-hypre_HybridSetKDim_flt( void * hybrid_vdata, HYPRE_Int k_dim );
+hypre_HybridSetKDim_flt( void *hybrid_vdata, HYPRE_Int k_dim );
 HYPRE_Int
-hypre_HybridSetKDim_dbl( void * hybrid_vdata, HYPRE_Int k_dim );
+hypre_HybridSetKDim_dbl( void *hybrid_vdata, HYPRE_Int k_dim );
 HYPRE_Int
-hypre_HybridSetKDim_long_dbl( void * hybrid_vdata, HYPRE_Int k_dim );
+hypre_HybridSetKDim_long_dbl( void *hybrid_vdata, HYPRE_Int k_dim );
 
 HYPRE_Int
-hypre_HybridSetLogging_flt( void * hybrid_vdata, HYPRE_Int logging );
+hypre_HybridSetLogging_flt( void *hybrid_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_HybridSetLogging_dbl( void * hybrid_vdata, HYPRE_Int logging );
+hypre_HybridSetLogging_dbl( void *hybrid_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_HybridSetLogging_long_dbl( void * hybrid_vdata, HYPRE_Int logging );
+hypre_HybridSetLogging_long_dbl( void *hybrid_vdata, HYPRE_Int logging );
 
 HYPRE_Int
-hypre_HybridSetPCGAbsoluteTolFactor_flt( void * hybrid_vdata, hypre_float pcg_atolf );
+hypre_HybridSetPCGAbsoluteTolFactor_flt( void *hybrid_vdata, hypre_float pcg_atolf );
 HYPRE_Int
-hypre_HybridSetPCGAbsoluteTolFactor_dbl( void * hybrid_vdata, hypre_double pcg_atolf );
+hypre_HybridSetPCGAbsoluteTolFactor_dbl( void *hybrid_vdata, hypre_double pcg_atolf );
 HYPRE_Int
-hypre_HybridSetPCGAbsoluteTolFactor_long_dbl( void * hybrid_vdata, hypre_long_double pcg_atolf );
+hypre_HybridSetPCGAbsoluteTolFactor_long_dbl( void *hybrid_vdata, hypre_long_double pcg_atolf );
 
 HYPRE_Int
-hypre_HybridSetPCGMaxIter_flt( void * hybrid_vdata, HYPRE_Int pcg_max_its );
+hypre_HybridSetPCGMaxIter_flt( void *hybrid_vdata, HYPRE_Int pcg_max_its );
 HYPRE_Int
-hypre_HybridSetPCGMaxIter_dbl( void * hybrid_vdata, HYPRE_Int pcg_max_its );
+hypre_HybridSetPCGMaxIter_dbl( void *hybrid_vdata, HYPRE_Int pcg_max_its );
 HYPRE_Int
-hypre_HybridSetPCGMaxIter_long_dbl( void * hybrid_vdata, HYPRE_Int pcg_max_its );
+hypre_HybridSetPCGMaxIter_long_dbl( void *hybrid_vdata, HYPRE_Int pcg_max_its );
 
 HYPRE_Int
-hypre_HybridSetPrintLevel_flt( void * hybrid_vdata, HYPRE_Int print_level );
+hypre_HybridSetPrintLevel_flt( void *hybrid_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_HybridSetPrintLevel_dbl( void * hybrid_vdata, HYPRE_Int print_level );
+hypre_HybridSetPrintLevel_dbl( void *hybrid_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_HybridSetPrintLevel_long_dbl( void * hybrid_vdata, HYPRE_Int print_level );
+hypre_HybridSetPrintLevel_long_dbl( void *hybrid_vdata, HYPRE_Int print_level );
 
 HYPRE_Int
-hypre_HybridSetRecomputeResidual_flt( void * hybrid_vdata, HYPRE_Int recompute_residual );
+hypre_HybridSetRecomputeResidual_flt( void *hybrid_vdata, HYPRE_Int recompute_residual );
 HYPRE_Int
-hypre_HybridSetRecomputeResidual_dbl( void * hybrid_vdata, HYPRE_Int recompute_residual );
+hypre_HybridSetRecomputeResidual_dbl( void *hybrid_vdata, HYPRE_Int recompute_residual );
 HYPRE_Int
-hypre_HybridSetRecomputeResidual_long_dbl( void * hybrid_vdata, HYPRE_Int recompute_residual );
+hypre_HybridSetRecomputeResidual_long_dbl( void *hybrid_vdata, HYPRE_Int recompute_residual );
 
 HYPRE_Int
-hypre_HybridSetRecomputeResidualP_flt( void * hybrid_vdata, HYPRE_Int recompute_residual_p );
+hypre_HybridSetRecomputeResidualP_flt( void *hybrid_vdata, HYPRE_Int recompute_residual_p );
 HYPRE_Int
-hypre_HybridSetRecomputeResidualP_dbl( void * hybrid_vdata, HYPRE_Int recompute_residual_p );
+hypre_HybridSetRecomputeResidualP_dbl( void *hybrid_vdata, HYPRE_Int recompute_residual_p );
 HYPRE_Int
-hypre_HybridSetRecomputeResidualP_long_dbl( void * hybrid_vdata, HYPRE_Int recompute_residual_p );
+hypre_HybridSetRecomputeResidualP_long_dbl( void *hybrid_vdata, HYPRE_Int recompute_residual_p );
 
 HYPRE_Int
-hypre_HybridSetRelChange_flt( void * hybrid_vdata, HYPRE_Int rel_change );
+hypre_HybridSetRelChange_flt( void *hybrid_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_HybridSetRelChange_dbl( void * hybrid_vdata, HYPRE_Int rel_change );
+hypre_HybridSetRelChange_dbl( void *hybrid_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_HybridSetRelChange_long_dbl( void * hybrid_vdata, HYPRE_Int rel_change );
+hypre_HybridSetRelChange_long_dbl( void *hybrid_vdata, HYPRE_Int rel_change );
 
 HYPRE_Int
-hypre_HybridSetSolverType_flt( void * hybrid_vdata, HYPRE_Int solver_type );
+hypre_HybridSetSolverType_flt( void *hybrid_vdata, HYPRE_Int solver_type );
 HYPRE_Int
-hypre_HybridSetSolverType_dbl( void * hybrid_vdata, HYPRE_Int solver_type );
+hypre_HybridSetSolverType_dbl( void *hybrid_vdata, HYPRE_Int solver_type );
 HYPRE_Int
-hypre_HybridSetSolverType_long_dbl( void * hybrid_vdata, HYPRE_Int solver_type );
+hypre_HybridSetSolverType_long_dbl( void *hybrid_vdata, HYPRE_Int solver_type );
 
 HYPRE_Int
-hypre_HybridSetStopCrit_flt( void * hybrid_vdata, HYPRE_Int stop_crit );
+hypre_HybridSetStopCrit_flt( void *hybrid_vdata, HYPRE_Int stop_crit );
 HYPRE_Int
-hypre_HybridSetStopCrit_dbl( void * hybrid_vdata, HYPRE_Int stop_crit );
+hypre_HybridSetStopCrit_dbl( void *hybrid_vdata, HYPRE_Int stop_crit );
 HYPRE_Int
-hypre_HybridSetStopCrit_long_dbl( void * hybrid_vdata, HYPRE_Int stop_crit );
+hypre_HybridSetStopCrit_long_dbl( void *hybrid_vdata, HYPRE_Int stop_crit );
 
 HYPRE_Int
-hypre_HybridSetTol_flt( void * hybrid_vdata, hypre_float tol );
+hypre_HybridSetTol_flt( void *hybrid_vdata, hypre_float tol );
 HYPRE_Int
-hypre_HybridSetTol_dbl( void * hybrid_vdata, hypre_double tol );
+hypre_HybridSetTol_dbl( void *hybrid_vdata, hypre_double tol );
 HYPRE_Int
-hypre_HybridSetTol_long_dbl( void * hybrid_vdata, hypre_long_double tol );
+hypre_HybridSetTol_long_dbl( void *hybrid_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_HybridSetTwoNorm_flt( void * hybrid_vdata, HYPRE_Int two_norm );
+hypre_HybridSetTwoNorm_flt( void *hybrid_vdata, HYPRE_Int two_norm );
 HYPRE_Int
-hypre_HybridSetTwoNorm_dbl( void * hybrid_vdata, HYPRE_Int two_norm );
+hypre_HybridSetTwoNorm_dbl( void *hybrid_vdata, HYPRE_Int two_norm );
 HYPRE_Int
-hypre_HybridSetTwoNorm_long_dbl( void * hybrid_vdata, HYPRE_Int two_norm );
+hypre_HybridSetTwoNorm_long_dbl( void *hybrid_vdata, HYPRE_Int two_norm );
 
 HYPRE_Int
-hypre_HybridSetup_flt( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSetup_flt( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_HybridSetup_dbl( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSetup_dbl( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_HybridSetup_long_dbl( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSetup_long_dbl( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_HybridSolve_flt( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSolve_flt( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_HybridSolve_dbl( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSolve_dbl( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_HybridSolve_long_dbl( void * hybrid_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_HybridSolve_long_dbl( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_JacobiCreate_flt( MPI_Comm comm );
@@ -259,333 +259,333 @@ void *
 hypre_JacobiCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_JacobiDestroy_flt( void * jacobi_vdata );
+hypre_JacobiDestroy_flt( void *jacobi_vdata );
 HYPRE_Int
-hypre_JacobiDestroy_dbl( void * jacobi_vdata );
+hypre_JacobiDestroy_dbl( void *jacobi_vdata );
 HYPRE_Int
-hypre_JacobiDestroy_long_dbl( void * jacobi_vdata );
+hypre_JacobiDestroy_long_dbl( void *jacobi_vdata );
 
 HYPRE_Int
-hypre_JacobiGetFinalRelativeResidualNorm_flt( void * jacobi_vdata, hypre_float * norm );
+hypre_JacobiGetFinalRelativeResidualNorm_flt( void *jacobi_vdata, hypre_float *norm );
 HYPRE_Int
-hypre_JacobiGetFinalRelativeResidualNorm_dbl( void * jacobi_vdata, hypre_double * norm );
+hypre_JacobiGetFinalRelativeResidualNorm_dbl( void *jacobi_vdata, hypre_double *norm );
 HYPRE_Int
-hypre_JacobiGetFinalRelativeResidualNorm_long_dbl( void * jacobi_vdata, hypre_long_double * norm );
+hypre_JacobiGetFinalRelativeResidualNorm_long_dbl( void *jacobi_vdata, hypre_long_double *norm );
 
 HYPRE_Int
-hypre_JacobiGetMaxIter_flt( void * jacobi_vdata, HYPRE_Int * max_iter );
+hypre_JacobiGetMaxIter_flt( void *jacobi_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_JacobiGetMaxIter_dbl( void * jacobi_vdata, HYPRE_Int * max_iter );
+hypre_JacobiGetMaxIter_dbl( void *jacobi_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_JacobiGetMaxIter_long_dbl( void * jacobi_vdata, HYPRE_Int * max_iter );
+hypre_JacobiGetMaxIter_long_dbl( void *jacobi_vdata, HYPRE_Int *max_iter );
 
 HYPRE_Int
-hypre_JacobiGetNumIterations_flt( void * jacobi_vdata, HYPRE_Int * num_iterations );
+hypre_JacobiGetNumIterations_flt( void *jacobi_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_JacobiGetNumIterations_dbl( void * jacobi_vdata, HYPRE_Int * num_iterations );
+hypre_JacobiGetNumIterations_dbl( void *jacobi_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_JacobiGetNumIterations_long_dbl( void * jacobi_vdata, HYPRE_Int * num_iterations );
+hypre_JacobiGetNumIterations_long_dbl( void *jacobi_vdata, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-hypre_JacobiGetTol_flt( void * jacobi_vdata, hypre_float * tol );
+hypre_JacobiGetTol_flt( void *jacobi_vdata, hypre_float *tol );
 HYPRE_Int
-hypre_JacobiGetTol_dbl( void * jacobi_vdata, hypre_double * tol );
+hypre_JacobiGetTol_dbl( void *jacobi_vdata, hypre_double *tol );
 HYPRE_Int
-hypre_JacobiGetTol_long_dbl( void * jacobi_vdata, hypre_long_double * tol );
+hypre_JacobiGetTol_long_dbl( void *jacobi_vdata, hypre_long_double *tol );
 
 HYPRE_Int
-hypre_JacobiGetZeroGuess_flt( void * jacobi_vdata, HYPRE_Int * zero_guess );
+hypre_JacobiGetZeroGuess_flt( void *jacobi_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_JacobiGetZeroGuess_dbl( void * jacobi_vdata, HYPRE_Int * zero_guess );
+hypre_JacobiGetZeroGuess_dbl( void *jacobi_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_JacobiGetZeroGuess_long_dbl( void * jacobi_vdata, HYPRE_Int * zero_guess );
+hypre_JacobiGetZeroGuess_long_dbl( void *jacobi_vdata, HYPRE_Int *zero_guess );
 
 HYPRE_Int
-hypre_JacobiSetMaxIter_flt( void * jacobi_vdata, HYPRE_Int max_iter );
+hypre_JacobiSetMaxIter_flt( void *jacobi_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_JacobiSetMaxIter_dbl( void * jacobi_vdata, HYPRE_Int max_iter );
+hypre_JacobiSetMaxIter_dbl( void *jacobi_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_JacobiSetMaxIter_long_dbl( void * jacobi_vdata, HYPRE_Int max_iter );
+hypre_JacobiSetMaxIter_long_dbl( void *jacobi_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_JacobiSetTempVec_flt( void * jacobi_vdata, hypre_StructVector * t );
+hypre_JacobiSetTempVec_flt( void *jacobi_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_JacobiSetTempVec_dbl( void * jacobi_vdata, hypre_StructVector * t );
+hypre_JacobiSetTempVec_dbl( void *jacobi_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_JacobiSetTempVec_long_dbl( void * jacobi_vdata, hypre_StructVector * t );
+hypre_JacobiSetTempVec_long_dbl( void *jacobi_vdata, hypre_StructVector *t );
 
 HYPRE_Int
-hypre_JacobiSetTol_flt( void * jacobi_vdata, hypre_float tol );
+hypre_JacobiSetTol_flt( void *jacobi_vdata, hypre_float tol );
 HYPRE_Int
-hypre_JacobiSetTol_dbl( void * jacobi_vdata, hypre_double tol );
+hypre_JacobiSetTol_dbl( void *jacobi_vdata, hypre_double tol );
 HYPRE_Int
-hypre_JacobiSetTol_long_dbl( void * jacobi_vdata, hypre_long_double tol );
+hypre_JacobiSetTol_long_dbl( void *jacobi_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_JacobiSetZeroGuess_flt( void * jacobi_vdata, HYPRE_Int zero_guess );
+hypre_JacobiSetZeroGuess_flt( void *jacobi_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_JacobiSetZeroGuess_dbl( void * jacobi_vdata, HYPRE_Int zero_guess );
+hypre_JacobiSetZeroGuess_dbl( void *jacobi_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_JacobiSetZeroGuess_long_dbl( void * jacobi_vdata, HYPRE_Int zero_guess );
+hypre_JacobiSetZeroGuess_long_dbl( void *jacobi_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_JacobiSetup_flt( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSetup_flt( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_JacobiSetup_dbl( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSetup_dbl( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_JacobiSetup_long_dbl( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSetup_long_dbl( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_JacobiSolve_flt( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSolve_flt( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_JacobiSolve_dbl( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSolve_dbl( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_JacobiSolve_long_dbl( void * jacobi_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_JacobiSolve_long_dbl( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-hypre_StructMatrix *
-hypre_PFMG2CreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-hypre_StructMatrix *
-hypre_PFMG2CreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-hypre_StructMatrix *
-hypre_PFMG2CreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
-HYPRE_Int
-hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 hypre_StructMatrix *
-hypre_PFMG3CreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMG2CreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMG3CreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMG2CreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMG3CreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMG2CreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 
 HYPRE_Int
-hypre_PFMGBuildCoarseOp5_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGBuildCoarseOp5_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGBuildCoarseOp5_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGBuildCoarseOp7_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGBuildCoarseOp7_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGBuildCoarseOp7_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix * RAP );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_flt( hypre_StructMatrix * A, hypre_float * dxyz, hypre_float * mean, hypre_float * deviation );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_dbl( hypre_StructMatrix * A, hypre_double * dxyz, hypre_double * mean, hypre_double * deviation );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_long_dbl( hypre_StructMatrix * A, hypre_long_double * dxyz, hypre_long_double * mean, hypre_long_double * deviation );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS19_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS19_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS19_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS27_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS27_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS27_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS5_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS5_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS5_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS7_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS7_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS7_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS9_flt( HYPRE_Int bi, hypre_StructMatrix * A, hypre_float * cxyz, hypre_float * sqcxyz );
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS9_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_double * cxyz, hypre_double * sqcxyz );
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS9_long_dbl( HYPRE_Int bi, hypre_StructMatrix * A, hypre_long_double * cxyz, hypre_long_double * sqcxyz );
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_flt( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1_long_dbl( HYPRE_Int ci, HYPRE_Int fi, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+hypre_StructMatrix *
+hypre_PFMG3CreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
+hypre_StructMatrix *
+hypre_PFMG3CreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
+hypre_StructMatrix *
+hypre_PFMG3CreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
+
+HYPRE_Int
+hypre_PFMGBuildCoarseOp5_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMGBuildCoarseOp5_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMGBuildCoarseOp5_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMGBuildCoarseOp7_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMGBuildCoarseOp7_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+HYPRE_Int
+hypre_PFMGBuildCoarseOp7_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_StructMatrix *RAP );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_flt( hypre_StructMatrix *A, hypre_float *dxyz, hypre_float *mean, hypre_float *deviation );
+HYPRE_Int
+hypre_PFMGComputeDxyz_dbl( hypre_StructMatrix *A, hypre_double *dxyz, hypre_double *mean, hypre_double *deviation );
+HYPRE_Int
+hypre_PFMGComputeDxyz_long_dbl( hypre_StructMatrix *A, hypre_long_double *dxyz, hypre_long_double *mean, hypre_long_double *deviation );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_CS_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_CS_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_CS_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS19_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS19_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS19_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS27_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS27_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS27_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS5_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS5_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS5_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS7_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS7_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS7_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
+
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS9_flt( HYPRE_Int bi, hypre_StructMatrix *A, hypre_float *cxyz, hypre_float *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS9_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_double *cxyz, hypre_double *sqcxyz );
+HYPRE_Int
+hypre_PFMGComputeDxyz_SS9_long_dbl( HYPRE_Int bi, hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
 
 void *
 hypre_PFMGCreate_flt( MPI_Comm comm );
@@ -595,158 +595,158 @@ void *
 hypre_PFMGCreate_long_dbl( MPI_Comm comm );
 
 hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp5_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMGCreateCoarseOp5_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp5_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMGCreateCoarseOp5_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp5_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-
-hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp7_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp7_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
-hypre_StructMatrix *
-hypre_PFMGCreateCoarseOp7_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir );
+hypre_PFMGCreateCoarseOp5_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 
 hypre_StructMatrix *
-hypre_PFMGCreateInterpOp_flt( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateCoarseOp7_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMGCreateInterpOp_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateCoarseOp7_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_PFMGCreateInterpOp_long_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateCoarseOp7_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
 
 hypre_StructMatrix *
-hypre_PFMGCreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateInterpOp_flt( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
 hypre_StructMatrix *
-hypre_PFMGCreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateInterpOp_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
 hypre_StructMatrix *
-hypre_PFMGCreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_PFMGCreateInterpOp_long_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir, HYPRE_Int rap_type );
+
+hypre_StructMatrix *
+hypre_PFMGCreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_StructMatrix *
+hypre_PFMGCreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
+hypre_StructMatrix *
+hypre_PFMGCreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int rap_type );
 
 HYPRE_Int
-hypre_PFMGDestroy_flt( void * pfmg_vdata );
+hypre_PFMGDestroy_flt( void *pfmg_vdata );
 HYPRE_Int
-hypre_PFMGDestroy_dbl( void * pfmg_vdata );
+hypre_PFMGDestroy_dbl( void *pfmg_vdata );
 HYPRE_Int
-hypre_PFMGDestroy_long_dbl( void * pfmg_vdata );
+hypre_PFMGDestroy_long_dbl( void *pfmg_vdata );
 
 HYPRE_Int
-hypre_PFMGGetFinalRelativeResidualNorm_flt( void * pfmg_vdata, hypre_float * relative_residual_norm );
+hypre_PFMGGetFinalRelativeResidualNorm_flt( void *pfmg_vdata, hypre_float *relative_residual_norm );
 HYPRE_Int
-hypre_PFMGGetFinalRelativeResidualNorm_dbl( void * pfmg_vdata, hypre_double * relative_residual_norm );
+hypre_PFMGGetFinalRelativeResidualNorm_dbl( void *pfmg_vdata, hypre_double *relative_residual_norm );
 HYPRE_Int
-hypre_PFMGGetFinalRelativeResidualNorm_long_dbl( void * pfmg_vdata, hypre_long_double * relative_residual_norm );
+hypre_PFMGGetFinalRelativeResidualNorm_long_dbl( void *pfmg_vdata, hypre_long_double *relative_residual_norm );
 
 HYPRE_Int
-hypre_PFMGGetJacobiWeight_flt( void * pfmg_vdata, hypre_float * weight );
+hypre_PFMGGetJacobiWeight_flt( void *pfmg_vdata, hypre_float *weight );
 HYPRE_Int
-hypre_PFMGGetJacobiWeight_dbl( void * pfmg_vdata, hypre_double * weight );
+hypre_PFMGGetJacobiWeight_dbl( void *pfmg_vdata, hypre_double *weight );
 HYPRE_Int
-hypre_PFMGGetJacobiWeight_long_dbl( void * pfmg_vdata, hypre_long_double * weight );
+hypre_PFMGGetJacobiWeight_long_dbl( void *pfmg_vdata, hypre_long_double *weight );
 
 HYPRE_Int
-hypre_PFMGGetLogging_flt( void * pfmg_vdata, HYPRE_Int * logging );
+hypre_PFMGGetLogging_flt( void *pfmg_vdata, HYPRE_Int *logging );
 HYPRE_Int
-hypre_PFMGGetLogging_dbl( void * pfmg_vdata, HYPRE_Int * logging );
+hypre_PFMGGetLogging_dbl( void *pfmg_vdata, HYPRE_Int *logging );
 HYPRE_Int
-hypre_PFMGGetLogging_long_dbl( void * pfmg_vdata, HYPRE_Int * logging );
+hypre_PFMGGetLogging_long_dbl( void *pfmg_vdata, HYPRE_Int *logging );
 
 HYPRE_Int
-hypre_PFMGGetMaxIter_flt( void * pfmg_vdata, HYPRE_Int * max_iter );
+hypre_PFMGGetMaxIter_flt( void *pfmg_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_PFMGGetMaxIter_dbl( void * pfmg_vdata, HYPRE_Int * max_iter );
+hypre_PFMGGetMaxIter_dbl( void *pfmg_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_PFMGGetMaxIter_long_dbl( void * pfmg_vdata, HYPRE_Int * max_iter );
+hypre_PFMGGetMaxIter_long_dbl( void *pfmg_vdata, HYPRE_Int *max_iter );
 
 HYPRE_Int
-hypre_PFMGGetMaxLevels_flt( void * pfmg_vdata, HYPRE_Int * max_levels );
+hypre_PFMGGetMaxLevels_flt( void *pfmg_vdata, HYPRE_Int *max_levels );
 HYPRE_Int
-hypre_PFMGGetMaxLevels_dbl( void * pfmg_vdata, HYPRE_Int * max_levels );
+hypre_PFMGGetMaxLevels_dbl( void *pfmg_vdata, HYPRE_Int *max_levels );
 HYPRE_Int
-hypre_PFMGGetMaxLevels_long_dbl( void * pfmg_vdata, HYPRE_Int * max_levels );
+hypre_PFMGGetMaxLevels_long_dbl( void *pfmg_vdata, HYPRE_Int *max_levels );
 
 HYPRE_Int
-hypre_PFMGGetNumIterations_flt( void * pfmg_vdata, HYPRE_Int * num_iterations );
+hypre_PFMGGetNumIterations_flt( void *pfmg_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_PFMGGetNumIterations_dbl( void * pfmg_vdata, HYPRE_Int * num_iterations );
+hypre_PFMGGetNumIterations_dbl( void *pfmg_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_PFMGGetNumIterations_long_dbl( void * pfmg_vdata, HYPRE_Int * num_iterations );
+hypre_PFMGGetNumIterations_long_dbl( void *pfmg_vdata, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-hypre_PFMGGetNumPostRelax_flt( void * pfmg_vdata, HYPRE_Int * num_post_relax );
+hypre_PFMGGetNumPostRelax_flt( void *pfmg_vdata, HYPRE_Int *num_post_relax );
 HYPRE_Int
-hypre_PFMGGetNumPostRelax_dbl( void * pfmg_vdata, HYPRE_Int * num_post_relax );
+hypre_PFMGGetNumPostRelax_dbl( void *pfmg_vdata, HYPRE_Int *num_post_relax );
 HYPRE_Int
-hypre_PFMGGetNumPostRelax_long_dbl( void * pfmg_vdata, HYPRE_Int * num_post_relax );
+hypre_PFMGGetNumPostRelax_long_dbl( void *pfmg_vdata, HYPRE_Int *num_post_relax );
 
 HYPRE_Int
-hypre_PFMGGetNumPreRelax_flt( void * pfmg_vdata, HYPRE_Int * num_pre_relax );
+hypre_PFMGGetNumPreRelax_flt( void *pfmg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int
-hypre_PFMGGetNumPreRelax_dbl( void * pfmg_vdata, HYPRE_Int * num_pre_relax );
+hypre_PFMGGetNumPreRelax_dbl( void *pfmg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int
-hypre_PFMGGetNumPreRelax_long_dbl( void * pfmg_vdata, HYPRE_Int * num_pre_relax );
+hypre_PFMGGetNumPreRelax_long_dbl( void *pfmg_vdata, HYPRE_Int *num_pre_relax );
 
 HYPRE_Int
-hypre_PFMGGetPrintLevel_flt( void * pfmg_vdata, HYPRE_Int * print_level );
+hypre_PFMGGetPrintLevel_flt( void *pfmg_vdata, HYPRE_Int *print_level );
 HYPRE_Int
-hypre_PFMGGetPrintLevel_dbl( void * pfmg_vdata, HYPRE_Int * print_level );
+hypre_PFMGGetPrintLevel_dbl( void *pfmg_vdata, HYPRE_Int *print_level );
 HYPRE_Int
-hypre_PFMGGetPrintLevel_long_dbl( void * pfmg_vdata, HYPRE_Int * print_level );
+hypre_PFMGGetPrintLevel_long_dbl( void *pfmg_vdata, HYPRE_Int *print_level );
 
 HYPRE_Int
-hypre_PFMGGetRAPType_flt( void * pfmg_vdata, HYPRE_Int * rap_type );
+hypre_PFMGGetRAPType_flt( void *pfmg_vdata, HYPRE_Int *rap_type );
 HYPRE_Int
-hypre_PFMGGetRAPType_dbl( void * pfmg_vdata, HYPRE_Int * rap_type );
+hypre_PFMGGetRAPType_dbl( void *pfmg_vdata, HYPRE_Int *rap_type );
 HYPRE_Int
-hypre_PFMGGetRAPType_long_dbl( void * pfmg_vdata, HYPRE_Int * rap_type );
+hypre_PFMGGetRAPType_long_dbl( void *pfmg_vdata, HYPRE_Int *rap_type );
 
 HYPRE_Int
-hypre_PFMGGetRelChange_flt( void * pfmg_vdata, HYPRE_Int * rel_change );
+hypre_PFMGGetRelChange_flt( void *pfmg_vdata, HYPRE_Int *rel_change );
 HYPRE_Int
-hypre_PFMGGetRelChange_dbl( void * pfmg_vdata, HYPRE_Int * rel_change );
+hypre_PFMGGetRelChange_dbl( void *pfmg_vdata, HYPRE_Int *rel_change );
 HYPRE_Int
-hypre_PFMGGetRelChange_long_dbl( void * pfmg_vdata, HYPRE_Int * rel_change );
+hypre_PFMGGetRelChange_long_dbl( void *pfmg_vdata, HYPRE_Int *rel_change );
 
 HYPRE_Int
-hypre_PFMGGetRelaxType_flt( void * pfmg_vdata, HYPRE_Int * relax_type );
+hypre_PFMGGetRelaxType_flt( void *pfmg_vdata, HYPRE_Int *relax_type );
 HYPRE_Int
-hypre_PFMGGetRelaxType_dbl( void * pfmg_vdata, HYPRE_Int * relax_type );
+hypre_PFMGGetRelaxType_dbl( void *pfmg_vdata, HYPRE_Int *relax_type );
 HYPRE_Int
-hypre_PFMGGetRelaxType_long_dbl( void * pfmg_vdata, HYPRE_Int * relax_type );
+hypre_PFMGGetRelaxType_long_dbl( void *pfmg_vdata, HYPRE_Int *relax_type );
 
 HYPRE_Int
-hypre_PFMGGetSkipRelax_flt( void * pfmg_vdata, HYPRE_Int * skip_relax );
+hypre_PFMGGetSkipRelax_flt( void *pfmg_vdata, HYPRE_Int *skip_relax );
 HYPRE_Int
-hypre_PFMGGetSkipRelax_dbl( void * pfmg_vdata, HYPRE_Int * skip_relax );
+hypre_PFMGGetSkipRelax_dbl( void *pfmg_vdata, HYPRE_Int *skip_relax );
 HYPRE_Int
-hypre_PFMGGetSkipRelax_long_dbl( void * pfmg_vdata, HYPRE_Int * skip_relax );
+hypre_PFMGGetSkipRelax_long_dbl( void *pfmg_vdata, HYPRE_Int *skip_relax );
 
 HYPRE_Int
-hypre_PFMGGetTol_flt( void * pfmg_vdata, hypre_float * tol );
+hypre_PFMGGetTol_flt( void *pfmg_vdata, hypre_float *tol );
 HYPRE_Int
-hypre_PFMGGetTol_dbl( void * pfmg_vdata, hypre_double * tol );
+hypre_PFMGGetTol_dbl( void *pfmg_vdata, hypre_double *tol );
 HYPRE_Int
-hypre_PFMGGetTol_long_dbl( void * pfmg_vdata, hypre_long_double * tol );
+hypre_PFMGGetTol_long_dbl( void *pfmg_vdata, hypre_long_double *tol );
 
 HYPRE_Int
-hypre_PFMGGetZeroGuess_flt( void * pfmg_vdata, HYPRE_Int * zero_guess );
+hypre_PFMGGetZeroGuess_flt( void *pfmg_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_PFMGGetZeroGuess_dbl( void * pfmg_vdata, HYPRE_Int * zero_guess );
+hypre_PFMGGetZeroGuess_dbl( void *pfmg_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_PFMGGetZeroGuess_long_dbl( void * pfmg_vdata, HYPRE_Int * zero_guess );
+hypre_PFMGGetZeroGuess_long_dbl( void *pfmg_vdata, HYPRE_Int *zero_guess );
 
 HYPRE_Int
-hypre_PFMGPrintLogging_flt( void * pfmg_vdata, HYPRE_Int myid );
+hypre_PFMGPrintLogging_flt( void *pfmg_vdata, HYPRE_Int myid );
 HYPRE_Int
-hypre_PFMGPrintLogging_dbl( void * pfmg_vdata, HYPRE_Int myid );
+hypre_PFMGPrintLogging_dbl( void *pfmg_vdata, HYPRE_Int myid );
 HYPRE_Int
-hypre_PFMGPrintLogging_long_dbl( void * pfmg_vdata, HYPRE_Int myid );
+hypre_PFMGPrintLogging_long_dbl( void *pfmg_vdata, HYPRE_Int myid );
 
 HYPRE_Int
-hypre_PFMGRelax_flt( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelax_flt( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGRelax_dbl( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelax_dbl( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGRelax_long_dbl( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelax_long_dbl( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_PFMGRelaxCreate_flt( MPI_Comm comm );
@@ -756,263 +756,263 @@ void *
 hypre_PFMGRelaxCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_PFMGRelaxDestroy_flt( void * pfmg_relax_vdata );
+hypre_PFMGRelaxDestroy_flt( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxDestroy_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxDestroy_dbl( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxDestroy_long_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxDestroy_long_dbl( void *pfmg_relax_vdata );
 
 HYPRE_Int
-hypre_PFMGRelaxSetJacobiWeight_flt( void * pfmg_relax_vdata, hypre_float weight );
+hypre_PFMGRelaxSetJacobiWeight_flt( void *pfmg_relax_vdata, hypre_float weight );
 HYPRE_Int
-hypre_PFMGRelaxSetJacobiWeight_dbl( void * pfmg_relax_vdata, hypre_double weight );
+hypre_PFMGRelaxSetJacobiWeight_dbl( void *pfmg_relax_vdata, hypre_double weight );
 HYPRE_Int
-hypre_PFMGRelaxSetJacobiWeight_long_dbl( void * pfmg_relax_vdata, hypre_long_double weight );
+hypre_PFMGRelaxSetJacobiWeight_long_dbl( void *pfmg_relax_vdata, hypre_long_double weight );
 
 HYPRE_Int
-hypre_PFMGRelaxSetMaxIter_flt( void * pfmg_relax_vdata, HYPRE_Int max_iter );
+hypre_PFMGRelaxSetMaxIter_flt( void *pfmg_relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PFMGRelaxSetMaxIter_dbl( void * pfmg_relax_vdata, HYPRE_Int max_iter );
+hypre_PFMGRelaxSetMaxIter_dbl( void *pfmg_relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PFMGRelaxSetMaxIter_long_dbl( void * pfmg_relax_vdata, HYPRE_Int max_iter );
+hypre_PFMGRelaxSetMaxIter_long_dbl( void *pfmg_relax_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_PFMGRelaxSetPostRelax_flt( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPostRelax_flt( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxSetPostRelax_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPostRelax_dbl( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxSetPostRelax_long_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPostRelax_long_dbl( void *pfmg_relax_vdata );
 
 HYPRE_Int
-hypre_PFMGRelaxSetPreRelax_flt( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPreRelax_flt( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxSetPreRelax_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPreRelax_dbl( void *pfmg_relax_vdata );
 HYPRE_Int
-hypre_PFMGRelaxSetPreRelax_long_dbl( void * pfmg_relax_vdata );
+hypre_PFMGRelaxSetPreRelax_long_dbl( void *pfmg_relax_vdata );
 
 HYPRE_Int
-hypre_PFMGRelaxSetTempVec_flt( void * pfmg_relax_vdata, hypre_StructVector * t );
+hypre_PFMGRelaxSetTempVec_flt( void *pfmg_relax_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_PFMGRelaxSetTempVec_dbl( void * pfmg_relax_vdata, hypre_StructVector * t );
+hypre_PFMGRelaxSetTempVec_dbl( void *pfmg_relax_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_PFMGRelaxSetTempVec_long_dbl( void * pfmg_relax_vdata, hypre_StructVector * t );
+hypre_PFMGRelaxSetTempVec_long_dbl( void *pfmg_relax_vdata, hypre_StructVector *t );
 
 HYPRE_Int
-hypre_PFMGRelaxSetTol_flt( void * pfmg_relax_vdata, hypre_float tol );
+hypre_PFMGRelaxSetTol_flt( void *pfmg_relax_vdata, hypre_float tol );
 HYPRE_Int
-hypre_PFMGRelaxSetTol_dbl( void * pfmg_relax_vdata, hypre_double tol );
+hypre_PFMGRelaxSetTol_dbl( void *pfmg_relax_vdata, hypre_double tol );
 HYPRE_Int
-hypre_PFMGRelaxSetTol_long_dbl( void * pfmg_relax_vdata, hypre_long_double tol );
+hypre_PFMGRelaxSetTol_long_dbl( void *pfmg_relax_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_PFMGRelaxSetType_flt( void * pfmg_relax_vdata, HYPRE_Int relax_type );
+hypre_PFMGRelaxSetType_flt( void *pfmg_relax_vdata, HYPRE_Int relax_type );
 HYPRE_Int
-hypre_PFMGRelaxSetType_dbl( void * pfmg_relax_vdata, HYPRE_Int relax_type );
+hypre_PFMGRelaxSetType_dbl( void *pfmg_relax_vdata, HYPRE_Int relax_type );
 HYPRE_Int
-hypre_PFMGRelaxSetType_long_dbl( void * pfmg_relax_vdata, HYPRE_Int relax_type );
+hypre_PFMGRelaxSetType_long_dbl( void *pfmg_relax_vdata, HYPRE_Int relax_type );
 
 HYPRE_Int
-hypre_PFMGRelaxSetZeroGuess_flt( void * pfmg_relax_vdata, HYPRE_Int zero_guess );
+hypre_PFMGRelaxSetZeroGuess_flt( void *pfmg_relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PFMGRelaxSetZeroGuess_dbl( void * pfmg_relax_vdata, HYPRE_Int zero_guess );
+hypre_PFMGRelaxSetZeroGuess_dbl( void *pfmg_relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PFMGRelaxSetZeroGuess_long_dbl( void * pfmg_relax_vdata, HYPRE_Int zero_guess );
+hypre_PFMGRelaxSetZeroGuess_long_dbl( void *pfmg_relax_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_PFMGRelaxSetup_flt( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelaxSetup_flt( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGRelaxSetup_dbl( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelaxSetup_dbl( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGRelaxSetup_long_dbl( void * pfmg_relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGRelaxSetup_long_dbl( void *pfmg_relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_PFMGSetDxyz_flt( void * pfmg_vdata, hypre_float * dxyz );
+hypre_PFMGSetDxyz_flt( void *pfmg_vdata, hypre_float *dxyz );
 HYPRE_Int
-hypre_PFMGSetDxyz_dbl( void * pfmg_vdata, hypre_double * dxyz );
+hypre_PFMGSetDxyz_dbl( void *pfmg_vdata, hypre_double *dxyz );
 HYPRE_Int
-hypre_PFMGSetDxyz_long_dbl( void * pfmg_vdata, hypre_long_double * dxyz );
+hypre_PFMGSetDxyz_long_dbl( void *pfmg_vdata, hypre_long_double *dxyz );
 
 HYPRE_Int
-hypre_PFMGSetJacobiWeight_flt( void * pfmg_vdata, hypre_float weight );
+hypre_PFMGSetJacobiWeight_flt( void *pfmg_vdata, hypre_float weight );
 HYPRE_Int
-hypre_PFMGSetJacobiWeight_dbl( void * pfmg_vdata, hypre_double weight );
+hypre_PFMGSetJacobiWeight_dbl( void *pfmg_vdata, hypre_double weight );
 HYPRE_Int
-hypre_PFMGSetJacobiWeight_long_dbl( void * pfmg_vdata, hypre_long_double weight );
+hypre_PFMGSetJacobiWeight_long_dbl( void *pfmg_vdata, hypre_long_double weight );
 
 HYPRE_Int
-hypre_PFMGSetLogging_flt( void * pfmg_vdata, HYPRE_Int logging );
+hypre_PFMGSetLogging_flt( void *pfmg_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_PFMGSetLogging_dbl( void * pfmg_vdata, HYPRE_Int logging );
+hypre_PFMGSetLogging_dbl( void *pfmg_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_PFMGSetLogging_long_dbl( void * pfmg_vdata, HYPRE_Int logging );
+hypre_PFMGSetLogging_long_dbl( void *pfmg_vdata, HYPRE_Int logging );
 
 HYPRE_Int
-hypre_PFMGSetMaxIter_flt( void * pfmg_vdata, HYPRE_Int max_iter );
+hypre_PFMGSetMaxIter_flt( void *pfmg_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PFMGSetMaxIter_dbl( void * pfmg_vdata, HYPRE_Int max_iter );
+hypre_PFMGSetMaxIter_dbl( void *pfmg_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PFMGSetMaxIter_long_dbl( void * pfmg_vdata, HYPRE_Int max_iter );
+hypre_PFMGSetMaxIter_long_dbl( void *pfmg_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_PFMGSetMaxLevels_flt( void * pfmg_vdata, HYPRE_Int max_levels );
+hypre_PFMGSetMaxLevels_flt( void *pfmg_vdata, HYPRE_Int max_levels );
 HYPRE_Int
-hypre_PFMGSetMaxLevels_dbl( void * pfmg_vdata, HYPRE_Int max_levels );
+hypre_PFMGSetMaxLevels_dbl( void *pfmg_vdata, HYPRE_Int max_levels );
 HYPRE_Int
-hypre_PFMGSetMaxLevels_long_dbl( void * pfmg_vdata, HYPRE_Int max_levels );
+hypre_PFMGSetMaxLevels_long_dbl( void *pfmg_vdata, HYPRE_Int max_levels );
 
 HYPRE_Int
-hypre_PFMGSetNumPostRelax_flt( void * pfmg_vdata, HYPRE_Int num_post_relax );
+hypre_PFMGSetNumPostRelax_flt( void *pfmg_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_PFMGSetNumPostRelax_dbl( void * pfmg_vdata, HYPRE_Int num_post_relax );
+hypre_PFMGSetNumPostRelax_dbl( void *pfmg_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_PFMGSetNumPostRelax_long_dbl( void * pfmg_vdata, HYPRE_Int num_post_relax );
+hypre_PFMGSetNumPostRelax_long_dbl( void *pfmg_vdata, HYPRE_Int num_post_relax );
 
 HYPRE_Int
-hypre_PFMGSetNumPreRelax_flt( void * pfmg_vdata, HYPRE_Int num_pre_relax );
+hypre_PFMGSetNumPreRelax_flt( void *pfmg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_PFMGSetNumPreRelax_dbl( void * pfmg_vdata, HYPRE_Int num_pre_relax );
+hypre_PFMGSetNumPreRelax_dbl( void *pfmg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_PFMGSetNumPreRelax_long_dbl( void * pfmg_vdata, HYPRE_Int num_pre_relax );
+hypre_PFMGSetNumPreRelax_long_dbl( void *pfmg_vdata, HYPRE_Int num_pre_relax );
 
 HYPRE_Int
-hypre_PFMGSetPrintLevel_flt( void * pfmg_vdata, HYPRE_Int print_level );
+hypre_PFMGSetPrintLevel_flt( void *pfmg_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_PFMGSetPrintLevel_dbl( void * pfmg_vdata, HYPRE_Int print_level );
+hypre_PFMGSetPrintLevel_dbl( void *pfmg_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_PFMGSetPrintLevel_long_dbl( void * pfmg_vdata, HYPRE_Int print_level );
+hypre_PFMGSetPrintLevel_long_dbl( void *pfmg_vdata, HYPRE_Int print_level );
 
 HYPRE_Int
-hypre_PFMGSetRAPType_flt( void * pfmg_vdata, HYPRE_Int rap_type );
+hypre_PFMGSetRAPType_flt( void *pfmg_vdata, HYPRE_Int rap_type );
 HYPRE_Int
-hypre_PFMGSetRAPType_dbl( void * pfmg_vdata, HYPRE_Int rap_type );
+hypre_PFMGSetRAPType_dbl( void *pfmg_vdata, HYPRE_Int rap_type );
 HYPRE_Int
-hypre_PFMGSetRAPType_long_dbl( void * pfmg_vdata, HYPRE_Int rap_type );
+hypre_PFMGSetRAPType_long_dbl( void *pfmg_vdata, HYPRE_Int rap_type );
 
 HYPRE_Int
-hypre_PFMGSetRelChange_flt( void * pfmg_vdata, HYPRE_Int rel_change );
+hypre_PFMGSetRelChange_flt( void *pfmg_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_PFMGSetRelChange_dbl( void * pfmg_vdata, HYPRE_Int rel_change );
+hypre_PFMGSetRelChange_dbl( void *pfmg_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_PFMGSetRelChange_long_dbl( void * pfmg_vdata, HYPRE_Int rel_change );
+hypre_PFMGSetRelChange_long_dbl( void *pfmg_vdata, HYPRE_Int rel_change );
 
 HYPRE_Int
-hypre_PFMGSetRelaxType_flt( void * pfmg_vdata, HYPRE_Int relax_type );
+hypre_PFMGSetRelaxType_flt( void *pfmg_vdata, HYPRE_Int relax_type );
 HYPRE_Int
-hypre_PFMGSetRelaxType_dbl( void * pfmg_vdata, HYPRE_Int relax_type );
+hypre_PFMGSetRelaxType_dbl( void *pfmg_vdata, HYPRE_Int relax_type );
 HYPRE_Int
-hypre_PFMGSetRelaxType_long_dbl( void * pfmg_vdata, HYPRE_Int relax_type );
+hypre_PFMGSetRelaxType_long_dbl( void *pfmg_vdata, HYPRE_Int relax_type );
 
 HYPRE_Int
-hypre_PFMGSetSkipRelax_flt( void * pfmg_vdata, HYPRE_Int skip_relax );
+hypre_PFMGSetSkipRelax_flt( void *pfmg_vdata, HYPRE_Int skip_relax );
 HYPRE_Int
-hypre_PFMGSetSkipRelax_dbl( void * pfmg_vdata, HYPRE_Int skip_relax );
+hypre_PFMGSetSkipRelax_dbl( void *pfmg_vdata, HYPRE_Int skip_relax );
 HYPRE_Int
-hypre_PFMGSetSkipRelax_long_dbl( void * pfmg_vdata, HYPRE_Int skip_relax );
+hypre_PFMGSetSkipRelax_long_dbl( void *pfmg_vdata, HYPRE_Int skip_relax );
 
 HYPRE_Int
-hypre_PFMGSetTol_flt( void * pfmg_vdata, hypre_float tol );
+hypre_PFMGSetTol_flt( void *pfmg_vdata, hypre_float tol );
 HYPRE_Int
-hypre_PFMGSetTol_dbl( void * pfmg_vdata, hypre_double tol );
+hypre_PFMGSetTol_dbl( void *pfmg_vdata, hypre_double tol );
 HYPRE_Int
-hypre_PFMGSetTol_long_dbl( void * pfmg_vdata, hypre_long_double tol );
+hypre_PFMGSetTol_long_dbl( void *pfmg_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_PFMGSetZeroGuess_flt( void * pfmg_vdata, HYPRE_Int zero_guess );
+hypre_PFMGSetZeroGuess_flt( void *pfmg_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PFMGSetZeroGuess_dbl( void * pfmg_vdata, HYPRE_Int zero_guess );
+hypre_PFMGSetZeroGuess_dbl( void *pfmg_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PFMGSetZeroGuess_long_dbl( void * pfmg_vdata, HYPRE_Int zero_guess );
+hypre_PFMGSetZeroGuess_long_dbl( void *pfmg_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_PFMGSetup_flt( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSetup_flt( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGSetup_dbl( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSetup_dbl( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGSetup_long_dbl( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSetup_long_dbl( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_flt( hypre_StructMatrix * A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix * P, HYPRE_Int rap_type );
+hypre_PFMGSetupInterpOp_flt( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix *P, HYPRE_Int rap_type );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_dbl( hypre_StructMatrix * A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix * P, HYPRE_Int rap_type );
+hypre_PFMGSetupInterpOp_dbl( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix *P, HYPRE_Int rap_type );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_long_dbl( hypre_StructMatrix * A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix * P, HYPRE_Int rap_type );
+hypre_PFMGSetupInterpOp_long_dbl( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix *P, HYPRE_Int rap_type );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS15_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS15_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS15_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS15_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS15_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS15_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS19_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS19_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS19_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS19_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS19_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS19_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS27_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS27_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS27_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS27_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS27_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS27_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS5_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS5_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS5_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS5_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS5_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS5_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS7_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS7_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS7_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS7_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS7_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS7_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS9_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS9_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS9_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS9_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS9_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, hypre_Index * P_stencil_shape );
+hypre_PFMGSetupInterpOp_CC0_SS9_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC1_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC1_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC1_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC1_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC1_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC1_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC2_flt( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float * Pp0, hypre_float * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC2_flt( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_float *Pp0, hypre_float *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC2_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double * Pp0, hypre_double * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC2_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_double *Pp0, hypre_double *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC2_long_dbl( HYPRE_Int i, hypre_StructMatrix * A, hypre_Box * A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box * P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double * Pp0, hypre_long_double * Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
+hypre_PFMGSetupInterpOp_CC2_long_dbl( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, hypre_long_double *Pp0, hypre_long_double *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 
 HYPRE_Int
-hypre_PFMGSetupRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix * Ac );
+hypre_PFMGSetupRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix *Ac );
 HYPRE_Int
-hypre_PFMGSetupRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix * Ac );
+hypre_PFMGSetupRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix *Ac );
 HYPRE_Int
-hypre_PFMGSetupRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix * Ac );
+hypre_PFMGSetupRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int rap_type, hypre_StructMatrix *Ac );
 
 HYPRE_Int
-hypre_PFMGSolve_flt( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSolve_flt( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGSolve_dbl( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSolve_dbl( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PFMGSolve_long_dbl( void * pfmg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PFMGSolve_long_dbl( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_PointRelax_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelax_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PointRelax_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelax_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PointRelax_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelax_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_PointRelaxCreate_flt( MPI_Comm comm );
@@ -1022,137 +1022,137 @@ void *
 hypre_PointRelaxCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_PointRelaxDestroy_flt( void * relax_vdata );
+hypre_PointRelaxDestroy_flt( void *relax_vdata );
 HYPRE_Int
-hypre_PointRelaxDestroy_dbl( void * relax_vdata );
+hypre_PointRelaxDestroy_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_PointRelaxDestroy_long_dbl( void * relax_vdata );
+hypre_PointRelaxDestroy_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_PointRelaxGetFinalRelativeResidualNorm_flt( void * relax_vdata, hypre_float * norm );
+hypre_PointRelaxGetFinalRelativeResidualNorm_flt( void *relax_vdata, hypre_float *norm );
 HYPRE_Int
-hypre_PointRelaxGetFinalRelativeResidualNorm_dbl( void * relax_vdata, hypre_double * norm );
+hypre_PointRelaxGetFinalRelativeResidualNorm_dbl( void *relax_vdata, hypre_double *norm );
 HYPRE_Int
-hypre_PointRelaxGetFinalRelativeResidualNorm_long_dbl( void * relax_vdata, hypre_long_double * norm );
+hypre_PointRelaxGetFinalRelativeResidualNorm_long_dbl( void *relax_vdata, hypre_long_double *norm );
 
 HYPRE_Int
-hypre_PointRelaxGetMaxIter_flt( void * relax_vdata, HYPRE_Int * max_iter );
+hypre_PointRelaxGetMaxIter_flt( void *relax_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_PointRelaxGetMaxIter_dbl( void * relax_vdata, HYPRE_Int * max_iter );
+hypre_PointRelaxGetMaxIter_dbl( void *relax_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_PointRelaxGetMaxIter_long_dbl( void * relax_vdata, HYPRE_Int * max_iter );
+hypre_PointRelaxGetMaxIter_long_dbl( void *relax_vdata, HYPRE_Int *max_iter );
 
 HYPRE_Int
-hypre_PointRelaxGetNumIterations_flt( void * relax_vdata, HYPRE_Int * num_iterations );
+hypre_PointRelaxGetNumIterations_flt( void *relax_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_PointRelaxGetNumIterations_dbl( void * relax_vdata, HYPRE_Int * num_iterations );
+hypre_PointRelaxGetNumIterations_dbl( void *relax_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_PointRelaxGetNumIterations_long_dbl( void * relax_vdata, HYPRE_Int * num_iterations );
+hypre_PointRelaxGetNumIterations_long_dbl( void *relax_vdata, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-hypre_PointRelaxGetTol_flt( void * relax_vdata, hypre_float * tol );
+hypre_PointRelaxGetTol_flt( void *relax_vdata, hypre_float *tol );
 HYPRE_Int
-hypre_PointRelaxGetTol_dbl( void * relax_vdata, hypre_double * tol );
+hypre_PointRelaxGetTol_dbl( void *relax_vdata, hypre_double *tol );
 HYPRE_Int
-hypre_PointRelaxGetTol_long_dbl( void * relax_vdata, hypre_long_double * tol );
+hypre_PointRelaxGetTol_long_dbl( void *relax_vdata, hypre_long_double *tol );
 
 HYPRE_Int
-hypre_PointRelaxGetZeroGuess_flt( void * relax_vdata, HYPRE_Int * zero_guess );
+hypre_PointRelaxGetZeroGuess_flt( void *relax_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_PointRelaxGetZeroGuess_dbl( void * relax_vdata, HYPRE_Int * zero_guess );
+hypre_PointRelaxGetZeroGuess_dbl( void *relax_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_PointRelaxGetZeroGuess_long_dbl( void * relax_vdata, HYPRE_Int * zero_guess );
+hypre_PointRelaxGetZeroGuess_long_dbl( void *relax_vdata, HYPRE_Int *zero_guess );
 
 HYPRE_Int
-hypre_PointRelaxSetMaxIter_flt( void * relax_vdata, HYPRE_Int max_iter );
+hypre_PointRelaxSetMaxIter_flt( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PointRelaxSetMaxIter_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_PointRelaxSetMaxIter_dbl( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_PointRelaxSetMaxIter_long_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_PointRelaxSetMaxIter_long_dbl( void *relax_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_PointRelaxSetNumPointsets_flt( void * relax_vdata, HYPRE_Int num_pointsets );
+hypre_PointRelaxSetNumPointsets_flt( void *relax_vdata, HYPRE_Int num_pointsets );
 HYPRE_Int
-hypre_PointRelaxSetNumPointsets_dbl( void * relax_vdata, HYPRE_Int num_pointsets );
+hypre_PointRelaxSetNumPointsets_dbl( void *relax_vdata, HYPRE_Int num_pointsets );
 HYPRE_Int
-hypre_PointRelaxSetNumPointsets_long_dbl( void * relax_vdata, HYPRE_Int num_pointsets );
+hypre_PointRelaxSetNumPointsets_long_dbl( void *relax_vdata, HYPRE_Int num_pointsets );
 
 HYPRE_Int
-hypre_PointRelaxSetPointset_flt( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index * pointset_indices );
+hypre_PointRelaxSetPointset_flt( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index *pointset_indices );
 HYPRE_Int
-hypre_PointRelaxSetPointset_dbl( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index * pointset_indices );
+hypre_PointRelaxSetPointset_dbl( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index *pointset_indices );
 HYPRE_Int
-hypre_PointRelaxSetPointset_long_dbl( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index * pointset_indices );
+hypre_PointRelaxSetPointset_long_dbl( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index *pointset_indices );
 
 HYPRE_Int
-hypre_PointRelaxSetPointsetRank_flt( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
+hypre_PointRelaxSetPointsetRank_flt( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
 HYPRE_Int
-hypre_PointRelaxSetPointsetRank_dbl( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
+hypre_PointRelaxSetPointsetRank_dbl( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
 HYPRE_Int
-hypre_PointRelaxSetPointsetRank_long_dbl( void * relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
+hypre_PointRelaxSetPointsetRank_long_dbl( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank );
 
 HYPRE_Int
-hypre_PointRelaxSetTempVec_flt( void * relax_vdata, hypre_StructVector * t );
+hypre_PointRelaxSetTempVec_flt( void *relax_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_PointRelaxSetTempVec_dbl( void * relax_vdata, hypre_StructVector * t );
+hypre_PointRelaxSetTempVec_dbl( void *relax_vdata, hypre_StructVector *t );
 HYPRE_Int
-hypre_PointRelaxSetTempVec_long_dbl( void * relax_vdata, hypre_StructVector * t );
+hypre_PointRelaxSetTempVec_long_dbl( void *relax_vdata, hypre_StructVector *t );
 
 HYPRE_Int
-hypre_PointRelaxSetTol_flt( void * relax_vdata, hypre_float tol );
+hypre_PointRelaxSetTol_flt( void *relax_vdata, hypre_float tol );
 HYPRE_Int
-hypre_PointRelaxSetTol_dbl( void * relax_vdata, hypre_double tol );
+hypre_PointRelaxSetTol_dbl( void *relax_vdata, hypre_double tol );
 HYPRE_Int
-hypre_PointRelaxSetTol_long_dbl( void * relax_vdata, hypre_long_double tol );
+hypre_PointRelaxSetTol_long_dbl( void *relax_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_PointRelaxSetWeight_flt( void * relax_vdata, hypre_float weight );
+hypre_PointRelaxSetWeight_flt( void *relax_vdata, hypre_float weight );
 HYPRE_Int
-hypre_PointRelaxSetWeight_dbl( void * relax_vdata, hypre_double weight );
+hypre_PointRelaxSetWeight_dbl( void *relax_vdata, hypre_double weight );
 HYPRE_Int
-hypre_PointRelaxSetWeight_long_dbl( void * relax_vdata, hypre_long_double weight );
+hypre_PointRelaxSetWeight_long_dbl( void *relax_vdata, hypre_long_double weight );
 
 HYPRE_Int
-hypre_PointRelaxSetZeroGuess_flt( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_PointRelaxSetZeroGuess_flt( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PointRelaxSetZeroGuess_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_PointRelaxSetZeroGuess_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_PointRelaxSetZeroGuess_long_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_PointRelaxSetZeroGuess_long_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_PointRelaxSetup_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelaxSetup_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PointRelaxSetup_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelaxSetup_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_PointRelaxSetup_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_PointRelaxSetup_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_PointRelax_core0_flt( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_float * bp, hypre_float * xp, hypre_float * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core0_flt( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_float *bp, hypre_float *xp, hypre_float *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 HYPRE_Int
-hypre_PointRelax_core0_dbl( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_double * bp, hypre_double * xp, hypre_double * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core0_dbl( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_double *bp, hypre_double *xp, hypre_double *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 HYPRE_Int
-hypre_PointRelax_core0_long_dbl( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_long_double * bp, hypre_long_double * xp, hypre_long_double * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core0_long_dbl( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_long_double *bp, hypre_long_double *xp, hypre_long_double *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 
 HYPRE_Int
-hypre_PointRelax_core12_flt( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_float * bp, hypre_float * xp, hypre_float * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core12_flt( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_float *bp, hypre_float *xp, hypre_float *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 HYPRE_Int
-hypre_PointRelax_core12_dbl( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_double * bp, hypre_double * xp, hypre_double * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core12_dbl( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_double *bp, hypre_double *xp, hypre_double *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 HYPRE_Int
-hypre_PointRelax_core12_long_dbl( void * relax_vdata, hypre_StructMatrix * A, HYPRE_Int constant_coefficient, hypre_Box * compute_box, hypre_long_double * bp, hypre_long_double * xp, hypre_long_double * tp, HYPRE_Int boxarray_id, hypre_Box * A_data_box, hypre_Box * b_data_box, hypre_Box * x_data_box, hypre_Box * t_data_box, hypre_IndexRef stride );
+hypre_PointRelax_core12_long_dbl( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, hypre_long_double *bp, hypre_long_double *xp, hypre_long_double *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride );
 
 HYPRE_Int
-hypre_RedBlackConstantCoefGS_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackConstantCoefGS_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackConstantCoefGS_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackConstantCoefGS_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackConstantCoefGS_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackConstantCoefGS_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_RedBlackGS_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGS_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackGS_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGS_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackGS_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGS_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_RedBlackGSCreate_flt( MPI_Comm comm );
@@ -1162,130 +1162,130 @@ void *
 hypre_RedBlackGSCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_RedBlackGSDestroy_flt( void * relax_vdata );
+hypre_RedBlackGSDestroy_flt( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSDestroy_dbl( void * relax_vdata );
+hypre_RedBlackGSDestroy_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSDestroy_long_dbl( void * relax_vdata );
+hypre_RedBlackGSDestroy_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_RedBlackGSSetMaxIter_flt( void * relax_vdata, HYPRE_Int max_iter );
+hypre_RedBlackGSSetMaxIter_flt( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_RedBlackGSSetMaxIter_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_RedBlackGSSetMaxIter_dbl( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_RedBlackGSSetMaxIter_long_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_RedBlackGSSetMaxIter_long_dbl( void *relax_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_RedBlackGSSetStartBlack_flt( void * relax_vdata );
+hypre_RedBlackGSSetStartBlack_flt( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSSetStartBlack_dbl( void * relax_vdata );
+hypre_RedBlackGSSetStartBlack_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSSetStartBlack_long_dbl( void * relax_vdata );
+hypre_RedBlackGSSetStartBlack_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_RedBlackGSSetStartRed_flt( void * relax_vdata );
+hypre_RedBlackGSSetStartRed_flt( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSSetStartRed_dbl( void * relax_vdata );
+hypre_RedBlackGSSetStartRed_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_RedBlackGSSetStartRed_long_dbl( void * relax_vdata );
+hypre_RedBlackGSSetStartRed_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_RedBlackGSSetTol_flt( void * relax_vdata, hypre_float tol );
+hypre_RedBlackGSSetTol_flt( void *relax_vdata, hypre_float tol );
 HYPRE_Int
-hypre_RedBlackGSSetTol_dbl( void * relax_vdata, hypre_double tol );
+hypre_RedBlackGSSetTol_dbl( void *relax_vdata, hypre_double tol );
 HYPRE_Int
-hypre_RedBlackGSSetTol_long_dbl( void * relax_vdata, hypre_long_double tol );
+hypre_RedBlackGSSetTol_long_dbl( void *relax_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_RedBlackGSSetZeroGuess_flt( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_RedBlackGSSetZeroGuess_flt( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_RedBlackGSSetZeroGuess_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_RedBlackGSSetZeroGuess_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_RedBlackGSSetZeroGuess_long_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_RedBlackGSSetZeroGuess_long_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_RedBlackGSSetup_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGSSetup_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackGSSetup_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGSSetup_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_RedBlackGSSetup_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_RedBlackGSSetup_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMG2BuildRAPNoSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPNoSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG2BuildRAPNoSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPNoSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG2BuildRAPNoSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPNoSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 
 HYPRE_Int
-hypre_SMG2BuildRAPSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG2BuildRAPSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG2BuildRAPSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-
-hypre_StructMatrix *
-hypre_SMG2CreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
-hypre_StructMatrix *
-hypre_SMG2CreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
-hypre_StructMatrix *
-hypre_SMG2CreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
-
-HYPRE_Int
-hypre_SMG2RAPPeriodicNoSym_flt( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG2RAPPeriodicNoSym_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG2RAPPeriodicNoSym_long_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-
-HYPRE_Int
-hypre_SMG2RAPPeriodicSym_flt( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG2RAPPeriodicSym_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG2RAPPeriodicSym_long_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-
-HYPRE_Int
-hypre_SMG3BuildRAPNoSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG3BuildRAPNoSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG3BuildRAPNoSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-
-HYPRE_Int
-hypre_SMG3BuildRAPSym_flt( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG3BuildRAPSym_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
-HYPRE_Int
-hypre_SMG3BuildRAPSym_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * R, hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2BuildRAPSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 
 hypre_StructMatrix *
-hypre_SMG3CreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
+hypre_SMG2CreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
 hypre_StructMatrix *
-hypre_SMG3CreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
+hypre_SMG2CreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
 hypre_StructMatrix *
-hypre_SMG3CreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
+hypre_SMG2CreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
 
 HYPRE_Int
-hypre_SMG3RAPPeriodicNoSym_flt( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicNoSym_flt( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG3RAPPeriodicNoSym_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicNoSym_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG3RAPPeriodicNoSym_long_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicNoSym_long_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 
 HYPRE_Int
-hypre_SMG3RAPPeriodicSym_flt( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicSym_flt( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG3RAPPeriodicSym_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicSym_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMG3RAPPeriodicSym_long_dbl( hypre_StructMatrix * RAP, hypre_Index cindex, hypre_Index cstride );
+hypre_SMG2RAPPeriodicSym_long_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 
 HYPRE_Int
-hypre_SMGAxpy_flt( hypre_float alpha, hypre_StructVector * x, hypre_StructVector * y, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMG3BuildRAPNoSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGAxpy_dbl( hypre_double alpha, hypre_StructVector * x, hypre_StructVector * y, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMG3BuildRAPNoSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGAxpy_long_dbl( hypre_long_double alpha, hypre_StructVector * x, hypre_StructVector * y, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMG3BuildRAPNoSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+
+HYPRE_Int
+hypre_SMG3BuildRAPSym_flt( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3BuildRAPSym_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3BuildRAPSym_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *R, hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+
+hypre_StructMatrix *
+hypre_SMG3CreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
+hypre_StructMatrix *
+hypre_SMG3CreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
+hypre_StructMatrix *
+hypre_SMG3CreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
+
+HYPRE_Int
+hypre_SMG3RAPPeriodicNoSym_flt( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3RAPPeriodicNoSym_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3RAPPeriodicNoSym_long_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+
+HYPRE_Int
+hypre_SMG3RAPPeriodicSym_flt( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3RAPPeriodicSym_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+HYPRE_Int
+hypre_SMG3RAPPeriodicSym_long_dbl( hypre_StructMatrix *RAP, hypre_Index cindex, hypre_Index cstride );
+
+HYPRE_Int
+hypre_SMGAxpy_flt( hypre_float alpha, hypre_StructVector *x, hypre_StructVector *y, hypre_Index base_index, hypre_Index base_stride );
+HYPRE_Int
+hypre_SMGAxpy_dbl( hypre_double alpha, hypre_StructVector *x, hypre_StructVector *y, hypre_Index base_index, hypre_Index base_stride );
+HYPRE_Int
+hypre_SMGAxpy_long_dbl( hypre_long_double alpha, hypre_StructVector *x, hypre_StructVector *y, hypre_Index base_index, hypre_Index base_stride );
 
 void *
 hypre_SMGCreate_flt( MPI_Comm comm );
@@ -1295,123 +1295,123 @@ void *
 hypre_SMGCreate_long_dbl( MPI_Comm comm );
 
 hypre_StructMatrix *
-hypre_SMGCreateInterpOp_flt( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
+hypre_SMGCreateInterpOp_flt( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_SMGCreateInterpOp_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
+hypre_SMGCreateInterpOp_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
 hypre_StructMatrix *
-hypre_SMGCreateInterpOp_long_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
-
-hypre_StructMatrix *
-hypre_SMGCreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
-hypre_StructMatrix *
-hypre_SMGCreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
-hypre_StructMatrix *
-hypre_SMGCreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructGrid * coarse_grid );
+hypre_SMGCreateInterpOp_long_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
 
 hypre_StructMatrix *
-hypre_SMGCreateRestrictOp_flt( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
+hypre_SMGCreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
 hypre_StructMatrix *
-hypre_SMGCreateRestrictOp_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
+hypre_SMGCreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
 hypre_StructMatrix *
-hypre_SMGCreateRestrictOp_long_dbl( hypre_StructMatrix * A, hypre_StructGrid * cgrid, HYPRE_Int cdir );
+hypre_SMGCreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructGrid *coarse_grid );
+
+hypre_StructMatrix *
+hypre_SMGCreateRestrictOp_flt( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
+hypre_StructMatrix *
+hypre_SMGCreateRestrictOp_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
+hypre_StructMatrix *
+hypre_SMGCreateRestrictOp_long_dbl( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir );
 
 HYPRE_Int
-hypre_SMGDestroy_flt( void * smg_vdata );
+hypre_SMGDestroy_flt( void *smg_vdata );
 HYPRE_Int
-hypre_SMGDestroy_dbl( void * smg_vdata );
+hypre_SMGDestroy_dbl( void *smg_vdata );
 HYPRE_Int
-hypre_SMGDestroy_long_dbl( void * smg_vdata );
+hypre_SMGDestroy_long_dbl( void *smg_vdata );
 
 HYPRE_Int
-hypre_SMGGetFinalRelativeResidualNorm_flt( void * smg_vdata, hypre_float * relative_residual_norm );
+hypre_SMGGetFinalRelativeResidualNorm_flt( void *smg_vdata, hypre_float *relative_residual_norm );
 HYPRE_Int
-hypre_SMGGetFinalRelativeResidualNorm_dbl( void * smg_vdata, hypre_double * relative_residual_norm );
+hypre_SMGGetFinalRelativeResidualNorm_dbl( void *smg_vdata, hypre_double *relative_residual_norm );
 HYPRE_Int
-hypre_SMGGetFinalRelativeResidualNorm_long_dbl( void * smg_vdata, hypre_long_double * relative_residual_norm );
+hypre_SMGGetFinalRelativeResidualNorm_long_dbl( void *smg_vdata, hypre_long_double *relative_residual_norm );
 
 HYPRE_Int
-hypre_SMGGetLogging_flt( void * smg_vdata, HYPRE_Int * logging );
+hypre_SMGGetLogging_flt( void *smg_vdata, HYPRE_Int *logging );
 HYPRE_Int
-hypre_SMGGetLogging_dbl( void * smg_vdata, HYPRE_Int * logging );
+hypre_SMGGetLogging_dbl( void *smg_vdata, HYPRE_Int *logging );
 HYPRE_Int
-hypre_SMGGetLogging_long_dbl( void * smg_vdata, HYPRE_Int * logging );
+hypre_SMGGetLogging_long_dbl( void *smg_vdata, HYPRE_Int *logging );
 
 HYPRE_Int
-hypre_SMGGetMaxIter_flt( void * smg_vdata, HYPRE_Int * max_iter );
+hypre_SMGGetMaxIter_flt( void *smg_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_SMGGetMaxIter_dbl( void * smg_vdata, HYPRE_Int * max_iter );
+hypre_SMGGetMaxIter_dbl( void *smg_vdata, HYPRE_Int *max_iter );
 HYPRE_Int
-hypre_SMGGetMaxIter_long_dbl( void * smg_vdata, HYPRE_Int * max_iter );
+hypre_SMGGetMaxIter_long_dbl( void *smg_vdata, HYPRE_Int *max_iter );
 
 HYPRE_Int
-hypre_SMGGetMemoryUse_flt( void * smg_vdata, HYPRE_Int * memory_use );
+hypre_SMGGetMemoryUse_flt( void *smg_vdata, HYPRE_Int *memory_use );
 HYPRE_Int
-hypre_SMGGetMemoryUse_dbl( void * smg_vdata, HYPRE_Int * memory_use );
+hypre_SMGGetMemoryUse_dbl( void *smg_vdata, HYPRE_Int *memory_use );
 HYPRE_Int
-hypre_SMGGetMemoryUse_long_dbl( void * smg_vdata, HYPRE_Int * memory_use );
+hypre_SMGGetMemoryUse_long_dbl( void *smg_vdata, HYPRE_Int *memory_use );
 
 HYPRE_Int
-hypre_SMGGetNumIterations_flt( void * smg_vdata, HYPRE_Int * num_iterations );
+hypre_SMGGetNumIterations_flt( void *smg_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_SMGGetNumIterations_dbl( void * smg_vdata, HYPRE_Int * num_iterations );
+hypre_SMGGetNumIterations_dbl( void *smg_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
-hypre_SMGGetNumIterations_long_dbl( void * smg_vdata, HYPRE_Int * num_iterations );
+hypre_SMGGetNumIterations_long_dbl( void *smg_vdata, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-hypre_SMGGetNumPostRelax_flt( void * smg_vdata, HYPRE_Int * num_post_relax );
+hypre_SMGGetNumPostRelax_flt( void *smg_vdata, HYPRE_Int *num_post_relax );
 HYPRE_Int
-hypre_SMGGetNumPostRelax_dbl( void * smg_vdata, HYPRE_Int * num_post_relax );
+hypre_SMGGetNumPostRelax_dbl( void *smg_vdata, HYPRE_Int *num_post_relax );
 HYPRE_Int
-hypre_SMGGetNumPostRelax_long_dbl( void * smg_vdata, HYPRE_Int * num_post_relax );
+hypre_SMGGetNumPostRelax_long_dbl( void *smg_vdata, HYPRE_Int *num_post_relax );
 
 HYPRE_Int
-hypre_SMGGetNumPreRelax_flt( void * smg_vdata, HYPRE_Int * num_pre_relax );
+hypre_SMGGetNumPreRelax_flt( void *smg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int
-hypre_SMGGetNumPreRelax_dbl( void * smg_vdata, HYPRE_Int * num_pre_relax );
+hypre_SMGGetNumPreRelax_dbl( void *smg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int
-hypre_SMGGetNumPreRelax_long_dbl( void * smg_vdata, HYPRE_Int * num_pre_relax );
+hypre_SMGGetNumPreRelax_long_dbl( void *smg_vdata, HYPRE_Int *num_pre_relax );
 
 HYPRE_Int
-hypre_SMGGetPrintLevel_flt( void * smg_vdata, HYPRE_Int * print_level );
+hypre_SMGGetPrintLevel_flt( void *smg_vdata, HYPRE_Int *print_level );
 HYPRE_Int
-hypre_SMGGetPrintLevel_dbl( void * smg_vdata, HYPRE_Int * print_level );
+hypre_SMGGetPrintLevel_dbl( void *smg_vdata, HYPRE_Int *print_level );
 HYPRE_Int
-hypre_SMGGetPrintLevel_long_dbl( void * smg_vdata, HYPRE_Int * print_level );
+hypre_SMGGetPrintLevel_long_dbl( void *smg_vdata, HYPRE_Int *print_level );
 
 HYPRE_Int
-hypre_SMGGetRelChange_flt( void * smg_vdata, HYPRE_Int * rel_change );
+hypre_SMGGetRelChange_flt( void *smg_vdata, HYPRE_Int *rel_change );
 HYPRE_Int
-hypre_SMGGetRelChange_dbl( void * smg_vdata, HYPRE_Int * rel_change );
+hypre_SMGGetRelChange_dbl( void *smg_vdata, HYPRE_Int *rel_change );
 HYPRE_Int
-hypre_SMGGetRelChange_long_dbl( void * smg_vdata, HYPRE_Int * rel_change );
+hypre_SMGGetRelChange_long_dbl( void *smg_vdata, HYPRE_Int *rel_change );
 
 HYPRE_Int
-hypre_SMGGetTol_flt( void * smg_vdata, hypre_float * tol );
+hypre_SMGGetTol_flt( void *smg_vdata, hypre_float *tol );
 HYPRE_Int
-hypre_SMGGetTol_dbl( void * smg_vdata, hypre_double * tol );
+hypre_SMGGetTol_dbl( void *smg_vdata, hypre_double *tol );
 HYPRE_Int
-hypre_SMGGetTol_long_dbl( void * smg_vdata, hypre_long_double * tol );
+hypre_SMGGetTol_long_dbl( void *smg_vdata, hypre_long_double *tol );
 
 HYPRE_Int
-hypre_SMGGetZeroGuess_flt( void * smg_vdata, HYPRE_Int * zero_guess );
+hypre_SMGGetZeroGuess_flt( void *smg_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_SMGGetZeroGuess_dbl( void * smg_vdata, HYPRE_Int * zero_guess );
+hypre_SMGGetZeroGuess_dbl( void *smg_vdata, HYPRE_Int *zero_guess );
 HYPRE_Int
-hypre_SMGGetZeroGuess_long_dbl( void * smg_vdata, HYPRE_Int * zero_guess );
+hypre_SMGGetZeroGuess_long_dbl( void *smg_vdata, HYPRE_Int *zero_guess );
 
 HYPRE_Int
-hypre_SMGPrintLogging_flt( void * smg_vdata, HYPRE_Int myid );
+hypre_SMGPrintLogging_flt( void *smg_vdata, HYPRE_Int myid );
 HYPRE_Int
-hypre_SMGPrintLogging_dbl( void * smg_vdata, HYPRE_Int myid );
+hypre_SMGPrintLogging_dbl( void *smg_vdata, HYPRE_Int myid );
 HYPRE_Int
-hypre_SMGPrintLogging_long_dbl( void * smg_vdata, HYPRE_Int myid );
+hypre_SMGPrintLogging_long_dbl( void *smg_vdata, HYPRE_Int myid );
 
 HYPRE_Int
-hypre_SMGRelax_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelax_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelax_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelax_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelax_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelax_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 void *
 hypre_SMGRelaxCreate_flt( MPI_Comm comm );
@@ -1421,459 +1421,459 @@ void *
 hypre_SMGRelaxCreate_long_dbl( MPI_Comm comm );
 
 HYPRE_Int
-hypre_SMGRelaxDestroy_flt( void * relax_vdata );
+hypre_SMGRelaxDestroy_flt( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroy_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroy_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroy_long_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroy_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_SMGRelaxDestroyARem_flt( void * relax_vdata );
+hypre_SMGRelaxDestroyARem_flt( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyARem_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyARem_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyARem_long_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyARem_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_SMGRelaxDestroyASol_flt( void * relax_vdata );
+hypre_SMGRelaxDestroyASol_flt( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyASol_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyASol_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyASol_long_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyASol_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_SMGRelaxDestroyTempVec_flt( void * relax_vdata );
+hypre_SMGRelaxDestroyTempVec_flt( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyTempVec_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyTempVec_dbl( void *relax_vdata );
 HYPRE_Int
-hypre_SMGRelaxDestroyTempVec_long_dbl( void * relax_vdata );
+hypre_SMGRelaxDestroyTempVec_long_dbl( void *relax_vdata );
 
 HYPRE_Int
-hypre_SMGRelaxSetBase_flt( void * relax_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGRelaxSetBase_flt( void *relax_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGRelaxSetBase_dbl( void * relax_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGRelaxSetBase_dbl( void *relax_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGRelaxSetBase_long_dbl( void * relax_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGRelaxSetBase_long_dbl( void *relax_vdata, hypre_Index base_index, hypre_Index base_stride );
 
 HYPRE_Int
-hypre_SMGRelaxSetMaxIter_flt( void * relax_vdata, HYPRE_Int max_iter );
+hypre_SMGRelaxSetMaxIter_flt( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_SMGRelaxSetMaxIter_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_SMGRelaxSetMaxIter_dbl( void *relax_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_SMGRelaxSetMaxIter_long_dbl( void * relax_vdata, HYPRE_Int max_iter );
+hypre_SMGRelaxSetMaxIter_long_dbl( void *relax_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_SMGRelaxSetMaxLevel_flt( void * relax_vdata, HYPRE_Int num_max_level );
+hypre_SMGRelaxSetMaxLevel_flt( void *relax_vdata, HYPRE_Int num_max_level );
 HYPRE_Int
-hypre_SMGRelaxSetMaxLevel_dbl( void * relax_vdata, HYPRE_Int num_max_level );
+hypre_SMGRelaxSetMaxLevel_dbl( void *relax_vdata, HYPRE_Int num_max_level );
 HYPRE_Int
-hypre_SMGRelaxSetMaxLevel_long_dbl( void * relax_vdata, HYPRE_Int num_max_level );
+hypre_SMGRelaxSetMaxLevel_long_dbl( void *relax_vdata, HYPRE_Int num_max_level );
 
 HYPRE_Int
-hypre_SMGRelaxSetMemoryUse_flt( void * relax_vdata, HYPRE_Int memory_use );
+hypre_SMGRelaxSetMemoryUse_flt( void *relax_vdata, HYPRE_Int memory_use );
 HYPRE_Int
-hypre_SMGRelaxSetMemoryUse_dbl( void * relax_vdata, HYPRE_Int memory_use );
+hypre_SMGRelaxSetMemoryUse_dbl( void *relax_vdata, HYPRE_Int memory_use );
 HYPRE_Int
-hypre_SMGRelaxSetMemoryUse_long_dbl( void * relax_vdata, HYPRE_Int memory_use );
+hypre_SMGRelaxSetMemoryUse_long_dbl( void *relax_vdata, HYPRE_Int memory_use );
 
 HYPRE_Int
-hypre_SMGRelaxSetNewMatrixStencil_flt( void * relax_vdata, hypre_StructStencil * diff_stencil );
+hypre_SMGRelaxSetNewMatrixStencil_flt( void *relax_vdata, hypre_StructStencil *diff_stencil );
 HYPRE_Int
-hypre_SMGRelaxSetNewMatrixStencil_dbl( void * relax_vdata, hypre_StructStencil * diff_stencil );
+hypre_SMGRelaxSetNewMatrixStencil_dbl( void *relax_vdata, hypre_StructStencil *diff_stencil );
 HYPRE_Int
-hypre_SMGRelaxSetNewMatrixStencil_long_dbl( void * relax_vdata, hypre_StructStencil * diff_stencil );
+hypre_SMGRelaxSetNewMatrixStencil_long_dbl( void *relax_vdata, hypre_StructStencil *diff_stencil );
 
 HYPRE_Int
-hypre_SMGRelaxSetNumPostRelax_flt( void * relax_vdata, HYPRE_Int num_post_relax );
+hypre_SMGRelaxSetNumPostRelax_flt( void *relax_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_SMGRelaxSetNumPostRelax_dbl( void * relax_vdata, HYPRE_Int num_post_relax );
+hypre_SMGRelaxSetNumPostRelax_dbl( void *relax_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_SMGRelaxSetNumPostRelax_long_dbl( void * relax_vdata, HYPRE_Int num_post_relax );
+hypre_SMGRelaxSetNumPostRelax_long_dbl( void *relax_vdata, HYPRE_Int num_post_relax );
 
 HYPRE_Int
-hypre_SMGRelaxSetNumPreRelax_flt( void * relax_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGRelaxSetNumPreRelax_flt( void *relax_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_SMGRelaxSetNumPreRelax_dbl( void * relax_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGRelaxSetNumPreRelax_dbl( void *relax_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_SMGRelaxSetNumPreRelax_long_dbl( void * relax_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGRelaxSetNumPreRelax_long_dbl( void *relax_vdata, HYPRE_Int num_pre_relax );
 
 HYPRE_Int
-hypre_SMGRelaxSetNumPreSpaces_flt( void * relax_vdata, HYPRE_Int num_pre_spaces );
+hypre_SMGRelaxSetNumPreSpaces_flt( void *relax_vdata, HYPRE_Int num_pre_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumPreSpaces_dbl( void * relax_vdata, HYPRE_Int num_pre_spaces );
+hypre_SMGRelaxSetNumPreSpaces_dbl( void *relax_vdata, HYPRE_Int num_pre_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumPreSpaces_long_dbl( void * relax_vdata, HYPRE_Int num_pre_spaces );
+hypre_SMGRelaxSetNumPreSpaces_long_dbl( void *relax_vdata, HYPRE_Int num_pre_spaces );
 
 HYPRE_Int
-hypre_SMGRelaxSetNumRegSpaces_flt( void * relax_vdata, HYPRE_Int num_reg_spaces );
+hypre_SMGRelaxSetNumRegSpaces_flt( void *relax_vdata, HYPRE_Int num_reg_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumRegSpaces_dbl( void * relax_vdata, HYPRE_Int num_reg_spaces );
+hypre_SMGRelaxSetNumRegSpaces_dbl( void *relax_vdata, HYPRE_Int num_reg_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumRegSpaces_long_dbl( void * relax_vdata, HYPRE_Int num_reg_spaces );
+hypre_SMGRelaxSetNumRegSpaces_long_dbl( void *relax_vdata, HYPRE_Int num_reg_spaces );
 
 HYPRE_Int
-hypre_SMGRelaxSetNumSpaces_flt( void * relax_vdata, HYPRE_Int num_spaces );
+hypre_SMGRelaxSetNumSpaces_flt( void *relax_vdata, HYPRE_Int num_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumSpaces_dbl( void * relax_vdata, HYPRE_Int num_spaces );
+hypre_SMGRelaxSetNumSpaces_dbl( void *relax_vdata, HYPRE_Int num_spaces );
 HYPRE_Int
-hypre_SMGRelaxSetNumSpaces_long_dbl( void * relax_vdata, HYPRE_Int num_spaces );
+hypre_SMGRelaxSetNumSpaces_long_dbl( void *relax_vdata, HYPRE_Int num_spaces );
 
 HYPRE_Int
-hypre_SMGRelaxSetPreSpaceRank_flt( void * relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
+hypre_SMGRelaxSetPreSpaceRank_flt( void *relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
 HYPRE_Int
-hypre_SMGRelaxSetPreSpaceRank_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
+hypre_SMGRelaxSetPreSpaceRank_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
 HYPRE_Int
-hypre_SMGRelaxSetPreSpaceRank_long_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
+hypre_SMGRelaxSetPreSpaceRank_long_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int pre_space_rank );
 
 HYPRE_Int
-hypre_SMGRelaxSetRegSpaceRank_flt( void * relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
+hypre_SMGRelaxSetRegSpaceRank_flt( void *relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
 HYPRE_Int
-hypre_SMGRelaxSetRegSpaceRank_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
+hypre_SMGRelaxSetRegSpaceRank_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
 HYPRE_Int
-hypre_SMGRelaxSetRegSpaceRank_long_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
+hypre_SMGRelaxSetRegSpaceRank_long_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int reg_space_rank );
 
 HYPRE_Int
-hypre_SMGRelaxSetSpace_flt( void * relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
+hypre_SMGRelaxSetSpace_flt( void *relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
 HYPRE_Int
-hypre_SMGRelaxSetSpace_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
+hypre_SMGRelaxSetSpace_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
 HYPRE_Int
-hypre_SMGRelaxSetSpace_long_dbl( void * relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
+hypre_SMGRelaxSetSpace_long_dbl( void *relax_vdata, HYPRE_Int i, HYPRE_Int space_index, HYPRE_Int space_stride );
 
 HYPRE_Int
-hypre_SMGRelaxSetTempVec_flt( void * relax_vdata, hypre_StructVector * temp_vec );
+hypre_SMGRelaxSetTempVec_flt( void *relax_vdata, hypre_StructVector *temp_vec );
 HYPRE_Int
-hypre_SMGRelaxSetTempVec_dbl( void * relax_vdata, hypre_StructVector * temp_vec );
+hypre_SMGRelaxSetTempVec_dbl( void *relax_vdata, hypre_StructVector *temp_vec );
 HYPRE_Int
-hypre_SMGRelaxSetTempVec_long_dbl( void * relax_vdata, hypre_StructVector * temp_vec );
+hypre_SMGRelaxSetTempVec_long_dbl( void *relax_vdata, hypre_StructVector *temp_vec );
 
 HYPRE_Int
-hypre_SMGRelaxSetTol_flt( void * relax_vdata, hypre_float tol );
+hypre_SMGRelaxSetTol_flt( void *relax_vdata, hypre_float tol );
 HYPRE_Int
-hypre_SMGRelaxSetTol_dbl( void * relax_vdata, hypre_double tol );
+hypre_SMGRelaxSetTol_dbl( void *relax_vdata, hypre_double tol );
 HYPRE_Int
-hypre_SMGRelaxSetTol_long_dbl( void * relax_vdata, hypre_long_double tol );
+hypre_SMGRelaxSetTol_long_dbl( void *relax_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_SMGRelaxSetZeroGuess_flt( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_SMGRelaxSetZeroGuess_flt( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_SMGRelaxSetZeroGuess_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_SMGRelaxSetZeroGuess_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_SMGRelaxSetZeroGuess_long_dbl( void * relax_vdata, HYPRE_Int zero_guess );
+hypre_SMGRelaxSetZeroGuess_long_dbl( void *relax_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_SMGRelaxSetup_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetup_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetup_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetup_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetup_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetup_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGRelaxSetupARem_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupARem_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupARem_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupARem_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupARem_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupARem_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGRelaxSetupASol_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupASol_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupASol_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupASol_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupASol_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupASol_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGRelaxSetupBaseBoxArray_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupBaseBoxArray_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupBaseBoxArray_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupBaseBoxArray_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupBaseBoxArray_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupBaseBoxArray_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGRelaxSetupTempVec_flt( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupTempVec_flt( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupTempVec_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupTempVec_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGRelaxSetupTempVec_long_dbl( void * relax_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGRelaxSetupTempVec_long_dbl( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGResidual_flt( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidual_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidual_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidual_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidual_long_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidual_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
 HYPRE_Int
-hypre_SMGResidual_flt( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidual_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidual_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidual_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidual_long_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
-
-void *
-hypre_SMGResidualCreate_flt(  void );
-void *
-hypre_SMGResidualCreate_dbl(  void );
-void *
-hypre_SMGResidualCreate_long_dbl(  void );
+hypre_SMGResidual_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
 void *
-hypre_SMGResidualCreate_flt(  void );
+hypre_SMGResidualCreate_flt( void );
 void *
-hypre_SMGResidualCreate_dbl(  void );
+hypre_SMGResidualCreate_dbl( void );
 void *
-hypre_SMGResidualCreate_long_dbl(  void );
+hypre_SMGResidualCreate_long_dbl( void );
+
+void *
+hypre_SMGResidualCreate_flt( void );
+void *
+hypre_SMGResidualCreate_dbl( void );
+void *
+hypre_SMGResidualCreate_long_dbl( void );
 
 HYPRE_Int
-hypre_SMGResidualDestroy_flt( void * residual_vdata );
+hypre_SMGResidualDestroy_flt( void *residual_vdata );
 HYPRE_Int
-hypre_SMGResidualDestroy_dbl( void * residual_vdata );
+hypre_SMGResidualDestroy_dbl( void *residual_vdata );
 HYPRE_Int
-hypre_SMGResidualDestroy_long_dbl( void * residual_vdata );
+hypre_SMGResidualDestroy_long_dbl( void *residual_vdata );
 
 HYPRE_Int
-hypre_SMGResidualDestroy_flt( void * residual_vdata );
+hypre_SMGResidualDestroy_flt( void *residual_vdata );
 HYPRE_Int
-hypre_SMGResidualDestroy_dbl( void * residual_vdata );
+hypre_SMGResidualDestroy_dbl( void *residual_vdata );
 HYPRE_Int
-hypre_SMGResidualDestroy_long_dbl( void * residual_vdata );
+hypre_SMGResidualDestroy_long_dbl( void *residual_vdata );
 
 HYPRE_Int
-hypre_SMGResidualSetBase_flt( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_flt( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGResidualSetBase_dbl( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGResidualSetBase_long_dbl( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_long_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 
 HYPRE_Int
-hypre_SMGResidualSetBase_flt( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_flt( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGResidualSetBase_dbl( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGResidualSetBase_long_dbl( void * residual_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGResidualSetBase_long_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 
 HYPRE_Int
-hypre_SMGResidualSetup_flt( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidualSetup_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidualSetup_long_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
 HYPRE_Int
-hypre_SMGResidualSetup_flt( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidualSetup_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 HYPRE_Int
-hypre_SMGResidualSetup_long_dbl( void * residual_vdata, hypre_StructMatrix * A, hypre_StructVector * x, hypre_StructVector * b, hypre_StructVector * r );
+hypre_SMGResidualSetup_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
 HYPRE_Int
-hypre_SMGSetBase_flt( void * smg_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGSetBase_flt( void *smg_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGSetBase_dbl( void * smg_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGSetBase_dbl( void *smg_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
-hypre_SMGSetBase_long_dbl( void * smg_vdata, hypre_Index base_index, hypre_Index base_stride );
+hypre_SMGSetBase_long_dbl( void *smg_vdata, hypre_Index base_index, hypre_Index base_stride );
 
 HYPRE_Int
-hypre_SMGSetLogging_flt( void * smg_vdata, HYPRE_Int logging );
+hypre_SMGSetLogging_flt( void *smg_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_SMGSetLogging_dbl( void * smg_vdata, HYPRE_Int logging );
+hypre_SMGSetLogging_dbl( void *smg_vdata, HYPRE_Int logging );
 HYPRE_Int
-hypre_SMGSetLogging_long_dbl( void * smg_vdata, HYPRE_Int logging );
+hypre_SMGSetLogging_long_dbl( void *smg_vdata, HYPRE_Int logging );
 
 HYPRE_Int
-hypre_SMGSetMaxIter_flt( void * smg_vdata, HYPRE_Int max_iter );
+hypre_SMGSetMaxIter_flt( void *smg_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_SMGSetMaxIter_dbl( void * smg_vdata, HYPRE_Int max_iter );
+hypre_SMGSetMaxIter_dbl( void *smg_vdata, HYPRE_Int max_iter );
 HYPRE_Int
-hypre_SMGSetMaxIter_long_dbl( void * smg_vdata, HYPRE_Int max_iter );
+hypre_SMGSetMaxIter_long_dbl( void *smg_vdata, HYPRE_Int max_iter );
 
 HYPRE_Int
-hypre_SMGSetMemoryUse_flt( void * smg_vdata, HYPRE_Int memory_use );
+hypre_SMGSetMemoryUse_flt( void *smg_vdata, HYPRE_Int memory_use );
 HYPRE_Int
-hypre_SMGSetMemoryUse_dbl( void * smg_vdata, HYPRE_Int memory_use );
+hypre_SMGSetMemoryUse_dbl( void *smg_vdata, HYPRE_Int memory_use );
 HYPRE_Int
-hypre_SMGSetMemoryUse_long_dbl( void * smg_vdata, HYPRE_Int memory_use );
+hypre_SMGSetMemoryUse_long_dbl( void *smg_vdata, HYPRE_Int memory_use );
 
 HYPRE_Int
-hypre_SMGSetNumPostRelax_flt( void * smg_vdata, HYPRE_Int num_post_relax );
+hypre_SMGSetNumPostRelax_flt( void *smg_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_SMGSetNumPostRelax_dbl( void * smg_vdata, HYPRE_Int num_post_relax );
+hypre_SMGSetNumPostRelax_dbl( void *smg_vdata, HYPRE_Int num_post_relax );
 HYPRE_Int
-hypre_SMGSetNumPostRelax_long_dbl( void * smg_vdata, HYPRE_Int num_post_relax );
+hypre_SMGSetNumPostRelax_long_dbl( void *smg_vdata, HYPRE_Int num_post_relax );
 
 HYPRE_Int
-hypre_SMGSetNumPreRelax_flt( void * smg_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGSetNumPreRelax_flt( void *smg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_SMGSetNumPreRelax_dbl( void * smg_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGSetNumPreRelax_dbl( void *smg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int
-hypre_SMGSetNumPreRelax_long_dbl( void * smg_vdata, HYPRE_Int num_pre_relax );
+hypre_SMGSetNumPreRelax_long_dbl( void *smg_vdata, HYPRE_Int num_pre_relax );
 
 HYPRE_Int
-hypre_SMGSetPrintLevel_flt( void * smg_vdata, HYPRE_Int print_level );
+hypre_SMGSetPrintLevel_flt( void *smg_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_SMGSetPrintLevel_dbl( void * smg_vdata, HYPRE_Int print_level );
+hypre_SMGSetPrintLevel_dbl( void *smg_vdata, HYPRE_Int print_level );
 HYPRE_Int
-hypre_SMGSetPrintLevel_long_dbl( void * smg_vdata, HYPRE_Int print_level );
+hypre_SMGSetPrintLevel_long_dbl( void *smg_vdata, HYPRE_Int print_level );
 
 HYPRE_Int
-hypre_SMGSetRelChange_flt( void * smg_vdata, HYPRE_Int rel_change );
+hypre_SMGSetRelChange_flt( void *smg_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_SMGSetRelChange_dbl( void * smg_vdata, HYPRE_Int rel_change );
+hypre_SMGSetRelChange_dbl( void *smg_vdata, HYPRE_Int rel_change );
 HYPRE_Int
-hypre_SMGSetRelChange_long_dbl( void * smg_vdata, HYPRE_Int rel_change );
+hypre_SMGSetRelChange_long_dbl( void *smg_vdata, HYPRE_Int rel_change );
 
 HYPRE_Int
-hypre_SMGSetStructVectorConstantValues_flt( hypre_StructVector * vector, hypre_float values, hypre_BoxArray * box_array, hypre_Index stride );
+hypre_SMGSetStructVectorConstantValues_flt( hypre_StructVector *vector, hypre_float values, hypre_BoxArray *box_array, hypre_Index stride );
 HYPRE_Int
-hypre_SMGSetStructVectorConstantValues_dbl( hypre_StructVector * vector, hypre_double values, hypre_BoxArray * box_array, hypre_Index stride );
+hypre_SMGSetStructVectorConstantValues_dbl( hypre_StructVector *vector, hypre_double values, hypre_BoxArray *box_array, hypre_Index stride );
 HYPRE_Int
-hypre_SMGSetStructVectorConstantValues_long_dbl( hypre_StructVector * vector, hypre_long_double values, hypre_BoxArray * box_array, hypre_Index stride );
+hypre_SMGSetStructVectorConstantValues_long_dbl( hypre_StructVector *vector, hypre_long_double values, hypre_BoxArray *box_array, hypre_Index stride );
 
 HYPRE_Int
-hypre_SMGSetTol_flt( void * smg_vdata, hypre_float tol );
+hypre_SMGSetTol_flt( void *smg_vdata, hypre_float tol );
 HYPRE_Int
-hypre_SMGSetTol_dbl( void * smg_vdata, hypre_double tol );
+hypre_SMGSetTol_dbl( void *smg_vdata, hypre_double tol );
 HYPRE_Int
-hypre_SMGSetTol_long_dbl( void * smg_vdata, hypre_long_double tol );
+hypre_SMGSetTol_long_dbl( void *smg_vdata, hypre_long_double tol );
 
 HYPRE_Int
-hypre_SMGSetZeroGuess_flt( void * smg_vdata, HYPRE_Int zero_guess );
+hypre_SMGSetZeroGuess_flt( void *smg_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_SMGSetZeroGuess_dbl( void * smg_vdata, HYPRE_Int zero_guess );
+hypre_SMGSetZeroGuess_dbl( void *smg_vdata, HYPRE_Int zero_guess );
 HYPRE_Int
-hypre_SMGSetZeroGuess_long_dbl( void * smg_vdata, HYPRE_Int zero_guess );
+hypre_SMGSetZeroGuess_long_dbl( void *smg_vdata, HYPRE_Int zero_guess );
 
 HYPRE_Int
-hypre_SMGSetup_flt( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSetup_flt( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGSetup_dbl( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSetup_dbl( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGSetup_long_dbl( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSetup_long_dbl( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SMGSetupInterpOp_flt( void * relax_data, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x, hypre_StructMatrix * PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SMGSetupInterpOp_flt( void *relax_data, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x, hypre_StructMatrix *PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_SMGSetupInterpOp_dbl( void * relax_data, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x, hypre_StructMatrix * PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SMGSetupInterpOp_dbl( void *relax_data, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x, hypre_StructMatrix *PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_SMGSetupInterpOp_long_dbl( void * relax_data, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x, hypre_StructMatrix * PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SMGSetupInterpOp_long_dbl( void *relax_data, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x, hypre_StructMatrix *PT, HYPRE_Int cdir, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 
 HYPRE_Int
-hypre_SMGSetupRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGSetupRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGSetupRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * PT, hypre_StructMatrix * Ac, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *PT, hypre_StructMatrix *Ac, hypre_Index cindex, hypre_Index cstride );
 
 HYPRE_Int
-hypre_SMGSetupRestrictOp_flt( hypre_StructMatrix * A, hypre_StructMatrix * R, hypre_StructVector * temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRestrictOp_flt( hypre_StructMatrix *A, hypre_StructMatrix *R, hypre_StructVector *temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGSetupRestrictOp_dbl( hypre_StructMatrix * A, hypre_StructMatrix * R, hypre_StructVector * temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRestrictOp_dbl( hypre_StructMatrix *A, hypre_StructMatrix *R, hypre_StructVector *temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
 HYPRE_Int
-hypre_SMGSetupRestrictOp_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * R, hypre_StructVector * temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
+hypre_SMGSetupRestrictOp_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *R, hypre_StructVector *temp_vec, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride );
 
 HYPRE_Int
-hypre_SMGSolve_flt( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSolve_flt( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGSolve_dbl( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSolve_dbl( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 HYPRE_Int
-hypre_SMGSolve_long_dbl( void * smg_vdata, hypre_StructMatrix * A, hypre_StructVector * b, hypre_StructVector * x );
+hypre_SMGSolve_long_dbl( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_SemiBuildRAP_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix * RAP );
+hypre_SemiBuildRAP_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_SemiBuildRAP_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix * RAP );
+hypre_SemiBuildRAP_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix *RAP );
 HYPRE_Int
-hypre_SemiBuildRAP_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructMatrix * R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix * RAP );
+hypre_SemiBuildRAP_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, HYPRE_Int P_stored_as_transpose, hypre_StructMatrix *RAP );
 
 hypre_StructMatrix *
-hypre_SemiCreateRAPOp_flt( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
+hypre_SemiCreateRAPOp_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
 hypre_StructMatrix *
-hypre_SemiCreateRAPOp_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
+hypre_SemiCreateRAPOp_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
 hypre_StructMatrix *
-hypre_SemiCreateRAPOp_long_dbl( hypre_StructMatrix * R, hypre_StructMatrix * A, hypre_StructMatrix * P, hypre_StructGrid * coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
+hypre_SemiCreateRAPOp_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir, HYPRE_Int P_stored_as_transpose );
 
 HYPRE_Int
-hypre_SemiInterp_flt( void * interp_vdata, hypre_StructMatrix * P, hypre_StructVector * xc, hypre_StructVector * e );
+hypre_SemiInterp_flt( void *interp_vdata, hypre_StructMatrix *P, hypre_StructVector *xc, hypre_StructVector *e );
 HYPRE_Int
-hypre_SemiInterp_dbl( void * interp_vdata, hypre_StructMatrix * P, hypre_StructVector * xc, hypre_StructVector * e );
+hypre_SemiInterp_dbl( void *interp_vdata, hypre_StructMatrix *P, hypre_StructVector *xc, hypre_StructVector *e );
 HYPRE_Int
-hypre_SemiInterp_long_dbl( void * interp_vdata, hypre_StructMatrix * P, hypre_StructVector * xc, hypre_StructVector * e );
-
-void *
-hypre_SemiInterpCreate_flt(  void );
-void *
-hypre_SemiInterpCreate_dbl(  void );
-void *
-hypre_SemiInterpCreate_long_dbl(  void );
-
-HYPRE_Int
-hypre_SemiInterpDestroy_flt( void * interp_vdata );
-HYPRE_Int
-hypre_SemiInterpDestroy_dbl( void * interp_vdata );
-HYPRE_Int
-hypre_SemiInterpDestroy_long_dbl( void * interp_vdata );
-
-HYPRE_Int
-hypre_SemiInterpSetup_flt( void * interp_vdata, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, hypre_StructVector * xc, hypre_StructVector * e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
-HYPRE_Int
-hypre_SemiInterpSetup_dbl( void * interp_vdata, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, hypre_StructVector * xc, hypre_StructVector * e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
-HYPRE_Int
-hypre_SemiInterpSetup_long_dbl( void * interp_vdata, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, hypre_StructVector * xc, hypre_StructVector * e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
-
-HYPRE_Int
-hypre_SemiRestrict_flt( void * restrict_vdata, hypre_StructMatrix * R, hypre_StructVector * r, hypre_StructVector * rc );
-HYPRE_Int
-hypre_SemiRestrict_dbl( void * restrict_vdata, hypre_StructMatrix * R, hypre_StructVector * r, hypre_StructVector * rc );
-HYPRE_Int
-hypre_SemiRestrict_long_dbl( void * restrict_vdata, hypre_StructMatrix * R, hypre_StructVector * r, hypre_StructVector * rc );
+hypre_SemiInterp_long_dbl( void *interp_vdata, hypre_StructMatrix *P, hypre_StructVector *xc, hypre_StructVector *e );
 
 void *
-hypre_SemiRestrictCreate_flt(  void );
+hypre_SemiInterpCreate_flt( void );
 void *
-hypre_SemiRestrictCreate_dbl(  void );
+hypre_SemiInterpCreate_dbl( void );
 void *
-hypre_SemiRestrictCreate_long_dbl(  void );
+hypre_SemiInterpCreate_long_dbl( void );
 
 HYPRE_Int
-hypre_SemiRestrictDestroy_flt( void * restrict_vdata );
+hypre_SemiInterpDestroy_flt( void *interp_vdata );
 HYPRE_Int
-hypre_SemiRestrictDestroy_dbl( void * restrict_vdata );
+hypre_SemiInterpDestroy_dbl( void *interp_vdata );
 HYPRE_Int
-hypre_SemiRestrictDestroy_long_dbl( void * restrict_vdata );
+hypre_SemiInterpDestroy_long_dbl( void *interp_vdata );
 
 HYPRE_Int
-hypre_SemiRestrictSetup_flt( void * restrict_vdata, hypre_StructMatrix * R, HYPRE_Int R_stored_as_transpose, hypre_StructVector * r, hypre_StructVector * rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SemiInterpSetup_flt( void *interp_vdata, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, hypre_StructVector *xc, hypre_StructVector *e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_SemiRestrictSetup_dbl( void * restrict_vdata, hypre_StructMatrix * R, HYPRE_Int R_stored_as_transpose, hypre_StructVector * r, hypre_StructVector * rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SemiInterpSetup_dbl( void *interp_vdata, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, hypre_StructVector *xc, hypre_StructVector *e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_SemiRestrictSetup_long_dbl( void * restrict_vdata, hypre_StructMatrix * R, HYPRE_Int R_stored_as_transpose, hypre_StructVector * r, hypre_StructVector * rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
+hypre_SemiInterpSetup_long_dbl( void *interp_vdata, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, hypre_StructVector *xc, hypre_StructVector *e, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 
 HYPRE_Int
-hypre_StructCoarsen_flt( hypre_StructGrid * fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid ** cgrid_ptr );
+hypre_SemiRestrict_flt( void *restrict_vdata, hypre_StructMatrix *R, hypre_StructVector *r, hypre_StructVector *rc );
 HYPRE_Int
-hypre_StructCoarsen_dbl( hypre_StructGrid * fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid ** cgrid_ptr );
+hypre_SemiRestrict_dbl( void *restrict_vdata, hypre_StructMatrix *R, hypre_StructVector *r, hypre_StructVector *rc );
 HYPRE_Int
-hypre_StructCoarsen_long_dbl( hypre_StructGrid * fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid ** cgrid_ptr );
+hypre_SemiRestrict_long_dbl( void *restrict_vdata, hypre_StructMatrix *R, hypre_StructVector *r, hypre_StructVector *rc );
+
+void *
+hypre_SemiRestrictCreate_flt( void );
+void *
+hypre_SemiRestrictCreate_dbl( void );
+void *
+hypre_SemiRestrictCreate_long_dbl( void );
 
 HYPRE_Int
-hypre_StructDiagScale_flt( hypre_StructMatrix * A, hypre_StructVector * y, hypre_StructVector * x );
+hypre_SemiRestrictDestroy_flt( void *restrict_vdata );
 HYPRE_Int
-hypre_StructDiagScale_dbl( hypre_StructMatrix * A, hypre_StructVector * y, hypre_StructVector * x );
+hypre_SemiRestrictDestroy_dbl( void *restrict_vdata );
 HYPRE_Int
-hypre_StructDiagScale_long_dbl( hypre_StructMatrix * A, hypre_StructVector * y, hypre_StructVector * x );
+hypre_SemiRestrictDestroy_long_dbl( void *restrict_vdata );
 
 HYPRE_Int
-hypre_StructInterpAssemble_flt( hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+hypre_SemiRestrictSetup_flt( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int R_stored_as_transpose, hypre_StructVector *r, hypre_StructVector *rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_StructInterpAssemble_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+hypre_SemiRestrictSetup_dbl( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int R_stored_as_transpose, hypre_StructVector *r, hypre_StructVector *rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 HYPRE_Int
-hypre_StructInterpAssemble_long_dbl( hypre_StructMatrix * A, hypre_StructMatrix * P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+hypre_SemiRestrictSetup_long_dbl( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int R_stored_as_transpose, hypre_StructVector *r, hypre_StructVector *rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 
 HYPRE_Int
-hypre_StructKrylovAxpy_flt( hypre_float alpha, void * x, void * y );
+hypre_StructCoarsen_flt( hypre_StructGrid *fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
 HYPRE_Int
-hypre_StructKrylovAxpy_dbl( hypre_double alpha, void * x, void * y );
+hypre_StructCoarsen_dbl( hypre_StructGrid *fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
 HYPRE_Int
-hypre_StructKrylovAxpy_long_dbl( hypre_long_double alpha, void * x, void * y );
+hypre_StructCoarsen_long_dbl( hypre_StructGrid *fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+
+HYPRE_Int
+hypre_StructDiagScale_flt( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+HYPRE_Int
+hypre_StructDiagScale_dbl( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+HYPRE_Int
+hypre_StructDiagScale_long_dbl( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+
+HYPRE_Int
+hypre_StructInterpAssemble_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_StructInterpAssemble_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_StructInterpAssemble_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
+hypre_StructKrylovAxpy_flt( hypre_float alpha, void *x, void *y );
+HYPRE_Int
+hypre_StructKrylovAxpy_dbl( hypre_double alpha, void *x, void *y );
+HYPRE_Int
+hypre_StructKrylovAxpy_long_dbl( hypre_long_double alpha, void *x, void *y );
 
 void *
 hypre_StructKrylovCAlloc_flt( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
@@ -1883,109 +1883,109 @@ void *
 hypre_StructKrylovCAlloc_long_dbl( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
 
 HYPRE_Int
-hypre_StructKrylovClearVector_flt( void * x );
+hypre_StructKrylovClearVector_flt( void *x );
 HYPRE_Int
-hypre_StructKrylovClearVector_dbl( void * x );
+hypre_StructKrylovClearVector_dbl( void *x );
 HYPRE_Int
-hypre_StructKrylovClearVector_long_dbl( void * x );
+hypre_StructKrylovClearVector_long_dbl( void *x );
 
 HYPRE_Int
-hypre_StructKrylovCommInfo_flt( void * A, HYPRE_Int * my_id, HYPRE_Int * num_procs );
+hypre_StructKrylovCommInfo_flt( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
 HYPRE_Int
-hypre_StructKrylovCommInfo_dbl( void * A, HYPRE_Int * my_id, HYPRE_Int * num_procs );
+hypre_StructKrylovCommInfo_dbl( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
 HYPRE_Int
-hypre_StructKrylovCommInfo_long_dbl( void * A, HYPRE_Int * my_id, HYPRE_Int * num_procs );
+hypre_StructKrylovCommInfo_long_dbl( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
 
 HYPRE_Int
-hypre_StructKrylovCopyVector_flt( void * x, void * y );
+hypre_StructKrylovCopyVector_flt( void *x, void *y );
 HYPRE_Int
-hypre_StructKrylovCopyVector_dbl( void * x, void * y );
+hypre_StructKrylovCopyVector_dbl( void *x, void *y );
 HYPRE_Int
-hypre_StructKrylovCopyVector_long_dbl( void * x, void * y );
-
-void *
-hypre_StructKrylovCreateVector_flt( void * vvector );
-void *
-hypre_StructKrylovCreateVector_dbl( void * vvector );
-void *
-hypre_StructKrylovCreateVector_long_dbl( void * vvector );
+hypre_StructKrylovCopyVector_long_dbl( void *x, void *y );
 
 void *
-hypre_StructKrylovCreateVectorArray_flt( HYPRE_Int n, void * vvector );
+hypre_StructKrylovCreateVector_flt( void *vvector );
 void *
-hypre_StructKrylovCreateVectorArray_dbl( HYPRE_Int n, void * vvector );
+hypre_StructKrylovCreateVector_dbl( void *vvector );
 void *
-hypre_StructKrylovCreateVectorArray_long_dbl( HYPRE_Int n, void * vvector );
+hypre_StructKrylovCreateVector_long_dbl( void *vvector );
+
+void *
+hypre_StructKrylovCreateVectorArray_flt( HYPRE_Int n, void *vvector );
+void *
+hypre_StructKrylovCreateVectorArray_dbl( HYPRE_Int n, void *vvector );
+void *
+hypre_StructKrylovCreateVectorArray_long_dbl( HYPRE_Int n, void *vvector );
 
 HYPRE_Int
-hypre_StructKrylovDestroyVector_flt( void * vvector );
+hypre_StructKrylovDestroyVector_flt( void *vvector );
 HYPRE_Int
-hypre_StructKrylovDestroyVector_dbl( void * vvector );
+hypre_StructKrylovDestroyVector_dbl( void *vvector );
 HYPRE_Int
-hypre_StructKrylovDestroyVector_long_dbl( void * vvector );
+hypre_StructKrylovDestroyVector_long_dbl( void *vvector );
 
 HYPRE_Int
-hypre_StructKrylovFree_flt( void * ptr );
+hypre_StructKrylovFree_flt( void *ptr );
 HYPRE_Int
-hypre_StructKrylovFree_dbl( void * ptr );
+hypre_StructKrylovFree_dbl( void *ptr );
 HYPRE_Int
-hypre_StructKrylovFree_long_dbl( void * ptr );
+hypre_StructKrylovFree_long_dbl( void *ptr );
 
 HYPRE_Int
-hypre_StructKrylovIdentity_flt( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentity_flt( void *vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_StructKrylovIdentity_dbl( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentity_dbl( void *vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_StructKrylovIdentity_long_dbl( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentity_long_dbl( void *vdata, void *A, void *b, void *x );
 
 HYPRE_Int
-hypre_StructKrylovIdentitySetup_flt( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentitySetup_flt( void *vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_StructKrylovIdentitySetup_dbl( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentitySetup_dbl( void *vdata, void *A, void *b, void *x );
 HYPRE_Int
-hypre_StructKrylovIdentitySetup_long_dbl( void * vdata, void * A, void * b, void * x );
+hypre_StructKrylovIdentitySetup_long_dbl( void *vdata, void *A, void *b, void *x );
 
 HYPRE_Real
-hypre_StructKrylovInnerProd_flt( void * x, void * y );
+hypre_StructKrylovInnerProd_flt( void *x, void *y );
 HYPRE_Real
-hypre_StructKrylovInnerProd_dbl( void * x, void * y );
+hypre_StructKrylovInnerProd_dbl( void *x, void *y );
 HYPRE_Real
-hypre_StructKrylovInnerProd_long_dbl( void * x, void * y );
+hypre_StructKrylovInnerProd_long_dbl( void *x, void *y );
 
 HYPRE_Int
-hypre_StructKrylovInnerProdTagged_flt( void * x, void * y, HYPRE_Int * num_tags_ptr, hypre_float ** iprod_ptr );
+hypre_StructKrylovInnerProdTagged_flt( void *x, void *y, HYPRE_Int *num_tags_ptr, hypre_float **iprod_ptr );
 HYPRE_Int
-hypre_StructKrylovInnerProdTagged_dbl( void * x, void * y, HYPRE_Int * num_tags_ptr, hypre_double ** iprod_ptr );
+hypre_StructKrylovInnerProdTagged_dbl( void *x, void *y, HYPRE_Int *num_tags_ptr, hypre_double **iprod_ptr );
 HYPRE_Int
-hypre_StructKrylovInnerProdTagged_long_dbl( void * x, void * y, HYPRE_Int * num_tags_ptr, hypre_long_double ** iprod_ptr );
+hypre_StructKrylovInnerProdTagged_long_dbl( void *x, void *y, HYPRE_Int *num_tags_ptr, hypre_long_double **iprod_ptr );
 
 HYPRE_Int
-hypre_StructKrylovMatvec_flt( void * matvec_data, hypre_float alpha, void * A, void * x, hypre_float beta, void * y );
+hypre_StructKrylovMatvec_flt( void *matvec_data, hypre_float alpha, void *A, void *x, hypre_float beta, void *y );
 HYPRE_Int
-hypre_StructKrylovMatvec_dbl( void * matvec_data, hypre_double alpha, void * A, void * x, hypre_double beta, void * y );
+hypre_StructKrylovMatvec_dbl( void *matvec_data, hypre_double alpha, void *A, void *x, hypre_double beta, void *y );
 HYPRE_Int
-hypre_StructKrylovMatvec_long_dbl( void * matvec_data, hypre_long_double alpha, void * A, void * x, hypre_long_double beta, void * y );
+hypre_StructKrylovMatvec_long_dbl( void *matvec_data, hypre_long_double alpha, void *A, void *x, hypre_long_double beta, void *y );
 
 void *
-hypre_StructKrylovMatvecCreate_flt( void * A, void * x );
+hypre_StructKrylovMatvecCreate_flt( void *A, void *x );
 void *
-hypre_StructKrylovMatvecCreate_dbl( void * A, void * x );
+hypre_StructKrylovMatvecCreate_dbl( void *A, void *x );
 void *
-hypre_StructKrylovMatvecCreate_long_dbl( void * A, void * x );
+hypre_StructKrylovMatvecCreate_long_dbl( void *A, void *x );
 
 HYPRE_Int
-hypre_StructKrylovMatvecDestroy_flt( void * matvec_data );
+hypre_StructKrylovMatvecDestroy_flt( void *matvec_data );
 HYPRE_Int
-hypre_StructKrylovMatvecDestroy_dbl( void * matvec_data );
+hypre_StructKrylovMatvecDestroy_dbl( void *matvec_data );
 HYPRE_Int
-hypre_StructKrylovMatvecDestroy_long_dbl( void * matvec_data );
+hypre_StructKrylovMatvecDestroy_long_dbl( void *matvec_data );
 
 HYPRE_Int
-hypre_StructKrylovScaleVector_flt( hypre_float alpha, void * x );
+hypre_StructKrylovScaleVector_flt( hypre_float alpha, void *x );
 HYPRE_Int
-hypre_StructKrylovScaleVector_dbl( hypre_double alpha, void * x );
+hypre_StructKrylovScaleVector_dbl( hypre_double alpha, void *x );
 HYPRE_Int
-hypre_StructKrylovScaleVector_long_dbl( hypre_long_double alpha, void * x );
+hypre_StructKrylovScaleVector_long_dbl( hypre_long_double alpha, void *x );
 
 HYPRE_Int
 hypre_StructMapCoarseToFine_flt( hypre_Index cindex, hypre_Index index, hypre_Index stride, hypre_Index findex );
@@ -2002,18 +2002,18 @@ HYPRE_Int
 hypre_StructMapFineToCoarse_long_dbl( hypre_Index findex, hypre_Index index, hypre_Index stride, hypre_Index cindex );
 
 HYPRE_Int
-hypre_StructSMGSetMaxLevel_flt( void * smg_vdata, HYPRE_Int max_level );
+hypre_StructSMGSetMaxLevel_flt( void *smg_vdata, HYPRE_Int max_level );
 HYPRE_Int
-hypre_StructSMGSetMaxLevel_dbl( void * smg_vdata, HYPRE_Int max_level );
+hypre_StructSMGSetMaxLevel_dbl( void *smg_vdata, HYPRE_Int max_level );
 HYPRE_Int
-hypre_StructSMGSetMaxLevel_long_dbl( void * smg_vdata, HYPRE_Int max_level );
+hypre_StructSMGSetMaxLevel_long_dbl( void *smg_vdata, HYPRE_Int max_level );
 
 HYPRE_Int
-hypre_StructSetRandomValues_flt( void * v, HYPRE_Int seed );
+hypre_StructSetRandomValues_flt( void *v, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructSetRandomValues_dbl( void * v, HYPRE_Int seed );
+hypre_StructSetRandomValues_dbl( void *v, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructSetRandomValues_long_dbl( void * v, HYPRE_Int seed );
+hypre_StructSetRandomValues_long_dbl( void *v, HYPRE_Int seed );
 
 HYPRE_Int
 hypre_StructSetRandomValues_flt( void* v, HYPRE_Int seed );
@@ -2023,39 +2023,39 @@ HYPRE_Int
 hypre_StructSetRandomValues_long_dbl( void* v, HYPRE_Int seed );
 
 HYPRE_Int
-hypre_StructVectorSetRandomValues_flt( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_flt( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructVectorSetRandomValues_dbl( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_dbl( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector *vector, HYPRE_Int seed );
 
 HYPRE_Int
-hypre_StructVectorSetRandomValues_flt( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_flt( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructVectorSetRandomValues_dbl( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_dbl( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int
-hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector * vector, HYPRE_Int seed );
+hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector *vector, HYPRE_Int seed );
 
 HYPRE_Int
-hypre_ZeroDiagonal_flt( hypre_StructMatrix * A );
+hypre_ZeroDiagonal_flt( hypre_StructMatrix *A );
 HYPRE_Int
-hypre_ZeroDiagonal_dbl( hypre_StructMatrix * A );
+hypre_ZeroDiagonal_dbl( hypre_StructMatrix *A );
 HYPRE_Int
-hypre_ZeroDiagonal_long_dbl( hypre_StructMatrix * A );
+hypre_ZeroDiagonal_long_dbl( hypre_StructMatrix *A );
 
 HYPRE_Int
-hypre_relax_copy_flt( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_copy_flt( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 HYPRE_Int
-hypre_relax_copy_dbl( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_copy_dbl( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 HYPRE_Int
-hypre_relax_copy_long_dbl( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_copy_long_dbl( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 
 HYPRE_Int
-hypre_relax_wtx_flt( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_wtx_flt( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 HYPRE_Int
-hypre_relax_wtx_dbl( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_wtx_dbl( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 HYPRE_Int
-hypre_relax_wtx_long_dbl( void * relax_vdata, HYPRE_Int pointset, hypre_StructVector * t, hypre_StructVector * x );
+hypre_relax_wtx_long_dbl( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x );
 
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use ../config/gen_code.sh to generate) ***/

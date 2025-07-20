@@ -16,7 +16,7 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGCreate_pre( HYPRE_Precision precision, mv_InterfaceInterpreter * interpreter, HYPRE_MatvecFunctions * mvfunctions, HYPRE_Solver * solver )
+HYPRE_LOBPCGCreate_pre( HYPRE_Precision precision, mv_InterfaceInterpreter *interpreter, HYPRE_MatvecFunctions *mvfunctions, HYPRE_Solver *solver )
 {
    switch (precision)
    {
@@ -70,7 +70,7 @@ HYPRE_LOBPCGEigenvaluesHistory_pre( HYPRE_Precision precision, HYPRE_Solver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_LOBPCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    switch (precision)
    {
@@ -304,7 +304,7 @@ HYPRE_LOBPCGSetupT_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Ma
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LOBPCGSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, mv_MultiVectorPtr y, mv_MultiVectorPtr x, void * lambda )
+HYPRE_LOBPCGSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, mv_MultiVectorPtr y, mv_MultiVectorPtr x, void *lambda )
 {
    switch (precision)
    {

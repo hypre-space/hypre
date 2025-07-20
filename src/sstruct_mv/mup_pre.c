@@ -34,7 +34,7 @@ HYPRE_SStructAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphAddEntries_pre( HYPRE_Precision precision, HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int * to_index, HYPRE_Int to_var )
+HYPRE_SStructGraphAddEntries_pre( HYPRE_Precision precision, HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int *to_index, HYPRE_Int to_var )
 {
    switch (precision)
    {
@@ -70,7 +70,7 @@ HYPRE_SStructGraphAssemble_pre( HYPRE_Precision precision, HYPRE_SStructGraph gr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructGraph * graph )
+HYPRE_SStructGraphCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructGraph *graph )
 {
    switch (precision)
    {
@@ -106,7 +106,7 @@ HYPRE_SStructGraphDestroy_pre( HYPRE_Precision precision, HYPRE_SStructGraph gra
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphPrint_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStructGraph graph )
+HYPRE_SStructGraphPrint_pre( HYPRE_Precision precision, FILE *file, HYPRE_SStructGraph graph )
 {
    switch (precision)
    {
@@ -124,7 +124,7 @@ HYPRE_SStructGraphPrint_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphRead_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStructGrid grid, HYPRE_SStructStencil ** stencils, HYPRE_SStructGraph * graph_ptr )
+HYPRE_SStructGraphRead_pre( HYPRE_Precision precision, FILE *file, HYPRE_SStructGrid grid, HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr )
 {
    switch (precision)
    {
@@ -178,7 +178,7 @@ HYPRE_SStructGraphSetFEM_pre( HYPRE_Precision precision, HYPRE_SStructGraph grap
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphSetFEMSparsity_pre( HYPRE_Precision precision, HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int nsparse, HYPRE_Int * sparsity )
+HYPRE_SStructGraphSetFEMSparsity_pre( HYPRE_Precision precision, HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int nsparse, HYPRE_Int *sparsity )
 {
    switch (precision)
    {
@@ -232,7 +232,7 @@ HYPRE_SStructGraphSetStencil_pre( HYPRE_Precision precision, HYPRE_SStructGraph 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridAddVariables_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int nvars, HYPRE_SStructVariable * vartypes )
+HYPRE_SStructGridAddVariables_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
 {
    switch (precision)
    {
@@ -268,7 +268,7 @@ HYPRE_SStructGridAssemble_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid * grid )
+HYPRE_SStructGridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid )
 {
    switch (precision)
    {
@@ -304,7 +304,7 @@ HYPRE_SStructGridDestroy_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetExtents_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper )
+HYPRE_SStructGridSetExtents_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper )
 {
    switch (precision)
    {
@@ -322,7 +322,7 @@ HYPRE_SStructGridSetExtents_pre( HYPRE_Precision precision, HYPRE_SStructGrid gr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetFEMOrdering_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ordering )
+HYPRE_SStructGridSetFEMOrdering_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ordering )
 {
    switch (precision)
    {
@@ -340,7 +340,7 @@ HYPRE_SStructGridSetFEMOrdering_pre( HYPRE_Precision precision, HYPRE_SStructGri
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetNeighborPart_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int nbor_part, HYPRE_Int * nbor_ilower, HYPRE_Int * nbor_iupper, HYPRE_Int * index_map, HYPRE_Int * index_dir )
+HYPRE_SStructGridSetNeighborPart_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nbor_part, HYPRE_Int *nbor_ilower, HYPRE_Int *nbor_iupper, HYPRE_Int *index_map, HYPRE_Int *index_dir )
 {
    switch (precision)
    {
@@ -358,7 +358,7 @@ HYPRE_SStructGridSetNeighborPart_pre( HYPRE_Precision precision, HYPRE_SStructGr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetNumGhost_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int * num_ghost )
+HYPRE_SStructGridSetNumGhost_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int *num_ghost )
 {
    switch (precision)
    {
@@ -376,7 +376,7 @@ HYPRE_SStructGridSetNumGhost_pre( HYPRE_Precision precision, HYPRE_SStructGrid g
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetPeriodic_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * periodic )
+HYPRE_SStructGridSetPeriodic_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *periodic )
 {
    switch (precision)
    {
@@ -394,7 +394,7 @@ HYPRE_SStructGridSetPeriodic_pre( HYPRE_Precision precision, HYPRE_SStructGrid g
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetSharedPart_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int * offset, HYPRE_Int shared_part, HYPRE_Int * shared_ilower, HYPRE_Int * shared_iupper, HYPRE_Int * shared_offset, HYPRE_Int * index_map, HYPRE_Int * index_dir )
+HYPRE_SStructGridSetSharedPart_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *offset, HYPRE_Int shared_part, HYPRE_Int *shared_ilower, HYPRE_Int *shared_iupper, HYPRE_Int *shared_offset, HYPRE_Int *index_map, HYPRE_Int *index_dir )
 {
    switch (precision)
    {
@@ -412,7 +412,7 @@ HYPRE_SStructGridSetSharedPart_pre( HYPRE_Precision precision, HYPRE_SStructGrid
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetVariables_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int nvars, HYPRE_SStructVariable * vartypes )
+HYPRE_SStructGridSetVariables_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
 {
    switch (precision)
    {
@@ -430,7 +430,7 @@ HYPRE_SStructGridSetVariables_pre( HYPRE_Precision precision, HYPRE_SStructGrid 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y, void * result )
+HYPRE_SStructInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y, void *result )
 {
    switch (precision)
    {
@@ -448,7 +448,7 @@ HYPRE_SStructInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, void * values )
+HYPRE_SStructMatrixAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values )
 {
    switch (precision)
    {
@@ -466,7 +466,7 @@ HYPRE_SStructMatrixAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStruct
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructMatrixAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
@@ -484,7 +484,7 @@ HYPRE_SStructMatrixAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -502,7 +502,7 @@ HYPRE_SStructMatrixAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructM
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -520,7 +520,7 @@ HYPRE_SStructMatrixAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStruct
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -556,7 +556,7 @@ HYPRE_SStructMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_SStructMatrix 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGraph graph, HYPRE_SStructMatrix * matrix )
+HYPRE_SStructMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGraph graph, HYPRE_SStructMatrix *matrix )
 {
    switch (precision)
    {
@@ -592,7 +592,7 @@ HYPRE_SStructMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_SStructMatrix m
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -610,7 +610,7 @@ HYPRE_SStructMatrixGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -628,7 +628,7 @@ HYPRE_SStructMatrixGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMa
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
@@ -646,7 +646,7 @@ HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetObject_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, void ** object )
+HYPRE_SStructMatrixGetObject_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, void **object )
 {
    switch (precision)
    {
@@ -664,7 +664,7 @@ HYPRE_SStructMatrixGetObject_pre( HYPRE_Precision precision, HYPRE_SStructMatrix
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixGetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -718,7 +718,7 @@ HYPRE_SStructMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alph
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixPrint_pre( HYPRE_Precision precision, const char * filename, HYPRE_SStructMatrix matrix, HYPRE_Int all )
+HYPRE_SStructMatrixPrint_pre( HYPRE_Precision precision, const char *filename, HYPRE_SStructMatrix matrix, HYPRE_Int all )
 {
    switch (precision)
    {
@@ -736,7 +736,7 @@ HYPRE_SStructMatrixPrint_pre( HYPRE_Precision precision, const char * filename, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char * filename, HYPRE_SStructMatrix * matrix_ptr )
+HYPRE_SStructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_SStructMatrix *matrix_ptr )
 {
    switch (precision)
    {
@@ -754,7 +754,7 @@ HYPRE_SStructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const cha
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -772,7 +772,7 @@ HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -862,7 +862,7 @@ HYPRE_SStructMatrixSetSymmetric_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
    {
@@ -880,7 +880,7 @@ HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilCreate_pre( HYPRE_Precision precision, HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil * stencil )
+HYPRE_SStructStencilCreate_pre( HYPRE_Precision precision, HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil *stencil )
 {
    switch (precision)
    {
@@ -916,7 +916,7 @@ HYPRE_SStructStencilDestroy_pre( HYPRE_Precision precision, HYPRE_SStructStencil
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilPrint_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStructStencil stencil )
+HYPRE_SStructStencilPrint_pre( HYPRE_Precision precision, FILE *file, HYPRE_SStructStencil stencil )
 {
    switch (precision)
    {
@@ -934,7 +934,7 @@ HYPRE_SStructStencilPrint_pre( HYPRE_Precision precision, FILE * file, HYPRE_SSt
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilRead_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStructStencil * stencil_ptr )
+HYPRE_SStructStencilRead_pre( HYPRE_Precision precision, FILE *file, HYPRE_SStructStencil *stencil_ptr )
 {
    switch (precision)
    {
@@ -952,7 +952,7 @@ HYPRE_SStructStencilRead_pre( HYPRE_Precision precision, FILE * file, HYPRE_SStr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilSetEntry_pre( HYPRE_Precision precision, HYPRE_SStructStencil stencil, HYPRE_Int entry, HYPRE_Int * offset, HYPRE_Int var )
+HYPRE_SStructStencilSetEntry_pre( HYPRE_Precision precision, HYPRE_SStructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset, HYPRE_Int var )
 {
    switch (precision)
    {
@@ -970,7 +970,7 @@ HYPRE_SStructStencilSetEntry_pre( HYPRE_Precision precision, HYPRE_SStructStenci
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, void * values )
+HYPRE_SStructVectorAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values )
 {
    switch (precision)
    {
@@ -988,7 +988,7 @@ HYPRE_SStructVectorAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStruct
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructVectorAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
@@ -1006,7 +1006,7 @@ HYPRE_SStructVectorAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    switch (precision)
    {
@@ -1024,7 +1024,7 @@ HYPRE_SStructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructV
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -1042,7 +1042,7 @@ HYPRE_SStructVectorAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStruct
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    switch (precision)
    {
@@ -1096,7 +1096,7 @@ HYPRE_SStructVectorCopy_pre( HYPRE_Precision precision, HYPRE_SStructVector x, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructVector * vector )
+HYPRE_SStructVectorCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructVector *vector )
 {
    switch (precision)
    {
@@ -1150,7 +1150,7 @@ HYPRE_SStructVectorGather_pre( HYPRE_Precision precision, HYPRE_SStructVector ve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    switch (precision)
    {
@@ -1168,7 +1168,7 @@ HYPRE_SStructVectorGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -1186,7 +1186,7 @@ HYPRE_SStructVectorGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVe
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructVectorGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
@@ -1204,7 +1204,7 @@ HYPRE_SStructVectorGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetObject_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, void ** object )
+HYPRE_SStructVectorGetObject_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, void **object )
 {
    switch (precision)
    {
@@ -1222,7 +1222,7 @@ HYPRE_SStructVectorGetObject_pre( HYPRE_Precision precision, HYPRE_SStructVector
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorGetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    switch (precision)
    {
@@ -1258,7 +1258,7 @@ HYPRE_SStructVectorInitialize_pre( HYPRE_Precision precision, HYPRE_SStructVecto
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char * filename, HYPRE_SStructVector vector, HYPRE_Int all )
+HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char *filename, HYPRE_SStructVector vector, HYPRE_Int all )
 {
    switch (precision)
    {
@@ -1276,7 +1276,7 @@ HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char * filename, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char * filename, HYPRE_SStructVector * vector_ptr )
+HYPRE_SStructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr )
 {
    switch (precision)
    {
@@ -1312,7 +1312,7 @@ HYPRE_SStructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    switch (precision)
    {
@@ -1330,7 +1330,7 @@ HYPRE_SStructVectorSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    switch (precision)
    {
@@ -1384,7 +1384,7 @@ HYPRE_SStructVectorSetObjectType_pre( HYPRE_Precision precision, HYPRE_SStructVe
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    switch (precision)
    {

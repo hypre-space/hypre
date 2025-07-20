@@ -71,7 +71,6 @@
 #define hypre_CSRMatrixComputeColSum HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixComputeColSum )
 #define hypre_CSRMatrixComputeColSumHost HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixComputeColSumHost )
 #define hypre_CSRMatrixTaggedFnormHost HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixTaggedFnormHost )
-#define hypre_CSRMatrixToParCSRMatrix HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixToParCSRMatrix )
 #define hypre_CSRMatrixUnion HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixUnion )
 #define hypre_CSRMatrixMatvec HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixMatvec )
 #define hypre_CSRMatrixMatvec_FF HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixMatvec_FF )

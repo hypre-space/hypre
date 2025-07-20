@@ -25,7 +25,7 @@ HYPRE_SStructAxpy( hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStruct
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int * to_index, HYPRE_Int to_var )
+HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int *to_index, HYPRE_Int to_var )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGraphAddEntries_pre( precision, graph, part, index, var, to_part, to_index, to_var );
@@ -43,7 +43,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphCreate( MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructGraph * graph )
+HYPRE_SStructGraphCreate( MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructGraph *graph )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGraphCreate_pre( precision, comm, grid, graph );
@@ -61,7 +61,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphPrint( FILE * file, HYPRE_SStructGraph graph )
+HYPRE_SStructGraphPrint( FILE *file, HYPRE_SStructGraph graph )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGraphPrint_pre( precision, file, graph );
@@ -70,7 +70,7 @@ HYPRE_SStructGraphPrint( FILE * file, HYPRE_SStructGraph graph )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphRead( FILE * file, HYPRE_SStructGrid grid, HYPRE_SStructStencil ** stencils, HYPRE_SStructGraph * graph_ptr )
+HYPRE_SStructGraphRead( FILE *file, HYPRE_SStructGrid grid, HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGraphRead_pre( precision, file, grid, stencils, graph_ptr );
@@ -97,7 +97,7 @@ HYPRE_SStructGraphSetFEM( HYPRE_SStructGraph graph, HYPRE_Int part )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGraphSetFEMSparsity( HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int nsparse, HYPRE_Int * sparsity )
+HYPRE_SStructGraphSetFEMSparsity( HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_Int nsparse, HYPRE_Int *sparsity )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGraphSetFEMSparsity_pre( precision, graph, part, nsparse, sparsity );
@@ -124,7 +124,7 @@ HYPRE_SStructGraphSetStencil( HYPRE_SStructGraph graph, HYPRE_Int part, HYPRE_In
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridAddVariables( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int nvars, HYPRE_SStructVariable * vartypes )
+HYPRE_SStructGridAddVariables( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridAddVariables_pre( precision, grid, part, index, nvars, vartypes );
@@ -142,7 +142,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridCreate( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid * grid )
+HYPRE_SStructGridCreate( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridCreate_pre( precision, comm, ndim, nparts, grid );
@@ -160,7 +160,7 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetExtents( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper )
+HYPRE_SStructGridSetExtents( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetExtents_pre( precision, grid, part, ilower, iupper );
@@ -169,7 +169,7 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ordering )
+HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ordering )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetFEMOrdering_pre( precision, grid, part, ordering );
@@ -178,7 +178,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_I
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int nbor_part, HYPRE_Int * nbor_ilower, HYPRE_Int * nbor_iupper, HYPRE_Int * index_map, HYPRE_Int * index_dir )
+HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nbor_part, HYPRE_Int *nbor_ilower, HYPRE_Int *nbor_iupper, HYPRE_Int *index_map, HYPRE_Int *index_dir )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetNeighborPart_pre( precision, grid, part, ilower, iupper, nbor_part, nbor_ilower, nbor_iupper, index_map, index_dir );
@@ -187,7 +187,7 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid, HYPRE_Int * num_ghost )
+HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid, HYPRE_Int *num_ghost )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetNumGhost_pre( precision, grid, num_ghost );
@@ -196,7 +196,7 @@ HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid, HYPRE_Int * num_ghost )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * periodic )
+HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *periodic )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetPeriodic_pre( precision, grid, part, periodic );
@@ -205,7 +205,7 @@ HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int * offset, HYPRE_Int shared_part, HYPRE_Int * shared_ilower, HYPRE_Int * shared_iupper, HYPRE_Int * shared_offset, HYPRE_Int * index_map, HYPRE_Int * index_dir )
+HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *offset, HYPRE_Int shared_part, HYPRE_Int *shared_ilower, HYPRE_Int *shared_iupper, HYPRE_Int *shared_offset, HYPRE_Int *index_map, HYPRE_Int *index_dir )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetSharedPart_pre( precision, grid, part, ilower, iupper, offset, shared_part, shared_ilower, shared_iupper, shared_offset, index_map, index_dir );
@@ -214,7 +214,7 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_In
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructGridSetVariables( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int nvars, HYPRE_SStructVariable * vartypes )
+HYPRE_SStructGridSetVariables( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructGridSetVariables_pre( precision, grid, part, nvars, vartypes );
@@ -223,7 +223,7 @@ HYPRE_SStructGridSetVariables( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructInnerProd( HYPRE_SStructVector x, HYPRE_SStructVector y, void * result )
+HYPRE_SStructInnerProd( HYPRE_SStructVector x, HYPRE_SStructVector y, void *result )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructInnerProd_pre( precision, x, y, result );
@@ -232,7 +232,7 @@ HYPRE_SStructInnerProd( HYPRE_SStructVector x, HYPRE_SStructVector y, void * res
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddFEMBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, void * values )
+HYPRE_SStructMatrixAddFEMBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixAddFEMBoxValues_pre( precision, matrix, part, ilower, iupper, values );
@@ -241,7 +241,7 @@ HYPRE_SStructMatrixAddFEMBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixAddFEMValues_pre( precision, matrix, part, index, values );
@@ -250,7 +250,7 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixAddToBoxValues_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, values );
@@ -259,7 +259,7 @@ HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixAddToBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixAddToBoxValues2_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
@@ -268,7 +268,7 @@ HYPRE_SStructMatrixAddToBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixAddToValues_pre( precision, matrix, part, index, var, nentries, entries, values );
@@ -286,7 +286,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixCreate( MPI_Comm comm, HYPRE_SStructGraph graph, HYPRE_SStructMatrix * matrix )
+HYPRE_SStructMatrixCreate( MPI_Comm comm, HYPRE_SStructGraph graph, HYPRE_SStructMatrix *matrix )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixCreate_pre( precision, comm, graph, matrix );
@@ -304,7 +304,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixGetBoxValues_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, values );
@@ -313,7 +313,7 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixGetBoxValues2_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
@@ -322,7 +322,7 @@ HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixGetFEMValues_pre( precision, matrix, part, index, values );
@@ -331,7 +331,7 @@ HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix, void ** object )
+HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix, void **object )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixGetObject_pre( precision, matrix, object );
@@ -340,7 +340,7 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix, void ** object )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixGetValues_pre( precision, matrix, part, index, var, nentries, entries, values );
@@ -367,7 +367,7 @@ HYPRE_SStructMatrixMatvec( hypre_long_double alpha, HYPRE_SStructMatrix A, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixPrint( const char * filename, HYPRE_SStructMatrix matrix, HYPRE_Int all )
+HYPRE_SStructMatrixPrint( const char *filename, HYPRE_SStructMatrix matrix, HYPRE_Int all )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixPrint_pre( precision, filename, matrix, all );
@@ -376,7 +376,7 @@ HYPRE_SStructMatrixPrint( const char * filename, HYPRE_SStructMatrix matrix, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixRead( MPI_Comm comm, const char * filename, HYPRE_SStructMatrix * matrix_ptr )
+HYPRE_SStructMatrixRead( MPI_Comm comm, const char *filename, HYPRE_SStructMatrix *matrix_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixRead_pre( precision, comm, filename, matrix_ptr );
@@ -385,7 +385,7 @@ HYPRE_SStructMatrixRead( MPI_Comm comm, const char * filename, HYPRE_SStructMatr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixSetBoxValues_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, values );
@@ -394,7 +394,7 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructMatrixSetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixSetBoxValues2_pre( precision, matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
@@ -439,7 +439,7 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int * entries, void * values )
+HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixSetValues_pre( precision, matrix, part, index, var, nentries, entries, values );
@@ -448,7 +448,7 @@ HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilCreate( HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil * stencil )
+HYPRE_SStructStencilCreate( HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil *stencil )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructStencilCreate_pre( precision, ndim, size, stencil );
@@ -466,7 +466,7 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilPrint( FILE * file, HYPRE_SStructStencil stencil )
+HYPRE_SStructStencilPrint( FILE *file, HYPRE_SStructStencil stencil )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructStencilPrint_pre( precision, file, stencil );
@@ -475,7 +475,7 @@ HYPRE_SStructStencilPrint( FILE * file, HYPRE_SStructStencil stencil )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilRead( FILE * file, HYPRE_SStructStencil * stencil_ptr )
+HYPRE_SStructStencilRead( FILE *file, HYPRE_SStructStencil *stencil_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructStencilRead_pre( precision, file, stencil_ptr );
@@ -484,7 +484,7 @@ HYPRE_SStructStencilRead( FILE * file, HYPRE_SStructStencil * stencil_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil stencil, HYPRE_Int entry, HYPRE_Int * offset, HYPRE_Int var )
+HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset, HYPRE_Int var )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructStencilSetEntry_pre( precision, stencil, entry, offset, var );
@@ -493,7 +493,7 @@ HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil stencil, HYPRE_Int entry, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddFEMBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, void * values )
+HYPRE_SStructVectorAddFEMBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorAddFEMBoxValues_pre( precision, vector, part, ilower, iupper, values );
@@ -502,7 +502,7 @@ HYPRE_SStructVectorAddFEMBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorAddFEMValues_pre( precision, vector, part, index, values );
@@ -511,7 +511,7 @@ HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorAddToBoxValues_pre( precision, vector, part, ilower, iupper, var, values );
@@ -520,7 +520,7 @@ HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorAddToBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorAddToBoxValues2_pre( precision, vector, part, ilower, iupper, var, vilower, viupper, values );
@@ -529,7 +529,7 @@ HYPRE_SStructVectorAddToBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorAddToValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorAddToValues_pre( precision, vector, part, index, var, value );
@@ -556,7 +556,7 @@ HYPRE_SStructVectorCopy( HYPRE_SStructVector x, HYPRE_SStructVector y )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorCreate( MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructVector * vector )
+HYPRE_SStructVectorCreate( MPI_Comm comm, HYPRE_SStructGrid grid, HYPRE_SStructVector *vector )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorCreate_pre( precision, comm, grid, vector );
@@ -583,7 +583,7 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGetBoxValues_pre( precision, vector, part, ilower, iupper, var, values );
@@ -592,7 +592,7 @@ HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorGetBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGetBoxValues2_pre( precision, vector, part, ilower, iupper, var, vilower, viupper, values );
@@ -601,7 +601,7 @@ HYPRE_SStructVectorGetBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, void * values )
+HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGetFEMValues_pre( precision, vector, part, index, values );
@@ -610,7 +610,7 @@ HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector, void ** object )
+HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector, void **object )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGetObject_pre( precision, vector, object );
@@ -619,7 +619,7 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector, void ** object )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGetValues_pre( precision, vector, part, index, var, value );
@@ -637,7 +637,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorPrint( const char * filename, HYPRE_SStructVector vector, HYPRE_Int all )
+HYPRE_SStructVectorPrint( const char *filename, HYPRE_SStructVector vector, HYPRE_Int all )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorPrint_pre( precision, filename, vector, all );
@@ -646,7 +646,7 @@ HYPRE_SStructVectorPrint( const char * filename, HYPRE_SStructVector vector, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorRead( MPI_Comm comm, const char * filename, HYPRE_SStructVector * vector_ptr )
+HYPRE_SStructVectorRead( MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorRead_pre( precision, comm, filename, vector_ptr );
@@ -664,7 +664,7 @@ HYPRE_SStructVectorScale( hypre_long_double alpha, HYPRE_SStructVector y )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, void * values )
+HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorSetBoxValues_pre( precision, vector, part, ilower, iupper, var, values );
@@ -673,7 +673,7 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * ilower, HYPRE_Int * iupper, HYPRE_Int var, HYPRE_Int * vilower, HYPRE_Int * viupper, void * values )
+HYPRE_SStructVectorSetBoxValues2( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorSetBoxValues2_pre( precision, vector, part, ilower, iupper, var, vilower, viupper, values );
@@ -700,7 +700,7 @@ HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector, HYPRE_Int type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int * index, HYPRE_Int var, void * value )
+HYPRE_SStructVectorSetValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorSetValues_pre( precision, vector, part, index, var, value );

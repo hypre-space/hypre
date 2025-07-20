@@ -41,49 +41,49 @@ HYPRE_Int
 HYPRE_BiCGSTABDestroy( HYPRE_Solver solver );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_BiCGSTABGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_BiCGSTABGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_BiCGSTABGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_BiCGSTABGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_BiCGSTABGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_BiCGSTABGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_BiCGSTABGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_BiCGSTABGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_BiCGSTABGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_BiCGSTABGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_BiCGSTABGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_BiCGSTABGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
 HYPRE_BiCGSTABSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -203,31 +203,31 @@ HYPRE_Int
 HYPRE_CGNRDestroy( HYPRE_Solver solver );
 
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_CGNRGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_CGNRGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_CGNRGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_CGNRGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_CGNRGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_CGNRGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_CGNRGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_CGNRGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_CGNRGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_CGNRGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_CGNRGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_CGNRGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_CGNRGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_CGNRGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_CGNRGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
 HYPRE_CGNRSetLogging_flt( HYPRE_Solver solver, HYPRE_Int logging );
@@ -302,130 +302,130 @@ HYPRE_Int
 HYPRE_CGNRSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_COGMRESGetCGS_flt( HYPRE_Solver solver, HYPRE_Int * cgs );
+HYPRE_COGMRESGetCGS_flt( HYPRE_Solver solver, HYPRE_Int *cgs );
 HYPRE_Int
-HYPRE_COGMRESGetCGS_dbl( HYPRE_Solver solver, HYPRE_Int * cgs );
+HYPRE_COGMRESGetCGS_dbl( HYPRE_Solver solver, HYPRE_Int *cgs );
 HYPRE_Int
-HYPRE_COGMRESGetCGS_long_dbl( HYPRE_Solver solver, HYPRE_Int * cgs );
+HYPRE_COGMRESGetCGS_long_dbl( HYPRE_Solver solver, HYPRE_Int *cgs );
 HYPRE_Int
-HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int * cgs );
+HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int *cgs );
 
 HYPRE_Int
-HYPRE_COGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_COGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_COGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_COGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_COGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_COGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float * cf_tol );
+HYPRE_COGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float *cf_tol );
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double * cf_tol );
+HYPRE_COGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double *cf_tol );
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double * cf_tol );
+HYPRE_COGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double *cf_tol );
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol );
+HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_COGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_COGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_COGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_COGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_COGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_COGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_COGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_COGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_COGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_COGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_COGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_COGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_COGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_COGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_COGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_COGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_COGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_COGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_COGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_COGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_COGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_COGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_COGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_COGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_COGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_COGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_COGMRESGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_COGMRESGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_COGMRESGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_COGMRESGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_COGMRESGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_COGMRESGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_COGMRESGetTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_COGMRESGetTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_COGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_COGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_COGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_COGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_COGMRESGetTol( HYPRE_Solver solver, void * tol );
+HYPRE_COGMRESGetTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_COGMRESGetUnroll_flt( HYPRE_Solver solver, HYPRE_Int * unroll );
+HYPRE_COGMRESGetUnroll_flt( HYPRE_Solver solver, HYPRE_Int *unroll );
 HYPRE_Int
-HYPRE_COGMRESGetUnroll_dbl( HYPRE_Solver solver, HYPRE_Int * unroll );
+HYPRE_COGMRESGetUnroll_dbl( HYPRE_Solver solver, HYPRE_Int *unroll );
 HYPRE_Int
-HYPRE_COGMRESGetUnroll_long_dbl( HYPRE_Solver solver, HYPRE_Int * unroll );
+HYPRE_COGMRESGetUnroll_long_dbl( HYPRE_Solver solver, HYPRE_Int *unroll );
 HYPRE_Int
-HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int * unroll );
+HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int *unroll );
 
 HYPRE_Int
 HYPRE_COGMRESSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -554,112 +554,112 @@ HYPRE_Int
 HYPRE_COGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_FlexGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_FlexGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_FlexGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float * cf_tol );
+HYPRE_FlexGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float *cf_tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double * cf_tol );
+HYPRE_FlexGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double *cf_tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double * cf_tol );
+HYPRE_FlexGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double *cf_tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol );
+HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_FlexGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_FlexGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_FlexGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_FlexGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_FlexGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_FlexGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_FlexGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_FlexGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_FlexGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_FlexGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_FlexGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_FlexGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_FlexGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_FlexGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_FlexGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_FlexGMRESGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_FlexGMRESGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_FlexGMRESGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_FlexGMRESGetTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_FlexGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_FlexGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void * tol );
+HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_FlexGMRESSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -770,166 +770,166 @@ HYPRE_Int
 HYPRE_FlexGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_GMRESGetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_GMRESGetAbsoluteTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_GMRESGetAbsoluteTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void * tol );
+HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_GMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_GMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_GMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_GMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_GMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_GMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float * cf_tol );
+HYPRE_GMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float *cf_tol );
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double * cf_tol );
+HYPRE_GMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double *cf_tol );
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double * cf_tol );
+HYPRE_GMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double *cf_tol );
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol );
+HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_GMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_GMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_GMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_GMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_GMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_GMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_GMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_GMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_GMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_GMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_GMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_GMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_GMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_GMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_GMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_GMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_GMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_GMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_GMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_GMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_GMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_GMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_GMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_GMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_GMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_GMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_GMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_GMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_GMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_GMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_GMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_GMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_GMRESGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_GMRESGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_GMRESGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_GMRESGetRefSolution_flt( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_GMRESGetRefSolution_flt( HYPRE_Solver solver, HYPRE_Vector *xref );
 HYPRE_Int
-HYPRE_GMRESGetRefSolution_dbl( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_GMRESGetRefSolution_dbl( HYPRE_Solver solver, HYPRE_Vector *xref );
 HYPRE_Int
-HYPRE_GMRESGetRefSolution_long_dbl( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_GMRESGetRefSolution_long_dbl( HYPRE_Solver solver, HYPRE_Vector *xref );
 HYPRE_Int
-HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector *xref );
 
 HYPRE_Int
-HYPRE_GMRESGetRelChange_flt( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_GMRESGetRelChange_flt( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_GMRESGetRelChange_dbl( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_GMRESGetRelChange_dbl( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_GMRESGetRelChange_long_dbl( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_GMRESGetRelChange_long_dbl( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int *rel_change );
 
 HYPRE_Int
-HYPRE_GMRESGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_GMRESGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_GMRESGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_GMRESGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_GMRESGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_GMRESGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_GMRESGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck_flt( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check );
+HYPRE_GMRESGetSkipRealResidualCheck_flt( HYPRE_Solver solver, HYPRE_Int *skip_real_r_check );
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck_dbl( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check );
+HYPRE_GMRESGetSkipRealResidualCheck_dbl( HYPRE_Solver solver, HYPRE_Int *skip_real_r_check );
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck_long_dbl( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check );
+HYPRE_GMRESGetSkipRealResidualCheck_long_dbl( HYPRE_Solver solver, HYPRE_Int *skip_real_r_check );
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check );
+HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int *skip_real_r_check );
 
 HYPRE_Int
-HYPRE_GMRESGetStopCrit_flt( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_GMRESGetStopCrit_flt( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_GMRESGetStopCrit_dbl( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_GMRESGetStopCrit_dbl( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_GMRESGetStopCrit_long_dbl( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_GMRESGetStopCrit_long_dbl( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 
 HYPRE_Int
-HYPRE_GMRESGetTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_GMRESGetTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_GMRESGetTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_GMRESGetTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_GMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_GMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_GMRESGetTol( HYPRE_Solver solver, void * tol );
+HYPRE_GMRESGetTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_GMRESSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -1076,121 +1076,121 @@ HYPRE_Int
 HYPRE_GMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_LGMRESGetAugDim_flt( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetAugDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetAugDim_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetAugDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetAugDim_long_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetAugDim_long_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_LGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_LGMRESGetConverged_flt( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_LGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_LGMRESGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_LGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_LGMRESGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float * cf_tol );
+HYPRE_LGMRESGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float *cf_tol );
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double * cf_tol );
+HYPRE_LGMRESGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double *cf_tol );
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double * cf_tol );
+HYPRE_LGMRESGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double *cf_tol );
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol );
+HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_LGMRESGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_LGMRESGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_LGMRESGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_LGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetKDim_long_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
-HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_LGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetLogging_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_LGMRESGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_LGMRESGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_LGMRESGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_LGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_LGMRESGetMinIter_flt( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_LGMRESGetMinIter_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_LGMRESGetMinIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *min_iter );
 HYPRE_Int
-HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_LGMRESGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_LGMRESGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_LGMRESGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_LGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_LGMRESGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_LGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_LGMRESGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_LGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_LGMRESGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_LGMRESGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_LGMRESGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_LGMRESGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_LGMRESGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_LGMRESGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_LGMRESGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_LGMRESGetTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_LGMRESGetTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_LGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_LGMRESGetTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_LGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_LGMRESGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_LGMRESGetTol( HYPRE_Solver solver, void * tol );
+HYPRE_LGMRESGetTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_LGMRESSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -1301,166 +1301,166 @@ HYPRE_Int
 HYPRE_LGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor_flt( HYPRE_Solver solver, hypre_float * abstolf );
+HYPRE_PCGGetAbsoluteTolFactor_flt( HYPRE_Solver solver, hypre_float *abstolf );
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor_dbl( HYPRE_Solver solver, hypre_double * abstolf );
+HYPRE_PCGGetAbsoluteTolFactor_dbl( HYPRE_Solver solver, hypre_double *abstolf );
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor_long_dbl( HYPRE_Solver solver, hypre_long_double * abstolf );
+HYPRE_PCGGetAbsoluteTolFactor_long_dbl( HYPRE_Solver solver, hypre_long_double *abstolf );
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void * abstolf );
+HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void *abstolf );
 
 HYPRE_Int
-HYPRE_PCGGetConverged_flt( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_PCGGetConverged_flt( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_PCGGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_PCGGetConverged_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_PCGGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_PCGGetConverged_long_dbl( HYPRE_Solver solver, HYPRE_Int *converged );
 HYPRE_Int
-HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float * cf_tol );
+HYPRE_PCGGetConvergenceFactorTol_flt( HYPRE_Solver solver, hypre_float *cf_tol );
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double * cf_tol );
+HYPRE_PCGGetConvergenceFactorTol_dbl( HYPRE_Solver solver, hypre_double *cf_tol );
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double * cf_tol );
+HYPRE_PCGGetConvergenceFactorTol_long_dbl( HYPRE_Solver solver, hypre_long_double *cf_tol );
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol );
+HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float * norm );
+HYPRE_PCGGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double * norm );
+HYPRE_PCGGetFinalRelativeResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double * norm );
+HYPRE_PCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm );
+HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_PCGGetFlex_flt( HYPRE_Solver solver, HYPRE_Int * flex );
+HYPRE_PCGGetFlex_flt( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int
-HYPRE_PCGGetFlex_dbl( HYPRE_Solver solver, HYPRE_Int * flex );
+HYPRE_PCGGetFlex_dbl( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int
-HYPRE_PCGGetFlex_long_dbl( HYPRE_Solver solver, HYPRE_Int * flex );
+HYPRE_PCGGetFlex_long_dbl( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int
-HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int * flex );
+HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int *flex );
 
 HYPRE_Int
-HYPRE_PCGGetLogging_flt( HYPRE_Solver solver, HYPRE_Int * logging );
+HYPRE_PCGGetLogging_flt( HYPRE_Solver solver, HYPRE_Int *logging );
 HYPRE_Int
-HYPRE_PCGGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int * logging );
+HYPRE_PCGGetLogging_dbl( HYPRE_Solver solver, HYPRE_Int *logging );
 HYPRE_Int
-HYPRE_PCGGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int * logging );
+HYPRE_PCGGetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int *logging );
 HYPRE_Int
-HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int * logging );
+HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int *logging );
 
 HYPRE_Int
-HYPRE_PCGGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_PCGGetMaxIter_flt( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_PCGGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_PCGGetMaxIter_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_PCGGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_PCGGetMaxIter_long_dbl( HYPRE_Solver solver, HYPRE_Int *max_iter );
 HYPRE_Int
-HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_PCGGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_PCGGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_PCGGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_PCGGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_PCGGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_PCGGetNumIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
-HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_PCGGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_PCGGetPrecond_flt( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_PCGGetPrecond_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_PCGGetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_PCGGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_PCGGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_PCGGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_PCGGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_PCGGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_PCGGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_PCGGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_PCGGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_PCGGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
-HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_PCGGetRelChange_flt( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_PCGGetRelChange_flt( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_PCGGetRelChange_dbl( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_PCGGetRelChange_dbl( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_PCGGetRelChange_long_dbl( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_PCGGetRelChange_long_dbl( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int
-HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int *rel_change );
 
 HYPRE_Int
-HYPRE_PCGGetResidual_flt( HYPRE_Solver solver, void * residual );
+HYPRE_PCGGetResidual_flt( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_PCGGetResidual_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_PCGGetResidual_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_PCGGetResidual_long_dbl( HYPRE_Solver solver, void * residual );
+HYPRE_PCGGetResidual_long_dbl( HYPRE_Solver solver, void *residual );
 HYPRE_Int
-HYPRE_PCGGetResidual( HYPRE_Solver solver, void * residual );
+HYPRE_PCGGetResidual( HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_PCGGetResidualTol_flt( HYPRE_Solver solver, hypre_float * rtol );
+HYPRE_PCGGetResidualTol_flt( HYPRE_Solver solver, hypre_float *rtol );
 HYPRE_Int
-HYPRE_PCGGetResidualTol_dbl( HYPRE_Solver solver, hypre_double * rtol );
+HYPRE_PCGGetResidualTol_dbl( HYPRE_Solver solver, hypre_double *rtol );
 HYPRE_Int
-HYPRE_PCGGetResidualTol_long_dbl( HYPRE_Solver solver, hypre_long_double * rtol );
+HYPRE_PCGGetResidualTol_long_dbl( HYPRE_Solver solver, hypre_long_double *rtol );
 HYPRE_Int
-HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void * rtol );
+HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void *rtol );
 
 HYPRE_Int
-HYPRE_PCGGetSkipBreak_flt( HYPRE_Solver solver, HYPRE_Int * skip_break );
+HYPRE_PCGGetSkipBreak_flt( HYPRE_Solver solver, HYPRE_Int *skip_break );
 HYPRE_Int
-HYPRE_PCGGetSkipBreak_dbl( HYPRE_Solver solver, HYPRE_Int * skip_break );
+HYPRE_PCGGetSkipBreak_dbl( HYPRE_Solver solver, HYPRE_Int *skip_break );
 HYPRE_Int
-HYPRE_PCGGetSkipBreak_long_dbl( HYPRE_Solver solver, HYPRE_Int * skip_break );
+HYPRE_PCGGetSkipBreak_long_dbl( HYPRE_Solver solver, HYPRE_Int *skip_break );
 HYPRE_Int
-HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int * skip_break );
+HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int *skip_break );
 
 HYPRE_Int
-HYPRE_PCGGetStopCrit_flt( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_PCGGetStopCrit_flt( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_PCGGetStopCrit_dbl( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_PCGGetStopCrit_dbl( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_PCGGetStopCrit_long_dbl( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_PCGGetStopCrit_long_dbl( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 HYPRE_Int
-HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int *stop_crit );
 
 HYPRE_Int
-HYPRE_PCGGetTol_flt( HYPRE_Solver solver, hypre_float * tol );
+HYPRE_PCGGetTol_flt( HYPRE_Solver solver, hypre_float *tol );
 HYPRE_Int
-HYPRE_PCGGetTol_dbl( HYPRE_Solver solver, hypre_double * tol );
+HYPRE_PCGGetTol_dbl( HYPRE_Solver solver, hypre_double *tol );
 HYPRE_Int
-HYPRE_PCGGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double * tol );
+HYPRE_PCGGetTol_long_dbl( HYPRE_Solver solver, hypre_long_double *tol );
 HYPRE_Int
-HYPRE_PCGGetTol( HYPRE_Solver solver, void * tol );
+HYPRE_PCGGetTol( HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_PCGGetTwoNorm_flt( HYPRE_Solver solver, HYPRE_Int * two_norm );
+HYPRE_PCGGetTwoNorm_flt( HYPRE_Solver solver, HYPRE_Int *two_norm );
 HYPRE_Int
-HYPRE_PCGGetTwoNorm_dbl( HYPRE_Solver solver, HYPRE_Int * two_norm );
+HYPRE_PCGGetTwoNorm_dbl( HYPRE_Solver solver, HYPRE_Int *two_norm );
 HYPRE_Int
-HYPRE_PCGGetTwoNorm_long_dbl( HYPRE_Solver solver, HYPRE_Int * two_norm );
+HYPRE_PCGGetTwoNorm_long_dbl( HYPRE_Solver solver, HYPRE_Int *two_norm );
 HYPRE_Int
-HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int * two_norm );
+HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int *two_norm );
 
 HYPRE_Int
 HYPRE_PCGSetAbsoluteTol_flt( HYPRE_Solver solver, hypre_float a_tol );
@@ -1657,19 +1657,19 @@ HYPRE_Int
 HYPRE_BiCGSTABDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_BiCGSTABGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_BiCGSTABGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_BiCGSTABGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
 HYPRE_BiCGSTABSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );
@@ -1711,13 +1711,13 @@ HYPRE_Int
 HYPRE_CGNRDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver );
 
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_CGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_CGNRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_CGNRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_CGNRGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_CGNRGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
 HYPRE_CGNRSetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int logging );
@@ -1744,46 +1744,46 @@ HYPRE_Int
 HYPRE_CGNRSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_COGMRESGetCGS_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * cgs );
+HYPRE_COGMRESGetCGS_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cgs );
 
 HYPRE_Int
-HYPRE_COGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_COGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol );
+HYPRE_COGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_COGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_COGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_COGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_COGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_COGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_COGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_COGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_COGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_COGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_COGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_COGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_COGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_COGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_COGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_COGMRESGetUnroll_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * unroll );
+HYPRE_COGMRESGetUnroll_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *unroll );
 
 HYPRE_Int
 HYPRE_COGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );
@@ -1828,40 +1828,40 @@ HYPRE_Int
 HYPRE_COGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_FlexGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol );
+HYPRE_FlexGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_FlexGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_FlexGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_FlexGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_FlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_FlexGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_FlexGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_FlexGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_FlexGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );
@@ -1900,58 +1900,58 @@ HYPRE_Int
 HYPRE_FlexGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_GMRESGetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_GMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_GMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol );
+HYPRE_GMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_GMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_GMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_GMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_GMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_GMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_GMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_GMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_GMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_GMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_GMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector *xref );
 
 HYPRE_Int
-HYPRE_GMRESGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_GMRESGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *rel_change );
 
 HYPRE_Int
-HYPRE_GMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_GMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * skip_real_r_check );
+HYPRE_GMRESGetSkipRealResidualCheck_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *skip_real_r_check );
 
 HYPRE_Int
-HYPRE_GMRESGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_GMRESGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *stop_crit );
 
 HYPRE_Int
-HYPRE_GMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_GMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_GMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );
@@ -2002,43 +2002,43 @@ HYPRE_Int
 HYPRE_GMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_LGMRESGetAugDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetAugDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_LGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_LGMRESGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol );
+HYPRE_LGMRESGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_LGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * k_dim );
+HYPRE_LGMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
-HYPRE_LGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_LGMRESGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_LGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * min_iter );
+HYPRE_LGMRESGetMinIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *min_iter );
 
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_LGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_LGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_LGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_LGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_LGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_LGMRESGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_LGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_LGMRESGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
 HYPRE_LGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );
@@ -2077,58 +2077,58 @@ HYPRE_Int
 HYPRE_LGMRESSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * abstolf );
+HYPRE_PCGGetAbsoluteTolFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *abstolf );
 
 HYPRE_Int
-HYPRE_PCGGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * converged );
+HYPRE_PCGGetConverged_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *converged );
 
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * cf_tol );
+HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cf_tol );
 
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * norm );
+HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
-HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * flex );
+HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *flex );
 
 HYPRE_Int
-HYPRE_PCGGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * logging );
+HYPRE_PCGGetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *logging );
 
 HYPRE_Int
-HYPRE_PCGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * max_iter );
+HYPRE_PCGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
-HYPRE_PCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * num_iterations );
+HYPRE_PCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
-HYPRE_PCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr );
+HYPRE_PCGGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr );
+HYPRE_PCGGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 HYPRE_Int
-HYPRE_PCGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
+HYPRE_PCGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
-HYPRE_PCGGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * rel_change );
+HYPRE_PCGGetRelChange_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *rel_change );
 
 HYPRE_Int
-HYPRE_PCGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * residual );
+HYPRE_PCGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *residual );
 
 HYPRE_Int
-HYPRE_PCGGetResidualTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * rtol );
+HYPRE_PCGGetResidualTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *rtol );
 
 HYPRE_Int
-HYPRE_PCGGetSkipBreak_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * skip_break );
+HYPRE_PCGGetSkipBreak_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *skip_break );
 
 HYPRE_Int
-HYPRE_PCGGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * stop_crit );
+HYPRE_PCGGetStopCrit_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *stop_crit );
 
 HYPRE_Int
-HYPRE_PCGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void * tol );
+HYPRE_PCGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *tol );
 
 HYPRE_Int
-HYPRE_PCGGetTwoNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * two_norm );
+HYPRE_PCGGetTwoNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *two_norm );
 
 HYPRE_Int
 HYPRE_PCGSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double a_tol );

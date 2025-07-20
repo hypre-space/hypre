@@ -25,7 +25,7 @@ HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -34,7 +34,7 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetNumIterations_pre( precision, solver, num_iterations );
@@ -43,7 +43,7 @@ HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -52,7 +52,7 @@ HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
@@ -61,7 +61,7 @@ HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetResidual_pre( precision, solver, residual );
@@ -187,7 +187,7 @@ HYPRE_CGNRDestroy( HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -196,7 +196,7 @@ HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetNumIterations_pre( precision, solver, num_iterations );
@@ -205,7 +205,7 @@ HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -286,7 +286,7 @@ HYPRE_CGNRSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vect
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int * cgs )
+HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int *cgs )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetCGS_pre( precision, solver, cgs );
@@ -295,7 +295,7 @@ HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int * cgs )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetConverged_pre( precision, solver, converged );
@@ -304,7 +304,7 @@ HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
+HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
@@ -313,7 +313,7 @@ HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -322,7 +322,7 @@ HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetKDim_pre( precision, solver, k_dim );
@@ -331,7 +331,7 @@ HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetLogging_pre( precision, solver, level );
@@ -340,7 +340,7 @@ HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetMaxIter_pre( precision, solver, max_iter );
@@ -349,7 +349,7 @@ HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetMinIter_pre( precision, solver, min_iter );
@@ -358,7 +358,7 @@ HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -367,7 +367,7 @@ HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -376,7 +376,7 @@ HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetPrintLevel_pre( precision, solver, level );
@@ -385,7 +385,7 @@ HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetResidual_pre( precision, solver, residual );
@@ -394,7 +394,7 @@ HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void * residual )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetTol( HYPRE_Solver solver, void * tol )
+HYPRE_COGMRESGetTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetTol_pre( precision, solver, tol );
@@ -403,7 +403,7 @@ HYPRE_COGMRESGetTol( HYPRE_Solver solver, void * tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int * unroll )
+HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int *unroll )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetUnroll_pre( precision, solver, unroll );
@@ -538,7 +538,7 @@ HYPRE_COGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_V
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetConverged_pre( precision, solver, converged );
@@ -547,7 +547,7 @@ HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
+HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
@@ -556,7 +556,7 @@ HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -565,7 +565,7 @@ HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetKDim_pre( precision, solver, k_dim );
@@ -574,7 +574,7 @@ HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetLogging_pre( precision, solver, level );
@@ -583,7 +583,7 @@ HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetMaxIter_pre( precision, solver, max_iter );
@@ -592,7 +592,7 @@ HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetMinIter_pre( precision, solver, min_iter );
@@ -601,7 +601,7 @@ HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -610,7 +610,7 @@ HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -619,7 +619,7 @@ HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetPrintLevel_pre( precision, solver, level );
@@ -628,7 +628,7 @@ HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetResidual_pre( precision, solver, residual );
@@ -637,7 +637,7 @@ HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void * residual )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void * tol )
+HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetTol_pre( precision, solver, tol );
@@ -754,7 +754,7 @@ HYPRE_FlexGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void * tol )
+HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetAbsoluteTol_pre( precision, solver, tol );
@@ -763,7 +763,7 @@ HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void * tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetConverged_pre( precision, solver, converged );
@@ -772,7 +772,7 @@ HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
+HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
@@ -781,7 +781,7 @@ HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -790,7 +790,7 @@ HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetKDim_pre( precision, solver, k_dim );
@@ -799,7 +799,7 @@ HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetLogging_pre( precision, solver, level );
@@ -808,7 +808,7 @@ HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetMaxIter_pre( precision, solver, max_iter );
@@ -817,7 +817,7 @@ HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetMinIter_pre( precision, solver, min_iter );
@@ -826,7 +826,7 @@ HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -835,7 +835,7 @@ HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -844,7 +844,7 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
@@ -853,7 +853,7 @@ HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrintLevel_pre( precision, solver, level );
@@ -862,7 +862,7 @@ HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref )
+HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector *xref )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetRefSolution_pre( precision, solver, xref );
@@ -871,7 +871,7 @@ HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
+HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int *rel_change )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetRelChange_pre( precision, solver, rel_change );
@@ -880,7 +880,7 @@ HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_GMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetResidual_pre( precision, solver, residual );
@@ -889,7 +889,7 @@ HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check )
+HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int *skip_real_r_check )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetSkipRealResidualCheck_pre( precision, solver, skip_real_r_check );
@@ -898,7 +898,7 @@ HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int * skip_real_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
+HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int *stop_crit )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetStopCrit_pre( precision, solver, stop_crit );
@@ -907,7 +907,7 @@ HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GMRESGetTol( HYPRE_Solver solver, void * tol )
+HYPRE_GMRESGetTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetTol_pre( precision, solver, tol );
@@ -1060,7 +1060,7 @@ HYPRE_GMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vec
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetAugDim_pre( precision, solver, k_dim );
@@ -1069,7 +1069,7 @@ HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int *converged )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetConverged_pre( precision, solver, converged );
@@ -1078,7 +1078,7 @@ HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
+HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
@@ -1087,7 +1087,7 @@ HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -1096,7 +1096,7 @@ HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
+HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int *k_dim )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetKDim_pre( precision, solver, k_dim );
@@ -1105,7 +1105,7 @@ HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetLogging_pre( precision, solver, level );
@@ -1114,7 +1114,7 @@ HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetMaxIter_pre( precision, solver, max_iter );
@@ -1123,7 +1123,7 @@ HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
+HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int *min_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetMinIter_pre( precision, solver, min_iter );
@@ -1132,7 +1132,7 @@ HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetNumIterations_pre( precision, solver, num_iterations );
@@ -1141,7 +1141,7 @@ HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -1150,7 +1150,7 @@ HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetPrintLevel_pre( precision, solver, level );
@@ -1159,7 +1159,7 @@ HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetResidual_pre( precision, solver, residual );
@@ -1168,7 +1168,7 @@ HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void * residual )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_LGMRESGetTol( HYPRE_Solver solver, void * tol )
+HYPRE_LGMRESGetTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetTol_pre( precision, solver, tol );
@@ -1285,7 +1285,7 @@ HYPRE_LGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Ve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void * abstolf )
+HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void *abstolf )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetAbsoluteTolFactor_pre( precision, solver, abstolf );
@@ -1294,7 +1294,7 @@ HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void * abstolf )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
+HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int *converged )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetConverged_pre( precision, solver, converged );
@@ -1303,7 +1303,7 @@ HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
+HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void *cf_tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetConvergenceFactorTol_pre( precision, solver, cf_tol );
@@ -1312,7 +1312,7 @@ HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
+HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetFinalRelativeResidualNorm_pre( precision, solver, norm );
@@ -1321,7 +1321,7 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int * flex )
+HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int *flex )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetFlex_pre( precision, solver, flex );
@@ -1330,7 +1330,7 @@ HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int * flex )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int * logging )
+HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int *logging )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetLogging_pre( precision, solver, logging );
@@ -1339,7 +1339,7 @@ HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int * logging )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
+HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetMaxIter_pre( precision, solver, max_iter );
@@ -1348,7 +1348,7 @@ HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
+HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetNumIterations_pre( precision, solver, num_iterations );
@@ -1357,7 +1357,7 @@ HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
+HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrecond_pre( precision, solver, precond_data_ptr );
@@ -1366,7 +1366,7 @@ HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
+HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
@@ -1375,7 +1375,7 @@ HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_pt
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
+HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrintLevel_pre( precision, solver, level );
@@ -1384,7 +1384,7 @@ HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
+HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int *rel_change )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetRelChange_pre( precision, solver, rel_change );
@@ -1393,7 +1393,7 @@ HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetResidual( HYPRE_Solver solver, void * residual )
+HYPRE_PCGGetResidual( HYPRE_Solver solver, void *residual )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetResidual_pre( precision, solver, residual );
@@ -1402,7 +1402,7 @@ HYPRE_PCGGetResidual( HYPRE_Solver solver, void * residual )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void * rtol )
+HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void *rtol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetResidualTol_pre( precision, solver, rtol );
@@ -1411,7 +1411,7 @@ HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void * rtol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int * skip_break )
+HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int *skip_break )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetSkipBreak_pre( precision, solver, skip_break );
@@ -1420,7 +1420,7 @@ HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int * skip_break )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
+HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int *stop_crit )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetStopCrit_pre( precision, solver, stop_crit );
@@ -1429,7 +1429,7 @@ HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetTol( HYPRE_Solver solver, void * tol )
+HYPRE_PCGGetTol( HYPRE_Solver solver, void *tol )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetTol_pre( precision, solver, tol );
@@ -1438,7 +1438,7 @@ HYPRE_PCGGetTol( HYPRE_Solver solver, void * tol )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int * two_norm )
+HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int *two_norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetTwoNorm_pre( precision, solver, two_norm );
