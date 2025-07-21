@@ -141,6 +141,24 @@ HYPRE_MappedMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_MappedMatrix ma
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_MappedMatrix
+HYPRE_MappedMatrixCreate_pre( HYPRE_Precision precision )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MappedMatrixCreate_flt( );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MappedMatrixCreate_dbl( );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MappedMatrixCreate_long_dbl( );
+      default:
+         { HYPRE_MappedMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MappedMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_MappedMatrix matrix )
 {
@@ -298,6 +316,24 @@ HYPRE_MultiblockMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_MultiblockM
          return HYPRE_MultiblockMatrixAssemble_long_dbl( matrix );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_MultiblockMatrix
+HYPRE_MultiblockMatrixCreate_pre( HYPRE_Precision precision )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MultiblockMatrixCreate_flt( );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MultiblockMatrixCreate_dbl( );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MultiblockMatrixCreate_long_dbl( );
+      default:
+         { HYPRE_MultiblockMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
 }
 

@@ -78,6 +78,15 @@ HYPRE_MappedMatrixAssemble( HYPRE_MappedMatrix matrix )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_MappedMatrix
+HYPRE_MappedMatrixCreate( void )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MappedMatrixCreate_pre( precision );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MappedMatrixDestroy( HYPRE_MappedMatrix matrix )
 {
@@ -155,6 +164,15 @@ HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_MultiblockMatrixAssemble_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_MultiblockMatrix
+HYPRE_MultiblockMatrixCreate( void )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MultiblockMatrixCreate_pre( precision );
 }
 
 /*--------------------------------------------------------------------------*/

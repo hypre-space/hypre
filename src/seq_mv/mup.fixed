@@ -1,5 +1,3 @@
-HYPRE_MappedMatrixCreate
-HYPRE_MultiblockMatrixCreate
 hypre_CSRMatrixAdd
 hypre_CSRMatrixAddFirstPass
 hypre_CSRMatrixAddHost

@@ -5,6 +5,7 @@ HYPRE_CSRMatrixInitialize
 HYPRE_CSRMatrixPrint
 HYPRE_CSRMatrixRead
 HYPRE_MappedMatrixAssemble
+HYPRE_MappedMatrixCreate
 HYPRE_MappedMatrixDestroy
 HYPRE_MappedMatrixGetColIndex
 HYPRE_MappedMatrixGetMatrix
@@ -15,6 +16,7 @@ HYPRE_MappedMatrixSetColMap
 HYPRE_MappedMatrixSetMapData
 HYPRE_MappedMatrixSetMatrix
 HYPRE_MultiblockMatrixAssemble
+HYPRE_MultiblockMatrixCreate
 HYPRE_MultiblockMatrixDestroy
 HYPRE_MultiblockMatrixInitialize
 HYPRE_MultiblockMatrixLimitedDestroy

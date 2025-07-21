@@ -56,8 +56,17 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
             s_str = sprintf("%s,", s_str)
          }
       }
-      p_str=sprintf("%s ", p_str)
-      s_str=sprintf("%s ", s_str)
+      if (NF < 3)
+      {
+         # This is a special case Foo(void) function
+         p_str = " void "
+         s_str = " precision "
+      }
+      else
+      {
+         p_str = sprintf("%s ", p_str)
+         s_str = sprintf(" precision,%s ", s_str)
+      }
 
       arg_flt      = sprintf("%s", p_str)
       arg_dbl      = sprintf("%s", p_str)
@@ -81,7 +90,7 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       print fret"\n"fdef"("arg_mup")"                                                          >> outc
       print "{"                                                                                >> outc
       print tab "HYPRE_Precision precision = hypre_GlobalPrecision();"                         >> outc
-      print tab "return "fdef"_pre( precision,"s_str");"                                       >> outc
+      print tab "return "fdef"_pre("s_str");"                                                  >> outc
       print "}\n"                                                                              >> outc
    }
    close(filename)

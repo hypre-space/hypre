@@ -19,6 +19,7 @@
 #undef HYPRE_CSRMatrixPrint
 #undef HYPRE_CSRMatrixRead
 #undef HYPRE_MappedMatrixAssemble
+#undef HYPRE_MappedMatrixCreate
 #undef HYPRE_MappedMatrixDestroy
 #undef HYPRE_MappedMatrixGetColIndex
 #undef HYPRE_MappedMatrixGetMatrix
@@ -29,6 +30,7 @@
 #undef HYPRE_MappedMatrixSetMapData
 #undef HYPRE_MappedMatrixSetMatrix
 #undef HYPRE_MultiblockMatrixAssemble
+#undef HYPRE_MultiblockMatrixCreate
 #undef HYPRE_MultiblockMatrixDestroy
 #undef HYPRE_MultiblockMatrixInitialize
 #undef HYPRE_MultiblockMatrixLimitedDestroy
@@ -40,8 +42,6 @@
 #undef HYPRE_VectorInitialize
 #undef HYPRE_VectorPrint
 #undef HYPRE_VectorRead
-#undef HYPRE_MappedMatrixCreate
-#undef HYPRE_MultiblockMatrixCreate
 #undef hypre_CSRMatrixAdd
 #undef hypre_CSRMatrixAddFirstPass
 #undef hypre_CSRMatrixAddHost

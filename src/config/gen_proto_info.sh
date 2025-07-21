@@ -32,8 +32,9 @@ HFILE=$2
 # every semicolon, then remove EOL on all lines without a semicolon.
 sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /[;]/) {print} else {printf "%s ", $0}}' > $HFILE.tmp
 
-# Match and print the prototype for each function, then strip away extra
-# space, parentheses, and commas.
+# Match and print the prototype for each function, then strip away extra space,
+# parentheses, and commas.  Also strip away ' , void ' at the end of a line to
+# make it easy to handle functions with no arguments, i.e., Foo(void).
 cat $FFILE | while read -r FNAME
 do
    awk -v fname=$FNAME '
@@ -49,7 +50,8 @@ do
       }}
 
    }' $HFILE.tmp |
-   sed -e 's/;//g' -e 's/(/,/g' -e 's/)/ /g' -e 's/,/ , /g' -e 's/[[:blank:]][[:blank:]]*/ /g'
+   sed -e 's/;//g' -e 's/(/,/g' -e 's/)/ /g' -e 's/,/ , /g' -e 's/[[:blank:]][[:blank:]]*/ /g' |
+   sed -e 's/ , void $//'
 done
 
 # Clean up temporary files

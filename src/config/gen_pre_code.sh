@@ -56,10 +56,20 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
             s_str = sprintf("%s,", s_str)
          }
       }
-      p_str=sprintf("%s ", p_str)
-      s_str=sprintf("%s ", s_str)
 
-      arg_pre      = sprintf(" HYPRE_Precision precision,%s", p_str)
+      if (NF < 3)
+      {
+         # This is a special case Foo(void) function
+         p_str = " void "
+         s_str = " "
+         arg_pre = " HYPRE_Precision precision "
+      }
+      else
+      {
+         p_str = sprintf("%s ", p_str)
+         s_str = sprintf("%s ", s_str)
+         arg_pre = sprintf(" HYPRE_Precision precision,%s", p_str)
+      }
 
       # First replace HYPRE_Real* and HYPRE_Complex* with void*
       gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*[*]+/, "void *", arg_pre)

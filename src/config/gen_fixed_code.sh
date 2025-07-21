@@ -58,8 +58,18 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
             s_str = sprintf("%s,", s_str)
          }
       }
-      p_str=sprintf("%s ", p_str)
-      s_str=sprintf("%s ", s_str)
+      if (NF < 3)
+      {
+         # This is a special case Foo(void) function
+         p_str = " void "
+         s_str = " "
+         arg_pre = " HYPRE_Precision precision "
+      }
+      else
+      {
+         p_str = sprintf("%s ", p_str)
+         s_str = sprintf("%s ", s_str)
+      }
 
       arg_flt      = sprintf("%s", p_str)
       arg_dbl      = sprintf("%s", p_str)
