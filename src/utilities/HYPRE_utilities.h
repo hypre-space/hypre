@@ -172,6 +172,16 @@ typedef enum
 #endif
 #endif
 
+#ifndef HYPRE_CURRENTPRECISION_FUNC
+#if defined(HYPRE_SINGLE)
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##_flt
+#elif defined(HYPRE_LONG_DOUBLE)
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##long_dbl
+#else
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##_dbl
+#endif
+#endif
+
 HYPRE_Int
 HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
 

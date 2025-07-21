@@ -4938,7 +4938,8 @@ HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_nor
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * Miscellaneous: These probably do not belong in the interface.
+ * RDF: These don't belong in the external interface but are used in various
+ * test drivers.  They should be moved into the test directory instead.
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm    comm,

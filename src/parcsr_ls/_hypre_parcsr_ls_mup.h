@@ -21,48 +21,6 @@ extern "C" {
 
 
 HYPRE_ParCSRMatrix
-GenerateDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian_flt( MPI_Comm comm, HYPRE_BigInt ix, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian_dbl( MPI_Comm comm, HYPRE_BigInt ix, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian_long_dbl( MPI_Comm comm, HYPRE_BigInt ix, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_float alpha, hypre_float eps );
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_double alpha, hypre_double eps );
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_long_double alpha, hypre_long_double eps );
-
-HYPRE_ParCSRMatrix
 GenerateSysLaplacian_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_float *mtrx, hypre_float *value );
 HYPRE_ParCSRMatrix
 GenerateSysLaplacian_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_double *mtrx, hypre_double *value );
@@ -75,13 +33,6 @@ HYPRE_ParCSRMatrix
 GenerateSysLaplacianVCoef_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_double *mtrx, hypre_double *value );
 HYPRE_ParCSRMatrix
 GenerateSysLaplacianVCoef_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_long_double *mtrx, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float eps, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double eps, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double eps, HYPRE_ParVector *rhs_ptr );
 
 HYPRE_Real
 afun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
@@ -1414,13 +1365,6 @@ HYPRE_Int
 hypre_AmgCGCPrepare_long_dbl( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker, HYPRE_Int **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_Int **vrange );
 
 HYPRE_Int
-hypre_AmgCGCPrepare_flt( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker, HYPRE_BigInt **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_BigInt **vrange );
-HYPRE_Int
-hypre_AmgCGCPrepare_dbl( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker, HYPRE_BigInt **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_BigInt **vrange );
-HYPRE_Int
-hypre_AmgCGCPrepare_long_dbl( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker, HYPRE_BigInt **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_BigInt **vrange );
-
-HYPRE_Int
 hypre_Bisection_flt( HYPRE_Int n, hypre_float *diag, hypre_float *offd, hypre_float y, hypre_float z, hypre_float tol, HYPRE_Int k, hypre_float *ev_ptr );
 HYPRE_Int
 hypre_Bisection_dbl( HYPRE_Int n, hypre_double *diag, hypre_double *offd, hypre_double y, hypre_double z, hypre_double tol, HYPRE_Int k, hypre_double *ev_ptr );
@@ -2323,11 +2267,11 @@ hypre_BoomerAMGGetAdditive_dbl( void *data, HYPRE_Int *additive );
 HYPRE_Int
 hypre_BoomerAMGGetAdditive_long_dbl( void *data, HYPRE_Int *additive );
 
-char*
+const char*
 hypre_BoomerAMGGetAggProlongationName_flt( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetAggProlongationName_dbl( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetAggProlongationName_long_dbl( hypre_ParAMGData *amg_data );
 
 HYPRE_Int
@@ -2344,11 +2288,11 @@ hypre_BoomerAMGGetCoarsenType_dbl( void *data, HYPRE_Int *coarsen_type );
 HYPRE_Int
 hypre_BoomerAMGGetCoarsenType_long_dbl( void *data, HYPRE_Int *coarsen_type );
 
-char*
+const char*
 hypre_BoomerAMGGetCoarseningName_flt( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetCoarseningName_dbl( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetCoarseningName_long_dbl( hypre_ParAMGData *amg_data );
 
 HYPRE_Int
@@ -2372,11 +2316,11 @@ hypre_BoomerAMGGetCumNumIterations_dbl( void *data, HYPRE_Int *cum_num_iteration
 HYPRE_Int
 hypre_BoomerAMGGetCumNumIterations_long_dbl( void *data, HYPRE_Int *cum_num_iterations );
 
-char*
+const char*
 hypre_BoomerAMGGetCycleName_flt( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetCycleName_dbl( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetCycleName_long_dbl( hypre_ParAMGData *amg_data );
 
 HYPRE_Int
@@ -2610,11 +2554,11 @@ hypre_BoomerAMGGetPrintLevel_dbl( void *data, HYPRE_Int *print_level );
 HYPRE_Int
 hypre_BoomerAMGGetPrintLevel_long_dbl( void *data, HYPRE_Int *print_level );
 
-char*
+const char*
 hypre_BoomerAMGGetProlongationName_flt( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetProlongationName_dbl( hypre_ParAMGData *amg_data );
-char*
+const char*
 hypre_BoomerAMGGetProlongationName_long_dbl( hypre_ParAMGData *amg_data );
 
 HYPRE_Int
@@ -4493,13 +4437,6 @@ hypre_GaussElimSolve_dbl( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int
 HYPRE_Int
 hypre_GaussElimSolve_long_dbl( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type );
 
-float *
-hypre_GenerateCoordinates_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-float *
-hypre_GenerateCoordinates_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-float *
-hypre_GenerateCoordinates_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-
 HYPRE_Int
 hypre_GenerateMultiPi_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *P, HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, hypre_ParCSRMatrix **Pi_ptr );
 HYPRE_Int
@@ -5228,26 +5165,12 @@ hypre_LINPACKcgpthy_dbl( hypre_double *a, hypre_double *b );
 HYPRE_Real
 hypre_LINPACKcgpthy_long_dbl( hypre_long_double *a, hypre_long_double *b );
 
-HYPRE_Real
-hypre_LINPACKcgpthy_flt( hypre_float*, hypre_float* );
-HYPRE_Real
-hypre_LINPACKcgpthy_dbl( hypre_double*, hypre_double* );
-HYPRE_Real
-hypre_LINPACKcgpthy_long_dbl( hypre_long_double*, hypre_long_double* );
-
 HYPRE_Int
 hypre_LINPACKcgtql1_flt( HYPRE_Int *n, hypre_float *d, hypre_float *e, HYPRE_Int *ierr );
 HYPRE_Int
 hypre_LINPACKcgtql1_dbl( HYPRE_Int *n, hypre_double *d, hypre_double *e, HYPRE_Int *ierr );
 HYPRE_Int
 hypre_LINPACKcgtql1_long_dbl( HYPRE_Int *n, hypre_long_double *d, hypre_long_double *e, HYPRE_Int *ierr );
-
-HYPRE_Int
-hypre_LINPACKcgtql1_flt( HYPRE_Int*, hypre_float *, hypre_float *, HYPRE_Int * );
-HYPRE_Int
-hypre_LINPACKcgtql1_dbl( HYPRE_Int*, hypre_double *, hypre_double *, HYPRE_Int * );
-HYPRE_Int
-hypre_LINPACKcgtql1_long_dbl( HYPRE_Int*, hypre_long_double *, hypre_long_double *, HYPRE_Int * );
 
 HYPRE_Int
 hypre_MGRAddVectorP_flt( hypre_IntArray *CF_marker, HYPRE_Int point_type, hypre_float a, hypre_ParVector *fromVector, hypre_float b, hypre_ParVector **toVector );

@@ -18,11 +18,9 @@ IJMVFILES           = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_flt
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_dbl
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_ldbl
-IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_def
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_flt
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_dbl
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_ldbl
-IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_def
 
 EUCLIDFILES         = ${HYPRE_EUCLID_FILES}
 EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
@@ -40,7 +38,6 @@ KRYLOVFILES         = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
 KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_flt
 KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_dbl
 KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_ldbl
-KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_def
 
 MATMATFILES         = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
 MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
@@ -52,21 +49,17 @@ PARCSRLSFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_flt
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_dbl
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_ldbl
-PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_def
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj_flt
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj_dbl
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj_ldbl
-PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj_def
 
 PARCSRMVFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_flt
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_dbl
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_ldbl
-PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_def
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_flt
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_dbl
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_ldbl
-PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_def
 
 PARCSRBLOCKMVFILES  = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
 PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
@@ -75,11 +68,9 @@ SEQMVFILES          = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_flt
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_dbl
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_ldbl
-SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_def
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_flt
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_dbl
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_ldbl
-SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_def
 
 SEQBLOCKMVFILES     = ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o
 SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/MuP_obj.dir/seq_block_mv_*/*.o
@@ -88,41 +79,33 @@ SSTRUCTLSFILES      = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_flt
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_dbl
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_ldbl
-SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_def
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_flt
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_dbl
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_ldbl
-SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_def
 
 SSTRUCTMVFILES      = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o_flt
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o_dbl
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o_ldbl
-SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o_def
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj_flt
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj_dbl
 SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj_ldbl
-SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj_def
 
 STRUCTLSFILES       = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o_flt
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o_dbl
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o_ldbl
-STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o_def
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj_flt
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj_dbl
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj_ldbl
-STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj_def
 
 STRUCTMVFILES       = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_flt
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_dbl
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_ldbl
-STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_def
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_flt
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_dbl
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_ldbl
-STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_def
 
 UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj

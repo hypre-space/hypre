@@ -1602,20 +1602,6 @@ hypre_SMGResidual_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_Struct
 HYPRE_Int
 hypre_SMGResidual_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
-HYPRE_Int
-hypre_SMGResidual_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int
-hypre_SMGResidual_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int
-hypre_SMGResidual_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-
-void *
-hypre_SMGResidualCreate_flt( void );
-void *
-hypre_SMGResidualCreate_dbl( void );
-void *
-hypre_SMGResidualCreate_long_dbl( void );
-
 void *
 hypre_SMGResidualCreate_flt( void );
 void *
@@ -1631,32 +1617,11 @@ HYPRE_Int
 hypre_SMGResidualDestroy_long_dbl( void *residual_vdata );
 
 HYPRE_Int
-hypre_SMGResidualDestroy_flt( void *residual_vdata );
-HYPRE_Int
-hypre_SMGResidualDestroy_dbl( void *residual_vdata );
-HYPRE_Int
-hypre_SMGResidualDestroy_long_dbl( void *residual_vdata );
-
-HYPRE_Int
 hypre_SMGResidualSetBase_flt( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
 hypre_SMGResidualSetBase_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
 HYPRE_Int
 hypre_SMGResidualSetBase_long_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
-
-HYPRE_Int
-hypre_SMGResidualSetBase_flt( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
-HYPRE_Int
-hypre_SMGResidualSetBase_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
-HYPRE_Int
-hypre_SMGResidualSetBase_long_dbl( void *residual_vdata, hypre_Index base_index, hypre_Index base_stride );
-
-HYPRE_Int
-hypre_SMGResidualSetup_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int
-hypre_SMGResidualSetup_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int
-hypre_SMGResidualSetup_long_dbl( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
 
 HYPRE_Int
 hypre_SMGResidualSetup_flt( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
@@ -2009,25 +1974,11 @@ HYPRE_Int
 hypre_StructSMGSetMaxLevel_long_dbl( void *smg_vdata, HYPRE_Int max_level );
 
 HYPRE_Int
-hypre_StructSetRandomValues_flt( void *v, HYPRE_Int seed );
-HYPRE_Int
-hypre_StructSetRandomValues_dbl( void *v, HYPRE_Int seed );
-HYPRE_Int
-hypre_StructSetRandomValues_long_dbl( void *v, HYPRE_Int seed );
-
-HYPRE_Int
 hypre_StructSetRandomValues_flt( void* v, HYPRE_Int seed );
 HYPRE_Int
 hypre_StructSetRandomValues_dbl( void* v, HYPRE_Int seed );
 HYPRE_Int
 hypre_StructSetRandomValues_long_dbl( void* v, HYPRE_Int seed );
-
-HYPRE_Int
-hypre_StructVectorSetRandomValues_flt( hypre_StructVector *vector, HYPRE_Int seed );
-HYPRE_Int
-hypre_StructVectorSetRandomValues_dbl( hypre_StructVector *vector, HYPRE_Int seed );
-HYPRE_Int
-hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector *vector, HYPRE_Int seed );
 
 HYPRE_Int
 hypre_StructVectorSetRandomValues_flt( hypre_StructVector *vector, HYPRE_Int seed );

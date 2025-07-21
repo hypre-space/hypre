@@ -67,15 +67,13 @@ ifeq (${MP_BUILD}, 1)
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}
 COBJS_longdouble  = ${FILES:.c=.o_ldbl}
-COBJS_default     = ${FILES:.c=.o_def}
 CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
-CUOBJS_default    = ${CUFILES:.c=.obj_def}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
-OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${COBJS_default} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${CUOBJS_default}
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
 
 endif
 
@@ -97,8 +95,8 @@ install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
 
 clean:
 	rm -f *.o *.obj libHYPRE*
-	rm -f *.o_flt *.o_dbl *.o_ldbl *.o_def
-	rm -f *.obj_flt *.obj_dbl *.obj_ldbl *.obj_def
+	rm -f *.o_flt *.o_dbl *.o_ldbl
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

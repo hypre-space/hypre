@@ -14,6 +14,870 @@
 
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructAxpy( HYPRE_Complex alpha, hypre_SStructVector *x, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructAxpy)( alpha, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetBoxnum( hypre_BoxManEntry *entry, HYPRE_Int *id_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetBoxnum)( entry, id_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetCSRstrides( hypre_BoxManEntry *entry, hypre_Index strides )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetCSRstrides)( entry, strides );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetGhstrides( hypre_BoxManEntry *entry, hypre_Index strides )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetGhstrides)( entry, strides );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetGlobalCSRank( hypre_BoxManEntry *entry, hypre_Index index, HYPRE_BigInt *rank_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetGlobalCSRank)( entry, index, rank_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetGlobalGhrank( hypre_BoxManEntry *entry, hypre_Index index, HYPRE_BigInt *rank_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetGlobalGhrank)( entry, index, rank_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry, hypre_Index index, HYPRE_BigInt *rank_ptr, HYPRE_Int type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetGlobalRank)( entry, index, rank_ptr, type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetPart( hypre_BoxManEntry *entry, HYPRE_Int part, HYPRE_Int *part_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetPart)( entry, part, part_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetProcess( hypre_BoxManEntry *entry, HYPRE_Int *proc_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetProcess)( entry, proc_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxManEntryGetStrides( hypre_BoxManEntry *entry, hypre_Index strides, HYPRE_Int type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxManEntryGetStrides)( entry, strides, type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxNumMap( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum, HYPRE_Int **num_varboxes_ptr, HYPRE_Int ***map_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxNumMap)( grid, part, boxnum, num_varboxes_ptr, map_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructBoxToNborBox( hypre_Box *box, hypre_Index root, hypre_Index nbor_root, hypre_Index coord, hypre_Index dir )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructBoxToNborBox)( box, root, nbor_root, coord, dir );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructCellBoxToVarBox( hypre_Box *box, hypre_Index offset, hypre_Index varoffset, HYPRE_Int *valid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructCellBoxToVarBox)( box, offset, varoffset, valid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructCellGridBoxNumMap( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int ***num_varboxes_ptr, HYPRE_Int ****map_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructCellGridBoxNumMap)( grid, part, num_varboxes_ptr, map_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructCopy( hypre_SStructVector *x, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructCopy)( x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGraphFindBoxEndpt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphFindBoxEndpt)( graph, part, var, proc, endpt, boxi );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGraphFindSGridEndpts( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphFindSGridEndpts)( graph, part, var, proc, endpt, endpts );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, hypre_Index index, HYPRE_BigInt *rank )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphGetUVEntryRank)( graph, part, var, index, rank );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGraphRef( hypre_SStructGraph *graph, hypre_SStructGraph **graph_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphRef)( graph, graph_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridAssembleBoxManagers)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridAssembleNborBoxManagers)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridBoxProcFindBoxManEntry( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int box, HYPRE_Int proc, hypre_BoxManEntry **entry_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridBoxProcFindBoxManEntry)( grid, part, var, box, proc, entry_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridCreateCommInfo( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridCreateCommInfo)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridFindBoxManEntry( hypre_SStructGrid *grid, HYPRE_Int part, hypre_Index index, HYPRE_Int var, hypre_BoxManEntry **entry_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridFindBoxManEntry)( grid, part, index, var, entry_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid *grid, HYPRE_Int part, hypre_Index index, HYPRE_Int var, hypre_BoxManEntry **entry_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridFindNborBoxManEntry)( grid, part, index, var, entry_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridGetMaxBoxSize( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridGetMaxBoxSize)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridIntersect( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridIntersect)( grid, part, var, box, action, entries_ptr, nentries_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridPrint( FILE *file, hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridPrint)( file, grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridRead( MPI_Comm comm, FILE *file, hypre_SStructGrid **grid_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRead)( comm, file, grid_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridRef( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRef)( grid, grid_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridSetNumGhost( hypre_SStructGrid *grid, HYPRE_Int *num_ghost )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridSetNumGhost)( grid, num_ghost );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructIndexToNborIndex( hypre_Index index, hypre_Index root, hypre_Index nbor_root, hypre_Index coord, hypre_Index dir, HYPRE_Int ndim, hypre_Index nbor_index )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructIndexToNborIndex)( index, root, nbor_root, coord, dir, ndim, nbor_index );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructInnerProd( hypre_SStructVector *x, hypre_SStructVector *y, HYPRE_Real *result_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructInnerProd)( x, y, result_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_MemoryLocation
+hypre_SStructMatrixMemoryLocation( hypre_SStructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixMemoryLocation)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixRef( hypre_SStructMatrix *matrix, hypre_SStructMatrix **matrix_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixRef)( matrix, matrix_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixSetBoxValues)( matrix, part, set_box, var, nentries, entries, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixSetInterPartValues)( matrix, part, set_box, var, nentries, entries, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixSetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixSetValues)( matrix, part, index, var, nentries, entries, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *nSentries_ptr, HYPRE_Int **Sentries_ptr, HYPRE_Int *nUentries_ptr, HYPRE_Int **Uentries_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixSplitEntries)( matrix, part, var, nentries, entries, nSentries_ptr, Sentries_ptr, nUentries_ptr, Uentries_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvec( HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructVector *x, HYPRE_Complex beta, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvec)( alpha, A, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructVector *x, HYPRE_Complex beta, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecCompute)( matvec_vdata, alpha, A, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecCreate)( matvec_vdata_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecDestroy( void *matvec_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecDestroy)( matvec_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecSetup( void *matvec_vdata, hypre_SStructMatrix *A, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecSetup)( matvec_vdata, A, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructNborBoxToBox( hypre_Box *nbor_box, hypre_Index root, hypre_Index nbor_root, hypre_Index coord, hypre_Index dir )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructNborBoxToBox)( nbor_box, root, nbor_root, coord, dir );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructNborIndexToIndex( hypre_Index nbor_index, hypre_Index root, hypre_Index nbor_root, hypre_Index coord, hypre_Index dir, HYPRE_Int ndim, hypre_Index index )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructNborIndexToIndex)( nbor_index, root, nbor_root, coord, dir, ndim, index );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPAxpy( HYPRE_Complex alpha, hypre_SStructPVector *px, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPAxpy)( alpha, px, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPCopy( hypre_SStructPVector *px, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPCopy)( px, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridAssemble)( pgrid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridCreate( MPI_Comm comm, HYPRE_Int ndim, hypre_SStructPGrid **pgrid_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridCreate)( comm, ndim, pgrid_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridDestroy)( pgrid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridGetMaxBoxSize( hypre_SStructPGrid *pgrid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridGetMaxBoxSize)( pgrid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid *pgrid, hypre_StructGrid *cell_sgrid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetCellSGrid)( pgrid, cell_sgrid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridSetExtents( hypre_SStructPGrid *pgrid, hypre_Index ilower, hypre_Index iupper )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetExtents)( pgrid, ilower, iupper );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid, hypre_Box *pneighbor_box, hypre_Index pnbor_offset )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetPNeighbor)( pgrid, pneighbor_box, pnbor_offset );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetVariables)( pgrid, nvars, vartypes );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPInnerProd( hypre_SStructPVector *px, hypre_SStructPVector *py, HYPRE_Real *presult_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPInnerProd)( px, py, presult_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixAccumulate)( pmatrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixAssemble)( pmatrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixCreate( MPI_Comm comm, hypre_SStructPGrid *pgrid, hypre_SStructStencil **stencils, hypre_SStructPMatrix **pmatrix_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixCreate)( comm, pgrid, stencils, pmatrix_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixDestroy)( pmatrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixInitialize)( pmatrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixPrint( const char *filename, hypre_SStructPMatrix *pmatrix, HYPRE_Int all )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixPrint)( filename, pmatrix, all );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixRef( hypre_SStructPMatrix *matrix, hypre_SStructPMatrix **matrix_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixRef)( matrix, matrix_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetBoxValues)( pmatrix, set_box, var, nentries, entries, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetSymmetric)( pmatrix, var, to_var, symmetric );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix, hypre_Index index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetValues)( pmatrix, index, var, nentries, entries, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvec( HYPRE_Complex alpha, hypre_SStructPMatrix *pA, hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvec)( alpha, pA, px, beta, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecCompute( void *pmatvec_vdata, HYPRE_Complex alpha, hypre_SStructPMatrix *pA, hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecCompute)( pmatvec_vdata, alpha, pA, px, beta, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecCreate)( pmatvec_vdata_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecDestroy)( pmatvec_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecSetup( void *pmatvec_vdata, hypre_SStructPMatrix *pA, hypre_SStructPVector *px )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecSetup)( pmatvec_vdata, pA, px );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPScale( HYPRE_Complex alpha, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPScale)( alpha, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorAccumulate)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorAssemble)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorCreate( MPI_Comm comm, hypre_SStructPGrid *pgrid, hypre_SStructPVector **pvector_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorCreate)( comm, pgrid, pvector_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorDestroy)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorGather( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorGather)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector, hypre_Box *set_box, HYPRE_Int var, hypre_Box *value_box, HYPRE_Complex *values )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorGetBoxValues)( pvector, set_box, var, value_box, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector, hypre_Index index, HYPRE_Int var, HYPRE_Complex *value )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorGetValues)( pvector, index, var, value );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorInitialize)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorInitializeShell)( pvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorPrint( const char *filename, hypre_SStructPVector *pvector, HYPRE_Int all )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorPrint)( filename, pvector, all );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorRef( hypre_SStructPVector *vector, hypre_SStructPVector **vector_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorRef)( vector, vector_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector, hypre_Box *set_box, HYPRE_Int var, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetBoxValues)( pvector, set_box, var, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector, HYPRE_Complex value )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetConstantValues)( pvector, value );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector, hypre_Index index, HYPRE_Int var, HYPRE_Complex *value, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetValues)( pvector, index, var, value, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPartialPCopy( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPartialPCopy)( px, py, array_boxes );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructScale( HYPRE_Complex alpha, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructScale)( alpha, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructStencilRef( hypre_SStructStencil *stencil, hypre_SStructStencil **stencil_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructStencilRef)( stencil, stencil_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixAssemble)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixInitialize)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixSetBoxValues)( matrix, part, set_box, var, nentries, entries, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix, HYPRE_Int part, hypre_Index index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixSetValues)( matrix, part, index, var, nentries, entries, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVarToNborVar( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *coord, HYPRE_Int *nbor_var_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVarToNborVar)( grid, part, var, coord, nbor_var_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVariableGetOffset( HYPRE_SStructVariable vartype, HYPRE_Int ndim, hypre_Index varoffset )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVariableGetOffset)( vartype, ndim, varoffset );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorClearGhostValues( hypre_SStructVector *vector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorClearGhostValues)( vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorConvert( hypre_SStructVector *vector, hypre_ParVector **parvector_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorConvert)( vector, parvector_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorInitializeShell( hypre_SStructVector *vector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorInitializeShell)( vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_MemoryLocation
+hypre_SStructVectorMemoryLocation( hypre_SStructVector *vector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorMemoryLocation)( vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorParConvert( hypre_SStructVector *vector, hypre_ParVector **parvector_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorParConvert)( vector, parvector_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorParRestore( hypre_SStructVector *vector, hypre_ParVector *parvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorParRestore)( vector, parvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseDivision( hypre_SStructVector *x, hypre_SStructVector *y, hypre_SStructVector **z_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseDivision)( x, y, z_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseInverse( hypre_SStructVector *x, hypre_SStructVector **y_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseInverse)( x, y_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseProduct( hypre_SStructVector *x, hypre_SStructVector *y, hypre_SStructVector **z_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseProduct)( x, y, z_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorRef( hypre_SStructVector *vector, hypre_SStructVector **vector_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorRef)( vector, vector_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorRestore( hypre_SStructVector *vector, hypre_ParVector *parvector )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorRestore)( vector, parvector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector, HYPRE_Complex value )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorSetConstantValues)( vector, value );
+}
+
 
 #endif
 

@@ -14,6 +14,214 @@
 
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGDestroy( void *pcg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGDestroy)( pcg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+utilities_FortranMatrix*
+hypre_LOBPCGEigenvaluesHistory( void *vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGEigenvaluesHistory)( vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGGetPrecond( void *pcg_vdata, HYPRE_Solver *precond_data_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGGetPrecond)( pcg_vdata, precond_data_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGIterations( void* vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGIterations)( vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGMultiOperatorA( void *data, void * x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGMultiOperatorA)( data, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGMultiOperatorB( void *data, void * x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGMultiOperatorB)( data, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGMultiPreconditioner( void *data, void * x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGMultiPreconditioner)( data, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGOperatorA)( pcg_vdata, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGOperatorB)( pcg_vdata, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGPreconditioner)( vdata, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNorms( void *vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGResidualNorms)( vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNormsHistory( void *vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGResidualNormsHistory)( vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetMaxIter( void* pcg_vdata, HYPRE_Int max_iter )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetMaxIter)( pcg_vdata, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetPrecond( void *pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetPrecond)( pcg_vdata, precond, precond_setup, precond_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetPrecondUsageMode( void* pcg_vdata, HYPRE_Int mode )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetPrecondUsageMode)( pcg_vdata, mode );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetPrintLevel( void *pcg_vdata, HYPRE_Int level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetPrintLevel)( pcg_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetRTol( void* pcg_vdata, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetRTol)( pcg_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetTol)( pcg_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetup)( pcg_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetupB( void *pcg_vdata, void *B, void *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetupB)( pcg_vdata, B, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSetupT( void *pcg_vdata, void *T, void *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSetupT)( pcg_vdata, T, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LOBPCGSolve( void *vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, HYPRE_Real* val )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LOBPCGSolve)( vdata, con, vec, val );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix *xy )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(lobpcg_MultiVectorByMultiVector)( x, y, xy );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+lobpcg_clean( lobpcg_Data* data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(lobpcg_clean)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+lobpcg_initialize( lobpcg_Data* data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(lobpcg_initialize)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+lobpcg_solve( mv_MultiVectorPtr blockVectorX, void* operatorAData, lobpcg_operator operatorA, void* operatorBData, lobpcg_operator operatorB, void* operatorTData, lobpcg_operator operatorT, mv_MultiVectorPtr blockVectorY, lobpcg_BLASLAPACKFunctions blap_fn, lobpcg_Tolerance tolerance, HYPRE_Int maxIterations, HYPRE_Int verbosityLevel, HYPRE_Int* iterationNumber, HYPRE_Real * lambda_values, HYPRE_Real * lambdaHistory_values, HYPRE_BigInt lambdaHistory_gh, HYPRE_Real * residualNorms_values, HYPRE_Real * residualNormsHistory_values, HYPRE_BigInt residualNormsHistory_gh )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(lobpcg_solve)( blockVectorX, operatorAData, operatorA, operatorBData, operatorB, operatorTData, operatorT, blockVectorY, blap_fn, tolerance, maxIterations, verbosityLevel, iterationNumber, lambda_values, lambdaHistory_values, lambdaHistory_gh, residualNorms_values, residualNormsHistory_values, residualNormsHistory_gh );
+}
+
 
 #endif
 

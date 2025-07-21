@@ -74,6 +74,7 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       arg_flt      = sprintf("%s", p_str)
       arg_dbl      = sprintf("%s", p_str)
       arg_long_dbl = sprintf("%s", p_str)
+      arg_mup      = sprintf("%s", p_str)
 
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_float", arg_flt)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_double", arg_dbl)
@@ -84,6 +85,11 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       print fret"\n"fdef"_long_dbl("arg_long_dbl");\n" >> outh
 
       # Put fixed implementation code here if needed
+      print "/*--------------------------------------------------------------------------*/\n" >> outc
+      print fret"\n"fdef"("arg_mup")"                                                          >> outc
+      print "{"                                                                                >> outc
+      print tab "return HYPRE_CURRENTPRECISION_FUNC("fdef")("s_str");"                         >> outc
+      print "}\n"                                                                              >> outc
    }
    close(filename)
 }'

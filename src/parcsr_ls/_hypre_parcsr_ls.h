@@ -1997,7 +1997,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC ( hypre_ParCSRMatrix *S, HYPRE_Int numberofg
                                       HYPRE_Int coarsen_type, HYPRE_Int *CF_marker );
 HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker,
                                 HYPRE_Int **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_Int **vrange );
-//HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_BigInt **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
 HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S, HYPRE_Int *vertexrange,
                                       HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_IJMatrix *ijG );
 HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G, HYPRE_Int *vertexrange, HYPRE_Int mpisize,
@@ -2069,11 +2068,6 @@ HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm, HYPRE_Int local_num_
 HYPRE_Int hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, HYPRE_Int local_size,
                                             HYPRE_Int offset, HYPRE_Int num_functions );
 
-/* par_coordinates.c */
-float *hypre_GenerateCoordinates ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                   HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R,
-                                   HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-
 /* par_cr.c */
 HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A, hypre_IntArray **CF_marker_ptr,
                                       HYPRE_BigInt *coarse_size_ptr, HYPRE_Int num_CR_relax_steps, HYPRE_Int IS_type,
@@ -2112,11 +2106,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A, hypre_IntArray **CF_
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata, hypre_ParVector **F_array,
                                  hypre_ParVector **U_array );
-
-/* par_difconv.c */
-HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                     HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                     HYPRE_Real *value );
 
 /* par_gsmg.c */
 HYPRE_Int hypre_ParCSRMatrixFillSmooth ( HYPRE_Int nsamples, HYPRE_Real *samples,
@@ -2206,23 +2195,15 @@ HYPRE_Int hypre_ParCSRMatrix_dof_func_offd ( hypre_ParCSRMatrix *A, HYPRE_Int nu
                                              HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd );
 
 /* par_laplace_27pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian27pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                           HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                           HYPRE_Real *value );
 HYPRE_Int hypre_map3 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q,
                        HYPRE_Int r, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part,
                        HYPRE_BigInt *nz_part );
 
 /* par_laplace_9pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian9pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                          HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real *value );
 HYPRE_BigInt hypre_map2 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q,
                           HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
 
 /* par_laplace.c */
-HYPRE_ParCSRMatrix GenerateLaplacian ( MPI_Comm comm, HYPRE_BigInt ix, HYPRE_BigInt ny,
-                                       HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                       HYPRE_Real *value );
 HYPRE_BigInt hypre_map ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p,
                          HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part,
                          HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
@@ -2577,18 +2558,12 @@ HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a, HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                         HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
                                         hypre_ParVector *u, hypre_ParVector *Vtemp );
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
 
 /* par_relax_more_device.c */
 HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A, HYPRE_Int scale,
                                              HYPRE_Real *max_eig, HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCGDevice ( hypre_ParCSRMatrix *A, HYPRE_Int scale,
                                                HYPRE_Int max_iter, HYPRE_Real *max_eig, HYPRE_Real *min_eig );
-
-/* par_rotate_7pt.c */
-HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P,
-                                       HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real alpha, HYPRE_Real eps );
 
 /* par_scaled_matnorm.c */
 HYPRE_Int hypre_ParCSRMatrixScaledNorm ( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm );
@@ -2697,9 +2672,6 @@ HYPRE_Int hypre_BoomerAMGBuildPartialExtInterp ( hypre_ParCSRMatrix *A, HYPRE_In
                                                  HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
 /* par_vardifconv.c */
-HYPRE_ParCSRMatrix GenerateVarDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                        HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                        HYPRE_Real eps, HYPRE_ParVector *rhs_ptr );
 HYPRE_Real afun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real cfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
@@ -2711,9 +2683,6 @@ HYPRE_Real rfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bndfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 
 /* par_vardifconv_rs.c */
-HYPRE_ParCSRMatrix GenerateRSVarDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                          HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                          HYPRE_Real eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
 HYPRE_Real afun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real cfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );

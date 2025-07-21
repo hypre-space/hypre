@@ -63,10 +63,6 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
-/* HYPRE_struct_int.c */
-HYPRE_Int hypre_StructVectorSetRandomValues ( hypre_StructVector *vector, HYPRE_Int seed );
-HYPRE_Int hypre_StructSetRandomValues ( void *v, HYPRE_Int seed );
-
 /* HYPRE_struct_pfmg.c */
 HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
 
@@ -517,16 +513,6 @@ HYPRE_Int hypre_SMGRelaxSetupBaseBoxArray ( void *relax_vdata, hypre_StructMatri
 HYPRE_Int hypre_SMGRelaxSetMaxLevel( void *relax_vdata, HYPRE_Int   num_max_level );
 
 /* smg_residual.c */
-void *hypre_SMGResidualCreate ( void );
-HYPRE_Int hypre_SMGResidualSetup ( void *residual_vdata, hypre_StructMatrix *A,
-                                   hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidual ( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x,
-                              hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_index,
-                                     hypre_Index base_stride );
-HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
-
-/* smg_residual_unrolled.c */
 void *hypre_SMGResidualCreate ( void );
 HYPRE_Int hypre_SMGResidualSetup ( void *residual_vdata, hypre_StructMatrix *A,
                                    hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
