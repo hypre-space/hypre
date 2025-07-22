@@ -73,7 +73,9 @@ SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_dbl
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj_ldbl
 
 SEQBLOCKMVFILES     = ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o
-SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/MuP_obj.dir/seq_block_mv_*/*.o
+SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o_flt
+SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o_dbl
+SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o_ldbl
 
 SSTRUCTLSFILES      = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
 SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_flt

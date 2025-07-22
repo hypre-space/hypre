@@ -14,6 +14,7 @@ DIRS="\
  lapack\
  parcsr_ls\
  parcsr_mv\
+ seq_block_mv\
  seq_mv\
  sstruct_ls\
  sstruct_mv\
@@ -27,7 +28,6 @@ DIRS="\
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
 # parcsr_block_mv          - no external header
-# seq_block_mv             - no external header
 # utilities
 
 for i in $DIRS

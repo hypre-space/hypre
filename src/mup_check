@@ -19,6 +19,7 @@ DIRS="\
  lapack\
  parcsr_ls\
  parcsr_mv\
+ seq_block_mv\
  seq_mv\
  sstruct_ls\
  sstruct_mv\
@@ -32,7 +33,6 @@ DIRS="\
 # matrix_matrix
 # multivector
 # parcsr_block_mv
-# seq_block_mv
 # utilities
 
 # RDF: May need to add '--enable-complex --with-timing' options, but this caused
