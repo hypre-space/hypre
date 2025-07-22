@@ -60,13 +60,13 @@ endif()
 include(CheckLanguage)
 check_language(CUDA)
 if(DEFINED CMAKE_CUDA_COMPILER)
-   enable_language(CUDA)
+  enable_language(CUDA)
 else()
   message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
 endif()
 
 # Find the CUDA Toolkit
-find_package(CUDAToolkit REQUIRED)
+find_package(CUDAToolkit REQUIRED ${CUDA_DIR})
 
 # Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
 if(NOT TARGET cuda)
@@ -208,21 +208,14 @@ endfunction()
 # Handle CUDA libraries
 list(APPEND CUDA_LIBS CUDA::cudart) # Add cudart first since other CUDA libraries may depend on it
 find_and_add_cuda_library(cusparse HYPRE_ENABLE_CUSPARSE)
-find_and_add_cuda_library(curand HYPRE_ENABLE_CURAND)
-find_and_add_cuda_library(cublas HYPRE_ENABLE_CUBLAS)
+find_and_add_cuda_library(curand   HYPRE_ENABLE_CURAND)
+find_and_add_cuda_library(cublas   HYPRE_ENABLE_CUBLAS)
 find_and_add_cuda_library(cublasLt HYPRE_ENABLE_CUBLAS)
 find_and_add_cuda_library(cusolver HYPRE_ENABLE_CUSOLVER)
 
-# Handle GPU Profiling with nvToolsExt
+# Handle GPU Profiling with nvtx3
 if(HYPRE_ENABLE_GPU_PROFILING)
-  find_library(NVTX_LIBRARY nvToolsExt HINTS ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib64 lib)
-  if(NVTX_LIBRARY)
-    message(STATUS "Found NVTX library")
-    set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
-    list(APPEND CUDA_LIBS ${NVTX_LIBRARY})
-  else()
-    message(FATAL_ERROR "NVTX library not found! Make sure CUDA is installed correctly.")
-  endif()
+  set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
 endif()
 
 # Add CUDA Toolkit include directories to the target

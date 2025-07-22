@@ -70,13 +70,13 @@ FILES =\
  timing.c
 
 CUFILES=\
+ device_markers.c\
  device_utils.c\
  general.c\
  handle.c\
  int_array_device.c\
  memory.c\
  omp_device.c\
- nvtx.c\
  stl_ops.c
 
 COBJS = ${FILES:.c=.o}

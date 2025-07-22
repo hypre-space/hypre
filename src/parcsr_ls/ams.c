@@ -495,11 +495,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_SYCL)
 struct l1_norm_op1
-#else
-struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
-#endif
 {
    __host__ __device__
    HYPRE_Complex operator()(const HYPRE_Complex &x, const HYPRE_Complex &y) const
@@ -507,14 +503,8 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
       return x <= 4.0 / 3.0 * y ? y : x;
    }
 };
-#endif
 
-#if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_SYCL)
 struct l1_norm_op6
-#else
-struct l1_norm_op6 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
-#endif
 {
    __host__ __device__
    HYPRE_Complex operator()(const HYPRE_Complex &d, const HYPRE_Complex &l) const
@@ -698,14 +688,14 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
 
 #if defined(HYPRE_USING_GPU)
-      if ( exec == HYPRE_EXEC_DEVICE)
+      if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, [] (const auto & x) {return !x;},
-         1.0 );
+         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
+                            [] (const auto & x) {return !x;}, 1.0 );
 #else
-         thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, HYPRE_THRUST_NOT(identity), 1.0 );
+         HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
+                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)), 1.0 );
 #endif
       }
       else
