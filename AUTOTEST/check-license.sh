@@ -91,4 +91,5 @@ rm -f check-license.remove check-license.files
 ### Next check for files that should not have the license, but do
 
 # blas and lapack '.c' files should not have an LLNL license
-egrep -lR "$LicStr" ./src/blas ./src/lapack | egrep '[.]/src/(blas|lapack)/.*[.]c' >&2
+egrep -lR "$LicStr" ./src/blas ./src/lapack | egrep '[.]/src/(blas|lapack)/.*[.]c' |
+  egrep -v 'mup.*[.]c' >&2
