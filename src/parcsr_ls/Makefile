@@ -69,6 +69,7 @@ FILES =\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
  HYPRE_parcsr_cgnr.c\
+ HYPRE_parcsr_cheby.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_cogmres.c\
@@ -103,6 +104,8 @@ FILES =\
  par_coarsen.c\
  par_cgc_coarsen.c\
  par_cheby.c\
+ par_cheby_setup.c\
+ par_cheby_solve.c\
  par_coarse_parms.c\
  par_coordinates.c\
  par_cr.c\
