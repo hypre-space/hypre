@@ -17,7 +17,7 @@
 #include "Hash.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "ParaSails_mup_func.h"
+#include "_hypre_ParaSails_mup_def.h"
 #endif
 
 #ifndef _NUMBERING_H

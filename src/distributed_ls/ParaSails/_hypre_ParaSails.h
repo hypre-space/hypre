@@ -11,11 +11,18 @@
  *
  *****************************************************************************/
 
+#ifndef hypre_PARASAILS_HEADER
+#define hypre_PARASAILS_HEADER
+
 #include "HYPRE_distributed_matrix_protos.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "ParaSails_mup_func.h"
+#include "_hypre_ParaSails_mup_def.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 typedef void *hypre_ParaSails;
@@ -34,3 +41,10 @@ HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
 HYPRE_Int hypre_ParaSailsApply(hypre_ParaSails ps, HYPRE_Real *u, HYPRE_Real *v);
 HYPRE_Int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, HYPRE_Real *u, HYPRE_Real *v);
 HYPRE_Int hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+

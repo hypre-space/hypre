@@ -25,8 +25,9 @@ IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_ldbl
 EUCLIDFILES         = ${HYPRE_EUCLID_FILES}
 EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
 
-PARASAILSFILES      = ${HYPRE_PARASAILS_FILES}
-PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/MuP_obj.dir/ParaSails_*/*.o
+PARASAILSFILES      = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_flt
+PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_dbl
+PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_ldbl
 
 PILUTFILES          = ${HYPRE_PILUT_FILES}
 PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/MuP_obj.dir/pilut_*/*.o
