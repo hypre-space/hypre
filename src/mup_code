@@ -21,6 +21,7 @@ DIRS="\
  sstruct_mv\
  struct_ls\
  struct_mv\
+ utilities\
 "
 # distributed_ls/Euclid    - no external header
 # distributed_ls/pilut     - no external header, no internal header
@@ -28,7 +29,6 @@ DIRS="\
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
 # parcsr_block_mv          - no external header
-# utilities
 
 for i in $DIRS
 do

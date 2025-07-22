@@ -53,6 +53,7 @@
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)
 #undef  HYPRE_SINGLE
 #undef  HYPRE_LONG_DOUBLE
+#define hypre_DEFINE_GLOBAL_MP 1  /* Define globals only once during double precision build */
 
 #elif defined(MP_BUILD_LONGDOUBLE)
 
@@ -71,7 +72,6 @@
 #define HYPRE_MULTIPRECISION_FUNC(a) a
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, def)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
-#define hypre_DEFINE_GLOBAL_MP 1  /* Define globals only once during default precision build */
 
 #else
 

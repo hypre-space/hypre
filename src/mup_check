@@ -26,6 +26,7 @@ DIRS="\
  sstruct_mv\
  struct_ls\
  struct_mv\
+ utilities\
 "
 # distributed_ls/Euclid
 # distributed_ls/pilut
@@ -33,12 +34,11 @@ DIRS="\
 # matrix_matrix
 # multivector
 # parcsr_block_mv
-# utilities
 
-# RDF: May need to add '--enable-complex --with-timing' options, but this caused
-# some problems for me when I tried it.  Sort out later.
+# RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
+# but this caused some problems for me when I tried it.  Sort out later.
 make distclean
-./configure --enable-debug --enable-hopscotch
+./configure --enable-debug
 make -s -j
 
 echo "FUNCTION CHECK:"

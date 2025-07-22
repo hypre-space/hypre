@@ -110,8 +110,13 @@ STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_flt
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_dbl
 STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_ldbl
 
-UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
-UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
+UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_flt
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_dbl
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_ldbl
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.obj_flt
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.obj_dbl
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.obj_ldbl
 
 BLASFILES           = ${HYPRE_SRC_TOP_DIR}/blas/*.o
 BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/*.o_flt

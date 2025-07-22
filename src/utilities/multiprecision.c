@@ -10,10 +10,8 @@
 #ifdef HYPRE_MIXED_PRECISION
 
 /* Global variable for default runtime precision */
-/* Guard definition to avoid linker errors for multiprecision build */
-#if defined (hypre_DEFINE_GLOBAL)
+/* No guard is needed since this file is only compiled once */
 HYPRE_Precision hypre__global_precision = HYPRE_REAL_DOUBLE;
-#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

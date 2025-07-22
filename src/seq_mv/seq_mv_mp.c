@@ -12,7 +12,6 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#include "hypre_utilities_mup.h"
 
 #if defined(HYPRE_MIXED_PRECISION)
 

@@ -11,16 +11,12 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "hypre_utilities_mup.h"
 #include "HYPRE.h"
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_struct_mv_mp.h"
-#include "hypre_struct_mv_mup.h"
 #include "HYPRE_struct_ls.h"
 #include "_hypre_struct_ls.h"
-#include "hypre_struct_ls_mup.h"
 #include "HYPRE_krylov.h"
-//#include "hypre_krylov_mup.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS

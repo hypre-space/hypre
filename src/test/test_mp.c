@@ -20,7 +20,6 @@
 #include <string.h>
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "hypre_utilities_mup.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -304,10 +303,10 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorGetObject_dbl(ijxtmp, (void **) &xtmp);      
             
       /* Defect correction solver using AMG */
-      hypre_printf_dbl("\n\n***** Richardson Defect Correction Solver for AMG *****\n");
+      hypre_printf("\n\n***** Richardson Defect Correction Solver for AMG *****\n");
       /* step 0: create and setup single precision amg solver */
-      time_index = hypre_InitializeTiming_dbl("Setup AMG float");
-      hypre_BeginTiming_dbl(time_index);
+      time_index = hypre_InitializeTiming("Setup AMG float");
+      hypre_BeginTiming(time_index);
 
       HYPRE_Solver amg_solver;
       HYPRE_BoomerAMGCreate_flt(&amg_solver);
@@ -318,14 +317,14 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetTol_flt(amg_solver, 1.0e-16); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
       HYPRE_BoomerAMGSetup_flt(amg_solver, parcsr_A, par_b, par_x);    
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Setup AMG float",hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup AMG float",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
       
-      time_index = hypre_InitializeTiming_dbl("Solve DC mixed");
-      hypre_BeginTiming_dbl(time_index);
+      time_index = hypre_InitializeTiming("Solve DC mixed");
+      hypre_BeginTiming(time_index);
       /* step 1: approximate solve */
       HYPRE_BoomerAMGSolve_flt(amg_solver, parcsr_A, par_b, par_x);
 
@@ -339,7 +338,7 @@ int main (int argc, char *argv[])
 //exit(0);
    
       /* Iterative refinement loop */
-      hypre_printf_dbl("\n\n***** Begin REFINEMENT *****\n");
+      hypre_printf("\n\n***** Begin REFINEMENT *****\n");
 
       /* datastructs for statistics */
       double enrm[MAXITS];
@@ -387,19 +386,19 @@ int main (int argc, char *argv[])
            
          /*=====================*/
     }
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Solve DC mixed",hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve DC mixed",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
 
     /* print some stats */
     /*==========================================*/
     //HYPRE_ParVectorPrint_dbl(par_xb,"MP_sol");
-    hypre_printf_dbl("iter          <e,e>       <r,r>\n");
+    hypre_printf("iter          <e,e>       <r,r>\n");
     for(i=0; i<MAXITS; i++) 
     {
-        hypre_printf_dbl("%d       %e       %e\n",i+1, enrm[i], rnrm[i]);
+        hypre_printf("%d       %e       %e\n",i+1, enrm[i], rnrm[i]);
     }
     /*==========================================*/
 

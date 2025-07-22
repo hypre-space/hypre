@@ -20,7 +20,6 @@
 #include <string.h>
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "hypre_utilities_mup.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -338,9 +337,9 @@ int main (int argc, char *argv[])
       HYPRE_Solver pcg_solver;
       HYPRE_Solver        pcg_precond_gotten;      
 
-      time_index = hypre_InitializeTiming_dbl("DBL Setup");
+      time_index = hypre_InitializeTiming("DBL Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       // Create PCG solver
       HYPRE_ParCSRPCGCreate_dbl(hypre_MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, MAXITS);
@@ -355,7 +354,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
      if(solver_id == 1)
      {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
+        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
 
          HYPRE_BoomerAMGCreate_dbl(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, 0); /* print amg solution info */
@@ -377,45 +376,45 @@ int main (int argc, char *argv[])
          HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
             return (-1);
          }
          else if (myid == 0)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
          }
       }
       else
       {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Double precision Setup Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Double precision Setup Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
 
-      time_index = hypre_InitializeTiming_dbl("DBL Solve");
+      time_index = hypre_InitializeTiming("DBL Solve");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       //  PCG solve
       HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
 
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Double precision Solve Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Double precision Solve Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
       HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
       if (myid == 0)
       {
-        hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
-      	hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+      	hypre_printf("Iteration count = %d \n", num_iterations);         
       }
       fflush(NULL);
       // destroy pcg solver
@@ -431,9 +430,9 @@ int main (int argc, char *argv[])
       HYPRE_Solver pcg_solver;
       HYPRE_Solver        pcg_precond_gotten;      
 
-      time_index = hypre_InitializeTiming_dbl("FLT Setup");
+      time_index = hypre_InitializeTiming("FLT Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       // Create PCG solver
       HYPRE_ParCSRPCGCreate_flt(hypre_MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_flt(pcg_solver, MAXITS);
@@ -448,7 +447,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
       if(solver_id == 1)
       {
-         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
+         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
@@ -469,45 +468,45 @@ int main (int argc, char *argv[])
          HYPRE_PCGGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
             return (-1);
          }
          else if (myid == 0)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
          }
       }
       else
       {
-         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
+         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver
       HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)parcsr_A,  (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Single precision Setup Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Single precision Setup Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
 
-      time_index = hypre_InitializeTiming_dbl("FLT Solve");
+      time_index = hypre_InitializeTiming("FLT Solve");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       //  PCG solve
       HYPRE_PCGSolve_flt(pcg_solver, (HYPRE_Matrix)parcsr_A,  (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
 
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Single precision Solve Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Single precision Solve Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
       HYPRE_PCGGetNumIterations_flt(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
       if (myid == 0)
       {
-         hypre_printf_dbl("final relative residual norm = %e \n", final_res_norm);
-         hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+         hypre_printf("final relative residual norm = %e \n", final_res_norm);
+         hypre_printf("Iteration count = %d \n", num_iterations);         
       }
       fflush(NULL);
       // destroy pcg solver
@@ -523,9 +522,9 @@ int main (int argc, char *argv[])
       HYPRE_Solver pcg_solver;
       HYPRE_Solver        pcg_precond_gotten;      
 
-      time_index = hypre_InitializeTiming_dbl("DBL Setup");
+      time_index = hypre_InitializeTiming("DBL Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       // Create PCG solver
       HYPRE_ParCSRPCGCreate_dbl(hypre_MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, MAXITS);
@@ -540,7 +539,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
      if(solver_id == 1)
      {
-         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
+         if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
@@ -564,45 +563,45 @@ int main (int argc, char *argv[])
          HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
             return (-1);
          }
          else if (myid == 0)
          {
-            hypre_printf_dbl("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
          }
       }
       else
       {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver (double precision)
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Mixed precision Setup Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Mixed precision Setup Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
 
-      time_index = hypre_InitializeTiming_dbl("DBL Solve");
+      time_index = hypre_InitializeTiming("DBL Solve");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_BeginTiming_dbl(time_index);
+      hypre_BeginTiming(time_index);
       //  PCG solve (double precision)
       HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
 
       MPI_Barrier(hypre_MPI_COMM_WORLD);
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Mixed precision Solve Time", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Mixed precision Solve Time", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
       HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
       if (myid == 0)
       {
-        hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
-        hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+        hypre_printf("Iteration count = %d \n", num_iterations);         
       }
       fflush(NULL);
       // destroy pcg solver

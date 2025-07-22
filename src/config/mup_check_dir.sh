@@ -20,6 +20,12 @@ export LC_COLLATE=C  # sort by listing capital letters first
 cat mup.fixed mup.functions mup.methods | sort | uniq  > mup_check.old
 $scriptdir/generate_function_list.sh    | sort | uniq  > mup_check.new
 
+# Remove functions listed in mup.exclude (if it exists)
+if [ -e mup.exclude ]; then
+    egrep -v -f mup.exclude mup_check.new > mup_check.new.tmp
+    mv  mup_check.new.tmp mup_check.new
+fi
+
 diff -wc mup_check.old mup_check.new                   > mup_check.err
 
 SZ=`ls -l mup_check.err | awk '{print $5}'`
