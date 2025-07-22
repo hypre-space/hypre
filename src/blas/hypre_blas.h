@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "blas_mup_func.h"
+#include "_hypre_blas_mup_def.h"
 #endif
 
 

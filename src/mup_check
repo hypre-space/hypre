@@ -14,7 +14,9 @@ scriptpath=$PWD
 
 DIRS="\
  IJ_mv\
+ blas\
  krylov\
+ lapack\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -23,12 +25,10 @@ DIRS="\
  struct_ls\
  struct_mv\
 "
-# blas
 # distributed_ls/Euclid
 # distributed_ls/ParaSails
 # distributed_ls/pilut
 # distributed_matrix
-# lapack
 # matrix_matrix
 # multivector
 # parcsr_block_mv

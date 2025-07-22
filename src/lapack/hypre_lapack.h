@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "lapack_mup_func.h"
+#include "_hypre_lapack_mup_def.h"
 #endif
 
 /* blas */

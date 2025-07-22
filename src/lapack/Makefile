@@ -9,8 +9,11 @@ include ../config/Makefile.config
 
 C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../blas -I../utilities
 
-LAPACK_HEADERS =  f2c.h hypre_lapack.h
-LAPACK_FILES = \
+HEADERS =\
+ f2c.h\
+ hypre_lapack.h
+
+FILES =\
  dbdsqr.c\
  dgebd2.c\
  dgebrd.c\
@@ -29,6 +32,7 @@ LAPACK_FILES = \
  dlacpy.c\
  dlae2.c\
  dlaev2.c\
+ dlamch.c\
  dlange.c\
  dlanst.c\
  dlansy.c\
@@ -84,102 +88,45 @@ LAPACK_FILES = \
  lsame.c\
  xerbla.c
 
-OBJS = ${LAPACK_FILES:.c=.o}
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
+OBJS = ${FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+
+endif
 
 #################################################################
 # Targets
 #################################################################
 
-all: lapack_OBJS dlamch_obj
+all: ${OBJS}
+	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 
 install: all
 	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -rf *.o
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
+#################################################################
+# Rules
+#################################################################
 
-##################################################################
-# Build Rules
-##################################################################
-
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-#MKDIR_P = mkdir -p
-#mkmpdir: 
-#	${MKDIR_P} ${MuP_OBJDIR}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c ${LAPACK_HEADERS}
-#	@echo  "MuP_OBJDIR is ${ADD_OBJS_single} ... $%"
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-dlamch_single = ${MuP_OBJDIR_single}/dlamch.o
-${dlamch_single}: dlamch.c ${LAPACK_HEADERS}
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -DMP_BUILD_SINGLE=1 -c -o $@ dlamch.c
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${OBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c ${LAPACK_HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-dlamch_double = ${MuP_OBJDIR_double}/dlamch.o
-${dlamch_double}: dlamch.c ${LAPACK_HEADERS}
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -DMP_BUILD_DOUBLE=1 -c -o $@ dlamch.c
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${OBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c ${LAPACK_HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-dlamch_longdouble = ${MuP_OBJDIR_longdouble}/dlamch.o
-${dlamch_longdouble}: dlamch.c ${LAPACK_HEADERS}
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -DMP_BUILD_LONGDOUBLE=1 -c -o $@ dlamch.c
-#
-# compile without optimization
-dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -c dlamch.c
-
-dlamch_obj: dlamch.o
-#
-# multiprecision object files
-${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
-lapack_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-# compile without optimization
-dlamch_obj: ${dlamch_single} ${dlamch_double} ${dlamch_longdouble}
-
-else
-# compile without optimization
-dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -c dlamch.c
-
-dlamch_obj: dlamch.o
-
-${OBJS}: ${LAPACK_HEADERS}
-lapack_OBJS: ${OBJS}
-endif
-
+${OBJS}: ${HEADERS}

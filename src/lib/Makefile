@@ -111,10 +111,14 @@ UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/ut
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
 
 BLASFILES           = ${HYPRE_SRC_TOP_DIR}/blas/*.o
-BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
+BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/*.o_flt
+BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/*.o_dbl
+BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/*.o_ldbl
 
 LAPACKFILES         = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
-LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/MuP_obj.dir/lapack_*/*.o
+LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/*.o_flt
+LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/*.o_dbl
+LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/*.o_ldbl
 
 # normal build
 else

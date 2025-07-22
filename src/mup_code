@@ -9,7 +9,9 @@
 
 DIRS="\
  IJ_mv\
+ blas\
  krylov\
+ lapack\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -18,12 +20,10 @@ DIRS="\
  struct_ls\
  struct_mv\
 "
-# blas                     - no external header
 # distributed_ls/Euclid    - no external header
 # distributed_ls/ParaSails - no external header, no internal header
 # distributed_ls/pilut     - no external header, no internal header
 # distributed_matrix       - no external header, no internal header
-# lapack                   - no external header
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
 # parcsr_block_mv          - no external header

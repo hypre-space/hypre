@@ -12,8 +12,11 @@ include ../config/Makefile.config
 
 C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
 
-BLAS_HEADERS =  f2c.h  hypre_blas.h
-BLAS_FILES = \
+HEADERS =\
+ f2c.h\
+ hypre_blas.h
+
+FILES =\
  dasum.c\
  daxpy.c\
  dcopy.c\
@@ -39,74 +42,45 @@ BLAS_FILES = \
  lsame.c\
  xerbla.c
 
-OBJS = ${BLAS_FILES:.c=.o}
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
+OBJS = ${FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+
+endif
 
 ##################################################################
 # Targets
 ##################################################################
 
-#all: ${OBJS}
-
-all: blas_OBJS
+all: ${OBJS}
+	cp -fR $(srcdir)/_hypre_blas.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 
 install: all
 	cp -fR $(srcdir)/_hypre_blas.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -rf *.o
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
-
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-#MKDIR_P = mkdir -p
-#mkmpdir: 
-#	${MKDIR_P} ${MuP_OBJDIR}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c ${BLAS_HEADERS}
-#	@echo  "MuP_OBJDIR is ${ADD_OBJS_single} ... $%"
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${OBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c ${BLAS_HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${OBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c ${BLAS_HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-# multiprecision object files
-${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
-blas_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-#
-else
-${OBJS}: ${BLAS_HEADERS}
-blas_OBJS: ${OBJS}
-endif
-
+${OBJS}: ${HEADERS}
