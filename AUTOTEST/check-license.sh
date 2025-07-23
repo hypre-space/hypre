@@ -43,7 +43,7 @@ egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif|png)$' |
   egrep -v '[.]/.*HYPRE_config[.]h' |
   egrep -v '[.]/src/(blas|lapack)/.*[.]c' |
   egrep -v '[.]/src/.*functions[.]saved$' |
-  egrep -v '[.]/src/.*mup[.](fixed|functions|methods)$' |
+  egrep -v '[.]/src/.*mup[.](exclude|fixed|functions|methods)$' |
   egrep -v '[.]/src/examples/docs' |
   egrep -v '[.]/src/test/TEST_.*'    > check-license.files
 
