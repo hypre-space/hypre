@@ -469,7 +469,7 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
       }
       else
       {
-         parcsr_AH = hypre_ParCSRMatrixRAPKT(parcsr_P, parcsr_A, parcsr_P, keepTranspose);
+         parcsr_AH = hypre_ParCSRMatrixRAPKT(parcsr_P, parcsr_A, parcsr_P, keepTranspose, 1);
       }
 
       if (i == rep - 1)
