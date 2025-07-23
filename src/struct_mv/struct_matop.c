@@ -95,6 +95,8 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
          }
          hypre_BoxLoop1ReductionEnd(Ai, diag_product_local);
 #undef DEVICE_VAR
+#undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION
 
          diag_product += (HYPRE_Real) diag_product_local;
       }
