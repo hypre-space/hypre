@@ -19,7 +19,6 @@
 #include "_hypre_lobpcg.h"
 #include "fortran_matrix.h"
 #include "multivector.h"
-#include "HYPRE_MatvecFunctions.h"
 #include "_hypre_lapack.h"
 
 static HYPRE_Int dsygv_interface (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *

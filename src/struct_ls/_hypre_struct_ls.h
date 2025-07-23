@@ -11,8 +11,6 @@
 
 #include "temp_multivector.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
-#include "HYPRE_MatvecFunctions.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_struct_ls_mup_def.h"

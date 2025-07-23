@@ -27,8 +27,7 @@ HEADERS =\
  flexgmres.h\
  lgmres.h\
  pcg.h\
- HYPRE_lobpcg.h\
- HYPRE_MatvecFunctions.h
+ HYPRE_lobpcg.h
 
 FILES =\
  bicgstab.c\

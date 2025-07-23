@@ -10,7 +10,6 @@
 
 #include "multivector.h"
 #include "fortran_matrix.h"
-#include "HYPRE_MatvecFunctions.h"
 #include "HYPRE_krylov.h"
 #include "HYPRE_lobpcg.h"
 #include "_hypre_krylov.h"
