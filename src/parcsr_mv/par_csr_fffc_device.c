@@ -361,10 +361,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker,
-                                                      make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
-                      thrust::make_transform_iterator(CF_marker + n_local,
-                                                      make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      thrust::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
                       itmp, /* C */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
