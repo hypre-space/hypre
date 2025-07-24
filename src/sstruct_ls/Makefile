@@ -110,7 +110,6 @@ CUFILES =\
  fac_setup2.c\
  fac_zero_stencilcoef.c\
  node_relax.c\
- ssamg_interp.c\
  ssamg_relax.c\
  ssamg_uinterp.c
 
