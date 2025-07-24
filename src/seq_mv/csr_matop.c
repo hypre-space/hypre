@@ -167,20 +167,23 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
          }
       }
 
-      if (ii < (num_threads - 1))
+      if (lastrow > firstrow)
       {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+         if ((ii < (num_threads - 1)) && (lastrow < nnzrows_C))
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
-      }
-      else
-      {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+         else
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
       }
    }
@@ -229,6 +232,12 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               hypre_CSRMatrix   *B,
                               hypre_CSRMatrix   *C )
 {
+   /* Exit if local number of rows is zero */
+   if (lastrow - firstrow <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
@@ -448,7 +457,22 @@ hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
                     HYPRE_Complex    beta,
                     hypre_CSRMatrix *B)
 {
+   HYPRE_Int        nrows_A   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        ncols_A   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int        nnzrows_B = hypre_CSRMatrixNumRownnz(A);
+
    hypre_CSRMatrix *C = NULL;
+
+   /* Trivial case: input matrices are empty */
+   if (!nnzrows_A && !nnzrows_B)
+   {
+      C = hypre_CSRMatrixCreate(nrows_A, ncols_A, 0);
+      hypre_CSRMatrixNumRownnz(C) = 0;
+      hypre_CSRMatrixInitialize_v2(C, 0, hypre_CSRMatrixMemoryLocation(A));
+
+      return C;
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),

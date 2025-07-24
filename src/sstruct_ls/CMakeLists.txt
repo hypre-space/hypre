@@ -73,12 +73,13 @@ set(SRCS
   sys_pfmg_solve.c
   ssamg.c
   ssamg_csolver.c
-  ssamg_stats.c
+  ssamg_interp.c
+  ssamg_relax.c
   ssamg_setup.c
   ssamg_setup_rap.c
-  ssamg_relax.c
   ssamg_solve.c
-  ssamg_interp.c
+  ssamg_stats.c
+  ssamg_uinterp.c
 )
 
 target_sources(${PROJECT_NAME}
@@ -96,6 +97,7 @@ if (HYPRE_USING_GPU)
     node_relax.c
     ssamg_interp.c
     ssamg_relax.c
+    ssamg_uinterp.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

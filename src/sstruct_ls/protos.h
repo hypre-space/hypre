@@ -547,6 +547,10 @@ hypre_SStructMatrix* hypre_SSAMGCreateInterpOp ( hypre_SStructMatrix *A, hypre_S
 HYPRE_Int hypre_SSAMGSetupInterpOp ( hypre_SStructMatrix  *A, HYPRE_Int *cdir_p,
                                      hypre_SStructMatrix *P, HYPRE_Int interp_type );
 
+/* ssamg_uinterp.c */
+HYPRE_Int hypre_SSAMGSetupUInterpOp ( hypre_SStructMatrix  *A, HYPRE_Int *cdir_p,
+                                      hypre_SStructMatrix *P, HYPRE_Int interp_type );
+
 /* ssamg_setup_rap.c */
 HYPRE_Int hypre_SSAMGComputeRAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,
                                   hypre_SStructGrid **cgrid, HYPRE_Int *cdir_p, HYPRE_Int non_galerkin,
@@ -706,4 +710,3 @@ HYPRE_Int hypre_SysSemiRestrictSetup ( void *sys_restrict_vdata, hypre_SStructPM
 HYPRE_Int hypre_SysSemiRestrict ( void *sys_restrict_vdata, hypre_SStructPMatrix *R,
                                   hypre_SStructPVector *r, hypre_SStructPVector *rc );
 HYPRE_Int hypre_SysSemiRestrictDestroy ( void *sys_restrict_vdata );
-
