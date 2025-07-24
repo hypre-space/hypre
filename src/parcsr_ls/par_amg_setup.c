@@ -1548,9 +1548,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if defined(HYPRE_USING_SYCL)
                      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
-                                                                             in_range<HYPRE_Int>(1, 2)),
+                                                                             make_func_converter<HYPRE_Int>(in_range<HYPRE_Int>(1, 2))),
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]) + local_num_vars,
-                                                                             in_range<HYPRE_Int>(1, 2)),
+                                                                             make_func_converter<HYPRE_Int>(in_range<HYPRE_Int>(1, 2))),
                                         tmp,
                                         HYPRE_Int(0) );
 
