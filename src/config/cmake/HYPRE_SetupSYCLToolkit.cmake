@@ -14,6 +14,9 @@ endif()
 # Find Intel SYCL
 find_package(IntelSYCL REQUIRED)
 
+# Sycl requires hypre streams
+set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+
 # Set up SYCL flags
 if(IntelSYCL_FOUND)
   # Standard SYCL flags
