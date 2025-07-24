@@ -2320,6 +2320,11 @@ PrintUsage( char *progname,
       /* end lobpcg */
 
       hypre_printf("\n");
+      hypre_printf("  -precision <p>     : runtime precision, -1 (default) \n");
+      hypre_printf("                       -1 = default precision at compilation\n");
+      hypre_printf("                        0 = flt, 1 = dbl, 2 = long_dbl\n");
+
+      hypre_printf("\n");
    }
 
    return 0;
@@ -2520,6 +2525,8 @@ main( hypre_int argc,
 
    HYPRE_Int             num_iterations;
    HYPRE_Real            final_res_norm;
+   hypre_long_double     final_res_norm_mem;  // memory for multiprecision res norm
+   void                 *final_res_norm_ptr = &final_res_norm_mem;
 
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             device_id = -1;
@@ -2544,6 +2551,8 @@ main( hypre_int argc,
    HYPRE_Int             row, col;
    HYPRE_Int             gradient_matrix;
    HYPRE_Int             old_default;
+
+   HYPRE_Int             precision_id;
 
    /* begin lobpcg */
 
@@ -2675,9 +2684,12 @@ main( hypre_int argc,
 
    old_default = 0;
 
+   precision_id = -1;
+
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
+
    arg_index = 1;
 
    /* parse command line for input file name */
@@ -2849,7 +2861,8 @@ main( hypre_int argc,
             solver_id = NO_SOLVER;
             arg_index++;
          }
-         else /* end lobpcg */
+         /* end lobpcg */
+         else
          {
             solver_id = atoi(argv[arg_index++]);
          }
@@ -3025,6 +3038,12 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
+      /* end lobpcg */
+      else if ( strcmp(argv[arg_index], "-precision") == 0 )
+      {
+         arg_index++;
+         precision_id = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
          arg_index++;
@@ -3100,8 +3119,6 @@ main( hypre_int argc,
       solver_id = 10;
    }
 
-   /* end lobpcg */
-
    /*-----------------------------------------------------------
     * Print driver parameters TODO
     *-----------------------------------------------------------*/
@@ -3128,9 +3145,34 @@ main( hypre_int argc,
 
    hypre_MPI_Barrier(comm);
 
-   /* Set global precision */
-   HYPRE_SetGlobalPrecision(HYPRE_REAL_DOUBLE);
-//   HYPRE_SetGlobalPrecision(HYPRE_REAL_SINGLE);
+   /*-----------------------------------------------------------
+    * Set global precision
+    *-----------------------------------------------------------*/
+
+   {
+      HYPRE_Precision precision;
+      switch(precision_id)
+      {
+         case -1:
+            HYPRE_GetGlobalPrecision(&precision);
+            break;
+         case 0:
+            precision = HYPRE_REAL_SINGLE;
+            break;
+         case 1:
+            precision = HYPRE_REAL_DOUBLE;
+            break;
+         case 2:
+            precision = HYPRE_REAL_LONGDOUBLE;
+            break;
+      }
+
+      HYPRE_SetGlobalPrecision(precision);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the system and solve (one or more times)
+    *-----------------------------------------------------------*/
 
    for (rep = 0; rep < repeats; rep++)
    {
@@ -3916,9 +3958,9 @@ main( hypre_int argc,
          if (object_type == HYPRE_SSTRUCT)
          {
             /* Apply A to cosine vector to yield righthand side */
-            hypre_SStructMatvec(1.0, A, x, 0.0, b);
+            HYPRE_SStructMatrixMatvec(1.0, A, x, 0.0, b);
             /* Reset initial guess to zero */
-            hypre_SStructMatvec(0.0, A, b, 0.0, x);
+            HYPRE_SStructMatrixMatvec(0.0, A, b, 0.0, x);
          }
          else if (object_type == HYPRE_PARCSR)
          {
@@ -3930,9 +3972,9 @@ main( hypre_int argc,
          else if (object_type == HYPRE_STRUCT)
          {
             /* Apply A to cosine vector to yield righthand side */
-            hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
+            HYPRE_StructMatrixMatvec(1.0, sA, sx, 0.0, sb);
             /* Reset initial guess to zero */
-            hypre_StructMatvec(0.0, sA, sb, 0.0, sx);
+            HYPRE_StructMatrixMatvec(0.0, sA, sb, 0.0, sx);
          }
       }
 
@@ -4082,11 +4124,11 @@ main( hypre_int argc,
          char  filename[255];
 
          /* result is 1's on the interior of the grid */
-         hypre_SStructMatvec(1.0, A, b, 0.0, x);
+         HYPRE_SStructMatrixMatvec(1.0, A, b, 0.0, x);
          HYPRE_SStructVectorPrint("sstruct.out.matvec", x, 0);
 
          /* result is all 1's */
-         hypre_SStructCopy(b, x);
+         HYPRE_SStructVectorCopy(b, x);
          HYPRE_SStructVectorPrint("sstruct.out.copy", x, 0);
 
          /* result is all 2's */
@@ -4094,11 +4136,11 @@ main( hypre_int argc,
          HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
 
          /* result is all 0's */
-         hypre_SStructAxpy(-2.0, b, x);
+         HYPRE_SStructAxpy(-2.0, b, x);
          HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);
 
          /* result is 1's with 0's on some boundaries */
-         hypre_SStructCopy(b, x);
+         HYPRE_SStructVectorCopy(b, x);
          hypre_sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
          file = fopen(filename, "w");
          for (part = 0; part < data.nparts; part++)
@@ -4148,7 +4190,7 @@ main( hypre_int argc,
          fclose(file);
 
          /* re-initializes x to 0 */
-         hypre_SStructAxpy(-1.0, b, x);
+         HYPRE_SStructAxpy(-1.0, b, x);
       }
 #endif
 
@@ -4199,7 +4241,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_SStructSysPFMGGetNumIterations(solver, &num_iterations);
-         HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+         HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(solver, final_res_norm_ptr);
 
          HYPRE_SStructSysPFMGDestroy(solver);
       }
@@ -4242,7 +4284,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_SStructSplitGetNumIterations(solver, &num_iterations);
-         HYPRE_SStructSplitGetFinalRelativeResidualNorm(solver, &final_res_norm);
+         HYPRE_SStructSplitGetFinalRelativeResidualNorm(solver, final_res_norm_ptr);
 
          HYPRE_SStructSplitDestroy(solver);
       }
@@ -4338,7 +4380,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
-         HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
+         HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, final_res_norm_ptr );
          HYPRE_SStructPCGDestroy(solver);
 
          if ((solver_id == 10) || (solver_id == 11))
@@ -4854,7 +4896,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_PCGGetNumIterations( par_solver, &num_iterations );
-         HYPRE_PCGGetFinalRelativeResidualNorm( par_solver, &final_res_norm );
+         HYPRE_PCGGetFinalRelativeResidualNorm( par_solver, final_res_norm_ptr );
          HYPRE_ParCSRPCGDestroy(par_solver);
 
          if (solver_id == 20)
@@ -4938,7 +4980,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_GMRESGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
-         HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
+         HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, final_res_norm_ptr );
          HYPRE_SStructGMRESDestroy(solver);
 
          if ((solver_id == 30) || (solver_id == 31))
@@ -5020,7 +5062,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_GMRESGetNumIterations( par_solver, &num_iterations);
-         HYPRE_GMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+         HYPRE_GMRESGetFinalRelativeResidualNorm( par_solver, final_res_norm_ptr);
          HYPRE_ParCSRGMRESDestroy(par_solver);
 
          if (solver_id == 40)
@@ -5103,7 +5145,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
-         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, final_res_norm_ptr );
          HYPRE_SStructBiCGSTABDestroy(solver);
 
          if ((solver_id == 50) || (solver_id == 51))
@@ -5185,7 +5227,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_BiCGSTABGetNumIterations( par_solver, &num_iterations);
-         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( par_solver, final_res_norm_ptr);
          HYPRE_ParCSRBiCGSTABDestroy(par_solver);
 
          if (solver_id == 60)
@@ -5269,7 +5311,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
-         HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
+         HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, final_res_norm_ptr );
          HYPRE_SStructFlexGMRESDestroy(solver);
 
          if ((solver_id == 70) || (solver_id == 71))
@@ -5330,7 +5372,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_FlexGMRESGetNumIterations( par_solver, &num_iterations);
-         HYPRE_FlexGMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+         HYPRE_FlexGMRESGetFinalRelativeResidualNorm( par_solver, final_res_norm_ptr);
          HYPRE_ParCSRFlexGMRESDestroy(par_solver);
 
          if (solver_id == 80)
@@ -5392,7 +5434,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_LGMRESGetNumIterations( par_solver, &num_iterations);
-         HYPRE_LGMRESGetFinalRelativeResidualNorm( par_solver, &final_res_norm);
+         HYPRE_LGMRESGetFinalRelativeResidualNorm( par_solver, final_res_norm_ptr);
          HYPRE_ParCSRLGMRESDestroy(par_solver);
 
          if (solver_id == 90)
@@ -5464,7 +5506,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_ParCSRHybridGetNumIterations(par_solver, &num_iterations);
-         HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+         HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(par_solver, final_res_norm_ptr);
 
          /*
          HYPRE_Real time[4];
@@ -5522,7 +5564,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_StructSMGGetNumIterations(struct_solver, &num_iterations);
-         HYPRE_StructSMGGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+         HYPRE_StructSMGGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
          HYPRE_StructSMGDestroy(struct_solver);
       }
 
@@ -5565,7 +5607,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_StructPFMGGetNumIterations(struct_solver, &num_iterations);
-         HYPRE_StructPFMGGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+         HYPRE_StructPFMGGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
          HYPRE_StructPFMGDestroy(struct_solver);
       }
 
@@ -5607,13 +5649,14 @@ main( hypre_int argc,
          HYPRE_StructVectorInitialize(sr);
          HYPRE_StructVectorAssemble(sr);
          HYPRE_StructVectorCopy(sb, sr);
-         hypre_StructMatvec(-1.0, sA, sx, 1.0, sr);
+         HYPRE_StructMatrixMatvec(-1.0, sA, sx, 1.0, sr);
          /* Using an inner product instead of a norm to help with testing */
-         final_res_norm = hypre_StructInnerProd(sr, sr);
+         final_res_norm = hypre_StructInnerProd(sr, sr);  // RDF: Add HYPRE_InnerProd
          if (final_res_norm < 1.0e-20)
          {
             final_res_norm = 0.0;
          }
+         hypre_MPDataCopyToMP(final_res_norm_ptr, &final_res_norm, 1); // RDF: See above
          HYPRE_StructVectorDestroy(sr);
 
          HYPRE_StructCycRedDestroy(struct_solver);
@@ -5649,8 +5692,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_StructJacobiGetNumIterations(struct_solver, &num_iterations);
-         HYPRE_StructJacobiGetFinalRelativeResidualNorm(struct_solver,
-                                                        &final_res_norm);
+         HYPRE_StructJacobiGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
          HYPRE_StructJacobiDestroy(struct_solver);
       }
 
@@ -5759,7 +5801,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_PCGGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations );
-         HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm );
+         HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, final_res_norm_ptr );
          HYPRE_StructPCGDestroy(struct_solver);
 
          if (solver_id == 210)
@@ -5864,7 +5906,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_StructHybridGetNumIterations(struct_solver, &num_iterations);
-         HYPRE_StructHybridGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+         HYPRE_StructHybridGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
          HYPRE_StructHybridDestroy(struct_solver);
 
          if (solver_id == 220)
@@ -5980,7 +6022,7 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_GMRESGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations);
-         HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm);
+         HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, final_res_norm_ptr);
          HYPRE_StructGMRESDestroy(struct_solver);
 
          if (solver_id == 230)
@@ -6099,7 +6141,8 @@ main( hypre_int argc,
          hypre_ClearTiming();
 
          HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations);
-         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver,
+                                                     final_res_norm_ptr);
          HYPRE_StructBiCGSTABDestroy(struct_solver);
 
          if (solver_id == 240)
@@ -6125,6 +6168,8 @@ main( hypre_int argc,
       /*-----------------------------------------------------------
        * Print the solution and other info
        *-----------------------------------------------------------*/
+
+      hypre_MPDataCopyFromMP(&final_res_norm, final_res_norm_ptr, 1);
 
       if (print_system)
       {
@@ -6226,7 +6271,7 @@ main( hypre_int argc,
          if (object_type == HYPRE_SSTRUCT)
          {
             HYPRE_SStructInnerProd(b, b, &bnorm);
-            hypre_SStructMatvec(-1.0, A, xnew, 1.0, b);
+            HYPRE_SStructMatrixMatvec(-1.0, A, xnew, 1.0, b);
             HYPRE_SStructInnerProd(b, b, &rnorm);
          }
          else if (object_type == HYPRE_PARCSR)
@@ -6240,7 +6285,7 @@ main( hypre_int argc,
          {
             bnorm = hypre_StructInnerProd(sb, sb);
             HYPRE_SStructVectorGetObject(xnew, (void **) &sxnew);
-            hypre_StructMatvec(-1.0, sA, sxnew, 1.0, sb);
+            HYPRE_StructMatrixMatvec(-1.0, sA, sxnew, 1.0, sb);
             rnorm = hypre_StructInnerProd(sb, sb);
          }
          bnorm = hypre_sqrt(bnorm);
