@@ -2208,7 +2208,7 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
 #endif
    {
 #ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < k; i++)
       {
