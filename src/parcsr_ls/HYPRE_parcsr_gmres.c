@@ -89,6 +89,28 @@ HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESSetRefSolution(HYPRE_Solver    solver,
+                                HYPRE_ParVector ref_solution)
+{
+   return (HYPRE_GMRESSetRefSolution(solver, (HYPRE_Vector) ref_solution));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESGetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESGetRefSolution(HYPRE_Solver     solver,
+                                HYPRE_ParVector *ref_solution)
+{
+   return (HYPRE_GMRESGetRefSolution(solver, (HYPRE_Vector *) ref_solution));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
