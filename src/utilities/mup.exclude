@@ -1,3 +1,5 @@
+HYPRE_SetGlobalPrecision
+HYPRE_GetGlobalPrecision
 free_format
 hypre_fprintf
 hypre_fscanf

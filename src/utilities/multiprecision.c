@@ -44,5 +44,25 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
    return hypre_error_flag;
 }
 
+#else
+
+/*--------------------------------------------------------------------------
+ * non-multiprecision case
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision)
+{
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
+{
+   *precision = HYPRE_OBJECT_PRECISION;
+
+   return hypre_error_flag;
+}
+
 #endif
 

@@ -83,13 +83,12 @@ CUFILES=\
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c\
- multiprecision.c
+ mup_pre.c
 
 ifeq (${MP_BUILD}, 1)
-MP_FILES += printf.c
+MP_FILES += printf.c multiprecision.c
 else
-FILES += printf.c
+FILES += printf.c multiprecision.c
 endif
 
 COBJS = ${FILES:.c=.o}

@@ -147,13 +147,8 @@ typedef long double  hypre_long_double;
  * Multiprecision
  *--------------------------------------------------------------------------*/
 
-#ifdef HYPRE_MIXED_PRECISION
+/* object precision options and API are available to users at all times */
 
-#ifdef hypre_DEFINE_GLOBAL_MP
-#define hypre_DEFINE_GLOBAL 1
-#endif
-
-/* object precision options */
 typedef enum 
 {
    HYPRE_REAL_SINGLE,
@@ -162,6 +157,13 @@ typedef enum
 
 } HYPRE_Precision;
 
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
+
+/* RDF: This probably needs to be renamed to something like HYPRE_COMPILE_PRECISION */
 #ifndef HYPRE_OBJECT_PRECISION
 #if defined(HYPRE_SINGLE)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
@@ -170,6 +172,12 @@ typedef enum
 #else
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
 #endif
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+
+#ifdef hypre_DEFINE_GLOBAL_MP
+#define hypre_DEFINE_GLOBAL 1
 #endif
 
 #ifndef HYPRE_CURRENTPRECISION_FUNC
@@ -181,12 +189,6 @@ typedef enum
 #define HYPRE_CURRENTPRECISION_FUNC(a) a##_dbl
 #endif
 #endif
-
-HYPRE_Int
-HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
-
-HYPRE_Int
-HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 
 #endif
 
