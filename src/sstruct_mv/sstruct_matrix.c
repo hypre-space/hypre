@@ -13,6 +13,7 @@
 
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_struct_mv.hpp"
+#include "_hypre_onedpl.hpp"
 
 /* #define DEBUG_MATCONV */
 /* #define DEBUG_U2S */
@@ -1569,8 +1570,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             });
 #elif defined(HYPRE_USING_SYCL)
             HYPRE_ONEDPL_CALL( for_each,
-                               oneapi::dpl::make_counting_iterator<HYPRE_Int>(0),
-                               oneapi::dpl::make_counting_iterator<HYPRE_Int>(num_nonzeros),
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
                                [=] (HYPRE_Int i)
             {
                if (values_map[i] >= 0)
@@ -2165,7 +2166,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
    HYPRE_Int                size;
    HYPRE_Complex           *values;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int                max_num_rownnz;
    HYPRE_Int               *nonzero_rows     = NULL;
    HYPRE_Int               *nonzero_rows_end = NULL;
@@ -2539,8 +2540,8 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
       HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
 
 #elif defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( fill, ncols, ncols + nrows, 1 );
-      HYPRE_ONEDPL_CALL( fill, values, values + nrows, 1.0 );
+      HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
+      HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
       hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
       hypreSycl_sequence( rows, rows + nrows, sizes[0] );
       hypreSycl_sequence( cols, cols + nrows, sizes[2] );

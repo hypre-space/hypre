@@ -322,7 +322,7 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
                                   A_data + num_nonzeros,
                                   [=] __device__ (HYPRE_Complex v) { return hypre_cabs(v) <= tol; } );
 #elif defined(HYPRE_USING_SYCL)
-   num_zeros = HYPRE_ONEDPL_CALL( count_if,
+   num_zeros = HYPRE_ONEDPL_CALL( std::count_if,
                                   A_data,
                                   A_data + num_nonzeros,
                                   [=] (HYPRE_Complex v) { return hypre_cabs(v) <= tol; } );
@@ -376,8 +376,8 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
       });
 #elif defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( for_each,
-                         oneapi::dpl::make_counting_iterator(0),
-                         oneapi::dpl::make_counting_iterator(nrows_A),
+                         oneapi::dpl::counting_iterator(0),
+                         oneapi::dpl::counting_iterator(nrows_A),
                          [=] (HYPRE_Int i)
       {
          for (HYPRE_Int k = A_i[i]; k < A_i[i+1]; k++)
@@ -416,10 +416,10 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
                          } );
 #elif defined(HYPRE_USING_SYCL)
       auto B_row_indices_end = B_row_indices + num_nonzeros_B;
-      HYPRE_ONEDPL_CALL( fill, B_i, B_i + 1, 0 );
+      HYPRE_ONEDPL_CALL( std::fill, B_i, B_i + 1, 0 );
       HYPRE_ONEDPL_CALL( transform,
-                         oneapi::dpl::make_counting_iterator<HYPRE_Int>(0),
-                         oneapi::dpl::make_counting_iterator<HYPRE_Int>(nrows_A),
+                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                         oneapi::dpl::counting_iterator<HYPRE_Int>(nrows_A),
                          B_i + 1,
                          [=] (HYPRE_Int i) {
                             return std::upper_bound(B_row_indices, B_row_indices_end, i) - B_row_indices;
@@ -3177,8 +3177,8 @@ hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A )
 
 #elif defined(HYPRE_USING_SYCL)
    irownnz = HYPRE_ONEDPL_CALL( count_if,
-                                oneapi::dpl::make_counting_iterator(0),
-                                oneapi::dpl::make_counting_iterator(num_rows),
+                                oneapi::dpl::counting_iterator(0),
+                                oneapi::dpl::counting_iterator(num_rows),
                                 [=] (const HYPRE_Int i) { return (A_i[i + 1] - A_i[i]) > 0; } );
 #endif
    hypre_CSRMatrixNumRownnz(A) = irownnz;
@@ -3204,8 +3204,8 @@ hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A )
 
 #elif defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( copy_if,
-                         oneapi::dpl::make_counting_iterator(0),
-                         oneapi::dpl::make_counting_iterator(num_rows),
+                         oneapi::dpl::counting_iterator(0),
+                         oneapi::dpl::counting_iterator(num_rows),
                          Arownnz,
                          [=] (const HYPRE_Int i) { return (A_i[i + 1] - A_i[i]) > 0; } );
 #endif

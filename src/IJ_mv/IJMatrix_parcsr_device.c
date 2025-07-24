@@ -1184,8 +1184,8 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       });
 #elif defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(for_each,
-                        oneapi::dpl::make_counting_iterator<HYPRE_Int>(0),
-                        oneapi::dpl::make_counting_iterator<HYPRE_Int>(nrows),
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
       [=] (HYPRE_Int i)
       {
          for (HYPRE_Int j = d_row_indexes[i]; j < d_row_indexes[i + 1]; j++)
@@ -1238,8 +1238,8 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       });
 #elif defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(for_each,
-                        oneapi::dpl::make_counting_iterator<HYPRE_Int>(0),
-                        oneapi::dpl::make_counting_iterator<HYPRE_Int>(total_lookups),
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
       [=] (HYPRE_Int k)
       {
          HYPRE_BigInt g_row = extended_rows[k];
