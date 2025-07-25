@@ -131,10 +131,10 @@ co="--enable-longdouble --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
-# co="--enable-debug CC=mpiCC"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
-# ./renametest.sh basic $output_dir/basic-debug-cpp
-# 
+co="--enable-debug CC=mpiCC"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./renametest.sh basic $output_dir/basic-debug-cpp
+
 # co="--enable-bigint --enable-debug"
 # ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 # ./renametest.sh basic $output_dir/basic--enable-bigint

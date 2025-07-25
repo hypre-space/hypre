@@ -2391,7 +2391,7 @@ hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
    {
       case HYPRE_REAL_SINGLE:
       {
-         hypre_float *p_dst = dst;
+         hypre_float *p_dst = (hypre_float *) dst;
          for (i = 0; i < count; i++)
          {
             p_dst[i] = (hypre_float) src[i];
@@ -2400,7 +2400,7 @@ hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
       }
       case HYPRE_REAL_DOUBLE:
       {
-         hypre_double *p_dst = dst;
+         hypre_double *p_dst = (hypre_double *) dst;
          for (i = 0; i < count; i++)
          {
             p_dst[i] = (hypre_double) src[i];
@@ -2409,7 +2409,7 @@ hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
       }
       case HYPRE_REAL_LONGDOUBLE:
       {
-         hypre_long_double *p_dst = dst;
+         hypre_long_double *p_dst = (hypre_long_double *) dst;
          for (i = 0; i < count; i++)
          {
             p_dst[i] = (hypre_long_double) src[i];
@@ -2431,7 +2431,7 @@ hypre_MPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
    {
       case HYPRE_REAL_SINGLE:
       {
-         hypre_float *p_src = src;
+         hypre_float *p_src = (hypre_float *) src;
          for (i = 0; i < count; i++)
          {
             dst[i] = (HYPRE_Real) p_src[i];
@@ -2440,7 +2440,7 @@ hypre_MPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
       }
       case HYPRE_REAL_DOUBLE:
       {
-         hypre_double *p_src = src;
+         hypre_double *p_src = (hypre_double *) src;
          for (i = 0; i < count; i++)
          {
             dst[i] = (HYPRE_Real) p_src[i];
@@ -2449,7 +2449,7 @@ hypre_MPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
       }
       case HYPRE_REAL_LONGDOUBLE:
       {
-         hypre_long_double *p_src = src;
+         hypre_long_double *p_src = (hypre_long_double *) src;
          for (i = 0; i < count; i++)
          {
             dst[i] = (HYPRE_Real) p_src[i];
@@ -2526,7 +2526,7 @@ main( hypre_int argc,
    HYPRE_Int             num_iterations;
    HYPRE_Real            final_res_norm;
    hypre_long_double     final_res_norm_mem;  // memory for multiprecision res norm
-   void                 *final_res_norm_ptr = &final_res_norm_mem;
+   HYPRE_Real           *final_res_norm_ptr = (HYPRE_Real *) &final_res_norm_mem;
 
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             device_id = -1;
