@@ -115,8 +115,6 @@ hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix  *A,
  * option 3 = Compute the l2 norm^2 of the rows
  * option 4 = Truncated version of option 2 based on Remark 6.2 in "Multigrid
  *            Smoothers for Ultra-Parallel Computing"
- *
- * TODO: implement options 2-4.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -124,9 +122,9 @@ hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix  *A,
                                    HYPRE_Int             option,
                                    hypre_SStructVector **l1_norms_ptr )
 {
-   MPI_Comm               comm  = hypre_SStructMatrixComm(A);
-   hypre_SStructGraph    *graph = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid     *grid  = hypre_SStructGraphGrid(graph);
+   MPI_Comm               comm     = hypre_SStructMatrixComm(A);
+   hypre_SStructGraph    *graph    = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid     *grid     = hypre_SStructGraphGrid(graph);
    hypre_SStructVector   *l1_norms;
 
    /* Create l1_norms vector */
@@ -141,15 +139,19 @@ hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix  *A,
    }
    else if (option == 2)
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Option 2 not implemented yet!");
    }
    else if (option == 3)
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Option 3 not implemented yet!");
    }
    else if (option == 4)
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Option 4 not implemented yet!");
    }
    else
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown option!");
    }
 
    *l1_norms_ptr = l1_norms;

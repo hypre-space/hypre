@@ -92,27 +92,27 @@ Final Relative Residual Norm = 3.073550e-07
 
 # Output file: solvers.out.27
 Iterations = 20
-Final Relative Residual Norm = 8.077169e-07
+Final Relative Residual Norm = 8.064992e-07
 
 # Output file: solvers.out.28
 Iterations = 20
-Final Relative Residual Norm = 8.077169e-07
+Final Relative Residual Norm = 8.065630e-07
 
 # Output file: solvers.out.29
-Iterations = 28
-Final Relative Residual Norm = 6.690372e-07
+Iterations = 27
+Final Relative Residual Norm = 9.862452e-07
 
 # Output file: solvers.out.30
 Iterations = 10
-Final Relative Residual Norm = 8.505864e-07
+Final Relative Residual Norm = 8.494308e-07
 
 # Output file: solvers.out.31
 Iterations = 10
-Final Relative Residual Norm = 8.505864e-07
+Final Relative Residual Norm = 8.495113e-07
 
 # Output file: solvers.out.32
 Iterations = 16
-Final Relative Residual Norm = 6.716635e-07
+Final Relative Residual Norm = 6.449814e-07
 
 # Output file: solvers.out.33
 Iterations = 11
@@ -135,16 +135,16 @@ Iterations = 33
 Final Relative Residual Norm = 9.815193e-07
 
 # Output file: solvers.out.38
-Iterations = 22
-Final Relative Residual Norm = 9.638458e-07
+Iterations = 20
+Final Relative Residual Norm = 7.298161e-07
 
 # Output file: solvers.out.39
-Iterations = 22
-Final Relative Residual Norm = 9.638458e-07
+Iterations = 20
+Final Relative Residual Norm = 6.920001e-07
 
 # Output file: solvers.out.40
-Iterations = 36
-Final Relative Residual Norm = 8.626187e-07
+Iterations = 28
+Final Relative Residual Norm = 9.245643e-07
 
 # Output file: solvers.out.41
 Iterations = 17
@@ -156,7 +156,7 @@ Final Relative Residual Norm = 7.137571e-07
 
 # Output file: solvers.out.43
 Iterations = 19
-Final Relative Residual Norm = 8.792117e-07
+Final Relative Residual Norm = 8.795265e-07
 
 # Output file: solvers.out.44
 Iterations = 16
@@ -176,43 +176,43 @@ Final Relative Residual Norm = 3.620491e-07
 
 # Output file: solvers.out.48
 Iterations = 19
-Final Relative Residual Norm = 9.434710e-07
+Final Relative Residual Norm = 9.434680e-07
 
 # Output file: solvers.out.49
 Iterations = 19
-Final Relative Residual Norm = 9.434710e-07
+Final Relative Residual Norm = 9.434675e-07
 
 # Output file: solvers.out.50
 Iterations = 9
-Final Relative Residual Norm = 6.143905e-07
+Final Relative Residual Norm = 5.708657e-07
 
 # Output file: solvers.out.51
 Iterations = 9
-Final Relative Residual Norm = 3.992538e-07
+Final Relative Residual Norm = 4.786920e-07
 
 # Output file: solvers.out.52
 Iterations = 10
-Final Relative Residual Norm = 5.551324e-07
+Final Relative Residual Norm = 5.546960e-07
 
 # Output file: solvers.out.53
 Iterations = 10
-Final Relative Residual Norm = 5.551324e-07
+Final Relative Residual Norm = 5.546960e-07
 
 # Output file: solvers.out.56
 Iterations = 9
-Final Relative Residual Norm = 4.326545e-07
+Final Relative Residual Norm = 4.299808e-07
 
 # Output file: solvers.out.57
 Iterations = 9
-Final Relative Residual Norm = 4.663609e-07
+Final Relative Residual Norm = 4.639955e-07
 
 # Output file: solvers.out.58
 Iterations = 15
-Final Relative Residual Norm = 7.581156e-07
+Final Relative Residual Norm = 7.581157e-07
 
 # Output file: solvers.out.59
 Iterations = 15
-Final Relative Residual Norm = 7.581156e-07
+Final Relative Residual Norm = 7.581157e-07
 
 # Output file: solvers.out.121
 Iterations = 8
@@ -240,23 +240,23 @@ Final Relative Residual Norm = 9.016110e-08
 
 # Output file: solvers.out.127
 Iterations = 9
-Final Relative Residual Norm = 4.580315e-07
+Final Relative Residual Norm = 4.581734e-07
 
 # Output file: solvers.out.128
 Iterations = 9
-Final Relative Residual Norm = 4.580315e-07
+Final Relative Residual Norm = 4.581776e-07
 
 # Output file: solvers.out.129
 Iterations = 6
-Final Relative Residual Norm = 4.961532e-07
+Final Relative Residual Norm = 4.953666e-07
 
 # Output file: solvers.out.130
 Iterations = 6
-Final Relative Residual Norm = 4.961532e-07
+Final Relative Residual Norm = 4.954254e-07
 
 # Output file: solvers.out.131
 Iterations = 8
-Final Relative Residual Norm = 3.432278e-07
+Final Relative Residual Norm = 3.397928e-07
 
 # Output file: solvers.out.132
 Iterations = 7
@@ -284,15 +284,15 @@ Final Relative Residual Norm = 4.469909e-07
 
 # Output file: solvers.out.138
 Iterations = 9
-Final Relative Residual Norm = 5.805179e-07
+Final Relative Residual Norm = 4.624732e-07
 
 # Output file: solvers.out.139
 Iterations = 9
-Final Relative Residual Norm = 5.805179e-07
+Final Relative Residual Norm = 4.577062e-07
 
 # Output file: solvers.out.140
 Iterations = 11
-Final Relative Residual Norm = 3.897422e-07
+Final Relative Residual Norm = 2.703015e-07
 
 # Output file: solvers.out.141
 Iterations = 8
@@ -304,5 +304,5 @@ Final Relative Residual Norm = 3.969852e-07
 
 # Output file: solvers.out.143
 Iterations = 9
-Final Relative Residual Norm = 6.840574e-07
+Final Relative Residual Norm = 6.839878e-07
 

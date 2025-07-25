@@ -50,11 +50,13 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    HYPRE_Real             b_dot_b = 1.0, r_dot_r, eps = 0;
    HYPRE_Real             e_dot_e = 0.0, x_dot_x = 1.0;
    HYPRE_Int              i, l;
+   char                   marker_name[32];
 #ifdef DEBUG_SOLVE
    char                   filename[255];
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("SSAMG-Solve");
 
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
@@ -83,6 +85,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
       }
       hypre_EndTiming(ssamg_data -> time_index);
+
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -107,6 +111,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          /* if rhs is zero, return a zero solution */
          hypre_SStructVectorSetConstantValues(x_l[0], 0.0);
          hypre_EndTiming(ssamg_data -> time_index);
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
@@ -139,20 +144,26 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
        * Down cycle
        *--------------------------------------------------*/
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+      hypre_sprintf(marker_name, "%s-%d", "SSAMG Level", 0);
+      hypre_GpuProfilingPushRange(marker_name);
 
       /* fine grid pre-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+      hypre_GpuProfilingPushRange("Relaxation");
       hypre_SSAMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       /* compute fine grid residual (r = b - Ax) */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
+      hypre_GpuProfilingPushRange("Residual");
       hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
                                  A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
       /* convergence check */
@@ -173,12 +184,14 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             {
                if ((e_dot_e / x_dot_x) < eps)
                {
+                  hypre_GpuProfilingPopRange();
                   HYPRE_ANNOTATE_MGLEVEL_END(0);
                   break;
                }
             }
             else
             {
+               hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
@@ -189,8 +202,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       {
          /* restrict fine grid residual */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
+         hypre_GpuProfilingPushRange("Restriction");
          hypre_SStructMatvecCompute(restrict_data_l[0], 1.0,
                                     RT_l[0], r_l[0], 0.0, b_l[1], b_l[1]);
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #ifdef DEBUG_SOLVE
          hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, 0);
@@ -200,27 +215,34 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_sprintf(filename, "ssamg_b.i%02d.l%02d", i, 1);
          HYPRE_SStructVectorPrint(filename, b_l[1], 0);
 #endif
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_MGLEVEL_END(0);
 
          for (l = 1; l <= (num_levels - 2); l++)
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+            hypre_sprintf(marker_name, "%s-%d", "SSAMG Level", l);
+            hypre_GpuProfilingPushRange(marker_name);
 
             /* Set active parts on current grid */
             hypre_SStructGridSetActiveParts(grid_l[l], active_l[l]);
 
             /* pre-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+            hypre_GpuProfilingPushRange("Relaxation");
             hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* compute residual (r = b - Ax) */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
+            hypre_GpuProfilingPushRange("Residual");
             hypre_SStructMatvecCompute(matvec_data_l[l], -1.0,
                                        A_l[l], x_l[l], 1.0, b_l[l], r_l[l]);
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
             /* Set all parts on current grid to active */
@@ -228,8 +250,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
+            hypre_GpuProfilingPushRange("Restriction");
             hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
                                        RT_l[l], r_l[l], 0.0, b_l[l + 1], b_l[l + 1]);
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #ifdef DEBUG_SOLVE
             hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, l);
@@ -239,6 +263,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             hypre_sprintf(filename, "ssamg_b.i%02d.l%02d", i, l + 1);
             HYPRE_SStructVectorPrint(filename, b_l[l + 1], 0);
 #endif
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
@@ -246,6 +271,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
           * Bottom
           *--------------------------------------------------*/
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
+         hypre_sprintf(marker_name, "%s-%d", "SSAMG Level", num_levels - 1);
+         hypre_GpuProfilingPushRange(marker_name);
 
          /* Run coarse solver */
          hypre_SSAMGCoarseSolve(ssamg_vdata);
@@ -264,9 +291,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* interpolate error and correct (x = x + Pe_c) */
             /* TODO: Can we simplify the next two calls? */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+            hypre_GpuProfilingPushRange("Interpolation");
             hypre_SStructMatvecCompute(interp_data_l[l], 1.0,
                                        P_l[l], x_l[l + 1], 0.0, e_l[l], e_l[l]);
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
+            hypre_GpuProfilingPopRange();
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #ifdef DEBUG_SOLVE
@@ -276,16 +306,20 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+            hypre_sprintf(marker_name, "%s-%d", "SSAMG Level", l);
+            hypre_GpuProfilingPushRange(marker_name);
 
             /* Set active parts on current grid */
             hypre_SStructGridSetActiveParts(grid_l[l], active_l[l]);
 
             /* post-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+            hypre_GpuProfilingPushRange("Relaxation");
             hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* Set all parts to active */
@@ -295,9 +329,14 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          /* TODO: Can we simplify the next two calls? */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+         hypre_GpuProfilingPushRange("Interpolation");
+
          hypre_SStructMatvecCompute(interp_data_l[0], 1.0,
                                     P_l[0], x_l[1], 0.0, e_l[0], e_l[0]);
          hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
+
+         hypre_GpuProfilingPopRange();
+         //hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 #ifdef DEBUG_SOLVE
@@ -306,7 +345,10 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          hypre_sprintf(filename, "ssamg_xup.i%02d.l%02d", i, 0);
          HYPRE_SStructVectorPrint(filename, x_l[0], 0);
 #endif
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+         hypre_sprintf(marker_name, "%s-%d", "SSAMG Level", 0);
+         hypre_GpuProfilingPushRange(marker_name);
       }
 
       /* part of convergence check */
@@ -326,10 +368,14 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 
       /* fine grid post-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+      hypre_GpuProfilingPushRange("Relaxation");
+
       hypre_SSAMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SSAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SSAMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_SSAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
 #ifdef DEBUG_SOLVE
@@ -338,6 +384,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 #endif
 
       (ssamg_data -> num_iterations) = (i + 1);
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
@@ -370,6 +417,8 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
 
    hypre_EndTiming(ssamg_data -> time_index);
    hypre_SSAMGPrintLogging((void *) ssamg_data);
+
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

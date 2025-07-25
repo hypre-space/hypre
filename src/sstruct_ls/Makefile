@@ -97,10 +97,11 @@ FILES =\
  sys_pfmg_solve.c\
  ssamg.c\
  ssamg_csolver.c\
+ ssamg_interp.c\
  ssamg_stats.c\
  ssamg_setup.c\
  ssamg_setup_rap.c\
- ssamg_solve.c
+ ssamg_solve.c\
 
 CUFILES =\
  fac_amr_fcoarsen.c\
@@ -109,8 +110,8 @@ CUFILES =\
  fac_setup2.c\
  fac_zero_stencilcoef.c\
  node_relax.c\
- ssamg_interp.c\
- ssamg_relax.c
+ ssamg_relax.c\
+ ssamg_uinterp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

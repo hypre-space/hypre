@@ -1059,6 +1059,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    HYPRE_Int                m, t;
    HYPRE_Int                num_nonzeros_uP;
+   HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1066,6 +1067,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+
    /* The following ensures that NumNonzeros is initialized (a negative value
     * means uninitialized).  RDF: Not sure if this is needed for anything other
     * than matching the subsequent if test for the special PtAP case. */
@@ -1097,8 +1099,18 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          hypre_MatvecCommPkgCreate(parcsr_sP);
       }
 
-      //hypre_BoomerAMGBuildCoarseOperator(parcsr_sP, parcsr_sA, parcsr_sP, &parcsr_uM);
-      parcsr_uM = hypre_ParCSRMatrixRAP(parcsr_sP, parcsr_sA, parcsr_sP);
+      /* Compute unstructured RAP */
+      if (!urap2)
+      {
+         /* Note: this call does NOT add structural zeros to the diagonal */
+         parcsr_uM = hypre_ParCSRMatrixRAPKT(parcsr_sP, parcsr_sA, parcsr_sP, 1, 0);
+      }
+      else
+      {
+         hypre_ParCSRMatrix *Q = hypre_ParCSRMatMat(parcsr_sA, parcsr_sP);
+         parcsr_uM = hypre_ParCSRTMatMatKT(parcsr_sP, Q, 1);
+         hypre_MatvecCommPkgCreate(parcsr_uM);
+      }
 
       HYPRE_IJMatrixDestroy(ij_tmp);
    }
@@ -1273,45 +1285,13 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
    hypre_SStructMatrixParCSRMatrix(M) = parcsr_uM;
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
-
-   /* WM: extra delete zeros... I'm getting zero diagonals everywhere in the U matrices? */
-   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM),
-                                                              HYPRE_REAL_MIN);
-   if (delete_zeros)
-   {
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
-      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
-      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
-   }
-   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
-   if (delete_zeros)
-   {
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
-      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
-      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
-   }
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
+   /* Add to entries in S with entries from U where the sparsity pattern permits. */
+#if !defined(HYPRE_USING_GPU)
    hypre_SStructMatrixCompressUToS(M, 1);
-
-   /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
-   /*     note that once I'm not converting the entire struct matrix, most of these should go away, I think... */
-   /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
-   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
-   if (delete_zeros)
-   {
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
-      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
-      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
-   }
-   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
-   if (delete_zeros)
-   {
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
-      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
-      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
-   }
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 

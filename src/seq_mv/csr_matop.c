@@ -167,20 +167,23 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
          }
       }
 
-      if (ii < (num_threads - 1))
+      if (lastrow > firstrow)
       {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+         if ((ii < (num_threads - 1)) && (lastrow < nnzrows_C))
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
-      }
-      else
-      {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+         else
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
       }
    }
@@ -229,6 +232,12 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               hypre_CSRMatrix   *B,
                               hypre_CSRMatrix   *C )
 {
+   /* Exit if local number of rows is zero */
+   if (lastrow - firstrow <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
@@ -448,7 +457,22 @@ hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
                     HYPRE_Complex    beta,
                     hypre_CSRMatrix *B)
 {
+   HYPRE_Int        nrows_A   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        ncols_A   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int        nnzrows_B = hypre_CSRMatrixNumRownnz(A);
+
    hypre_CSRMatrix *C = NULL;
+
+   /* Trivial case: input matrices are empty */
+   if (!nnzrows_A && !nnzrows_B)
+   {
+      C = hypre_CSRMatrixCreate(nrows_A, ncols_A, 0);
+      hypre_CSRMatrixNumRownnz(C) = 0;
+      hypre_CSRMatrixInitialize_v2(C, 0, hypre_CSRMatrixMemoryLocation(A));
+
+      return C;
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
@@ -2057,12 +2081,6 @@ hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonalHost
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2080,7 +2098,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
 
    for (i = 0; i < nrows; i++)
    {
-      d_i = 0.0;
+      d_i = (type < 10) ? 0.0 : d[i];
       for (j = A_i[i]; j < A_i[i + 1]; j++)
       {
          if (A_j[j] == i)
@@ -2092,6 +2110,14 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             else if (type == 1)
             {
                d_i = hypre_cabs(A_data[j]);
+            }
+            else if (type == 10)
+            {
+               d_i += A_data[j];
+            }
+            else if (type == 11)
+            {
+               d_i += hypre_cabs(A_data[j]);
             }
             else
             {
@@ -2123,18 +2149,25 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonal
+ * Extracts values from the diagonal of a CSR matrix based on the specified type.
  *
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
+ * Parameters:
+ *   A    - Input CSR matrix.
+ *   d    - Array to store the extracted or computed values.
+ *   type - Specifies the operation to perform on the diagonal coefficients:
+ *     0: Extract the diagonal coefficients.
+ *     1: Extract the absolute values of the diagonal coefs..
+ *     2: Compute the inverse of the diagonal coefs. (1 / diag).
+ *     3: Compute the inverse square root of the diagonal coefs. (1 / sqrt(diag)).
+ *    10: Extract diagonal coefs. and adds them to pre-existing values in d
+ *    11: Extract the absolute values of diagonal coefs. and adds them to
+ *        pre-existing values in d.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
-                                HYPRE_Complex   *d,
-                                HYPRE_Int        type)
+hypre_CSRMatrixExtractDiagonal(hypre_CSRMatrix *A,
+                               HYPRE_Complex   *d,
+                               HYPRE_Int        type)
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
@@ -2153,8 +2186,6 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixScale
- *
  * Scales CSR matrix: A = scalar * A.
  *--------------------------------------------------------------------------*/
 
@@ -2176,6 +2207,9 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < k; i++)
       {
          data[i] *= scalar;
@@ -2353,6 +2387,9 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < nnz; i++)
       {
          hypre_CSRMatrixData(A)[i] = value;

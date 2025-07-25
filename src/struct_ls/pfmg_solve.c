@@ -54,6 +54,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int             constant_coefficient;
    HYPRE_Real            e_dot_e = 0.0, b_dot_b = 0.0, eps = 0.0;
    HYPRE_Real            r_dot_r = 0.0, x_dot_x = 0.0;
+   char                  marker_name[32];
 
 #ifdef DEBUG_SOLVE
    char                  filename[255];
@@ -64,7 +65,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("PFMGSolve");
+   hypre_GpuProfilingPushRange("PFMG-Solve");
 
    hypre_BeginTiming(pfmg_data -> time_index);
 
@@ -132,6 +133,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
        *--------------------------------------------------*/
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+      hypre_sprintf(marker_name, "%s-%d", "PFMG Level", 0);
+      hypre_GpuProfilingPushRange(marker_name);
 
       if (constant_coefficient)
       {
@@ -140,17 +143,21 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
       /* fine grid pre-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+      hypre_GpuProfilingPushRange("Relaxation");
       hypre_PFMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       /* compute fine grid residual (b - Ax) */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
+      hypre_GpuProfilingPushRange("Residual");
       hypre_StructCopy(b_l[0], r_l[0]);
       hypre_StructMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
       /* convergence check */
@@ -176,6 +183,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             if ( ((rel_change) && (e_dot_e / x_dot_x) < eps) || (!rel_change) )
             {
+              hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }
@@ -186,7 +194,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       {
          /* restrict fine grid residual */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
+         hypre_GpuProfilingPushRange("Restriction");
          hypre_StructMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0, b_l[1]);
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
 #ifdef DEBUG_SOLVE
@@ -197,11 +207,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, 1);
          hypre_StructVectorPrint(filename, b_l[1], 0);
 #endif
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_MGLEVEL_END(0);
 
          for (l = 1; l <= (num_levels - 2); l++)
          {
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+            hypre_sprintf(marker_name, "%s-%d", "PFMG Level", l);
+            hypre_GpuProfilingPushRange(marker_name);
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (hypre_StructGridDataLocation(hypre_StructVectorGrid(r_l[l])) == HYPRE_MEMORY_HOST)
@@ -218,17 +231,21 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             {
                /* pre-relaxation */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+               hypre_GpuProfilingPushRange("Relaxation");
                hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+               hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
                /* compute residual (b - Ax) */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
+               hypre_GpuProfilingPushRange("Residual");
                hypre_StructCopy(b_l[l], r_l[l]);
                hypre_StructMatvecCompute(matvec_data_l[l],
                                          -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+               hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Residual");
             }
             else
@@ -240,7 +257,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
+            hypre_GpuProfilingPushRange("Restriction");
             hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l + 1]);
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
 #ifdef DEBUG_SOLVE
@@ -251,6 +270,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, l + 1);
             hypre_StructVectorPrint(filename, b_l[l + 1], 0);
 #endif
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
 
@@ -259,6 +279,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
           *--------------------------------------------------*/
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
+         hypre_sprintf(marker_name, "%s-%d", "PFMG Level", num_levels - 1);
+         hypre_GpuProfilingPushRange(marker_name);
+
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          if (active_l[l])
          {
@@ -298,8 +321,11 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             /* interpolate error and correct (x = x + Pe_c) */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+            hypre_GpuProfilingPushRange("Interpolation");
             hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 0.0, e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+            hypre_GpuProfilingPopRange();
+            hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 
@@ -312,18 +338,23 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #endif
 
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
-            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+            hypre_sprintf(marker_name, "%s-%d", "PFMG Level", l);
+            hypre_GpuProfilingPushRange(marker_name);
+
             if (active_l[l])
             {
-               /* post-relaxation */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+               hypre_GpuProfilingPushRange("Relaxation");
+
+               /* post-relaxation */
                hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+               hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
             }
-            HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          }
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
@@ -338,8 +369,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+         hypre_GpuProfilingPushRange("Interpolation");
+
          hypre_StructMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0, e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
+
+         hypre_GpuProfilingPopRange();
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 
@@ -350,6 +386,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_StructVectorPrint(filename, x_l[0], 0);
 #endif
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
+         hypre_sprintf(marker_name, "%s-%d", "PFMG Level", 0);
+         hypre_GpuProfilingPushRange(marker_name);
       }
 
       /* part of convergence check */
@@ -369,13 +407,17 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
       /* fine grid post-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+      hypre_GpuProfilingPushRange("Relaxation");
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
       (pfmg_data -> num_iterations) = (i + 1);
+
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 

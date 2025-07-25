@@ -1935,6 +1935,7 @@ HYPRE_Int hypre_BoxGrowByValue ( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByBox ( hypre_Box *box, hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box, HYPRE_Int *array );
 HYPRE_Int hypre_BoxPrint ( FILE *file, hypre_Box *box );
+HYPRE_Int hypre_BoxPrintDebug( const char *prefix, hypre_Box *box );
 HYPRE_Int hypre_BoxRead ( FILE *file, HYPRE_Int ndim, hypre_Box **box_ptr );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayCreateFromIndices ( HYPRE_Int ndim, HYPRE_Int num_indices_in,
@@ -3259,8 +3260,12 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
+#ifndef OMP0
 #define OMP0 Pragma(omp parallel for HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#endif
+#ifndef OMP1
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#endif
 #else /* #if defined(HYPRE_USING_OPENMP) */
 #define OMP0
 #define OMP1
@@ -3632,4 +3637,3 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #endif
 
 #endif
-

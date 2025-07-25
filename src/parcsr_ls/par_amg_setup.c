@@ -2886,7 +2886,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      A_H = hypre_ParCSRMatrixRAPKT(P, A_array[level],
-                                                   P, keepTranspose);
+                                                   P, keepTranspose, 1);
                   }
                   else
                   {
@@ -3072,7 +3072,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
                A_H = hypre_ParCSRMatrixRAPKT(P_array[level], A_array[level],
-                                             P_array[level], keepTranspose);
+                                             P_array[level], keepTranspose, 1);
             }
             else
             {
@@ -4038,7 +4038,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
-   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end  ", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 

@@ -342,20 +342,21 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    HYPRE_Int                 A_object_type = hypre_SStructMatrixObjectType(A);
    HYPRE_Int                 part;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    if (x_object_type != A_object_type)
    {
       hypre_error_in_arg(2);
       hypre_error_in_arg(3);
 
-      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("SStructMatvecCompute");
 
    if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
    {
       /* do S-matrix computations */
+      hypre_GpuProfilingPushRange("Structured");
       for (part = 0; part < nparts; part++)
       {
          pA = hypre_SStructMatrixPMatrix(A, part);
@@ -366,10 +367,11 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, pb, py);
       }
+      hypre_GpuProfilingPopRange();
 
+      hypre_GpuProfilingPushRange("Unstructured");
       if (x_object_type == HYPRE_SSTRUCT)
       {
-
          /* do U-matrix computations */
 
          /* GEC1002 the data chunk pointed by the local-parvectors
@@ -397,6 +399,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          parx = NULL;
       }
+      hypre_GpuProfilingPopRange();
    }
    else if (x_object_type == HYPRE_PARCSR)
    {
@@ -411,6 +414,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       parx = NULL;
    }
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

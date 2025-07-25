@@ -95,6 +95,8 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
          }
          hypre_BoxLoop1ReductionEnd(Ai, diag_product_local);
 #undef DEVICE_VAR
+#undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION
 
          diag_product += (HYPRE_Real) diag_product_local;
       }
@@ -910,6 +912,9 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
    HYPRE_Int             depth, cdepth, vdepth;
    HYPRE_Int             csi[UNROLL_MAXDEPTH], vsi[UNROLL_MAXDEPTH];
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("StructMatrixComputeRowSum");
+
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
@@ -945,6 +950,9 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
                                                  box, Adbox, rdbox, type);
       } /* loop on stencil entries */
    }
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

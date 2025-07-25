@@ -69,8 +69,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              d, l;
    HYPRE_Int              nparts;
    HYPRE_Int              num_levels;
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
+   char                   marker_name[32];
 
    /*-----------------------------------------------------
     * Sanity checks
@@ -78,7 +77,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    if (hypre_SStructMatrixObjectType(A) != HYPRE_SSTRUCT)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Matrix is not HYPRE_SSTRUCT");
-      HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
@@ -86,7 +84,6 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    if (hypre_SStructVectorObjectType(x) != HYPRE_SSTRUCT)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "LHS is not HYPRE_SSTRUCT");
-      HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
@@ -94,14 +91,22 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    if (hypre_SStructVectorObjectType(b) != HYPRE_SSTRUCT)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "RHS is not HYPRE_SSTRUCT");
-      HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("SSAMG-Setup");
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "SSAMG setup begin", 0);
+   hypre_SetLogLevel(0);
+
    /*-----------------------------------------------------
     * Initialize some data.
     *-----------------------------------------------------*/
+
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "SSAMG-Init");
+   hypre_GpuProfilingPushRange("SSAMG-Init");
+
    nparts    = hypre_SStructMatrixNParts(A);
    dxyz_flag = hypre_TAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
    for (d = 0; d < ndim; d++)
@@ -122,24 +127,25 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SSAMGCoarsen(ssamg_vdata, grid, dxyz_flag, dxyz);
 
    /* Get info from ssamg_data */
-   cdir_l        = hypre_SSAMGDataCdir(ssamg_data);
-   grid_l        = hypre_SSAMGDataGridl(ssamg_data);
-   active_l      = hypre_SSAMGDataActivel(ssamg_data);
-   relax_weights = hypre_SSAMGDataRelaxWeights(ssamg_data);
+   cdir_l          = hypre_SSAMGDataCdir(ssamg_data);
+   grid_l          = hypre_SSAMGDataGridl(ssamg_data);
+   active_l        = hypre_SSAMGDataActivel(ssamg_data);
+   relax_weights   = hypre_SSAMGDataRelaxWeights(ssamg_data);
 
-   /*-----------------------------------------------------
-    * Set up matrix and vector structures
-    *-----------------------------------------------------*/
-
-   num_levels = hypre_SSAMGDataNumLevels(ssamg_data);
-   A_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels, HYPRE_MEMORY_HOST);
-   P_l  = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
-   RT_l = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
-   b_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-   x_l  = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-   tx_l = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
-   r_l  = tx_l;
-   e_l  = tx_l;
+   /* Allocate data */
+   num_levels      = hypre_SSAMGDataNumLevels(ssamg_data);
+   A_l             = hypre_TAlloc(hypre_SStructMatrix *, num_levels, HYPRE_MEMORY_HOST);
+   P_l             = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   RT_l            = hypre_TAlloc(hypre_SStructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   b_l             = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   x_l             = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   tx_l            = hypre_TAlloc(hypre_SStructVector *, num_levels, HYPRE_MEMORY_HOST);
+   r_l             = tx_l;
+   e_l             = tx_l;
+   relax_data_l    = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   matvec_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
 
    hypre_SStructMatrixRef(A, &A_l[0]);
    hypre_SStructVectorRef(b, &b_l[0]);
@@ -149,72 +155,24 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_SStructVectorInitialize(tx_l[0]);
    HYPRE_SStructVectorAssemble(tx_l[0]);
 
-   /* Compute interpolation, restriction and coarse grids */
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_REGION_END("%s", "SSAMG-Init");
+
+   /*---------------------------------------------------------------------
+    * Compute relaxation, interpolation, restriction and coarse grids
+    *---------------------------------------------------------------------*/
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      hypre_sprintf(marker_name, "%s-%d", "MG Level", l);
+      hypre_GpuProfilingPushRange(marker_name);
 
-      // Build prolongation matrix
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-      P_l[l] = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
-      HYPRE_SStructMatrixInitialize(P_l[l]);
-      HYPRE_SStructMatrixAssemble(P_l[l]);
-      //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
-      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
+      /* Build relaxation data */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+      hypre_GpuProfilingPushRange("Relaxation");
 
-      // Build restriction matrix
-      hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
-      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
-
-      // Compute coarse matrix
-      hypre_SSAMGComputeRAP(A_l[l], P_l[l], &grid_l[l + 1], cdir_l[l], non_galerkin, &A_l[l + 1]);
-
-      // Build SStructVectors
-      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &b_l[l + 1]);
-      HYPRE_SStructVectorInitialize(b_l[l + 1]);
-      HYPRE_SStructVectorAssemble(b_l[l + 1]);
-
-      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &x_l[l + 1]);
-      HYPRE_SStructVectorInitialize(x_l[l + 1]);
-      HYPRE_SStructVectorAssemble(x_l[l + 1]);
-
-      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &tx_l[l + 1]);
-      HYPRE_SStructVectorInitialize(tx_l[l + 1]);
-      HYPRE_SStructVectorAssemble(tx_l[l + 1]);
-
-      HYPRE_ANNOTATE_MGLEVEL_END(l);
-   }
-
-   (ssamg_data -> A_l)  = A_l;
-   (ssamg_data -> P_l)  = P_l;
-   (ssamg_data -> RT_l) = RT_l;
-   (ssamg_data -> b_l)  = b_l;
-   (ssamg_data -> x_l)  = x_l;
-   (ssamg_data -> tx_l) = tx_l;
-   (ssamg_data -> r_l)  = r_l;
-   (ssamg_data -> e_l)  = e_l;
-
-   /*-----------------------------------------------------
-    * Set up multigrid operators and call setup routines
-    *-----------------------------------------------------*/
-
-   relax_data_l    = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
-   matvec_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
-   restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
-   interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
-
-   for (l = 0; l < (num_levels - 1); l++)
-   {
       hypre_SStructMatvecCreate(&matvec_data_l[l]);
       hypre_SStructMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
-
-      hypre_SStructMatvecCreate(&interp_data_l[l]);
-      hypre_SStructMatvecSetup(interp_data_l[l], P_l[l], x_l[l + 1]);
-
-      hypre_SStructMatvecCreate(&restrict_data_l[l]);
-      hypre_SStructMatvecSetTranspose(restrict_data_l[l], 1);
-      hypre_SStructMatvecSetup(restrict_data_l[l], RT_l[l], x_l[l]);
-
       hypre_SSAMGRelaxCreate(comm, nparts, &relax_data_l[l]);
       hypre_SSAMGRelaxSetTol(relax_data_l[l], 0.0);
       hypre_SSAMGRelaxSetWeights(relax_data_l[l], relax_weights[l]);
@@ -223,14 +181,66 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_SSAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       hypre_SSAMGRelaxSetMatvecData(relax_data_l[l], matvec_data_l[l]);
       hypre_SSAMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
+
+      /* Build prolongation matrix */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+      hypre_GpuProfilingPushRange("Interpolation");
+      P_l[l] = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
+      HYPRE_SStructMatrixInitialize(P_l[l]);
+      HYPRE_SStructMatrixAssemble(P_l[l]);
+      //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
+      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
+
+      /* Build restriction matrix */
+      hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
+
+      /* Compute coarse matrix and build work structures for the coarse level */
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
+      hypre_GpuProfilingPushRange("RAP");
+
+      hypre_SSAMGComputeRAP(A_l[l], P_l[l], &grid_l[l + 1], cdir_l[l], non_galerkin, &A_l[l + 1]);
+      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &b_l[l + 1]);
+      HYPRE_SStructVectorInitialize(b_l[l + 1]);
+      HYPRE_SStructVectorAssemble(b_l[l + 1]);
+      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &x_l[l + 1]);
+      HYPRE_SStructVectorInitialize(x_l[l + 1]);
+      HYPRE_SStructVectorAssemble(x_l[l + 1]);
+      HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &tx_l[l + 1]);
+      HYPRE_SStructVectorInitialize(tx_l[l + 1]);
+      HYPRE_SStructVectorAssemble(tx_l[l + 1]);
+      hypre_SStructMatvecCreate(&interp_data_l[l]);
+      hypre_SStructMatvecSetup(interp_data_l[l], P_l[l], x_l[l + 1]);
+      hypre_SStructMatvecCreate(&restrict_data_l[l]);
+      hypre_SStructMatvecSetTranspose(restrict_data_l[l], 1);
+      hypre_SStructMatvecSetup(restrict_data_l[l], RT_l[l], x_l[l]);
+
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
+
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
 
+   /* Update SSAMG pointers */
+   (ssamg_data -> A_l)             = A_l;
+   (ssamg_data -> P_l)             = P_l;
+   (ssamg_data -> RT_l)            = RT_l;
+   (ssamg_data -> b_l)             = b_l;
+   (ssamg_data -> x_l)             = x_l;
+   (ssamg_data -> tx_l)            = tx_l;
+   (ssamg_data -> r_l)             = r_l;
+   (ssamg_data -> e_l)             = e_l;
    (ssamg_data -> relax_data_l)    = relax_data_l;
    (ssamg_data -> matvec_data_l)   = matvec_data_l;
    (ssamg_data -> restrict_data_l) = restrict_data_l;
    (ssamg_data -> interp_data_l)   = interp_data_l;
 
-   /* set up coarse solve */
+   /* Set up coarse solve */
    hypre_SSAMGCoarseSolverSetup(ssamg_vdata);
 
    /*-----------------------------------------------------
@@ -521,6 +531,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 #endif // ifdef (DEBUG_MATMULT)
 #endif // ifdef (DEBUG_SETUP)
 
+   hypre_RestoreLogLevel();
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "SSAMG setup end  ", 0);
+   hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
