@@ -19,6 +19,7 @@ DIRS="\
  distributed_ls/ParaSails\
  krylov\
  lapack\
+ parcsr_block_mv\
  parcsr_ls\
  parcsr_mv\
  seq_block_mv\
@@ -33,7 +34,6 @@ DIRS="\
 # distributed_matrix
 # matrix_matrix
 # multivector
-# parcsr_block_mv
 
 # RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
 # but this caused some problems for me when I tried it.  Sort out later.

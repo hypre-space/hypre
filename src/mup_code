@@ -14,6 +14,7 @@ DIRS="\
  distributed_ls/ParaSails\
  krylov\
  lapack\
+ parcsr_block_mv\
  parcsr_ls\
  parcsr_mv\
  seq_block_mv\
@@ -28,7 +29,6 @@ DIRS="\
 # distributed_matrix       - no external header, no internal header
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
-# parcsr_block_mv          - no external header
 
 for i in $DIRS
 do

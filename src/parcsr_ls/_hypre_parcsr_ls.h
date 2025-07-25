@@ -32,7 +32,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData

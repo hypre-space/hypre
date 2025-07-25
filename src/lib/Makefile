@@ -63,8 +63,9 @@ PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_flt
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_dbl
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj_ldbl
 
-PARCSRBLOCKMVFILES  = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
-PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
+PARCSRBLOCKMVFILES  = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o_flt
+PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o_dbl
+PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o_ldbl
 
 SEQMVFILES          = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_flt
