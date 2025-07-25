@@ -48,7 +48,9 @@ MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o_dbl
 MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o_ldbl
 
 MULTIVECFILES       = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
-MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
+MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/*.o_flt
+MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/*.o_dbl
+MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/*.o_ldbl
 
 PARCSRLSFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_flt
