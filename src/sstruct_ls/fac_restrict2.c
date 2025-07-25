@@ -451,8 +451,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    {
       s_rc     = hypre_SStructPVectorSVector(rc, vars);
       s_cvector = hypre_SStructPVectorSVector(fgrid_cvectors, vars);
-      send_rboxes = hypre_BoxArrayArrayDuplicate(send_boxes[vars]);
-      recv_rboxes = hypre_BoxArrayArrayDuplicate(recv_boxes[vars]);
+      send_rboxes = hypre_BoxArrayArrayClone(send_boxes[vars]);
+      recv_rboxes = hypre_BoxArrayArrayClone(recv_boxes[vars]);
 
       hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars],
                            send_processes[vars], recv_processes[vars],
@@ -464,6 +464,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                           hypre_StructVectorDataSpace(s_rc),
                           num_values, NULL, 0,
                           hypre_StructVectorComm(s_rc),
+                          hypre_StructVectorMemoryLocation(s_rc),
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
@@ -517,6 +518,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_StructVector     *xc_temp;
    hypre_StructVector     *xc_var;
    hypre_StructVector     *xf_var;
+   HYPRE_Complex          *sdata, *rdata;
 
    HYPRE_Real           ***xfp;
    HYPRE_Real           ***xcp;
@@ -803,12 +805,10 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    {
       xc_temp = hypre_SStructPVectorSVector(fgrid_cvectors, var);
       xc_var = hypre_SStructPVectorSVector(xc, var);
-      hypre_InitializeCommunication(interlevel_comm[var],
-                                    hypre_StructVectorData(xc_temp),
-                                    hypre_StructVectorData(xc_var), 0, 0,
-                                    &comm_handle);
-
-      hypre_FinalizeCommunication(comm_handle);
+      sdata = hypre_StructVectorData(xc_temp);
+      rdata = hypre_StructVectorData(xc_var);
+      hypre_StructCommunicationInitialize(interlevel_comm[var], &sdata, &rdata, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
    }
 
    /*------------------------------------------------------------------

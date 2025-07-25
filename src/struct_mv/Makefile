@@ -20,20 +20,25 @@ HEADERS =\
  _hypre_struct_mv.hpp\
  assumed_part.h\
  box.h\
+ box_ds.h\
  box_manager.h\
  computation.h\
  struct_communication.h\
  struct_grid.h\
  struct_matrix.h\
  struct_stencil.h\
- struct_vector.h
+ struct_stmatrix.h\
+ struct_vector.h\
+ struct_matmult.h
 
 FILES =\
  assumed_part.c\
  box_algebra.c\
  box_boundary.c\
  box.c\
+ box_ds.c\
  box_manager.c\
+ coarsen.c\
  communication_info.c\
  computation.c\
  F90_HYPRE_struct_grid.c\
@@ -48,15 +53,22 @@ FILES =\
  struct_grid.c\
  struct_io.c\
  struct_matrix_mask.c\
- struct_stencil.c
+ struct_stencil.c\
+ struct_stmatrix.c
 
 CUFILES =\
  struct_axpy.c\
  struct_communication.c\
  struct_copy.c\
+ struct_data.c\
  struct_innerprod.c\
+ struct_matmult.c\
+ struct_matmult_core.c\
+ struct_matmult_fuse.c\
+ struct_matop.c\
  struct_matrix.c\
  struct_matvec.c\
+ struct_matvec_core.c\
  struct_scale.c\
  struct_vector.c
 

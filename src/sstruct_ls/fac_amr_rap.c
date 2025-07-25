@@ -48,6 +48,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_StructMatrix          *smatrix, *fac_smatrix;
    hypre_Box                   *smatrix_dbox, *fac_smatrix_dbox;
    HYPRE_Real                  *smatrix_vals, *fac_smatrix_vals;
+   HYPRE_Complex               *sdata, *rdata;
 
    hypre_SStructGrid           *fac_grid;
    hypre_SStructGraph          *fac_graph;
@@ -204,7 +205,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   fac_smatrix_dbox =
                      hypre_BoxArrayBox(hypre_StructMatrixDataSpace(fac_smatrix), i);
 
-                  hypre_CopyIndex(hypre_SStructStencilEntry(stencils, j), stencil_shape);
+                  hypre_CopyIndex(hypre_SStructStencilOffset(stencils, j), stencil_shape);
                   smatrix_vals = hypre_StructMatrixExtractPointerByIndex(smatrix,
                                                                          i,
                                                                          stencil_shape);
@@ -259,7 +260,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   fac_smatrix_dbox =
                      hypre_BoxArrayBox(hypre_StructMatrixDataSpace(fac_smatrix), i);
 
-                  hypre_CopyIndex(hypre_SStructStencilEntry(stencils, k), stencil_shape);
+                  hypre_CopyIndex(hypre_SStructStencilOffset(stencils, k), stencil_shape);
                   smatrix_vals = hypre_StructMatrixExtractPointerByIndex(smatrix,
                                                                          i,
                                                                          stencil_shape);
@@ -393,7 +394,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                   fac_smatrix_dbox =
                      hypre_BoxArrayBox(hypre_StructMatrixDataSpace(fac_smatrix), cbox);
 
-                  hypre_CopyIndex(hypre_SStructStencilEntry(stencils, k), stencil_shape);
+                  hypre_CopyIndex(hypre_SStructStencilOffset(stencils, k), stencil_shape);
                   smatrix_vals =
                      hypre_StructMatrixExtractPointerByIndex(smatrix,
                                                              i,
@@ -455,11 +456,10 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                comm,
                                                &amrA_comm_pkg);
 
-            hypre_InitializeCommunication(amrA_comm_pkg,
-                                          hypre_StructMatrixData(smatrix),
-                                          hypre_StructMatrixData(fac_smatrix), 0, 0,
-                                          &comm_handle);
-            hypre_FinalizeCommunication(comm_handle);
+            sdata = hypre_StructMatrixData(smatrix);
+            rdata = hypre_StructMatrixData(fac_smatrix);
+            hypre_StructCommunicationInitialize(amrA_comm_pkg, &sdata, &rdata, 0, 0, &comm_handle);
+            hypre_StructCommunicationFinalize(comm_handle);
 
             hypre_CommPkgDestroy(amrA_comm_pkg);
          }

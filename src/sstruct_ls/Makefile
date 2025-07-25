@@ -49,6 +49,7 @@ FILES =\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
  F90_HYPRE_sstruct_sys_pfmg.c\
+ F90_HYPRE_sstruct_ssamg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_flexgmres.c\
@@ -59,6 +60,7 @@ FILES =\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
+ HYPRE_sstruct_ssamg.c\
  bsearch.c\
  fac.c\
  fac_amr_zero_data.c\
@@ -92,10 +94,14 @@ FILES =\
  sys_pfmg_relax.c\
  sys_pfmg_setup.c\
  sys_pfmg_setup_interp.c\
- sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
- sys_semi_interp.c\
- sys_semi_restrict.c
+ ssamg.c\
+ ssamg_csolver.c\
+ ssamg_interp.c\
+ ssamg_stats.c\
+ ssamg_setup.c\
+ ssamg_setup_rap.c\
+ ssamg_solve.c\
 
 CUFILES =\
  fac_amr_fcoarsen.c\
@@ -104,6 +110,8 @@ CUFILES =\
  fac_setup2.c\
  fac_zero_stencilcoef.c\
  node_relax.c\
+ ssamg_relax.c\
+ ssamg_uinterp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

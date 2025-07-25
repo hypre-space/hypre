@@ -292,6 +292,21 @@ HYPRE_Int HYPRE_StructPFMGGetRAPType(HYPRE_StructSolver solver,
                                      HYPRE_Int *rap_type );
 
 /**
+ * (Optional) Set the kernel type used for computing struct matrix-matrix multiplication.
+ *
+ * Current values set by \e matmult_type are:
+ *
+ *    - -1 : proxy to the default depending on hypre's build type (CPU or GPU)
+ *    - 0  : standard (core) algorithm (default for CPUs)
+ *    - 1  : fused algorithm with less, but more computationally intensive BoxLoops (default for GPUs)
+ **/
+HYPRE_Int HYPRE_StructPFMGSetMatmultType(HYPRE_StructSolver solver,
+                                         HYPRE_Int          matmult_type);
+
+HYPRE_Int HYPRE_StructPFMGGetMatmultType(HYPRE_StructSolver solver,
+                                         HYPRE_Int         *matmult_type);
+
+/**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
@@ -336,7 +351,10 @@ HYPRE_Int HYPRE_StructPFMGGetLogging(HYPRE_StructSolver solver,
                                      HYPRE_Int *logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
                                         HYPRE_Int          print_level);
@@ -486,7 +504,10 @@ HYPRE_Int HYPRE_StructSMGGetLogging(HYPRE_StructSolver solver,
                                     HYPRE_Int *logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
                                        HYPRE_Int          print_level);
@@ -1110,72 +1131,6 @@ HYPRE_Int HYPRE_StructHybridSetPCGAbsoluteTolFactor(HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/*
- * @name Struct SparseMSG Solver
- **/
-
-HYPRE_Int HYPRE_StructSparseMSGCreate(MPI_Comm            comm,
-                                      HYPRE_StructSolver *solver);
-
-HYPRE_Int HYPRE_StructSparseMSGDestroy(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetup(HYPRE_StructSolver solver,
-                                     HYPRE_StructMatrix A,
-                                     HYPRE_StructVector b,
-                                     HYPRE_StructVector x);
-
-HYPRE_Int HYPRE_StructSparseMSGSolve(HYPRE_StructSolver solver,
-                                     HYPRE_StructMatrix A,
-                                     HYPRE_StructVector b,
-                                     HYPRE_StructVector x);
-
-HYPRE_Int HYPRE_StructSparseMSGSetTol(HYPRE_StructSolver solver,
-                                      HYPRE_Real         tol);
-
-HYPRE_Int HYPRE_StructSparseMSGSetMaxIter(HYPRE_StructSolver solver,
-                                          HYPRE_Int          max_iter);
-
-HYPRE_Int HYPRE_StructSparseMSGSetJump(HYPRE_StructSolver solver,
-                                       HYPRE_Int          jump);
-
-HYPRE_Int HYPRE_StructSparseMSGSetRelChange(HYPRE_StructSolver solver,
-                                            HYPRE_Int          rel_change);
-
-HYPRE_Int HYPRE_StructSparseMSGSetZeroGuess(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNonZeroGuess(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetRelaxType(HYPRE_StructSolver solver,
-                                            HYPRE_Int          relax_type);
-
-HYPRE_Int HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
-                                               HYPRE_Real         weight);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumPreRelax(HYPRE_StructSolver solver,
-                                              HYPRE_Int          num_pre_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumPostRelax(HYPRE_StructSolver solver,
-                                               HYPRE_Int          num_post_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumFineRelax(HYPRE_StructSolver solver,
-                                               HYPRE_Int          num_fine_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetLogging(HYPRE_StructSolver solver,
-                                          HYPRE_Int          logging);
-
-HYPRE_Int HYPRE_StructSparseMSGSetPrintLevel(HYPRE_StructSolver solver,
-                                             HYPRE_Int   print_level);
-
-
-HYPRE_Int HYPRE_StructSparseMSGGetNumIterations(HYPRE_StructSolver  solver,
-                                                HYPRE_Int          *num_iterations);
-
-HYPRE_Int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
-                                                            HYPRE_Real         *norm);
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
 /**
  * @name Struct LOBPCG Eigensolver
  *
@@ -1210,4 +1165,3 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 #endif
 
 #endif
-

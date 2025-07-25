@@ -326,7 +326,7 @@ hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix
                                              HYPRE_Int *row_nums);
 HYPRE_Int hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
                                         HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal,
-                                        const char *set_or_add );
+                                        const char *set_or_add);
 HYPRE_Int hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A, HYPRE_Complex *col_sum,
                                         HYPRE_Int type, HYPRE_Complex scal );
 HYPRE_Int hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
@@ -343,6 +343,7 @@ hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                                                        hypre_CSRMatrix *C );
+hypre_CSRMatrix *hypre_CSRMatrixDeleteZerosDevice ( hypre_CSRMatrix *A, HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixMergeColMapOffd( HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                           HYPRE_Int B_ext_offd_nnz, HYPRE_BigInt *B_ext_offd_bigj, HYPRE_Int *num_cols_offd_C_ptr,
                                           HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int **map_B_to_C_ptr );
@@ -358,6 +359,7 @@ HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_
                                      HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                      HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr,
                                      hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
+HYPRE_Int hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix **AT,
                                            HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B,

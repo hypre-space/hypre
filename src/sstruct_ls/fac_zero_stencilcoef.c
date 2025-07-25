@@ -147,7 +147,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                 *---------------------------------------------------------*/
                for (i = 0; i < stencil_size; i++)
                {
-                  hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                  hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                   stencil_shape);
                   AbsStencilShape(stencil_shape, abs_shape);
 
@@ -314,7 +314,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                for (i = 0; i < stencil_size; i++)
                {
-                  hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                  hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                   stencil_shape);
                   AbsStencilShape(stencil_shape, abs_shape);
 

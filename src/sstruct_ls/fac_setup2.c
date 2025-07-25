@@ -478,7 +478,7 @@ hypre_FacSetup2( void                 *fac_vdata,
          {
             var2 = stencil_vars[i];
             A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
-            hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
+            hypre_CopyIndex(hypre_SStructStencilOffset(stencils, i), stencil_shape_i);
 
             hypre_ForBoxI(j, sgrid_boxes)
             {
@@ -551,7 +551,7 @@ hypre_FacSetup2( void                 *fac_vdata,
             {
                var2 = stencil_vars[i];
                A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
-               hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
+               hypre_CopyIndex(hypre_SStructStencilOffset(stencils, i), stencil_shape_i);
 
                hypre_ForBoxI( j, sgrid_boxes )
                {
@@ -811,7 +811,7 @@ hypre_FacSetup2( void                 *fac_vdata,
       {
          var2 = stencil_vars[i];
          A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
-         hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
+         hypre_CopyIndex(hypre_SStructStencilOffset(stencils, i), stencil_shape_i);
          hypre_ForBoxI(j, sgrid_boxes)
          {
             sgrid_box =  hypre_BoxArrayBox(sgrid_boxes, j);

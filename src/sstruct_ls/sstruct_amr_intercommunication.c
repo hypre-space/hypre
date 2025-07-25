@@ -43,8 +43,8 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
    /*------------------------------------------------------------------------
     *  The communication info is copied from sendinfo & recvinfo.
     *------------------------------------------------------------------------*/
-   sendboxes  = hypre_BoxArrayArrayDuplicate(sendinfo -> send_boxes);
-   send_rboxes = hypre_BoxArrayArrayDuplicate(sendinfo -> send_boxes);
+   sendboxes  = hypre_BoxArrayArrayClone(sendinfo -> send_boxes);
+   send_rboxes = hypre_BoxArrayArrayClone(sendinfo -> send_boxes);
 
    sprocesses   = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(send_rboxes), HYPRE_MEMORY_HOST);
    send_rboxnums = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(send_rboxes),
@@ -63,8 +63,8 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
       }
    }
 
-   recvboxes   = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
-   recv_rboxes = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
+   recvboxes   = hypre_BoxArrayArrayClone(recvinfo -> recv_boxes);
+   recv_rboxes = hypre_BoxArrayArrayClone(recvinfo -> recv_boxes);
    rprocesses  = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
 
    /* dummy pointer for CommInfoCreate */
@@ -91,6 +91,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
                        send_data_space,
                        recv_data_space,
                        num_values, NULL, 0, comm,
+                       HYPRE_MEMORY_HOST,
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
 
@@ -98,5 +99,3 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
 
    return ierr;
 }
-
-

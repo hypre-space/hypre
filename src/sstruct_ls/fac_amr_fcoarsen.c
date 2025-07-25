@@ -579,9 +579,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   found = falseV;
                   for (i = 0; i < stencil_size; i++)
                   {
-                     hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                     hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                      stencil_shape_i);
-                     hypre_CopyIndex(hypre_StructStencilElement(stencils_last, i),
+                     hypre_CopyIndex(hypre_StructStencilOffset(stencils_last, i),
                                      stencil_last_shape_i);
 
                      hypre_SetIndex3(index_temp,
@@ -682,7 +682,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                for (i = 0; i < stencil_size; i++)
                {
                   shift_box[i] = hypre_BoxCreate(ndim);
-                  hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                  hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                   stencil_shape_i);
                   MapStencilRank(stencil_shape_i, j);
                   stencil_ranks[i] = j;
@@ -748,7 +748,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   k = 0;
 
                   stencil_contrib_i[stencil_i][k] = stencil_i;
-                  AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                  AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                    abs_stencil_shape );
                   weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                   sum += weights[abs_stencil_shape];
@@ -759,7 +759,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                        AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                        AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                         abs_stencil_shape );
                         weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                         sum += weights[abs_stencil_shape];
@@ -777,7 +777,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + i];
 
                               AbsStencilShape(
-                                 hypre_StructStencilElement(stencils, rank_stencils[j * 9 + i]),
+                                 hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + i]),
                                  abs_stencil_shape );
                               weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                               sum += weights[abs_stencil_shape];
@@ -833,7 +833,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   k = 0;
 
                   stencil_contrib_i[stencil_i][k] = stencil_i;
-                  AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                  AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                    abs_stencil_shape );
                   weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                   sum += weights[abs_stencil_shape];
@@ -844,7 +844,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                        AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                        AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                         abs_stencil_shape );
                         weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                         sum += weights[abs_stencil_shape];
@@ -862,7 +862,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + i];
 
                               AbsStencilShape(
-                                 hypre_StructStencilElement(stencils, rank_stencils[j * 9 + i]),
+                                 hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + i]),
                                  abs_stencil_shape );
                               weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                               sum += weights[abs_stencil_shape];
@@ -918,7 +918,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   k = 0;
 
                   stencil_contrib_i[stencil_i][k] = stencil_i;
-                  AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                  AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                    abs_stencil_shape );
                   weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                   sum += weights[abs_stencil_shape];
@@ -929,7 +929,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                        AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                        AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                         abs_stencil_shape );
                         weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                         sum += weights[abs_stencil_shape];
@@ -947,7 +947,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + i];
 
                               AbsStencilShape(
-                                 hypre_StructStencilElement(stencils, rank_stencils[j * 9 + i]),
+                                 hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + i]),
                                  abs_stencil_shape );
                               weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                               sum += weights[abs_stencil_shape];
@@ -1003,7 +1003,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   k = 0;
 
                   stencil_contrib_i[stencil_i][k] = stencil_i;
-                  AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                  AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                    abs_stencil_shape );
                   weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                   sum += weights[abs_stencil_shape];
@@ -1014,7 +1014,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                        AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                        AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                         abs_stencil_shape );
                         weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                         sum += weights[abs_stencil_shape];
@@ -1032,7 +1032,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                               stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + i];
 
                               AbsStencilShape(
-                                 hypre_StructStencilElement(stencils, rank_stencils[j * 9 + i]),
+                                 hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + i]),
                                  abs_stencil_shape );
                               weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                               sum += weights[abs_stencil_shape];
@@ -1112,7 +1112,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1123,7 +1123,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[9 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[9 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[9 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1162,7 +1162,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1173,7 +1173,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[18 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[18 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[18 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1212,7 +1212,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1223,7 +1223,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + 4];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[j * 9 + 4]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + 4]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1262,7 +1262,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1273,7 +1273,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + 7];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[j * 9 + 7]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + 7]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1312,7 +1312,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1323,7 +1323,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + 5];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[j * 9 + 5]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + 5]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1362,7 +1362,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1373,7 +1373,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[j * 9 + 8];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[j * 9 + 8]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[j * 9 + 8]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1412,7 +1412,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1423,7 +1423,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[10 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[10 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[10 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1462,7 +1462,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1473,7 +1473,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[11 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[11 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[11 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1512,7 +1512,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1523,7 +1523,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1562,7 +1562,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1573,7 +1573,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1612,7 +1612,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1623,7 +1623,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[19 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[19 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[19 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1662,7 +1662,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1673,7 +1673,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[20 + i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[20 + i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[20 + i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1712,7 +1712,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1723,7 +1723,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1762,7 +1762,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      k = 0;
 
                      stencil_contrib_i[stencil_i][k] = stencil_i;
-                     AbsStencilShape( hypre_StructStencilElement(stencils, stencil_i),
+                     AbsStencilShape( hypre_StructStencilOffset(stencils, stencil_i),
                                       abs_stencil_shape );
                      weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                      sum += weights[abs_stencil_shape];
@@ -1773,7 +1773,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_i[stencil_i][k] = rank_stencils[i];
 
-                           AbsStencilShape(hypre_StructStencilElement(stencils, rank_stencils[i]),
+                           AbsStencilShape(hypre_StructStencilOffset(stencils, rank_stencils[i]),
                                            abs_stencil_shape );
                            weight_contrib_i[stencil_i][k++] = weights[abs_stencil_shape];
                            sum += weights[abs_stencil_shape];
@@ -1855,7 +1855,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *------------------------------------------------------------------*/
                for (i = 0; i < stencil_size; i++)
                {
-                  hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape_i);
+                  hypre_CopyIndex(hypre_StructStencilOffset(stencils, i), stencil_shape_i);
                   crse_ptrs[i] = hypre_StructMatrixExtractPointerByIndex(crse_smatrix,
                                                                          ci,
                                                                          stencil_shape_i);
@@ -1874,7 +1874,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                              interior_fboxi_ci[fi]);
                   for (i = 0; i < stencil_size; i++)
                   {
-                     hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                     hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                      stencil_shape_i);
                      a_ptrs[i] =
                         hypre_StructMatrixExtractPointerByIndex(smatrix_var,
@@ -2051,7 +2051,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                                 bdy_fboxi_ci[arrayi]);
                      for (i = 0; i < stencil_size; i++)
                      {
-                        hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+                        hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                                         stencil_shape_i);
                         a_ptrs[i] =
                            hypre_StructMatrixExtractPointerByIndex(smatrix_var,
@@ -2533,7 +2533,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          rank_stencils = hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
          for (i = 0; i < stencil_size; i++)
          {
-            hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+            hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                             stencil_shape_i);
             MapStencilRank( stencil_shape_i, stencil_ranks[i] );
             rank_stencils[ stencil_ranks[i] ] = i;
@@ -3082,7 +3082,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *-----------------------------------------------------------------*/
                for (j = 0; j < m; j++)
                {
-                  hypre_CopyIndex(hypre_StructStencilElement(
+                  hypre_CopyIndex(hypre_StructStencilOffset(
                                      stencils, common_rank_stencils[j]),
                                   stencil_shape_i);
                   AbsStencilShape(stencil_shape_i, abs_stencil_shape);
@@ -3515,7 +3515,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       rank_stencils = hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < stencil_size; i++)
       {
-         hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+         hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                          stencil_shape_i);
          MapStencilRank(stencil_shape_i, rank);
          rank_stencils[rank] = i;
@@ -3532,7 +3532,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
          for (i = 0; i < stencil_size; i++)
          {
-            hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
+            hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
                             stencil_shape_i);
             a_ptrs[i] = hypre_StructMatrixExtractPointerByIndex(smatrix_var,
                                                                 ci,

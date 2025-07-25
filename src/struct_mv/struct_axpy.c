@@ -15,7 +15,9 @@
 #include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
- * hypre_StructAxpy
+ * The vectors x and y may have different base grids, but the grid boxes for
+ * each vector (defined by grid, stride, nboxes, boxnums) must be the same.
+ * Only nboxes is checked, the rest is assumed to be true.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -23,41 +25,56 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
                   hypre_StructVector *x,
                   hypre_StructVector *y     )
 {
+   HYPRE_Int         ndim = hypre_StructVectorNDim(x);
+
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
 
    HYPRE_Complex    *xp;
    HYPRE_Complex    *yp;
 
-   hypre_BoxArray   *boxes;
-   hypre_Box        *box;
+   HYPRE_Int         nboxes;
+   hypre_Box        *loop_box;
    hypre_Index       loop_size;
    hypre_IndexRef    start;
-   hypre_Index       unit_stride;
+   hypre_Index       ustride;
 
    HYPRE_Int         i;
 
-   hypre_SetIndex(unit_stride, 1);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-   hypre_ForBoxI(i, boxes)
+   nboxes = hypre_StructVectorNBoxes(x);
+
+   /* Return if nboxes is not the same for x and y */
+   if (nboxes != hypre_StructVectorNBoxes(y))
    {
-      box   = hypre_BoxArrayBox(boxes, i);
-      start = hypre_BoxIMin(box);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "StructAxpy: nboxes for x and y do not match!");
 
-      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
-      xp = hypre_StructVectorBoxData(x, i);
-      yp = hypre_StructVectorBoxData(y, i);
+   loop_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(ustride, 1);
 
-      hypre_BoxGetSize(box, loop_size);
+   for (i = 0; i < nboxes; i++)
+   {
+      hypre_StructVectorGridBoxCopy(x, i, loop_box);
+      start = hypre_BoxIMin(loop_box);
+
+      x_data_box = hypre_StructVectorGridDataBox(x, i);
+      y_data_box = hypre_StructVectorGridDataBox(y, i);
+
+      xp = hypre_StructVectorGridData(x, i);
+      yp = hypre_StructVectorGridData(y, i);
+
+      hypre_BoxGetSize(loop_box, loop_size);
 
 #if 0
       HYPRE_BOXLOOP (
-         hypre_BoxLoop2Begin, (hypre_StructVectorNDim(x), loop_size,
-                               x_data_box, start, unit_stride, xi,
-                               y_data_box, start, unit_stride, yi),
+         hypre_BoxLoop2Begin, (ndim, loop_size,
+                               x_data_box, start, ustride, xi,
+                               y_data_box, start, ustride, yi),
       {
          yp[yi] += alpha * xp[xi];
       },
@@ -66,9 +83,9 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 #else
 
 #define DEVICE_VAR is_device_ptr(yp,xp)
-      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
+      hypre_BoxLoop2Begin(ndim, loop_size,
+                          x_data_box, start, ustride, xi,
+                          y_data_box, start, ustride, yi);
       {
          yp[yi] += alpha * xp[xi];
       }
@@ -78,6 +95,117 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 #endif
    }
 
+   hypre_BoxDestroy(loop_box);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * y = alpha*x./z + beta*y
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseDivpy( HYPRE_Complex       alpha,
+                                  hypre_StructVector *x,
+                                  hypre_StructVector *z,
+                                  HYPRE_Complex       beta,
+                                  hypre_StructVector *y )
+{
+   HYPRE_Int           ndim  = hypre_StructVectorNDim(x);
+   hypre_StructGrid   *xgrid = hypre_StructVectorGrid(x);
+   hypre_BoxArray     *boxes = hypre_StructGridBoxes(xgrid);
+
+   hypre_Box          *xdbox, *ydbox, *zdbox;
+   HYPRE_Complex      *xp, *yp, *zp;
+
+   hypre_Box          *box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         ustride;
+
+   HYPRE_Int           i;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
+   hypre_ForBoxI(i, boxes)
+   {
+      box   = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
+
+      xdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+      ydbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      zdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(z), i);
+
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
+      zp = hypre_StructVectorBoxData(z, i);
+
+      hypre_BoxGetSize(box, loop_size);
+#define DEVICE_VAR is_device_ptr(zp, yp,xp)
+      hypre_BoxLoop3Begin(ndim, loop_size,
+                          xdbox, start, ustride, xi,
+                          ydbox, start, ustride, yi,
+                          zdbox, start, ustride, zi);
+      {
+         yp[yi] = alpha * xp[xi] / zp[zi] + beta * yp[yi];
+      }
+      hypre_BoxLoop3End(xi, yi, zi);
+#undef DEVICE_VAR
+   }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseDivision( hypre_StructVector  *x,
+                                     hypre_StructVector  *y,
+                                     hypre_StructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseProduct( hypre_StructVector  *x,
+                                    hypre_StructVector  *y,
+                                    hypre_StructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseInverse( hypre_StructVector  *x,
+                                    hypre_StructVector **y_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}

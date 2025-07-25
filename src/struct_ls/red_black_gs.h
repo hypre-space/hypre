@@ -23,8 +23,6 @@ typedef struct
    hypre_StructVector     *b;
    hypre_StructVector     *x;
 
-   HYPRE_Int               diag_rank;
-
    hypre_ComputePkg       *compute_pkg;
 
    /* log info (always logged) */

@@ -48,7 +48,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
 
    hypre_Index            index_temp;
    HYPRE_Int              j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
 
    RAP_stencil_dim = 2;
 
@@ -56,7 +56,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -76,13 +76,13 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Storage for 5 elements (c,w,e,n,s)
+             * Storage for 5 entries (c,w,e,n,s)
              *--------------------------------------------------------------*/
             if (i * j == 0)
             {
                hypre_SetIndex3(index_temp, i, j, 0);
-               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-               stencil_rank++;
+               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+               stencil_entry++;
             }
          }
       }
@@ -109,13 +109,13 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Store 3 elements in (c,w,s)
+             * Store 3 entries in (c,w,s)
              *--------------------------------------------------------------*/
-            if ( i * j == 0 )
+            if (i * j == 0)
             {
                hypre_SetIndex3(index_temp, i, j, 0);
-               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-               stencil_rank++;
+               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+               stencil_entry++;
             }
          }
       }
@@ -137,7 +137,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
    /*-----------------------------------------------------------------------
     * Set number of ghost points - one one each boundary
     *-----------------------------------------------------------------------*/
-   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }
@@ -160,6 +160,8 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                           hypre_Index         cstride,
                           hypre_StructMatrix *RAP     )
 {
+   HYPRE_UNUSED_VAR(R);
+
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           index;
    hypre_Index           index_temp;
@@ -211,17 +213,18 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
-   hypre_assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
-   if ( constant_coefficient == 0 )
-   {
-      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 0 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 0 );
-   }
-   else /* 1 or 2 */
-   {
-      hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 1 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 1 );
-   }
+
+   /* hypre_assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient ); */
+   /* if ( constant_coefficient==0 ) */
+   /* { */
+   /*    hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 0 ); */
+   /*    hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 0 ); */
+   /* } */
+   /* else /\* 1 or 2 *\/ */
+   /* { */
+   /*    hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 1 ); */
+   /*    hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 1 ); */
+   /* } */
 
    fcbox = hypre_BoxCreate(ndim);
    bdy_boxes = hypre_BoxArrayCreate(0, ndim);

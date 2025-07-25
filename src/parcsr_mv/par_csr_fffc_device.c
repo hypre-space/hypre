@@ -87,9 +87,9 @@ struct FF_pred
 /* this predicate selects A^s_{FC} */
 template<typename T>
 #if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
-struct FC_pred
-#else
 struct FC_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct FC_pred
 #endif
 {
    HYPRE_Int *row_CF_marker;

@@ -132,6 +132,7 @@ typedef HYPRE_BigInt   hypre_F90_BigIntArray;
 typedef HYPRE_BigInt   hypre_F90_BigIntArrayArray;
 typedef HYPRE_Real     hypre_F90_Real;
 typedef HYPRE_Real     hypre_F90_RealArray;
+typedef HYPRE_Real*    hypre_F90_RealArray2D;
 typedef HYPRE_Complex  hypre_F90_Complex;
 typedef HYPRE_Complex  hypre_F90_ComplexArray;
 typedef HYPRE_Int     *hypre_F90_Obj;
@@ -149,6 +150,7 @@ typedef HYPRE_Int     *hypre_F90_ObjRef;
 #define hypre_F90_PassReal(arg)             ((HYPRE_Real) *arg)
 #define hypre_F90_PassRealRef(arg)          ((HYPRE_Real *) arg)
 #define hypre_F90_PassRealArray(arg)        ((HYPRE_Real *) arg)
+#define hypre_F90_PassRealArray2D(arg)      ((HYPRE_Real **) arg)
 #define hypre_F90_PassComplex(arg)          ((HYPRE_Complex) *arg)
 #define hypre_F90_PassComplexRef(arg)       ((HYPRE_Complex *) arg)
 #define hypre_F90_PassComplexArray(arg)     ((HYPRE_Complex *) arg)

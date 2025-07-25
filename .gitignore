@@ -18,6 +18,7 @@ config.status
 Makefile.config
 HYPRE_config.h
 autom4te.cache
+*.TVD.v4breakpoints*
 src/TAGS
 hypre/
 install/
@@ -56,10 +57,14 @@ src/test/maxwell_unscaled
 src/test/maxwell_unscaled.exe
 src/test/sstruct
 src/test/sstruct.exe
+src/test/sstructmat
+src/test/sstructmat.exe
 src/test/sstruct_fac
 src/test/sstruct_fac.exe
 src/test/struct
 src/test/struct.exe
+src/test/structmat
+src/test/structmat.exe
 src/test/struct_migrate
 src/test/struct_migrate.exe
 src/test/zboxloop

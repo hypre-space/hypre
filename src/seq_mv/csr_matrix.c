@@ -356,17 +356,21 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 
    HYPRE_Int             i, irownnz = 0;
 
-   for (i = 0; i < num_rows; i++)
+   /* Count the number of rows with nonzero entries */
+   if ((A_i[num_rows] - A_i[0]) > 0)
    {
-      if ((A_i[i + 1] - A_i[i]) > 0)
+      for (i = 0; i < num_rows; i++)
       {
-         irownnz++;
+         if ((A_i[i + 1] - A_i[i]) > 0)
+         {
+            irownnz++;
+         }
       }
    }
 
    hypre_CSRMatrixNumRownnz(matrix) = irownnz;
 
-   /* Free old rownnz pointer */
+   /* Free old rownnz array */
    hypre_TFree(Arownnz, memory_location);
 
    /* Set new rownnz pointer */
@@ -376,6 +380,7 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
    }
    else
    {
+      /* Compute new rownnz array */
       Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz, memory_location);
       irownnz = 0;
       for (i = 0; i < num_rows; i++)
@@ -392,23 +397,26 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixSetRownnz
- *
- * function to set the substructure rownnz and num_rowsnnz inside the CSRMatrix
- * it needs the A_i substructure of CSRMatrix to find the nonzero rows.
- * It runs after the create CSR and when A_i is known..It does not check for
- * the existence of A_i or of the CSR matrix.
+ * Function to set the array rownnz and num_rownnz inside the CSRMatrix.
+ *  - Needs the A_i array of CSRMatrix to find the nonzero rows.
+ *  - Does not check for the existence of A_i or of the CSR matrix.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   /* Return in case rownnz has been previously computed */
+   if (hypre_CSRMatrixRownnz(matrix))
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      // TODO RL: there's no need currently for having rownnz on GPUs
+      hypre_CSRMatrixSetRownnzDevice(matrix);
    }
    else
 #endif
@@ -922,8 +930,6 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
  *
  * Migrates matrix row pointer, column indices and data to memory_location
  * if it is different to the current one.
- *
- * Note: Does not move rownnz array.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

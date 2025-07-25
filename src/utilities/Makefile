@@ -60,6 +60,7 @@ FILES =\
  prefix_sum.c\
  printf.c\
  qsort.c\
+ unique.c\
  utilities.c\
  mpistubs.c\
  qsplit.c\
@@ -67,7 +68,8 @@ FILES =\
  state.c\
  threading.c\
  timer.c\
- timing.c
+ timing.c\
+ caliper_instrumentation.c
 
 CUFILES=\
  device_utils.c\

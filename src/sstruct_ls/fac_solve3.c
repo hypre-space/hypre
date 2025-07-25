@@ -23,35 +23,35 @@ hypre_FACSolve3( void                 *fac_vdata,
 {
    HYPRE_UNUSED_VAR(A_user);
 
-   hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
+   hypre_FACData           *fac_data            = (hypre_FACData*)fac_vdata;
 
-   hypre_SStructMatrix     *A_in               = (fac_data-> A_rap);
-   hypre_SStructMatrix    **A_level            = (fac_data-> A_level);
-   hypre_SStructVector    **b_level            = (fac_data-> b_level);
-   hypre_SStructVector    **x_level            = (fac_data-> x_level);
-   hypre_SStructVector    **e_level            = (fac_data-> e_level);
-   hypre_SStructPVector   **tx_level           = (fac_data-> tx_level);
-   hypre_SStructVector     *tx                 = (fac_data-> tx);
-   void                   **relax_data_level   = (fac_data-> relax_data_level);
-   void                   **matvec_data_level  = (fac_data-> matvec_data_level);
-   void                   **pmatvec_data_level = (fac_data-> pmatvec_data_level);
+   hypre_SStructMatrix     *A_in                = (fac_data-> A_rap);
+   hypre_SStructMatrix    **A_level             = (fac_data-> A_level);
+   hypre_SStructVector    **b_level             = (fac_data-> b_level);
+   hypre_SStructVector    **x_level             = (fac_data-> x_level);
+   hypre_SStructVector    **e_level             = (fac_data-> e_level);
+   hypre_SStructPVector   **tx_level            = (fac_data-> tx_level);
+   hypre_SStructVector     *tx                  = (fac_data-> tx);
+   void                   **relax_data_level    = (fac_data-> relax_data_level);
+   void                   **matvec_data_level   = (fac_data-> matvec_data_level);
+   void                   **pmatvec_data_level  = (fac_data-> pmatvec_data_level);
    void                   **restrict_data_level = (fac_data-> restrict_data_level);
-   void                   **interp_data_level  = (fac_data-> interp_data_level);
-   void                    *matvec_data        = (fac_data-> matvec_data);
-   HYPRE_SStructSolver      csolver            = (fac_data-> csolver);
+   void                   **interp_data_level   = (fac_data-> interp_data_level);
+   void                    *matvec_data         = (fac_data-> matvec_data);
+   HYPRE_SStructSolver      csolver             = (fac_data-> csolver);
 
-   HYPRE_Int                max_level          = (fac_data-> max_levels);
-   HYPRE_Int               *levels             = (fac_data-> level_to_part);
-   HYPRE_Int                max_cycles         = (fac_data-> max_cycles);
-   HYPRE_Int                rel_change         = (fac_data-> rel_change);
-   HYPRE_Int                zero_guess         = (fac_data-> zero_guess);
-   HYPRE_Int                num_pre_smooth     = (fac_data-> num_pre_smooth);
-   HYPRE_Int                num_post_smooth    = (fac_data-> num_post_smooth);
-   HYPRE_Int                csolver_type       = (fac_data-> csolver_type);
-   HYPRE_Int                logging            = (fac_data-> logging);
-   HYPRE_Real              *norms              = (fac_data-> norms);
-   HYPRE_Real              *rel_norms          = (fac_data-> rel_norms);
-   HYPRE_Real               tol                = (fac_data-> tol);
+   HYPRE_Int                max_level           = (fac_data-> max_levels);
+   HYPRE_Int               *levels              = (fac_data-> level_to_part);
+   HYPRE_Int                max_cycles          = (fac_data-> max_cycles);
+   HYPRE_Int                rel_change          = (fac_data-> rel_change);
+   HYPRE_Int                zero_guess          = (fac_data-> zero_guess);
+   HYPRE_Int                num_pre_smooth      = (fac_data-> num_pre_smooth);
+   HYPRE_Int                num_post_smooth     = (fac_data-> num_post_smooth);
+   HYPRE_Int                csolver_type        = (fac_data-> csolver_type);
+   HYPRE_Int                logging             = (fac_data-> logging);
+   HYPRE_Real              *norms               = (fac_data-> norms);
+   HYPRE_Real              *rel_norms           = (fac_data-> rel_norms);
+   HYPRE_Real               tol                 = (fac_data-> tol);
 
    HYPRE_Int                part_crse = 0;
    HYPRE_Int                part_fine = 1;
@@ -128,8 +128,7 @@ hypre_FACSolve3( void                 *fac_vdata,
     *--------------------------------------------------------------*/
    for (i = 0; i < max_cycles; i++)
    {
-      hypre_SStructCopy(b_in, tx);
-      hypre_SStructMatvecCompute(matvec_data, -1.0, A_in, x_in, 1.0, tx);
+      hypre_SStructMatvecCompute(matvec_data, -1.0, A_in, x_in, 1.0, b_in, tx);
 
       /*-----------------------------------------------------------
        * convergence check
@@ -217,7 +216,7 @@ hypre_FACSolve3( void                 *fac_vdata,
 
          /* structured contribution */
          hypre_SStructPMatvecCompute(pmatvec_data_level[level],
-                                     -1.0, pA, px, 1.0, py);
+                                     -1.0, pA, px, 1.0, py, py);
 
          /* unstructured contribution */
          parcsrA = hypre_SStructMatrixParCSRMatrix(A_level[level]);
@@ -324,7 +323,7 @@ hypre_FACSolve3( void                 *fac_vdata,
          {
             hypre_SStructMatvecCompute(matvec_data_level[level], -1.0,
                                        A_level[level], e_level[level],
-                                       1.0, b_level[level]);
+                                       1.0, b_level[level], b_level[level]);
          }
 
          /*-----------------------------------------------------------
@@ -353,7 +352,6 @@ hypre_FACSolve3( void                 *fac_vdata,
                                   hypre_SStructVectorPVector(e_level[level], part_fine));
             }
          }
-
       }
 
       /*--------------------------------------------------------------

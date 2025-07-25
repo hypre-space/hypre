@@ -517,7 +517,7 @@ int main (int argc, char *argv[])
          int part = 0;
 
          /* Create the graph object */
-         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, &A_graph);
+         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, edge_grid, &A_graph);
 
          /* See MatrixSetObjectType below */
          HYPRE_SStructGraphSetObjectType(A_graph, HYPRE_PARCSR);
@@ -719,7 +719,7 @@ int main (int argc, char *argv[])
          int var; /* the edge variables */
 
          /* Create the discrete gradient graph object */
-         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, &G_graph);
+         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, edge_grid, &G_graph);
 
          /* See MatrixSetObjectType below */
          HYPRE_SStructGraphSetObjectType(G_graph, HYPRE_PARCSR);

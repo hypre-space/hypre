@@ -43,7 +43,7 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
 
    /* set up matrix */
    PT = hypre_StructMatrixCreate(hypre_StructMatrixComm(A), cgrid, stencil);
-   hypre_StructMatrixSetNumGhost(PT, num_ghost);
+   HYPRE_StructMatrixSetNumGhost(PT, num_ghost);
 
    hypre_StructStencilDestroy(stencil);
 
@@ -98,6 +98,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    HYPRE_Int             compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
    hypre_ComputeInfo    *compute_info;
+   hypre_Index           ustride;
 
    hypre_CommHandle     *comm_handle;
 
@@ -117,6 +118,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    HYPRE_Int             si, sj, d;
    HYPRE_Int             compute_i, i, j;
+
+   hypre_SetIndex(ustride, 1);
 
    /*--------------------------------------------------------
     * Initialize some things
@@ -193,7 +196,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        *-----------------------------------------------------*/
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
-      hypre_CreateComputeInfo(fgrid, compute_pkg_stencil, &compute_info);
+      hypre_CreateComputeInfo(fgrid, ustride, compute_pkg_stencil, &compute_info);
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
       hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
