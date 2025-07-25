@@ -21,6 +21,7 @@ DIRS="\
  distributed_matrix\
  krylov\
  lapack\
+ matrix_matrix\
  parcsr_block_mv\
  parcsr_ls\
  parcsr_mv\
@@ -32,7 +33,6 @@ DIRS="\
  struct_mv\
  utilities\
 "
-# matrix_matrix
 # multivector
 
 # RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,

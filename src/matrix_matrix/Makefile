@@ -22,19 +22,19 @@ EXTRA_FILES =\
 HEADERS = HYPRE_matrix_matrix_protos.h
  
 FILES =\
-
-#######################
-# Multiprecision files
-#######################
-MuP_FILES = \
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c
- 
-ifeq (${MP_BUILD}, 1)
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   MuP_COBJS = ${MuP_FILES:.c=.o}
-else
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
+
+OBJS = ${FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+
 endif
 
 SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -44,67 +44,22 @@ SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
-#	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/matrix_matrix_mup_func.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_MatrixMatrix${HYPRE_LIB_SUFFIX}
-#	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/matrix_matrix_mup_func.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -f *.o lib*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1)
-clean_mup:
-	rm -rf ${MuP_OBJDIR}
-else
-clean_mup:
-endif
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
-
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-else
-OBJS = ${COBJS}
-endif
-#
 libHYPRE_MatrixMatrix.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}

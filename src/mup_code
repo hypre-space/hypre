@@ -16,6 +16,7 @@ DIRS="\
  distributed_matrix\
  krylov\
  lapack\
+ matrix_matrix\
  parcsr_block_mv\
  parcsr_ls\
  parcsr_mv\
@@ -27,7 +28,6 @@ DIRS="\
  struct_mv\
  utilities\
 "
-# matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
 
 for i in $DIRS

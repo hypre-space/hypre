@@ -43,8 +43,9 @@ KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_flt
 KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_dbl
 KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_ldbl
 
-MATMATFILES         = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
-MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
+MATMATFILES         = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o_flt
+MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o_dbl
+MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o_ldbl
 
 MULTIVECFILES       = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
 MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
