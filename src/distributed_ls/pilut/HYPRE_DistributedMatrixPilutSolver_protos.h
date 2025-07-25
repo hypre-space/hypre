@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "pilut_mup_func.h"
+#include "_hypre_pilut_mup_def.h"
 #endif
 
 /* HYPRE_DistributedMatrixPilutSolver.c */

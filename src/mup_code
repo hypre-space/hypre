@@ -12,6 +12,7 @@ DIRS="\
  blas\
  distributed_ls/Euclid\
  distributed_ls/ParaSails\
+ distributed_ls/pilut\
  krylov\
  lapack\
  parcsr_block_mv\
@@ -25,7 +26,6 @@ DIRS="\
  struct_mv\
  utilities\
 "
-# distributed_ls/pilut     - no external header, no internal header
 # distributed_matrix       - no external header, no internal header
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header
