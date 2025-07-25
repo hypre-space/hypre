@@ -18,7 +18,7 @@
 typedef void *HYPRE_DistributedMatrix;
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "distributed_matrix_mup_func.h"
+#include "_hypre_distributed_matrix_mup_def.h"
 #endif
 
 /* HYPRE_distributed_matrix.c */

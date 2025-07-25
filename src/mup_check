@@ -18,6 +18,7 @@ DIRS="\
  distributed_ls/Euclid\
  distributed_ls/ParaSails\
  distributed_ls/pilut\
+ distributed_matrix\
  krylov\
  lapack\
  parcsr_block_mv\
@@ -31,7 +32,6 @@ DIRS="\
  struct_mv\
  utilities\
 "
-# distributed_matrix
 # matrix_matrix
 # multivector
 
