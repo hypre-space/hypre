@@ -761,6 +761,14 @@ hypre_MPI_Bcast( void *buffer, HYPRE_Int count, hypre_MPI_Datatype datatype, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs, HYPRE_Int num_sends, HYPRE_Int *sends )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_CheckCommMatrix)( comm, num_recvs, recvs, num_sends, sends );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group, hypre_MPI_Comm *newcomm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Comm_create)( comm, group, newcomm );
@@ -1193,6 +1201,14 @@ hypre_Memset( void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation locat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_PrefixSumInt( HYPRE_Int nvals, HYPRE_Int *vals, HYPRE_Int *sums )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PrefixSumInt)( nvals, vals, sums );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_PrintTiming_fcn( const char *heading, MPI_Comm comm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PrintTiming_fcn)( heading, comm );
@@ -1228,6 +1244,14 @@ void *
 hypre_ReAlloc_v2( void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ReAlloc_v2)( ptr, old_size, new_size, location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RestoreLogLevel( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_RestoreLogLevel)( );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1292,6 +1316,14 @@ HYPRE_Int
 hypre_SetLogLevel( HYPRE_Int log_level )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SetLogLevel)( log_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetLogLevelSaved( HYPRE_Int log_level_saved )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetLogLevelSaved)( log_level_saved );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1380,6 +1412,14 @@ HYPRE_Int
 hypre_SetUserDeviceMfree( GPUMfreeFunc func )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SetUserDeviceMfree)( func );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_UniqueIntArrayND( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_UniqueIntArrayND)( ndim, size, array );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1616,7 +1656,7 @@ hypre_partition1D( HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_In
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_prefix_sum( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_prefix_sum)( in_out, sum, workspace );
@@ -1624,7 +1664,7 @@ hypre_prefix_sum( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace )
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_prefix_sum_multiple( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_prefix_sum_multiple)( in_out, sum, n, workspace );
@@ -1632,7 +1672,7 @@ hypre_prefix_sum_multiple( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_prefix_sum_pair( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_prefix_sum_pair)( in_out1, sum1, in_out2, sum2, workspace );
@@ -1640,7 +1680,7 @@ hypre_prefix_sum_pair( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, 
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_prefix_sum_triple( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_prefix_sum_triple)( in_out1, sum1, in_out2, sum2, in_out3, sum3, workspace );
@@ -1716,6 +1756,14 @@ void
 hypre_qsort3ir( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int *z, HYPRE_Int left, HYPRE_Int right )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_qsort3ir)( v, w, z, left, right );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_qsortND( HYPRE_Int **v, HYPRE_Int ndim, HYPRE_Int left, HYPRE_Int right )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_qsortND)( v, ndim, left, right );
 }
 
 /*--------------------------------------------------------------------------*/

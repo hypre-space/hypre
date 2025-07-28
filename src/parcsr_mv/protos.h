@@ -523,13 +523,15 @@ hypre_ParCSRMatrix *hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A, hypre_P
                                                  HYPRE_Int keep_transpose);
 hypre_ParCSRMatrix *hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B,
                                            HYPRE_Int keep_transpose);
-hypre_ParCSRMatrix *hypre_ParCSRTMatMat( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B);
-hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix  *A,
-                                             hypre_ParCSRMatrix  *P, HYPRE_Int keepTranspose );
+hypre_ParCSRMatrix *hypre_ParCSRTMatMat( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B);
+hypre_ParCSRMatrix *hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A,
+                                             hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose,
+                                             HYPRE_Int has_diagonal );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix  *A,
-                                           hypre_ParCSRMatrix  *P );
+                                           hypre_ParCSRMatrix *P );
 hypre_ParCSRMatrix* hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A,
-                                                   hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose );
+                                                   hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose,
+                                                   HYPRE_Int has_diagonal );
 hypre_ParCSRMatrix* hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A,
                                                  hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose );
 

@@ -178,6 +178,15 @@ HYPRE_IJMatrixNorm( HYPRE_IJMatrix matrix, void *norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_IJMatrixPartialClone( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_IJMatrixPartialClone_pre( precision, matrix_in, matrix_out );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, const char *filename )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

@@ -1103,6 +1103,15 @@ HYPRE_Int
 HYPRE_StructPFMGGetLogging( HYPRE_StructSolver solver, HYPRE_Int *logging );
 
 HYPRE_Int
+HYPRE_StructPFMGGetMatmultType_flt( HYPRE_StructSolver solver, HYPRE_Int *matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGGetMatmultType_dbl( HYPRE_StructSolver solver, HYPRE_Int *matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGGetMatmultType_long_dbl( HYPRE_StructSolver solver, HYPRE_Int *matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGGetMatmultType( HYPRE_StructSolver solver, HYPRE_Int *matmult_type );
+
+HYPRE_Int
 HYPRE_StructPFMGGetMaxIter_flt( HYPRE_StructSolver solver, HYPRE_Int *max_iter );
 HYPRE_Int
 HYPRE_StructPFMGGetMaxIter_dbl( HYPRE_StructSolver solver, HYPRE_Int *max_iter );
@@ -1236,6 +1245,15 @@ HYPRE_Int
 HYPRE_StructPFMGSetLogging_long_dbl( HYPRE_StructSolver solver, HYPRE_Int logging );
 HYPRE_Int
 HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver, HYPRE_Int logging );
+
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType_flt( HYPRE_StructSolver solver, HYPRE_Int matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType_dbl( HYPRE_StructSolver solver, HYPRE_Int matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType_long_dbl( HYPRE_StructSolver solver, HYPRE_Int matmult_type );
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType( HYPRE_StructSolver solver, HYPRE_Int matmult_type );
 
 HYPRE_Int
 HYPRE_StructPFMGSetMaxIter_flt( HYPRE_StructSolver solver, HYPRE_Int max_iter );
@@ -1975,6 +1993,9 @@ HYPRE_Int
 HYPRE_StructPFMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *logging );
 
 HYPRE_Int
+HYPRE_StructPFMGGetMatmultType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *matmult_type );
+
+HYPRE_Int
 HYPRE_StructPFMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter );
 
 HYPRE_Int
@@ -2018,6 +2039,9 @@ HYPRE_StructPFMGSetJacobiWeight_pre( HYPRE_Precision precision, HYPRE_StructSolv
 
 HYPRE_Int
 HYPRE_StructPFMGSetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int logging );
+
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int matmult_type );
 
 HYPRE_Int
 HYPRE_StructPFMGSetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int max_iter );

@@ -490,7 +490,7 @@ int main (int argc, char *argv[])
       int part = 0;
 
       /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
 
       /* See MatrixSetObjectType below */
       object_type = HYPRE_STRUCT;

@@ -276,73 +276,6 @@ HYPRE_IJMatrixSetPrintLevel( HYPRE_IJMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
- * This is a helper routine to compute a prefix sum of integer values.
- *
- * The current implementation is okay for modest numbers of threads.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PrefixSumInt(HYPRE_Int   nvals,
-                   HYPRE_Int  *vals,
-                   HYPRE_Int  *sums)
-{
-   HYPRE_Int  j, nthreads, bsize;
-
-   nthreads = hypre_NumThreads();
-   bsize = (nvals + nthreads - 1) / nthreads; /* This distributes the remainder */
-
-   if (nvals < nthreads || bsize == 1)
-   {
-      sums[0] = 0;
-      for (j = 1; j < nvals; j++)
-      {
-         sums[j] += sums[j - 1] + vals[j - 1];
-      }
-   }
-   else
-   {
-
-      /* Compute preliminary partial sums (in parallel) within each interval */
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < nvals; j += bsize)
-      {
-         HYPRE_Int  i, n = hypre_min((j + bsize), nvals);
-
-         sums[j] = 0;
-         for (i = j + 1; i < n; i++)
-         {
-            sums[i] = sums[i - 1] + vals[i - 1];
-         }
-      }
-
-      /* Compute final partial sums (in serial) for the first entry of every interval */
-      for (j = bsize; j < nvals; j += bsize)
-      {
-         sums[j] = sums[j - bsize] + sums[j - 1] + vals[j - 1];
-      }
-
-      /* Compute final partial sums (in parallel) for the remaining entries */
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = bsize; j < nvals; j += bsize)
-      {
-         HYPRE_Int  i, n = hypre_min((j + bsize), nvals);
-
-         for (i = j + 1; i < n; i++)
-         {
-            sums[i] += sums[j];
-         }
-      }
-   }
-
-   return hypre_error_flag;
-}
-
-
-/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -937,15 +870,16 @@ HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues not implemented for GPUs!");
+      hypre_IJMatrixGetValuesParCSRDevice(ijmatrix, nrows, ncols, rows,
+                                          row_indexes, cols, values, 0);
    }
    else
 #endif
    {
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
       {
-         hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
-                                        rows, row_indexes, cols, values, 0 );
+         hypre_IJMatrixGetValuesParCSR(ijmatrix, nrows, ncols, rows,
+                                       row_indexes, cols, values, 0);
       }
       else
       {
@@ -954,7 +888,6 @@ HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -1011,25 +944,16 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* TODO: add device implementation */
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
-
-      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-      {
-         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_HOST);
-         hypre_IJMatrixGetValuesParCSR(ijmatrix, nrows, ncols,
-                                       rows, row_indexes, cols, values, 1);
-         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_DEVICE);
-      }
+      hypre_IJMatrixGetValuesParCSRDevice(ijmatrix, nrows, ncols, rows,
+                                          row_indexes, cols, values, 1);
    }
    else
 #endif
    {
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
       {
-         hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
-                                        rows, row_indexes, cols, values, 1 );
+         hypre_IJMatrixGetValuesParCSR(ijmatrix, nrows, ncols, rows,
+                                       row_indexes, cols, values, 1);
       }
       else
       {
@@ -1038,7 +962,6 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------

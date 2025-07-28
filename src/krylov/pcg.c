@@ -219,6 +219,7 @@ hypre_PCGSetup( void *pcg_vdata,
    void 	      *precond_Mat          = (pcg_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PCG-Setup");
 
    //set preconditioning matrix
    if((pcg_data -> precond_Mat)  == NULL)
@@ -300,6 +301,7 @@ hypre_PCGSetup( void *pcg_vdata,
                                                 pcg_functions, HYPRE_MEMORY_HOST );
    }
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -391,6 +393,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int       my_id, num_procs;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PCG-Solve");
 
    (pcg_data -> converged) = 0;
 
@@ -450,6 +453,8 @@ hypre_PCGSolve( void *pcg_vdata,
          hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -489,6 +494,7 @@ hypre_PCGSolve( void *pcg_vdata,
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
       }
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -528,6 +534,7 @@ hypre_PCGSolve( void *pcg_vdata,
          hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -1013,6 +1020,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (pcg_data -> rel_residual_norm) = 0.0;
    }
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

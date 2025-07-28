@@ -211,7 +211,7 @@ int main (int argc, char *argv[])
       int var0 = 0, var1 = 1;
 
       /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
 
       /* Set up the object type (see Matrix and VectorSetObjectType below) */
       HYPRE_SStructGraphSetObjectType(graph, object_type);

@@ -117,6 +117,7 @@ HYPRE_StructPFMGDestroy
 HYPRE_StructPFMGGetFinalRelativeResidualNorm
 HYPRE_StructPFMGGetJacobiWeight
 HYPRE_StructPFMGGetLogging
+HYPRE_StructPFMGGetMatmultType
 HYPRE_StructPFMGGetMaxIter
 HYPRE_StructPFMGGetMaxLevels
 HYPRE_StructPFMGGetNumIterations
@@ -132,6 +133,7 @@ HYPRE_StructPFMGGetZeroGuess
 HYPRE_StructPFMGSetDxyz
 HYPRE_StructPFMGSetJacobiWeight
 HYPRE_StructPFMGSetLogging
+HYPRE_StructPFMGSetMatmultType
 HYPRE_StructPFMGSetMaxIter
 HYPRE_StructPFMGSetMaxLevels
 HYPRE_StructPFMGSetNonZeroGuess

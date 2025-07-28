@@ -9,11 +9,12 @@ set(HDRS
 )
 
 set(SRCS
-  coarsen.c
   cyclic_reduction.c
   diagscale.c
   F90_HYPRE_struct_bicgstab.c
   F90_HYPRE_struct_cycred.c
+  F90_HYPRE_struct_flexgmres.c
+  F90_HYPRE_struct_lgmres.c
   F90_HYPRE_struct_gmres.c
   F90_HYPRE_struct_hybrid.c
   F90_HYPRE_struct_int.c
@@ -21,7 +22,6 @@ set(SRCS
   F90_HYPRE_struct_pcg.c
   F90_HYPRE_struct_pfmg.c
   F90_HYPRE_struct_smg.c
-  F90_HYPRE_struct_sparse_msg.c
   hybrid.c
   HYPRE_struct_bicgstab.c
   HYPRE_struct_cycred.c
@@ -30,7 +30,6 @@ set(SRCS
   HYPRE_struct_jacobi.c
   HYPRE_struct_pfmg.c
   HYPRE_struct_smg.c
-  HYPRE_struct_sparse_msg.c
   HYPRE_struct_pcg.c
   HYPRE_struct_gmres.c
   HYPRE_struct_flexgmres.c
@@ -40,6 +39,7 @@ set(SRCS
   pfmg2_setup_rap.c
   pfmg3_setup_rap.c
   pfmg.c
+  pfmg_coarsen.c
   pfmg_relax.c
   pfmg_setup.c
   pfmg_setup_interp.c
@@ -47,7 +47,6 @@ set(SRCS
   pfmg_setup_rap7.c
   pfmg_setup_rap.c
   pfmg_solve.c
-  point_relax.c
   red_black_constantcoef_gs.c
   red_black_gs.c
   semi.c
@@ -66,17 +65,6 @@ set(SRCS
   smg_setup_rap.c
   smg_setup_restrict.c
   smg_solve.c
-  sparse_msg2_setup_rap.c
-  sparse_msg3_setup_rap.c
-  sparse_msg.c
-  sparse_msg_filter.c
-  sparse_msg_interp.c
-  sparse_msg_restrict.c
-  sparse_msg_setup.c
-  sparse_msg_setup_rap.c
-  sparse_msg_solve.c
-  F90_HYPRE_struct_flexgmres.c
-  F90_HYPRE_struct_lgmres.c
 )
 target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
@@ -86,10 +74,12 @@ target_sources(${PROJECT_NAME}
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     cyclic_reduction.c
+    jacobi.c
     HYPRE_struct_int.c
     HYPRE_struct_pcg.c
     pfmg2_setup_rap.c
     pfmg3_setup_rap.c
+    pfmg_coarsen.c
     pfmg_setup.c
     pfmg_setup_interp.c
     pfmg_setup_rap5.c
@@ -106,11 +96,6 @@ if (HYPRE_USING_GPU)
     smg_axpy.c
     smg_residual.c
     smg_setup_interp.c
-    sparse_msg2_setup_rap.c
-    sparse_msg3_setup_rap.c
-    sparse_msg_filter.c
-    sparse_msg_interp.c
-    sparse_msg_restrict.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

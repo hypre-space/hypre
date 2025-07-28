@@ -672,6 +672,13 @@ HYPRE_Int
 hypre_MPI_Bcast_long_dbl( void *buffer, HYPRE_Int count, hypre_MPI_Datatype datatype, HYPRE_Int root, hypre_MPI_Comm comm );
 
 HYPRE_Int
+hypre_MPI_CheckCommMatrix_flt( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs, HYPRE_Int num_sends, HYPRE_Int *sends );
+HYPRE_Int
+hypre_MPI_CheckCommMatrix_dbl( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs, HYPRE_Int num_sends, HYPRE_Int *sends );
+HYPRE_Int
+hypre_MPI_CheckCommMatrix_long_dbl( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs, HYPRE_Int num_sends, HYPRE_Int *sends );
+
+HYPRE_Int
 hypre_MPI_Comm_create_flt( hypre_MPI_Comm comm, hypre_MPI_Group group, hypre_MPI_Comm *newcomm );
 HYPRE_Int
 hypre_MPI_Comm_create_dbl( hypre_MPI_Comm comm, hypre_MPI_Group group, hypre_MPI_Comm *newcomm );
@@ -1050,6 +1057,13 @@ void *
 hypre_Memset_long_dbl( void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location );
 
 HYPRE_Int
+hypre_PrefixSumInt_flt( HYPRE_Int nvals, HYPRE_Int *vals, HYPRE_Int *sums );
+HYPRE_Int
+hypre_PrefixSumInt_dbl( HYPRE_Int nvals, HYPRE_Int *vals, HYPRE_Int *sums );
+HYPRE_Int
+hypre_PrefixSumInt_long_dbl( HYPRE_Int nvals, HYPRE_Int *vals, HYPRE_Int *sums );
+
+HYPRE_Int
 hypre_PrintTiming_fcn_flt( const char *heading, MPI_Comm comm );
 HYPRE_Int
 hypre_PrintTiming_fcn_dbl( const char *heading, MPI_Comm comm );
@@ -1083,6 +1097,13 @@ void *
 hypre_ReAlloc_v2_dbl( void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location );
 void *
 hypre_ReAlloc_v2_long_dbl( void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location );
+
+HYPRE_Int
+hypre_RestoreLogLevel_flt( void );
+HYPRE_Int
+hypre_RestoreLogLevel_dbl( void );
+HYPRE_Int
+hypre_RestoreLogLevel_long_dbl( void );
 
 void
 hypre_SeedRand_flt( HYPRE_Int seed );
@@ -1139,6 +1160,13 @@ HYPRE_Int
 hypre_SetLogLevel_dbl( HYPRE_Int log_level );
 HYPRE_Int
 hypre_SetLogLevel_long_dbl( HYPRE_Int log_level );
+
+HYPRE_Int
+hypre_SetLogLevelSaved_flt( HYPRE_Int log_level_saved );
+HYPRE_Int
+hypre_SetLogLevelSaved_dbl( HYPRE_Int log_level_saved );
+HYPRE_Int
+hypre_SetLogLevelSaved_long_dbl( HYPRE_Int log_level_saved );
 
 HYPRE_Int
 hypre_SetSpGemmAlgorithm_flt( HYPRE_Int value );
@@ -1216,6 +1244,13 @@ HYPRE_Int
 hypre_SetUserDeviceMfree_dbl( GPUMfreeFunc func );
 HYPRE_Int
 hypre_SetUserDeviceMfree_long_dbl( GPUMfreeFunc func );
+
+HYPRE_Int
+hypre_UniqueIntArrayND_flt( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
+HYPRE_Int
+hypre_UniqueIntArrayND_dbl( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
+HYPRE_Int
+hypre_UniqueIntArrayND_long_dbl( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
 
 void
 hypre_UnorderedBigIntMapCreate_flt( hypre_UnorderedBigIntMap *m, HYPRE_Int inCapacity, HYPRE_Int concurrencyLevel );
@@ -1420,32 +1455,32 @@ hypre_partition1D_dbl( HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPR
 void
 hypre_partition1D_long_dbl( HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e );
 
-void
+HYPRE_Int
 hypre_prefix_sum_flt( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_dbl( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_long_dbl( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace );
 
-void
+HYPRE_Int
 hypre_prefix_sum_multiple_flt( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_multiple_dbl( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_multiple_long_dbl( HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace );
 
-void
+HYPRE_Int
 hypre_prefix_sum_pair_flt( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_pair_dbl( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_pair_long_dbl( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace );
 
-void
+HYPRE_Int
 hypre_prefix_sum_triple_flt( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_triple_dbl( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace );
-void
+HYPRE_Int
 hypre_prefix_sum_triple_long_dbl( HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace );
 
 void
@@ -1510,6 +1545,13 @@ void
 hypre_qsort3ir_dbl( HYPRE_Int *v, hypre_double *w, HYPRE_Int *z, HYPRE_Int left, HYPRE_Int right );
 void
 hypre_qsort3ir_long_dbl( HYPRE_Int *v, hypre_long_double *w, HYPRE_Int *z, HYPRE_Int left, HYPRE_Int right );
+
+void
+hypre_qsortND_flt( HYPRE_Int **v, HYPRE_Int ndim, HYPRE_Int left, HYPRE_Int right );
+void
+hypre_qsortND_dbl( HYPRE_Int **v, HYPRE_Int ndim, HYPRE_Int left, HYPRE_Int right );
+void
+hypre_qsortND_long_dbl( HYPRE_Int **v, HYPRE_Int ndim, HYPRE_Int left, HYPRE_Int right );
 
 void
 hypre_qsort_abs_flt( hypre_float *w, HYPRE_Int left, HYPRE_Int right );

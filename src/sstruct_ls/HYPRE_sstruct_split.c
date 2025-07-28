@@ -28,8 +28,8 @@ typedef HYPRE_Int (*HYPRE_PtrToVoid4Fcn)(void*, void*, void*, void*);
 
 typedef struct hypre_SStructSolver_struct
 {
+   MPI_Comm                 comm;
    hypre_SStructVector     *y;
-
    HYPRE_Int                nparts;
    HYPRE_Int               *nvars;
 
@@ -42,9 +42,16 @@ typedef struct hypre_SStructSolver_struct
    HYPRE_Real               tol;
    HYPRE_Int                max_iter;
    HYPRE_Int                zero_guess;
-   HYPRE_Int                num_iterations;
-   HYPRE_Real               rel_norm;
    HYPRE_Int                ssolver;
+
+   /* log info (always logged) */
+   HYPRE_Int                num_iterations;
+   HYPRE_Int                print_level;
+
+   /* additional log info (logged when `logging' > 0) */
+   HYPRE_Int                logging;
+   HYPRE_Real              *norms;
+   HYPRE_Real              *rel_norms;
 
    void                    *matvec_data;
 
@@ -63,6 +70,7 @@ HYPRE_SStructSplitCreate( MPI_Comm             comm,
 
    solver = hypre_TAlloc(hypre_SStructSolver,  1, HYPRE_MEMORY_HOST);
 
+   (solver -> comm)            = comm;
    (solver -> y)               = NULL;
    (solver -> nparts)          = 0;
    (solver -> nvars)           = 0;
@@ -74,7 +82,10 @@ HYPRE_SStructSplitCreate( MPI_Comm             comm,
    (solver -> max_iter)        = 200;
    (solver -> zero_guess)      = 0;
    (solver -> num_iterations)  = 0;
-   (solver -> rel_norm)        = 0;
+   (solver -> print_level)     = 0;
+   (solver -> logging)         = 0;
+   (solver -> norms)           = NULL;
+   (solver -> rel_norms)       = NULL;
    (solver -> ssolver)         = HYPRE_SMG;
    (solver -> matvec_data)     = NULL;
 
@@ -111,6 +122,12 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
       ssolver_solve   = (solver -> ssolver_solve);
       ssolver_destroy = (solver -> ssolver_destroy);
       ssolver_data    = (solver -> ssolver_data);
+
+      if ((solver -> logging) > 0)
+      {
+         hypre_TFree(solver -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(solver -> rel_norms, HYPRE_MEMORY_HOST);
+      }
 
       HYPRE_SStructVectorDestroy(y);
       for (part = 0; part < nparts; part++)
@@ -156,6 +173,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector x )
 {
    HYPRE_Int                ssolver = (solver -> ssolver);
+   HYPRE_Int                max_iter = (solver -> max_iter);
    hypre_SStructVector     *y;
    HYPRE_Int                nparts;
    HYPRE_Int               *nvars;
@@ -300,6 +318,21 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    (solver -> ssolver_solve)   = ssolver_solve;
    (solver -> ssolver_destroy) = ssolver_destroy;
    (solver -> ssolver_data)    = ssolver_data;
+
+   /*-----------------------------------------------------
+    * Allocate space for log info
+    *-----------------------------------------------------*/
+
+   if ((solver -> logging) > 0)
+   {
+      (solver -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (solver -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+   }
+
+   /*-----------------------------------------------------
+    * Setup matvec for A*x
+    *-----------------------------------------------------*/
+
    if ((solver -> tol) > 0.0)
    {
       hypre_SStructMatvecCreate(&(solver -> matvec_data));
@@ -327,6 +360,9 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    HYPRE_Real               tol                   = (solver -> tol);
    HYPRE_Int                max_iter              = (solver -> max_iter);
    HYPRE_Int                zero_guess            = (solver -> zero_guess);
+   HYPRE_Int                logging               = (solver -> logging);
+   HYPRE_Real              *norms                 = (solver -> norms);
+   HYPRE_Real              *rel_norms             = (solver -> rel_norms);
    void                    *matvec_data           = (solver -> matvec_data);
 
    hypre_SStructPMatrix    *pA;
@@ -343,19 +379,28 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    HYPRE_Int                iter, part, vi, vj;
-   HYPRE_Real               b_dot_b = 0, r_dot_r;
+   HYPRE_Real               b_dot_b = 0.0, r_dot_r = 0.0;
+   HYPRE_Real               eps = 0.0;
+#ifdef DEBUG
+   char                     filename[255];
+#endif
 
    /* part of convergence check */
    if (tol > 0.0)
    {
       /* eps = (tol^2) */
       hypre_SStructInnerProd(b, b, &b_dot_b);
+      eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
-      if (b_dot_b == 0.0)
+      if (!(b_dot_b > 0.0))
       {
          hypre_SStructVectorSetConstantValues(x, 0.0);
-         (solver -> rel_norm) = 0.0;
+         if (logging > 0)
+         {
+            norms[0]     = 0.0;
+            rel_norms[0] = 0.0;
+         }
 
          return hypre_error_flag;
       }
@@ -366,16 +411,28 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
       /* convergence check */
       if (tol > 0.0)
       {
-         /* compute fine grid residual (b - Ax) */
-         hypre_SStructCopy(b, y);
-         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, y);
+         /* compute fine grid residual (r = b - Ax) */
+         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, y);
          hypre_SStructInnerProd(y, y, &r_dot_r);
-         (solver -> rel_norm) = hypre_sqrt(r_dot_r / b_dot_b);
 
-         if ((solver -> rel_norm) < tol)
+         if (logging > 0)
+         {
+            norms[iter]     = sqrt(r_dot_r);
+            rel_norms[iter] = sqrt(r_dot_r / b_dot_b);
+         }
+
+         if (r_dot_r / b_dot_b < eps)
          {
             break;
          }
+
+#ifdef DEBUG
+         hypre_sprintf(filename, "split_x.i%02d", iter);
+         HYPRE_SStructVectorPrint(filename, x, 0);
+
+         hypre_sprintf(filename, "split_r.i%02d", iter);
+         HYPRE_SStructVectorPrint(filename, y, 0);
+#endif
       }
 
       /* copy b into y */
@@ -432,6 +489,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    }
 
    (solver -> num_iterations) = iter;
+   HYPRE_SStructSplitPrintLogging(solver);
 
    return hypre_error_flag;
 }
@@ -455,6 +513,28 @@ HYPRE_SStructSplitSetMaxIter( HYPRE_SStructSolver solver,
                               HYPRE_Int           max_iter )
 {
    (solver -> max_iter) = max_iter;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver,
+                                 HYPRE_Int           print_level )
+{
+   (solver -> print_level) = print_level;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSplitSetLogging( HYPRE_SStructSolver solver,
+                              HYPRE_Int           logging )
+{
+   (solver -> logging) = logging;
    return hypre_error_flag;
 }
 
@@ -504,9 +584,73 @@ HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver )
+{
+   MPI_Comm           comm           = (solver -> comm);
+   HYPRE_Int          num_iterations = (solver -> num_iterations);
+   HYPRE_Int          max_iter       = (solver -> max_iter);
+   HYPRE_Int          logging        = (solver -> logging);
+   HYPRE_Int          print_level    = (solver -> print_level);
+   HYPRE_Real        *norms          = (solver -> norms);
+   HYPRE_Real        *rel_norms      = (solver -> rel_norms);
+
+   HYPRE_Int          myid, i;
+   HYPRE_Real         convr = 1.0;
+   HYPRE_Real         avg_convr;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   if ((myid == 0) && (logging > 0) && (print_level > 0))
+   {
+      hypre_printf("Iters         ||r||_2   conv.rate  ||r||_2/||b||_2\n");
+      hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
+      for (i = 1; i <= num_iterations; i++)
+      {
+         convr = norms[i] / norms[i - 1];
+         hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
+      }
+
+      if (max_iter > 1)
+      {
+         if (rel_norms[0] > 0.)
+         {
+            avg_convr = pow((rel_norms[num_iterations] / rel_norms[0]),
+                            (1.0 / (HYPRE_Real) num_iterations));
+            hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 HYPRE_Real          *norm )
 {
-   *norm = (solver -> rel_norm);
+   HYPRE_Int       max_iter        = (solver -> max_iter);
+   HYPRE_Int       num_iterations  = (solver -> num_iterations);
+   HYPRE_Int       logging         = (solver -> logging);
+   HYPRE_Real     *rel_norms       = (solver -> rel_norms);
+
+   if (logging > 0)
+   {
+      if (max_iter == 0)
+      {
+         hypre_error_in_arg(1);
+      }
+      else if (num_iterations == max_iter)
+      {
+         *norm = rel_norms[num_iterations - 1];
+      }
+      else
+      {
+         *norm = rel_norms[num_iterations];
+      }
+   }
+
    return hypre_error_flag;
 }

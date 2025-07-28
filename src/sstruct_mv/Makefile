@@ -45,6 +45,8 @@ FILES =\
  sstruct_grid.c\
  sstruct_innerprod.c\
  sstruct_matvec.c\
+ sstruct_matmult.c\
+ sstruct_matop.c\
  sstruct_scale.c\
  sstruct_stencil.c
 

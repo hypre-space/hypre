@@ -35,6 +35,7 @@ extern "C" {
 /*--------------------------------------------------------------------------
  * Big int stuff
  *--------------------------------------------------------------------------*/
+#include <limits.h>
 
 #if defined(HYPRE_BIGINT)
 typedef long long int HYPRE_BigInt;
@@ -47,6 +48,8 @@ typedef long long int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
+#define HYPRE_INT_MAX LLONG_MAX
+#define HYPRE_INT_MIN LLONG_MIN
 
 #elif defined(HYPRE_MIXEDINT)
 typedef long long int HYPRE_BigInt;
@@ -59,6 +62,8 @@ typedef int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_INT
+#define HYPRE_INT_MAX INT_MAX
+#define HYPRE_INT_MIN INT_MIN
 
 #else /* default */
 typedef int HYPRE_BigInt;
@@ -71,6 +76,8 @@ typedef int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_INT
 #define HYPRE_MPI_INT MPI_INT
+#define HYPRE_INT_MAX INT_MAX
+#define HYPRE_INT_MIN INT_MIN
 #endif
 
 /*--------------------------------------------------------------------------

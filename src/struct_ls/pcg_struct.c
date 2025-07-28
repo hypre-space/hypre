@@ -7,6 +7,9 @@
 
 #include "_hypre_struct_ls.h"
 
+/* TODO (VPM): should this file be renamed?
+    These routines are also used by other Krylov methods */
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -181,6 +184,17 @@ hypre_StructKrylovClearVector( void *x )
 {
    return ( hypre_StructVectorSetConstantValues( (hypre_StructVector *) x,
                                                  0.0 ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructKrylovSetRandomValues( void *x,
+                                   HYPRE_Int seed )
+{
+   return ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) x,
+                                               seed ) );
 }
 
 /*--------------------------------------------------------------------------

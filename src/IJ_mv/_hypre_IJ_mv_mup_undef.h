@@ -139,7 +139,6 @@
 #undef hypre_IJVectorSetValuesPar
 #undef hypre_IJVectorZeroValues
 #undef hypre_IJVectorZeroValuesPar
-#undef hypre_PrefixSumInt
 #undef hypre_ijmatrixaddtovalues
 #undef hypre_ijmatrixassemble
 #undef hypre_ijmatrixcreate

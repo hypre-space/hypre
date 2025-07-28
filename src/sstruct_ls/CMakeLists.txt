@@ -17,6 +17,7 @@ set(SRCS
   F90_HYPRE_sstruct_pcg.c
   F90_HYPRE_sstruct_split.c
   F90_HYPRE_sstruct_sys_pfmg.c
+  F90_HYPRE_sstruct_ssamg.c
   HYPRE_sstruct_bicgstab.c
   HYPRE_sstruct_gmres.c
   HYPRE_sstruct_flexgmres.c
@@ -25,6 +26,7 @@ set(SRCS
   HYPRE_sstruct_pcg.c
   HYPRE_sstruct_split.c
   HYPRE_sstruct_sys_pfmg.c
+  HYPRE_sstruct_ssamg.c
   krylov.c
   krylov_sstruct.c
   node_relax.c
@@ -32,10 +34,16 @@ set(SRCS
   sys_pfmg_relax.c
   sys_pfmg_setup.c
   sys_pfmg_setup_interp.c
-  sys_pfmg_setup_rap.c
   sys_pfmg_solve.c
-  sys_semi_interp.c
-  sys_semi_restrict.c
+  ssamg.c
+  ssamg_csolver.c
+  ssamg_interp.c
+  ssamg_relax.c
+  ssamg_setup.c
+  ssamg_setup_rap.c
+  ssamg_solve.c
+  ssamg_stats.c
+  ssamg_uinterp.c
 )
 
 target_sources(${PROJECT_NAME}
@@ -45,7 +53,15 @@ target_sources(${PROJECT_NAME}
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    fac_amr_fcoarsen.c
+    fac_amr_rap.c
+    fac_restrict2.c
+    fac_setup2.c
+    fac_zero_stencilcoef.c
     node_relax.c
+    ssamg_interp.c
+    ssamg_relax.c
+    ssamg_uinterp.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

@@ -31,7 +31,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
 
    HYPRE_Int              j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
 
    RAP_stencil_dim = 2;
 
@@ -39,7 +39,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -59,10 +59,10 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
+             * Storage for 9 entries (c,w,e,n,s,sw,se,nw,se)
              *--------------------------------------------------------------*/
-            hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, 0);
-            stencil_rank++;
+            hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, 0);
+            stencil_entry++;
          }
       }
    }
@@ -88,12 +88,12 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Store 5 elements in (c,w,s,sw,se)
+             * Store 5 entries in (c,w,s,sw,se)
              *--------------------------------------------------------------*/
-            if ( i + j <= 0 )
+            if (i + j <= 0)
             {
-               hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, 0);
-               stencil_rank++;
+               hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, 0);
+               stencil_entry++;
             }
          }
       }
@@ -120,7 +120,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
       RAP_num_ghost[1] = 0;
       RAP_num_ghost[3] = 0;
    }
-   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }

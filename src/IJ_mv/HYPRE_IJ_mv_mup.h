@@ -194,6 +194,15 @@ HYPRE_Int
 HYPRE_IJMatrixNorm( HYPRE_IJMatrix matrix, void *norm );
 
 HYPRE_Int
+HYPRE_IJMatrixPartialClone_flt( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+HYPRE_Int
+HYPRE_IJMatrixPartialClone_dbl( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+HYPRE_Int
+HYPRE_IJMatrixPartialClone_long_dbl( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+HYPRE_Int
+HYPRE_IJMatrixPartialClone( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+
+HYPRE_Int
 HYPRE_IJMatrixPrint_flt( HYPRE_IJMatrix matrix, const char *filename );
 HYPRE_Int
 HYPRE_IJMatrixPrint_dbl( HYPRE_IJMatrix matrix, const char *filename );
@@ -662,6 +671,9 @@ HYPRE_IJMatrixMigrate_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix, HYP
 
 HYPRE_Int
 HYPRE_IJMatrixNorm_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix, void *norm );
+
+HYPRE_Int
+HYPRE_IJMatrixPartialClone_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
 
 HYPRE_Int
 HYPRE_IJMatrixPrint_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix, const char *filename );

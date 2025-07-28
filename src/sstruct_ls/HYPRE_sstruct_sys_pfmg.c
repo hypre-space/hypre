@@ -204,4 +204,3 @@ HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 {
    return ( hypre_SysPFMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
-

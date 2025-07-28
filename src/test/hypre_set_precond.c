@@ -24,7 +24,6 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
     ***********************************************************************/
    if (matrix_id == HYPRE_PARCSR)
    {
-
       /************************************************************************
        *     PCG Solver
        ***********************************************************************/
@@ -173,14 +172,13 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
                                   (HYPRE_Solver) precond);
          }
       }
-
    }
-
 
    /************************************************************************
     * SSTRUCT MATRIX
     ***********************************************************************/
-   if (matrix_id == HYPRE_SSTRUCT)
+
+   else if (matrix_id == HYPRE_SSTRUCT)
    {
 
       /************************************************************************
@@ -281,7 +279,8 @@ HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int 
    /************************************************************************
     * STRUCT MATRIX
     ***********************************************************************/
-   if (matrix_id == HYPRE_STRUCT)
+
+   else if (matrix_id == HYPRE_STRUCT)
    {
 
       /************************************************************************
@@ -555,7 +554,6 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       ierr = HYPRE_ParCSRPilutCreate( hypre_MPI_COMM_WORLD, precond );
    }
 }
-
 
 HYPRE_Int hypre_destroy_precond(HYPRE_Int precond_id, void *precond)
 {

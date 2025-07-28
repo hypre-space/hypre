@@ -466,6 +466,8 @@ HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
 HYPRE_Int HYPRE_IJMatrixMigrate(HYPRE_IJMatrix       matrix,
                                 HYPRE_MemoryLocation memory_location);
 
+HYPRE_Int HYPRE_IJMatrixPartialClone ( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------

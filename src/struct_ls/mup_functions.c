@@ -1087,6 +1087,15 @@ HYPRE_StructPFMGGetLogging( HYPRE_StructSolver solver, HYPRE_Int *logging )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructPFMGGetMatmultType( HYPRE_StructSolver solver, HYPRE_Int *matmult_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructPFMGGetMatmultType_pre( precision, solver, matmult_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructPFMGGetMaxIter( HYPRE_StructSolver solver, HYPRE_Int *max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -1217,6 +1226,15 @@ HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver, HYPRE_Int logging )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructPFMGSetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType( HYPRE_StructSolver solver, HYPRE_Int matmult_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructPFMGSetMatmultType_pre( precision, solver, matmult_type );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -158,6 +158,15 @@ HYPRE_Int
 HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid );
 
 HYPRE_Int
+HYPRE_SStructGridCoarsen_flt( HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid );
+HYPRE_Int
+HYPRE_SStructGridCoarsen_dbl( HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid );
+HYPRE_Int
+HYPRE_SStructGridCoarsen_long_dbl( HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid );
+HYPRE_Int
+HYPRE_SStructGridCoarsen( HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid );
+
+HYPRE_Int
 HYPRE_SStructGridCreate_flt( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid );
 HYPRE_Int
 HYPRE_SStructGridCreate_dbl( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid );
@@ -174,6 +183,33 @@ HYPRE_Int
 HYPRE_SStructGridDestroy_long_dbl( HYPRE_SStructGrid grid );
 HYPRE_Int
 HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid );
+
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox_flt( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper );
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox_dbl( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper );
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox_long_dbl( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper );
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper );
+
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis_flt( HYPRE_SStructGrid grid, const char *meshprefix, hypre_float *trans, hypre_float *origin );
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis_dbl( HYPRE_SStructGrid grid, const char *meshprefix, hypre_double *trans, hypre_double *origin );
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis_long_dbl( HYPRE_SStructGrid grid, const char *meshprefix, hypre_long_double *trans, hypre_long_double *origin );
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis( HYPRE_SStructGrid grid, const char *meshprefix, void *trans, void *origin );
+
+HYPRE_Int
+HYPRE_SStructGridProjectBox_flt( HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_SStructGridProjectBox_dbl( HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_SStructGridProjectBox_long_dbl( HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_SStructGridProjectBox( HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_SStructGridSetExtents_flt( HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper );
@@ -347,6 +383,15 @@ HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixGetGrid_flt( HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid );
+HYPRE_Int
+HYPRE_SStructMatrixGetGrid_dbl( HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid );
+HYPRE_Int
+HYPRE_SStructMatrixGetGrid_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid );
+HYPRE_Int
+HYPRE_SStructMatrixGetGrid( HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid );
+
+HYPRE_Int
 HYPRE_SStructMatrixGetObject_flt( HYPRE_SStructMatrix matrix, void **object );
 HYPRE_Int
 HYPRE_SStructMatrixGetObject_dbl( HYPRE_SStructMatrix matrix, void **object );
@@ -419,6 +464,24 @@ HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues2( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries );
+HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries );
+HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries );
+HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries );
+
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride );
+
+HYPRE_Int
 HYPRE_SStructMatrixSetEarlyAssemble_flt( HYPRE_SStructMatrix matrix, HYPRE_Int early_assemble );
 HYPRE_Int
 HYPRE_SStructMatrixSetEarlyAssemble_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int early_assemble );
@@ -446,6 +509,15 @@ HYPRE_Int
 HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix matrix, HYPRE_Int type );
 
 HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride );
+HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride );
+
+HYPRE_Int
 HYPRE_SStructMatrixSetSymmetric_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric );
 HYPRE_Int
 HYPRE_SStructMatrixSetSymmetric_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric );
@@ -462,6 +534,15 @@ HYPRE_Int
 HYPRE_SStructMatrixSetValues_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_long_double *values );
 HYPRE_Int
 HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
+
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix_flt( HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix );
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix );
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix );
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix );
 
 HYPRE_Int
 HYPRE_SStructStencilCreate_flt( HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil *stencil );
@@ -662,6 +743,15 @@ HYPRE_Int
 HYPRE_SStructVectorPrint( const char *filename, HYPRE_SStructVector vector, HYPRE_Int all );
 
 HYPRE_Int
+HYPRE_SStructVectorPrintGLVis_flt( HYPRE_SStructVector vector, const char *fileprefix );
+HYPRE_Int
+HYPRE_SStructVectorPrintGLVis_dbl( HYPRE_SStructVector vector, const char *fileprefix );
+HYPRE_Int
+HYPRE_SStructVectorPrintGLVis_long_dbl( HYPRE_SStructVector vector, const char *fileprefix );
+HYPRE_Int
+HYPRE_SStructVectorPrintGLVis( HYPRE_SStructVector vector, const char *fileprefix );
+
+HYPRE_Int
 HYPRE_SStructVectorRead_flt( MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr );
 HYPRE_Int
 HYPRE_SStructVectorRead_dbl( MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr );
@@ -714,6 +804,15 @@ HYPRE_Int
 HYPRE_SStructVectorSetObjectType_long_dbl( HYPRE_SStructVector vector, HYPRE_Int type );
 HYPRE_Int
 HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector, HYPRE_Int type );
+
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues_flt( HYPRE_SStructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues_dbl( HYPRE_SStructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues_long_dbl( HYPRE_SStructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues( HYPRE_SStructVector vector, HYPRE_Int seed );
 
 HYPRE_Int
 HYPRE_SStructVectorSetValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, hypre_float *value );
@@ -778,10 +877,22 @@ HYPRE_Int
 HYPRE_SStructGridAssemble_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid );
 
 HYPRE_Int
+HYPRE_SStructGridCoarsen_pre( HYPRE_Precision precision, HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid );
+
+HYPRE_Int
 HYPRE_SStructGridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid );
 
 HYPRE_Int
 HYPRE_SStructGridDestroy_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid );
+
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper );
+
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, const char *meshprefix, void *trans, void *origin );
+
+HYPRE_Int
+HYPRE_SStructGridProjectBox_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_SStructGridSetExtents_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper );
@@ -841,6 +952,9 @@ HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixGetGrid_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid );
+
+HYPRE_Int
 HYPRE_SStructMatrixGetObject_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, void **object );
 
 HYPRE_Int
@@ -865,6 +979,12 @@ HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries );
+
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride );
+
+HYPRE_Int
 HYPRE_SStructMatrixSetEarlyAssemble_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int early_assemble );
 
 HYPRE_Int
@@ -874,10 +994,16 @@ HYPRE_Int
 HYPRE_SStructMatrixSetObjectType_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int type );
 
 HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride );
+
+HYPRE_Int
 HYPRE_SStructMatrixSetSymmetric_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric );
 
 HYPRE_Int
 HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
+
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix );
 
 HYPRE_Int
 HYPRE_SStructStencilCreate_pre( HYPRE_Precision precision, HYPRE_Int ndim, HYPRE_Int size, HYPRE_SStructStencil *stencil );
@@ -946,6 +1072,9 @@ HYPRE_Int
 HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char *filename, HYPRE_SStructVector vector, HYPRE_Int all );
 
 HYPRE_Int
+HYPRE_SStructVectorPrintGLVis_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, const char *fileprefix );
+
+HYPRE_Int
 HYPRE_SStructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr );
 
 HYPRE_Int
@@ -962,6 +1091,9 @@ HYPRE_SStructVectorSetConstantValues_pre( HYPRE_Precision precision, HYPRE_SStru
 
 HYPRE_Int
 HYPRE_SStructVectorSetObjectType_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int type );
+
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int seed );
 
 HYPRE_Int
 HYPRE_SStructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, HYPRE_Int var, void *value );

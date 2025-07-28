@@ -268,6 +268,24 @@ HYPRE_SStructGridAssemble_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructGridCoarsen_pre( HYPRE_Precision precision, HYPRE_SStructGrid fgrid, HYPRE_Index *strides, HYPRE_SStructGrid *cgrid )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructGridCoarsen_flt( fgrid, strides, cgrid );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructGridCoarsen_dbl( fgrid, strides, cgrid );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructGridCoarsen_long_dbl( fgrid, strides, cgrid );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructGridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts, HYPRE_SStructGrid *grid )
 {
    switch (precision)
@@ -296,6 +314,60 @@ HYPRE_SStructGridDestroy_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid 
          return HYPRE_SStructGridDestroy_dbl( grid );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SStructGridDestroy_long_dbl( grid );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int part, HYPRE_Int var, HYPRE_Int *cell_ilower, HYPRE_Int *cell_iupper, HYPRE_Int *var_ilower, HYPRE_Int *var_iupper )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructGridGetVariableBox_flt( grid, part, var, cell_ilower, cell_iupper, var_ilower, var_iupper );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructGridGetVariableBox_dbl( grid, part, var, cell_ilower, cell_iupper, var_ilower, var_iupper );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructGridGetVariableBox_long_dbl( grid, part, var, cell_ilower, cell_iupper, var_ilower, var_iupper );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridPrintGLVis_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, const char *meshprefix, void *trans, void *origin )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructGridPrintGLVis_flt( grid, meshprefix, trans, origin );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructGridPrintGLVis_dbl( grid, meshprefix, trans, origin );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructGridPrintGLVis_long_dbl( grid, meshprefix, trans, origin );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGridProjectBox_pre( HYPRE_Precision precision, HYPRE_SStructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructGridProjectBox_flt( grid, ilower, iupper, origin, stride );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructGridProjectBox_dbl( grid, ilower, iupper, origin, stride );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructGridProjectBox_long_dbl( grid, ilower, iupper, origin, stride );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
@@ -646,6 +718,24 @@ HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixGetGrid_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_SStructGrid *grid )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixGetGrid_flt( matrix, grid );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixGetGrid_dbl( matrix, grid );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixGetGrid_long_dbl( matrix, grid );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixGetObject_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, void **object )
 {
    switch (precision)
@@ -790,6 +880,42 @@ HYPRE_SStructMatrixSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMa
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int nentries, HYPRE_Int *centries )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixSetConstantEntries_flt( matrix, part, var, to_var, nentries, centries );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixSetConstantEntries_dbl( matrix, part, var, to_var, nentries, centries );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixSetConstantEntries_long_dbl( matrix, part, var, to_var, nentries, centries );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *dom_stride )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixSetDomainStride_flt( matrix, part, dom_stride );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixSetDomainStride_dbl( matrix, part, dom_stride );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixSetDomainStride_long_dbl( matrix, part, dom_stride );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixSetEarlyAssemble_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int early_assemble )
 {
    switch (precision)
@@ -844,6 +970,24 @@ HYPRE_SStructMatrixSetObjectType_pre( HYPRE_Precision precision, HYPRE_SStructMa
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ran_stride )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixSetRangeStride_flt( matrix, part, ran_stride );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixSetRangeStride_dbl( matrix, part, ran_stride );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixSetRangeStride_long_dbl( matrix, part, ran_stride );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixSetSymmetric_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric )
 {
    switch (precision)
@@ -872,6 +1016,24 @@ HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix
          return HYPRE_SStructMatrixSetValues_dbl( matrix, part, index, var, nentries, entries, values );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SStructMatrixSetValues_long_dbl( matrix, part, index, var, nentries, entries, values );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixToIJMatrix_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal, HYPRE_IJMatrix *ijmatrix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixToIJMatrix_flt( matrix, fill_diagonal, ijmatrix );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixToIJMatrix_dbl( matrix, fill_diagonal, ijmatrix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixToIJMatrix_long_dbl( matrix, fill_diagonal, ijmatrix );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
@@ -1276,6 +1438,24 @@ HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char *filename, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorPrintGLVis_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, const char *fileprefix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructVectorPrintGLVis_flt( vector, fileprefix );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructVectorPrintGLVis_dbl( vector, fileprefix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructVectorPrintGLVis_long_dbl( vector, fileprefix );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_SStructVector *vector_ptr )
 {
    switch (precision)
@@ -1376,6 +1556,24 @@ HYPRE_SStructVectorSetObjectType_pre( HYPRE_Precision precision, HYPRE_SStructVe
          return HYPRE_SStructVectorSetObjectType_dbl( vector, type );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SStructVectorSetObjectType_long_dbl( vector, type );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int seed )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructVectorSetRandomValues_flt( vector, seed );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructVectorSetRandomValues_dbl( vector, seed );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructVectorSetRandomValues_long_dbl( vector, seed );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }

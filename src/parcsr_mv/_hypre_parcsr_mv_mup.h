@@ -889,11 +889,11 @@ hypre_ParCSRMatrix *
 hypre_ParCSRMatrixRAP_long_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
 
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRAPKT_flt( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose );
+hypre_ParCSRMatrixRAPKT_flt( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRAPKT_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose );
+hypre_ParCSRMatrixRAPKT_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRAPKT_long_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose );
+hypre_ParCSRMatrixRAPKT_long_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
 
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTHost_flt( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose );

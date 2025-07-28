@@ -93,6 +93,7 @@ hypre_MPI_Allreduce
 hypre_MPI_Alltoall
 hypre_MPI_Barrier
 hypre_MPI_Bcast
+hypre_MPI_CheckCommMatrix
 hypre_MPI_Comm_create
 hypre_MPI_Comm_dup
 hypre_MPI_Comm_f2c
@@ -147,11 +148,13 @@ hypre_MemPrefetch
 hypre_Memcpy
 hypre_MemoryPrintUsage
 hypre_Memset
+hypre_PrefixSumInt
 hypre_PrintTiming_fcn
 hypre_Rand
 hypre_RandI
 hypre_ReAlloc
 hypre_ReAlloc_v2
+hypre_RestoreLogLevel
 hypre_SeedRand
 hypre_SetCubMemPoolSize
 hypre_SetDevice
@@ -160,6 +163,7 @@ hypre_SetGaussSeidelMethod
 hypre_SetGpuAwareMPI
 hypre_SetInitialized
 hypre_SetLogLevel
+hypre_SetLogLevelSaved
 hypre_SetSpGemmAlgorithm
 hypre_SetSpGemmBinned
 hypre_SetSpGemmRownnzEstimateMethod
@@ -171,6 +175,7 @@ hypre_SetSpTransUseVendor
 hypre_SetUseGpuRand
 hypre_SetUserDeviceMalloc
 hypre_SetUserDeviceMfree
+hypre_UniqueIntArrayND
 hypre_UnorderedBigIntMapCreate
 hypre_UnorderedBigIntMapDestroy
 hypre_UnorderedBigIntSetCopyToArray
@@ -221,6 +226,7 @@ hypre_qsort3
 hypre_qsort3_abs
 hypre_qsort3i
 hypre_qsort3ir
+hypre_qsortND
 hypre_qsort_abs
 hypre_remove_point
 hypre_setexecutionpolicy

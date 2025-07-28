@@ -61,7 +61,6 @@ hypre_IJVectorSetTagsPar
 hypre_IJVectorSetValuesPar
 hypre_IJVectorZeroValues
 hypre_IJVectorZeroValuesPar
-hypre_PrefixSumInt
 hypre_ijmatrixaddtovalues
 hypre_ijmatrixassemble
 hypre_ijmatrixcreate

@@ -13,7 +13,9 @@ set(SRCS
   box_algebra.c
   box_boundary.c
   box.c
+  box_ds.c
   box_manager.c
+  coarsen.c
   communication_info.c
   computation.c
   F90_HYPRE_struct_grid.c
@@ -28,12 +30,19 @@ set(SRCS
   struct_axpy.c
   struct_communication.c
   struct_copy.c
+  struct_data.c
   struct_grid.c
   struct_innerprod.c
   struct_io.c
   struct_matrix.c
   struct_matrix_mask.c
   struct_matvec.c
+  struct_matvec_core.c
+  struct_matmult.c
+  struct_matmult_core.c
+  struct_matmult_fuse.c
+  struct_matop.c
+  struct_stmatrix.c
   struct_scale.c
   struct_stencil.c
   struct_vector.c
@@ -49,9 +58,15 @@ if (HYPRE_USING_GPU)
     struct_axpy.c
     struct_communication.c
     struct_copy.c
+    struct_data.c
     struct_innerprod.c
+    struct_matmult.c
+    struct_matmult_core.c
+    struct_matmult_fuse.c
+    struct_matop.c
     struct_matrix.c
     struct_matvec.c
+    struct_matvec_core.c
     struct_scale.c
     struct_vector.c
   )

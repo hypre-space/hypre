@@ -73,14 +73,6 @@ hypre_CyclicReductionSetCDir( void *cyc_red_vdata, HYPRE_Int cdir )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CyclicReductionSetMaxLevel( void *cyc_red_vdata, HYPRE_Int max_level )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CyclicReductionSetMaxLevel)( cyc_red_vdata, max_level );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_CyclicReductionSetup( void *cyc_red_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CyclicReductionSetup)( cyc_red_vdata, A, b, x );
@@ -276,110 +268,6 @@ HYPRE_Int
 hypre_HybridSolve( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_HybridSolve)( hybrid_vdata, A, b, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-void *
-hypre_JacobiCreate( MPI_Comm comm )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiCreate)( comm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiDestroy( void *jacobi_vdata )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiDestroy)( jacobi_vdata );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiGetFinalRelativeResidualNorm( void *jacobi_vdata, HYPRE_Real *norm )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiGetFinalRelativeResidualNorm)( jacobi_vdata, norm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiGetMaxIter( void *jacobi_vdata, HYPRE_Int *max_iter )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiGetMaxIter)( jacobi_vdata, max_iter );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiGetNumIterations( void *jacobi_vdata, HYPRE_Int *num_iterations )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiGetNumIterations)( jacobi_vdata, num_iterations );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiGetTol( void *jacobi_vdata, HYPRE_Real *tol )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiGetTol)( jacobi_vdata, tol );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiGetZeroGuess( void *jacobi_vdata, HYPRE_Int *zero_guess )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiGetZeroGuess)( jacobi_vdata, zero_guess );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSetMaxIter( void *jacobi_vdata, HYPRE_Int max_iter )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSetMaxIter)( jacobi_vdata, max_iter );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSetTempVec( void *jacobi_vdata, hypre_StructVector *t )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSetTempVec)( jacobi_vdata, t );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSetTol( void *jacobi_vdata, HYPRE_Real tol )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSetTol)( jacobi_vdata, tol );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSetZeroGuess( void *jacobi_vdata, HYPRE_Int zero_guess )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSetZeroGuess)( jacobi_vdata, zero_guess );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSetup( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSetup)( jacobi_vdata, A, b, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_JacobiSolve( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_JacobiSolve)( jacobi_vdata, A, b, x );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -609,57 +497,33 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_St
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Real *mean, HYPRE_Real *deviation )
+hypre_PFMGCoarsen( hypre_Box *cbox, hypre_Index periodic, HYPRE_Int max_levels, HYPRE_Int dxyz_flag, HYPRE_Real *dxyz, HYPRE_Int **cdir_l_ptr, HYPRE_Int **active_l_ptr, HYPRE_Real **relax_weights_ptr, HYPRE_Int *num_levels )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz)( A, dxyz, mean, deviation );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGCoarsen)( cbox, periodic, max_levels, dxyz_flag, dxyz, cdir_l_ptr, active_l_ptr, relax_weights_ptr, num_levels );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
+hypre_PFMGComputeCxyz( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_CS)( bi, A, cxyz, sqcxyz );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeCxyz)( A, cxyz, sqcxyz );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
+hypre_PFMGComputeDxyz( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Int *dxyz_flag )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_SS19)( bi, A, cxyz, sqcxyz );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz)( A, dxyz, dxyz_flag );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
+hypre_PFMGComputeMaxLevels( hypre_StructGrid *grid, HYPRE_Int *max_levels_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_SS27)( bi, A, cxyz, sqcxyz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_SS5)( bi, A, cxyz, sqcxyz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_SS7)( bi, A, cxyz, sqcxyz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz_SS9)( bi, A, cxyz, sqcxyz );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeMaxLevels)( grid, max_levels_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -689,9 +553,9 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_S
 /*--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_PFMGCreateInterpOp( hypre_StructMatrix *A, hypre_StructGrid *cgrid, HYPRE_Int cdir, HYPRE_Int rap_type )
+hypre_PFMGCreateInterpOp( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index stride, HYPRE_Int rap_type )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGCreateInterpOp)( A, cgrid, cdir, rap_type );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGCreateInterpOp)( A, cdir, stride, rap_type );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -737,6 +601,14 @@ hypre_PFMGGetLogging( void *pfmg_vdata, HYPRE_Int *logging )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_PFMGGetMatmultType( void *pfmg_vdata, HYPRE_Int *matmult_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGGetMatmultType)( pfmg_vdata, matmult_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_PFMGGetMaxIter( void *pfmg_vdata, HYPRE_Int *max_iter )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGGetMaxIter)( pfmg_vdata, max_iter );
@@ -772,6 +644,14 @@ HYPRE_Int
 hypre_PFMGGetNumPreRelax( void *pfmg_vdata, HYPRE_Int *num_pre_relax )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGGetNumPreRelax)( pfmg_vdata, num_pre_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGGetPrintFreq( void *pfmg_vdata, HYPRE_Int *print_freq )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGGetPrintFreq)( pfmg_vdata, print_freq );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -833,9 +713,9 @@ hypre_PFMGGetZeroGuess( void *pfmg_vdata, HYPRE_Int *zero_guess )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGPrintLogging( void *pfmg_vdata, HYPRE_Int myid )
+hypre_PFMGPrintLogging( void *pfmg_vdata )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGPrintLogging)( pfmg_vdata, myid );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGPrintLogging)( pfmg_vdata );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -961,6 +841,14 @@ hypre_PFMGSetLogging( void *pfmg_vdata, HYPRE_Int logging )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_PFMGSetMatmultType( void *pfmg_vdata, HYPRE_Int matmult_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetMatmultType)( pfmg_vdata, matmult_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_PFMGSetMaxIter( void *pfmg_vdata, HYPRE_Int max_iter )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetMaxIter)( pfmg_vdata, max_iter );
@@ -988,6 +876,14 @@ HYPRE_Int
 hypre_PFMGSetNumPreRelax( void *pfmg_vdata, HYPRE_Int num_pre_relax )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetNumPreRelax)( pfmg_vdata, num_pre_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGSetPrintFreq( void *pfmg_vdata, HYPRE_Int print_freq )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetPrintFreq)( pfmg_vdata, print_freq );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1057,73 +953,25 @@ hypre_PFMGSetup( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_StructMatrix *P, HYPRE_Int rap_type )
+hypre_PFMGSetupInterpOp( hypre_StructMatrix *P, hypre_StructMatrix *A, HYPRE_Int cdir )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp)( A, cdir, findex, stride, P, rap_type );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp)( P, A, cdir );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS15( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
+hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix *P, hypre_StructMatrix *A, HYPRE_Int cdir, HYPRE_Complex *Pconst0_ptr, HYPRE_Complex *Pconst1_ptr, HYPRE_Complex *Pconst2_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS15)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_core_CC)( P, A, cdir, Pconst0_ptr, Pconst1_ptr, Pconst2_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS19( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
+hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P, hypre_StructMatrix *A, HYPRE_Int cdir, HYPRE_Complex Pconst0, HYPRE_Complex Pconst1, HYPRE_Complex Pconst2 )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS19)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS27( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS27)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS5( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS5)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS7( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS7)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS9( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, hypre_Index *P_stencil_shape )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC0_SS9)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC1( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC1)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC2( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox, HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc, hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0, HYPRE_Real *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_CC2)( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size, P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSetupInterpOp_core_VC)( P, A, cdir, Pconst0, Pconst1, Pconst2 );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1140,158 +988,6 @@ HYPRE_Int
 hypre_PFMGSolve( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGSolve)( pfmg_vdata, A, b, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelax( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelax)( relax_vdata, A, b, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-void *
-hypre_PointRelaxCreate( MPI_Comm comm )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxCreate)( comm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxDestroy( void *relax_vdata )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxDestroy)( relax_vdata );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxGetFinalRelativeResidualNorm( void *relax_vdata, HYPRE_Real *norm )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxGetFinalRelativeResidualNorm)( relax_vdata, norm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxGetMaxIter( void *relax_vdata, HYPRE_Int *max_iter )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxGetMaxIter)( relax_vdata, max_iter );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxGetNumIterations( void *relax_vdata, HYPRE_Int *num_iterations )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxGetNumIterations)( relax_vdata, num_iterations );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxGetTol( void *relax_vdata, HYPRE_Real *tol )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxGetTol)( relax_vdata, tol );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxGetZeroGuess( void *relax_vdata, HYPRE_Int *zero_guess )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxGetZeroGuess)( relax_vdata, zero_guess );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetMaxIter( void *relax_vdata, HYPRE_Int max_iter )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetMaxIter)( relax_vdata, max_iter );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetNumPointsets( void *relax_vdata, HYPRE_Int num_pointsets )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetNumPointsets)( relax_vdata, num_pointsets );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetPointset( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_size, hypre_Index pointset_stride, hypre_Index *pointset_indices )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetPointset)( relax_vdata, pointset, pointset_size, pointset_stride, pointset_indices );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetPointsetRank( void *relax_vdata, HYPRE_Int pointset, HYPRE_Int pointset_rank )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetPointsetRank)( relax_vdata, pointset, pointset_rank );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetTempVec( void *relax_vdata, hypre_StructVector *t )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetTempVec)( relax_vdata, t );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetTol( void *relax_vdata, HYPRE_Real tol )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetTol)( relax_vdata, tol );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetWeight( void *relax_vdata, HYPRE_Real weight )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetWeight)( relax_vdata, weight );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetZeroGuess( void *relax_vdata, HYPRE_Int zero_guess )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetZeroGuess)( relax_vdata, zero_guess );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelaxSetup( void *relax_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelaxSetup)( relax_vdata, A, b, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelax_core0( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, HYPRE_Real *bp, HYPRE_Real *xp, HYPRE_Real *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelax_core0)( relax_vdata, A, constant_coefficient, compute_box, bp, xp, tp, boxarray_id, A_data_box, b_data_box, x_data_box, t_data_box, stride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PointRelax_core12( void *relax_vdata, hypre_StructMatrix *A, HYPRE_Int constant_coefficient, hypre_Box *compute_box, HYPRE_Real *bp, HYPRE_Real *xp, HYPRE_Real *tp, HYPRE_Int boxarray_id, hypre_Box *A_data_box, hypre_Box *b_data_box, hypre_Box *x_data_box, hypre_Box *t_data_box, hypre_IndexRef stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_PointRelax_core12)( relax_vdata, A, constant_coefficient, compute_box, bp, xp, tp, boxarray_id, A_data_box, b_data_box, x_data_box, t_data_box, stride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1593,9 +1289,9 @@ hypre_SMGGetZeroGuess( void *smg_vdata, HYPRE_Int *zero_guess )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SMGPrintLogging( void *smg_vdata, HYPRE_Int myid )
+hypre_SMGPrintLogging( void *smg_vdata )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SMGPrintLogging)( smg_vdata, myid );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SMGPrintLogging)( smg_vdata );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1881,6 +1577,14 @@ hypre_SMGSetMaxIter( void *smg_vdata, HYPRE_Int max_iter )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SMGSetMaxLevel( void *smg_vdata, HYPRE_Int max_level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SMGSetMaxLevel)( smg_vdata, max_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SMGSetMemoryUse( void *smg_vdata, HYPRE_Int memory_use )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SMGSetMemoryUse)( smg_vdata, memory_use );
@@ -2065,25 +1769,121 @@ hypre_SemiRestrictSetup( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructCoarsen( hypre_StructGrid *fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructCoarsen)( fgrid, index, stride, prune, cgrid_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructDiagScale( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructDiagScale)( A, y, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructInterpAssemble( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructInterpAssemble)( A, P, P_stored_as_transpose, cdir, index, stride );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void *
+hypre_StructJacobiCreate( MPI_Comm comm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiCreate)( comm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiDestroy( void *jacobi_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiDestroy)( jacobi_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiGetFinalRelativeResidualNorm( void *jacobi_vdata, HYPRE_Real *norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiGetFinalRelativeResidualNorm)( jacobi_vdata, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiGetMaxIter( void *jacobi_vdata, HYPRE_Int *max_iter )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiGetMaxIter)( jacobi_vdata, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiGetNumIterations( void *jacobi_vdata, HYPRE_Int *num_iterations )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiGetNumIterations)( jacobi_vdata, num_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiGetTol( void *jacobi_vdata, HYPRE_Real *tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiGetTol)( jacobi_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiGetZeroGuess( void *jacobi_vdata, HYPRE_Int *zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiGetZeroGuess)( jacobi_vdata, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetMaxIter( void *jacobi_vdata, HYPRE_Int max_iter )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetMaxIter)( jacobi_vdata, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetTempVec( void *jacobi_vdata, hypre_StructVector *t )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetTempVec)( jacobi_vdata, t );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetTol( void *jacobi_vdata, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetTol)( jacobi_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetWeight( void *jacobi_vdata, HYPRE_Real weight )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetWeight)( jacobi_vdata, weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetZeroGuess( void *jacobi_vdata, HYPRE_Int zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetZeroGuess)( jacobi_vdata, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSetup( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSetup)( jacobi_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructJacobiSolve( void *jacobi_vdata, hypre_StructMatrix *A, hypre_StructVector *b, hypre_StructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructJacobiSolve)( jacobi_vdata, A, b, x );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2225,65 +2025,9 @@ hypre_StructKrylovScaleVector( HYPRE_Complex alpha, void *x )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMapCoarseToFine( hypre_Index cindex, hypre_Index index, hypre_Index stride, hypre_Index findex )
+hypre_StructKrylovSetRandomValues( void *x, HYPRE_Int seed )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMapCoarseToFine)( cindex, index, stride, findex );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMapFineToCoarse( hypre_Index findex, hypre_Index index, hypre_Index stride, hypre_Index cindex )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMapFineToCoarse)( findex, index, stride, cindex );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructSMGSetMaxLevel( void *smg_vdata, HYPRE_Int max_level )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructSMGSetMaxLevel)( smg_vdata, max_level );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructSetRandomValues( void* v, HYPRE_Int seed )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructSetRandomValues)( v, seed );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorSetRandomValues( hypre_StructVector *vector, HYPRE_Int seed )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorSetRandomValues)( vector, seed );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ZeroDiagonal( hypre_StructMatrix *A )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ZeroDiagonal)( A );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_relax_copy)( relax_vdata, pointset, t, x );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset, hypre_StructVector *t, hypre_StructVector *x )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_relax_wtx)( relax_vdata, pointset, t, x );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructKrylovSetRandomValues)( x, seed );
 }
 
 

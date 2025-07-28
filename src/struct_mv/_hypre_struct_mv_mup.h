@@ -91,6 +91,13 @@ HYPRE_Int
 hypre_AppendBoxArray_long_dbl( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
 
 hypre_BoxArrayArray *
+hypre_BoxArrayArrayClone_flt( hypre_BoxArrayArray *box_array_array );
+hypre_BoxArrayArray *
+hypre_BoxArrayArrayClone_dbl( hypre_BoxArrayArray *box_array_array );
+hypre_BoxArrayArray *
+hypre_BoxArrayArrayClone_long_dbl( hypre_BoxArrayArray *box_array_array );
+
+hypre_BoxArrayArray *
 hypre_BoxArrayArrayCreate_flt( HYPRE_Int size, HYPRE_Int ndim );
 hypre_BoxArrayArray *
 hypre_BoxArrayArrayCreate_dbl( HYPRE_Int size, HYPRE_Int ndim );
@@ -104,12 +111,26 @@ hypre_BoxArrayArrayDestroy_dbl( hypre_BoxArrayArray *box_array_array );
 HYPRE_Int
 hypre_BoxArrayArrayDestroy_long_dbl( hypre_BoxArrayArray *box_array_array );
 
-hypre_BoxArrayArray *
-hypre_BoxArrayArrayDuplicate_flt( hypre_BoxArrayArray *box_array_array );
-hypre_BoxArrayArray *
-hypre_BoxArrayArrayDuplicate_dbl( hypre_BoxArrayArray *box_array_array );
-hypre_BoxArrayArray *
-hypre_BoxArrayArrayDuplicate_long_dbl( hypre_BoxArrayArray *box_array_array );
+HYPRE_Int
+hypre_BoxArrayArrayPrint_flt( MPI_Comm comm, const char *filename, hypre_BoxArrayArray *box_array_array );
+HYPRE_Int
+hypre_BoxArrayArrayPrint_dbl( MPI_Comm comm, const char *filename, hypre_BoxArrayArray *box_array_array );
+HYPRE_Int
+hypre_BoxArrayArrayPrint_long_dbl( MPI_Comm comm, const char *filename, hypre_BoxArrayArray *box_array_array );
+
+HYPRE_Int
+hypre_BoxArrayArrayPrintToFile_flt( FILE *file, hypre_BoxArrayArray *box_array_array );
+HYPRE_Int
+hypre_BoxArrayArrayPrintToFile_dbl( FILE *file, hypre_BoxArrayArray *box_array_array );
+HYPRE_Int
+hypre_BoxArrayArrayPrintToFile_long_dbl( FILE *file, hypre_BoxArrayArray *box_array_array );
+
+hypre_BoxArray *
+hypre_BoxArrayClone_flt( hypre_BoxArray *box_array );
+hypre_BoxArray *
+hypre_BoxArrayClone_dbl( hypre_BoxArray *box_array );
+hypre_BoxArray *
+hypre_BoxArrayClone_long_dbl( hypre_BoxArray *box_array );
 
 hypre_BoxArray *
 hypre_BoxArrayCreate_flt( HYPRE_Int size, HYPRE_Int ndim );
@@ -119,18 +140,46 @@ hypre_BoxArray *
 hypre_BoxArrayCreate_long_dbl( HYPRE_Int size, HYPRE_Int ndim );
 
 HYPRE_Int
+hypre_BoxArrayCreateFromIndices_flt( HYPRE_Int ndim, HYPRE_Int num_indices_in, HYPRE_Int **indices_in, hypre_float threshold, hypre_BoxArray **box_array_ptr );
+HYPRE_Int
+hypre_BoxArrayCreateFromIndices_dbl( HYPRE_Int ndim, HYPRE_Int num_indices_in, HYPRE_Int **indices_in, hypre_double threshold, hypre_BoxArray **box_array_ptr );
+HYPRE_Int
+hypre_BoxArrayCreateFromIndices_long_dbl( HYPRE_Int ndim, HYPRE_Int num_indices_in, HYPRE_Int **indices_in, hypre_long_double threshold, hypre_BoxArray **box_array_ptr );
+
+HYPRE_Int
 hypre_BoxArrayDestroy_flt( hypre_BoxArray *box_array );
 HYPRE_Int
 hypre_BoxArrayDestroy_dbl( hypre_BoxArray *box_array );
 HYPRE_Int
 hypre_BoxArrayDestroy_long_dbl( hypre_BoxArray *box_array );
 
-hypre_BoxArray *
-hypre_BoxArrayDuplicate_flt( hypre_BoxArray *box_array );
-hypre_BoxArray *
-hypre_BoxArrayDuplicate_dbl( hypre_BoxArray *box_array );
-hypre_BoxArray *
-hypre_BoxArrayDuplicate_long_dbl( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayInBoxArray_flt( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+HYPRE_Int
+hypre_BoxArrayInBoxArray_dbl( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+HYPRE_Int
+hypre_BoxArrayInBoxArray_long_dbl( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+
+HYPRE_Int
+hypre_BoxArrayPrint_flt( MPI_Comm comm, const char *filename, hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayPrint_dbl( MPI_Comm comm, const char *filename, hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayPrint_long_dbl( MPI_Comm comm, const char *filename, hypre_BoxArray *box_array );
+
+HYPRE_Int
+hypre_BoxArrayPrintToFile_flt( FILE *file, hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayPrintToFile_dbl( FILE *file, hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayPrintToFile_long_dbl( FILE *file, hypre_BoxArray *box_array );
+
+HYPRE_Int
+hypre_BoxArrayReadFromFile_flt( FILE *file, hypre_BoxArray **box_array_ptr );
+HYPRE_Int
+hypre_BoxArrayReadFromFile_dbl( FILE *file, hypre_BoxArray **box_array_ptr );
+HYPRE_Int
+hypre_BoxArrayReadFromFile_long_dbl( FILE *file, hypre_BoxArray **box_array_ptr );
 
 HYPRE_Int
 hypre_BoxArraySetSize_flt( hypre_BoxArray *box_array, HYPRE_Int size );
@@ -138,6 +187,139 @@ HYPRE_Int
 hypre_BoxArraySetSize_dbl( hypre_BoxArray *box_array, HYPRE_Int size );
 HYPRE_Int
 hypre_BoxArraySetSize_long_dbl( hypre_BoxArray *box_array, HYPRE_Int size );
+
+HYPRE_Int
+hypre_BoxArrayVolume_flt( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayVolume_dbl( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayVolume_long_dbl( hypre_BoxArray *box_array );
+
+HYPRE_Int
+hypre_BoxArraysEqual_flt( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+HYPRE_Int
+hypre_BoxArraysEqual_dbl( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+HYPRE_Int
+hypre_BoxArraysEqual_long_dbl( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
+
+HYPRE_Int
+hypre_BoxBTNodeCreate_flt( HYPRE_Int ndim, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTNodeCreate_dbl( HYPRE_Int ndim, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTNodeCreate_long_dbl( HYPRE_Int ndim, hypre_BoxBTNode **btnode_ptr );
+
+HYPRE_Int
+hypre_BoxBTNodeDestroy_flt( hypre_BoxBTNode *btnode );
+HYPRE_Int
+hypre_BoxBTNodeDestroy_dbl( hypre_BoxBTNode *btnode );
+HYPRE_Int
+hypre_BoxBTNodeDestroy_long_dbl( hypre_BoxBTNode *btnode );
+
+HYPRE_Int
+hypre_BoxBTNodeInitialize_flt( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
+HYPRE_Int
+hypre_BoxBTNodeInitialize_dbl( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
+HYPRE_Int
+hypre_BoxBTNodeInitialize_long_dbl( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
+
+HYPRE_Int
+hypre_BoxBTNodeSetIndices_flt( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices );
+HYPRE_Int
+hypre_BoxBTNodeSetIndices_dbl( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices );
+HYPRE_Int
+hypre_BoxBTNodeSetIndices_long_dbl( hypre_BoxBTNode *btnode, HYPRE_Int num_indices, HYPRE_Int **indices );
+
+HYPRE_Int
+hypre_BoxBTQueueCreate_flt( hypre_BoxBTQueue **btqueue_ptr );
+HYPRE_Int
+hypre_BoxBTQueueCreate_dbl( hypre_BoxBTQueue **btqueue_ptr );
+HYPRE_Int
+hypre_BoxBTQueueCreate_long_dbl( hypre_BoxBTQueue **btqueue_ptr );
+
+HYPRE_Int
+hypre_BoxBTQueueDelete_flt( hypre_BoxBTQueue *btqueue, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTQueueDelete_dbl( hypre_BoxBTQueue *btqueue, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTQueueDelete_long_dbl( hypre_BoxBTQueue *btqueue, hypre_BoxBTNode **btnode_ptr );
+
+HYPRE_Int
+hypre_BoxBTQueueDestroy_flt( hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueDestroy_dbl( hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueDestroy_long_dbl( hypre_BoxBTQueue *btqueue );
+
+HYPRE_Int
+hypre_BoxBTQueueInitialize_flt( HYPRE_Int capacity, hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueInitialize_dbl( HYPRE_Int capacity, hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueInitialize_long_dbl( HYPRE_Int capacity, hypre_BoxBTQueue *btqueue );
+
+HYPRE_Int
+hypre_BoxBTQueueInsert_flt( hypre_BoxBTNode *btnode, hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueInsert_dbl( hypre_BoxBTNode *btnode, hypre_BoxBTQueue *btqueue );
+HYPRE_Int
+hypre_BoxBTQueueInsert_long_dbl( hypre_BoxBTNode *btnode, hypre_BoxBTQueue *btqueue );
+
+HYPRE_Int
+hypre_BoxBTStackCreate_flt( hypre_BoxBTStack **btstack_ptr );
+HYPRE_Int
+hypre_BoxBTStackCreate_dbl( hypre_BoxBTStack **btstack_ptr );
+HYPRE_Int
+hypre_BoxBTStackCreate_long_dbl( hypre_BoxBTStack **btstack_ptr );
+
+HYPRE_Int
+hypre_BoxBTStackDelete_flt( hypre_BoxBTStack *btstack, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTStackDelete_dbl( hypre_BoxBTStack *btstack, hypre_BoxBTNode **btnode_ptr );
+HYPRE_Int
+hypre_BoxBTStackDelete_long_dbl( hypre_BoxBTStack *btstack, hypre_BoxBTNode **btnode_ptr );
+
+HYPRE_Int
+hypre_BoxBTStackDestroy_flt( hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackDestroy_dbl( hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackDestroy_long_dbl( hypre_BoxBTStack *btstack );
+
+HYPRE_Int
+hypre_BoxBTStackInitialize_flt( HYPRE_Int capacity, hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackInitialize_dbl( HYPRE_Int capacity, hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackInitialize_long_dbl( HYPRE_Int capacity, hypre_BoxBTStack *btstack );
+
+HYPRE_Int
+hypre_BoxBTStackInsert_flt( hypre_BoxBTNode *btnode, hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackInsert_dbl( hypre_BoxBTNode *btnode, hypre_BoxBTStack *btstack );
+HYPRE_Int
+hypre_BoxBTStackInsert_long_dbl( hypre_BoxBTNode *btnode, hypre_BoxBTStack *btstack );
+
+HYPRE_Int
+hypre_BoxBinTreeCreate_flt( HYPRE_Int ndim, hypre_BoxBinTree **boxbt_ptr );
+HYPRE_Int
+hypre_BoxBinTreeCreate_dbl( HYPRE_Int ndim, hypre_BoxBinTree **boxbt_ptr );
+HYPRE_Int
+hypre_BoxBinTreeCreate_long_dbl( HYPRE_Int ndim, hypre_BoxBinTree **boxbt_ptr );
+
+HYPRE_Int
+hypre_BoxBinTreeDestroy_flt( hypre_BoxBinTree *boxbt );
+HYPRE_Int
+hypre_BoxBinTreeDestroy_dbl( hypre_BoxBinTree *boxbt );
+HYPRE_Int
+hypre_BoxBinTreeDestroy_long_dbl( hypre_BoxBinTree *boxbt );
+
+HYPRE_Int
+hypre_BoxBinTreeInitialize_flt( hypre_BoxBinTree *boxbt, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
+HYPRE_Int
+hypre_BoxBinTreeInitialize_dbl( hypre_BoxBinTree *boxbt, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
+HYPRE_Int
+hypre_BoxBinTreeInitialize_long_dbl( hypre_BoxBinTree *boxbt, HYPRE_Int num_indices, HYPRE_Int **indices, hypre_Box *box );
 
 HYPRE_Int
 hypre_BoxBoundaryDG_flt( hypre_Box *box, hypre_StructGrid *g, hypre_BoxArray *boundarym, hypre_BoxArray *boundaryp, HYPRE_Int d );
@@ -161,6 +343,13 @@ HYPRE_Int
 hypre_BoxBoundaryIntersect_long_dbl( hypre_Box *box, hypre_StructGrid *grid, HYPRE_Int d, HYPRE_Int dir, hypre_BoxArray *boundary );
 
 hypre_Box *
+hypre_BoxClone_flt( hypre_Box *box );
+hypre_Box *
+hypre_BoxClone_dbl( hypre_Box *box );
+hypre_Box *
+hypre_BoxClone_long_dbl( hypre_Box *box );
+
+hypre_Box *
 hypre_BoxCreate_flt( HYPRE_Int ndim );
 hypre_Box *
 hypre_BoxCreate_dbl( HYPRE_Int ndim );
@@ -173,13 +362,6 @@ HYPRE_Int
 hypre_BoxDestroy_dbl( hypre_Box *box );
 HYPRE_Int
 hypre_BoxDestroy_long_dbl( hypre_Box *box );
-
-hypre_Box *
-hypre_BoxDuplicate_flt( hypre_Box *box );
-hypre_Box *
-hypre_BoxDuplicate_dbl( hypre_Box *box );
-hypre_Box *
-hypre_BoxDuplicate_long_dbl( hypre_Box *box );
 
 HYPRE_Int
 hypre_BoxGetSize_flt( hypre_Box *box, hypre_Index size );
@@ -210,6 +392,13 @@ HYPRE_Int
 hypre_BoxGrowByArray_long_dbl( hypre_Box *box, HYPRE_Int *array );
 
 HYPRE_Int
+hypre_BoxGrowByBox_flt( hypre_Box *box, hypre_Box *gbox );
+HYPRE_Int
+hypre_BoxGrowByBox_dbl( hypre_Box *box, hypre_Box *gbox );
+HYPRE_Int
+hypre_BoxGrowByBox_long_dbl( hypre_Box *box, hypre_Box *gbox );
+
+HYPRE_Int
 hypre_BoxGrowByIndex_flt( hypre_Box *box, hypre_Index index );
 HYPRE_Int
 hypre_BoxGrowByIndex_dbl( hypre_Box *box, hypre_Index index );
@@ -222,6 +411,13 @@ HYPRE_Int
 hypre_BoxGrowByValue_dbl( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int
 hypre_BoxGrowByValue_long_dbl( hypre_Box *box, HYPRE_Int val );
+
+HYPRE_Int
+hypre_BoxInBox_flt( hypre_Box *box1, hypre_Box *box2 );
+HYPRE_Int
+hypre_BoxInBox_dbl( hypre_Box *box1, hypre_Box *box2 );
+HYPRE_Int
+hypre_BoxInBox_long_dbl( hypre_Box *box1, hypre_Box *box2 );
 
 HYPRE_Int
 hypre_BoxIndexRank_flt( hypre_Box *box, hypre_Index index );
@@ -292,6 +488,13 @@ HYPRE_Int
 hypre_BoxManEntryGetInfo_dbl( hypre_BoxManEntry *entry, void **info_ptr );
 HYPRE_Int
 hypre_BoxManEntryGetInfo_long_dbl( hypre_BoxManEntry *entry, void **info_ptr );
+
+HYPRE_Int
+hypre_BoxManEntryGetStride_flt( hypre_BoxManEntry *entry, hypre_Index stride );
+HYPRE_Int
+hypre_BoxManEntryGetStride_dbl( hypre_BoxManEntry *entry, hypre_Index stride );
+HYPRE_Int
+hypre_BoxManEntryGetStride_long_dbl( hypre_BoxManEntry *entry, hypre_Index stride );
 
 HYPRE_Int
 hypre_BoxManGatherEntries_flt( hypre_BoxManager *manager, hypre_Index imin, hypre_Index imax );
@@ -413,6 +616,20 @@ HYPRE_Int
 hypre_BoxManSetNumGhost_long_dbl( hypre_BoxManager *manager, HYPRE_Int *num_ghost );
 
 HYPRE_Int
+hypre_BoxMaxSize_flt( hypre_Box *box );
+HYPRE_Int
+hypre_BoxMaxSize_dbl( hypre_Box *box );
+HYPRE_Int
+hypre_BoxMaxSize_long_dbl( hypre_Box *box );
+
+HYPRE_Int
+hypre_BoxNnodes_flt( hypre_Box *box );
+HYPRE_Int
+hypre_BoxNnodes_dbl( hypre_Box *box );
+HYPRE_Int
+hypre_BoxNnodes_long_dbl( hypre_Box *box );
+
+HYPRE_Int
 hypre_BoxOffsetDistance_flt( hypre_Box *box, hypre_Index index );
 HYPRE_Int
 hypre_BoxOffsetDistance_dbl( hypre_Box *box, hypre_Index index );
@@ -420,11 +637,25 @@ HYPRE_Int
 hypre_BoxOffsetDistance_long_dbl( hypre_Box *box, hypre_Index index );
 
 HYPRE_Int
+hypre_BoxPartialVolume_flt( hypre_Box *box, hypre_Index partial_volume );
+HYPRE_Int
+hypre_BoxPartialVolume_dbl( hypre_Box *box, hypre_Index partial_volume );
+HYPRE_Int
+hypre_BoxPartialVolume_long_dbl( hypre_Box *box, hypre_Index partial_volume );
+
+HYPRE_Int
 hypre_BoxPrint_flt( FILE *file, hypre_Box *box );
 HYPRE_Int
 hypre_BoxPrint_dbl( FILE *file, hypre_Box *box );
 HYPRE_Int
 hypre_BoxPrint_long_dbl( FILE *file, hypre_Box *box );
+
+HYPRE_Int
+hypre_BoxPrintDebug_flt( const char *prefix, hypre_Box *box );
+HYPRE_Int
+hypre_BoxPrintDebug_dbl( const char *prefix, hypre_Box *box );
+HYPRE_Int
+hypre_BoxPrintDebug_long_dbl( const char *prefix, hypre_Box *box );
 
 HYPRE_Int
 hypre_BoxRankIndex_flt( hypre_Box *box, HYPRE_Int rank, hypre_Index index );
@@ -462,11 +693,95 @@ HYPRE_Int
 hypre_BoxShiftPos_long_dbl( hypre_Box *box, hypre_Index shift );
 
 HYPRE_Int
+hypre_BoxSplit_flt( hypre_Box *box, hypre_Index index, hypre_Box **lbox_ptr, hypre_Box **rbox_ptr );
+HYPRE_Int
+hypre_BoxSplit_dbl( hypre_Box *box, hypre_Index index, hypre_Box **lbox_ptr, hypre_Box **rbox_ptr );
+HYPRE_Int
+hypre_BoxSplit_long_dbl( hypre_Box *box, hypre_Index index, hypre_Box **lbox_ptr, hypre_Box **rbox_ptr );
+
+HYPRE_Int
+hypre_BoxStrideVolume_flt( hypre_Box *box, hypre_Index stride );
+HYPRE_Int
+hypre_BoxStrideVolume_dbl( hypre_Box *box, hypre_Index stride );
+HYPRE_Int
+hypre_BoxStrideVolume_long_dbl( hypre_Box *box, hypre_Index stride );
+
+HYPRE_Int
 hypre_BoxVolume_flt( hypre_Box *box );
 HYPRE_Int
 hypre_BoxVolume_dbl( hypre_Box *box );
 HYPRE_Int
 hypre_BoxVolume_long_dbl( hypre_Box *box );
+
+HYPRE_Int
+hypre_CoarsenBox_flt( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBox_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBox_long_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
+
+HYPRE_Int
+hypre_CoarsenBoxArray_flt( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBoxArray_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBoxArray_long_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
+
+HYPRE_Int
+hypre_CoarsenBoxArrayArray_flt( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBoxArrayArray_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenBoxArrayArray_long_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
+
+HYPRE_Int
+hypre_CoarsenBoxArrayArrayOutward_flt( hypre_BoxArrayArray *boxaa, hypre_BoxArray *refboxa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int
+hypre_CoarsenBoxArrayArrayOutward_dbl( hypre_BoxArrayArray *boxaa, hypre_BoxArray *refboxa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int
+hypre_CoarsenBoxArrayArrayOutward_long_dbl( hypre_BoxArrayArray *boxaa, hypre_BoxArray *refboxa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
+
+HYPRE_Int
+hypre_CommBlockSetEntries_flt( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+HYPRE_Int
+hypre_CommBlockSetEntries_dbl( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+HYPRE_Int
+hypre_CommBlockSetEntries_long_dbl( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+
+HYPRE_Int
+hypre_CommBlockSetEntry_flt( hypre_CommBlock *comm_block, HYPRE_Int comm_num, hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, HYPRE_Int *rem_order, hypre_Box *data_box, HYPRE_Int data_box_offset );
+HYPRE_Int
+hypre_CommBlockSetEntry_dbl( hypre_CommBlock *comm_block, HYPRE_Int comm_num, hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, HYPRE_Int *rem_order, hypre_Box *data_box, HYPRE_Int data_box_offset );
+HYPRE_Int
+hypre_CommBlockSetEntry_long_dbl( hypre_CommBlock *comm_block, HYPRE_Int comm_num, hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, HYPRE_Int *rem_order, hypre_Box *data_box, HYPRE_Int data_box_offset );
+
+HYPRE_Int
+hypre_CommInfoClone_flt( hypre_CommInfo *comm_info, hypre_CommInfo **clone_ptr );
+HYPRE_Int
+hypre_CommInfoClone_dbl( hypre_CommInfo *comm_info, hypre_CommInfo **clone_ptr );
+HYPRE_Int
+hypre_CommInfoClone_long_dbl( hypre_CommInfo *comm_info, hypre_CommInfo **clone_ptr );
+
+HYPRE_Int
+hypre_CommInfoCoarsen_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsen_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsen_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
+hypre_CommInfoCoarsenRecv_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsenRecv_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsenRecv_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
+hypre_CommInfoCoarsenSend_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsenSend_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoCoarsenSend_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
 
 HYPRE_Int
 hypre_CommInfoCreate_flt( hypre_BoxArrayArray *send_boxes, hypre_BoxArrayArray *recv_boxes, HYPRE_Int **send_procs, HYPRE_Int **recv_procs, HYPRE_Int **send_rboxnums, HYPRE_Int **recv_rboxnums, hypre_BoxArrayArray *send_rboxes, hypre_BoxArrayArray *recv_rboxes, HYPRE_Int boxes_match, hypre_CommInfo **comm_info_ptr );
@@ -504,6 +819,27 @@ HYPRE_Int
 hypre_CommInfoProjectSend_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
 
 HYPRE_Int
+hypre_CommInfoRefine_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefine_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefine_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
+hypre_CommInfoRefineRecv_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefineRecv_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefineRecv_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
+hypre_CommInfoRefineSend_flt( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefineSend_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+HYPRE_Int
+hypre_CommInfoRefineSend_long_dbl( hypre_CommInfo *comm_info, hypre_Index index, hypre_Index stride );
+
+HYPRE_Int
 hypre_CommInfoSetTransforms_flt( hypre_CommInfo *comm_info, HYPRE_Int num_transforms, hypre_Index *coords, hypre_Index *dirs, HYPRE_Int **send_transforms, HYPRE_Int **recv_transforms );
 HYPRE_Int
 hypre_CommInfoSetTransforms_dbl( hypre_CommInfo *comm_info, HYPRE_Int num_transforms, hypre_Index *coords, hypre_Index *dirs, HYPRE_Int **send_transforms, HYPRE_Int **recv_transforms );
@@ -511,11 +847,32 @@ HYPRE_Int
 hypre_CommInfoSetTransforms_long_dbl( hypre_CommInfo *comm_info, HYPRE_Int num_transforms, hypre_Index *coords, hypre_Index *dirs, HYPRE_Int **send_transforms, HYPRE_Int **recv_transforms );
 
 HYPRE_Int
-hypre_CommPkgCreate_flt( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, hypre_CommPkg **comm_pkg_ptr );
+hypre_CommPkgAgglomData_flt( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_float ***comm_data_a, hypre_CommPkg *comm_pkg, hypre_float ***agg_comm_data_ptr );
 HYPRE_Int
-hypre_CommPkgCreate_dbl( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, hypre_CommPkg **comm_pkg_ptr );
+hypre_CommPkgAgglomData_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_double ***comm_data_a, hypre_CommPkg *comm_pkg, hypre_double ***agg_comm_data_ptr );
 HYPRE_Int
-hypre_CommPkgCreate_long_dbl( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, hypre_CommPkg **comm_pkg_ptr );
+hypre_CommPkgAgglomData_long_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_long_double ***comm_data_a, hypre_CommPkg *comm_pkg, hypre_long_double ***agg_comm_data_ptr );
+
+HYPRE_Int
+hypre_CommPkgAgglomDestroy_flt( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_float ***comm_data_a );
+HYPRE_Int
+hypre_CommPkgAgglomDestroy_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_double ***comm_data_a );
+HYPRE_Int
+hypre_CommPkgAgglomDestroy_long_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a, hypre_long_double ***comm_data_a );
+
+HYPRE_Int
+hypre_CommPkgAgglomerate_flt( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkgs, hypre_CommPkg **agg_comm_pkg_ptr );
+HYPRE_Int
+hypre_CommPkgAgglomerate_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkgs, hypre_CommPkg **agg_comm_pkg_ptr );
+HYPRE_Int
+hypre_CommPkgAgglomerate_long_dbl( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkgs, hypre_CommPkg **agg_comm_pkg_ptr );
+
+HYPRE_Int
+hypre_CommPkgCreate_flt( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, HYPRE_MemoryLocation memory_location, hypre_CommPkg **comm_pkg_ptr );
+HYPRE_Int
+hypre_CommPkgCreate_dbl( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, HYPRE_MemoryLocation memory_location, hypre_CommPkg **comm_pkg_ptr );
+HYPRE_Int
+hypre_CommPkgCreate_long_dbl( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space, hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse, MPI_Comm comm, HYPRE_MemoryLocation memory_location, hypre_CommPkg **comm_pkg_ptr );
 
 HYPRE_Int
 hypre_CommPkgDestroy_flt( hypre_CommPkg *comm_pkg );
@@ -525,18 +882,39 @@ HYPRE_Int
 hypre_CommPkgDestroy_long_dbl( hypre_CommPkg *comm_pkg );
 
 HYPRE_Int
-hypre_CommTypeSetEntries_flt( hypre_CommType *comm_type, HYPRE_Int *boxnums, hypre_Box *boxes, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+hypre_CommPkgSetPrefixSizes_flt( hypre_CommPkg *comm_pkg );
 HYPRE_Int
-hypre_CommTypeSetEntries_dbl( hypre_CommType *comm_type, HYPRE_Int *boxnums, hypre_Box *boxes, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+hypre_CommPkgSetPrefixSizes_dbl( hypre_CommPkg *comm_pkg );
 HYPRE_Int
-hypre_CommTypeSetEntries_long_dbl( hypre_CommType *comm_type, HYPRE_Int *boxnums, hypre_Box *boxes, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
+hypre_CommPkgSetPrefixSizes_long_dbl( hypre_CommPkg *comm_pkg );
+
+hypre_CommStencil *
+hypre_CommStencilCreate_flt( HYPRE_Int ndim );
+hypre_CommStencil *
+hypre_CommStencilCreate_dbl( HYPRE_Int ndim );
+hypre_CommStencil *
+hypre_CommStencilCreate_long_dbl( HYPRE_Int ndim );
 
 HYPRE_Int
-hypre_CommTypeSetEntry_flt( hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_Box *data_box, HYPRE_Int data_box_offset, hypre_CommEntryType *comm_entry );
+hypre_CommStencilCreateNumGhost_flt( hypre_CommStencil *comm_stencil, HYPRE_Int **num_ghost_ptr );
 HYPRE_Int
-hypre_CommTypeSetEntry_dbl( hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_Box *data_box, HYPRE_Int data_box_offset, hypre_CommEntryType *comm_entry );
+hypre_CommStencilCreateNumGhost_dbl( hypre_CommStencil *comm_stencil, HYPRE_Int **num_ghost_ptr );
 HYPRE_Int
-hypre_CommTypeSetEntry_long_dbl( hypre_Box *box, hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, hypre_Box *data_box, HYPRE_Int data_box_offset, hypre_CommEntryType *comm_entry );
+hypre_CommStencilCreateNumGhost_long_dbl( hypre_CommStencil *comm_stencil, HYPRE_Int **num_ghost_ptr );
+
+HYPRE_Int
+hypre_CommStencilDestroy_flt( hypre_CommStencil *comm_stencil );
+HYPRE_Int
+hypre_CommStencilDestroy_dbl( hypre_CommStencil *comm_stencil );
+HYPRE_Int
+hypre_CommStencilDestroy_long_dbl( hypre_CommStencil *comm_stencil );
+
+HYPRE_Int
+hypre_CommStencilSetEntry_flt( hypre_CommStencil *comm_stencil, hypre_Index offset );
+HYPRE_Int
+hypre_CommStencilSetEntry_dbl( hypre_CommStencil *comm_stencil, hypre_Index offset );
+HYPRE_Int
+hypre_CommStencilSetEntry_long_dbl( hypre_CommStencil *comm_stencil, hypre_Index offset );
 
 HYPRE_Int
 hypre_ComputeBoxnums_flt( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_Int **boxnums_ptr );
@@ -544,6 +922,13 @@ HYPRE_Int
 hypre_ComputeBoxnums_dbl( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_Int **boxnums_ptr );
 HYPRE_Int
 hypre_ComputeBoxnums_long_dbl( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_Int **boxnums_ptr );
+
+HYPRE_Int
+hypre_ComputeCoarseOriginStride_flt( hypre_Index coarse_origin, hypre_Index coarse_stride, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_ComputeCoarseOriginStride_dbl( hypre_Index coarse_origin, hypre_Index coarse_stride, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_ComputeCoarseOriginStride_long_dbl( hypre_Index coarse_origin, hypre_Index coarse_stride, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
 
 HYPRE_Int
 hypre_ComputeInfoCreate_flt( hypre_CommInfo *comm_info, hypre_BoxArrayArray *indt_boxes, hypre_BoxArrayArray *dept_boxes, hypre_ComputeInfo **compute_info_ptr );
@@ -595,6 +980,20 @@ HYPRE_Int
 hypre_ComputePkgDestroy_long_dbl( hypre_ComputePkg *compute_pkg );
 
 HYPRE_Int
+hypre_ComputePkgSetMemoryLocation_flt( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ComputePkgSetMemoryLocation_dbl( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ComputePkgSetMemoryLocation_long_dbl( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
+hypre_ConvertToCanonicalIndex_flt( hypre_Index index, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_ConvertToCanonicalIndex_dbl( hypre_Index index, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_ConvertToCanonicalIndex_long_dbl( hypre_Index index, hypre_Index stride, HYPRE_Int ndim );
+
+HYPRE_Int
 hypre_CopyBox_flt( hypre_Box *box1, hypre_Box *box2 );
 HYPRE_Int
 hypre_CopyBox_dbl( hypre_Box *box1, hypre_Box *box2 );
@@ -616,6 +1015,20 @@ HYPRE_Int
 hypre_CopyToCleanIndex_long_dbl( hypre_Index in_index, HYPRE_Int ndim, hypre_Index out_index );
 
 HYPRE_Int
+hypre_CopyToIndex_flt( hypre_Index in_index, HYPRE_Int ndim, hypre_Index out_index );
+HYPRE_Int
+hypre_CopyToIndex_dbl( hypre_Index in_index, HYPRE_Int ndim, hypre_Index out_index );
+HYPRE_Int
+hypre_CopyToIndex_long_dbl( hypre_Index in_index, HYPRE_Int ndim, hypre_Index out_index );
+
+HYPRE_Int
+hypre_CreateCommInfo_flt( hypre_StructGrid *bgrid, hypre_Index stride, hypre_CommStencil *comm_stencil, hypre_CommInfo **comm_info_ptr );
+HYPRE_Int
+hypre_CreateCommInfo_dbl( hypre_StructGrid *bgrid, hypre_Index stride, hypre_CommStencil *comm_stencil, hypre_CommInfo **comm_info_ptr );
+HYPRE_Int
+hypre_CreateCommInfo_long_dbl( hypre_StructGrid *bgrid, hypre_Index stride, hypre_CommStencil *comm_stencil, hypre_CommInfo **comm_info_ptr );
+
+HYPRE_Int
 hypre_CreateCommInfoFromGrids_flt( hypre_StructGrid *from_grid, hypre_StructGrid *to_grid, hypre_CommInfo **comm_info_ptr );
 HYPRE_Int
 hypre_CreateCommInfoFromGrids_dbl( hypre_StructGrid *from_grid, hypre_StructGrid *to_grid, hypre_CommInfo **comm_info_ptr );
@@ -623,25 +1036,25 @@ HYPRE_Int
 hypre_CreateCommInfoFromGrids_long_dbl( hypre_StructGrid *from_grid, hypre_StructGrid *to_grid, hypre_CommInfo **comm_info_ptr );
 
 HYPRE_Int
-hypre_CreateCommInfoFromNumGhost_flt( hypre_StructGrid *grid, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromNumGhost_flt( hypre_StructGrid *grid, hypre_Index stride, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
 HYPRE_Int
-hypre_CreateCommInfoFromNumGhost_dbl( hypre_StructGrid *grid, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromNumGhost_dbl( hypre_StructGrid *grid, hypre_Index stride, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
 HYPRE_Int
-hypre_CreateCommInfoFromNumGhost_long_dbl( hypre_StructGrid *grid, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromNumGhost_long_dbl( hypre_StructGrid *grid, hypre_Index stride, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr );
 
 HYPRE_Int
-hypre_CreateCommInfoFromStencil_flt( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromStencil_flt( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
 HYPRE_Int
-hypre_CreateCommInfoFromStencil_dbl( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromStencil_dbl( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
 HYPRE_Int
-hypre_CreateCommInfoFromStencil_long_dbl( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
+hypre_CreateCommInfoFromStencil_long_dbl( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr );
 
 HYPRE_Int
-hypre_CreateComputeInfo_flt( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
+hypre_CreateComputeInfo_flt( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
 HYPRE_Int
-hypre_CreateComputeInfo_dbl( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
+hypre_CreateComputeInfo_dbl( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
 HYPRE_Int
-hypre_CreateComputeInfo_long_dbl( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
+hypre_CreateComputeInfo_long_dbl( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr );
 
 HYPRE_Int
 hypre_DeleteBox_flt( hypre_BoxArray *box_array, HYPRE_Int index );
@@ -658,11 +1071,11 @@ HYPRE_Int
 hypre_DeleteMultipleBoxes_long_dbl( hypre_BoxArray *box_array, HYPRE_Int *indices, HYPRE_Int num );
 
 HYPRE_Int
-hypre_ExchangeLocalData_flt( hypre_CommPkg *comm_pkg, hypre_float *send_data, hypre_float *recv_data, HYPRE_Int action );
+hypre_ExchangeLocalData_flt( hypre_CommPkg *comm_pkg, hypre_float **send_data, hypre_float **recv_data, HYPRE_Int action );
 HYPRE_Int
-hypre_ExchangeLocalData_dbl( hypre_CommPkg *comm_pkg, hypre_double *send_data, hypre_double *recv_data, HYPRE_Int action );
+hypre_ExchangeLocalData_dbl( hypre_CommPkg *comm_pkg, hypre_double **send_data, hypre_double **recv_data, HYPRE_Int action );
 HYPRE_Int
-hypre_ExchangeLocalData_long_dbl( hypre_CommPkg *comm_pkg, hypre_long_double *send_data, hypre_long_double *recv_data, HYPRE_Int action );
+hypre_ExchangeLocalData_long_dbl( hypre_CommPkg *comm_pkg, hypre_long_double **send_data, hypre_long_double **recv_data, HYPRE_Int action );
 
 HYPRE_Int
 hypre_FillResponseBoxManAssemble1_flt( void *p_recv_contact_buf, HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, HYPRE_Int *response_message_size );
@@ -679,13 +1092,6 @@ HYPRE_Int
 hypre_FillResponseBoxManAssemble2_long_dbl( void *p_recv_contact_buf, HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, HYPRE_Int *response_message_size );
 
 HYPRE_Int
-hypre_FinalizeCommunication_flt( hypre_CommHandle *comm_handle );
-HYPRE_Int
-hypre_FinalizeCommunication_dbl( hypre_CommHandle *comm_handle );
-HYPRE_Int
-hypre_FinalizeCommunication_long_dbl( hypre_CommHandle *comm_handle );
-
-HYPRE_Int
 hypre_FinalizeIndtComputations_flt( hypre_CommHandle *comm_handle );
 HYPRE_Int
 hypre_FinalizeIndtComputations_dbl( hypre_CommHandle *comm_handle );
@@ -700,11 +1106,18 @@ HYPRE_Int
 hypre_GatherAllBoxes_long_dbl( MPI_Comm comm, hypre_BoxArray *boxes, HYPRE_Int dim, hypre_BoxArray **all_boxes_ptr, HYPRE_Int **all_procs_ptr, HYPRE_Int *first_local_ptr );
 
 HYPRE_Int
-hypre_GeneralBoxBoundaryIntersect_flt( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
+hypre_GeneralBoxBoundaryIntersect_flt( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_offset, hypre_BoxArray *boundary );
 HYPRE_Int
-hypre_GeneralBoxBoundaryIntersect_dbl( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
+hypre_GeneralBoxBoundaryIntersect_dbl( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_offset, hypre_BoxArray *boundary );
 HYPRE_Int
-hypre_GeneralBoxBoundaryIntersect_long_dbl( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
+hypre_GeneralBoxBoundaryIntersect_long_dbl( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_offset, hypre_BoxArray *boundary );
+
+HYPRE_Int
+hypre_IndexElementMult_flt( hypre_Index index, HYPRE_Int ndim );
+HYPRE_Int
+hypre_IndexElementMult_dbl( hypre_Index index, HYPRE_Int ndim );
+HYPRE_Int
+hypre_IndexElementMult_long_dbl( hypre_Index index, HYPRE_Int ndim );
 
 HYPRE_Int
 hypre_IndexEqual_flt( hypre_Index index, HYPRE_Int val, HYPRE_Int ndim );
@@ -756,11 +1169,18 @@ HYPRE_Int
 hypre_IndexesEqual_long_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
 
 HYPRE_Int
-hypre_InitializeCommunication_flt( hypre_CommPkg *comm_pkg, hypre_float *send_data, hypre_float *recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
+hypre_IndexesGreater_flt( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
 HYPRE_Int
-hypre_InitializeCommunication_dbl( hypre_CommPkg *comm_pkg, hypre_double *send_data, hypre_double *recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
+hypre_IndexesGreater_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
 HYPRE_Int
-hypre_InitializeCommunication_long_dbl( hypre_CommPkg *comm_pkg, hypre_long_double *send_data, hypre_long_double *recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
+hypre_IndexesGreater_long_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_IndexesGreaterEqual_flt( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_IndexesGreaterEqual_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_IndexesGreaterEqual_long_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
 
 HYPRE_Int
 hypre_InitializeIndtComputations_flt( hypre_ComputePkg *compute_pkg, hypre_float *data, hypre_CommHandle **comm_handle_ptr );
@@ -777,6 +1197,20 @@ HYPRE_Int
 hypre_IntersectBoxes_long_dbl( hypre_Box *box1, hypre_Box *box2, hypre_Box *ibox );
 
 HYPRE_Int
+hypre_MapToCoarseIndex_flt( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_MapToCoarseIndex_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_MapToCoarseIndex_long_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_MapToFineIndex_flt( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_MapToFineIndex_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_MapToFineIndex_long_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+
+HYPRE_Int
 hypre_MinUnionBoxes_flt( hypre_BoxArray *boxes );
 HYPRE_Int
 hypre_MinUnionBoxes_dbl( hypre_BoxArray *boxes );
@@ -784,60 +1218,60 @@ HYPRE_Int
 hypre_MinUnionBoxes_long_dbl( hypre_BoxArray *boxes );
 
 HYPRE_Int
-hypre_PrintBoxArrayData_flt( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_float *data );
+hypre_PrintBoxArrayData_flt( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, hypre_float *data );
 HYPRE_Int
-hypre_PrintBoxArrayData_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_double *data );
+hypre_PrintBoxArrayData_dbl( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, hypre_double *data );
 HYPRE_Int
-hypre_PrintBoxArrayData_long_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_long_double *data );
+hypre_PrintBoxArrayData_long_dbl( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, hypre_long_double *data );
 
 HYPRE_Int
-hypre_PrintCCBoxArrayData_flt( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_float *data );
+hypre_ProjectBox_flt( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_PrintCCBoxArrayData_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_double *data );
+hypre_ProjectBox_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_PrintCCBoxArrayData_long_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_long_double *data );
+hypre_ProjectBox_long_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
-hypre_PrintCCVDBoxArrayData_flt( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int center_rank, HYPRE_Int stencil_size, HYPRE_Int *symm_elements, HYPRE_Int dim, hypre_float *data );
+hypre_ProjectBoxArray_flt( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_PrintCCVDBoxArrayData_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int center_rank, HYPRE_Int stencil_size, HYPRE_Int *symm_elements, HYPRE_Int dim, hypre_double *data );
+hypre_ProjectBoxArray_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_PrintCCVDBoxArrayData_long_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int center_rank, HYPRE_Int stencil_size, HYPRE_Int *symm_elements, HYPRE_Int dim, hypre_long_double *data );
+hypre_ProjectBoxArray_long_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
-hypre_ProjectBox_flt( hypre_Box *box, hypre_Index index, hypre_Index stride );
+hypre_ProjectBoxArrayArray_flt( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ProjectBox_dbl( hypre_Box *box, hypre_Index index, hypre_Index stride );
+hypre_ProjectBoxArrayArray_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ProjectBox_long_dbl( hypre_Box *box, hypre_Index index, hypre_Index stride );
+hypre_ProjectBoxArrayArray_long_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
-hypre_ProjectBoxArray_flt( hypre_BoxArray *box_array, hypre_Index index, hypre_Index stride );
+hypre_ReadBoxArrayData_flt( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, hypre_float **values_ptr );
 HYPRE_Int
-hypre_ProjectBoxArray_dbl( hypre_BoxArray *box_array, hypre_Index index, hypre_Index stride );
+hypre_ReadBoxArrayData_dbl( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, hypre_double **values_ptr );
 HYPRE_Int
-hypre_ProjectBoxArray_long_dbl( hypre_BoxArray *box_array, hypre_Index index, hypre_Index stride );
+hypre_ReadBoxArrayData_long_dbl( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, hypre_long_double **values_ptr );
 
 HYPRE_Int
-hypre_ProjectBoxArrayArray_flt( hypre_BoxArrayArray *box_array_array, hypre_Index index, hypre_Index stride );
+hypre_RefineBox_flt( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ProjectBoxArrayArray_dbl( hypre_BoxArrayArray *box_array_array, hypre_Index index, hypre_Index stride );
+hypre_RefineBox_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ProjectBoxArrayArray_long_dbl( hypre_BoxArrayArray *box_array_array, hypre_Index index, hypre_Index stride );
+hypre_RefineBox_long_dbl( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
-hypre_ReadBoxArrayData_flt( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_float *data );
+hypre_RefineBoxArray_flt( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ReadBoxArrayData_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_double *data );
+hypre_RefineBoxArray_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ReadBoxArrayData_long_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, hypre_long_double *data );
+hypre_RefineBoxArray_long_dbl( hypre_BoxArray *box_array, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
-hypre_ReadBoxArrayData_CC_flt( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int stencil_size, HYPRE_Int real_stencil_size, HYPRE_Int constant_coefficient, HYPRE_Int dim, hypre_float *data );
+hypre_RefineBoxArrayArray_flt( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ReadBoxArrayData_CC_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int stencil_size, HYPRE_Int real_stencil_size, HYPRE_Int constant_coefficient, HYPRE_Int dim, hypre_double *data );
+hypre_RefineBoxArrayArray_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int
-hypre_ReadBoxArrayData_CC_long_dbl( FILE *file, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int stencil_size, HYPRE_Int real_stencil_size, HYPRE_Int constant_coefficient, HYPRE_Int dim, hypre_long_double *data );
+hypre_RefineBoxArrayArray_long_dbl( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin, hypre_Index stride );
 
 HYPRE_Int
 hypre_SetIndex_flt( hypre_Index index, HYPRE_Int val );
@@ -847,11 +1281,172 @@ HYPRE_Int
 hypre_SetIndex_long_dbl( hypre_Index index, HYPRE_Int val );
 
 HYPRE_Int
-hypre_StructAssumedPartitionCreate_flt( HYPRE_Int dim, hypre_Box *bounding_box, hypre_float global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int *local_boxnums, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_float gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
+hypre_SnapIndexNeg_flt( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
 HYPRE_Int
-hypre_StructAssumedPartitionCreate_dbl( HYPRE_Int dim, hypre_Box *bounding_box, hypre_double global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int *local_boxnums, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_double gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
+hypre_SnapIndexNeg_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
 HYPRE_Int
-hypre_StructAssumedPartitionCreate_long_dbl( HYPRE_Int dim, hypre_Box *bounding_box, hypre_long_double global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int *local_boxnums, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_long_double gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
+hypre_SnapIndexNeg_long_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_SnapIndexPos_flt( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_SnapIndexPos_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+HYPRE_Int
+hypre_SnapIndexPos_long_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StCoeffClone_flt( hypre_StCoeff *coeff, HYPRE_Int ndim, hypre_StCoeff **clone_ptr );
+HYPRE_Int
+hypre_StCoeffClone_dbl( hypre_StCoeff *coeff, HYPRE_Int ndim, hypre_StCoeff **clone_ptr );
+HYPRE_Int
+hypre_StCoeffClone_long_dbl( hypre_StCoeff *coeff, HYPRE_Int ndim, hypre_StCoeff **clone_ptr );
+
+HYPRE_Int
+hypre_StCoeffCreate_flt( HYPRE_Int nterms, hypre_StCoeff **coeff_ptr );
+HYPRE_Int
+hypre_StCoeffCreate_dbl( HYPRE_Int nterms, hypre_StCoeff **coeff_ptr );
+HYPRE_Int
+hypre_StCoeffCreate_long_dbl( HYPRE_Int nterms, hypre_StCoeff **coeff_ptr );
+
+HYPRE_Int
+hypre_StCoeffDestroy_flt( hypre_StCoeff *coeff );
+HYPRE_Int
+hypre_StCoeffDestroy_dbl( hypre_StCoeff *coeff );
+HYPRE_Int
+hypre_StCoeffDestroy_long_dbl( hypre_StCoeff *coeff );
+
+HYPRE_Int
+hypre_StCoeffMult_flt( hypre_StCoeff *Acoeff, hypre_StCoeff *Bcoeff, HYPRE_Int ndim, hypre_StCoeff **Ccoeff_ptr );
+HYPRE_Int
+hypre_StCoeffMult_dbl( hypre_StCoeff *Acoeff, hypre_StCoeff *Bcoeff, HYPRE_Int ndim, hypre_StCoeff **Ccoeff_ptr );
+HYPRE_Int
+hypre_StCoeffMult_long_dbl( hypre_StCoeff *Acoeff, hypre_StCoeff *Bcoeff, HYPRE_Int ndim, hypre_StCoeff **Ccoeff_ptr );
+
+HYPRE_Int
+hypre_StCoeffPrint_flt( hypre_StCoeff *coeff, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StCoeffPrint_dbl( hypre_StCoeff *coeff, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StCoeffPrint_long_dbl( hypre_StCoeff *coeff, char *matnames, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StCoeffPush_flt( hypre_StCoeff **stack_ptr, hypre_StCoeff *coeff );
+HYPRE_Int
+hypre_StCoeffPush_dbl( hypre_StCoeff **stack_ptr, hypre_StCoeff *coeff );
+HYPRE_Int
+hypre_StCoeffPush_long_dbl( hypre_StCoeff **stack_ptr, hypre_StCoeff *coeff );
+
+HYPRE_Int
+hypre_StCoeffShift_flt( hypre_StCoeff *coeff, hypre_Index shift, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StCoeffShift_dbl( hypre_StCoeff *coeff, hypre_Index shift, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StCoeffShift_long_dbl( hypre_StCoeff *coeff, hypre_Index shift, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StIndexCopy_flt( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexCopy_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexCopy_long_dbl( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StIndexNegate_flt( hypre_Index index, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexNegate_dbl( hypre_Index index, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexNegate_long_dbl( hypre_Index index, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StIndexPrint_flt( hypre_Index index, char lchar, char rchar, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexPrint_dbl( hypre_Index index, char lchar, char rchar, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexPrint_long_dbl( hypre_Index index, char lchar, char rchar, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StIndexShift_flt( hypre_Index index, hypre_Index shift, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexShift_dbl( hypre_Index index, hypre_Index shift, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StIndexShift_long_dbl( hypre_Index index, hypre_Index shift, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StMatrixClone_flt( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StMatrix **mclone_ptr );
+HYPRE_Int
+hypre_StMatrixClone_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StMatrix **mclone_ptr );
+HYPRE_Int
+hypre_StMatrixClone_long_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StMatrix **mclone_ptr );
+
+HYPRE_Int
+hypre_StMatrixCreate_flt( HYPRE_Int id, HYPRE_Int size, HYPRE_Int ndim, hypre_StMatrix **matrix_ptr );
+HYPRE_Int
+hypre_StMatrixCreate_dbl( HYPRE_Int id, HYPRE_Int size, HYPRE_Int ndim, hypre_StMatrix **matrix_ptr );
+HYPRE_Int
+hypre_StMatrixCreate_long_dbl( HYPRE_Int id, HYPRE_Int size, HYPRE_Int ndim, hypre_StMatrix **matrix_ptr );
+
+HYPRE_Int
+hypre_StMatrixDestroy_flt( hypre_StMatrix *matrix );
+HYPRE_Int
+hypre_StMatrixDestroy_dbl( hypre_StMatrix *matrix );
+HYPRE_Int
+hypre_StMatrixDestroy_long_dbl( hypre_StMatrix *matrix );
+
+HYPRE_Int
+hypre_StMatrixMatmat_flt( hypre_StMatrix *A, hypre_StMatrix *B, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmat_dbl( hypre_StMatrix *A, hypre_StMatrix *B, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmat_long_dbl( hypre_StMatrix *A, hypre_StMatrix *B, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+
+HYPRE_Int
+hypre_StMatrixMatmult_flt( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmult_dbl( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmult_long_dbl( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+
+HYPRE_Int
+hypre_StMatrixNEntryCoeffs_flt( hypre_StMatrix *matrix, HYPRE_Int entry );
+HYPRE_Int
+hypre_StMatrixNEntryCoeffs_dbl( hypre_StMatrix *matrix, HYPRE_Int entry );
+HYPRE_Int
+hypre_StMatrixNEntryCoeffs_long_dbl( hypre_StMatrix *matrix, HYPRE_Int entry );
+
+HYPRE_Int
+hypre_StMatrixPrint_flt( hypre_StMatrix *matrix, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StMatrixPrint_dbl( hypre_StMatrix *matrix, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StMatrixPrint_long_dbl( hypre_StMatrix *matrix, char *matnames, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StMatrixTranspose_flt( hypre_StMatrix *matrix, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StMatrixTranspose_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StMatrixTranspose_long_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StTermCopy_flt( hypre_StTerm *term1, hypre_StTerm *term2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StTermCopy_dbl( hypre_StTerm *term1, hypre_StTerm *term2, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StTermCopy_long_dbl( hypre_StTerm *term1, hypre_StTerm *term2, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StTermPrint_flt( hypre_StTerm *term, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StTermPrint_dbl( hypre_StTerm *term, char *matnames, HYPRE_Int ndim );
+HYPRE_Int
+hypre_StTermPrint_long_dbl( hypre_StTerm *term, char *matnames, HYPRE_Int ndim );
+
+HYPRE_Int
+hypre_StructAssumedPartitionCreate_flt( HYPRE_Int dim, hypre_Box *bounding_box, hypre_float global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_float gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
+HYPRE_Int
+hypre_StructAssumedPartitionCreate_dbl( HYPRE_Int dim, hypre_Box *bounding_box, hypre_double global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_double gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
+HYPRE_Int
+hypre_StructAssumedPartitionCreate_long_dbl( HYPRE_Int dim, hypre_Box *bounding_box, hypre_long_double global_boxes_size, HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes, HYPRE_Int max_regions, HYPRE_Int max_refinements, hypre_long_double gamma, MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
 
 HYPRE_Int
 hypre_StructAssumedPartitionDestroy_flt( hypre_StructAssumedPart *assumed_part );
@@ -875,11 +1470,46 @@ HYPRE_Int
 hypre_StructAssumedPartitionGetRegionsFromProc_long_dbl( hypre_StructAssumedPart *assumed_part, HYPRE_Int proc_id, hypre_BoxArray *assumed_regions );
 
 HYPRE_Int
+hypre_StructAssumedPartitionPrint_flt( const char *filename, hypre_StructAssumedPart *ap );
+HYPRE_Int
+hypre_StructAssumedPartitionPrint_dbl( const char *filename, hypre_StructAssumedPart *ap );
+HYPRE_Int
+hypre_StructAssumedPartitionPrint_long_dbl( const char *filename, hypre_StructAssumedPart *ap );
+
+HYPRE_Int
 hypre_StructAxpy_flt( hypre_float alpha, hypre_StructVector *x, hypre_StructVector *y );
 HYPRE_Int
 hypre_StructAxpy_dbl( hypre_double alpha, hypre_StructVector *x, hypre_StructVector *y );
 HYPRE_Int
 hypre_StructAxpy_long_dbl( hypre_long_double alpha, hypre_StructVector *x, hypre_StructVector *y );
+
+HYPRE_Int
+hypre_StructCoarsen_flt( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+HYPRE_Int
+hypre_StructCoarsen_dbl( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+HYPRE_Int
+hypre_StructCoarsen_long_dbl( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+
+HYPRE_Int
+hypre_StructCoarsenAP_flt( hypre_StructAssumedPart *ap, hypre_Index origin, hypre_Index stride, hypre_StructAssumedPart **new_ap_ptr );
+HYPRE_Int
+hypre_StructCoarsenAP_dbl( hypre_StructAssumedPart *ap, hypre_Index origin, hypre_Index stride, hypre_StructAssumedPart **new_ap_ptr );
+HYPRE_Int
+hypre_StructCoarsenAP_long_dbl( hypre_StructAssumedPart *ap, hypre_Index origin, hypre_Index stride, hypre_StructAssumedPart **new_ap_ptr );
+
+HYPRE_Int
+hypre_StructCommunicationFinalize_flt( hypre_CommHandle *comm_handle );
+HYPRE_Int
+hypre_StructCommunicationFinalize_dbl( hypre_CommHandle *comm_handle );
+HYPRE_Int
+hypre_StructCommunicationFinalize_long_dbl( hypre_CommHandle *comm_handle );
+
+HYPRE_Int
+hypre_StructCommunicationInitialize_flt( hypre_CommPkg *comm_pkg, hypre_float **send_data, hypre_float **recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
+HYPRE_Int
+hypre_StructCommunicationInitialize_dbl( hypre_CommPkg *comm_pkg, hypre_double **send_data, hypre_double **recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
+HYPRE_Int
+hypre_StructCommunicationInitialize_long_dbl( hypre_CommPkg *comm_pkg, hypre_long_double **send_data, hypre_long_double **recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
 
 HYPRE_Int
 hypre_StructCopy_flt( hypre_StructVector *x, hypre_StructVector *y );
@@ -889,11 +1519,32 @@ HYPRE_Int
 hypre_StructCopy_long_dbl( hypre_StructVector *x, hypre_StructVector *y );
 
 HYPRE_Int
+hypre_StructDataCopy_flt( hypre_float *fr_data, /* from */ hypre_BoxArray *fr_data_space, hypre_float *to_data, /* to */ hypre_BoxArray *to_data_space, HYPRE_Int ndim, HYPRE_Int nval );
+HYPRE_Int
+hypre_StructDataCopy_dbl( hypre_double *fr_data, /* from */ hypre_BoxArray *fr_data_space, hypre_double *to_data, /* to */ hypre_BoxArray *to_data_space, HYPRE_Int ndim, HYPRE_Int nval );
+HYPRE_Int
+hypre_StructDataCopy_long_dbl( hypre_long_double *fr_data, /* from */ hypre_BoxArray *fr_data_space, hypre_long_double *to_data, /* to */ hypre_BoxArray *to_data_space, HYPRE_Int ndim, HYPRE_Int nval );
+
+HYPRE_Int
 hypre_StructGridAssemble_flt( hypre_StructGrid *grid );
 HYPRE_Int
 hypre_StructGridAssemble_dbl( hypre_StructGrid *grid );
 HYPRE_Int
 hypre_StructGridAssemble_long_dbl( hypre_StructGrid *grid );
+
+HYPRE_Int
+hypre_StructGridComputeBoxnums_flt( hypre_StructGrid *grid, HYPRE_Int nboxes, HYPRE_Int *boxnums, hypre_Index stride, HYPRE_Int *new_nboxes_ptr, HYPRE_Int **new_boxnums_ptr );
+HYPRE_Int
+hypre_StructGridComputeBoxnums_dbl( hypre_StructGrid *grid, HYPRE_Int nboxes, HYPRE_Int *boxnums, hypre_Index stride, HYPRE_Int *new_nboxes_ptr, HYPRE_Int **new_boxnums_ptr );
+HYPRE_Int
+hypre_StructGridComputeBoxnums_long_dbl( hypre_StructGrid *grid, HYPRE_Int nboxes, HYPRE_Int *boxnums, hypre_Index stride, HYPRE_Int *new_nboxes_ptr, HYPRE_Int **new_boxnums_ptr );
+
+HYPRE_Int
+hypre_StructGridComputeGlobalSize_flt( hypre_StructGrid *grid );
+HYPRE_Int
+hypre_StructGridComputeGlobalSize_dbl( hypre_StructGrid *grid );
+HYPRE_Int
+hypre_StructGridComputeGlobalSize_long_dbl( hypre_StructGrid *grid );
 
 HYPRE_Int
 hypre_StructGridCreate_flt( MPI_Comm comm, HYPRE_Int dim, hypre_StructGrid **grid_ptr );
@@ -922,6 +1573,13 @@ HYPRE_Int
 hypre_StructGridPrint_dbl( FILE *file, hypre_StructGrid *grid );
 HYPRE_Int
 hypre_StructGridPrint_long_dbl( FILE *file, hypre_StructGrid *grid );
+
+HYPRE_Int
+hypre_StructGridPrintVTK_flt( const char *filename, hypre_StructGrid *grid );
+HYPRE_Int
+hypre_StructGridPrintVTK_dbl( const char *filename, hypre_StructGrid *grid );
+HYPRE_Int
+hypre_StructGridPrintVTK_long_dbl( const char *filename, hypre_StructGrid *grid );
 
 HYPRE_Int
 hypre_StructGridRead_flt( MPI_Comm comm, FILE *file, hypre_StructGrid **grid_ptr );
@@ -1000,6 +1658,160 @@ hypre_StructInnerProd_dbl( hypre_StructVector *x, hypre_StructVector *y );
 HYPRE_Real
 hypre_StructInnerProd_long_dbl( hypre_StructVector *x, hypre_StructVector *y );
 
+HYPRE_Real
+hypre_StructInnerProdLocal_flt( hypre_StructVector *x, hypre_StructVector *y );
+HYPRE_Real
+hypre_StructInnerProdLocal_dbl( hypre_StructVector *x, hypre_StructVector *y );
+HYPRE_Real
+hypre_StructInnerProdLocal_long_dbl( hypre_StructVector *x, hypre_StructVector *y );
+
+HYPRE_Int
+hypre_StructMapCoarseToFine_flt( hypre_Index cindex, hypre_Index origin, hypre_Index stride, hypre_Index findex );
+HYPRE_Int
+hypre_StructMapCoarseToFine_dbl( hypre_Index cindex, hypre_Index origin, hypre_Index stride, hypre_Index findex );
+HYPRE_Int
+hypre_StructMapCoarseToFine_long_dbl( hypre_Index cindex, hypre_Index origin, hypre_Index stride, hypre_Index findex );
+
+HYPRE_Int
+hypre_StructMapFineToCoarse_flt( hypre_Index findex, hypre_Index origin, hypre_Index stride, hypre_Index cindex );
+HYPRE_Int
+hypre_StructMapFineToCoarse_dbl( hypre_Index findex, hypre_Index origin, hypre_Index stride, hypre_Index cindex );
+HYPRE_Int
+hypre_StructMapFineToCoarse_long_dbl( hypre_Index findex, hypre_Index origin, hypre_Index stride, hypre_Index cindex );
+
+HYPRE_Int
+hypre_StructMatmat_flt( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmat_dbl( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmat_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatmatSetup_flt( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmatSetup_dbl( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmatSetup_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *B, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatmult_flt( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmult_dbl( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmult_long_dbl( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatmultCommSetup_flt( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultCommSetup_dbl( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultCommSetup_long_dbl( hypre_StructMatmultData *mmdata );
+
+HYPRE_Int
+hypre_StructMatmultCommunicate_flt( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultCommunicate_dbl( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultCommunicate_long_dbl( hypre_StructMatmultData *mmdata );
+
+HYPRE_Int
+hypre_StructMatmultCompute_flt( hypre_StructMatmultData *mmdata, HYPRE_Int iM );
+HYPRE_Int
+hypre_StructMatmultCompute_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int iM );
+HYPRE_Int
+hypre_StructMatmultCompute_long_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int iM );
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_flt( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_core_dbl( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_core_long_dbl( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_generic_flt( hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int nterms, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_core_generic_dbl( hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int nterms, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_core_generic_long_dbl( hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int nterms, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_flt( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_dbl( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_long_dbl( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
+
+HYPRE_Int
+hypre_StructMatmultCreate_flt( HYPRE_Int max_matmults, HYPRE_Int max_matrices, hypre_StructMatmultData **mmdata_ptr );
+HYPRE_Int
+hypre_StructMatmultCreate_dbl( HYPRE_Int max_matmults, HYPRE_Int max_matrices, hypre_StructMatmultData **mmdata_ptr );
+HYPRE_Int
+hypre_StructMatmultCreate_long_dbl( HYPRE_Int max_matmults, HYPRE_Int max_matrices, hypre_StructMatmultData **mmdata_ptr );
+
+HYPRE_Int
+hypre_StructMatmultDestroy_flt( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultDestroy_dbl( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultDestroy_long_dbl( hypre_StructMatmultData *mmdata );
+
+HYPRE_Int
+hypre_StructMatmultGetMatrix_flt( hypre_StructMatmultData *mmdata, HYPRE_Int iM, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmultGetMatrix_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int iM, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmultGetMatrix_long_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int iM, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatmultInitialize_flt( hypre_StructMatmultData *mmdata, HYPRE_Int assemble_grid );
+HYPRE_Int
+hypre_StructMatmultInitialize_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int assemble_grid );
+HYPRE_Int
+hypre_StructMatmultInitialize_long_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int assemble_grid );
+
+HYPRE_Int
+hypre_StructMatmultMultiply_flt( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultMultiply_dbl( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultMultiply_long_dbl( hypre_StructMatmultData *mmdata );
+
+HYPRE_Int
+hypre_StructMatmultSetKernelType_flt( hypre_StructMatmultData *mmdata, HYPRE_Int kernel_type );
+HYPRE_Int
+hypre_StructMatmultSetKernelType_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int kernel_type );
+HYPRE_Int
+hypre_StructMatmultSetKernelType_long_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int kernel_type );
+
+HYPRE_Int
+hypre_StructMatmultSetProduct_flt( hypre_StructMatmultData *mmdata, HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in, HYPRE_Int nterms, HYPRE_Int *terms_in, HYPRE_Int *transposes_in, HYPRE_Int *iM_ptr );
+HYPRE_Int
+hypre_StructMatmultSetProduct_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in, HYPRE_Int nterms, HYPRE_Int *terms_in, HYPRE_Int *transposes_in, HYPRE_Int *iM_ptr );
+HYPRE_Int
+hypre_StructMatmultSetProduct_long_dbl( hypre_StructMatmultData *mmdata, HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in, HYPRE_Int nterms, HYPRE_Int *terms_in, HYPRE_Int *transposes_in, HYPRE_Int *iM_ptr );
+
+HYPRE_Int
+hypre_StructMatmultSetup_flt( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmultSetup_dbl( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmultSetup_long_dbl( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixAddInit_flt( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
+HYPRE_Int
+hypre_StructMatrixAddInit_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
+HYPRE_Int
+hypre_StructMatrixAddInit_long_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
+
+HYPRE_Int
+hypre_StructMatrixAddMat_flt( hypre_StructMatrix *A, hypre_float alpha, hypre_StructMatrix *B );
+HYPRE_Int
+hypre_StructMatrixAddMat_dbl( hypre_StructMatrix *A, hypre_double alpha, hypre_StructMatrix *B );
+HYPRE_Int
+hypre_StructMatrixAddMat_long_dbl( hypre_StructMatrix *A, hypre_long_double alpha, hypre_StructMatrix *B );
+
 HYPRE_Int
 hypre_StructMatrixAssemble_flt( hypre_StructMatrix *matrix );
 HYPRE_Int
@@ -1035,12 +1847,33 @@ hypre_StructMatrixClearValues_dbl( hypre_StructMatrix *matrix, hypre_Index grid_
 HYPRE_Int
 hypre_StructMatrixClearValues_long_dbl( hypre_StructMatrix *matrix, hypre_Index grid_index, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Int boxnum, HYPRE_Int outside );
 
+HYPRE_Int
+hypre_StructMatrixComputeDataSpace_flt( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixComputeDataSpace_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixComputeDataSpace_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+
+HYPRE_Int
+hypre_StructMatrixComputeRowSum_flt( hypre_StructMatrix *A, HYPRE_Int type, hypre_StructVector *rowsum );
+HYPRE_Int
+hypre_StructMatrixComputeRowSum_dbl( hypre_StructMatrix *A, HYPRE_Int type, hypre_StructVector *rowsum );
+HYPRE_Int
+hypre_StructMatrixComputeRowSum_long_dbl( hypre_StructMatrix *A, HYPRE_Int type, hypre_StructVector *rowsum );
+
 hypre_StructMatrix *
 hypre_StructMatrixCreate_flt( MPI_Comm comm, hypre_StructGrid *grid, hypre_StructStencil *user_stencil );
 hypre_StructMatrix *
 hypre_StructMatrixCreate_dbl( MPI_Comm comm, hypre_StructGrid *grid, hypre_StructStencil *user_stencil );
 hypre_StructMatrix *
 hypre_StructMatrixCreate_long_dbl( MPI_Comm comm, hypre_StructGrid *grid, hypre_StructStencil *user_stencil );
+
+HYPRE_Int
+hypre_StructMatrixCreateCommPkg_flt( hypre_StructMatrix *matrix, hypre_CommInfo *comm_info, hypre_CommPkg **comm_pkg_ptr, hypre_float ***comm_data_ptr );
+HYPRE_Int
+hypre_StructMatrixCreateCommPkg_dbl( hypre_StructMatrix *matrix, hypre_CommInfo *comm_info, hypre_CommPkg **comm_pkg_ptr, hypre_double ***comm_data_ptr );
+HYPRE_Int
+hypre_StructMatrixCreateCommPkg_long_dbl( hypre_StructMatrix *matrix, hypre_CommInfo *comm_info, hypre_CommPkg **comm_pkg_ptr, hypre_long_double ***comm_data_ptr );
 
 hypre_StructMatrix *
 hypre_StructMatrixCreateMask_flt( hypre_StructMatrix *matrix, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices );
@@ -1064,6 +1897,69 @@ HYPRE_Complex *
 hypre_StructMatrixExtractPointerByIndex_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int b, hypre_Index index );
 
 HYPRE_Int
+hypre_StructMatrixForget_flt( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixForget_dbl( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixForget_long_dbl( hypre_StructMatrix *matrix );
+
+HYPRE_Int
+hypre_StructMatrixGetCStride_flt( hypre_StructMatrix *matrix, hypre_IndexRef *cstride );
+HYPRE_Int
+hypre_StructMatrixGetCStride_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *cstride );
+HYPRE_Int
+hypre_StructMatrixGetCStride_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *cstride );
+
+HYPRE_Int
+hypre_StructMatrixGetDataMapStride_flt( hypre_StructMatrix *matrix, hypre_IndexRef *stride );
+HYPRE_Int
+hypre_StructMatrixGetDataMapStride_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *stride );
+HYPRE_Int
+hypre_StructMatrixGetDataMapStride_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *stride );
+
+HYPRE_Int
+hypre_StructMatrixGetDiagonal_flt( hypre_StructMatrix *matrix, hypre_StructVector *diag );
+HYPRE_Int
+hypre_StructMatrixGetDiagonal_dbl( hypre_StructMatrix *matrix, hypre_StructVector *diag );
+HYPRE_Int
+hypre_StructMatrixGetDiagonal_long_dbl( hypre_StructMatrix *matrix, hypre_StructVector *diag );
+
+HYPRE_Int
+hypre_StructMatrixGetFStride_flt( hypre_StructMatrix *matrix, hypre_IndexRef *fstride );
+HYPRE_Int
+hypre_StructMatrixGetFStride_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *fstride );
+HYPRE_Int
+hypre_StructMatrixGetFStride_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef *fstride );
+
+HYPRE_Int
+hypre_StructMatrixGetStSpaces_flt( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *num_sspaces_ptr, HYPRE_Int **sentry_sspaces_ptr, hypre_Index **sspace_origins_ptr, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStSpaces_dbl( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *num_sspaces_ptr, HYPRE_Int **sentry_sspaces_ptr, hypre_Index **sspace_origins_ptr, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStSpaces_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *num_sspaces_ptr, HYPRE_Int **sentry_sspaces_ptr, hypre_Index **sspace_origins_ptr, hypre_Index stride );
+
+HYPRE_Int
+hypre_StructMatrixGetStencilSpace_flt( hypre_StructMatrix *matrix, HYPRE_Int entry, HYPRE_Int transpose, hypre_Index origin, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStencilSpace_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, HYPRE_Int transpose, hypre_Index origin, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStencilSpace_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, HYPRE_Int transpose, hypre_Index origin, hypre_Index stride );
+
+HYPRE_Int
+hypre_StructMatrixGetStencilStride_flt( hypre_StructMatrix *matrix, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStencilStride_dbl( hypre_StructMatrix *matrix, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStencilStride_long_dbl( hypre_StructMatrix *matrix, hypre_Index stride );
+
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace_flt( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
+
+HYPRE_Int
 hypre_StructMatrixInitialize_flt( hypre_StructMatrix *matrix );
 HYPRE_Int
 hypre_StructMatrixInitialize_dbl( hypre_StructMatrix *matrix );
@@ -1071,11 +1967,11 @@ HYPRE_Int
 hypre_StructMatrixInitialize_long_dbl( hypre_StructMatrix *matrix );
 
 HYPRE_Int
-hypre_StructMatrixInitializeData_flt( hypre_StructMatrix *matrix, hypre_float *data, hypre_float *data_const );
+hypre_StructMatrixInitializeData_flt( hypre_StructMatrix *matrix, hypre_float *data );
 HYPRE_Int
-hypre_StructMatrixInitializeData_dbl( hypre_StructMatrix *matrix, hypre_double *data, hypre_double *data_const );
+hypre_StructMatrixInitializeData_dbl( hypre_StructMatrix *matrix, hypre_double *data );
 HYPRE_Int
-hypre_StructMatrixInitializeData_long_dbl( hypre_StructMatrix *matrix, hypre_long_double *data, hypre_long_double *data_const );
+hypre_StructMatrixInitializeData_long_dbl( hypre_StructMatrix *matrix, hypre_long_double *data );
 
 HYPRE_Int
 hypre_StructMatrixInitializeShell_flt( hypre_StructMatrix *matrix );
@@ -1085,11 +1981,53 @@ HYPRE_Int
 hypre_StructMatrixInitializeShell_long_dbl( hypre_StructMatrix *matrix );
 
 HYPRE_Int
+hypre_StructMatrixMapCommInfo_flt( hypre_StructMatrix *matrix, hypre_IndexRef origin, hypre_Index stride, hypre_CommInfo *comm_info );
+HYPRE_Int
+hypre_StructMatrixMapCommInfo_dbl( hypre_StructMatrix *matrix, hypre_IndexRef origin, hypre_Index stride, hypre_CommInfo *comm_info );
+HYPRE_Int
+hypre_StructMatrixMapCommInfo_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef origin, hypre_Index stride, hypre_CommInfo *comm_info );
+
+HYPRE_Int
+hypre_StructMatrixMapDataBox_flt( hypre_StructMatrix *matrix, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructMatrixMapDataBox_dbl( hypre_StructMatrix *matrix, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructMatrixMapDataBox_long_dbl( hypre_StructMatrix *matrix, hypre_Box *dbox );
+
+HYPRE_Int
+hypre_StructMatrixMapDataIndex_flt( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int
+hypre_StructMatrixMapDataIndex_dbl( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int
+hypre_StructMatrixMapDataIndex_long_dbl( hypre_StructMatrix *matrix, hypre_Index dindex );
+
+HYPRE_Int
+hypre_StructMatrixMapDataStride_flt( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int
+hypre_StructMatrixMapDataStride_dbl( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int
+hypre_StructMatrixMapDataStride_long_dbl( hypre_StructMatrix *matrix, hypre_Index dstride );
+
+HYPRE_Int
 hypre_StructMatrixMigrate_flt( hypre_StructMatrix *from_matrix, hypre_StructMatrix *to_matrix );
 HYPRE_Int
 hypre_StructMatrixMigrate_dbl( hypre_StructMatrix *from_matrix, hypre_StructMatrix *to_matrix );
 HYPRE_Int
 hypre_StructMatrixMigrate_long_dbl( hypre_StructMatrix *from_matrix, hypre_StructMatrix *to_matrix );
+
+HYPRE_Int
+hypre_StructMatrixNeedResize_flt( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructMatrixNeedResize_dbl( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructMatrixNeedResize_long_dbl( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+
+HYPRE_Int
+hypre_StructMatrixPlaceStencil_flt( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index );
+HYPRE_Int
+hypre_StructMatrixPlaceStencil_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index );
+HYPRE_Int
+hypre_StructMatrixPlaceStencil_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index );
 
 HYPRE_Int
 hypre_StructMatrixPrint_flt( const char *filename, hypre_StructMatrix *matrix, HYPRE_Int all );
@@ -1104,6 +2042,48 @@ HYPRE_Int
 hypre_StructMatrixPrintData_dbl( FILE *file, hypre_StructMatrix *matrix, HYPRE_Int all );
 HYPRE_Int
 hypre_StructMatrixPrintData_long_dbl( FILE *file, hypre_StructMatrix *matrix, HYPRE_Int all );
+
+HYPRE_Int
+hypre_StructMatrixPtAP_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixPtAP_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixPtAP_long_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixPtAPSetup_flt( HYPRE_Int kernel_type, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixPtAPSetup_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixPtAPSetup_long_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixRAP_flt( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRAP_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRAP_long_dbl( hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixRAPSetup_flt( HYPRE_Int kernel_type, hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRAPSetup_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRAPSetup_long_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *R, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixRTtAP_flt( hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRTtAP_dbl( hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRTtAP_long_dbl( hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+
+HYPRE_Int
+hypre_StructMatrixRTtAPSetup_flt( HYPRE_Int kernel_type, hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRTtAPSetup_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixRTtAPSetup_long_dbl( HYPRE_Int kernel_type, hypre_StructMatrix *RT, hypre_StructMatrix *A, hypre_StructMatrix *P, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
 
 hypre_StructMatrix *
 hypre_StructMatrixRead_flt( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost );
@@ -1127,18 +2107,25 @@ hypre_StructMatrix *
 hypre_StructMatrixRef_long_dbl( hypre_StructMatrix *matrix );
 
 HYPRE_Int
+hypre_StructMatrixResize_flt( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructMatrixResize_dbl( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructMatrixResize_long_dbl( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
+
+HYPRE_Int
+hypre_StructMatrixRestore_flt( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixRestore_dbl( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixRestore_long_dbl( hypre_StructMatrix *matrix );
+
+HYPRE_Int
 hypre_StructMatrixSetBoxValues_flt( hypre_StructMatrix *matrix, hypre_Box *set_box, hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_float *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int
 hypre_StructMatrixSetBoxValues_dbl( hypre_StructMatrix *matrix, hypre_Box *set_box, hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int
 hypre_StructMatrixSetBoxValues_long_dbl( hypre_StructMatrix *matrix, hypre_Box *set_box, hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
-
-HYPRE_Int
-hypre_StructMatrixSetConstantCoefficient_flt( hypre_StructMatrix *matrix, HYPRE_Int constant_coefficient );
-HYPRE_Int
-hypre_StructMatrixSetConstantCoefficient_dbl( hypre_StructMatrix *matrix, HYPRE_Int constant_coefficient );
-HYPRE_Int
-hypre_StructMatrixSetConstantCoefficient_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int constant_coefficient );
 
 HYPRE_Int
 hypre_StructMatrixSetConstantEntries_flt( hypre_StructMatrix *matrix, HYPRE_Int nentries, HYPRE_Int *entries );
@@ -1155,11 +2142,46 @@ HYPRE_Int
 hypre_StructMatrixSetConstantValues_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int action );
 
 HYPRE_Int
-hypre_StructMatrixSetNumGhost_flt( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost );
+hypre_StructMatrixSetDomainStride_flt( hypre_StructMatrix *matrix, hypre_IndexRef domain_stride );
 HYPRE_Int
-hypre_StructMatrixSetNumGhost_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost );
+hypre_StructMatrixSetDomainStride_dbl( hypre_StructMatrix *matrix, hypre_IndexRef domain_stride );
 HYPRE_Int
-hypre_StructMatrixSetNumGhost_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost );
+hypre_StructMatrixSetDomainStride_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef domain_stride );
+
+HYPRE_Int
+hypre_StructMatrixSetGhost_flt( hypre_StructMatrix *matrix, HYPRE_Int ghost, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetGhost_dbl( hypre_StructMatrix *matrix, HYPRE_Int ghost, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetGhost_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int ghost, HYPRE_Int *resize );
+
+HYPRE_Int
+hypre_StructMatrixSetMemoryLocation_flt( hypre_StructMatrix *matrix, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_StructMatrixSetMemoryLocation_dbl( hypre_StructMatrix *matrix, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_StructMatrixSetMemoryLocation_long_dbl( hypre_StructMatrix *matrix, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
+hypre_StructMatrixSetNumGhost_flt( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetNumGhost_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetNumGhost_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int *num_ghost, HYPRE_Int *resize );
+
+HYPRE_Int
+hypre_StructMatrixSetRangeStride_flt( hypre_StructMatrix *matrix, hypre_IndexRef range_stride );
+HYPRE_Int
+hypre_StructMatrixSetRangeStride_dbl( hypre_StructMatrix *matrix, hypre_IndexRef range_stride );
+HYPRE_Int
+hypre_StructMatrixSetRangeStride_long_dbl( hypre_StructMatrix *matrix, hypre_IndexRef range_stride );
+
+HYPRE_Int
+hypre_StructMatrixSetTranspose_flt( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetTranspose_dbl( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *resize );
+HYPRE_Int
+hypre_StructMatrixSetTranspose_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int transpose, HYPRE_Int *resize );
 
 HYPRE_Int
 hypre_StructMatrixSetValues_flt( hypre_StructMatrix *matrix, hypre_Index grid_index, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_float *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
@@ -1169,6 +2191,34 @@ HYPRE_Int
 hypre_StructMatrixSetValues_long_dbl( hypre_StructMatrix *matrix, hypre_Index grid_index, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 
 HYPRE_Int
+hypre_StructMatrixUnMapDataBox_flt( hypre_StructMatrix *matrix, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructMatrixUnMapDataBox_dbl( hypre_StructMatrix *matrix, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructMatrixUnMapDataBox_long_dbl( hypre_StructMatrix *matrix, hypre_Box *dbox );
+
+HYPRE_Int
+hypre_StructMatrixUnMapDataIndex_flt( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int
+hypre_StructMatrixUnMapDataIndex_dbl( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int
+hypre_StructMatrixUnMapDataIndex_long_dbl( hypre_StructMatrix *matrix, hypre_Index dindex );
+
+HYPRE_Int
+hypre_StructMatrixUnMapDataStride_flt( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int
+hypre_StructMatrixUnMapDataStride_dbl( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int
+hypre_StructMatrixUnMapDataStride_long_dbl( hypre_StructMatrix *matrix, hypre_Index dstride );
+
+HYPRE_Int
+hypre_StructMatrixZeroDiagonal_flt( hypre_StructMatrix *A );
+HYPRE_Int
+hypre_StructMatrixZeroDiagonal_dbl( hypre_StructMatrix *A );
+HYPRE_Int
+hypre_StructMatrixZeroDiagonal_long_dbl( hypre_StructMatrix *A );
+
+HYPRE_Int
 hypre_StructMatvec_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_float beta, hypre_StructVector *y );
 HYPRE_Int
 hypre_StructMatvec_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_double beta, hypre_StructVector *y );
@@ -1176,32 +2226,25 @@ HYPRE_Int
 hypre_StructMatvec_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_long_double beta, hypre_StructVector *y );
 
 HYPRE_Int
-hypre_StructMatvecCC0_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC0_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC0_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-
-HYPRE_Int
-hypre_StructMatvecCC1_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC1_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC1_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-
-HYPRE_Int
-hypre_StructMatvecCC2_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC2_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-HYPRE_Int
-hypre_StructMatvecCC2_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *compute_box_aa, hypre_IndexRef stride );
-
-HYPRE_Int
 hypre_StructMatvecCompute_flt( void *matvec_vdata, hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_float beta, hypre_StructVector *y );
 HYPRE_Int
 hypre_StructMatvecCompute_dbl( void *matvec_vdata, hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_double beta, hypre_StructVector *y );
 HYPRE_Int
 hypre_StructMatvecCompute_long_dbl( void *matvec_vdata, hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_long_double beta, hypre_StructVector *y );
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_CC_flt( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *x_data_box, hypre_Box *y_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_CC_dbl( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *x_data_box, hypre_Box *y_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_CC_long_dbl( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *x_data_box, hypre_Box *y_data_box );
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_VC_flt( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_VC_dbl( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_VC_long_dbl( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box );
 
 void *
 hypre_StructMatvecCreate_flt( void );
@@ -1218,11 +2261,32 @@ HYPRE_Int
 hypre_StructMatvecDestroy_long_dbl( void *matvec_vdata );
 
 HYPRE_Int
+hypre_StructMatvecSetTranspose_flt( void *matvec_vdata, HYPRE_Int transpose );
+HYPRE_Int
+hypre_StructMatvecSetTranspose_dbl( void *matvec_vdata, HYPRE_Int transpose );
+HYPRE_Int
+hypre_StructMatvecSetTranspose_long_dbl( void *matvec_vdata, HYPRE_Int transpose );
+
+HYPRE_Int
 hypre_StructMatvecSetup_flt( void *matvec_vdata, hypre_StructMatrix *A, hypre_StructVector *x );
 HYPRE_Int
 hypre_StructMatvecSetup_dbl( void *matvec_vdata, hypre_StructMatrix *A, hypre_StructVector *x );
 HYPRE_Int
 hypre_StructMatvecSetup_long_dbl( void *matvec_vdata, hypre_StructMatrix *A, hypre_StructVector *x );
+
+HYPRE_Int
+hypre_StructMatvecT_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_float beta, hypre_StructVector *y );
+HYPRE_Int
+hypre_StructMatvecT_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_double beta, hypre_StructVector *y );
+HYPRE_Int
+hypre_StructMatvecT_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_long_double beta, hypre_StructVector *y );
+
+HYPRE_Int
+hypre_StructNumGhostFromStencil_flt( hypre_StructStencil *stencil, HYPRE_Int **num_ghost_ptr );
+HYPRE_Int
+hypre_StructNumGhostFromStencil_dbl( hypre_StructStencil *stencil, HYPRE_Int **num_ghost_ptr );
+HYPRE_Int
+hypre_StructNumGhostFromStencil_long_dbl( hypre_StructStencil *stencil, HYPRE_Int **num_ghost_ptr );
 
 HYPRE_Int
 hypre_StructPartialCopy_flt( hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *array_boxes );
@@ -1253,11 +2317,25 @@ HYPRE_Int
 hypre_StructStencilDestroy_long_dbl( hypre_StructStencil *stencil );
 
 HYPRE_Int
-hypre_StructStencilElementRank_flt( hypre_StructStencil *stencil, hypre_Index stencil_element );
+hypre_StructStencilOffsetEntry_flt( hypre_StructStencil *stencil, hypre_Index stencil_offset );
 HYPRE_Int
-hypre_StructStencilElementRank_dbl( hypre_StructStencil *stencil, hypre_Index stencil_element );
+hypre_StructStencilOffsetEntry_dbl( hypre_StructStencil *stencil, hypre_Index stencil_offset );
 HYPRE_Int
-hypre_StructStencilElementRank_long_dbl( hypre_StructStencil *stencil, hypre_Index stencil_element );
+hypre_StructStencilOffsetEntry_long_dbl( hypre_StructStencil *stencil, hypre_Index stencil_offset );
+
+HYPRE_Int
+hypre_StructStencilPrint_flt( FILE *file, hypre_StructStencil *stencil );
+HYPRE_Int
+hypre_StructStencilPrint_dbl( FILE *file, hypre_StructStencil *stencil );
+HYPRE_Int
+hypre_StructStencilPrint_long_dbl( FILE *file, hypre_StructStencil *stencil );
+
+HYPRE_Int
+hypre_StructStencilRead_flt( FILE *file, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
+HYPRE_Int
+hypre_StructStencilRead_dbl( FILE *file, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
+HYPRE_Int
+hypre_StructStencilRead_long_dbl( FILE *file, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
 
 hypre_StructStencil *
 hypre_StructStencilRef_flt( hypre_StructStencil *stencil );
@@ -1267,11 +2345,11 @@ hypre_StructStencil *
 hypre_StructStencilRef_long_dbl( hypre_StructStencil *stencil );
 
 HYPRE_Int
-hypre_StructStencilSymmetrize_flt( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_elements_ptr );
+hypre_StructStencilSymmetrize_flt( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_offsets_ptr );
 HYPRE_Int
-hypre_StructStencilSymmetrize_dbl( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_elements_ptr );
+hypre_StructStencilSymmetrize_dbl( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_offsets_ptr );
 HYPRE_Int
-hypre_StructStencilSymmetrize_long_dbl( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_elements_ptr );
+hypre_StructStencilSymmetrize_long_dbl( hypre_StructStencil *stencil, hypre_StructStencil **symm_stencil_ptr, HYPRE_Int **symm_offsets_ptr );
 
 HYPRE_Int
 hypre_StructVectorAssemble_flt( hypre_StructVector *vector );
@@ -1323,11 +2401,11 @@ hypre_StructVector *
 hypre_StructVectorClone_long_dbl( hypre_StructVector *vector );
 
 HYPRE_Int
-hypre_StructVectorCopy_flt( hypre_StructVector *x, hypre_StructVector *y );
+hypre_StructVectorComputeDataSpace_flt( hypre_StructVector *vector, hypre_IndexRef stride, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
 HYPRE_Int
-hypre_StructVectorCopy_dbl( hypre_StructVector *x, hypre_StructVector *y );
+hypre_StructVectorComputeDataSpace_dbl( hypre_StructVector *vector, hypre_IndexRef stride, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
 HYPRE_Int
-hypre_StructVectorCopy_long_dbl( hypre_StructVector *x, hypre_StructVector *y );
+hypre_StructVectorComputeDataSpace_long_dbl( hypre_StructVector *vector, hypre_IndexRef stride, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr );
 
 hypre_StructVector *
 hypre_StructVectorCreate_flt( MPI_Comm comm, hypre_StructGrid *grid );
@@ -1342,6 +2420,13 @@ HYPRE_Int
 hypre_StructVectorDestroy_dbl( hypre_StructVector *vector );
 HYPRE_Int
 hypre_StructVectorDestroy_long_dbl( hypre_StructVector *vector );
+
+HYPRE_Int
+hypre_StructVectorForget_flt( hypre_StructVector *vector );
+HYPRE_Int
+hypre_StructVectorForget_dbl( hypre_StructVector *vector );
+HYPRE_Int
+hypre_StructVectorForget_long_dbl( hypre_StructVector *vector );
 
 hypre_CommPkg *
 hypre_StructVectorGetMigrateCommPkg_flt( hypre_StructVector *from_vector, hypre_StructVector *to_vector );
@@ -1372,6 +2457,34 @@ HYPRE_Int
 hypre_StructVectorInitializeShell_long_dbl( hypre_StructVector *vector );
 
 HYPRE_Int
+hypre_StructVectorMapCommInfo_flt( hypre_StructVector *vector, hypre_CommInfo *comm_info );
+HYPRE_Int
+hypre_StructVectorMapCommInfo_dbl( hypre_StructVector *vector, hypre_CommInfo *comm_info );
+HYPRE_Int
+hypre_StructVectorMapCommInfo_long_dbl( hypre_StructVector *vector, hypre_CommInfo *comm_info );
+
+HYPRE_Int
+hypre_StructVectorMapDataBox_flt( hypre_StructVector *vector, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructVectorMapDataBox_dbl( hypre_StructVector *vector, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructVectorMapDataBox_long_dbl( hypre_StructVector *vector, hypre_Box *dbox );
+
+HYPRE_Int
+hypre_StructVectorMapDataIndex_flt( hypre_StructVector *vector, hypre_Index dindex );
+HYPRE_Int
+hypre_StructVectorMapDataIndex_dbl( hypre_StructVector *vector, hypre_Index dindex );
+HYPRE_Int
+hypre_StructVectorMapDataIndex_long_dbl( hypre_StructVector *vector, hypre_Index dindex );
+
+HYPRE_Int
+hypre_StructVectorMapDataStride_flt( hypre_StructVector *vector, hypre_Index dstride );
+HYPRE_Int
+hypre_StructVectorMapDataStride_dbl( hypre_StructVector *vector, hypre_Index dstride );
+HYPRE_Int
+hypre_StructVectorMapDataStride_long_dbl( hypre_StructVector *vector, hypre_Index dstride );
+
+HYPRE_Int
 hypre_StructVectorMigrate_flt( hypre_CommPkg *comm_pkg, hypre_StructVector *from_vector, hypre_StructVector *to_vector );
 HYPRE_Int
 hypre_StructVectorMigrate_dbl( hypre_CommPkg *comm_pkg, hypre_StructVector *from_vector, hypre_StructVector *to_vector );
@@ -1379,11 +2492,25 @@ HYPRE_Int
 hypre_StructVectorMigrate_long_dbl( hypre_CommPkg *comm_pkg, hypre_StructVector *from_vector, hypre_StructVector *to_vector );
 
 HYPRE_Int
+hypre_StructVectorNeedResize_flt( hypre_StructVector *vector, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructVectorNeedResize_dbl( hypre_StructVector *vector, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructVectorNeedResize_long_dbl( hypre_StructVector *vector, hypre_BoxArray *data_space );
+
+HYPRE_Int
 hypre_StructVectorPointwiseDivision_flt( hypre_StructVector *x, hypre_StructVector *y, hypre_StructVector **z_ptr );
 HYPRE_Int
 hypre_StructVectorPointwiseDivision_dbl( hypre_StructVector *x, hypre_StructVector *y, hypre_StructVector **z_ptr );
 HYPRE_Int
 hypre_StructVectorPointwiseDivision_long_dbl( hypre_StructVector *x, hypre_StructVector *y, hypre_StructVector **z_ptr );
+
+HYPRE_Int
+hypre_StructVectorPointwiseDivpy_flt( hypre_float alpha, hypre_StructVector *x, hypre_StructVector *z, hypre_float beta, hypre_StructVector *y );
+HYPRE_Int
+hypre_StructVectorPointwiseDivpy_dbl( hypre_double alpha, hypre_StructVector *x, hypre_StructVector *z, hypre_double beta, hypre_StructVector *y );
+HYPRE_Int
+hypre_StructVectorPointwiseDivpy_long_dbl( hypre_long_double alpha, hypre_StructVector *x, hypre_StructVector *z, hypre_long_double beta, hypre_StructVector *y );
 
 HYPRE_Int
 hypre_StructVectorPointwiseInverse_flt( hypre_StructVector *x, hypre_StructVector **y_ptr );
@@ -1427,12 +2554,33 @@ hypre_StructVectorReadData_dbl( FILE *file, hypre_StructVector *vector );
 HYPRE_Int
 hypre_StructVectorReadData_long_dbl( FILE *file, hypre_StructVector *vector );
 
+HYPRE_Int
+hypre_StructVectorRebase_flt( hypre_StructVector *vector, hypre_StructGrid *grid, hypre_Index stride );
+HYPRE_Int
+hypre_StructVectorRebase_dbl( hypre_StructVector *vector, hypre_StructGrid *grid, hypre_Index stride );
+HYPRE_Int
+hypre_StructVectorRebase_long_dbl( hypre_StructVector *vector, hypre_StructGrid *grid, hypre_Index stride );
+
 hypre_StructVector *
 hypre_StructVectorRef_flt( hypre_StructVector *vector );
 hypre_StructVector *
 hypre_StructVectorRef_dbl( hypre_StructVector *vector );
 hypre_StructVector *
 hypre_StructVectorRef_long_dbl( hypre_StructVector *vector );
+
+HYPRE_Int
+hypre_StructVectorResize_flt( hypre_StructVector *vector, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructVectorResize_dbl( hypre_StructVector *vector, hypre_BoxArray *data_space );
+HYPRE_Int
+hypre_StructVectorResize_long_dbl( hypre_StructVector *vector, hypre_BoxArray *data_space );
+
+HYPRE_Int
+hypre_StructVectorRestore_flt( hypre_StructVector *vector );
+HYPRE_Int
+hypre_StructVectorRestore_dbl( hypre_StructVector *vector );
+HYPRE_Int
+hypre_StructVectorRestore_long_dbl( hypre_StructVector *vector );
 
 HYPRE_Int
 hypre_StructVectorScaleValues_flt( hypre_StructVector *vector, hypre_float factor );
@@ -1449,11 +2597,11 @@ HYPRE_Int
 hypre_StructVectorSetBoxValues_long_dbl( hypre_StructVector *vector, hypre_Box *set_box, hypre_Box *value_box, hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 
 HYPRE_Int
-hypre_StructVectorSetConstantValues_flt( hypre_StructVector *vector, hypre_float values );
+hypre_StructVectorSetConstantValues_flt( hypre_StructVector *vector, hypre_float value );
 HYPRE_Int
-hypre_StructVectorSetConstantValues_dbl( hypre_StructVector *vector, hypre_double values );
+hypre_StructVectorSetConstantValues_dbl( hypre_StructVector *vector, hypre_double value );
 HYPRE_Int
-hypre_StructVectorSetConstantValues_long_dbl( hypre_StructVector *vector, hypre_long_double values );
+hypre_StructVectorSetConstantValues_long_dbl( hypre_StructVector *vector, hypre_long_double value );
 
 HYPRE_Int
 hypre_StructVectorSetDataSize_flt( hypre_StructVector *vector, HYPRE_Int *data_size, HYPRE_Int *data_host_size );
@@ -1463,6 +2611,13 @@ HYPRE_Int
 hypre_StructVectorSetDataSize_long_dbl( hypre_StructVector *vector, HYPRE_Int *data_size, HYPRE_Int *data_host_size );
 
 HYPRE_Int
+hypre_StructVectorSetMemoryMode_flt( hypre_StructVector *vector, HYPRE_Int memory_mode );
+HYPRE_Int
+hypre_StructVectorSetMemoryMode_dbl( hypre_StructVector *vector, HYPRE_Int memory_mode );
+HYPRE_Int
+hypre_StructVectorSetMemoryMode_long_dbl( hypre_StructVector *vector, HYPRE_Int memory_mode );
+
+HYPRE_Int
 hypre_StructVectorSetNumGhost_flt( hypre_StructVector *vector, HYPRE_Int *num_ghost );
 HYPRE_Int
 hypre_StructVectorSetNumGhost_dbl( hypre_StructVector *vector, HYPRE_Int *num_ghost );
@@ -1470,11 +2625,46 @@ HYPRE_Int
 hypre_StructVectorSetNumGhost_long_dbl( hypre_StructVector *vector, HYPRE_Int *num_ghost );
 
 HYPRE_Int
+hypre_StructVectorSetRandomValues_flt( hypre_StructVector *vector, HYPRE_Int seed );
+HYPRE_Int
+hypre_StructVectorSetRandomValues_dbl( hypre_StructVector *vector, HYPRE_Int seed );
+HYPRE_Int
+hypre_StructVectorSetRandomValues_long_dbl( hypre_StructVector *vector, HYPRE_Int seed );
+
+HYPRE_Int
+hypre_StructVectorSetStride_flt( hypre_StructVector *vector, hypre_IndexRef stride );
+HYPRE_Int
+hypre_StructVectorSetStride_dbl( hypre_StructVector *vector, hypre_IndexRef stride );
+HYPRE_Int
+hypre_StructVectorSetStride_long_dbl( hypre_StructVector *vector, hypre_IndexRef stride );
+
+HYPRE_Int
 hypre_StructVectorSetValues_flt( hypre_StructVector *vector, hypre_Index grid_index, hypre_float *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int
 hypre_StructVectorSetValues_dbl( hypre_StructVector *vector, hypre_Index grid_index, hypre_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int
 hypre_StructVectorSetValues_long_dbl( hypre_StructVector *vector, hypre_Index grid_index, hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
+
+HYPRE_Int
+hypre_StructVectorUnMapDataBox_flt( hypre_StructVector *vector, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructVectorUnMapDataBox_dbl( hypre_StructVector *vector, hypre_Box *dbox );
+HYPRE_Int
+hypre_StructVectorUnMapDataBox_long_dbl( hypre_StructVector *vector, hypre_Box *dbox );
+
+HYPRE_Int
+hypre_StructVectorUnMapDataIndex_flt( hypre_StructVector *vector, hypre_Index dindex );
+HYPRE_Int
+hypre_StructVectorUnMapDataIndex_dbl( hypre_StructVector *vector, hypre_Index dindex );
+HYPRE_Int
+hypre_StructVectorUnMapDataIndex_long_dbl( hypre_StructVector *vector, hypre_Index dindex );
+
+HYPRE_Int
+hypre_StructVectorUnMapDataStride_flt( hypre_StructVector *vector, hypre_Index dstride );
+HYPRE_Int
+hypre_StructVectorUnMapDataStride_dbl( hypre_StructVector *vector, hypre_Index dstride );
+HYPRE_Int
+hypre_StructVectorUnMapDataStride_long_dbl( hypre_StructVector *vector, hypre_Index dstride );
 
 HYPRE_Int
 hypre_SubtractBoxArrays_flt( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2, hypre_BoxArray *tmp_box_array );

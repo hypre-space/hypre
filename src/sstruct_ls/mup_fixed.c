@@ -113,6 +113,462 @@ hypre_NodeRelaxSetup( void *relax_vdata, hypre_SStructPMatrix *A, hypre_SStructP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SSAMGCoarseSolve( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCoarseSolve)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGCoarseSolverDestroy( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCoarseSolverDestroy)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCoarseSolverSetup)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGCoarsen( void *ssamg_vdata, hypre_SStructGrid *grid, HYPRE_Int *dxyz_flag, HYPRE_Real **dxyz )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCoarsen)( ssamg_vdata, grid, dxyz_flag, dxyz );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGComputeDxyz( hypre_SStructMatrix *A, HYPRE_Real **dxyz, HYPRE_Int *dxyz_flag )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGComputeDxyz)( A, dxyz, dxyz_flag );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGComputeMaxLevels( hypre_SStructGrid *grid, HYPRE_Int *max_levels )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGComputeMaxLevels)( grid, max_levels );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGComputeRAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructGrid **cgrid, HYPRE_Int *cdir_p, HYPRE_Int non_galerkin, hypre_SStructMatrix **Ac_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGComputeRAP)( A, P, cgrid, cdir_p, non_galerkin, Ac_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix *A, hypre_SStructMatrix *P, HYPRE_Int *cdir_p, hypre_SStructMatrix **Ac_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGComputeRAPNonGlk)( A, P, cdir_p, Ac_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void *
+hypre_SSAMGCreate( hypre_MPI_Comm comm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCreate)( comm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_SStructMatrix*
+hypre_SSAMGCreateInterpOp( hypre_SStructMatrix *A, hypre_SStructGrid *cgrid, HYPRE_Int *cdir_p )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGCreateInterpOp)( A, cgrid, cdir_p );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGDestroy( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGDestroy)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGGetFinalRelativeResidualNorm( void *ssamg_vdata, HYPRE_Real *relative_residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGGetFinalRelativeResidualNorm)( ssamg_vdata, relative_residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGGetNumIterations( void *ssamg_vdata, HYPRE_Int *num_iterations )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGGetNumIterations)( ssamg_vdata, num_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGPrintLogging( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGPrintLogging)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGPrintStats( void *ssamg_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGPrintStats)( ssamg_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelax( void *relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelax)( relax_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxCreate( MPI_Comm comm, HYPRE_Int nparts, void **relax_vdata_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxCreate)( comm, nparts, relax_vdata_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxDestroy( void *relax_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxDestroy)( relax_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxGeneric( void *relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxGeneric)( relax_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxJacobi( void *relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxJacobi)( relax_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetActiveParts( void *relax_vdata, HYPRE_Int *active_p )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetActiveParts)( relax_vdata, active_p );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetMatvecData( void *relax_vdata, void *matvec_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetMatvecData)( relax_vdata, matvec_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetMaxIter( void *relax_vdata, HYPRE_Int max_iter )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetMaxIter)( relax_vdata, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetNodeset( void *relax_vdata, HYPRE_Int nodeset, HYPRE_Int nodeset_size, hypre_Index nodeset_stride, hypre_Index *nodeset_indices )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetNodeset)( relax_vdata, nodeset, nodeset_size, nodeset_stride, nodeset_indices );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetNodesetRank( void *relax_vdata, HYPRE_Int nodeset, HYPRE_Int nodeset_rank )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetNodesetRank)( relax_vdata, nodeset, nodeset_rank );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetNumNodesets( void *relax_vdata, HYPRE_Int num_nodesets )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetNumNodesets)( relax_vdata, num_nodesets );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetPostRelax( void *relax_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetPostRelax)( relax_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetPreRelax( void *relax_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetPreRelax)( relax_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetTempVec( void *relax_vdata, hypre_SStructVector *t )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetTempVec)( relax_vdata, t );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetTol( void *relax_vdata, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetTol)( relax_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetType( void *relax_vdata, HYPRE_Int relax_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetType)( relax_vdata, relax_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetWeights( void *relax_vdata, HYPRE_Real *weights )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetWeights)( relax_vdata, weights );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetZeroGuess( void *relax_vdata, HYPRE_Int zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetZeroGuess)( relax_vdata, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGRelaxSetup( void *relax_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGRelaxSetup)( relax_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetCoarseSolverType( void *ssamg_vdata, HYPRE_Int csolver_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetCoarseSolverType)( ssamg_vdata, csolver_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetDxyz( void *ssamg_vdata, HYPRE_Int nparts, HYPRE_Real **dxyz )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetDxyz)( ssamg_vdata, nparts, dxyz );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetInterpType( void *ssamg_vdata, HYPRE_Int interp_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetInterpType)( ssamg_vdata, interp_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetLogging( void *ssamg_vdata, HYPRE_Int logging )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetLogging)( ssamg_vdata, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxCoarseSize( void *ssamg_vdata, HYPRE_Int max_coarse_size )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetMaxCoarseSize)( ssamg_vdata, max_coarse_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxIter( void *ssamg_vdata, HYPRE_Int max_iter )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetMaxIter)( ssamg_vdata, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetMaxLevels( void *ssamg_vdata, HYPRE_Int max_levels )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetMaxLevels)( ssamg_vdata, max_levels );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetNonGalerkinRAP( void *ssamg_vdata, HYPRE_Int non_galerkin )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetNonGalerkinRAP)( ssamg_vdata, non_galerkin );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetNumCoarseRelax( void *ssamg_vdata, HYPRE_Int num_coarse_relax )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetNumCoarseRelax)( ssamg_vdata, num_coarse_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetNumPosRelax( void *ssamg_vdata, HYPRE_Int num_pos_relax )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetNumPosRelax)( ssamg_vdata, num_pos_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetNumPreRelax( void *ssamg_vdata, HYPRE_Int num_pre_relax )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetNumPreRelax)( ssamg_vdata, num_pre_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetPrintFreq( void *ssamg_vdata, HYPRE_Int print_freq )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetPrintFreq)( ssamg_vdata, print_freq );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetPrintLevel( void *ssamg_vdata, HYPRE_Int print_level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetPrintLevel)( ssamg_vdata, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetRelChange( void *ssamg_vdata, HYPRE_Int rel_change )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetRelChange)( ssamg_vdata, rel_change );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetRelaxType( void *ssamg_vdata, HYPRE_Int relax_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetRelaxType)( ssamg_vdata, relax_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetRelaxWeight( void *ssamg_vdata, HYPRE_Real relax_weight )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetRelaxWeight)( ssamg_vdata, relax_weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetSkipRelax( void *ssamg_vdata, HYPRE_Int skip_relax )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetSkipRelax)( ssamg_vdata, skip_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetTol( void *ssamg_vdata, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetTol)( ssamg_vdata, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetZeroGuess( void *ssamg_vdata, HYPRE_Int zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetZeroGuess)( ssamg_vdata, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetup( void *ssamg_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetup)( ssamg_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetupInterpOp( hypre_SStructMatrix *A, HYPRE_Int *cdir_p, hypre_SStructMatrix *P, HYPRE_Int interp_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetupInterpOp)( A, cdir_p, P, interp_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix *A, HYPRE_Int *cdir_p, hypre_SStructMatrix *P, HYPRE_Int interp_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSetupUInterpOp)( A, cdir_p, P, interp_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSolve( void *ssamg_vdata, hypre_SStructMatrix *A, hypre_SStructVector *b, hypre_SStructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SSAMGSolve)( ssamg_vdata, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructKrylovAxpy( HYPRE_Complex alpha, void *x, void *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructKrylovAxpy)( alpha, x, y );
@@ -249,25 +705,9 @@ hypre_SStructKrylovScaleVector( HYPRE_Complex alpha, void *x )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int seed )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetRandomValues)( pvector, seed );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_SStructSetRandomValues( void *v, HYPRE_Int seed )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructSetRandomValues)( v, seed );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, HYPRE_Int seed )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorSetRandomValues)( vector, seed );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -281,17 +721,9 @@ hypre_SysPFMGCreate( MPI_Comm comm )
 /*--------------------------------------------------------------------------*/
 
 hypre_SStructPMatrix *
-hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A, hypre_SStructPGrid *cgrid, HYPRE_Int cdir )
+hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A, HYPRE_Int cdir, hypre_Index stride )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGCreateInterpOp)( A, cgrid, cdir );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_SStructPMatrix *
-hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R, hypre_SStructPMatrix *A, hypre_SStructPMatrix *P, hypre_SStructPGrid *coarse_grid, HYPRE_Int cdir )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGCreateRAPOp)( R, A, P, coarse_grid, cdir );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGCreateInterpOp)( A, cdir, stride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -321,9 +753,9 @@ hypre_SysPFMGGetNumIterations( void *sys_pfmg_vdata, HYPRE_Int *num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata, HYPRE_Int myid )
+hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGPrintLogging)( sys_pfmg_vdata, myid );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGPrintLogging)( sys_pfmg_vdata );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -529,17 +961,9 @@ hypre_SysPFMGSetup( void *sys_pfmg_vdata, hypre_SStructMatrix *A_in, hypre_SStru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A, HYPRE_Int cdir, hypre_Index findex, hypre_Index stride, hypre_SStructPMatrix *P )
+hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *P, hypre_SStructPMatrix *A, HYPRE_Int cdir )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGSetupInterpOp)( A, cdir, findex, stride, P );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R, hypre_SStructPMatrix *A, hypre_SStructPMatrix *P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride, hypre_SStructPMatrix *Ac )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGSetupRAPOp)( R, A, P, cdir, cindex, cstride, Ac );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGSetupInterpOp)( P, A, cdir );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -553,73 +977,9 @@ hypre_SysPFMGSolve( void *sys_pfmg_vdata, hypre_SStructMatrix *A_in, hypre_SStru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SysSemiInterp( void *sys_interp_vdata, hypre_SStructPMatrix *P, hypre_SStructPVector *xc, hypre_SStructPVector *e )
+hypre_SysPFMGZeroDiagonal( hypre_SStructPMatrix *A )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiInterp)( sys_interp_vdata, P, xc, e );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiInterpCreate)( sys_interp_vdata_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiInterpDestroy)( sys_interp_vdata );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiInterpSetup( void *sys_interp_vdata, hypre_SStructPMatrix *P, HYPRE_Int P_stored_as_transpose, hypre_SStructPVector *xc, hypre_SStructPVector *e, hypre_Index cindex, hypre_Index findex, hypre_Index stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiInterpSetup)( sys_interp_vdata, P, P_stored_as_transpose, xc, e, cindex, findex, stride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiRestrict( void *sys_restrict_vdata, hypre_SStructPMatrix *R, hypre_SStructPVector *r, hypre_SStructPVector *rc )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiRestrict)( sys_restrict_vdata, R, r, rc );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiRestrictCreate)( sys_restrict_vdata_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiRestrictDestroy)( sys_restrict_vdata );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysSemiRestrictSetup( void *sys_restrict_vdata, hypre_SStructPMatrix *R, HYPRE_Int R_stored_as_transpose, hypre_SStructPVector *r, hypre_SStructPVector *rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysSemiRestrictSetup)( sys_restrict_vdata, R, R_stored_as_transpose, r, rc, cindex, findex, stride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysStructCoarsen( hypre_SStructPGrid *fgrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_SStructPGrid **cgrid_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysStructCoarsen)( fgrid, index, stride, prune, cgrid_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SysPFMGZeroDiagonal)( A );
 }
 
 

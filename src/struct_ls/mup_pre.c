@@ -2158,6 +2158,24 @@ HYPRE_StructPFMGGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver so
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructPFMGGetMatmultType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *matmult_type )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructPFMGGetMatmultType_flt( solver, matmult_type );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructPFMGGetMatmultType_dbl( solver, matmult_type );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructPFMGGetMatmultType_long_dbl( solver, matmult_type );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructPFMGGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter )
 {
    switch (precision)
@@ -2420,6 +2438,24 @@ HYPRE_StructPFMGSetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver so
          return HYPRE_StructPFMGSetLogging_dbl( solver, logging );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_StructPFMGSetLogging_long_dbl( solver, logging );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructPFMGSetMatmultType_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int matmult_type )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructPFMGSetMatmultType_flt( solver, matmult_type );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructPFMGSetMatmultType_dbl( solver, matmult_type );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructPFMGSetMatmultType_long_dbl( solver, matmult_type );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }

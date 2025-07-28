@@ -50,6 +50,15 @@ HYPRE_Int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid );
 
 HYPRE_Int
+HYPRE_StructGridCoarsen_flt( HYPRE_StructGrid grid, HYPRE_Int *stride, HYPRE_StructGrid *cgrid );
+HYPRE_Int
+HYPRE_StructGridCoarsen_dbl( HYPRE_StructGrid grid, HYPRE_Int *stride, HYPRE_StructGrid *cgrid );
+HYPRE_Int
+HYPRE_StructGridCoarsen_long_dbl( HYPRE_StructGrid grid, HYPRE_Int *stride, HYPRE_StructGrid *cgrid );
+HYPRE_Int
+HYPRE_StructGridCoarsen( HYPRE_StructGrid grid, HYPRE_Int *stride, HYPRE_StructGrid *cgrid );
+
+HYPRE_Int
 HYPRE_StructGridCreate_flt( MPI_Comm comm, HYPRE_Int ndim, HYPRE_StructGrid *grid );
 HYPRE_Int
 HYPRE_StructGridCreate_dbl( MPI_Comm comm, HYPRE_Int ndim, HYPRE_StructGrid *grid );
@@ -66,6 +75,24 @@ HYPRE_Int
 HYPRE_StructGridDestroy_long_dbl( HYPRE_StructGrid grid );
 HYPRE_Int
 HYPRE_StructGridDestroy( HYPRE_StructGrid grid );
+
+HYPRE_Int
+HYPRE_StructGridPrintVTK_flt( const char *filename, HYPRE_StructGrid grid );
+HYPRE_Int
+HYPRE_StructGridPrintVTK_dbl( const char *filename, HYPRE_StructGrid grid );
+HYPRE_Int
+HYPRE_StructGridPrintVTK_long_dbl( const char *filename, HYPRE_StructGrid grid );
+HYPRE_Int
+HYPRE_StructGridPrintVTK( const char *filename, HYPRE_StructGrid grid );
+
+HYPRE_Int
+HYPRE_StructGridProjectBox_flt( HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructGridProjectBox_dbl( HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructGridProjectBox_long_dbl( HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructGridProjectBox( HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_StructGridSetExtents_flt( HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper );
@@ -140,6 +167,15 @@ HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
 
 HYPRE_Int
+HYPRE_StructMatrixClearBoundary_flt( HYPRE_StructMatrix matrix );
+HYPRE_Int
+HYPRE_StructMatrixClearBoundary_dbl( HYPRE_StructMatrix matrix );
+HYPRE_Int
+HYPRE_StructMatrixClearBoundary_long_dbl( HYPRE_StructMatrix matrix );
+HYPRE_Int
+HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix );
+
+HYPRE_Int
 HYPRE_StructMatrixCreate_flt( MPI_Comm comm, HYPRE_StructGrid grid, HYPRE_StructStencil stencil, HYPRE_StructMatrix *matrix );
 HYPRE_Int
 HYPRE_StructMatrixCreate_dbl( MPI_Comm comm, HYPRE_StructGrid grid, HYPRE_StructStencil stencil, HYPRE_StructMatrix *matrix );
@@ -203,6 +239,15 @@ HYPRE_Int
 HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix );
 
 HYPRE_Int
+HYPRE_StructMatrixMatmat_flt( HYPRE_StructMatrix A, HYPRE_Int Atranspose, HYPRE_StructMatrix B, HYPRE_Int Btranspose, HYPRE_StructMatrix *C );
+HYPRE_Int
+HYPRE_StructMatrixMatmat_dbl( HYPRE_StructMatrix A, HYPRE_Int Atranspose, HYPRE_StructMatrix B, HYPRE_Int Btranspose, HYPRE_StructMatrix *C );
+HYPRE_Int
+HYPRE_StructMatrixMatmat_long_dbl( HYPRE_StructMatrix A, HYPRE_Int Atranspose, HYPRE_StructMatrix B, HYPRE_Int Btranspose, HYPRE_StructMatrix *C );
+HYPRE_Int
+HYPRE_StructMatrixMatmat( HYPRE_StructMatrix A, HYPRE_Int Atranspose, HYPRE_StructMatrix B, HYPRE_Int Btranspose, HYPRE_StructMatrix *C );
+
+HYPRE_Int
 HYPRE_StructMatrixMatvec_flt( hypre_float alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_float beta, HYPRE_StructVector y );
 HYPRE_Int
 HYPRE_StructMatrixMatvec_dbl( hypre_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_double beta, HYPRE_StructVector y );
@@ -210,6 +255,15 @@ HYPRE_Int
 HYPRE_StructMatrixMatvec_long_dbl( hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
 HYPRE_Int
 HYPRE_StructMatrixMatvec( hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+
+HYPRE_Int
+HYPRE_StructMatrixMatvecT_flt( hypre_float alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_float beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructMatrixMatvecT_dbl( hypre_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_double beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructMatrixMatvecT_long_dbl( hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructMatrixMatvecT( hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
 
 HYPRE_Int
 HYPRE_StructMatrixPrint_flt( const char *filename, HYPRE_StructMatrix matrix, HYPRE_Int all );
@@ -266,6 +320,15 @@ HYPRE_Int
 HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
+HYPRE_StructMatrixSetDomainStride_flt( HYPRE_StructMatrix matrix, HYPRE_Int *domain_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetDomainStride_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *domain_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetDomainStride_long_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *domain_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetDomainStride( HYPRE_StructMatrix matrix, HYPRE_Int *domain_stride );
+
+HYPRE_Int
 HYPRE_StructMatrixSetNumGhost_flt( HYPRE_StructMatrix matrix, HYPRE_Int *num_ghost );
 HYPRE_Int
 HYPRE_StructMatrixSetNumGhost_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *num_ghost );
@@ -275,6 +338,15 @@ HYPRE_Int
 HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix, HYPRE_Int *num_ghost );
 
 HYPRE_Int
+HYPRE_StructMatrixSetRangeStride_flt( HYPRE_StructMatrix matrix, HYPRE_Int *range_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetRangeStride_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *range_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetRangeStride_long_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *range_stride );
+HYPRE_Int
+HYPRE_StructMatrixSetRangeStride( HYPRE_StructMatrix matrix, HYPRE_Int *range_stride );
+
+HYPRE_Int
 HYPRE_StructMatrixSetSymmetric_flt( HYPRE_StructMatrix matrix, HYPRE_Int symmetric );
 HYPRE_Int
 HYPRE_StructMatrixSetSymmetric_dbl( HYPRE_StructMatrix matrix, HYPRE_Int symmetric );
@@ -282,6 +354,15 @@ HYPRE_Int
 HYPRE_StructMatrixSetSymmetric_long_dbl( HYPRE_StructMatrix matrix, HYPRE_Int symmetric );
 HYPRE_Int
 HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix, HYPRE_Int symmetric );
+
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose_flt( HYPRE_StructMatrix matrix, HYPRE_Int transpose );
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose_dbl( HYPRE_StructMatrix matrix, HYPRE_Int transpose );
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose_long_dbl( HYPRE_StructMatrix matrix, HYPRE_Int transpose );
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix matrix, HYPRE_Int transpose );
 
 HYPRE_Int
 HYPRE_StructMatrixSetValues_flt( HYPRE_StructMatrix matrix, HYPRE_Int *index, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
@@ -320,6 +401,15 @@ HYPRE_Int
 HYPRE_StructStencilSetElement( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
 
 HYPRE_Int
+HYPRE_StructStencilSetEntry_flt( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
+HYPRE_Int
+HYPRE_StructStencilSetEntry_dbl( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
+HYPRE_Int
+HYPRE_StructStencilSetEntry_long_dbl( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
+HYPRE_Int
+HYPRE_StructStencilSetEntry( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
+
+HYPRE_Int
 HYPRE_StructVectorAddToBoxValues_flt( HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, hypre_float *values );
 HYPRE_Int
 HYPRE_StructVectorAddToBoxValues_dbl( HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, hypre_double *values );
@@ -354,6 +444,15 @@ HYPRE_Int
 HYPRE_StructVectorAssemble_long_dbl( HYPRE_StructVector vector );
 HYPRE_Int
 HYPRE_StructVectorAssemble( HYPRE_StructVector vector );
+
+HYPRE_Int
+HYPRE_StructVectorClone_flt( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
+HYPRE_Int
+HYPRE_StructVectorClone_dbl( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
+HYPRE_Int
+HYPRE_StructVectorClone_long_dbl( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
+HYPRE_Int
+HYPRE_StructVectorClone( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 
 HYPRE_Int
 HYPRE_StructVectorCopy_flt( HYPRE_StructVector x, HYPRE_StructVector y );
@@ -428,6 +527,15 @@ HYPRE_Int
 HYPRE_StructVectorInitialize( HYPRE_StructVector vector );
 
 HYPRE_Int
+HYPRE_StructVectorInnerProd_flt( HYPRE_StructVector x, HYPRE_StructVector y, hypre_float *result );
+HYPRE_Int
+HYPRE_StructVectorInnerProd_dbl( HYPRE_StructVector x, HYPRE_StructVector y, hypre_double *result );
+HYPRE_Int
+HYPRE_StructVectorInnerProd_long_dbl( HYPRE_StructVector x, HYPRE_StructVector y, hypre_long_double *result );
+HYPRE_Int
+HYPRE_StructVectorInnerProd( HYPRE_StructVector x, HYPRE_StructVector y, void *result );
+
+HYPRE_Int
 HYPRE_StructVectorMigrate_flt( HYPRE_CommPkg comm_pkg, HYPRE_StructVector from_vector, HYPRE_StructVector to_vector );
 HYPRE_Int
 HYPRE_StructVectorMigrate_dbl( HYPRE_CommPkg comm_pkg, HYPRE_StructVector from_vector, HYPRE_StructVector to_vector );
@@ -482,13 +590,13 @@ HYPRE_Int
 HYPRE_StructVectorSetBoxValues2( HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values );
 
 HYPRE_Int
-HYPRE_StructVectorSetConstantValues_flt( HYPRE_StructVector vector, hypre_float values );
+HYPRE_StructVectorSetConstantValues_flt( HYPRE_StructVector vector, hypre_float value );
 HYPRE_Int
-HYPRE_StructVectorSetConstantValues_dbl( HYPRE_StructVector vector, hypre_double values );
+HYPRE_StructVectorSetConstantValues_dbl( HYPRE_StructVector vector, hypre_double value );
 HYPRE_Int
-HYPRE_StructVectorSetConstantValues_long_dbl( HYPRE_StructVector vector, hypre_long_double values );
+HYPRE_StructVectorSetConstantValues_long_dbl( HYPRE_StructVector vector, hypre_long_double value );
 HYPRE_Int
-HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector, hypre_long_double values );
+HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector, hypre_long_double value );
 
 HYPRE_Int
 HYPRE_StructVectorSetNumGhost_flt( HYPRE_StructVector vector, HYPRE_Int *num_ghost );
@@ -498,6 +606,24 @@ HYPRE_Int
 HYPRE_StructVectorSetNumGhost_long_dbl( HYPRE_StructVector vector, HYPRE_Int *num_ghost );
 HYPRE_Int
 HYPRE_StructVectorSetNumGhost( HYPRE_StructVector vector, HYPRE_Int *num_ghost );
+
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues_flt( HYPRE_StructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues_dbl( HYPRE_StructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues_long_dbl( HYPRE_StructVector vector, HYPRE_Int seed );
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues( HYPRE_StructVector vector, HYPRE_Int seed );
+
+HYPRE_Int
+HYPRE_StructVectorSetStride_flt( HYPRE_StructVector vector, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructVectorSetStride_dbl( HYPRE_StructVector vector, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructVectorSetStride_long_dbl( HYPRE_StructVector vector, HYPRE_Int *stride );
+HYPRE_Int
+HYPRE_StructVectorSetStride( HYPRE_StructVector vector, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_StructVectorSetValues_flt( HYPRE_StructVector vector, HYPRE_Int *index, hypre_float value );
@@ -526,10 +652,19 @@ HYPRE_Int
 HYPRE_StructGridAssemble_pre( HYPRE_Precision precision, HYPRE_StructGrid grid );
 
 HYPRE_Int
+HYPRE_StructGridCoarsen_pre( HYPRE_Precision precision, HYPRE_StructGrid grid, HYPRE_Int *stride, HYPRE_StructGrid *cgrid );
+
+HYPRE_Int
 HYPRE_StructGridCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_Int ndim, HYPRE_StructGrid *grid );
 
 HYPRE_Int
 HYPRE_StructGridDestroy_pre( HYPRE_Precision precision, HYPRE_StructGrid grid );
+
+HYPRE_Int
+HYPRE_StructGridPrintVTK_pre( HYPRE_Precision precision, const char *filename, HYPRE_StructGrid grid );
+
+HYPRE_Int
+HYPRE_StructGridProjectBox_pre( HYPRE_Precision precision, HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *origin, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_StructGridSetExtents_pre( HYPRE_Precision precision, HYPRE_StructGrid grid, HYPRE_Int *ilower, HYPRE_Int *iupper );
@@ -556,6 +691,9 @@ HYPRE_Int
 HYPRE_StructMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix );
 
 HYPRE_Int
+HYPRE_StructMatrixClearBoundary_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix );
+
+HYPRE_Int
 HYPRE_StructMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructGrid grid, HYPRE_StructStencil stencil, HYPRE_StructMatrix *matrix );
 
 HYPRE_Int
@@ -577,7 +715,13 @@ HYPRE_Int
 HYPRE_StructMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix );
 
 HYPRE_Int
+HYPRE_StructMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_StructMatrix A, HYPRE_Int Atranspose, HYPRE_StructMatrix B, HYPRE_Int Btranspose, HYPRE_StructMatrix *C );
+
+HYPRE_Int
 HYPRE_StructMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+
+HYPRE_Int
+HYPRE_StructMatrixMatvecT_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructMatrix A, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
 
 HYPRE_Int
 HYPRE_StructMatrixPrint_pre( HYPRE_Precision precision, const char *filename, HYPRE_StructMatrix matrix, HYPRE_Int all );
@@ -598,10 +742,19 @@ HYPRE_Int
 HYPRE_StructMatrixSetConstantValues_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
+HYPRE_StructMatrixSetDomainStride_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *domain_stride );
+
+HYPRE_Int
 HYPRE_StructMatrixSetNumGhost_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *num_ghost );
 
 HYPRE_Int
+HYPRE_StructMatrixSetRangeStride_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *range_stride );
+
+HYPRE_Int
 HYPRE_StructMatrixSetSymmetric_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int symmetric );
+
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int transpose );
 
 HYPRE_Int
 HYPRE_StructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *index, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
@@ -616,6 +769,9 @@ HYPRE_Int
 HYPRE_StructStencilSetElement_pre( HYPRE_Precision precision, HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
 
 HYPRE_Int
+HYPRE_StructStencilSetEntry_pre( HYPRE_Precision precision, HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE_Int *offset );
+
+HYPRE_Int
 HYPRE_StructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values );
 
 HYPRE_Int
@@ -626,6 +782,9 @@ HYPRE_StructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_StructVector
 
 HYPRE_Int
 HYPRE_StructVectorAssemble_pre( HYPRE_Precision precision, HYPRE_StructVector vector );
+
+HYPRE_Int
+HYPRE_StructVectorClone_pre( HYPRE_Precision precision, HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 
 HYPRE_Int
 HYPRE_StructVectorCopy_pre( HYPRE_Precision precision, HYPRE_StructVector x, HYPRE_StructVector y );
@@ -652,6 +811,9 @@ HYPRE_Int
 HYPRE_StructVectorInitialize_pre( HYPRE_Precision precision, HYPRE_StructVector vector );
 
 HYPRE_Int
+HYPRE_StructVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_StructVector x, HYPRE_StructVector y, void *result );
+
+HYPRE_Int
 HYPRE_StructVectorMigrate_pre( HYPRE_Precision precision, HYPRE_CommPkg comm_pkg, HYPRE_StructVector from_vector, HYPRE_StructVector to_vector );
 
 HYPRE_Int
@@ -670,10 +832,16 @@ HYPRE_Int
 HYPRE_StructVectorSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int *vilower, HYPRE_Int *viupper, void *values );
 
 HYPRE_Int
-HYPRE_StructVectorSetConstantValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, hypre_long_double values );
+HYPRE_StructVectorSetConstantValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, hypre_long_double value );
 
 HYPRE_Int
 HYPRE_StructVectorSetNumGhost_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *num_ghost );
+
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int seed );
+
+HYPRE_Int
+HYPRE_StructVectorSetStride_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_StructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, hypre_long_double value );

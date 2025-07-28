@@ -193,6 +193,22 @@ hypre_SStructGridBoxProcFindBoxManEntry( hypre_SStructGrid *grid, HYPRE_Int part
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructGridCoarsen( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, hypre_SStructGrid **cgrid_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridCoarsen)( fgrid, origin, strides, periodic, cgrid_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridComputeGlobalSizes( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridComputeGlobalSizes)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructGridCreateCommInfo( hypre_SStructGrid *grid )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridCreateCommInfo)( grid );
@@ -241,6 +257,14 @@ hypre_SStructGridPrint( FILE *file, hypre_SStructGrid *grid )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridPrintGLVis)( grid, meshprefix, trans, origin );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructGridRead( MPI_Comm comm, FILE *file, hypre_SStructGrid **grid_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRead)( comm, file, grid_ptr );
@@ -252,6 +276,22 @@ HYPRE_Int
 hypre_SStructGridRef( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRef)( grid, grid_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridSetActiveParts( hypre_SStructGrid *grid, HYPRE_Int *active )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridSetActiveParts)( grid, active );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridSetAllPartsActive( hypre_SStructGrid *grid )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridSetAllPartsActive)( grid );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -280,10 +320,162 @@ hypre_SStructInnerProd( hypre_SStructVector *x, hypre_SStructVector *y, HYPRE_Re
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_SStructMatmat( hypre_SStructMatrix *A, hypre_SStructMatrix *B, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmat)( A, B, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmult( HYPRE_Int nmatrices, hypre_SStructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmult)( nmatrices, matrices, nterms, terms, trans, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultCommunicate( hypre_SStructMatmultData *mmdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultCommunicate)( mmdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata, hypre_SStructMatrix *M )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultCompute)( mmdata, M );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultComputeS( hypre_SStructMatmultData *mmdata, hypre_SStructMatrix *M )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultComputeS)( mmdata, M );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata, hypre_SStructMatrix *M )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultComputeU)( mmdata, M );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultCreate( HYPRE_Int nmatrices_input, hypre_SStructMatrix **matrices_input, HYPRE_Int nterms, HYPRE_Int *terms_input, HYPRE_Int *trans_input, hypre_SStructMatmultData **mmdata_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultCreate)( nmatrices_input, matrices_input, nterms, terms_input, trans_input, mmdata_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultDestroy( hypre_SStructMatmultData *mmdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultDestroy)( mmdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatmultInitialize( hypre_SStructMatmultData *mmdata, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatmultInitialize)( mmdata, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixBoxesToUMatrix)( A, grid, ij_Ahat_ptr, convert_boxa );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToS)( matrix, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixComputeL1Norms)( A, option, l1_norms_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix *A, HYPRE_Int type, hypre_SStructVector **rowsum_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixComputeRowSum)( A, type, rowsum_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix *matrix, hypre_SStructVector **diag_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixGetDiagonal)( matrix, diag_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixHaloToUMatrix)( A, grid, ij_Ahat_ptr, halo_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixMapDataBox( hypre_SStructMatrix *matrix, HYPRE_Int part, HYPRE_Int vi, HYPRE_Int vj, hypre_Box *map_vbox )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixMapDataBox)( matrix, part, vi, vj, map_vbox );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_MemoryLocation
 hypre_SStructMatrixMemoryLocation( hypre_SStructMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixMemoryLocation)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixPtAP)( A, P, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixRAP( hypre_SStructMatrix *R, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixRAP)( R, A, P, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixRTtAP( hypre_SStructMatrix *RT, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixRTtAP)( RT, A, P, M_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -328,6 +520,14 @@ hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix, HYPRE_Int part, HY
 
 /*--------------------------------------------------------------------------*/
 
+hypre_IJMatrix*
+hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix matrix, HYPRE_Int fill_diagonal )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixToUMatrix)( matrix, fill_diagonal );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatvec( HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructVector *x, HYPRE_Complex beta, hypre_SStructVector *y )
 {
@@ -337,9 +537,9 @@ hypre_SStructMatvec( HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructV
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatvecCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructVector *x, HYPRE_Complex beta, hypre_SStructVector *y )
+hypre_SStructMatvecCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_SStructMatrix *A, hypre_SStructVector *x, HYPRE_Complex beta, hypre_SStructVector *b, hypre_SStructVector *y )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecCompute)( matvec_vdata, alpha, A, x, beta, y );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecCompute)( matvec_vdata, alpha, A, x, beta, b, y );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -356,6 +556,14 @@ HYPRE_Int
 hypre_SStructMatvecDestroy( void *matvec_vdata )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecDestroy)( matvec_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecSetTranspose( void *matvec_vdata, HYPRE_Int transpose )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatvecSetTranspose)( matvec_vdata, transpose );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -433,6 +641,14 @@ hypre_SStructPGridGetMaxBoxSize( hypre_SStructPGrid *pgrid )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPGridRef( hypre_SStructPGrid *pgrid, hypre_SStructPGrid **pgrid_ref )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridRef)( pgrid, pgrid_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid *pgrid, hypre_StructGrid *cell_sgrid )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetCellSGrid)( pgrid, cell_sgrid );
@@ -457,6 +673,14 @@ hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid, hypre_Box *pneighbor_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPGridSetSGrid( hypre_StructGrid *sgrid, hypre_SStructPGrid *pgrid, HYPRE_Int var )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetSGrid)( sgrid, pgrid, var );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid, HYPRE_Int nvars, HYPRE_SStructVariable *vartypes )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPGridSetVariables)( pgrid, nvars, vartypes );
@@ -468,6 +692,78 @@ HYPRE_Int
 hypre_SStructPInnerProd( hypre_SStructPVector *px, hypre_SStructPVector *py, HYPRE_Real *presult_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPInnerProd)( px, py, presult_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPInnerProdLocal( hypre_SStructPVector *px, hypre_SStructPVector *py, HYPRE_Real *presult_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPInnerProdLocal)( px, py, presult_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmat( hypre_SStructPMatrix *A, hypre_SStructPMatrix *B, hypre_SStructPMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmat)( A, B, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmult( HYPRE_Int nmatrices, hypre_SStructPMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_SStructPMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmult)( nmatrices, matrices, nterms, terms, trans, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultCommSetup( hypre_SStructPMatmultData *pmmdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultCommSetup)( pmmdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultCommunicate)( pmmdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata, hypre_SStructPMatrix *pM )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultCompute)( pmmdata, pM );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultCreate( HYPRE_Int nmatrices_input, hypre_SStructPMatrix **pmatrices_input, HYPRE_Int nterms, HYPRE_Int *terms_input, HYPRE_Int *trans_input, hypre_SStructPMatmultData **pmmdata_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultCreate)( nmatrices_input, pmatrices_input, nterms, terms_input, trans_input, pmmdata_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultDestroy)( pmmdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData *pmmdata, HYPRE_Int assemble_grid, hypre_SStructPMatrix **pM_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatmultInitialize)( pmmdata, assemble_grid, pM_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -489,6 +785,14 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPMatrixComputeRowSum( hypre_SStructPMatrix *pA, HYPRE_Int type, hypre_SStructPVector *prowsum )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixComputeRowSum)( pA, type, prowsum );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPMatrixCreate( MPI_Comm comm, hypre_SStructPGrid *pgrid, hypre_SStructStencil **stencils, hypre_SStructPMatrix **pmatrix_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixCreate)( comm, pgrid, stencils, pmatrix_ptr );
@@ -500,6 +804,14 @@ HYPRE_Int
 hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixDestroy)( pmatrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixGetDiagonal( hypre_SStructPMatrix *pmatrix, hypre_SStructPVector *pdiag )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixGetDiagonal)( pmatrix, pdiag );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -521,6 +833,30 @@ hypre_SStructPMatrixPrint( const char *filename, hypre_SStructPMatrix *pmatrix, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPMatrixPtAP( hypre_SStructPMatrix *A, hypre_SStructPMatrix *P, hypre_SStructPMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixPtAP)( A, P, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixRAP( hypre_SStructPMatrix *R, hypre_SStructPMatrix *A, hypre_SStructPMatrix *P, hypre_SStructPMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixRAP)( R, A, P, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixRTtAP( hypre_SStructPMatrix *RT, hypre_SStructPMatrix *A, hypre_SStructPMatrix *P, hypre_SStructPMatrix **M_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixRTtAP)( RT, A, P, M_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPMatrixRef( hypre_SStructPMatrix *matrix, hypre_SStructPMatrix **matrix_ref )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixRef)( matrix, matrix_ref );
@@ -537,9 +873,41 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix, hypre_Box *set_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPMatrixSetCEntries( hypre_SStructPMatrix *pmatrix, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int num_centries, HYPRE_Int *centries )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetCEntries)( pmatrix, var, to_var, num_centries, centries );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetDomainStride( hypre_SStructPMatrix *pmatrix, hypre_Index dom_stride )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetDomainStride)( pmatrix, dom_stride );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetRangeStride( hypre_SStructPMatrix *pmatrix, hypre_Index ran_stride )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetRangeStride)( pmatrix, ran_stride );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix, HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetSymmetric)( pmatrix, var, to_var, symmetric );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetTranspose( hypre_SStructPMatrix *pmatrix, HYPRE_Int transpose, HYPRE_Int *resize )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetTranspose)( pmatrix, transpose, resize );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -561,9 +929,9 @@ hypre_SStructPMatvec( HYPRE_Complex alpha, hypre_SStructPMatrix *pA, hypre_SStru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatvecCompute( void *pmatvec_vdata, HYPRE_Complex alpha, hypre_SStructPMatrix *pA, hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *py )
+hypre_SStructPMatvecCompute( void *pmatvec_vdata, HYPRE_Complex alpha, hypre_SStructPMatrix *pA, hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *pb, hypre_SStructPVector *py )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecCompute)( pmatvec_vdata, alpha, pA, px, beta, py );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecCompute)( pmatvec_vdata, alpha, pA, px, beta, pb, py );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -580,6 +948,14 @@ HYPRE_Int
 hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecDestroy)( pmatvec_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatvecSetTranspose( void *pmatvec_vdata, HYPRE_Int transpose )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatvecSetTranspose)( pmatvec_vdata, transpose );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -673,6 +1049,14 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPVectorPointwiseDivpy( HYPRE_Complex alpha, hypre_SStructPVector *px, hypre_SStructPVector *pz, HYPRE_Complex beta, hypre_SStructPVector *py )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorPointwiseDivpy)( alpha, px, pz, beta, py );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPVectorPrint( const char *filename, hypre_SStructPVector *pvector, HYPRE_Int all )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorPrint)( filename, pvector, all );
@@ -700,6 +1084,14 @@ HYPRE_Int
 hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector, HYPRE_Complex value )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetConstantValues)( pvector, value );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int seed )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetRandomValues)( pvector, seed );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -745,9 +1137,9 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
+hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix, HYPRE_MemoryLocation memory_location )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixInitialize)( matrix );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixInitialize)( matrix, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -756,6 +1148,14 @@ HYPRE_Int
 hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixSetBoxValues)( matrix, part, set_box, var, nentries, entries, value_box, values, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action, HYPRE_IJMatrix ijmatrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixSetBoxValuesHelper)( matrix, part, set_box, var, nentries, entries, value_box, values, action, ijmatrix );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -841,6 +1241,14 @@ hypre_SStructVectorPointwiseDivision( hypre_SStructVector *x, hypre_SStructVecto
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructVectorPointwiseDivpy( HYPRE_Complex *alpha, hypre_SStructVector *x, hypre_SStructVector *z, HYPRE_Complex *beta, hypre_SStructVector *y )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseDivpy)( alpha, x, z, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructVectorPointwiseInverse( hypre_SStructVector *x, hypre_SStructVector **y_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseInverse)( x, y_ptr );
@@ -852,6 +1260,14 @@ HYPRE_Int
 hypre_SStructVectorPointwiseProduct( hypre_SStructVector *x, hypre_SStructVector *y, hypre_SStructVector **z_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPointwiseProduct)( x, y, z_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPrintGLVis( hypre_SStructVector *vector, const char *fileprefix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorPrintGLVis)( vector, fileprefix );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -876,6 +1292,14 @@ HYPRE_Int
 hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector, HYPRE_Complex value )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorSetConstantValues)( vector, value );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, HYPRE_Int seed )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructVectorSetRandomValues)( vector, seed );
 }
 
 

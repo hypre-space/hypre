@@ -142,7 +142,6 @@
 #define hypre_IJVectorSetValuesPar HYPRE_FIXEDPRECISION_FUNC ( hypre_IJVectorSetValuesPar )
 #define hypre_IJVectorZeroValues HYPRE_FIXEDPRECISION_FUNC ( hypre_IJVectorZeroValues )
 #define hypre_IJVectorZeroValuesPar HYPRE_FIXEDPRECISION_FUNC ( hypre_IJVectorZeroValuesPar )
-#define hypre_PrefixSumInt HYPRE_FIXEDPRECISION_FUNC ( hypre_PrefixSumInt )
 #define hypre_ijmatrixaddtovalues HYPRE_FIXEDPRECISION_FUNC ( hypre_ijmatrixaddtovalues )
 #define hypre_ijmatrixassemble HYPRE_FIXEDPRECISION_FUNC ( hypre_ijmatrixassemble )
 #define hypre_ijmatrixcreate HYPRE_FIXEDPRECISION_FUNC ( hypre_ijmatrixcreate )

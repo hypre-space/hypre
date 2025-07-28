@@ -35,3 +35,16 @@ mpirun -np 1  ./sstruct -in sstruct.in.amr.graphadd -solver 28 -r 1 2 1 -pooldis
  > amr2d.out.12
 mpirun -np 4  ./sstruct -in sstruct.in.amr.graphadd -solver 28 -P 1 2 1 -pooldist 1 \
  > amr2d.out.13
+
+mpirun -np 1  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 4 -r 4 4 1 -pooldist 0 \
+ > amr2d.out.14
+mpirun -np 2  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 4 -r 4 4 1 -pooldist 1 \
+ > amr2d.out.15
+mpirun -np 1  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 14 -r 4 4 1 -pooldist 0 \
+ > amr2d.out.16
+mpirun -np 2  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 14 -r 4 4 1 -pooldist 1 \
+ > amr2d.out.17
+mpirun -np 1  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -pooldist 0 \
+ > amr2d.out.18
+mpirun -np 2  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -pooldist 1 \
+ > amr2d.out.19

@@ -1009,9 +1009,9 @@ hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCS
 /*--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
-hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose )
+hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRAPKT)( R, A, P, keepTranspose );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRAPKT)( R, A, P, keep_transpose, has_diagonal );
 }
 
 /*--------------------------------------------------------------------------*/

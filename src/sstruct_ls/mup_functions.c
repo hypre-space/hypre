@@ -736,6 +736,240 @@ HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGCreate_pre( precision, comm, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGDestroy( HYPRE_SStructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGDestroy_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGGetFinalRelativeResidualNorm( HYPRE_SStructSolver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGGetFinalRelativeResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGGetNumIterations_pre( precision, solver, num_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetCoarseSolverType( HYPRE_SStructSolver solver, HYPRE_Int csolver_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetCoarseSolverType_pre( precision, solver, csolver_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetDxyz( HYPRE_SStructSolver solver, HYPRE_Int nparts, void *dxyz )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetDxyz_pre( precision, solver, nparts, dxyz );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetInterpType( HYPRE_SStructSolver solver, HYPRE_Int interp_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetInterpType_pre( precision, solver, interp_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetLogging( HYPRE_SStructSolver solver, HYPRE_Int logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxCoarseSize( HYPRE_SStructSolver solver, HYPRE_Int max_coarse_size )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetMaxCoarseSize_pre( precision, solver, max_coarse_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxIter( HYPRE_SStructSolver solver, HYPRE_Int max_iter )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetMaxIter_pre( precision, solver, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetMaxLevels( HYPRE_SStructSolver solver, HYPRE_Int max_levels )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetMaxLevels_pre( precision, solver, max_levels );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetNonGalerkinRAP( HYPRE_SStructSolver solver, HYPRE_Int non_galerkin )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetNonGalerkinRAP_pre( precision, solver, non_galerkin );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetNonZeroGuess( HYPRE_SStructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetNonZeroGuess_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumCoarseRelax( HYPRE_SStructSolver solver, HYPRE_Int num_coarse_relax )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetNumCoarseRelax_pre( precision, solver, num_coarse_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumPostRelax( HYPRE_SStructSolver solver, HYPRE_Int num_post_relax )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetNumPostRelax_pre( precision, solver, num_post_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetNumPreRelax( HYPRE_SStructSolver solver, HYPRE_Int num_pre_relax )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetNumPreRelax_pre( precision, solver, num_pre_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetPrintFreq( HYPRE_SStructSolver solver, HYPRE_Int print_freq )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetPrintFreq_pre( precision, solver, print_freq );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetPrintLevel( HYPRE_SStructSolver solver, HYPRE_Int print_level )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetPrintLevel_pre( precision, solver, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelChange( HYPRE_SStructSolver solver, HYPRE_Int rel_change )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetRelChange_pre( precision, solver, rel_change );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelaxType( HYPRE_SStructSolver solver, HYPRE_Int relax_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetRelaxType_pre( precision, solver, relax_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetRelaxWeight( HYPRE_SStructSolver solver, hypre_long_double weight )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetRelaxWeight_pre( precision, solver, weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetSkipRelax( HYPRE_SStructSolver solver, HYPRE_Int skip_relax )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetSkipRelax_pre( precision, solver, skip_relax );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetTol( HYPRE_SStructSolver solver, hypre_long_double tol )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetTol_pre( precision, solver, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetZeroGuess( HYPRE_SStructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetZeroGuess_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSetup( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSetup_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSSAMGSolve( HYPRE_SStructSolver solver, HYPRE_SStructMatrix A, HYPRE_SStructVector b, HYPRE_SStructVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSSAMGSolve_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -790,6 +1024,24 @@ HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver solver, HYPRE_Int *num_i
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSplitPrintLogging_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSplitSetLogging( HYPRE_SStructSolver solver, HYPRE_Int logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSplitSetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSplitSetMaxIter( HYPRE_SStructSolver solver, HYPRE_Int max_iter )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -803,6 +1055,15 @@ HYPRE_SStructSplitSetNonZeroGuess( HYPRE_SStructSolver solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructSplitSetNonZeroGuess_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructSplitSetPrintLevel( HYPRE_SStructSolver solver, HYPRE_Int print_level )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructSplitSetPrintLevel_pre( precision, solver, print_level );
 }
 
 /*--------------------------------------------------------------------------*/

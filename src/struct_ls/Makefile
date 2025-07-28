@@ -25,7 +25,6 @@ HEADERS =\
  smg.h
 
 FILES =\
- coarsen.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
  F90_HYPRE_struct_flexgmres.c\
@@ -62,17 +61,16 @@ FILES =\
 
 CUFILES =\
  cyclic_reduction.c\
- setrandom.c\
- diagscale.c\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
+ jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
+ pfmg_coarsen.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap5.c\
  pfmg_setup_rap7.c\
- point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
  semi_interp.c\

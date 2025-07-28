@@ -141,6 +141,7 @@
 #undef hypre_MPI_Alltoall
 #undef hypre_MPI_Barrier
 #undef hypre_MPI_Bcast
+#undef hypre_MPI_CheckCommMatrix
 #undef hypre_MPI_Comm_create
 #undef hypre_MPI_Comm_dup
 #undef hypre_MPI_Comm_f2c
@@ -195,11 +196,13 @@
 #undef hypre_Memcpy
 #undef hypre_MemoryPrintUsage
 #undef hypre_Memset
+#undef hypre_PrefixSumInt
 #undef hypre_PrintTiming_fcn
 #undef hypre_Rand
 #undef hypre_RandI
 #undef hypre_ReAlloc
 #undef hypre_ReAlloc_v2
+#undef hypre_RestoreLogLevel
 #undef hypre_SeedRand
 #undef hypre_SetCubMemPoolSize
 #undef hypre_SetDevice
@@ -208,6 +211,7 @@
 #undef hypre_SetGpuAwareMPI
 #undef hypre_SetInitialized
 #undef hypre_SetLogLevel
+#undef hypre_SetLogLevelSaved
 #undef hypre_SetSpGemmAlgorithm
 #undef hypre_SetSpGemmBinned
 #undef hypre_SetSpGemmRownnzEstimateMethod
@@ -219,6 +223,7 @@
 #undef hypre_SetUseGpuRand
 #undef hypre_SetUserDeviceMalloc
 #undef hypre_SetUserDeviceMfree
+#undef hypre_UniqueIntArrayND
 #undef hypre_UnorderedBigIntMapCreate
 #undef hypre_UnorderedBigIntMapDestroy
 #undef hypre_UnorderedBigIntSetCopyToArray
@@ -269,6 +274,7 @@
 #undef hypre_qsort3_abs
 #undef hypre_qsort3i
 #undef hypre_qsort3ir
+#undef hypre_qsortND
 #undef hypre_qsort_abs
 #undef hypre_remove_point
 #undef hypre_setexecutionpolicy

@@ -43,6 +43,7 @@ set(SRCS
   prefix_sum.c
   printf.c
   qsort.c
+  unique.c
   utilities.c
   mpistubs.c
   qsplit.c
@@ -52,6 +53,7 @@ set(SRCS
   threading.c
   timer.c
   timing.c
+  caliper_instrumentation.c
 )
 
 target_sources(${PROJECT_NAME}

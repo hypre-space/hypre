@@ -340,6 +340,24 @@ HYPRE_IJMatrixNorm_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix, void *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_IJMatrixPartialClone_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_IJMatrixPartialClone_flt( matrix_in, matrix_out );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_IJMatrixPartialClone_dbl( matrix_in, matrix_out );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_IJMatrixPartialClone_long_dbl( matrix_in, matrix_out );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_IJMatrixPrint_pre( HYPRE_Precision precision, HYPRE_IJMatrix matrix, const char *filename )
 {
    switch (precision)
