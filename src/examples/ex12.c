@@ -187,7 +187,7 @@ int main (int argc, char *argv[])
       and allows non-stencil relationships between the parts */
    {
       /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
+      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
       /* See MatrixSetObjectType below */
       HYPRE_SStructGraphSetObjectType(graph, object_type);

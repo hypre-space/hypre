@@ -46,7 +46,6 @@ FILES =\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
- jacobi.c\
  pcg_struct.c\
  pfmg.c\
  pfmg_relax.c\

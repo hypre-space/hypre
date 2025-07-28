@@ -62,8 +62,9 @@ mv -f check-case.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -struct -lobpcg"
+ro="-ams -ij -sstruct -struct"
 eo=""
+# From tux master: ro="-ams -ij -sstruct -struct -lobpcg"
 
 co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -98,8 +99,9 @@ co="--enable-shared"
 ./renametest.sh basic $output_dir/basic--enable-shared
 
 co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-debug1
+# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 
 # co="--enable-maxdim=4 --enable-debug"
 # ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
@@ -132,8 +134,9 @@ co="--enable-longdouble --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
 co="--enable-debug CC=mpiCC"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-debug-cpp
+# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 
 # co="--enable-bigint --enable-debug"
 # ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint

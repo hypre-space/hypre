@@ -262,7 +262,7 @@ int main (int argc, char *argv[])
       int part = 0;
 
       /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, grid, &graph);
+      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
       /* See MatrixSetObjectType below */
       if (solver_id > 1 && solver_id < 4)
