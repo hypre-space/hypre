@@ -2615,6 +2615,8 @@ main( hypre_int argc,
    hypre_long_double     final_res_norm_mem;  // memory for multiprecision res norm
    HYPRE_Real           *final_res_norm_ptr = (HYPRE_Real *) &final_res_norm_mem;
    HYPRE_Real            real_res_norm;
+   hypre_long_double     tmp_norm_mem;  // memory for multiprecision norms
+   HYPRE_Real           *tmp_norm_ptr = (HYPRE_Real *) &tmp_norm_mem;
    HYPRE_Real            rhs_norm;
    HYPRE_Real            x0_norm;
 
@@ -4262,6 +4264,7 @@ main( hypre_int argc,
          /*-----------------------------------------------------------
           * Set RHS based on the solution vector
           *-----------------------------------------------------------*/
+
          if (sol_type == 0 || sol_type == 1)
          {
             HYPRE_SStructVectorCreate(comm, grid, &x);
@@ -4291,12 +4294,11 @@ main( hypre_int argc,
                            SetCosineVector(scale, ilower, iupper, values);
                            size = BoxVolume(ilower, iupper);
 
-                           hypre_TMemcpy(d_values, values, HYPRE_Real, size,
-                                         memory_location, HYPRE_MEMORY_HOST);
+                           hypre_MPDataCopyToMP(h_values, values, size);
+                           hypre_MPDataMemcpy(d_values, h_values, size,
+                                              memory_location, HYPRE_MEMORY_HOST);
 
-                           HYPRE_SStructVectorSetBoxValues(x, part,
-                                                           ilower, iupper,
-                                                           var, d_values);
+                           HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, d_values);
                         }
                      }
                   }
@@ -4359,8 +4361,9 @@ main( hypre_int argc,
          }
       } /* if (read_fromfile_flag & 0x2) */
 
-      HYPRE_SStructInnerProd(b, b, &rhs_norm);
-      rhs_norm = sqrt(rhs_norm);
+      HYPRE_SStructInnerProd(b, b, tmp_norm_ptr);
+      hypre_MPDataCopyFromMP(&rhs_norm, tmp_norm_ptr, 1);
+      rhs_norm = hypre_sqrt(rhs_norm);
 
       /*-----------------------------------------------------------
        * Set up the initial solution vector
@@ -4398,8 +4401,9 @@ main( hypre_int argc,
          HYPRE_SStructVectorAssemble(x);
       } /* if (read_fromfile_flag & 0x4) */
 
-      HYPRE_SStructInnerProd(x, x, &x0_norm);
-      x0_norm = sqrt(x0_norm);
+      HYPRE_SStructInnerProd(x, x, tmp_norm_ptr);
+      hypre_MPDataCopyFromMP(&x0_norm, tmp_norm_ptr, 1);
+      x0_norm = hypre_sqrt(x0_norm);
 
       /*-----------------------------------------------------------
        * Build residual vector
@@ -6642,7 +6646,7 @@ main( hypre_int argc,
          {
             final_res_norm = 0.0;
          }
-         hypre_MPDataCopyToMP(final_res_norm_ptr, &final_res_norm, 1);  // RDF: See above
+         hypre_MPDataCopyToMP(final_res_norm_ptr, &final_res_norm, 1); // RDF: See above
          HYPRE_StructVectorDestroy(sr);
 
          HYPRE_StructCycRedDestroy(struct_solver);
@@ -7592,8 +7596,9 @@ main( hypre_int argc,
       {
          HYPRE_SStructVectorCopy(b, r);
          HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
-         HYPRE_SStructInnerProd(r, r, &real_res_norm);
-         real_res_norm = sqrt(real_res_norm);
+         HYPRE_SStructInnerProd(r, r, tmp_norm_ptr);
+         hypre_MPDataCopyFromMP(&real_res_norm, tmp_norm_ptr, 1);
+         real_res_norm = hypre_sqrt(real_res_norm);
          if (rhs_norm > 0)
          {
             real_res_norm = real_res_norm / rhs_norm;
