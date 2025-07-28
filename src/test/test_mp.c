@@ -20,22 +20,13 @@
 #include <string.h>
 #include <math.h>
 #include "_hypre_utilities.h"
-#include "hypre_utilities_mup.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
-#include "HYPRE_parcsr_mv_mp.h"
-#include "hypre_parcsr_mv_mup.h"
 
 #include "HYPRE_IJ_mv.h"
-#include "hypre_IJ_mv_mup.h"
 #include "HYPRE_parcsr_ls.h"
-#include "HYPRE_parcsr_ls_mp.h"
-#include "hypre_parcsr_ls_mup.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-#include "hypre_krylov_mup.h"
-//#include "HYPRE_krylov_mp.h"
-//#include "hypre_utilities_mp.h"
 
 #include <time.h>
 
@@ -58,21 +49,21 @@ int main (int argc, char *argv[])
    int N, n;
    int ilower, iupper;
    int local_size, extra;
-   int solver_id;
+   //int solver_id;
    float h, h2;
    double dh, dh2;
    double d_one = 1.0;
    float d_zero = 0.;
 
    int	       time_index;   
-   float   wall_time;   
+   //float   wall_time;   
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
        for the solver (A, parcsr_A) and the preconditioner (B, parcsr_B). I have included two suggestions 
        below on how we would utilize both of these matrices. 
    */
 
-   HYPRE_IJMatrix C;
-   HYPRE_ParCSRMatrix parcsr_C;   
+   //HYPRE_IJMatrix C;
+   //HYPRE_ParCSRMatrix parcsr_C;   
    
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -95,7 +86,7 @@ int main (int argc, char *argv[])
    /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
-   HYPRE_Solver solver, precond;
+   //HYPRE_Solver solver, precond;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -104,7 +95,7 @@ int main (int argc, char *argv[])
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
    n = 2;
-   solver_id = 0;
+   //solver_id = 0;
    /* Preliminaries: want at least one processor per row */
    if (n*n < num_procs) n = sqrt(num_procs) + 1;
    N = n*n; /* global number of rows */
@@ -296,7 +287,7 @@ int main (int argc, char *argv[])
 
    /*! Done with linear system setup. Now proceed to solve the system. */
    {
-      int num_iterations;
+      //int num_iterations;
       HYPRE_ParVector res = NULL;
       HYPRE_ParVector hres = NULL;      
       HYPRE_ParVector e = NULL;
@@ -312,10 +303,10 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorGetObject_dbl(ijxtmp, (void **) &xtmp);      
             
       /* Defect correction solver using AMG */
-      hypre_printf_dbl("\n\n***** Richardson Defect Correction Solver for AMG *****\n");
+      hypre_printf("\n\n***** Richardson Defect Correction Solver for AMG *****\n");
       /* step 0: create and setup single precision amg solver */
-      time_index = hypre_InitializeTiming_dbl("Setup AMG float");
-      hypre_BeginTiming_dbl(time_index);
+      time_index = hypre_InitializeTiming("Setup AMG float");
+      hypre_BeginTiming(time_index);
 
       HYPRE_Solver amg_solver;
       HYPRE_BoomerAMGCreate_flt(&amg_solver);
@@ -326,14 +317,14 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetTol_flt(amg_solver, 1.0e-16); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
       HYPRE_BoomerAMGSetup_flt(amg_solver, parcsr_A, par_b, par_x);    
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Setup AMG float",hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup AMG float",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
       
-      time_index = hypre_InitializeTiming_dbl("Solve DC mixed");
-      hypre_BeginTiming_dbl(time_index);
+      time_index = hypre_InitializeTiming("Solve DC mixed");
+      hypre_BeginTiming(time_index);
       /* step 1: approximate solve */
       HYPRE_BoomerAMGSolve_flt(amg_solver, parcsr_A, par_b, par_x);
 
@@ -347,7 +338,7 @@ int main (int argc, char *argv[])
 //exit(0);
    
       /* Iterative refinement loop */
-      hypre_printf_dbl("\n\n***** Begin REFINEMENT *****\n");
+      hypre_printf("\n\n***** Begin REFINEMENT *****\n");
 
       /* datastructs for statistics */
       double enrm[MAXITS];
@@ -395,19 +386,19 @@ int main (int argc, char *argv[])
            
          /*=====================*/
     }
-      hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Solve DC mixed",hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming_dbl(time_index);
-      hypre_ClearTiming_dbl();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve DC mixed",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
       fflush(NULL);
 
     /* print some stats */
     /*==========================================*/
     //HYPRE_ParVectorPrint_dbl(par_xb,"MP_sol");
-    hypre_printf_dbl("iter          <e,e>       <r,r>\n");
+    hypre_printf("iter          <e,e>       <r,r>\n");
     for(i=0; i<MAXITS; i++) 
     {
-        hypre_printf_dbl("%d       %e       %e\n",i+1, enrm[i], rnrm[i]);
+        hypre_printf("%d       %e       %e\n",i+1, enrm[i], rnrm[i]);
     }
     /*==========================================*/
 

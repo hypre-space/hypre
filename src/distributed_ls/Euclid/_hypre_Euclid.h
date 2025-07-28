@@ -16,7 +16,7 @@
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "Euclid_mup_func.h"
+#include "_hypre_Euclid_mup_def.h"
 #endif
 
 #elif defined(PETSC_MODE)

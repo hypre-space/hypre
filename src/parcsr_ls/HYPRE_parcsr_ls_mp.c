@@ -12,8 +12,6 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "hypre_parcsr_mv_mup.h"
-#include "hypre_parcsr_ls_mup.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 
@@ -41,14 +39,14 @@ HYPRE_BoomerAMGSetup_mp( HYPRE_Solver solver,
                                  &xtemp);
    HYPRE_ParVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);
    HYPRE_ParVectorCopy_mp(x, xtemp);
 
 /* call setup */        
    HYPRE_BoomerAMGSetup_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_ParVectorCopy_mp(btemp, b);
    HYPRE_ParVectorCopy_mp(xtemp, x);
 
@@ -83,14 +81,14 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
                                  &xtemp);
    HYPRE_ParVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);
    HYPRE_ParVectorCopy_mp(x, xtemp);
 
 /* call setup */        
    HYPRE_BoomerAMGSolve_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_ParVectorCopy_mp(btemp, b);
    HYPRE_ParVectorCopy_mp(xtemp, x);
 

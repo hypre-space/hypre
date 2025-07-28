@@ -14,7 +14,7 @@
 #ifndef STRUCT_MV_MUP_FUNC_HEADER
 #define STRUCT_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_APFillResponseStructAssumedPart HYPRE_MULTIPRECISION_FUNC ( hypre_APFillResponseStructAssumedPart )
 #define hypre_APFindMyBoxesInRegions HYPRE_MULTIPRECISION_FUNC ( hypre_APFindMyBoxesInRegions )
@@ -320,6 +320,10 @@
 #define hypre_StructVectorInitializeData HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorInitializeData )
 #define hypre_StructVectorInitializeShell HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorInitializeShell )
 #define hypre_StructVectorMigrate HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorMigrate )
+#define hypre_StructVectorPointwiseDivpy HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPointwiseDivpy )
+#define hypre_StructVectorPointwiseDivision HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPointwiseDivision )
+#define hypre_StructVectorPointwiseInverse HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPointwiseInverse )
+#define hypre_StructVectorPointwiseProduct HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPointwiseProduct )
 #define hypre_StructVectorPrint HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPrint )
 #define hypre_StructVectorPrintData HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorPrintData )
 #define hypre_StructVectorRead HYPRE_MULTIPRECISION_FUNC ( hypre_StructVectorRead )

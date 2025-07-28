@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 /* Mixed precision function protos */
+
 /* seq_mv_mp.c */
 
 #ifdef HYPRE_MIXED_PRECISION

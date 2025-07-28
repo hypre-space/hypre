@@ -14,7 +14,7 @@
 #ifndef PARCSR_BLOCK_MV_MUP_FUNC_HEADER
 #define PARCSR_BLOCK_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_CSRBlockMatrixBigInitialize HYPRE_MULTIPRECISION_FUNC ( hypre_CSRBlockMatrixBigInitialize )
 #define hypre_CSRBlockMatrixBlockAdd HYPRE_MULTIPRECISION_FUNC ( hypre_CSRBlockMatrixBlockAdd )

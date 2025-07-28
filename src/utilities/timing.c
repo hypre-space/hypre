@@ -28,11 +28,6 @@ hypre_TimingCPUCount -= time_getCPUSeconds()
 hypre_TimingWallCount += time_getWallclockSeconds();\
 hypre_TimingCPUCount += time_getCPUSeconds()
 
-/* Global variable for error handling */
-/* guard definition of global variables to avoid linker errors for multiprecision build */
-#if defined (DEFINE_GLOBAL_VARIABLE)
-hypre_TimingType *hypre_global_timing = NULL;
-#endif
 #define hypre_global_timing_ref(index,field) hypre_global_timing->field
 
 /*--------------------------------------------------------------------------
@@ -40,13 +35,13 @@ hypre_TimingType *hypre_global_timing = NULL;
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_InitializeTiming( const char *name )
+hypre_InitializeTiming_fcn( const char *name )
 {
    HYPRE_Int      time_index;
 
-   hypre_double  *old_wall_time;
-   hypre_double  *old_cpu_time;
-   hypre_double  *old_flops;
+   HYPRE_Real  *old_wall_time;
+   HYPRE_Real  *old_cpu_time;
+   HYPRE_Real  *old_flops;
    char   **old_name;
    HYPRE_Int     *old_state;
    HYPRE_Int     *old_num_regs;
@@ -110,11 +105,11 @@ hypre_InitializeTiming( const char *name )
          old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
 
          (hypre_global_timing_ref(threadid, wall_time)) =
-            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, cpu_time))  =
-            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, flops))     =
-            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, name))      =
             hypre_CTAlloc(char *,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, state))     =
@@ -156,7 +151,7 @@ hypre_InitializeTiming( const char *name )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_FinalizeTiming( HYPRE_Int time_index )
+hypre_FinalizeTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
@@ -200,7 +195,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
 }
 
 HYPRE_Int
-hypre_FinalizeAllTimings( void )
+hypre_FinalizeAllTimings_fcn( void )
 {
    HYPRE_Int time_index, ierr = 0;
 
@@ -224,7 +219,7 @@ hypre_FinalizeAllTimings( void )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IncFLOPCount( HYPRE_BigInt inc )
+hypre_IncFLOPCount_fcn( HYPRE_BigInt inc )
 {
    HYPRE_Int  ierr = 0;
 
@@ -233,7 +228,7 @@ hypre_IncFLOPCount( HYPRE_BigInt inc )
       return ierr;
    }
 
-   hypre_TimingFLOPCount += (hypre_double) (inc);
+   hypre_TimingFLOPCount += (HYPRE_Real) (inc);
 
    return ierr;
 }
@@ -243,7 +238,7 @@ hypre_IncFLOPCount( HYPRE_BigInt inc )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BeginTiming( HYPRE_Int time_index )
+hypre_BeginTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
 
@@ -271,7 +266,7 @@ hypre_BeginTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_EndTiming( HYPRE_Int time_index )
+hypre_EndTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
 
@@ -305,7 +300,7 @@ hypre_EndTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ClearTiming( void )
+hypre_ClearTiming_fcn( void )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
@@ -330,17 +325,17 @@ hypre_ClearTiming( void )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PrintTiming( const char     *heading,
-                   MPI_Comm        comm  )
+hypre_PrintTiming_fcn( const char     *heading,
+                       MPI_Comm        comm  )
 {
    HYPRE_Int  ierr = 0;
 
-   hypre_double  local_wall_time;
-   hypre_double  local_cpu_time;
-   hypre_double  wall_time;
-   hypre_double  cpu_time;
-   hypre_double  wall_mflops;
-   hypre_double  cpu_mflops;
+   HYPRE_Real  local_wall_time;
+   HYPRE_Real  local_cpu_time;
+   HYPRE_Real  wall_time;
+   HYPRE_Real  cpu_time;
+   HYPRE_Real  wall_mflops;
+   HYPRE_Real  cpu_mflops;
 
    HYPRE_Int     i;
    HYPRE_Int     myrank;
@@ -410,14 +405,14 @@ hypre_PrintTiming( const char     *heading,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_GetTiming( const char     *heading,
-                 hypre_double     *wall_time_ptr,
-                 MPI_Comm        comm  )
+hypre_GetTiming_fcn( const char     *heading,
+                     HYPRE_Real     *wall_time_ptr,
+                     MPI_Comm        comm  )
 {
    HYPRE_Int  ierr = 0;
 
-   hypre_double  local_wall_time;
-   hypre_double  wall_time;
+   HYPRE_Real  local_wall_time;
+   HYPRE_Real  wall_time;
 
    HYPRE_Int     i;
    HYPRE_Int     myrank;

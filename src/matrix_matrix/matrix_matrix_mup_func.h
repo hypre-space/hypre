@@ -14,7 +14,7 @@
 #ifndef MATRIX_MATRIX_MUP_FUNC_HEADER
 #define MATRIX_MATRIX_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define HYPRE_ConvertParCSRMatrixToDistributedMatrix HYPRE_MULTIPRECISION_FUNC ( HYPRE_ConvertParCSRMatrixToDistributedMatrix )
 

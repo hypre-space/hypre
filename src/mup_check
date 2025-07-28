@@ -1,0 +1,51 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+## Should be run from src directory
+# Loops over directories with multiprecision files and checks for changes in
+# saved multiprecision function objects.
+#
+# NOTE: Must be run on non-multiprecision build of hypre.
+
+scriptpath=$PWD
+
+DIRS="\
+ IJ_mv\
+ blas\
+ distributed_ls/Euclid\
+ distributed_ls/ParaSails\
+ distributed_ls/pilut\
+ distributed_matrix\
+ krylov\
+ lapack\
+ matrix_matrix\
+ multivector\
+ parcsr_block_mv\
+ parcsr_ls\
+ parcsr_mv\
+ seq_block_mv\
+ seq_mv\
+ sstruct_ls\
+ sstruct_mv\
+ struct_ls\
+ struct_mv\
+ utilities\
+"
+
+# RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
+# but this caused some problems for me when I tried it.  Sort out later.
+make distclean
+./configure --enable-debug
+make -s -j
+
+echo "FUNCTION CHECK:"
+for i in $DIRS
+do
+    echo "Checking $i ...   "
+    (cd $i; $scriptpath/config/mup_check_dir.sh)
+done
+
+

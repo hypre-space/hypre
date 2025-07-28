@@ -14,7 +14,7 @@
 #ifndef SSTRUCT_MV_MUP_FUNC_HEADER
 #define SSTRUCT_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_sstructgraphaddentries HYPRE_MULTIPRECISION_FUNC ( hypre_sstructgraphaddentries )
 #define hypre_sstructgraphassemble HYPRE_MULTIPRECISION_FUNC ( hypre_sstructgraphassemble )
@@ -116,6 +116,7 @@
 #define HYPRE_SStructMatrixRead HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixRead )
 #define HYPRE_SStructMatrixSetBoxValues HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetBoxValues )
 #define HYPRE_SStructMatrixSetBoxValues2 HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetBoxValues2 )
+#define HYPRE_SStructMatrixSetEarlyAssemble HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetEarlyAssemble )
 #define HYPRE_SStructMatrixSetNSSymmetric HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetNSSymmetric )
 #define HYPRE_SStructMatrixSetObjectType HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetObjectType )
 #define HYPRE_SStructMatrixSetSymmetric HYPRE_MULTIPRECISION_FUNC ( HYPRE_SStructMatrixSetSymmetric )
@@ -253,6 +254,9 @@
 #define hypre_SStructVectorMemoryLocation HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorMemoryLocation )
 #define hypre_SStructVectorParConvert HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorParConvert )
 #define hypre_SStructVectorParRestore HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorParRestore )
+#define hypre_SStructVectorPointwiseDivision HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorPointwiseDivision )
+#define hypre_SStructVectorPointwiseInverse HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorPointwiseInverse )
+#define hypre_SStructVectorPointwiseProduct HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorPointwiseProduct )
 #define hypre_SStructVectorRef HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorRef )
 #define hypre_SStructVectorRestore HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorRestore )
 #define hypre_SStructVectorSetConstantValues HYPRE_MULTIPRECISION_FUNC ( hypre_SStructVectorSetConstantValues )

@@ -51,8 +51,18 @@ EXTRA_FILES =
 
 DRIVER_FILES =
 
-COBJS = ${FILES:.c=.o}
+OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -61,9 +71,7 @@ SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/parcsr_block_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
 
 driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
@@ -91,62 +99,20 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS}
 
 install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fR $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fR $(srcdir)/parcsr_block_mv_mup_func.h $(HYPRE_INC_INSTALL)/.
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE_* $(HYPRE_LIB_INSTALL)/.
 
-clean: clean_mup
-	rm -f *.o libHYPRE*
+clean:
+	rm -rf *.o libHYPRE_*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -f driver driver_matvec driver_matmul
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
-
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${COBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${COBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${COBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-
-OBJS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-else
-OBJS = ${COBJS}
-endif
-#
 libHYPRE_parcsr_block_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}

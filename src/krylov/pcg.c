@@ -20,7 +20,7 @@
    version iterates with a special stopping criterion
 */
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
@@ -207,16 +207,16 @@ hypre_PCGSetup( void *pcg_vdata,
                 void *b,
                 void *x         )
 {
-   hypre_PCGData *pcg_data =  (hypre_PCGData *)pcg_vdata;
-   hypre_PCGFunctions *pcg_functions = pcg_data->functions;
-   HYPRE_Int            max_iter         = (pcg_data -> max_iter);
-   HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
-   HYPRE_Real           rtol = (pcg_data -> rtol);
-   HYPRE_Int            two_norm = (pcg_data -> two_norm);
-   HYPRE_Int            flex = (pcg_data -> flex);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
-   void          *precond_data     = (pcg_data -> precond_data);
-   void 	        *precond_Mat = (pcg_data -> precond_Mat) ;
+   hypre_PCGData      *pcg_data             = (hypre_PCGData *)pcg_vdata;
+   hypre_PCGFunctions *pcg_functions        = (pcg_data->functions);
+   HYPRE_Int           max_iter             = (pcg_data -> max_iter);
+   HYPRE_Int           recompute_residual_p = (pcg_data -> recompute_residual_p);
+   HYPRE_Real          rtol                 = (pcg_data -> rtol);
+   HYPRE_Int           two_norm             = (pcg_data -> two_norm);
+   HYPRE_Int           flex                 = (pcg_data -> flex);
+   HYPRE_Int         (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
+   void               *precond_data         = (pcg_data -> precond_data);
+   void 	      *precond_Mat          = (pcg_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -363,7 +363,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
    // preconditioning matrix
-   void	         *precond_Mat = (pcg_data -> precond_Mat) ;
+   void	          *precond_Mat  = (pcg_data -> precond_Mat) ;
    HYPRE_Int       print_level  = (pcg_data -> print_level);
    HYPRE_Int       logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
@@ -690,7 +690,7 @@ hypre_PCGSolve( void *pcg_vdata,
                HYPRE_Real r2ob2;
                /* v = C*s = C*(r_old-r_new) */
                (*(pcg_functions->ClearVector))(v);
-               precond(precond_data, A, s, v);
+               precond(precond_data, precond_Mat, s, v);
                /* <s,v> */
                r2ob2 = (*(pcg_functions->InnerProd))(s, v) / bi_prod;
                if ( r2ob2 < rtol * rtol )

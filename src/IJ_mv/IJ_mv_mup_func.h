@@ -14,7 +14,7 @@
 #ifndef IJ_MV_MUP_FUNC_HEADER
 #define IJ_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_AuxParCSRMatrixCreate HYPRE_MULTIPRECISION_FUNC ( hypre_AuxParCSRMatrixCreate )
 #define hypre_AuxParCSRMatrixDestroy HYPRE_MULTIPRECISION_FUNC ( hypre_AuxParCSRMatrixDestroy )
@@ -28,6 +28,7 @@
 #define hypre_ijmatrixassemble HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixassemble )
 #define hypre_ijmatrixcreate HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixcreate )
 #define hypre_ijmatrixdestroy HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixdestroy )
+#define hypre_ijmatrixgetglobalinfo HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixgetglobalinfo )
 #define hypre_ijmatrixgetlocalrange HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixgetlocalrange )
 #define hypre_ijmatrixgetobject HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixgetobject )
 #define hypre_ijmatrixgetobjecttype HYPRE_MULTIPRECISION_FUNC ( hypre_ijmatrixgetobjecttype )
@@ -87,6 +88,9 @@
 #define HYPRE_IJMatrixReadMM HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixReadMM )
 #define HYPRE_IJMatrixSetConstantValues HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetConstantValues )
 #define HYPRE_IJMatrixSetDiagOffdSizes HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetDiagOffdSizes )
+#define HYPRE_IJMatrixSetEarlyAssemble HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetEarlyAssemble )
+#define HYPRE_IJMatrixSetGrowFactor HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetGrowFactor )
+#define HYPRE_IJMatrixSetInitAllocation HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetInitAllocation )
 #define HYPRE_IJMatrixSetMaxOffProcElmts HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetMaxOffProcElmts )
 #define HYPRE_IJMatrixSetObjectType HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetObjectType )
 #define HYPRE_IJMatrixSetOMPFlag HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJMatrixSetOMPFlag )
@@ -120,6 +124,7 @@
 #define HYPRE_IJVectorSetNumComponents HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorSetNumComponents )
 #define HYPRE_IJVectorSetObjectType HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorSetObjectType )
 #define HYPRE_IJVectorSetPrintLevel HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorSetPrintLevel )
+#define HYPRE_IJVectorSetTags HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorSetTags )
 #define HYPRE_IJVectorSetValues HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorSetValues )
 #define HYPRE_IJVectorUpdateValues HYPRE_MULTIPRECISION_FUNC ( HYPRE_IJVectorUpdateValues )
 #define hypre_IJMatrixCreateAssumedPartition HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixCreateAssumedPartition )
@@ -147,6 +152,9 @@
 #define hypre_IJMatrixSetConstantValuesParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetConstantValuesParCSR )
 #define hypre_IJMatrixSetConstantValuesParCSRHost HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetConstantValuesParCSRHost )
 #define hypre_IJMatrixSetDiagOffdSizesParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetDiagOffdSizesParCSR )
+#define hypre_IJMatrixSetEarlyAssembleParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetEarlyAssembleParCSR )
+#define hypre_IJMatrixSetGrowFactorParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetGrowFactorParCSR )
+#define hypre_IJMatrixSetInitAllocationParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetInitAllocationParCSR )
 #define hypre_IJMatrixSetMaxOffProcElmtsParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetMaxOffProcElmtsParCSR )
 #define hypre_IJMatrixSetMaxOnProcElmtsParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetMaxOnProcElmtsParCSR )
 #define hypre_IJMatrixSetRowSizesParCSR HYPRE_MULTIPRECISION_FUNC ( hypre_IJMatrixSetRowSizesParCSR )
@@ -171,6 +179,7 @@
 #define hypre_IJVectorSetConstantValuesPar HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorSetConstantValuesPar )
 #define hypre_IJVectorSetMaxOffProcElmtsPar HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorSetMaxOffProcElmtsPar )
 #define hypre_IJVectorSetParData HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorSetParData )
+#define hypre_IJVectorSetTagsPar HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorSetTagsPar )
 #define hypre_IJVectorSetValuesPar HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorSetValuesPar )
 #define hypre_IJVectorZeroValuesPar HYPRE_MULTIPRECISION_FUNC ( hypre_IJVectorZeroValuesPar )
 

@@ -11,7 +11,7 @@
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "utilities_mup_func.h"
+#include "_hypre_utilities_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -225,10 +225,6 @@ typedef unsigned long int      hypre_ulongint;
 typedef unsigned long long int hypre_ulonglongint;
 typedef uint32_t               hypre_uint32;
 typedef uint64_t               hypre_uint64;
-
-/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
-typedef float                  hypre_float;
-typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define macros
@@ -638,7 +634,6 @@ typedef struct hypre_MatrixStatsArray_struct
 #include <stdio.h>
 
 /* printf.c */
-// #ifdef HYPRE_BIGINT
 HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
@@ -648,14 +643,6 @@ HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
 HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
-// #else
-// #define hypre_printf  printf
-// #define hypre_fprintf fprintf
-// #define hypre_sprintf sprintf
-// #define hypre_scanf   scanf
-// #define hypre_fscanf  fscanf
-// #define hypre_sscanf  sscanf
-// #endif
 
 #endif
 /******************************************************************************
@@ -1675,11 +1662,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-hypre_double time_getWallclockSeconds( void );
-hypre_double time_getCPUSeconds( void );
-/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
-//hypre_double time_get_wallclock_seconds_( void );
-//hypre_double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -1703,15 +1689,27 @@ hypre_double time_getCPUSeconds( void );
 
 #else
 
+#define hypre_InitializeTiming    hypre_InitializeTiming_fcn
+#define hypre_FinalizeTiming      hypre_FinalizeTiming_fcn
+#define hypre_FinalizeAllTimings  hypre_FinalizeAllTimings_fcn
+#define hypre_IncFLOPCount        hypre_IncFLOPCount_fcn
+#define hypre_BeginTiming         hypre_BeginTiming_fcn
+#define hypre_EndTiming           hypre_EndTiming_fcn
+#define hypre_PrintTiming         hypre_PrintTiming_fcn
+#define hypre_ClearTiming         hypre_ClearTiming_fcn
+#define hypre_GetTiming           hypre_GetTiming_fcn
+
+#endif
+
 /*-------------------------------------------------------
  * Global timing structure
  *-------------------------------------------------------*/
 
 typedef struct
 {
-   hypre_double  *wall_time;
-   hypre_double  *cpu_time;
-   hypre_double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -1719,17 +1717,17 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   hypre_double   wall_count;
-   hypre_double   CPU_count;
-   hypre_double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 
-//#ifdef HYPRE_TIMING_GLOBALS
-//hypre_TimingType *hypre_global_timing = NULL;
-//#else
+#ifdef HYPRE_TIMING_GLOBALS
+hypre_TimingType *hypre_global_timing = NULL;
+#else
 extern hypre_TimingType *hypre_global_timing;
-//#endif
+#endif
 
 /*-------------------------------------------------------
  * Accessor functions
@@ -1750,17 +1748,15 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 /* timing.c */
-HYPRE_Int hypre_InitializeTiming( const char *name );
-HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_FinalizeAllTimings( void );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
-HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_ClearTiming( void );
-HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, hypre_double *wall_time_ptr, MPI_Comm comm );
-
-#endif
+HYPRE_Int hypre_InitializeTiming_fcn( const char *name );
+HYPRE_Int hypre_FinalizeTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_FinalizeAllTimings_fcn( void );
+HYPRE_Int hypre_IncFLOPCount_fcn( HYPRE_BigInt inc );
+HYPRE_Int hypre_BeginTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_EndTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_ClearTiming_fcn( void );
+HYPRE_Int hypre_PrintTiming_fcn( const char *heading, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming_fcn( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
 
 #ifdef __cplusplus
 }
@@ -1853,12 +1849,25 @@ typedef struct
 
 } hypre_DataExchangeResponse;
 
-HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree**);
-HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
-HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list,
-                                 void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size,
-                                 HYPRE_Int response_obj_size, hypre_DataExchangeResponse *response_obj, HYPRE_Int max_response_size,
-                                 HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
+HYPRE_Int
+hypre_CreateBinaryTree(HYPRE_Int          myid,
+                       HYPRE_Int          num_procs,
+                       hypre_BinaryTree **tree_ptr);
+HYPRE_Int
+hypre_DestroyBinaryTree(hypre_BinaryTree *tree);
+HYPRE_Int
+hypre_DataExchangeList(HYPRE_Int num_contacts,
+                       HYPRE_Int *contact_proc_list,
+                       void *contact_send_buf,
+                       HYPRE_Int *contact_send_buf_starts,
+                       HYPRE_Int contact_obj_size,
+                       HYPRE_Int response_obj_size,
+                       hypre_DataExchangeResponse *response_obj,
+                       HYPRE_Int max_response_size,
+                       HYPRE_Int rnum,
+                       MPI_Comm comm,
+                       void **p_response_recv_buf,
+                       HYPRE_Int **p_response_recv_buf_starts);
 
 #endif /* end of header */
 /******************************************************************************
@@ -2468,7 +2477,7 @@ HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
-HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( hypre_float value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
@@ -3966,9 +3975,172 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 /*  high level routines */
 
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef FORTRAN_STYLE_MATRIX
+#define FORTRAN_STYLE_MATRIX
+
+#include "HYPRE_utilities.h"
+
+typedef struct
+{
+   HYPRE_BigInt globalHeight;
+   HYPRE_BigInt height;
+   HYPRE_BigInt width;
+   HYPRE_Real* value;
+   HYPRE_Int    ownsValues;
+} utilities_FortranMatrix;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+utilities_FortranMatrix*
+utilities_FortranMatrixCreate(void);
+void
+utilities_FortranMatrixAllocateData( HYPRE_BigInt h, HYPRE_BigInt w,
+                                     utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w,
+                             utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx );
+
+HYPRE_BigInt
+utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx );
+HYPRE_BigInt
+utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx );
+HYPRE_BigInt
+utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx );
+HYPRE_Real*
+utilities_FortranMatrixValues( utilities_FortranMatrix* mtx );
+
+void
+utilities_FortranMatrixClear( utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx );
+
+void
+utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx );
+
+void
+utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t,
+                             utilities_FortranMatrix* dest );
+void
+utilities_FortranMatrixIndexCopy( HYPRE_Int* index,
+                                  utilities_FortranMatrix* src, HYPRE_Int t,
+                                  utilities_FortranMatrix* dest );
+
+void
+utilities_FortranMatrixSetDiagonal( utilities_FortranMatrix* mtx,
+                                    utilities_FortranMatrix* d );
+void
+utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx,
+                                    utilities_FortranMatrix* d );
+void
+utilities_FortranMatrixAdd( HYPRE_Real a,
+                            utilities_FortranMatrix* mtxA,
+                            utilities_FortranMatrix* mtxB,
+                            utilities_FortranMatrix* mtxC );
+void
+utilities_FortranMatrixDMultiply( utilities_FortranMatrix* d,
+                                  utilities_FortranMatrix* mtx );
+void
+utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
+                                  utilities_FortranMatrix* d );
+void
+utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA,
+                                 utilities_FortranMatrix* mtxB, HYPRE_Int tB,
+                                 utilities_FortranMatrix* mtxC );
+HYPRE_Real
+utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx );
+
+HYPRE_Real
+utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
+                              HYPRE_BigInt i, HYPRE_BigInt j );
+HYPRE_Real*
+utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
+                                 HYPRE_BigInt i, HYPRE_BigInt j );
+HYPRE_Real
+utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx );
+
+void
+utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
+                                    HYPRE_BigInt iFrom, HYPRE_BigInt iTo,
+                                    HYPRE_BigInt jFrom, HYPRE_BigInt jTo,
+                                    utilities_FortranMatrix* block );
+void
+utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );
+
+HYPRE_Int
+utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName);
 
 #ifdef __cplusplus
 }
+#endif
+
+#endif /* FORTRAN_STYLE_MATRIX */
+
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef hypre_MULTIPRECISION_HEADER
+#define hypre_MULTIPRECISION_HEADER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+
+/*--------------------------------------------------------------------------
+ * Global variable
+ *--------------------------------------------------------------------------*/
+
+extern HYPRE_Precision hypre__global_precision;
+
+/*--------------------------------------------------------------------------
+ * Prototypes
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Precision
+hypre_GlobalPrecision();
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "_hypre_utilities_mup.h"
+#endif
 #endif
 
 #endif

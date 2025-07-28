@@ -17,7 +17,6 @@
 #define hypre_PAR_CSR_BLOCK_MATRIX_HEADER
 
 #include "_hypre_utilities.h"
-#include "csr_block_matrix.h"
 #include "_hypre_parcsr_mv.h"
 
 #ifdef __cplusplus

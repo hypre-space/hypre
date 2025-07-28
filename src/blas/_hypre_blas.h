@@ -20,7 +20,7 @@
 #include <HYPRE_config.h>
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "blas_mup_func.h"
+#include "_hypre_blas_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -150,6 +150,17 @@ HYPRE_Int hypre_idamax ( HYPRE_Int *n , HYPRE_Real *dx , HYPRE_Int *incx );
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_blas_mup_undef.h"
+#include "_hypre_blas_mup.h"
+#endif
 #endif
 
 #endif

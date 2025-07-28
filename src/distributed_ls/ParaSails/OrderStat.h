@@ -17,7 +17,7 @@
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "ParaSails_mup_func.h"
+#include "_hypre_ParaSails_mup_def.h"
 #endif
 
 HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i);

@@ -27,11 +27,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-hypre_double time_getWallclockSeconds( void );
-hypre_double time_getCPUSeconds( void );
-/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
-//hypre_double time_get_wallclock_seconds_( void );
-//hypre_double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -55,15 +54,27 @@ hypre_double time_getCPUSeconds( void );
 
 #else
 
+#define hypre_InitializeTiming    hypre_InitializeTiming_fcn
+#define hypre_FinalizeTiming      hypre_FinalizeTiming_fcn
+#define hypre_FinalizeAllTimings  hypre_FinalizeAllTimings_fcn
+#define hypre_IncFLOPCount        hypre_IncFLOPCount_fcn
+#define hypre_BeginTiming         hypre_BeginTiming_fcn
+#define hypre_EndTiming           hypre_EndTiming_fcn
+#define hypre_PrintTiming         hypre_PrintTiming_fcn
+#define hypre_ClearTiming         hypre_ClearTiming_fcn
+#define hypre_GetTiming           hypre_GetTiming_fcn
+
+#endif
+
 /*-------------------------------------------------------
  * Global timing structure
  *-------------------------------------------------------*/
 
 typedef struct
 {
-   hypre_double  *wall_time;
-   hypre_double  *cpu_time;
-   hypre_double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -71,17 +82,17 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   hypre_double   wall_count;
-   hypre_double   CPU_count;
-   hypre_double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 
-//#ifdef HYPRE_TIMING_GLOBALS
-//hypre_TimingType *hypre_global_timing = NULL;
-//#else
+#ifdef HYPRE_TIMING_GLOBALS
+hypre_TimingType *hypre_global_timing = NULL;
+#else
 extern hypre_TimingType *hypre_global_timing;
-//#endif
+#endif
 
 /*-------------------------------------------------------
  * Accessor functions
@@ -102,17 +113,15 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 /* timing.c */
-HYPRE_Int hypre_InitializeTiming( const char *name );
-HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_FinalizeAllTimings( void );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
-HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_ClearTiming( void );
-HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, hypre_double *wall_time_ptr, MPI_Comm comm );
-
-#endif
+HYPRE_Int hypre_InitializeTiming_fcn( const char *name );
+HYPRE_Int hypre_FinalizeTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_FinalizeAllTimings_fcn( void );
+HYPRE_Int hypre_IncFLOPCount_fcn( HYPRE_BigInt inc );
+HYPRE_Int hypre_BeginTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_EndTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_ClearTiming_fcn( void );
+HYPRE_Int hypre_PrintTiming_fcn( const char *heading, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming_fcn( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@
 #include "HYPRE_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "multivector_mup_func.h"
+#include "_hypre_multivector_mup_def.h"
 #endif
 
 typedef struct

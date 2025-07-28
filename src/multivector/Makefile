@@ -21,7 +21,18 @@ FILES =\
  multivector.c\
  temp_multivector.c
 
-OBJS = ${FILES:.c=.o}
+COBJS = ${FILES:.c=.o}
+OBJS = ${COBJS}
+
+ifeq (${MP_BUILD}, 1)
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+
+OBJS = ${COBJS} ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_multivector-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -37,68 +48,17 @@ install: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
 	cp -fR *.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -f *.o libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
-
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-#MKDIR_P = mkdir -p
-#mkmpdir: 
-#	${MKDIR_P} ${MuP_OBJDIR}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c 
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${OBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c 
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${OBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c 
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-# multiprecision object libraries
-MULTIVECTORLIBS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-libHYPRE_multivector.a: ${MULTIVECTORLIBS}
-	@echo  "Building $@ ... "
-	${AR} $@ ${MULTIVECTORLIBS}
-	${RANLIB} $@
-
-libHYPRE_multivector.so libHYPRE_multivector.dylib: ${MULTIVECTORLIBS}
-	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o ${SONAME} ${MULTIVECTORLIBS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s -f ${SONAME} $@
-else
 libHYPRE_multivector.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
@@ -110,4 +70,3 @@ libHYPRE_multivector.so libHYPRE_multivector.dylib: ${OBJS}
 	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
-endif

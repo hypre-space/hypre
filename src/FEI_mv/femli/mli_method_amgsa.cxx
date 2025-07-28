@@ -1687,7 +1687,7 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
 extern "C" {
 #endif
 
-#include "lobpcg.h"
+#include "_hypre_lobpcg.h"
 #include "IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "seq_mv.h"

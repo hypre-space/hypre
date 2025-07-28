@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_PCGCreate: Call class-specific function, e.g. HYPRE_ParCSRPCGCreate

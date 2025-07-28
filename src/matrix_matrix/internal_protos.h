@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "matrix_matrix_mup_func.h"
+#include "_hypre_matrix_matrix_mup_def.h"
 #endif
 
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */

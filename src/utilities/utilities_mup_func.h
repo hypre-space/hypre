@@ -14,7 +14,7 @@
 #ifndef UTILITIES_MUP_FUNC_HEADER
 #define UTILITIES_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_create_elt HYPRE_MULTIPRECISION_FUNC ( hypre_create_elt )
 #define hypre_dispose_elt HYPRE_MULTIPRECISION_FUNC ( hypre_dispose_elt )

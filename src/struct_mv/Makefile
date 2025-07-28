@@ -16,7 +16,6 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  HYPRE_struct_mv.h\
- HYPRE_struct_mv_mp.h\
  _hypre_struct_mv.h\
  _hypre_struct_mv.hpp\
  assumed_part.h\
@@ -27,27 +26,9 @@ HEADERS =\
  struct_grid.h\
  struct_matrix.h\
  struct_stencil.h\
- struct_vector.h\
- protos_mp.h
+ struct_vector.h
 
 FILES =\
- struct_mv_mp.c\
- HYPRE_struct_mv_mp.c
-
-CUFILES =\
- struct_axpy.c\
- struct_communication.c\
- struct_copy.c\
- struct_innerprod.c\
- struct_matrix.c\
- struct_matvec.c\
- struct_scale.c\
- struct_vector.c
-
-#######################
-# Multiprecision files
-#######################
-MuP_FILES = \
  assumed_part.c\
  box_algebra.c\
  box_boundary.c\
@@ -59,23 +40,50 @@ MuP_FILES = \
  F90_HYPRE_struct_matrix.c\
  F90_HYPRE_struct_stencil.c\
  F90_HYPRE_struct_vector.c\
+ HYPRE_struct_grid.c\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_stencil.c\
+ HYPRE_struct_vector.c\
  project.c\
  struct_grid.c\
  struct_io.c\
  struct_matrix_mask.c\
- struct_stencil.c\
- HYPRE_struct_grid.c\
- HYPRE_struct_matrix.c\
- HYPRE_struct_stencil.c\
- HYPRE_struct_vector.c
+ struct_stencil.c
+
+CUFILES =\
+ struct_axpy.c\
+ struct_communication.c\
+ struct_copy.c\
+ struct_innerprod.c\
+ struct_matrix.c\
+ struct_matvec.c\
+ struct_scale.c\
+ struct_vector.c
+
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+# RDF: We should also have these here: HYPRE_struct_mv_mp.c struct_mv_mp.c
+
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
-   MuP_COBJS = ${MuP_FILES:.c=.o}
-else
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+
 endif
 
 SONAME = libHYPRE_struct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -86,70 +94,26 @@ SONAME = libHYPRE_struct_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_struct_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_struct_mv.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/struct_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_struct_mv_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_struct_mv.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/struct_mv_mup_func.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_struct_mv_mup.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl *.o_def
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl *.obj_def
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
-
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
-
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o ${MuP_OBJDIR_single}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o ${MuP_OBJDIR_double}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-else
-OBJS = ${COBJS} ${CUOBJS}
-endif
-#
 
 libHYPRE_struct_mv.a: ${OBJS}
 	@echo  "Building $@ ... "

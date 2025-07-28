@@ -29,7 +29,7 @@ void
 utilities_FortranMatrixAllocateData( HYPRE_BigInt h, HYPRE_BigInt w,
                                      utilities_FortranMatrix* mtx );
 void
-utilities_FortranMatrixWrap( HYPRE_Real*, HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w,
+utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w,
                              utilities_FortranMatrix* mtx );
 void
 utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx );

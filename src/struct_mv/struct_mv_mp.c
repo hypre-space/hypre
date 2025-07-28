@@ -11,10 +11,7 @@
  *
  *****************************************************************************/
 
-#include "_hypre_utilities.h"
 #include "_hypre_struct_mv.h"
-#include "hypre_struct_mv_mup.h"
-#include "hypre_utilities_mup.h"
 
 #if defined(HYPRE_MIXED_PRECISION)
 

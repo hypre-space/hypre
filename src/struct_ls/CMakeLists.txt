@@ -11,6 +11,7 @@ set(HDRS
 set(SRCS
   coarsen.c
   cyclic_reduction.c
+  diagscale.c
   F90_HYPRE_struct_bicgstab.c
   F90_HYPRE_struct_cycred.c
   F90_HYPRE_struct_gmres.c
@@ -53,6 +54,7 @@ set(SRCS
   semi_interp.c
   semi_restrict.c
   semi_setup_rap.c
+  setrandom.c
   smg2_setup_rap.c
   smg3_setup_rap.c
   smg_axpy.c

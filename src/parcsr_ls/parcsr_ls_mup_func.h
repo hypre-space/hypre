@@ -14,7 +14,7 @@
 #ifndef PARCSR_LS_MUP_FUNC_HEADER
 #define PARCSR_LS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_ADSComputePi HYPRE_MULTIPRECISION_FUNC ( hypre_ADSComputePi )
 #define hypre_ADSComputePixyz HYPRE_MULTIPRECISION_FUNC ( hypre_ADSComputePixyz )
@@ -1030,6 +1030,7 @@
 #define HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm )
 #define HYPRE_ParCSRGMRESGetNumIterations HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESGetNumIterations )
 #define HYPRE_ParCSRGMRESGetPrecond HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESGetPrecond )
+#define HYPRE_ParCSRGMRESGetRefSolution HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESGetRefSolution )
 #define HYPRE_ParCSRGMRESGetResidual HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESGetResidual )
 #define HYPRE_ParCSRGMRESSetAbsoluteTol HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetAbsoluteTol )
 #define HYPRE_ParCSRGMRESSetKDim HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetKDim )
@@ -1038,6 +1039,7 @@
 #define HYPRE_ParCSRGMRESSetMinIter HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetMinIter )
 #define HYPRE_ParCSRGMRESSetPrecond HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetPrecond )
 #define HYPRE_ParCSRGMRESSetPrintLevel HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetPrintLevel )
+#define HYPRE_ParCSRGMRESSetRefSolution HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetRefSolution )
 #define HYPRE_ParCSRGMRESSetStopCrit HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetStopCrit )
 #define HYPRE_ParCSRGMRESSetTol HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetTol )
 #define HYPRE_ParCSRGMRESSetup HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRGMRESSetup )
@@ -1835,6 +1837,7 @@
 #define hypre_ParKrylovIdentity HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovIdentity )
 #define hypre_ParKrylovIdentitySetup HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovIdentitySetup )
 #define hypre_ParKrylovInnerProd HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovInnerProd )
+#define hypre_ParKrylovInnerProdTagged HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovInnerProdTagged )
 #define hypre_ParKrylovMassAxpy HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovMassAxpy )
 #define hypre_ParKrylovMassDotpTwo HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovMassDotpTwo )
 #define hypre_ParKrylovMassInnerProd HYPRE_MULTIPRECISION_FUNC ( hypre_ParKrylovMassInnerProd )
@@ -1874,8 +1877,8 @@
 #define hypre_MGRBuildPFromWpHost HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildPFromWpHost )
 #define hypre_MGRBuildPHost HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildPHost )
 #define hypre_MGRBuildRestrict HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildRestrict )
-#define hypre_MGRBuildRFromW HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildRFromW )
-#define hypre_MGRBuildRFromWHost HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildRFromWHost )
+#define hypre_MGRBuildRFromWr HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildRFromWr )
+#define hypre_MGRBuildRFromWrHost HYPRE_MULTIPRECISION_FUNC ( hypre_MGRBuildRFromWrHost )
 #define hypre_MGRColLumpedRestrict HYPRE_MULTIPRECISION_FUNC ( hypre_MGRColLumpedRestrict )
 #define hypre_MGRTruncateAcfCPR HYPRE_MULTIPRECISION_FUNC ( hypre_MGRTruncateAcfCPR )
 #define hypre_MGRTruncateAcfCPRDevice HYPRE_MULTIPRECISION_FUNC ( hypre_MGRTruncateAcfCPRDevice )

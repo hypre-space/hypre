@@ -4,43 +4,12 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-## Call from directory where multiprecision functions are.
-# Generate file containing function names in current folder.
-# This will be used to generate a header file for transforming 
-# multiprecision function names. It will also be useful for 
-# regression testing for the multiprecision build. 
+# Print the defined function names in the object files of the current directory.
 #
-# NOTE: It must be run on symbols generated from the 
-# non-multiprecision build of hypre.
+# The script uses 'nm' and searches for functions labeled with 'T'.
 
-# Assumes hypre has been built (non-multiprecision) to generate object files
-###
-#  * make distclean
-#  * ./configure –enable-debug
-#  * make -s 
-###
+# This prevents unmatched patterns from expanding (e.g., when there are no .obj files)
+shopt -s nullglob
 
-# extract directory rootname
-rootdir=$PWD
-rootdir="${rootdir%/}"
-rootname="${rootdir##*/}"
+nm -P *.o *.obj | grep ' T ' | awk '{print $1}' | sed 's/^_//' | sed 's/_$//'
 
-## extract function names and **remove** leading and trailing underscores, if any
-## To include local functions (static functions) test on $2=="t" as well (use: $2=="t|T"{print $3})
-#if [ ${rootname} == "utilities" ]
-#then
-#   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*//;s/_*$//' > ${rootname}_functions.new
-#else
-## NOTE: This will exclude functions beginning with HYPRE_
-#   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*//;s/_*$//' | sed -n '/^HYPRE_/ !p' > ${rootname}_functions.new
-#fi
-
-## extract function names and **remove** trailing underscores, if any
-## To include local functions (static functions) test on $2=="t" as well (use: $2=="t|T"{print $3})
-#if [ ${rootname} == "utilities" ]
-#then
-   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*$//' > ${rootname}_functions.new
-#else
-## NOTE: This will exclude functions beginning with HYPRE_
-#   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*$//' | sed -n '/^HYPRE_/ !p' > ${rootname}_functions.new
-#fi

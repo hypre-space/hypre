@@ -14,7 +14,7 @@
 #ifndef EUCLID_MUP_FUNC_HEADER
 #define EUCLID_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define Euclid_dhApply HYPRE_MULTIPRECISION_FUNC ( Euclid_dhApply )
 #define Euclid_dhCreate HYPRE_MULTIPRECISION_FUNC ( Euclid_dhCreate )

@@ -14,7 +14,7 @@
 #ifndef SEQ_BLOCK_MV_MUP_FUNC_HEADER
 #define SEQ_BLOCK_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_DenseBlockMatrixMultiply HYPRE_MULTIPRECISION_FUNC ( hypre_DenseBlockMatrixMultiply )
 #define hypre_DenseBlockMatrixMultiplyHost HYPRE_MULTIPRECISION_FUNC ( hypre_DenseBlockMatrixMultiplyHost )

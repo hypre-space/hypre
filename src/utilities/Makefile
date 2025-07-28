@@ -38,11 +38,6 @@ HEADERS =\
  _hypre_utilities.hpp
 
 FILES =\
- 
-#######################
-# Multiprecision files
-#######################
-MuP_FILES = \
  F90_HYPRE_error.c\
  F90_HYPRE_general.c\
  HYPRE_handle.c\
@@ -64,7 +59,6 @@ MuP_FILES = \
  mmio.c\
  mpi_comm_f2c.c\
  prefix_sum.c\
- printf.c\
  qsort.c\
  utilities.c\
  mpistubs.c\
@@ -85,18 +79,36 @@ CUFILES=\
  nvtx.c\
  stl_ops.c
 
-ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
-   MuP_COBJS = ${MuP_FILES:.c=.o}
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
+ifeq (${MP_BUILD}, 1)
+MP_FILES += printf.c multiprecision.c
 else
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
+FILES += printf.c multiprecision.c
 endif
 
-#COBJS = ${FILES:.c=.o}
-#CUOBJS = ${CUFILES:.c=.obj}
-#OBJS = ${COBJS} ${CUOBJS}
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -106,117 +118,39 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/multiprecision.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_utilities_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/multiprecision.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_utilities_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
 
 ##################################################################
 # Rules
 ##################################################################
 
-#libHYPRE_utilities.a: ${OBJS}
-#	@echo  "Building $@ ... "
-#	${AR} $@ ${OBJS}
-#	${RANLIB} $@
-
-#libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
-#	@echo  "Building $@ ... "
-#	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-#	ln -s -f ${SONAME} $@
-
-#${OBJS}: ${HEADERS}
-
-##################################################################
-# Multiprecision build Rules
-##################################################################
-
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-#MKDIR_P = mkdir -p
-#mkmpdir: 
-#	${MKDIR_P} ${MuP_OBJDIR}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o ${MuP_OBJDIR_single}/%.obj: %.c ${HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o ${MuP_OBJDIR_double}/%.obj: %.c ${HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c ${HEADERS}
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-#.SECONDEXPANSION:			
-#MuPlibs = libHYPRE_utilities_single.a libHYPRE_utilities_double.a libHYPRE_utilities_longdouble.a
-#${MuPlibs}: libHYPRE_utilities_%.a: $${ADD_OBJS_%}
-#	@echo  "Building $@ ... "
-#	ar -rcu $@ $^
-#	${RANLIB} $@
-
-# multiprecision object libraries
-#libHYPRE_utilities.a: ${MuPlibs}
-
-#UTILITIESLIBS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-else
-OBJS = ${COBJS} ${CUOBJS}
-endif
-
 libHYPRE_utilities.a: ${OBJS}
-	@echo "Building $@ ..."
-	rm -f $@
-	ar -rcu $@ ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
-
 
 ${OBJS}: ${HEADERS}

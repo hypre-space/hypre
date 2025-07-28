@@ -14,7 +14,7 @@
 #ifndef PILUT_MUP_FUNC_HEADER
 #define PILUT_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_GlobalSEMax HYPRE_MULTIPRECISION_FUNC ( hypre_GlobalSEMax )
 #define hypre_GlobalSEMaxDouble HYPRE_MULTIPRECISION_FUNC ( hypre_GlobalSEMaxDouble )

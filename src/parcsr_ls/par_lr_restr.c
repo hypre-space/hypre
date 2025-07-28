@@ -18,7 +18,7 @@
 
 /* Global variable for error handling */
 /* guard definition of global variables to avoid linker errors for multiprecision build */
-#if defined DEFINE_GLOBAL_VARIABLE
+#if defined hypre_DEFINE_GLOBAL
 HYPRE_Int AIR_TOT_SOL_SIZE = 0;
 HYPRE_Int AIR_MAX_SOL_SIZE = 0;
 #endif

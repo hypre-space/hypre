@@ -7,16 +7,13 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "_hypre_struct_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 
 #include "temp_multivector.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
-#include "HYPRE_MatvecFunctions.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
-#include "HYPRE_struct_ls_mp.h"
 #ifdef HYPRE_MIXED_PRECISION
-#include "struct_ls_mup_func.h"
+#include "_hypre_struct_ls_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -87,10 +84,6 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
                               hypre_StructVector *x );
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
-
-/* HYPRE_struct_int.c */
-HYPRE_Int hypre_StructVectorSetRandomValues ( hypre_StructVector *vector, HYPRE_Int seed );
-HYPRE_Int hypre_StructSetRandomValues ( void *v, HYPRE_Int seed );
 
 /* HYPRE_struct_pfmg.c */
 HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
@@ -551,16 +544,6 @@ HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_inde
                                      hypre_Index base_stride );
 HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
 
-/* smg_residual_unrolled.c */
-void *hypre_SMGResidualCreate ( void );
-HYPRE_Int hypre_SMGResidualSetup ( void *residual_vdata, hypre_StructMatrix *A,
-                                   hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidual ( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x,
-                              hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_index,
-                                     hypre_Index base_stride );
-HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
-
 /* smg_setup.c */
 HYPRE_Int hypre_SMGSetup ( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                            hypre_StructVector *x );
@@ -588,85 +571,6 @@ HYPRE_Int hypre_SMGSetupRestrictOp ( hypre_StructMatrix *A, hypre_StructMatrix *
 HYPRE_Int hypre_SMGSolve ( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                            hypre_StructVector *x );
 
-/* sparse_msg2_setup_rap.c */
-hypre_StructMatrix *hypre_SparseMSG2CreateRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix *A,
-                                                  hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
-HYPRE_Int hypre_SparseMSG2BuildRAPSym ( hypre_StructMatrix *A, hypre_StructMatrix *P,
-                                        hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride,
-                                        hypre_Index stridePR, hypre_StructMatrix *RAP );
-HYPRE_Int hypre_SparseMSG2BuildRAPNoSym ( hypre_StructMatrix *A, hypre_StructMatrix *P,
-                                          hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride,
-                                          hypre_Index stridePR, hypre_StructMatrix *RAP );
-
-/* sparse_msg3_setup_rap.c */
-hypre_StructMatrix *hypre_SparseMSG3CreateRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix *A,
-                                                  hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
-HYPRE_Int hypre_SparseMSG3BuildRAPSym ( hypre_StructMatrix *A, hypre_StructMatrix *P,
-                                        hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride,
-                                        hypre_Index stridePR, hypre_StructMatrix *RAP );
-HYPRE_Int hypre_SparseMSG3BuildRAPNoSym ( hypre_StructMatrix *A, hypre_StructMatrix *P,
-                                          hypre_StructMatrix *R, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride,
-                                          hypre_Index stridePR, hypre_StructMatrix *RAP );
-
-/* sparse_msg.c */
-void *hypre_SparseMSGCreate ( MPI_Comm comm );
-HYPRE_Int hypre_SparseMSGDestroy ( void *smsg_vdata );
-HYPRE_Int hypre_SparseMSGSetTol ( void *smsg_vdata, HYPRE_Real tol );
-HYPRE_Int hypre_SparseMSGSetMaxIter ( void *smsg_vdata, HYPRE_Int max_iter );
-HYPRE_Int hypre_SparseMSGSetJump ( void *smsg_vdata, HYPRE_Int jump );
-HYPRE_Int hypre_SparseMSGSetRelChange ( void *smsg_vdata, HYPRE_Int rel_change );
-HYPRE_Int hypre_SparseMSGSetZeroGuess ( void *smsg_vdata, HYPRE_Int zero_guess );
-HYPRE_Int hypre_SparseMSGSetRelaxType ( void *smsg_vdata, HYPRE_Int relax_type );
-HYPRE_Int hypre_SparseMSGSetJacobiWeight ( void *smsg_vdata, HYPRE_Real weight );
-HYPRE_Int hypre_SparseMSGSetNumPreRelax ( void *smsg_vdata, HYPRE_Int num_pre_relax );
-HYPRE_Int hypre_SparseMSGSetNumPostRelax ( void *smsg_vdata, HYPRE_Int num_post_relax );
-HYPRE_Int hypre_SparseMSGSetNumFineRelax ( void *smsg_vdata, HYPRE_Int num_fine_relax );
-HYPRE_Int hypre_SparseMSGSetLogging ( void *smsg_vdata, HYPRE_Int logging );
-HYPRE_Int hypre_SparseMSGSetPrintLevel ( void *smsg_vdata, HYPRE_Int print_level );
-HYPRE_Int hypre_SparseMSGGetNumIterations ( void *smsg_vdata, HYPRE_Int *num_iterations );
-HYPRE_Int hypre_SparseMSGPrintLogging ( void *smsg_vdata, HYPRE_Int myid );
-HYPRE_Int hypre_SparseMSGGetFinalRelativeResidualNorm ( void *smsg_vdata,
-                                                        HYPRE_Real *relative_residual_norm );
-
-/* sparse_msg_filter.c */
-HYPRE_Int hypre_SparseMSGFilterSetup ( hypre_StructMatrix *A, HYPRE_Int *num_grids, HYPRE_Int lx,
-                                       HYPRE_Int ly, HYPRE_Int lz, HYPRE_Int jump, hypre_StructVector *visitx, hypre_StructVector *visity,
-                                       hypre_StructVector *visitz );
-HYPRE_Int hypre_SparseMSGFilter ( hypre_StructVector *visit, hypre_StructVector *e, HYPRE_Int lx,
-                                  HYPRE_Int ly, HYPRE_Int lz, HYPRE_Int jump );
-
-/* sparse_msg_interp.c */
-void *hypre_SparseMSGInterpCreate ( void );
-HYPRE_Int hypre_SparseMSGInterpSetup ( void *interp_vdata, hypre_StructMatrix *P,
-                                       hypre_StructVector *xc, hypre_StructVector *e, hypre_Index cindex, hypre_Index findex,
-                                       hypre_Index stride, hypre_Index strideP );
-HYPRE_Int hypre_SparseMSGInterp ( void *interp_vdata, hypre_StructMatrix *P, hypre_StructVector *xc,
-                                  hypre_StructVector *e );
-HYPRE_Int hypre_SparseMSGInterpDestroy ( void *interp_vdata );
-
-/* sparse_msg_restrict.c */
-void *hypre_SparseMSGRestrictCreate ( void );
-HYPRE_Int hypre_SparseMSGRestrictSetup ( void *restrict_vdata, hypre_StructMatrix *R,
-                                         hypre_StructVector *r, hypre_StructVector *rc, hypre_Index cindex, hypre_Index findex,
-                                         hypre_Index stride, hypre_Index strideR );
-HYPRE_Int hypre_SparseMSGRestrict ( void *restrict_vdata, hypre_StructMatrix *R,
-                                    hypre_StructVector *r, hypre_StructVector *rc );
-HYPRE_Int hypre_SparseMSGRestrictDestroy ( void *restrict_vdata );
-
-/* sparse_msg_setup.c */
-HYPRE_Int hypre_SparseMSGSetup ( void *smsg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
-                                 hypre_StructVector *x );
-
-/* sparse_msg_setup_rap.c */
-hypre_StructMatrix *hypre_SparseMSGCreateRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix *A,
-                                                 hypre_StructMatrix *P, hypre_StructGrid *coarse_grid, HYPRE_Int cdir );
-HYPRE_Int hypre_SparseMSGSetupRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix *A,
-                                      hypre_StructMatrix *P, HYPRE_Int cdir, hypre_Index cindex, hypre_Index cstride,
-                                      hypre_Index stridePR, hypre_StructMatrix *Ac );
-
-/* sparse_msg_solve.c */
-HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
-                                 hypre_StructVector *x );
 /* setrandom.c */
 HYPRE_Int hypre_StructVectorSetRandomValues( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int hypre_StructSetRandomValues( void* v, HYPRE_Int seed ); 
@@ -675,6 +579,17 @@ HYPRE_Int hypre_StructDiagScale( hypre_StructMatrix   *A, hypre_StructVector   *
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_ls_mup_undef.h"
+#include "_hypre_struct_ls_mup.h"
+#endif
 #endif
 
 #endif

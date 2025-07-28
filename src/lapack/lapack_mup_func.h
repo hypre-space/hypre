@@ -14,7 +14,7 @@
 #ifndef LAPACK_MUP_FUNC_HEADER
 #define LAPACK_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_dbdsqr HYPRE_MULTIPRECISION_FUNC ( hypre_dbdsqr )
 #define hypre_dgebd2 HYPRE_MULTIPRECISION_FUNC ( hypre_dgebd2 )

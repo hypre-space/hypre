@@ -8,7 +8,7 @@
 #include "HYPRE_distributed_matrix_types.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "matrix_matrix_mup_func.h"
+#include "_hypre_matrix_matrix_mup_def.h"
 #endif
 
 #ifdef PETSC_AVAILABLE
