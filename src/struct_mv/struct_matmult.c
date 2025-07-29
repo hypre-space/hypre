@@ -1919,6 +1919,9 @@ hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
    /* RDF: Assume there is only one matrix (for now) and alpha = 1 */
 
    /* Compute A += alpha * B */
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(alpha);
+   HYPRE_UNUSED_VAR(B);
 
    return hypre_error_flag;
 }

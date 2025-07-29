@@ -53,7 +53,6 @@ set(SRCS
   semi_interp.c
   semi_restrict.c
   semi_setup_rap.c
-  setrandom.c
   smg2_setup_rap.c
   smg3_setup_rap.c
   smg_axpy.c

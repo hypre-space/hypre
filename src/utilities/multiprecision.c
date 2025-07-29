@@ -53,6 +53,8 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
 HYPRE_Int
 HYPRE_SetGlobalPrecision(HYPRE_Precision precision)
 {
+   HYPRE_UNUSED_VAR(precision);
+
    return hypre_error_flag;
 }
 
@@ -65,4 +67,3 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
 }
 
 #endif
-
