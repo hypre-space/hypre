@@ -13,7 +13,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "../parcsr_block_mv/_hypre_parcsr_block_mv.h"
+#include "_hypre_parcsr_block_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
