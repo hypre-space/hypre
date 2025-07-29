@@ -35,8 +35,6 @@ extern "C" {
  ******************************************************************************/
 
 /* HYPRE_sstruct_int.c */
-HYPRE_Int hypre_SStructPVectorSetRandomValues ( hypre_SStructPVector *pvector, HYPRE_Int seed );
-HYPRE_Int hypre_SStructVectorSetRandomValues ( hypre_SStructVector *vector, HYPRE_Int seed );
 HYPRE_Int hypre_SStructSetRandomValues ( void *v, HYPRE_Int seed );
 
 /* krylov.c */
