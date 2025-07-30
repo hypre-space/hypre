@@ -9,6 +9,10 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_IJ_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -564,78 +568,20 @@ HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int nu
                                             const HYPRE_BigInt *indices, const HYPRE_Complex *values, HYPRE_Int action);
 
 
-/* HYPRE_IJMatrix.c */
-HYPRE_Int HYPRE_IJMatrixCreate ( MPI_Comm comm, HYPRE_BigInt ilower, HYPRE_BigInt iupper,
-                                 HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_IJMatrix *matrix );
-HYPRE_Int HYPRE_IJMatrixPartialClone ( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
-HYPRE_Int HYPRE_IJMatrixDestroy ( HYPRE_IJMatrix matrix );
-HYPRE_Int HYPRE_IJMatrixInitialize ( HYPRE_IJMatrix matrix );
-HYPRE_Int HYPRE_IJMatrixSetPrintLevel ( HYPRE_IJMatrix matrix, HYPRE_Int print_level );
-HYPRE_Int HYPRE_IJMatrixSetValues ( HYPRE_IJMatrix matrix, HYPRE_Int nrows, HYPRE_Int *ncols,
-                                    const HYPRE_BigInt *rows, const HYPRE_BigInt *cols, const HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJMatrixSetConstantValues ( HYPRE_IJMatrix matrix, HYPRE_Complex value );
-HYPRE_Int HYPRE_IJMatrixAddToValues ( HYPRE_IJMatrix matrix, HYPRE_Int nrows, HYPRE_Int *ncols,
-                                      const HYPRE_BigInt *rows, const HYPRE_BigInt *cols, const HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJMatrixAssemble ( HYPRE_IJMatrix matrix );
-HYPRE_Int HYPRE_IJMatrixGetRowCounts ( HYPRE_IJMatrix matrix, HYPRE_Int nrows, HYPRE_BigInt *rows,
-                                       HYPRE_Int *ncols );
-HYPRE_Int HYPRE_IJMatrixGetValues ( HYPRE_IJMatrix matrix, HYPRE_Int nrows, HYPRE_Int *ncols,
-                                    HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJMatrixSetObjectType ( HYPRE_IJMatrix matrix, HYPRE_Int type );
-HYPRE_Int HYPRE_IJMatrixGetObjectType ( HYPRE_IJMatrix matrix, HYPRE_Int *type );
-HYPRE_Int HYPRE_IJMatrixGetLocalRange ( HYPRE_IJMatrix matrix, HYPRE_BigInt *ilower,
-                                        HYPRE_BigInt *iupper, HYPRE_BigInt *jlower, HYPRE_BigInt *jupper );
-HYPRE_Int HYPRE_IJMatrixGetObject ( HYPRE_IJMatrix matrix, void **object );
-HYPRE_Int HYPRE_IJMatrixSetRowSizes ( HYPRE_IJMatrix matrix, const HYPRE_Int *sizes );
-HYPRE_Int HYPRE_IJMatrixSetDiagOffdSizes ( HYPRE_IJMatrix matrix, const HYPRE_Int *diag_sizes,
-                                           const HYPRE_Int *offdiag_sizes );
-HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts ( HYPRE_IJMatrix matrix, HYPRE_Int max_off_proc_elmts );
-HYPRE_Int HYPRE_IJMatrixRead ( const char *filename, MPI_Comm comm, HYPRE_Int type,
-                               HYPRE_IJMatrix *matrix_ptr );
-HYPRE_Int HYPRE_IJMatrixReadBinary ( const char *filename, MPI_Comm comm, HYPRE_Int type,
-                                     HYPRE_IJMatrix *matrix_ptr );
-HYPRE_Int HYPRE_IJMatrixReadMM( const char *filename, MPI_Comm comm, HYPRE_Int type,
-                                HYPRE_IJMatrix *matrix_ptr );
-HYPRE_Int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix, const char *filename );
-HYPRE_Int HYPRE_IJMatrixPrintBinary ( HYPRE_IJMatrix matrix, const char *filename );
-HYPRE_Int HYPRE_IJMatrixSetOMPFlag ( HYPRE_IJMatrix matrix, HYPRE_Int omp_flag );
-HYPRE_Int HYPRE_IJMatrixTranspose ( HYPRE_IJMatrix  matrix_A, HYPRE_IJMatrix *matrix_AT );
-HYPRE_Int HYPRE_IJMatrixNorm ( HYPRE_IJMatrix matrix, HYPRE_Real *norm );
-HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha, HYPRE_IJMatrix matrix_A, HYPRE_Complex beta,
-                              HYPRE_IJMatrix matrix_B, HYPRE_IJMatrix *matrix_C );
-
-/* HYPRE_IJVector.c */
-HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm, HYPRE_BigInt jlower, HYPRE_BigInt jupper,
-                                 HYPRE_IJVector *vector );
-HYPRE_Int HYPRE_IJVectorSetNumComponents ( HYPRE_IJVector vector, HYPRE_Int num_components );
-HYPRE_Int HYPRE_IJVectorSetComponent ( HYPRE_IJVector vector, HYPRE_Int component );
-HYPRE_Int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
-HYPRE_Int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
-HYPRE_Int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector, HYPRE_Int print_level );
-HYPRE_Int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
-                                    const HYPRE_BigInt *indices, const HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJVectorSetConstantValues ( HYPRE_IJVector vector, HYPRE_Complex value );
-HYPRE_Int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
-                                      const HYPRE_BigInt *indices, const HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );
-HYPRE_Int HYPRE_IJVectorGetValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
-                                    const HYPRE_BigInt *indices, HYPRE_Complex *values );
-HYPRE_Int HYPRE_IJVectorSetMaxOffProcElmts ( HYPRE_IJVector vector, HYPRE_Int max_off_proc_elmts );
-HYPRE_Int HYPRE_IJVectorSetObjectType ( HYPRE_IJVector vector, HYPRE_Int type );
-HYPRE_Int HYPRE_IJVectorGetObjectType ( HYPRE_IJVector vector, HYPRE_Int *type );
-HYPRE_Int HYPRE_IJVectorGetLocalRange ( HYPRE_IJVector vector, HYPRE_BigInt *jlower,
-                                        HYPRE_BigInt *jupper );
-HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector, void **object );
-HYPRE_Int HYPRE_IJVectorRead ( const char *filename, MPI_Comm comm, HYPRE_Int type,
-                               HYPRE_IJVector *vector_ptr );
-HYPRE_Int HYPRE_IJVectorReadBinary ( const char *filename, MPI_Comm comm, HYPRE_Int type,
-                                     HYPRE_IJVector *vector_ptr );
-HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector, const char *filename );
-HYPRE_Int HYPRE_IJVectorPrintBinary ( HYPRE_IJVector vector, const char *filename );
-HYPRE_Int HYPRE_IJVectorInnerProd ( HYPRE_IJVector x, HYPRE_IJVector y, HYPRE_Real *prod );
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_IJ_mv_mup_undef.h"
+#include "_hypre_IJ_mv_mup.h"
+#endif
 #endif
 
 #endif

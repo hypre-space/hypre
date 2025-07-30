@@ -21,9 +21,7 @@ set(TEST_SRCS
   struct.c
   structmat.c
   ams_driver.c
-  maxwell_unscaled.c
   struct_migrate.c
-  sstruct_fac.c
   ij_assembly.c
 )
 

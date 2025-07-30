@@ -16,6 +16,10 @@
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_sstruct_ls_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -51,15 +55,6 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
                                                  HYPRE_SStructMatrix,
                                                  HYPRE_SStructVector,
                                                  HYPRE_SStructVector);
-
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
-/* if pc not defined, then may need HYPRE_SOLVER also */
-
-typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                            HYPRE_Int,
-                                            HYPRE_Real);
-#endif
 
 /**@}*/
 
@@ -434,15 +429,6 @@ HYPRE_Int
 HYPRE_SStructSSAMGSetCoarseSolverType(HYPRE_SStructSolver solver,
                                       HYPRE_Int           csolver_type);
 
-/**
- * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
- * greatly improve efficiency by eliminating unnecessary relaxations when the
- * underlying problem is isotropic.
- **/
-HYPRE_Int
-HYPRE_SStructSSAMGSetSkipRelax(HYPRE_SStructSolver solver,
-                               HYPRE_Int           skip_relax);
-
 /*
  * RE-VISIT
  **/
@@ -610,390 +596,7 @@ HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
                                                HYPRE_Real          *norm);
 
-/**@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-/**
- * @name SStruct FAC Solver
- *
- * @{
- **/
-
-/**
- * Create a solver object.
- **/
-HYPRE_Int
-HYPRE_SStructFACCreate(MPI_Comm             comm,
-                       HYPRE_SStructSolver *solver);
-
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-HYPRE_Int
-HYPRE_SStructFACDestroy2(HYPRE_SStructSolver solver);
-
-/**
- * Re-distribute the composite matrix so that the amr hierachy is approximately
- * nested. Coarse underlying operators are also formed.
- **/
-HYPRE_Int
-HYPRE_SStructFACAMR_RAP(HYPRE_SStructMatrix  A,
-                        HYPRE_Int          (*rfactors)[HYPRE_MAXDIM],
-                        HYPRE_SStructMatrix *fac_A);
-
-/**
- * Set up the FAC solver structure .
- **/
-HYPRE_Int
-HYPRE_SStructFACSetup2(HYPRE_SStructSolver solver,
-                       HYPRE_SStructMatrix A,
-                       HYPRE_SStructVector b,
-                       HYPRE_SStructVector x);
-
-/**
- * Solve the system.
- **/
-HYPRE_Int
-HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
-                       HYPRE_SStructMatrix A,
-                       HYPRE_SStructVector b,
-                       HYPRE_SStructVector x);
-
-/**
- * Set up amr structure
- **/
-HYPRE_Int
-HYPRE_SStructFACSetPLevels(HYPRE_SStructSolver solver,
-                           HYPRE_Int           nparts,
-                           HYPRE_Int          *plevels);
-/**
- * Set up amr refinement factors
- **/
-HYPRE_Int
-HYPRE_SStructFACSetPRefinements(HYPRE_SStructSolver  solver,
-                                HYPRE_Int            nparts,
-                                HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
-
-/**
- * (Optional, but user must make sure that they do this function otherwise.)
- * Zero off the coarse level stencils reaching into a fine level grid.
- **/
-HYPRE_Int
-HYPRE_SStructFACZeroCFSten(HYPRE_SStructMatrix  A,
-                           HYPRE_SStructGrid    grid,
-                           HYPRE_Int            part,
-                           HYPRE_Int            rfactors[HYPRE_MAXDIM]);
-
-/**
- * (Optional, but user must make sure that they do this function otherwise.)
- * Zero off the fine level stencils reaching into a coarse level grid.
- **/
-HYPRE_Int
-HYPRE_SStructFACZeroFCSten(HYPRE_SStructMatrix  A,
-                           HYPRE_SStructGrid    grid,
-                           HYPRE_Int            part);
-
-/**
- * (Optional, but user must make sure that they do this function otherwise.)
- *  Places the identity in the coarse grid matrix underlying the fine patches.
- *  Required between each pair of amr levels.
- **/
-HYPRE_Int
-HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
-                                  HYPRE_Int            part_crse,
-                                  HYPRE_Int            rfactors[HYPRE_MAXDIM]);
-
-/**
- * (Optional, but user must make sure that they do this function otherwise.)
- *  Places zeros in the coarse grid vector underlying the fine patches.
- *  Required between each pair of amr levels.
- **/
-HYPRE_Int
-HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
-                                  HYPRE_Int           *plevels,
-                                  HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
-
-/**
- * (Optional) Set maximum number of FAC levels.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver,
-                              HYPRE_Int           max_levels );
-/**
- * (Optional) Set the convergence tolerance.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetTol(HYPRE_SStructSolver solver,
-                       HYPRE_Real          tol);
-/**
- * (Optional) Set maximum number of iterations.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetMaxIter(HYPRE_SStructSolver solver,
-                           HYPRE_Int           max_iter);
-
-/**
- * (Optional) Additionally require that the relative difference in
- * successive iterates be small.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetRelChange(HYPRE_SStructSolver solver,
-                             HYPRE_Int           rel_change);
-
-/**
- * (Optional) Use a zero initial guess.  This allows the solver to cut corners
- * in the case where a zero initial guess is needed (e.g., for preconditioning)
- * to reduce compuational cost.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetZeroGuess(HYPRE_SStructSolver solver);
-
-/**
- * (Optional) Use a nonzero initial guess.  This is the default behavior, but
- * this routine allows the user to switch back after using \e SetZeroGuess.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetNonZeroGuess(HYPRE_SStructSolver solver);
-
-/**
- * (Optional) Set relaxation type.  See \ref HYPRE_SStructSysPFMGSetRelaxType
- * for appropriate values of \e relax\_type.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
-                             HYPRE_Int           relax_type);
-/**
- * (Optional) Set Jacobi weight if weighted Jacobi is used.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetJacobiWeight(HYPRE_SStructSolver solver,
-                                HYPRE_Real          weight);
-/**
- * (Optional) Set number of relaxation sweeps before coarse-grid correction.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetNumPreRelax(HYPRE_SStructSolver solver,
-                               HYPRE_Int           num_pre_relax);
-
-/**
- * (Optional) Set number of relaxation sweeps after coarse-grid correction.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetNumPostRelax(HYPRE_SStructSolver solver,
-                                HYPRE_Int           num_post_relax);
-/**
- * (Optional) Set coarsest solver type.
- *
- * Current solver types set by \e csolver\_type are:
- *
- *    - 1 : SysPFMG-PCG (default)
- *    - 2 : SysPFMG
- **/
-HYPRE_Int
-HYPRE_SStructFACSetCoarseSolverType(HYPRE_SStructSolver solver,
-                                    HYPRE_Int           csolver_type);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-HYPRE_Int
-HYPRE_SStructFACSetLogging(HYPRE_SStructSolver solver,
-                           HYPRE_Int           logging);
-
-/**
- * Return the number of iterations taken.
- **/
-HYPRE_Int
-HYPRE_SStructFACGetNumIterations(HYPRE_SStructSolver  solver,
-                                 HYPRE_Int           *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-HYPRE_Int
-HYPRE_SStructFACGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
-                                             HYPRE_Real         *norm);
-
-/**@}*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-/**
- * @name SStruct Maxwell Solver
- *
- * @{
- **/
-
-/**
- * Create a solver object.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellCreate( MPI_Comm             comm,
-                            HYPRE_SStructSolver *solver );
-/**
- * Destroy a solver object.  An object should be explicitly destroyed
- * using this destructor when the user's code no longer needs direct
- * access to it.  Once destroyed, the object must not be referenced
- * again.  Note that the object may not be deallocated at the
- * completion of this call, since there may be internal package
- * references to the object.  The object will then be destroyed when
- * all internal reference counts go to zero.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellDestroy( HYPRE_SStructSolver solver );
-
-/**
- * Prepare to solve the system.  The coefficient data in \e b and \e x is
- * ignored here, but information about the layout of the data may be used.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetup(HYPRE_SStructSolver solver,
-                          HYPRE_SStructMatrix A,
-                          HYPRE_SStructVector b,
-                          HYPRE_SStructVector x);
-
-/**
- * Solve the system. Full coupling of the augmented system used
- * throughout the multigrid hierarchy.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSolve(HYPRE_SStructSolver solver,
-                          HYPRE_SStructMatrix A,
-                          HYPRE_SStructVector b,
-                          HYPRE_SStructVector x);
-
-/**
- * Solve the system. Full coupling of the augmented system used
- * only on the finest level, i.e., the node and edge multigrid
- * cycles are coupled only on the finest level.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSolve2(HYPRE_SStructSolver solver,
-                           HYPRE_SStructMatrix A,
-                           HYPRE_SStructVector b,
-                           HYPRE_SStructVector x);
-
-/**
- * Sets the gradient operator in the Maxwell solver.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetGrad(HYPRE_SStructSolver solver,
-                            HYPRE_ParCSRMatrix  T);
-
-/**
- * Sets the coarsening factor.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
-                                HYPRE_Int          *rfactors);
-
-/**
- * Finds the physical boundary row ranks on all levels.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellPhysBdy(HYPRE_SStructGrid  *grid_l,
-                            HYPRE_Int           num_levels,
-                            HYPRE_Int          *rfactors,
-                            HYPRE_Int        ***BdryRanks_ptr,
-                            HYPRE_Int         **BdryRanksCnt_ptr );
-
-/**
- * Eliminates the rows and cols corresponding to the physical boundary in
- * a parcsr matrix.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellEliminateRowsCols(HYPRE_ParCSRMatrix  parA,
-                                      HYPRE_Int           nrows,
-                                      HYPRE_Int          *rows );
-
-/**
- * Zeros the rows corresponding to the physical boundary in
- * a par vector.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellZeroVector(HYPRE_ParVector  b,
-                               HYPRE_Int       *rows,
-                               HYPRE_Int        nrows );
-
-/**
- * (Optional) Set the constant coefficient flag- Nedelec interpolation
- * used.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetSetConstantCoef(HYPRE_SStructSolver solver,
-                                       HYPRE_Int           flag);
-
-/**
- * (Optional) Creates a gradient matrix from the grid. This presupposes
- * a particular orientation of the edge elements.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellGrad(HYPRE_SStructGrid    grid,
-                         HYPRE_ParCSRMatrix  *T);
-
-/**
- * (Optional) Set the convergence tolerance.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetTol(HYPRE_SStructSolver solver,
-                           HYPRE_Real          tol);
-/**
- * (Optional) Set maximum number of iterations.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetMaxIter(HYPRE_SStructSolver solver,
-                               HYPRE_Int           max_iter);
-
-/**
- * (Optional) Additionally require that the relative difference in
- * successive iterates be small.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetRelChange(HYPRE_SStructSolver solver,
-                                 HYPRE_Int           rel_change);
-
-/**
- * (Optional) Set number of relaxation sweeps before coarse-grid correction.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetNumPreRelax(HYPRE_SStructSolver solver,
-                                   HYPRE_Int           num_pre_relax);
-
-/**
- * (Optional) Set number of relaxation sweeps after coarse-grid correction.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetNumPostRelax(HYPRE_SStructSolver solver,
-                                    HYPRE_Int           num_post_relax);
-
-/**
- * (Optional) Set the amount of logging to do.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellSetLogging(HYPRE_SStructSolver solver,
-                               HYPRE_Int           logging);
-
-/**
- * Return the number of iterations taken.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellGetNumIterations(HYPRE_SStructSolver  solver,
-                                     HYPRE_Int           *num_iterations);
-
-/**
- * Return the norm of the final relative residual.
- **/
-HYPRE_Int
-HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
-                                                 HYPRE_Real         *norm);
+HYPRE_Int HYPRE_SStructSplitPrintLogging ( HYPRE_SStructSolver solver );
 
 /**@}*/
 
@@ -1532,6 +1135,17 @@ HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_sstruct_ls_mup_undef.h"
+#include "HYPRE_sstruct_ls_mup.h"
+#endif
 #endif
 
 #endif

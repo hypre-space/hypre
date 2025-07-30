@@ -6,9 +6,8 @@
 set(HDRS
   HYPRE_krylov.h
   HYPRE_lobpcg.h
-  HYPRE_MatvecFunctions.h
-  krylov.h
-  lobpcg.h
+  _hypre_krylov.h
+  _hypre_lobpcg.h
 )
 
 set(SRCS

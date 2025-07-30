@@ -985,7 +985,7 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
+HYPRE_SStructVectorPrintGLVis( HYPRE_SStructVector   vector,
                                const char           *fileprefix )
 {
    hypre_SStructVectorPrintGLVis(vector, fileprefix);

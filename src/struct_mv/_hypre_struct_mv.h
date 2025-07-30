@@ -12,6 +12,10 @@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_struct_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1542,7 +1546,55 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
+
 } hypre_StructMatrix;
+
+typedef struct 
+{
+   MPI_Comm              comm;
+
+   hypre_StructGrid     *grid;
+   hypre_StructStencil  *user_stencil;
+   hypre_StructStencil  *stencil;
+   HYPRE_Int             num_values;                /* Number of "stored" coefficients */
+
+   hypre_BoxArray       *data_space;
+
+   HYPRE_MemoryLocation  memory_location;           /* memory location of data */
+   void                 *data;                      /* Pointer to variable matrix data */
+   void                 *data_const;                /* Pointer to constant matrix data */
+   void                **stencil_data;              /* Pointer for each stencil */
+   HYPRE_Int             data_alloced;              /* Boolean used for freeing data */
+   HYPRE_Int             data_size;                 /* Size of variable matrix data */
+   HYPRE_Int             data_const_size;           /* Size of constant matrix data */
+   HYPRE_Int           **data_indices;              /* num-boxes by stencil-size array
+                                                       of indices into the data array.
+                                                       data_indices[b][s] is the starting
+                                                       index of matrix data corresponding
+                                                       to box b and stencil coefficient s */
+   HYPRE_Int             constant_coefficient;      /* normally 0; set to 1 for
+                                                       constant coefficient matrices
+                                                       or 2 for constant coefficient
+                                                       with variable diagonal */
+
+   HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
+
+   HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
+
+   hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
+
+   HYPRE_Int             ref_count;
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
+
+} hypre_StructMatrix_mp;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructMatrix
@@ -1608,6 +1660,10 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)
+#endif
+
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
@@ -1669,7 +1725,42 @@ typedef struct hypre_StructVector_struct
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
+
 } hypre_StructVector;
+
+typedef struct 
+{
+   MPI_Comm              comm;
+
+   hypre_StructGrid     *grid;
+
+   hypre_BoxArray       *data_space;
+
+   HYPRE_MemoryLocation  memory_location;             /* memory location of data */
+   void                 *data;                        /* Pointer to vector data on device*/
+   HYPRE_Int             data_alloced;                /* Boolean used for freeing data */
+   HYPRE_Int             data_size;                   /* Size of vector data */
+   HYPRE_Int            *data_indices;                /* num-boxes array of indices into
+                                                         the data array.  data_indices[b]
+                                                         is the starting index of vector
+                                                         data corresponding to box b. */
+
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each
+                                                       * direction */
+   HYPRE_Int             bghost_not_clear;            /* Are boundary ghosts clear? */
+
+   HYPRE_BigInt          global_size;                 /* Total number coefficients */
+
+   HYPRE_Int             ref_count;
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
+
+} hypre_StructVector_mp;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructVector
@@ -1735,6 +1826,10 @@ hypre_StructVectorBoxData(vector, hypre_StructVectorBoxnum(vector, i))
 
 #define hypre_StructVectorGridDataValue(vector, i, index) \
 hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i), index)
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)
+#endif
 
 #endif
 /******************************************************************************
@@ -2423,9 +2518,6 @@ hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
 HYPRE_Int
 hypre_StructMatrixGetCStride( hypre_StructMatrix *matrix,
                               hypre_IndexRef     *cstride );
-HYPRE_Int
-hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
-                                    hypre_IndexRef     *stride );
 HYPRE_Int hypre_StructMatrixGetDataMapStride ( hypre_StructMatrix *matrix, hypre_IndexRef *stride );
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
@@ -2433,12 +2525,6 @@ HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *
 HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
-HYPRE_Int
-hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
-                               hypre_CommInfo     *comm_info );
-HYPRE_Int
-hypre_StructVectorUnMapCommInfo( hypre_StructVector *vector,
-                                 hypre_CommInfo     *comm_info );
 HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix, HYPRE_Int entry,
                                            hypre_Index dindex, hypre_Index index );
 HYPRE_Int hypre_StructMatrixGetStencilStride ( hypre_StructMatrix *matrix, hypre_Index stride );
@@ -2662,6 +2748,25 @@ hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm, const char *filename
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector, HYPRE_Real *max_value,
                                        HYPRE_Int *max_index, hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/* Mixed precision function protos */
+/* struct_mv_mp.c */
+
+#if defined(HYPRE_MIXED_PRECISION)
+HYPRE_Int
+hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
+                     hypre_StructVector_mp *y );
+HYPRE_Int
+hypre_StructVectorConvert_mp( hypre_StructVector_mp *x,
+                     HYPRE_Precision new_precision);
+#endif
+
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -3260,12 +3365,8 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
-#ifndef OMP0
 #define OMP0 Pragma(omp parallel for HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
-#endif
-#ifndef OMP1
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
-#endif
 #else /* #if defined(HYPRE_USING_OPENMP) */
 #define OMP0
 #define OMP1
@@ -3636,4 +3737,16 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 }
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_mv_mup_undef.h"
+#include "_hypre_struct_mv_mup.h"
 #endif
+#endif
+
+#endif
+

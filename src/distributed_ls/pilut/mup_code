@@ -1,0 +1,20 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+touch mup_fake_ext.h
+cat internal_protos.h > mup_fake_int.h
+
+../../config/gen_code.sh mup_fake_ext.h mup_fake_int.h onlydef
+
+rm -f mup_fake_ext.h
+rm -f mup_fake_int.h
+
+# rename def file and header guard
+mv mup_fake_int_mup_def.h _hypre_pilut_mup_def.h
+
+sed -i .tmp 's/MUP_FAKE_INT/PILUT/' _hypre_pilut_mup_def.h
+rm -f _hypre_pilut_mup_def.h.tmp
+

@@ -1818,7 +1818,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
  * Print assumed partition (to help with debugging)
  *****************************************************************************/
 
-HYPRE_Int  hypre_AP_print_num = 0;
+static HYPRE_Int  hypre_AP_print_num = 0;
 
 HYPRE_Int
 hypre_StructAssumedPartitionPrint(const char               *filename,

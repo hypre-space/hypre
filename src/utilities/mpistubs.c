@@ -56,13 +56,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return (0);
 }
 
-HYPRE_Real
+hypre_double
 hypre_MPI_Wtime( void )
 {
    return (0.0);
 }
 
-HYPRE_Real
+hypre_double
 hypre_MPI_Wtick( void )
 {
    return (0.0);
@@ -948,16 +948,16 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return (HYPRE_Int) MPI_Abort(comm, (hypre_int)errorcode);
 }
 
-HYPRE_Real
+hypre_double
 hypre_MPI_Wtime( void )
 {
-   return (HYPRE_Real)MPI_Wtime();
+   return MPI_Wtime();
 }
 
-HYPRE_Real
+hypre_double
 hypre_MPI_Wtick( void )
 {
-   return (HYPRE_Real)MPI_Wtick();
+   return MPI_Wtick();
 }
 
 HYPRE_Int

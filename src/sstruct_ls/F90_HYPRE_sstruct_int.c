@@ -13,7 +13,6 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
-#include "HYPRE_MatvecFunctions.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -549,7 +549,7 @@ int main (int argc, char *argv[])
       /* Set up the Graph - determines the nonzero structure of the matrix. */
       {
          /* Create the graph object */
-         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, edge_grid, &A_graph);
+         HYPRE_SStructGraphCreate(MPI_COMM_WORLD, edge_grid, &A_graph);
 
          /* Indicate that this problem uses finite element stiffness matrices and
             load vectors, instead of stencils. */

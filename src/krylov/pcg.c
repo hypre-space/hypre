@@ -20,7 +20,7 @@
    version iterates with a special stopping criterion
 */
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
@@ -105,6 +105,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> owns_matvec_data ) = 1;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
+   (pcg_data -> precond_Mat)  = NULL;
    (pcg_data -> print_level)  = 0;
    (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;
@@ -206,18 +207,26 @@ hypre_PCGSetup( void *pcg_vdata,
                 void *b,
                 void *x         )
 {
-   hypre_PCGData *pcg_data =  (hypre_PCGData *)pcg_vdata;
-   hypre_PCGFunctions *pcg_functions = pcg_data->functions;
-   HYPRE_Int            max_iter         = (pcg_data -> max_iter);
-   HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
-   HYPRE_Real           rtol = (pcg_data -> rtol);
-   HYPRE_Int            two_norm = (pcg_data -> two_norm);
-   HYPRE_Int            flex = (pcg_data -> flex);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
-   void          *precond_data     = (pcg_data -> precond_data);
+   hypre_PCGData      *pcg_data             = (hypre_PCGData *)pcg_vdata;
+   hypre_PCGFunctions *pcg_functions        = (pcg_data->functions);
+   HYPRE_Int           max_iter             = (pcg_data -> max_iter);
+   HYPRE_Int           recompute_residual_p = (pcg_data -> recompute_residual_p);
+   HYPRE_Real          rtol                 = (pcg_data -> rtol);
+   HYPRE_Int           two_norm             = (pcg_data -> two_norm);
+   HYPRE_Int           flex                 = (pcg_data -> flex);
+   HYPRE_Int         (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
+   void               *precond_data         = (pcg_data -> precond_data);
+   void 	      *precond_Mat          = (pcg_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Setup");
+
+   //set preconditioning matrix
+   if((pcg_data -> precond_Mat)  == NULL)
+   {
+      (pcg_data -> precond_Mat)  = A;
+      precond_Mat = (pcg_data -> precond_Mat) ;
+   }
 
    (pcg_data -> A) = A;
 
@@ -269,7 +278,7 @@ hypre_PCGSetup( void *pcg_vdata,
       (pcg_data -> v) = (*(pcg_functions->CreateVector))(b);
    }
 
-   precond_setup(precond_data, A, b, x);
+   precond_setup(precond_data, precond_Mat, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -355,6 +364,8 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *matvec_data  = (pcg_data -> matvec_data);
    HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
+   // preconditioning matrix
+   void	          *precond_Mat  = (pcg_data -> precond_Mat) ;
    HYPRE_Int       print_level  = (pcg_data -> print_level);
    HYPRE_Int       logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
@@ -415,7 +426,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* bi_prod = <C*b,b> */
       (*(pcg_functions->ClearVector))(p);
-      precond(precond_data, A, b, p);
+      precond(precond_data, precond_Mat, b, p);
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
       if (print_level > 1 && my_id == 0)
       {
@@ -499,7 +510,7 @@ hypre_PCGSolve( void *pcg_vdata,
    //hypre_ParVectorUpdateHost(r);
    /* p = C*r */
    (*(pcg_functions->ClearVector))(p);
-   precond(precond_data, A, r, p);
+   precond(precond_data, precond_Mat, r, p);
 
    /* gamma = <r,p> = <r,Cr> */
    gamma = (*(pcg_functions->InnerProd))(r, p);
@@ -686,7 +697,7 @@ hypre_PCGSolve( void *pcg_vdata,
                HYPRE_Real r2ob2;
                /* v = C*s = C*(r_old-r_new) */
                (*(pcg_functions->ClearVector))(v);
-               precond(precond_data, A, s, v);
+               precond(precond_data, precond_Mat, s, v);
                /* <s,v> */
                r2ob2 = (*(pcg_functions->InnerProd))(s, v) / bi_prod;
                if ( r2ob2 < rtol * rtol )
@@ -720,7 +731,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* s = C*r */
       (*(pcg_functions->ClearVector))(s);
-      precond(precond_data, A, r, s);
+      precond(precond_data, precond_Mat, r, s);
 
       /* gamma = <r,s> */
       gamma = (*(pcg_functions->InnerProd))(r, s);
@@ -826,7 +837,7 @@ hypre_PCGSolve( void *pcg_vdata,
          {
             /* s = C*r */
             (*(pcg_functions->ClearVector))(s);
-            precond(precond_data, A, r, s);
+            precond(precond_data, precond_Mat, r, s);
             /* iprod = gamma = <r,s> */
             i_prod = (*(pcg_functions->InnerProd))(r, s);
             gamma = i_prod;
@@ -1401,6 +1412,30 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PCGSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGSetPrecondMatrix( void  *pcg_vdata,  void  *precond_matrix )
+{
+   hypre_PCGData  *pcg_data     =  (hypre_PCGData *)pcg_vdata;
+   (pcg_data -> precond_Mat)  = precond_matrix;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGGetPrecondMatrix( void  *pcg_vdata,  HYPRE_Matrix *precond_matrix_ptr )
+{
+   hypre_PCGData  *pcg_data     =  (hypre_PCGData *)pcg_vdata;
+   *precond_matrix_ptr = (HYPRE_Matrix)(pcg_data -> precond_Mat) ;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PCGSetPreconditioner
  *--------------------------------------------------------------------------*/
 
@@ -1421,6 +1456,7 @@ hypre_PCGSetPreconditioner(void *pcg_vdata,
 
    return hypre_error_flag;
 }
+
 
 /*--------------------------------------------------------------------------
  * hypre_PCGSetPrintLevel, hypre_PCGGetPrintLevel

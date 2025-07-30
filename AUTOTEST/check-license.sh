@@ -42,6 +42,8 @@ egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif|png)$' |
   egrep -v '[.]/[.]git' |
   egrep -v '[.]/.*HYPRE_config[.]h' |
   egrep -v '[.]/src/(blas|lapack)/.*[.]c' |
+  egrep -v '[.]/src/.*functions[.]saved$' |
+  egrep -v '[.]/src/.*mup[.](exclude|fixed|functions|methods)$' |
   egrep -v '[.]/src/examples/docs' |
   egrep -v '[.]/src/test/TEST_.*'    > check-license.files
 
@@ -89,4 +91,5 @@ rm -f check-license.remove check-license.files
 ### Next check for files that should not have the license, but do
 
 # blas and lapack '.c' files should not have an LLNL license
-egrep -lR "$LicStr" ./src/blas ./src/lapack | egrep '[.]/src/(blas|lapack)/.*[.]c' >&2
+egrep -lR "$LicStr" ./src/blas ./src/lapack | egrep '[.]/src/(blas|lapack)/.*[.]c' |
+  egrep -v 'mup.*[.]c' >&2

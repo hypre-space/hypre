@@ -430,16 +430,6 @@ HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_inde
                                      hypre_Index base_stride );
 HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
 
-/* smg_residual_unrolled.c */
-void *hypre_SMGResidualCreate ( void );
-HYPRE_Int hypre_SMGResidualSetup ( void *residual_vdata, hypre_StructMatrix *A,
-                                   hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidual ( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x,
-                              hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_index,
-                                     hypre_Index base_stride );
-HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
-
 /* smg_setup.c */
 HYPRE_Int hypre_SMGSetup ( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                            hypre_StructVector *x );

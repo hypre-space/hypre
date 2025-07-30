@@ -7,12 +7,14 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "_hypre_struct_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 
 #include "temp_multivector.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
-#include "HYPRE_MatvecFunctions.h"
- /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_struct_ls_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -450,16 +452,6 @@ HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_inde
                                      hypre_Index base_stride );
 HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
 
-/* smg_residual_unrolled.c */
-void *hypre_SMGResidualCreate ( void );
-HYPRE_Int hypre_SMGResidualSetup ( void *residual_vdata, hypre_StructMatrix *A,
-                                   hypre_StructVector *x, hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidual ( void *residual_vdata, hypre_StructMatrix *A, hypre_StructVector *x,
-                              hypre_StructVector *b, hypre_StructVector *r );
-HYPRE_Int hypre_SMGResidualSetBase ( void *residual_vdata, hypre_Index base_index,
-                                     hypre_Index base_stride );
-HYPRE_Int hypre_SMGResidualDestroy ( void *residual_vdata );
-
 /* smg_setup.c */
 HYPRE_Int hypre_SMGSetup ( void *smg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                            hypre_StructVector *x );
@@ -489,6 +481,17 @@ HYPRE_Int hypre_SMGSolve ( void *smg_vdata, hypre_StructMatrix *A, hypre_StructV
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_ls_mup_undef.h"
+#include "_hypre_struct_ls_mup.h"
+#endif
 #endif
 
 #endif

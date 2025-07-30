@@ -10,7 +10,8 @@
  * HYPRE_GMRES interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_GMRESDestroy
@@ -255,6 +256,30 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 {
    return ( hypre_GMRESGetPrecond( (void *)     solver,
                                    (HYPRE_Solver *) precond_data_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver  solver,
+                     HYPRE_Matrix precond_matrix)
+{
+   return( hypre_GMRESSetPrecondMatrix( (void *)     solver,
+                                (void *) precond_matrix) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver  solver,
+                     HYPRE_Matrix *precond_matrix_ptr )
+{
+   return( hypre_GMRESGetPrecondMatrix( (void *)     solver,
+                                (HYPRE_Matrix *) precond_matrix_ptr ) );
 }
 
 /*--------------------------------------------------------------------------

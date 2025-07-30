@@ -12,6 +12,10 @@
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_struct_ls_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,15 +51,6 @@ typedef HYPRE_Int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
                                                 HYPRE_StructMatrix,
                                                 HYPRE_StructVector,
                                                 HYPRE_StructVector);
-
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
-/* if pc not defined, then may need HYPRE_SOLVER also */
-
-typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                            HYPRE_Int,
-                                            HYPRE_Real);
-#endif
 
 /**@}*/
 
@@ -1162,6 +1157,18 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_ls_mup_undef.h"
+#include "HYPRE_struct_ls_mup.h"
+#include "HYPRE_struct_ls_mp.h"
+#endif
 #endif
 
 #endif

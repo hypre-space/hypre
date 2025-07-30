@@ -8,7 +8,7 @@
 #include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 #include "_hypre_utilities.hpp"
 
 #define DEBUG 0

@@ -11,6 +11,10 @@
  * This header renames the functions in LAPACK to avoid conflicts
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_lapack_mup_def.h"
+#endif
+
 /* blas */
 #define dasum_   hypre_dasum
 #define daxpy_   hypre_daxpy

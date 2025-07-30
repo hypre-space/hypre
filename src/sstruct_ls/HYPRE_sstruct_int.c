@@ -7,7 +7,6 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
 #include "temp_multivector.h"
 
 

@@ -41,6 +41,7 @@
 #include <time.h>
 
 #include "HYPRE_lobpcg.h"
+#include "_hypre_lobpcg.h"
 
 /* max dt */
 #define DT_INF 1.0e30
@@ -104,11 +105,11 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny,
 HYPRE_Int BuildParCoordinates (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int *coorddim_ptr, float **coord_ptr );
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
-                                                   HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
+//                                                   HYPRE_Real rel_residual_norm);
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
-                                                HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
+//                                                HYPRE_Real rel_residual_norm);
 #ifdef __cplusplus
 }
 #endif
@@ -3006,33 +3007,6 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-   /* Read matrix to be passed to the preconditioner */
-   if (build_matrix_M == 1)
-   {
-      time_index = hypre_InitializeTiming("Auxiliary Operator");
-      hypre_BeginTiming(time_index);
-
-      ierr = HYPRE_IJMatrixRead( argv[build_matrix_M_arg_index], comm,
-                                 HYPRE_PARCSR, &ij_M );
-      if (ierr)
-      {
-         hypre_printf("ERROR: Problem reading in the auxiliary matrix B!\n");
-         exit(1);
-      }
-
-      HYPRE_IJMatrixGetObject(ij_M, &object);
-      parcsr_M = (HYPRE_ParCSRMatrix) object;
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Auxiliary Operator", comm);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   }
-   else
-   {
-      parcsr_M = parcsr_A;
-   }
-
    /* Check the ij interface - not necessary if one just wants to test solvers */
    if (test_ij && build_matrix_type > -1)
    {
@@ -4160,6 +4134,40 @@ main( hypre_int argc,
    hypre_PrintTiming("IJ Vector Setup", comm);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+   /*-----------------------------------------------------------
+    * Read matrix to be passed to the preconditioner
+    *
+    * NOTE: This section of code is here to ensure parcsr_A is fully determined
+    * before potentially assigning it to parcsr_M.  There is 'test_scaling' code
+    * below that also appears to change parcsr_A that may need attention.
+    *-----------------------------------------------------------*/
+
+   if (build_matrix_M == 1)
+   {
+      time_index = hypre_InitializeTiming("Auxiliary Operator");
+      hypre_BeginTiming(time_index);
+
+      ierr = HYPRE_IJMatrixRead( argv[build_matrix_M_arg_index], comm,
+                                 HYPRE_PARCSR, &ij_M );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the auxiliary matrix B!\n");
+         exit(1);
+      }
+
+      HYPRE_IJMatrixGetObject(ij_M, &object);
+      parcsr_M = (HYPRE_ParCSRMatrix) object;
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Auxiliary Operator", comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   }
+   else
+   {
+      parcsr_M = parcsr_A;
+   }
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -8143,11 +8151,12 @@ main( hypre_int argc,
          hypre_printf("HYPRE_FlexGMRESGetPrecond got good precond\n");
       }
 
-
-      /* this is optional - could be a user defined one instead (see ex5.c)*/
-      HYPRE_FlexGMRESSetModifyPC( pcg_solver,
-                                  (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
-
+      // RDF: This is problematic right now with the multiprecision code because
+      // of the Real argument in the ModifyPCFcn.  Need to find a solution.
+      //
+      // /* this is optional - could be a user defined one instead (see ex5.c)*/
+      // HYPRE_FlexGMRESSetModifyPC( pcg_solver,
+      //                             (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
 
       HYPRE_FlexGMRESSetup
       (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);

@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
@@ -79,6 +79,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
    (bicgstab_data -> a_tol)          = 0.0;
    (bicgstab_data -> precond_data)   = NULL;
+   (bicgstab_data -> precond_Mat)   = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> print_level)    = 0;
    (bicgstab_data -> hybrid)         = 0;
@@ -151,8 +152,16 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    HYPRE_Int          (*precond_setup)(void*, void*, void*,
                                        void*) = (bicgstab_functions -> precond_setup);
    void          *precond_data     = (bicgstab_data -> precond_data);
+   void          *precond_Mat      = (bicgstab_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   //set preconditioning matrix
+   if((bicgstab_data -> precond_Mat)  == NULL)
+   {
+      (bicgstab_data -> precond_Mat)  = A;
+      precond_Mat = (bicgstab_data -> precond_Mat) ;
+   }
 
    (bicgstab_data -> A) = A;
 
@@ -191,7 +200,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
       (bicgstab_data -> matvec_data) =
          (*(bicgstab_functions->MatvecCreate))(A, x);
 
-   precond_setup(precond_data, A, b, x);
+   precond_setup(precond_data, precond_Mat, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -231,12 +240,12 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    hypre_BiCGSTABData      *bicgstab_data      = (hypre_BiCGSTABData*)bicgstab_vdata;
    hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
 
-   HYPRE_Int               min_iter     = (bicgstab_data -> min_iter);
-   HYPRE_Int           max_iter     = (bicgstab_data -> max_iter);
-   HYPRE_Int           stop_crit    = (bicgstab_data -> stop_crit);
-   HYPRE_Int           hybrid    = (bicgstab_data -> hybrid);
-   HYPRE_Real       r_tol     = (bicgstab_data -> tol);
-   HYPRE_Real       cf_tol       = (bicgstab_data -> cf_tol);
+   HYPRE_Int         min_iter     = (bicgstab_data -> min_iter);
+   HYPRE_Int         max_iter     = (bicgstab_data -> max_iter);
+   HYPRE_Int         stop_crit    = (bicgstab_data -> stop_crit);
+   HYPRE_Int         hybrid    = (bicgstab_data -> hybrid);
+   HYPRE_Real        r_tol     = (bicgstab_data -> tol);
+   HYPRE_Real        cf_tol       = (bicgstab_data -> cf_tol);
    void             *matvec_data  = (bicgstab_data -> matvec_data);
    HYPRE_Real        a_tol        = (bicgstab_data -> a_tol);
 
@@ -251,6 +260,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 
    HYPRE_Int              (*precond)(void*, void*, void*, void*)   = (bicgstab_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(bicgstab_data -> precond_data);
+   // preconditioning matrix
+   void          *precond_Mat = (bicgstab_data -> precond_Mat) ;
 
    /* logging variables */
    HYPRE_Int             logging        = (bicgstab_data -> logging);
@@ -450,7 +461,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       iter++;
 
       (*(bicgstab_functions->ClearVector))(v);
-      precond(precond_data, A, p, v);
+      precond(precond_data, precond_Mat, p, v);
       (*(bicgstab_functions->Matvec))(matvec_data, 1.0, A, v, 0.0, q);
       temp = (*(bicgstab_functions->InnerProd))(r0, q);
       if (hypre_abs(temp) >= epsmac)
@@ -467,7 +478,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       (*(bicgstab_functions->Axpy))(alpha, v, x);
       (*(bicgstab_functions->Axpy))(-alpha, q, r);
       (*(bicgstab_functions->ClearVector))(v);
-      precond(precond_data, A, r, v);
+      precond(precond_data, precond_Mat, r, v);
       (*(bicgstab_functions->Matvec))(matvec_data, 1.0, A, v, 0.0, s);
       /* Handle case when gamma = 0.0/0.0 as 0.0 and not NAN */
       gamma_numer = (*(bicgstab_functions->InnerProd))(r, s);
@@ -699,6 +710,30 @@ hypre_BiCGSTABGetPrecond( void         *bicgstab_vdata,
 
    *precond_data_ptr = (HYPRE_Solver)(bicgstab_data -> precond_data);
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BiCGSTABSetPrecondMatrix( void  *bicgstab_vdata,  void  *precond_matrix )
+{
+   hypre_BiCGSTABData  *bicgstab_data     =  (hypre_BiCGSTABData *)bicgstab_vdata;
+   (bicgstab_data -> precond_Mat)  = precond_matrix;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BiCGSTABGetPrecondMatrix( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr )
+{
+   hypre_BiCGSTABData  *bicgstab_data     =  (hypre_BiCGSTABData *)bicgstab_vdata;
+   *precond_matrix_ptr = (HYPRE_Matrix)(bicgstab_data -> precond_Mat) ;
    return hypre_error_flag;
 }
 

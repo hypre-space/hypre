@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_LOBPCG_SOLVER
-#define hypre_LOBPCG_SOLVER
+#ifndef HYPRE_LOBPCG_HEADER
+#define HYPRE_LOBPCG_HEADER
 
 #include "HYPRE_krylov.h"
 
@@ -14,11 +14,28 @@
 #include "multivector.h"
 #include "interpreter.h"
 #include "temp_multivector.h"
-#include "HYPRE_MatvecFunctions.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct
+{
+   void*  (*MatvecCreate)     ( void *A, void *x );
+   HYPRE_Int (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int (*MatvecDestroy) ( void *matvec_data );
+
+   void*  (*MatMultiVecCreate)     ( void *A, void *x );
+   HYPRE_Int (*MatMultiVec)        ( void *data, HYPRE_Complex alpha, void *A,
+                                     void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int (*MatMultiVecDestroy) ( void *data );
+
+} HYPRE_MatvecFunctions;
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -155,14 +172,6 @@ HYPRE_LOBPCGEigenvaluesHistory(HYPRE_Solver solver);
 /* Returns the number of iterations performed by LOBPCG */
 HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 
-void hypre_LOBPCGMultiOperatorB(void *data,
-                                void *x,
-                                void *y);
-
-void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
-                                     mv_MultiVectorPtr        y,
-                                     utilities_FortranMatrix *xy);
-
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -172,6 +181,17 @@ void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_krylov_mup_undef.h"
+#include "HYPRE_lobpcg_mup.h"
+#endif
 #endif
 
 #endif

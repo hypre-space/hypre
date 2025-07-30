@@ -14,7 +14,7 @@
 #include "Common.h"
 #include "HYPRE_distributed_matrix_types.h"
 #include "HYPRE_distributed_matrix_protos.h"
-#include "hypre_ParaSails.h"
+#include "_hypre_ParaSails.h"
 #include "Matrix.h"
 #include "ParaSails.h"
 

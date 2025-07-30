@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_pilut_mup_def.h"
+#endif
+
 /* HYPRE_DistributedMatrixPilutSolver.c */
 HYPRE_Int HYPRE_NewDistributedMatrixPilutSolver( MPI_Comm comm , HYPRE_DistributedMatrix matrix , HYPRE_DistributedMatrixPilutSolver *new_solver );
 HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver( HYPRE_DistributedMatrixPilutSolver in_ptr );

@@ -10,7 +10,7 @@
 #include "float.h"
 #include "ams.h"
 #include "temp_multivector.h"
-#include "lobpcg.h"
+#include "_hypre_lobpcg.h"
 #include "ame.h"
 #include "_hypre_utilities.hpp"
 

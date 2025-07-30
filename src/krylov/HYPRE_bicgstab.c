@@ -10,7 +10,8 @@
  * HYPRE_BiCGSTAB interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABCreate does not exist.  Call the appropriate function which
@@ -144,6 +145,31 @@ HYPRE_BiCGSTABGetPrecond( HYPRE_Solver  solver,
    return ( hypre_BiCGSTABGetPrecond( (void *)     solver,
                                       (HYPRE_Solver *) precond_data_ptr ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BiCGSTABSetPrecondMatrix( HYPRE_Solver  solver,
+                     HYPRE_Matrix precond_matrix)
+{
+   return( hypre_BiCGSTABSetPrecondMatrix( (void *)     solver,
+                                (void *) precond_matrix) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver  solver,
+                     HYPRE_Matrix *precond_matrix_ptr )
+{
+   return( hypre_BiCGSTABGetPrecondMatrix( (void *)     solver,
+                                (HYPRE_Matrix *) precond_matrix_ptr ) );
+}
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABSetLogging

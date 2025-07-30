@@ -1,0 +1,38 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+## Should be run from src directory
+# Loops over directories with multiprecision files and generates code.
+
+DIRS="\
+ IJ_mv\
+ blas\
+ distributed_ls/Euclid\
+ distributed_ls/ParaSails\
+ distributed_ls/pilut\
+ distributed_matrix\
+ krylov\
+ lapack\
+ matrix_matrix\
+ multivector\
+ parcsr_block_mv\
+ parcsr_ls\
+ parcsr_mv\
+ seq_block_mv\
+ seq_mv\
+ sstruct_ls\
+ sstruct_mv\
+ struct_ls\
+ struct_mv\
+ utilities\
+"
+
+for i in $DIRS
+do
+    echo "Writing multiprecision code for $i ..."
+    (cd $i; mup_code)
+done
+
