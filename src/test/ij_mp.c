@@ -6,12 +6,12 @@
  ******************************************************************************/
 
 /*!
-   This file contains a mocked-up example, based on ex5.c in the examples directory. 
-   The goal is to give an idea of how a user may utilize hypre to assemble matrix data 
-   and access solvers in a way that would facilitate a mixed-precision solution of the 
-   linear system. This particular driver demonstrates how the mixed-precision build may 
+   This file contains a mocked-up example, based on ex5.c in the examples directory.
+   The goal is to give an idea of how a user may utilize hypre to assemble matrix data
+   and access solvers in a way that would facilitate a mixed-precision solution of the
+   linear system. This particular driver demonstrates how the mixed-precision build may
    be used to develop mixed-precision solvers, such as the defect-correction-based solver
-   implemented here. Feel free to ask questions, make comments or suggestions 
+   implemented here. Feel free to ask questions, make comments or suggestions
    regarding any of the information below.
 */
 
@@ -34,30 +34,30 @@
 #define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
 HYPRE_Int BuildParLaplacian_mp( HYPRE_Int argc, char *argv[], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParSysLaplacian_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParDifConv_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                              HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParLaplacian9pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParLaplacian27pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParLaplacian125pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                     HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParRotate7pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
+                                HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParVarDifConv_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr,
-                   HYPRE_ParVector *rhs_flt_ptr, HYPRE_ParVector *rhs_dbl_ptr );
+                                 HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr,
+                                 HYPRE_ParVector *rhs_flt_ptr, HYPRE_ParVector *rhs_dbl_ptr );
 
-HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A, 
-		HYPRE_ParCSRMatrix B, 
-		HYPRE_ParVector x, 
-		HYPRE_ParVector b,
-		HYPRE_Solver solver,
-		HYPRE_PtrToSolverFcn approx_solve,
-		HYPRE_Int maxits);
+HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParCSRMatrix B,
+                                       HYPRE_ParVector x,
+                                       HYPRE_ParVector b,
+                                       HYPRE_Solver solver,
+                                       HYPRE_PtrToSolverFcn approx_solve,
+                                       HYPRE_Int maxits);
 
 int main (int argc, char *argv[])
 {
@@ -71,8 +71,8 @@ int main (int argc, char *argv[])
    int num_iterations;
    double dfinal_res_norm;
    float  final_res_norm;
-   int	  time_index;   
-   //float  wall_time;   
+   int     time_index;
+   //float  wall_time;
    double max_row_sum = 1.0;
    int build_matrix_type = 2;
    int build_rhs_type = 2;
@@ -121,8 +121,8 @@ int main (int argc, char *argv[])
    int two_norm = 0;
 
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
-       for the solver (A, parcsr_A) and the preconditioner (B, A_dbl). I have included two suggestions 
-       below on how we would utilize both of these matrices. 
+       for the solver (A, parcsr_A) and the preconditioner (B, A_dbl). I have included two suggestions
+       below on how we would utilize both of these matrices.
    */
 
    HYPRE_ParCSRMatrix A_flt = NULL;
@@ -135,9 +135,9 @@ int main (int argc, char *argv[])
    HYPRE_IJVector ij_b_dbl;
    HYPRE_ParVector b_dbl;
    HYPRE_IJVector ij_x_dbl;
-   HYPRE_ParVector x_dbl;   
-   
-   /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
+   HYPRE_ParVector x_dbl;
+
+   /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
    //HYPRE_Solver solver, precond;
@@ -163,7 +163,7 @@ int main (int argc, char *argv[])
       if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
-         solver_id = atoi(argv[arg_index++]);         
+         solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-laplace") == 0 )
       {
@@ -201,7 +201,7 @@ int main (int argc, char *argv[])
          build_matrix_type      = 8;
          build_matrix_arg_index = arg_index;
       }
-     else if ( strcmp(argv[arg_index], "-125pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-125pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 5;
@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
          arg_index++;
          num_paths = atoi(argv[arg_index++]);
       }
-     else if ( strcmp(argv[arg_index], "-agg_interp") == 0 )
+      else if ( strcmp(argv[arg_index], "-agg_interp") == 0 )
       {
          arg_index++;
          agg_interp_type  = atoi(argv[arg_index++]);
@@ -472,7 +472,7 @@ int main (int argc, char *argv[])
    }
 
    HYPRE_ParCSRMatrixGetLocalRange_flt( A_flt,
-                                       &ilower, &iupper, &jlower, &jupper);
+                                        &ilower, &iupper, &jlower, &jupper);
 
    if (build_rhs_type == 2)
    {
@@ -582,1283 +582,1283 @@ int main (int argc, char *argv[])
    // PCG solve
    if (solver_id < 2)
    {
-// Double precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create PCG solver
-      HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_PCGSetTol_dbl(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
-      HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
-      HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
-      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if (solver_id == 1)
-     {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
-
-         HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_dbl(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
-         }
-         
-         // Set the preconditioner for PCG
-         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
-        
-         HYPRE_PCGSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
-                                amg_solver);
-
-         HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id ==0)
+      // Double precision
       {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+         /* reset solution vector */
+         if (build_rhs_type < 4 || build_rhs_type == 6) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create PCG solver
+         HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_PCGSetTol_dbl(pcg_solver, tol);
+         HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
+         HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
+         HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
+         HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);
+
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 1)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n"); }
+
+            HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_dbl(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for PCG
+            HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+
+            HYPRE_PCGSetPrecond_dbl(pcg_solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
+                                    amg_solver);
+
+            HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 0)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n"); }
+         }
+         // Setup PCG solver
+         HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  PCG solve
+         HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
+         if (solver_id == 1) { HYPRE_BoomerAMGDestroy_dbl(amg_solver); }
       }
-      // Setup PCG solver
-      HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
-
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  PCG solve
-      HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
+      // Single precision
       {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-      	hypre_printf("Iteration count = %d \n", num_iterations);         
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_flt(x_flt, zero); }
+         else { HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("FLT Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create PCG solver
+         HYPRE_ParCSRPCGCreate_flt(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_PCGSetMaxIter_flt(pcg_solver, max_iter);
+         HYPRE_PCGSetTol_flt(pcg_solver, (float)tol);
+         HYPRE_PCGSetTwoNorm_flt(pcg_solver, two_norm);
+         HYPRE_PCGSetPrintLevel_flt(pcg_solver, ioutdat);
+         HYPRE_PCGSetFlex_flt(pcg_solver, flex);
+         HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, 1);
+
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 1)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n"); }
+            HYPRE_PCGSetMaxIter_flt(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for PCG
+            HYPRE_PCGSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
+
+            HYPRE_PCGSetPrecond_flt(pcg_solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
+                                    amg_solver);
+
+            HYPRE_PCGGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 0)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n"); }
+         }
+         // Setup PCG solver
+         HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("FLT Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  PCG solve
+         HYPRE_PCGSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_PCGGetNumIterations_flt(pcg_solver, &num_iterations);
+         HYPRE_PCGGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", final_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRPCGDestroy_flt(pcg_solver);
+         if (solver_id == 1) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
       }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-    }
-// Single precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_flt(x_flt, zero);
-      else  HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("FLT Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create PCG solver
-      HYPRE_ParCSRPCGCreate_flt(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_PCGSetMaxIter_flt(pcg_solver, max_iter);
-      HYPRE_PCGSetTol_flt(pcg_solver, (float)tol);
-      HYPRE_PCGSetTwoNorm_flt(pcg_solver, two_norm);
-      HYPRE_PCGSetPrintLevel_flt(pcg_solver, ioutdat);
-      HYPRE_PCGSetFlex_flt(pcg_solver, flex);
-      HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, 1);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-      if(solver_id == 1)
+      // mixed-precision
       {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
-         HYPRE_PCGSetMaxIter_flt(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for PCG
-         HYPRE_PCGSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
-        
-         HYPRE_PCGSetPrecond_flt(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
-                                amg_solver);
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
 
-         HYPRE_PCGGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 0)
-      {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
-      }
-      // Setup PCG solver
-      HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
 
-      time_index = hypre_InitializeTiming("FLT Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  PCG solve
-      HYPRE_PCGSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create PCG solver
+         HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_PCGSetTol_dbl(pcg_solver, tol);
+         HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
+         HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
+         HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
+         HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);
 
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
 
-      HYPRE_PCGGetNumIterations_flt(pcg_solver, &num_iterations);
-      HYPRE_PCGGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
-      if (myid == 0)
-      {
-         hypre_printf("final relative residual norm = %e \n", final_res_norm);
-         hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRPCGDestroy_flt(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    }
-// mixed-precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create PCG solver
-      HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_PCGSetTol_dbl(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
-      HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
-      HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
-      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if (solver_id == 1)
-     {
-         if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
-         HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 1)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n"); }
+            HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for PCG (single precision matrix)
+            HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
+            // Set the preconditioner for PCG.
+            // This actually sets a pointer to a single precision AMG solver.
+            // The setup and solve functions just allow us to accept double precision
+            // rhs and sol vectors from the PCG solver to do the preconditioner solve.
+            HYPRE_PCGSetPrecond_dbl(pcg_solver,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
+                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
+                                    amg_solver);
+
+            HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+            }
          }
-         if (relax_up > -1)
+         else if (solver_id == 0)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION DS-PCG *****\n"); }
          }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for PCG (single precision matrix)
-         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
-         // Set the preconditioner for PCG.
-         // This actually sets a pointer to a single precision AMG solver.
-         // The setup and solve functions just allow us to accept double precision
-         // rhs and sol vectors from the PCG solver to do the preconditioner solve.        
-         HYPRE_PCGSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
-                                amg_solver);
+         // Setup PCG solver (double precision)
+         HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
 
-         HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  PCG solve (double precision)
+         HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
          {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
-            return (-1);
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
          }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 0)
-      {
-        if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION DS-PCG *****\n");
-      }
-      // Setup PCG solver (double precision)
-      HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
-
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  PCG solve (double precision)
-      HYPRE_PCGSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
-      {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-        hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    } //end PCG   
-   }   
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
+         if (solver_id == 1) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
+      } //end PCG
+   }
    else if (solver_id < 4)  //GMRES
    {
-// double-precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create GMRES solver
-      HYPRE_ParCSRGMRESCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_GMRESSetKDim_dbl(pcg_solver, k_dim);
-      HYPRE_GMRESSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_GMRESSetTol_dbl(pcg_solver, tol);
-      HYPRE_GMRESSetPrintLevel_dbl(pcg_solver, ioutdat);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if (solver_id == 3)
-     {
-         if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-GMRES *****\n");
-
-         HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_dbl(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
-         }
-         
-         // Set the preconditioner for GMRES
-         HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
-        
-         HYPRE_GMRESSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
-                                amg_solver);
-
-         HYPRE_GMRESGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id ==2)
+      // double-precision
       {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-GMRES *****\n");
+         /* reset solution vector */
+         if (build_rhs_type < 4 || build_rhs_type == 6) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create GMRES solver
+         HYPRE_ParCSRGMRESCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_GMRESSetKDim_dbl(pcg_solver, k_dim);
+         HYPRE_GMRESSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_GMRESSetTol_dbl(pcg_solver, tol);
+         HYPRE_GMRESSetPrintLevel_dbl(pcg_solver, ioutdat);
+         //      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);
+
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 3)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-GMRES *****\n"); }
+
+            HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_dbl(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for GMRES
+            HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+
+            HYPRE_GMRESSetPrecond_dbl(pcg_solver,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
+                                      amg_solver);
+
+            HYPRE_GMRESGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 2)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-GMRES *****\n"); }
+         }
+         // Setup GMRES solver
+         HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  GMRES solve
+         HYPRE_GMRESSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_GMRESGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_GMRESGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
+         if (solver_id == 3) { HYPRE_BoomerAMGDestroy_dbl(amg_solver); }
       }
-      // Setup GMRES solver
-      HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
-
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  GMRES solve
-      HYPRE_GMRESSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_GMRESGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
+      // Single precision
       {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-      	hypre_printf("Iteration count = %d \n", num_iterations);         
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_flt(x_flt, zero); }
+         else { HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("FLT Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create GMRES solver
+         HYPRE_ParCSRGMRESCreate_flt(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_GMRESSetMaxIter_flt(pcg_solver, max_iter);
+         HYPRE_GMRESSetTol_flt(pcg_solver, (float)tol);
+         HYPRE_GMRESSetKDim_flt(pcg_solver, k_dim);
+         HYPRE_GMRESSetPrintLevel_flt(pcg_solver, ioutdat);
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 3)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-GMRES *****\n"); }
+            HYPRE_GMRESSetMaxIter_flt(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for GMRES
+            HYPRE_GMRESSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
+
+            HYPRE_GMRESSetPrecond_flt(pcg_solver,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
+                                      amg_solver);
+
+            HYPRE_GMRESGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 2)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-GMRES *****\n"); }
+         }
+         // Setup GMRES solver
+         HYPRE_GMRESSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("FLT Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  GMRES solve
+         HYPRE_GMRESSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_GMRESGetNumIterations_flt(pcg_solver, &num_iterations);
+         HYPRE_GMRESGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", final_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRGMRESDestroy_flt(pcg_solver);
+         if (solver_id == 3) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
       }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
-      if(solver_id == 3) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-    }
-// Single precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_flt(x_flt, zero);
-      else  HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("FLT Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create GMRES solver
-      HYPRE_ParCSRGMRESCreate_flt(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_GMRESSetMaxIter_flt(pcg_solver, max_iter);
-      HYPRE_GMRESSetTol_flt(pcg_solver, (float)tol);
-      HYPRE_GMRESSetKDim_flt(pcg_solver, k_dim);
-      HYPRE_GMRESSetPrintLevel_flt(pcg_solver, ioutdat);
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-      if(solver_id == 3)
+      // mixed-precision
       {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-GMRES *****\n");
-         HYPRE_GMRESSetMaxIter_flt(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for GMRES
-         HYPRE_GMRESSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
-        
-         HYPRE_GMRESSetPrecond_flt(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
-                                amg_solver);
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
 
-         HYPRE_GMRESGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 2)
-      {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-GMRES *****\n");
-      }
-      // Setup GMRES solver
-      HYPRE_GMRESSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
 
-      time_index = hypre_InitializeTiming("FLT Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  GMRES solve
-      HYPRE_GMRESSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create GMRES solver
+         HYPRE_ParCSRGMRESCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_GMRESSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_GMRESSetTol_dbl(pcg_solver, tol);
+         HYPRE_GMRESSetKDim_dbl(pcg_solver, k_dim);
+         HYPRE_GMRESSetPrintLevel_dbl(pcg_solver, ioutdat);
 
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
 
-      HYPRE_GMRESGetNumIterations_flt(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
-      if (myid == 0)
-      {
-         hypre_printf("final relative residual norm = %e \n", final_res_norm);
-         hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRGMRESDestroy_flt(pcg_solver);
-      if(solver_id == 3) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    }
-// mixed-precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create GMRES solver
-      HYPRE_ParCSRGMRESCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_GMRESSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_GMRESSetTol_dbl(pcg_solver, tol);
-      HYPRE_GMRESSetKDim_dbl(pcg_solver, k_dim);
-      HYPRE_GMRESSetPrintLevel_dbl(pcg_solver, ioutdat);
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if(solver_id == 3)
-     {
-         if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-GMRES *****\n");
-         HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 3)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-GMRES *****\n"); }
+            HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for GMRES (single precision matrix)
+            HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
+            // Set the preconditioner for GMRES.
+            // This actually sets a pointer to a single precision AMG solver.
+            // The setup and solve functions just allow us to accept double precision
+            // rhs and sol vectors from the GMRES solver to do the preconditioner solve.
+            HYPRE_GMRESSetPrecond_dbl(pcg_solver,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
+                                      (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
+                                      amg_solver);
+
+            HYPRE_GMRESGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
+            }
          }
-         if (relax_up > -1)
+         else if (solver_id == 2)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION DS-GMRES *****\n"); }
          }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for GMRES (single precision matrix)
-         HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
-         // Set the preconditioner for GMRES.
-         // This actually sets a pointer to a single precision AMG solver.
-         // The setup and solve functions just allow us to accept double precision
-         // rhs and sol vectors from the GMRES solver to do the preconditioner solve.        
-         HYPRE_GMRESSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
-                                amg_solver);
+         // Setup GMRES solver (double precision)
+         HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
 
-         HYPRE_GMRESGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  GMRES solve (double precision)
+         HYPRE_GMRESSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_GMRESGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_GMRESGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
          {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
-            return (-1);
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
          }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 2)
-      {
-        if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION DS-GMRES *****\n");
-      }
-      // Setup GMRES solver (double precision)
-      HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
-
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  GMRES solve (double precision)
-      HYPRE_GMRESSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_GMRESGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
-      {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-        hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy gmres solver
-      HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
-      if(solver_id == 3) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    } // end GMRES   
-   }   
+         fflush(NULL);
+         // destroy gmres solver
+         HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
+         if (solver_id == 3) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
+      } // end GMRES
+   }
    // BiCGSTAB solve
    else if (solver_id < 6)
    {
-// Double precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create BiCGSTAB solver
-      HYPRE_ParCSRBiCGSTABCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_BiCGSTABSetTol_dbl(pcg_solver, tol);
-      HYPRE_BiCGSTABSetPrintLevel_dbl(pcg_solver, ioutdat);
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if (solver_id == 5)
-     {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-BiCGSTAB *****\n");
-
-         HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_dbl(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
-         }
-         
-         // Set the preconditioner for BiCGSTAB
-         HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
-        
-         HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
-                                amg_solver);
-
-         HYPRE_BiCGSTABGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 4)
+      // Double precision
       {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-BiCGSTAB *****\n");
+         /* reset solution vector */
+         if (build_rhs_type < 4 || build_rhs_type == 6) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create BiCGSTAB solver
+         HYPRE_ParCSRBiCGSTABCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_BiCGSTABSetTol_dbl(pcg_solver, tol);
+         HYPRE_BiCGSTABSetPrintLevel_dbl(pcg_solver, ioutdat);
+
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 5)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-BiCGSTAB *****\n"); }
+
+            HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_dbl(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_dbl(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_dbl(amg_solver, strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_dbl(amg_solver, trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_dbl(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_dbl(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_dbl(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_dbl(amg_solver, relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_dbl(amg_solver, outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_dbl(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_dbl(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_dbl(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_dbl(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_dbl(amg_solver, max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_dbl(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_dbl(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_dbl(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_dbl(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_dbl(amg_solver, agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_dbl(amg_solver, agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_dbl(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_dbl(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_dbl(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_dbl(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_dbl(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_dbl(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_dbl(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for BiCGSTAB
+            HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+
+            HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
+                                         amg_solver);
+
+            HYPRE_BiCGSTABGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 4)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-BiCGSTAB *****\n"); }
+         }
+         // Setup BiCGSTAB solver
+         HYPRE_BiCGSTABSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  BiCGSTAB solve
+         HYPRE_BiCGSTABSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_BiCGSTABGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRBiCGSTABDestroy_dbl(pcg_solver);
+         if (solver_id == 5) { HYPRE_BoomerAMGDestroy_dbl(amg_solver); }
       }
-      // Setup BiCGSTAB solver
-      HYPRE_BiCGSTABSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
-
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  BiCGSTAB solve
-      HYPRE_BiCGSTABSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Double precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_BiCGSTABGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
+      // Single precision
       {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-      	hypre_printf("Iteration count = %d \n", num_iterations);         
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_flt(x_flt, zero); }
+         else { HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775); }
+
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
+
+         time_index = hypre_InitializeTiming("FLT Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create BiCGSTAB solver
+         HYPRE_ParCSRBiCGSTABCreate_flt(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_BiCGSTABSetMaxIter_flt(pcg_solver, max_iter);
+         HYPRE_BiCGSTABSetTol_flt(pcg_solver, (float)tol);
+         HYPRE_BiCGSTABSetPrintLevel_flt(pcg_solver, ioutdat);
+         //      HYPRE_BiCGSTABSetRecomputeResidual_flt(pcg_solver, recompute_res);
+
+
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 5)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-BiCGSTAB *****\n"); }
+            HYPRE_BiCGSTABSetMaxIter_flt(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for BiCGSTAB
+            HYPRE_BiCGSTABSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
+
+            HYPRE_BiCGSTABSetPrecond_flt(pcg_solver,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
+                                         amg_solver);
+
+            HYPRE_BiCGSTABGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
+            }
+         }
+         else if (solver_id == 4)
+         {
+            if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-BiCGSTAB *****\n"); }
+         }
+         // Setup BiCGSTAB solver
+         HYPRE_BiCGSTABSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
+
+         time_index = hypre_InitializeTiming("FLT Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  BiCGSTAB solve
+         HYPRE_BiCGSTABSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_BiCGSTABGetNumIterations_flt(pcg_solver, &num_iterations);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
+         if (myid == 0)
+         {
+            hypre_printf("final relative residual norm = %e \n", final_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
+         }
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRBiCGSTABDestroy_flt(pcg_solver);
+         if (solver_id == 5) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
       }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRBiCGSTABDestroy_dbl(pcg_solver);
-      if (solver_id == 5) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-    }
-// Single precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_flt(x_flt, zero);
-      else  HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("FLT Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create BiCGSTAB solver
-      HYPRE_ParCSRBiCGSTABCreate_flt(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_BiCGSTABSetMaxIter_flt(pcg_solver, max_iter);
-      HYPRE_BiCGSTABSetTol_flt(pcg_solver, (float)tol);
-      HYPRE_BiCGSTABSetPrintLevel_flt(pcg_solver, ioutdat);
-//      HYPRE_BiCGSTABSetRecomputeResidual_flt(pcg_solver, recompute_res);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-      if (solver_id == 5)
+      // mixed-precision
       {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-BiCGSTAB *****\n");
-         HYPRE_BiCGSTABSetMaxIter_flt(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
-         }
-         if (relax_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
-         }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for BiCGSTAB
-         HYPRE_BiCGSTABSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)A_flt);
-        
-         HYPRE_BiCGSTABSetPrecond_flt(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
-                                amg_solver);
+         /* reset solution vector */
+         if (build_rhs_type < 4) { HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero); }
+         else { HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775); }
 
-         HYPRE_BiCGSTABGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
-         {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
-            return (-1);
-         }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 4)
-      {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-BiCGSTAB *****\n");
-      }
-      // Setup BiCGSTAB solver
-      HYPRE_BiCGSTABSetup_flt(pcg_solver, (HYPRE_Matrix)A_flt, (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
+         HYPRE_Solver amg_solver;
+         HYPRE_Solver pcg_solver;
+         HYPRE_Solver pcg_precond_gotten;
 
-      time_index = hypre_InitializeTiming("FLT Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  BiCGSTAB solve
-      HYPRE_BiCGSTABSolve_flt(pcg_solver, (HYPRE_Matrix)A_flt,  (HYPRE_Vector)b_flt, (HYPRE_Vector)x_flt);
+         time_index = hypre_InitializeTiming("DBL Setup");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         // Create BiCGSTAB solver
+         HYPRE_ParCSRBiCGSTABCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
+         HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, max_iter);
+         HYPRE_BiCGSTABSetTol_dbl(pcg_solver, tol);
+         HYPRE_BiCGSTABSetPrintLevel_dbl(pcg_solver, ioutdat);
+         //      HYPRE_BiCGSTABSetRecomputeResidual_dbl(pcg_solver, recompute_res);
 
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Single precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
 
-      HYPRE_BiCGSTABGetNumIterations_flt(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
-      if (myid == 0)
-      {
-         hypre_printf("final relative residual norm = %e \n", final_res_norm);
-         hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRBiCGSTABDestroy_flt(pcg_solver);
-      if(solver_id == 5) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    }
-// mixed-precision
-    {
-      /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
-
-      HYPRE_Solver amg_solver;
-      HYPRE_Solver pcg_solver;
-      HYPRE_Solver pcg_precond_gotten;      
-
-      time_index = hypre_InitializeTiming("DBL Setup");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      // Create BiCGSTAB solver
-      HYPRE_ParCSRBiCGSTABCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, max_iter);
-      HYPRE_BiCGSTABSetTol_dbl(pcg_solver, tol);
-      HYPRE_BiCGSTABSetPrintLevel_dbl(pcg_solver, ioutdat);
-//      HYPRE_BiCGSTABSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
-      
-      
-      /* Now set up the AMG preconditioner and specify any parameters */
-     if (solver_id == 5)
-     {
-         if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-BiCGSTAB *****\n");
-         HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, mg_max_iter);
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
-         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
-         HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-         HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
-         HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
-         if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
-         if (relax_down > -1)
+         /* Now set up the AMG preconditioner and specify any parameters */
+         if (solver_id == 5)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-BiCGSTAB *****\n"); }
+            HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, mg_max_iter);
+            HYPRE_BoomerAMGCreate_flt(&amg_solver);
+            HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, poutdat); /* print amg solution info */
+            HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, coarsen_type);
+            HYPRE_BoomerAMGSetInterpType_flt(amg_solver, interp_type);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            HYPRE_BoomerAMGSetTol_flt(amg_solver, (float)zero); /* conv. tolerance zero */
+            HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+            HYPRE_BoomerAMGSetStrongThreshold_flt(amg_solver, (float)strong_threshold);
+            HYPRE_BoomerAMGSetTruncFactor_flt(amg_solver, (float)trunc_factor);
+            HYPRE_BoomerAMGSetPMaxElmts_flt(amg_solver, P_max_elmts);
+            HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, num_sweeps);
+            if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, relax_type); }
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
+            HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
+            HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
+            HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
+            HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
+            HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
+            HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
+            HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
+            HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
+            HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
+            HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
+            HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
+            HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
+            HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
+            HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
+            HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
+            HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
+            HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
+            HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
+            if (ns_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
+            }
+            if (ns_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
+            }
+            if (ns_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
+            }
+
+            // Set the preconditioner for BiCGSTAB (single precision matrix)
+            HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
+            // Set the preconditioner for BiCGSTAB.
+            // This actually sets a pointer to a single precision AMG solver.
+            // The setup and solve functions just allow us to accept double precision
+            // rhs and sol vectors from the BiCGSTAB solver to do the preconditioner solve.
+            HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
+                                         (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
+                                         amg_solver);
+
+            HYPRE_BiCGSTABGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
+            if (pcg_precond_gotten !=  amg_solver)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
+               return (-1);
+            }
+            else if (myid == 0)
+            {
+               hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
+            }
          }
-         if (relax_up > -1)
+         else if (solver_id == 4)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_up, 2);
+            if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION DS-BiCGSTAB *****\n"); }
          }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType_flt(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetRelaxOrder_flt(amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_flt(amg_solver, (float)relax_wt);
-         HYPRE_BoomerAMGSetOuterWt_flt(amg_solver, (float)outer_wt);
-         HYPRE_BoomerAMGSetMaxLevels_flt(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetSmoothType_flt(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps_flt(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetSmoothNumLevels_flt(amg_solver, smooth_num_levels);
-         HYPRE_BoomerAMGSetMaxRowSum_flt(amg_solver, (float)max_row_sum);
-         HYPRE_BoomerAMGSetDebugFlag_flt(amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_flt(amg_solver, num_functions);
-         HYPRE_BoomerAMGSetAggNumLevels_flt(amg_solver, agg_num_levels);
-         HYPRE_BoomerAMGSetAggInterpType_flt(amg_solver, agg_interp_type);
-         HYPRE_BoomerAMGSetAggTruncFactor_flt(amg_solver, (float)agg_trunc_factor);
-         HYPRE_BoomerAMGSetAggP12TruncFactor_flt(amg_solver, (float)agg_P12_trunc_factor);
-         HYPRE_BoomerAMGSetAggPMaxElmts_flt(amg_solver, agg_P_max_elmts);
-         HYPRE_BoomerAMGSetAggP12MaxElmts_flt(amg_solver, agg_P12_max_elmts);
-         HYPRE_BoomerAMGSetNumPaths_flt(amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_flt(amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_flt(amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_flt(amg_solver, keep_same_sign);
-         if (ns_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_coarse, 3);
-	 }
-         if (ns_down > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_down,   1);
-         }
-         if (ns_up > -1)
-         {
-            HYPRE_BoomerAMGSetCycleNumSweeps_flt(amg_solver, ns_up,     2);
-         }
-      
-         // Set the preconditioner for BiCGSTAB (single precision matrix)
-         HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
-         // Set the preconditioner for BiCGSTAB.
-         // This actually sets a pointer to a single precision AMG solver.
-         // The setup and solve functions just allow us to accept double precision
-         // rhs and sol vectors from the BiCGSTAB solver to do the preconditioner solve.        
-         HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
-                                amg_solver);
+         // Setup BiCGSTAB solver (double precision)
+         HYPRE_BiCGSTABSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+         fflush(NULL);
 
-         HYPRE_BiCGSTABGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
-         if (pcg_precond_gotten !=  amg_solver)
+         time_index = hypre_InitializeTiming("DBL Solve");
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_BeginTiming(time_index);
+         //  BiCGSTAB solve (double precision)
+         HYPRE_BiCGSTABSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+
+         MPI_Barrier(MPI_COMM_WORLD);
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_BiCGSTABGetNumIterations_dbl(pcg_solver, &num_iterations);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
+         if (myid == 0)
          {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got bad precond\n");
-            return (-1);
+            hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+            hypre_printf("Iteration count = %d \n", num_iterations);
          }
-         else if (myid == 0)
-         {
-            hypre_printf("HYPRE_ParCSRBiCGSTABGetPrecond got good precond\n");
-         }
-      }
-      else if (solver_id == 4)
-      {
-        if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION DS-BiCGSTAB *****\n");
-      }
-      // Setup BiCGSTAB solver (double precision)
-      HYPRE_BiCGSTABSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Setup Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-      fflush(NULL);
+         fflush(NULL);
+         // destroy pcg solver
+         HYPRE_ParCSRBiCGSTABDestroy_dbl(pcg_solver);
+         if (solver_id == 5) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
+      } //end BiCGSTAB
+   }
 
-      time_index = hypre_InitializeTiming("DBL Solve");
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_BeginTiming(time_index);
-      //  BiCGSTAB solve (double precision)
-      HYPRE_BiCGSTABSolve_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
-
-      MPI_Barrier(MPI_COMM_WORLD);
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Mixed precision Solve Time", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_BiCGSTABGetNumIterations_dbl(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      if (myid == 0)
-      {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-        hypre_printf("Iteration count = %d \n", num_iterations);         
-      }
-      fflush(NULL);
-      // destroy pcg solver
-      HYPRE_ParCSRBiCGSTABDestroy_dbl(pcg_solver);
-      if (solver_id == 5) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-    } //end BiCGSTAB   
-   }   
-    
    /* Clean up */
    HYPRE_IJVectorDestroy_flt(ij_b_flt);
    HYPRE_IJVectorDestroy_flt(ij_x_flt);
@@ -1869,19 +1869,19 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }
 
-HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A, 
-		HYPRE_ParCSRMatrix B, 
-		HYPRE_ParVector x, 
-		HYPRE_ParVector b,
-		HYPRE_Solver solver,
-		HYPRE_PtrToSolverFcn approx_solve,
-		HYPRE_Int maxits)
+HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParCSRMatrix B,
+                                       HYPRE_ParVector x,
+                                       HYPRE_ParVector b,
+                                       HYPRE_Solver solver,
+                                       HYPRE_PtrToSolverFcn approx_solve,
+                                       HYPRE_Int maxits)
 {
 
-   
+
 
    return 0;
 
@@ -2049,9 +2049,9 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
    if (num_fun == 1)
    {
       A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian_dbl(MPI_COMM_WORLD,
-                                                 nx, ny, nz, P, Q, R, p, q, r, values_dbl);
+                                                         nx, ny, nz, P, Q, R, p, q, r, values_dbl);
       A_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian_flt(MPI_COMM_WORLD,
-                                                 nx, ny, nz, P, Q, R, p, q, r, values_flt);
+                                                         nx, ny, nz, P, Q, R, p, q, r, values_flt);
    }
    else
    {
@@ -2195,17 +2195,17 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
          mtrx_dbl[15] = 1;
       }
 
-      for (i=0; i<num_fun*num_fun; i++)
+      for (i = 0; i < num_fun * num_fun; i++)
       {
          mtrx_flt[i] = (float)mtrx_dbl[i];
       }
 
       A_dbl = (HYPRE_ParCSRMatrix) GenerateSysLaplacian_dbl(MPI_COMM_WORLD,
-                                                       nx, ny, nz, P, Q,
-                                                       R, p, q, r, num_fun, mtrx_dbl, values_dbl);
+                                                            nx, ny, nz, P, Q,
+                                                            R, p, q, r, num_fun, mtrx_dbl, values_dbl);
       A_flt = (HYPRE_ParCSRMatrix) GenerateSysLaplacian_flt(MPI_COMM_WORLD,
-                                                       nx, ny, nz, P, Q,
-                                                       R, p, q, r, num_fun, mtrx_flt, values_flt);
+                                                            nx, ny, nz, P, Q,
+                                                            R, p, q, r, num_fun, mtrx_flt, values_flt);
 
       free(mtrx_dbl);
       free(mtrx_flt);
@@ -2519,15 +2519,15 @@ BuildParDifConv_mp( HYPRE_Int            argc,
       }
    }
 
-   for (i=0; i<7; i++)
+   for (i = 0; i < 7; i++)
    {
       values_flt[i] = (float)values_dbl[i];
    }
-	   
+
    A_dbl = (HYPRE_ParCSRMatrix) GenerateDifConv_dbl(MPI_COMM_WORLD,
-                                            nx, ny, nz, P, Q, R, p, q, r, values_dbl);
+                                                    nx, ny, nz, P, Q, R, p, q, r, values_dbl);
    A_flt = (HYPRE_ParCSRMatrix) GenerateDifConv_flt(MPI_COMM_WORLD,
-                                            nx, ny, nz, P, Q, R, p, q, r, values_flt);
+                                                    nx, ny, nz, P, Q, R, p, q, r, values_flt);
 
    free(values_dbl);
    free(values_flt);
@@ -2660,12 +2660,12 @@ BuildParLaplacian9pt_mp( HYPRE_Int            argc,
    }
 
    A_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt_flt(MPI_COMM_WORLD,
-                                                 nx, ny, P, Q, p, q, values_flt);
+                                                         nx, ny, P, Q, p, q, values_flt);
 
    free(values_flt);
 
    A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt_dbl(MPI_COMM_WORLD,
-                                                 nx, ny, P, Q, p, q, values_dbl);
+                                                         nx, ny, P, Q, p, q, values_dbl);
 
    free(values_dbl);
 
@@ -2797,12 +2797,12 @@ BuildParLaplacian27pt_mp( HYPRE_Int            argc,
    values_dbl[1] = -1.;
 
    A_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_flt(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_flt);
+                                                          nx, ny, nz, P, Q, R, p, q, r, values_flt);
 
    free(values_flt);
 
    A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_dbl(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_dbl);
+                                                          nx, ny, nz, P, Q, R, p, q, r, values_dbl);
 
    free(values_dbl);
 
@@ -2933,14 +2933,14 @@ BuildParLaplacian125pt_mp( HYPRE_Int            argc,
    values_dbl[1] = -1.;
 
    B_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_flt(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_flt);
+                                                          nx, ny, nz, P, Q, R, p, q, r, values_flt);
    A_flt = (HYPRE_ParCSRMatrix) hypre_ParCSRMatMat_flt(B_flt, B_flt);
 
    HYPRE_ParCSRMatrixDestroy_flt(B_flt);
    free(values_flt);
 
    B_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_dbl(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_dbl);
+                                                          nx, ny, nz, P, Q, R, p, q, r, values_dbl);
    A_dbl = (HYPRE_ParCSRMatrix) hypre_ParCSRMatMat_dbl(B_dbl, B_dbl);
 
    HYPRE_ParCSRMatrixDestroy_dbl(B_dbl);
@@ -2961,7 +2961,7 @@ HYPRE_Int
 BuildParRotate7pt_mp( HYPRE_Int            argc,
                       char                *argv[],
                       HYPRE_Int            arg_index,
-                      HYPRE_ParCSRMatrix  *A_flt_ptr, 
+                      HYPRE_ParCSRMatrix  *A_flt_ptr,
                       HYPRE_ParCSRMatrix  *A_dbl_ptr     )
 {
    HYPRE_BigInt              nx, ny;
@@ -3060,9 +3060,9 @@ BuildParRotate7pt_mp( HYPRE_Int            argc,
     *-----------------------------------------------------------*/
 
    A_flt = (HYPRE_ParCSRMatrix) GenerateRotate7pt_flt(MPI_COMM_WORLD,
-                                              nx, ny, P, Q, p, q, (float)alpha, (float)eps);
+                                                      nx, ny, P, Q, p, q, (float)alpha, (float)eps);
    A_dbl = (HYPRE_ParCSRMatrix) GenerateRotate7pt_dbl(MPI_COMM_WORLD,
-                                              nx, ny, P, Q, p, q, alpha, eps);
+                                                      nx, ny, P, Q, p, q, alpha, eps);
 
    *A_flt_ptr = A_flt;
    *A_dbl_ptr = A_dbl;
@@ -3198,20 +3198,20 @@ BuildParVarDifConv_mp( HYPRE_Int            argc,
    if (0 == type)
    {
       A_dbl = (HYPRE_ParCSRMatrix) GenerateVarDifConv_dbl(MPI_COMM_WORLD,
-                                                          nx, ny, nz, P, Q, R, p, q, r, 
-							  eps, &rhs_dbl);
+                                                          nx, ny, nz, P, Q, R, p, q, r,
+                                                          eps, &rhs_dbl);
       A_flt = (HYPRE_ParCSRMatrix) GenerateVarDifConv_flt(MPI_COMM_WORLD,
-                                                          nx, ny, nz, P, Q, R, p, q, r, 
-							  (float)eps, &rhs_flt);
+                                                          nx, ny, nz, P, Q, R, p, q, r,
+                                                          (float)eps, &rhs_flt);
    }
    else
    {
       A_dbl = (HYPRE_ParCSRMatrix) GenerateRSVarDifConv_dbl(MPI_COMM_WORLD,
-                                                            nx, ny, nz, P, Q, R, p, q, r, 
-							    eps, &rhs_dbl, type);
+                                                            nx, ny, nz, P, Q, R, p, q, r,
+                                                            eps, &rhs_dbl, type);
       A_flt = (HYPRE_ParCSRMatrix) GenerateRSVarDifConv_flt(MPI_COMM_WORLD,
-                                                            nx, ny, nz, P, Q, R, p, q, r, 
-							    (float)eps, &rhs_flt, type);
+                                                            nx, ny, nz, P, Q, R, p, q, r,
+                                                            (float)eps, &rhs_flt, type);
    }
 
    *A_flt_ptr = A_flt;

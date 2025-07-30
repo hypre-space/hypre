@@ -29,7 +29,7 @@
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
-                     hypre_StructVector_mp *y )
+                           hypre_StructVector_mp *y )
 {
    /* determine type of output vector data  ==> Precision of y. */
    HYPRE_Precision precision = hypre_StructVectorPrecision (y);
@@ -53,30 +53,30 @@ hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
          {
             ((hypre_float *)yp)[i] = (hypre_float)((hypre_double *)xp)[i];
          }
-      break;
+         break;
       case HYPRE_REAL_DOUBLE:
          for (i = 0; i < size; i++)
          {
             ((hypre_double *)yp)[i] = (hypre_double)((hypre_float *)xp)[i];
          }
-      break;
+         break;
       case HYPRE_REAL_LONGDOUBLE:
          for (i = 0; i < size; i++)
          {
-            ((hypre_long_double *)yp)[i] = 
-		    (hypre_long_double)((hypre_double *)xp)[i];
+            ((hypre_long_double *)yp)[i] =
+               (hypre_long_double)((hypre_double *)xp)[i];
          }
          break;
-         default:
+      default:
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
    }
 
-/*
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
-#endif
-   hypre_GpuProfilingPopRange();
-*/
+   /*
+   #ifdef HYPRE_PROFILE
+      hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+   #endif
+      hypre_GpuProfilingPopRange();
+   */
    return hypre_error_flag;
 }
 
@@ -144,8 +144,8 @@ hypre_StructVectorConvert_mp (hypre_StructVector_mp *v,
             hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                 x_data_box, start, unit_stride, vi);
             {
-               ((hypre_long_double *)(hypre_StructVectorBoxData(y, i))[vi] = 
-		(hypre_long_double)(hypre_double *)(hypre_StructVectorBoxData(x, i))[vi];
+               ((hypre_long_double *)(hypre_StructVectorBoxData(y, i))[vi] =
+      (hypre_long_double)(hypre_double *)(hypre_StructVectorBoxData(x, i))[vi];
             }
             hypre_BoxLoop1End(vi);
 #ifdef HYPRE_USING_OPENMP

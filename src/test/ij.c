@@ -4832,7 +4832,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
-				 free_dof_func = 0;
+         free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5146,7 +5146,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
-				 free_dof_func = 0;
+         free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5370,7 +5370,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-   				  free_dof_func = 0;
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -5571,7 +5571,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-   				  free_dof_func = 0;
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -9648,7 +9648,7 @@ final:
       hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
    }
    /* AMG takes ownership of dof_func, so we free it explicitly only when not using AMG */
-	 if (free_dof_func)
+   if (free_dof_func)
    {
       hypre_TFree(dof_func, memory_location);
    }

@@ -157,7 +157,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    //set preconditioning matrix
-   if((bicgstab_data -> precond_Mat)  == NULL)
+   if ((bicgstab_data -> precond_Mat)  == NULL)
    {
       (bicgstab_data -> precond_Mat)  = A;
       precond_Mat = (bicgstab_data -> precond_Mat) ;

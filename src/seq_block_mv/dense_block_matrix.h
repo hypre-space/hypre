@@ -33,7 +33,7 @@ typedef struct hypre_DenseBlockMatrix_struct
    HYPRE_Complex       **data_aop;           /* Array of pointers to data */
    HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 } hypre_DenseBlockMatrix;

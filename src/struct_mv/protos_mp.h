@@ -11,9 +11,9 @@
 #if defined(HYPRE_MIXED_PRECISION)
 HYPRE_Int
 hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
-                     hypre_StructVector_mp *y );
+                           hypre_StructVector_mp *y );
 HYPRE_Int
 hypre_StructVectorConvert_mp( hypre_StructVector_mp *x,
-                     HYPRE_Precision new_precision);
+                              HYPRE_Precision new_precision);
 #endif
 

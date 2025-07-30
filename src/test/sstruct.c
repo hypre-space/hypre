@@ -2417,7 +2417,7 @@ hypre_MPDataAlloc(HYPRE_Int count, HYPRE_MemoryLocation location)
    HYPRE_Precision precision;
    HYPRE_GetGlobalPrecision(&precision);
 
-   switch(precision)
+   switch (precision)
    {
       case HYPRE_REAL_SINGLE:
          data = hypre_TAlloc(hypre_float, count, location);
@@ -2440,7 +2440,7 @@ hypre_MPDataMemcpy(void *dst, void *src, HYPRE_Int count,
    HYPRE_Precision precision;
    HYPRE_GetGlobalPrecision(&precision);
 
-   switch(precision)
+   switch (precision)
    {
       case HYPRE_REAL_SINGLE:
          hypre_TMemcpy(dst, src, hypre_float, count, loc_dst, loc_src);
@@ -2462,7 +2462,7 @@ hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
    HYPRE_Precision precision;
    HYPRE_GetGlobalPrecision(&precision);
 
-   switch(precision)
+   switch (precision)
    {
       case HYPRE_REAL_SINGLE:
       {
@@ -2502,7 +2502,7 @@ hypre_MPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
    HYPRE_Precision precision;
    HYPRE_GetGlobalPrecision(&precision);
 
-   switch(precision)
+   switch (precision)
    {
       case HYPRE_REAL_SINGLE:
       {
@@ -3461,7 +3461,7 @@ main( hypre_int argc,
 
    {
       HYPRE_Precision precision;
-      switch(precision_id)
+      switch (precision_id)
       {
          case -1:
             HYPRE_GetGlobalPrecision(&precision);

@@ -156,7 +156,7 @@ typedef long double  hypre_long_double;
 
 /* object precision options and API are available to users at all times */
 
-typedef enum 
+typedef enum
 {
    HYPRE_REAL_SINGLE,
    HYPRE_REAL_DOUBLE,

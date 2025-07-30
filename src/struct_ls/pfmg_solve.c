@@ -183,7 +183,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
             if ( ((rel_change) && (e_dot_e / x_dot_x) < eps) || (!rel_change) )
             {
-              hypre_GpuProfilingPopRange();
+               hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
             }

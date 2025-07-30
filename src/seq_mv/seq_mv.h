@@ -80,7 +80,7 @@ typedef struct
    hypre_GpuMatData     *mat_data;
 #endif
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 } hypre_CSRMatrix;
@@ -269,9 +269,9 @@ typedef struct
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision vector_precision;
-#endif 
+#endif
 
 } hypre_Vector;
 
@@ -294,9 +294,9 @@ typedef struct
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision vector_precision;
-#endif 
+#endif
 
 } hypre_Vector_mp;
 
@@ -320,7 +320,7 @@ typedef struct
 #define hypre_VectorEntryIJ(vector, i, j) \
    ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
 #define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
 #endif
 
@@ -714,13 +714,13 @@ HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_l
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int
 hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
-                     hypre_Vector_mp *y );
+                        hypre_Vector_mp *y );
 
 HYPRE_Int
 hypre_SeqVectorAxpy_mp( hypre_double alpha,
-                     hypre_Vector_mp *x,
-                     hypre_Vector_mp *y     );
-                     
+                        hypre_Vector_mp *x,
+                        hypre_Vector_mp *y     );
+
 #endif
 
 #ifdef __cplusplus

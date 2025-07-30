@@ -328,10 +328,10 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_PCGSetPrecondMatrix( HYPRE_Solver  solver,
-                     HYPRE_Matrix precond_matrix)
+                           HYPRE_Matrix precond_matrix)
 {
-   return( hypre_PCGSetPrecondMatrix( (void *)     solver,
-                                (void *) precond_matrix) );
+   return ( hypre_PCGSetPrecondMatrix( (void *)     solver,
+                                       (void *) precond_matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -340,10 +340,10 @@ HYPRE_PCGSetPrecondMatrix( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_PCGGetPrecondMatrix( HYPRE_Solver  solver,
-                     HYPRE_Matrix *precond_matrix_ptr )
+                           HYPRE_Matrix *precond_matrix_ptr )
 {
-   return( hypre_PCGGetPrecondMatrix( (void *)     solver,
-                                (HYPRE_Matrix *) precond_matrix_ptr ) );
+   return ( hypre_PCGGetPrecondMatrix( (void *)     solver,
+                                       (HYPRE_Matrix *) precond_matrix_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
