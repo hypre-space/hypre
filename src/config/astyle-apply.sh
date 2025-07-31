@@ -54,6 +54,8 @@ find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/blas' |
   egrep -v '/lapack' |
   egrep -v '/distributed' |
+  egrep -v '/mup' |
+  egrep -v '_mup[.]h' |
   egrep -v '/hypre/include' |
   egrep -v '/HYPREf[.]h' |
   egrep -v '/utilities/HYPRE_error_f[.]h' |

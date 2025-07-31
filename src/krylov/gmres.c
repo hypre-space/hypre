@@ -200,7 +200,7 @@ hypre_GMRESSetup( void *gmres_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    //set preconditioning matrix
-   if((gmres_data -> precond_Mat)  == NULL)
+   if ((gmres_data -> precond_Mat)  == NULL)
    {
       (gmres_data -> precond_Mat)  = A;
       precond_Mat = (gmres_data -> precond_Mat) ;
@@ -1420,7 +1420,7 @@ hypre_GMRESGetSkipRealResidualCheck( void      *gmres_vdata,
 
 /*--------------------------------------------------------------------------
  *  hypre_GMRESSetStopCrit, hypre_GMRESGetStopCrit
- * 
+ *
  *  OBSOLETE
  *--------------------------------------------------------------------------*/
 

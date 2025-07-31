@@ -80,7 +80,7 @@ cat>> $MUP_HEADER <<@
 $(
 cat mup.functions mup.methods | while read -r func_name
 do
-   echo "#define $func_name HYPRE_ZZZZZPRECISION_FUNC ( $func_name )"
+   echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
 done
 cat mup.fixed | while read -r func_name
 do

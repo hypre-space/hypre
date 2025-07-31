@@ -1156,7 +1156,8 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       if (!d_row_indexes)
       {
          temp_row_indexes = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy(temp_row_indexes + 1, ncols, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(temp_row_indexes + 1, ncols, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_DEVICE);
          hypre_Memset(temp_row_indexes, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
          hypreDevice_IntegerExclusiveScan(nrows + 1, temp_row_indexes);
          d_row_indexes = temp_row_indexes;
@@ -1171,7 +1172,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_counting_iterator(0),
                         thrust::make_counting_iterator(nrows),
-      [=] __device__ (HYPRE_Int i)
+                        [ = ] __device__ (HYPRE_Int i)
       {
          for (HYPRE_Int j = d_row_indexes[i]; j < d_row_indexes[i + 1]; j++)
          {
@@ -1182,7 +1183,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_ONEDPL_CALL(for_each,
                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                         oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
-      [=] (HYPRE_Int i)
+                        [ = ] (HYPRE_Int i)
       {
          for (HYPRE_Int j = d_row_indexes[i]; j < d_row_indexes[i + 1]; j++)
          {
@@ -1197,7 +1198,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_counting_iterator(0),
                         thrust::make_counting_iterator(num_nonzeros),
-      [=] __device__ (HYPRE_Int k)
+                        [ = ] __device__ (HYPRE_Int k)
       {
          HYPRE_BigInt g_row = extended_rows[k];
          HYPRE_BigInt g_col = extended_cols[k];
@@ -1215,7 +1216,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
                {
                   HYPRE_Int offset = p_found - diag_j;
                   values[k] = diag_data[offset];
-                  if (zero_out) diag_data[offset] = 0.0;
+                  if (zero_out) { diag_data[offset] = 0.0; }
                }
             }
             else
@@ -1225,7 +1226,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
                   if (col_map_offd[offd_j[j]] == g_col)
                   {
                      values[k] = offd_data[j];
-                     if (zero_out) offd_data[j] = 0.0;
+                     if (zero_out) { offd_data[j] = 0.0; }
                      break;
                   }
                }
@@ -1236,7 +1237,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_ONEDPL_CALL(for_each,
                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                         oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
-      [=] (HYPRE_Int k)
+                        [ = ] (HYPRE_Int k)
       {
          HYPRE_BigInt g_row = extended_rows[k];
          HYPRE_BigInt g_col = extended_cols[k];
@@ -1254,7 +1255,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
                {
                   HYPRE_Int offset = p_found - diag_j;
                   values[k] = diag_data[offset];
-                  if (zero_out) diag_data[offset] = 0.0;
+                  if (zero_out) { diag_data[offset] = 0.0; }
                }
             }
             else
@@ -1264,7 +1265,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
                   if (col_map_offd[offd_j[j]] == g_col)
                   {
                      values[k] = offd_data[j];
-                     if (zero_out) offd_data[j] = 0.0;
+                     if (zero_out) { offd_data[j] = 0.0; }
                      break;
                   }
                }

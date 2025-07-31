@@ -258,7 +258,7 @@ typedef struct hypre_ParVector_struct
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision vector_precision;
 #endif
 } hypre_ParVector;
@@ -288,7 +288,7 @@ typedef struct hypre_ParVector_struct
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
 #define hypre_ParVectorPrecision(vector)          ((vector) -> vector_precision)
 #endif
 
@@ -384,7 +384,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Int            *soc_offd_j;
 #endif
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 
@@ -429,7 +429,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
 #define hypre_ParCSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
 #endif
 
@@ -1321,12 +1321,12 @@ HYPRE_Int hypre_ParVectorStridedCopy( hypre_ParVector *x, HYPRE_Int istride, HYP
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int
 hypre_ParVectorCopy_mp( hypre_ParVector *x,
-                     hypre_ParVector *y );
+                        hypre_ParVector *y );
 
 HYPRE_Int
 hypre_ParVectorAxpy_mp( hypre_double    alpha,
-                     hypre_ParVector *x,
-                     hypre_ParVector *y );
+                        hypre_ParVector *x,
+                        hypre_ParVector *y );
 
 #endif
 

@@ -21,14 +21,14 @@ extern "C" {
 #endif
 
 HYPRE_Int HYPRE_BoomerAMGSetup_mp(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_BoomerAMGSolve_mp(HYPRE_Solver       solver,
-                               HYPRE_ParCSRMatrix A,
-                               HYPRE_ParVector    b,
-                               HYPRE_ParVector    x);
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
 
 #ifdef __cplusplus
 }

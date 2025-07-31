@@ -27,7 +27,7 @@
 
 HYPRE_Int
 hypre_ParVectorCopy_mp( hypre_ParVector *x,
-                     hypre_ParVector *y )
+                        hypre_ParVector *y )
 {
    hypre_Vector_mp *x_local = (hypre_Vector_mp *)hypre_ParVectorLocalVector(x);
    hypre_Vector_mp *y_local = (hypre_Vector_mp *)hypre_ParVectorLocalVector(y);
@@ -40,12 +40,12 @@ hypre_ParVectorCopy_mp( hypre_ParVector *x,
 
 HYPRE_Int
 hypre_ParVectorAxpy_mp( hypre_double    alpha,
-                     hypre_ParVector *x,
-                     hypre_ParVector *y )
+                        hypre_ParVector *x,
+                        hypre_ParVector *y )
 {
    hypre_Vector_mp *x_local = (hypre_Vector_mp *)hypre_ParVectorLocalVector(x);
    hypre_Vector_mp *y_local = (hypre_Vector_mp *)hypre_ParVectorLocalVector(y);
-           
+
    return hypre_SeqVectorAxpy_mp( alpha, x_local, y_local);
 }
 

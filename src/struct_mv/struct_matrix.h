@@ -98,13 +98,13 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 
 } hypre_StructMatrix;
 
-typedef struct 
+typedef struct
 {
    MPI_Comm              comm;
 
@@ -142,7 +142,7 @@ typedef struct
 
    HYPRE_Int             ref_count;
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 
@@ -212,7 +212,7 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)
 #endif
 

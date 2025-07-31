@@ -577,7 +577,7 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
 
    hypre_StructMatrixMemoryLocation(matrix) = hypre_HandleMemoryLocation(hypre_handle());
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    hypre_StructMatrixPrecision(matrix) = HYPRE_OBJECT_PRECISION;
 #endif
 

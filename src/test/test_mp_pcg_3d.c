@@ -6,12 +6,12 @@
  ******************************************************************************/
 
 /*!
-   This file contains a mocked-up example, based on ex5.c in the examples directory. 
-   The goal is to give an idea of how a user may utilize hypre to assemble matrix data 
-   and access solvers in a way that would facilitate a mixed-precision solution of the 
-   linear system. This particular driver demonstrates how the mixed-precision build may 
+   This file contains a mocked-up example, based on ex5.c in the examples directory.
+   The goal is to give an idea of how a user may utilize hypre to assemble matrix data
+   and access solvers in a way that would facilitate a mixed-precision solution of the
+   linear system. This particular driver demonstrates how the mixed-precision build may
    be used to develop mixed-precision solvers, such as the defect-correction-based solver
-   implemented here. Feel free to ask questions, make comments or suggestions 
+   implemented here. Feel free to ask questions, make comments or suggestions
    regarding any of the information below.
 */
 
@@ -34,13 +34,13 @@
 
 #define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
-HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A, 
-		HYPRE_ParCSRMatrix B, 
-		HYPRE_ParVector x, 
-		HYPRE_ParVector b,
-		HYPRE_Solver solver,
-		HYPRE_PtrToSolverFcn approx_solve,
-		HYPRE_Int maxits);
+HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParCSRMatrix B,
+                                       HYPRE_ParVector x,
+                                       HYPRE_ParVector b,
+                                       HYPRE_Solver solver,
+                                       HYPRE_PtrToSolverFcn approx_solve,
+                                       HYPRE_Int maxits);
 
 int main (int argc, char *argv[])
 {
@@ -59,16 +59,16 @@ int main (int argc, char *argv[])
    int num_iterations;
    double dfinal_res_norm;
    float     final_res_norm;
-   int	       time_index;   
-   //float   wall_time;   
+   int          time_index;
+   //float   wall_time;
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
-       for the solver (A, parcsr_A) and the preconditioner (B, parcsr_B). I have included two suggestions 
-       below on how we would utilize both of these matrices. 
+       for the solver (A, parcsr_A) and the preconditioner (B, parcsr_B). I have included two suggestions
+       below on how we would utilize both of these matrices.
    */
 
    //HYPRE_IJMatrix C;
-   //HYPRE_ParCSRMatrix parcsr_C;   
-   
+   //HYPRE_ParCSRMatrix parcsr_C;
+
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
    HYPRE_IJVector b;
@@ -81,13 +81,13 @@ int main (int argc, char *argv[])
    HYPRE_IJVector bb;
    HYPRE_ParVector par_bb;
    HYPRE_IJVector xb;
-   HYPRE_ParVector par_xb;   
-   
+   HYPRE_ParVector par_xb;
+
    HYPRE_IJVector ijres;
    HYPRE_IJVector ijhres;
-   HYPRE_IJVector ije;   
-   HYPRE_IJVector ijxtmp;   
-   /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
+   HYPRE_IJVector ije;
+   HYPRE_IJVector ijxtmp;
+   /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
    //HYPRE_Solver solver, precond;
@@ -110,12 +110,12 @@ int main (int argc, char *argv[])
       if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
-         solver_id = atoi(argv[arg_index++]);         
+         solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-n") == 0 )
       {
          arg_index++;
-         n = atoi(argv[arg_index++]);         
+         n = atoi(argv[arg_index++]);
       }
       else
       {
@@ -124,38 +124,38 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n*n < num_procs) n = sqrt(num_procs) + 1;
-   N = n*n*n; /* global number of rows */
+   if (n * n * n < num_procs) { n = sqrt(num_procs) + 1; }
+   N = n * n * n; /* global number of rows */
    /* double and float variants of mesh spacing */
-   h = 1.0/(float)(n+1); /* mesh size*/
-   dh = 1.0/(double)(n+1);
-   h2 = h*h;
-   n2 = n*n;
-   dh2 = dh*dh;
+   h = 1.0 / (float)(n + 1); /* mesh size*/
+   dh = 1.0 / (double)(n + 1);
+   h2 = h * h;
+   n2 = n * n;
+   dh2 = dh * dh;
    /* partition rows */
-   local_size = N/num_procs;
+   local_size = N / num_procs;
    //local_size = N;
-   extra = N - local_size*num_procs;
+   extra = N - local_size * num_procs;
    //extra = 0;
 
-   ilower = local_size*myid;
+   ilower = local_size * myid;
    ilower += my_min(myid, extra);
 
-   iupper = local_size*(myid+1);
-   iupper += my_min(myid+1, extra);
+   iupper = local_size * (myid + 1);
+   iupper += my_min(myid + 1, extra);
    iupper = iupper - 1;
 
-   local_size = iupper - ilower + 1;   
+   local_size = iupper - ilower + 1;
 
-   HYPRE_IJMatrixCreate_flt(MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &A);      
+   HYPRE_IJMatrixCreate_flt(MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &A);
    HYPRE_IJMatrixSetObjectType_flt(A, HYPRE_PARCSR);
 
-   HYPRE_IJMatrixCreate_dbl(MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &B);      
+   HYPRE_IJMatrixCreate_dbl(MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &B);
    HYPRE_IJMatrixSetObjectType_dbl(B, HYPRE_PARCSR);
 
    /*! Initialize before setting coefficients */
    HYPRE_IJMatrixInitialize_flt(A);
-   HYPRE_IJMatrixInitialize_dbl(B);   
+   HYPRE_IJMatrixInitialize_dbl(B);
    /*! Set matrix entries */
    {
       int nnz;
@@ -168,25 +168,25 @@ int main (int argc, char *argv[])
       {
          nnz = 0;
          /* The bottom identity block:position i-n^2 */
-         if ((i-n2)>=0)
+         if ((i - n2) >= 0)
          {
-            cols[nnz] = i-n2;
+            cols[nnz] = i - n2;
             values[nnz] = -1.0;
             dvalues[nnz] = -1.0;
             nnz++;
          }
          /* The left identity block:position i-n */
-         if ((i-n)>=0)
+         if ((i - n) >= 0)
          {
-            cols[nnz] = i-n;
+            cols[nnz] = i - n;
             values[nnz] = -1.0;
             dvalues[nnz] = -1.0;
             nnz++;
          }
          /* The left -1: position i-1 */
-         if (i%n)
+         if (i % n)
          {
-            cols[nnz] = i-1;
+            cols[nnz] = i - 1;
             values[nnz] = -1.0;
             dvalues[nnz] = -1.0;
             nnz++;
@@ -197,35 +197,35 @@ int main (int argc, char *argv[])
          dvalues[nnz] = 6.0;
          nnz++;
          /* The right -1: position i+1 */
-         if ((i+1)%n)
+         if ((i + 1) % n)
          {
-            cols[nnz] = i+1;
+            cols[nnz] = i + 1;
             values[nnz] = -1.0;
             dvalues[nnz] = -1.0;
             nnz++;
          }
          /* The right identity block:position i+n */
-         if ((i+n)< N)
+         if ((i + n) < N)
          {
-            cols[nnz] = i+n;
+            cols[nnz] = i + n;
             values[nnz] = -1.0;
-            dvalues[nnz] = -1.0;            
+            dvalues[nnz] = -1.0;
             nnz++;
          }
          /* The top identity block:position i+n^2 */
-         if ((i+n2)< N)
+         if ((i + n2) < N)
          {
-            cols[nnz] = i+n2;
+            cols[nnz] = i + n2;
             values[nnz] = -1.0;
-            dvalues[nnz] = -1.0;            
+            dvalues[nnz] = -1.0;
             nnz++;
          }
 
          /* Set the values for row i */
          HYPRE_IJMatrixSetValues_flt(A, 1, &nnz, &i, cols, values);
-         HYPRE_IJMatrixSetValues_dbl(B, 1, &nnz, &i, cols, dvalues);         
+         HYPRE_IJMatrixSetValues_dbl(B, 1, &nnz, &i, cols, dvalues);
       }
-   }   
+   }
 
    /*! Assemble after setting the coefficients */
    HYPRE_IJMatrixAssemble_flt(A);
@@ -234,42 +234,42 @@ int main (int argc, char *argv[])
    HYPRE_IJMatrixGetObject_flt(A, (void**) &parcsr_A);
    HYPRE_IJMatrixGetObject_dbl(B, (void**) &parcsr_B);
    /*! Create the rhs and solution. Here, we only account for the solver precision. Since the preconditioner solve
-        is done internally, we can pass the appropriate vector types there. 
+        is done internally, we can pass the appropriate vector types there.
    */
    {
-      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper,&b);
+      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &b);
       HYPRE_IJVectorSetObjectType_flt(b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_flt(b);
 
-      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper,&x);
+      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &x);
       HYPRE_IJVectorSetObjectType_flt(x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_flt(x);
 
-      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper,&bb);
+      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &bb);
       HYPRE_IJVectorSetObjectType_dbl(bb, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(bb);
 
-      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper,&xb);
+      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &xb);
       HYPRE_IJVectorSetObjectType_dbl(xb, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(xb);
 
-      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper,&ijres);
+      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &ijres);
       HYPRE_IJVectorSetObjectType_flt(ijres, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_flt(ijres);
 
-      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper,&ije);
+      HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &ije);
       HYPRE_IJVectorSetObjectType_flt(ije, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_flt(ije);
 
-      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper,&ijhres);
+      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &ijhres);
       HYPRE_IJVectorSetObjectType_dbl(ijhres, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(ijhres);
 
-      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper,&ijxtmp);
+      HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &ijxtmp);
       HYPRE_IJVectorSetObjectType_dbl(ijxtmp, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(ijxtmp);
-   }    
-   
+   }
+
 
    /* Initialize rhs and solution */
    {
@@ -285,7 +285,7 @@ int main (int argc, char *argv[])
 
       rows = (int*) calloc(local_size, sizeof(int));
 
-      for (i=0; i<local_size; i++)
+      for (i = 0; i < local_size; i++)
       {
          rhs_values[i] = h2;
          x_values[i] = 0.0;
@@ -306,13 +306,13 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorSetValues_flt(ije, local_size, rows, x_values);
       HYPRE_IJVectorSetValues_dbl(ijhres, local_size, rows, drhs_values);
       HYPRE_IJVectorSetValues_dbl(ijxtmp, local_size, rows, dx_values);
-      
+
       free(x_values);
       free(rhs_values);
 
       free(dx_values);
       free(drhs_values);
-      
+
       free(rows);
    }
 
@@ -328,14 +328,14 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorGetObject_dbl(xb, (void **) &par_xb);
 
    /*! Done with linear system setup. Now proceed to solve the system. */
-// Double precision
-{
+   // Double precision
+   {
       /* reset solution vector */
       HYPRE_ParVectorSetConstantValues_dbl(par_xb, d_zero);
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
-      HYPRE_Solver        pcg_precond_gotten;      
+      HYPRE_Solver        pcg_precond_gotten;
 
       time_index = hypre_InitializeTiming("DBL Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -345,33 +345,33 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, MAXITS);
       HYPRE_PCGSetTol_dbl(pcg_solver, 1.0e-8);
       HYPRE_PCGSetTwoNorm_dbl(pcg_solver, 1);
-//      HYPRE_PCGSetRelChange_dbl(pcg_solver, rel_change);
-     HYPRE_PCGSetPrintLevel_dbl(pcg_solver, 0);
-//      HYPRE_PCGSetAbsoluteTo_dbll(pcg_solver, atol);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
-      
-      
+      //      HYPRE_PCGSetRelChange_dbl(pcg_solver, rel_change);
+      HYPRE_PCGSetPrintLevel_dbl(pcg_solver, 0);
+      //      HYPRE_PCGSetAbsoluteTo_dbll(pcg_solver, atol);
+      //      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);
+
+
       /* Now set up the AMG preconditioner and specify any parameters */
-     if(solver_id == 1)
-     {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
+      if (solver_id == 1)
+      {
+         if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n"); }
 
          HYPRE_BoomerAMGCreate_dbl(&amg_solver);
-//         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, 0); /* print amg solution info */
+         //         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_dbl(amg_solver, 8);
-//         HYPRE_BoomerAMGSetOldDefault_dbl(amg_solver); 
+         //         HYPRE_BoomerAMGSetOldDefault_dbl(amg_solver);
          HYPRE_BoomerAMGSetRelaxType_dbl(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
          HYPRE_BoomerAMGSetNumSweeps_dbl(amg_solver, 1);
          HYPRE_BoomerAMGSetTol_dbl(amg_solver, 0.0); /* conv. tolerance zero */
          HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
-      
+
          // Set the preconditioner for PCG
-        HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B);
-        
+         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B);
+
          HYPRE_PCGSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
-                                amg_solver);
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_dbl,
+                                 amg_solver);
 
          HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
@@ -386,7 +386,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+         if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n"); }
       }
       // Setup PCG solver
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
@@ -413,22 +413,22 @@ int main (int argc, char *argv[])
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
       if (myid == 0)
       {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-      	hypre_printf("Iteration count = %d \n", num_iterations);         
+         hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+         hypre_printf("Iteration count = %d \n", num_iterations);
       }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-}
-// Single precision
-{
+      if (solver_id == 1) { HYPRE_BoomerAMGDestroy_dbl(amg_solver); }
+   }
+   // Single precision
+   {
       /* reset solution vector */
       HYPRE_ParVectorSetConstantValues_flt(par_x, zero);
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
-      HYPRE_Solver        pcg_precond_gotten;      
+      HYPRE_Solver        pcg_precond_gotten;
 
       time_index = hypre_InitializeTiming("FLT Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -438,32 +438,32 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetMaxIter_flt(pcg_solver, MAXITS);
       HYPRE_PCGSetTol_flt(pcg_solver, 1.0e-8);
       HYPRE_PCGSetTwoNorm_flt(pcg_solver, 1);
-//      HYPRE_PCGSetRelChange_flt(pcg_solver, rel_change);
-     HYPRE_PCGSetPrintLevel_flt(pcg_solver, 0);
-//      HYPRE_PCGSetAbsoluteTo_fltl(pcg_solver, atol);
-//      HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, recompute_res);      
-      
-      
+      //      HYPRE_PCGSetRelChange_flt(pcg_solver, rel_change);
+      HYPRE_PCGSetPrintLevel_flt(pcg_solver, 0);
+      //      HYPRE_PCGSetAbsoluteTo_fltl(pcg_solver, atol);
+      //      HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, recompute_res);
+
+
       /* Now set up the AMG preconditioner and specify any parameters */
-      if(solver_id == 1)
+      if (solver_id == 1)
       {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
+         if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n"); }
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
-//         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
+         //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
-//         HYPRE_BoomerAMGSetOldDefault_flt(amg_solver); 
+         //         HYPRE_BoomerAMGSetOldDefault_flt(amg_solver);
          HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
          HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
          HYPRE_BoomerAMGSetTol_flt(amg_solver, 0.0); /* conv. tolerance zero */
          HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-      
+
          // Set the preconditioner for PCG
-        HYPRE_PCGSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)parcsr_A);
-        
+         HYPRE_PCGSetPrecondMatrix_flt(pcg_solver, (HYPRE_Matrix)parcsr_A);
+
          HYPRE_PCGSetPrecond_flt(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
-                                amg_solver);
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_flt,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_flt,
+                                 amg_solver);
 
          HYPRE_PCGGetPrecond_flt(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
@@ -478,7 +478,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-         if (myid == 0) hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
+         if (myid == 0) { hypre_printf("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n"); }
       }
       // Setup PCG solver
       HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)parcsr_A,  (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
@@ -506,21 +506,21 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          hypre_printf("final relative residual norm = %e \n", final_res_norm);
-         hypre_printf("Iteration count = %d \n", num_iterations);         
+         hypre_printf("Iteration count = %d \n", num_iterations);
       }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_flt(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
+      if (solver_id == 1) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
    }
-// mixed-precision
+   // mixed-precision
    {
       /* reset solution vector */
       HYPRE_ParVectorSetConstantValues_dbl(par_xb, d_zero);
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
-      HYPRE_Solver        pcg_precond_gotten;      
+      HYPRE_Solver        pcg_precond_gotten;
 
       time_index = hypre_InitializeTiming("DBL Setup");
       MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -530,35 +530,35 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, MAXITS);
       HYPRE_PCGSetTol_dbl(pcg_solver, 1.0e-8);
       HYPRE_PCGSetTwoNorm_dbl(pcg_solver, 1);
-//      HYPRE_PCGSetRelChange_dbl(pcg_solver, rel_change);
-     HYPRE_PCGSetPrintLevel_dbl(pcg_solver, 0);
-//      HYPRE_PCGSetAbsoluteTo_dbll(pcg_solver, atol);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
-      
-      
+      //      HYPRE_PCGSetRelChange_dbl(pcg_solver, rel_change);
+      HYPRE_PCGSetPrintLevel_dbl(pcg_solver, 0);
+      //      HYPRE_PCGSetAbsoluteTo_dbll(pcg_solver, atol);
+      //      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);
+
+
       /* Now set up the AMG preconditioner and specify any parameters */
-     if(solver_id == 1)
-     {
-         if (myid == 0) hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
+      if (solver_id == 1)
+      {
+         if (myid == 0) { hypre_printf("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n"); }
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
-//         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
+         //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
-//         HYPRE_BoomerAMGSetOldDefault_flt(amg_solver); 
+         //         HYPRE_BoomerAMGSetOldDefault_flt(amg_solver);
          HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
          HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
          HYPRE_BoomerAMGSetTol_flt(amg_solver, 0.0); /* conv. tolerance zero */
          HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
-      
+
          // Set the preconditioner for PCG (single precision matrix)
-        HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_A);
+         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_A);
          // Set the preconditioner for PCG.
          // This actually sets a pointer to a single precision AMG solver.
          // The setup and solve functions just allow us to accept double precision
-         // rhs and sol vectors from the PCG solver to do the preconditioner solve.        
+         // rhs and sol vectors from the PCG solver to do the preconditioner solve.
          HYPRE_PCGSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
-                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
-                                amg_solver);
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_mp,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup_mp,
+                                 amg_solver);
 
          HYPRE_PCGGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
@@ -573,7 +573,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-        if (myid == 0) hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+         if (myid == 0) { hypre_printf("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n"); }
       }
       // Setup PCG solver (double precision)
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
@@ -600,15 +600,15 @@ int main (int argc, char *argv[])
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
       if (myid == 0)
       {
-        hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
-        hypre_printf("Iteration count = %d \n", num_iterations);         
+         hypre_printf("final relative residual norm = %e \n", dfinal_res_norm);
+         hypre_printf("Iteration count = %d \n", num_iterations);
       }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
-      if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-   }   
-    
+      if (solver_id == 1) { HYPRE_BoomerAMGDestroy_flt(amg_solver); }
+   }
+
    /* Clean up */
    HYPRE_IJMatrixDestroy_flt(A);
    HYPRE_IJVectorDestroy_flt(b);
@@ -625,19 +625,19 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }
 
-HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A, 
-		HYPRE_ParCSRMatrix B, 
-		HYPRE_ParVector x, 
-		HYPRE_ParVector b,
-		HYPRE_Solver solver,
-		HYPRE_PtrToSolverFcn approx_solve,
-		HYPRE_Int maxits)
+HYPRE_Int HYPRE_DefectCorrectionSolver(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParCSRMatrix B,
+                                       HYPRE_ParVector x,
+                                       HYPRE_ParVector b,
+                                       HYPRE_Solver solver,
+                                       HYPRE_PtrToSolverFcn approx_solve,
+                                       HYPRE_Int maxits)
 {
 
-   
+
 
    return 0;
 

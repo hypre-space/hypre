@@ -19,28 +19,28 @@
 extern "C" {
 #endif
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
-                   HYPRE_StructMatrix A,
-                   HYPRE_StructVector b,
-                   HYPRE_StructVector x);
+                         HYPRE_StructMatrix A,
+                         HYPRE_StructVector b,
+                         HYPRE_StructVector x);
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSolve_mp( HYPRE_StructSolver solver,
-                   HYPRE_StructMatrix A,
-                   HYPRE_StructVector b,
-                   HYPRE_StructVector x); 
-HYPRE_Int 
+                         HYPRE_StructMatrix A,
+                         HYPRE_StructVector b,
+                         HYPRE_StructVector x);
+HYPRE_Int
 HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
-                    HYPRE_StructMatrix A,
-                    HYPRE_StructVector b,
-                    HYPRE_StructVector x); 
+                          HYPRE_StructMatrix A,
+                          HYPRE_StructVector b,
+                          HYPRE_StructVector x);
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSolve_mp( HYPRE_StructSolver solver,
-                      HYPRE_StructMatrix A,
-                      HYPRE_StructVector b,
-                      HYPRE_StructVector x); 
+                          HYPRE_StructMatrix A,
+                          HYPRE_StructVector b,
+                          HYPRE_StructVector x);
 
 #ifdef __cplusplus
 }

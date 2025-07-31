@@ -58,13 +58,13 @@ typedef struct hypre_StructVector_struct
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision vector_precision;
 #endif
 
 } hypre_StructVector;
 
-typedef struct 
+typedef struct
 {
    MPI_Comm              comm;
 
@@ -89,7 +89,7 @@ typedef struct
 
    HYPRE_Int             ref_count;
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision vector_precision;
 #endif
 
@@ -160,7 +160,7 @@ hypre_StructVectorBoxData(vector, hypre_StructVectorBoxnum(vector, i))
 #define hypre_StructVectorGridDataValue(vector, i, index) \
 hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i), index)
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)
 #endif
 

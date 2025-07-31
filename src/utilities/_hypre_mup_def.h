@@ -38,7 +38,6 @@
 
 #define hypre_MP_BUILD 1
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)
-#define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)
 #undef  HYPRE_LONG_DOUBLE
 #ifndef HYPRE_SINGLE
@@ -49,7 +48,6 @@
 
 #define hypre_MP_BUILD 1
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)
-#define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)
 #undef  HYPRE_SINGLE
 #undef  HYPRE_LONG_DOUBLE
@@ -59,7 +57,6 @@
 
 #define hypre_MP_BUILD 1
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
-#define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
 #undef  HYPRE_SINGLE
 #ifndef HYPRE_LONG_DOUBLE
@@ -69,14 +66,12 @@
 #elif defined(MP_BUILD_DEFAULT)
 
 #define hypre_MP_BUILD 1
-#define HYPRE_MULTIPRECISION_FUNC(a) a
-#define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, def)  /* RDF: Temporary */
+#define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, ignore)  /* Avoid prototype conflicts */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 
 #else
 
-#define HYPRE_MULTIPRECISION_FUNC(a) a
-#define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, def)  /* RDF: Temporary */
+#define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, ignore)  /* Avoid prototype conflicts */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 
 #endif

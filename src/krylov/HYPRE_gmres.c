@@ -264,10 +264,10 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver  solver,
-                     HYPRE_Matrix precond_matrix)
+                             HYPRE_Matrix precond_matrix)
 {
-   return( hypre_GMRESSetPrecondMatrix( (void *)     solver,
-                                (void *) precond_matrix) );
+   return ( hypre_GMRESSetPrecondMatrix( (void *)     solver,
+                                         (void *) precond_matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -276,10 +276,10 @@ HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver  solver,
-                     HYPRE_Matrix *precond_matrix_ptr )
+                             HYPRE_Matrix *precond_matrix_ptr )
 {
-   return( hypre_GMRESGetPrecondMatrix( (void *)     solver,
-                                (HYPRE_Matrix *) precond_matrix_ptr ) );
+   return ( hypre_GMRESGetPrecondMatrix( (void *)     solver,
+                                         (HYPRE_Matrix *) precond_matrix_ptr ) );
 }
 
 /*--------------------------------------------------------------------------

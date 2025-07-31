@@ -20,10 +20,10 @@
 
 HYPRE_Int
 HYPRE_ParVectorCopy_mp( HYPRE_ParVector x,
-                     HYPRE_ParVector y )
+                        HYPRE_ParVector y )
 {
    return ( hypre_ParVectorCopy_mp( (hypre_ParVector *) x,
-                                 (hypre_ParVector *) y ) );
+                                    (hypre_ParVector *) y ) );
 }
 
 #endif
