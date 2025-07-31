@@ -26,7 +26,7 @@
  * Mixed-precision HYPRE_SMGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -41,20 +41,20 @@ HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
    HYPRE_StructVectorCreate_flt(hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);
-   HYPRE_StructVectorInitialize_flt( xtemp );   
+   HYPRE_StructVectorInitialize_flt( xtemp );
 
-/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
-/* call setup */        
+   /* call setup */
    HYPRE_StructSMGSetup_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
+   /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
-/* free data */   
+   /* free data */
    HYPRE_StructVectorDestroy_flt(btemp);
    HYPRE_StructVectorDestroy_flt(xtemp);
 
@@ -65,7 +65,7 @@ HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  * Mixed-precision HYPRE_SMGSetup
  *--------------------------------------------------------------------------*/
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructSMGSolve_mp( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
@@ -81,20 +81,20 @@ HYPRE_StructSMGSolve_mp( HYPRE_StructSolver solver,
    HYPRE_StructVectorCreate_flt(hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);
-   HYPRE_StructVectorInitialize_flt( xtemp );   
+   HYPRE_StructVectorInitialize_flt( xtemp );
 
-/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
-/* call solve */        
+   /* call solve */
    HYPRE_StructSMGSolve_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
+   /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
-/* free data */   
+   /* free data */
    HYPRE_StructVectorDestroy_flt(btemp);
    HYPRE_StructVectorDestroy_flt(xtemp);
 
@@ -105,7 +105,7 @@ HYPRE_StructSMGSolve_mp( HYPRE_StructSolver solver,
  * Mixed-precision HYPRE_PFMGSetup
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
                           HYPRE_StructMatrix A,
                           HYPRE_StructVector b,
@@ -121,20 +121,20 @@ HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
    HYPRE_StructVectorCreate_flt(hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);
-   HYPRE_StructVectorInitialize_flt( xtemp );   
+   HYPRE_StructVectorInitialize_flt( xtemp );
 
-/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
-/* call setup */        
+   /* call setup */
    HYPRE_StructPFMGSetup_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
+   /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
-/* free data */   
+   /* free data */
    HYPRE_StructVectorDestroy_flt(btemp);
    HYPRE_StructVectorDestroy_flt(xtemp);
 
@@ -145,7 +145,7 @@ HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  * Mixed-precision HYPRE_PFMGSolve
  *--------------------------------------------------------------------------*/
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructPFMGSolve_mp( HYPRE_StructSolver solver,
                           HYPRE_StructMatrix A,
                           HYPRE_StructVector b,
@@ -161,20 +161,20 @@ HYPRE_StructPFMGSolve_mp( HYPRE_StructSolver solver,
    HYPRE_StructVectorCreate_flt(hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);
-   HYPRE_StructVectorInitialize_flt( xtemp );   
+   HYPRE_StructVectorInitialize_flt( xtemp );
 
-/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
-/* call setup */        
+   /* call setup */
    HYPRE_StructPFMGSolve_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
+   /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
-/* free data */   
+   /* free data */
    HYPRE_StructVectorDestroy_flt(btemp);
    HYPRE_StructVectorDestroy_flt(xtemp);
 

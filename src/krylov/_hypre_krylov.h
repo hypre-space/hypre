@@ -213,7 +213,7 @@ hypre_BiCGSTABFunctionsCreate(
    hypre_KrylovPtrToCommInfo      CommInfo,
    hypre_KrylovPtrToPrecond       Precond,
    hypre_KrylovPtrToPrecondSetup  PrecondSetup
-   );
+);
 
 /**
  * Description...
@@ -1229,7 +1229,8 @@ hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata,
                            void *precond_data );
 HYPRE_Int hypre_BiCGSTABGetPrecond ( void *bicgstab_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_BiCGSTABSetPrecondMatrix( void  *bicgstab_vdata,  void  *precond_matrix );
-HYPRE_Int hypre_BiCGSTABGetPrecondMatrix( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr ) ;
+HYPRE_Int hypre_BiCGSTABGetPrecondMatrix( void  *bicgstab_vdata,
+                                          HYPRE_Matrix *precond_matrix_ptr ) ;
 HYPRE_Int hypre_BiCGSTABSetLogging ( void *bicgstab_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetHybrid ( void *bicgstab_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetPrintLevel ( void *bicgstab_vdata, HYPRE_Int print_level );

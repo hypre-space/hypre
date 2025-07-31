@@ -140,7 +140,7 @@ hypre_BiCGSTABFunctionsCreate(
    hypre_KrylovPtrToCommInfo      CommInfo,
    hypre_KrylovPtrToPrecond       Precond,
    hypre_KrylovPtrToPrecondSetup  PrecondSetup
-   );
+);
 
 /**
  * Description...

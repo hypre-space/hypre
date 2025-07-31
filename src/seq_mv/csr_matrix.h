@@ -56,7 +56,7 @@ typedef struct
    hypre_GpuMatData     *mat_data;
 #endif
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    HYPRE_Precision matrix_precision;
 #endif
 } hypre_CSRMatrix;

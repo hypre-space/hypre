@@ -174,7 +174,7 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
 
 /**
  **/
-HYPRE_Int HYPRE_PCGSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+HYPRE_Int HYPRE_PCGSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 /**
  * (Optional) Set the preconditioner to use in a generic fashion.
@@ -275,7 +275,7 @@ HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_PCGGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_PCGGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 /**
  **/
@@ -394,7 +394,7 @@ HYPRE_Int HYPRE_GMRESSetPrecond(HYPRE_Solver         solver,
 
 /**
  **/
-HYPRE_Int HYPRE_GMRESSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+HYPRE_Int HYPRE_GMRESSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 /**
  * (Optional) Set the amount of logging to do.
@@ -505,7 +505,7 @@ HYPRE_Int HYPRE_GMRESGetPrecond(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_GMRESGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_GMRESGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 /**
  **/
@@ -1147,7 +1147,7 @@ HYPRE_Int HYPRE_BiCGSTABSetPrecond(HYPRE_Solver         solver,
 
 /**
  **/
-HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 /**
  * (Optional) Set the amount of logging to do.
@@ -1186,7 +1186,7 @@ HYPRE_Int HYPRE_BiCGSTABGetPrecond(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 /**@}*/
 

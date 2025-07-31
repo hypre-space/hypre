@@ -11,11 +11,11 @@
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int
 hypre_ParVectorCopy_mp( hypre_ParVector *x,
-                     hypre_ParVector *y );
+                        hypre_ParVector *y );
 
 HYPRE_Int
 hypre_ParVectorAxpy_mp( hypre_double    alpha,
-                     hypre_ParVector *x,
-                     hypre_ParVector *y );
+                        hypre_ParVector *x,
+                        hypre_ParVector *y );
 
 #endif

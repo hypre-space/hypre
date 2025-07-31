@@ -50,7 +50,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixCsrsvData(matrix)      = NULL;
 #endif
 
-#if defined(HYPRE_MIXED_PRECISION)   
+#if defined(HYPRE_MIXED_PRECISION)
    hypre_CSRMatrixPrecision(matrix) = HYPRE_OBJECT_PRECISION;
 #endif
 

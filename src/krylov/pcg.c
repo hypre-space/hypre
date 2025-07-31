@@ -216,13 +216,13 @@ hypre_PCGSetup( void *pcg_vdata,
    HYPRE_Int           flex                 = (pcg_data -> flex);
    HYPRE_Int         (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
    void               *precond_data         = (pcg_data -> precond_data);
-   void 	      *precond_Mat          = (pcg_data -> precond_Mat);
+   void        *precond_Mat          = (pcg_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Setup");
 
    //set preconditioning matrix
-   if((pcg_data -> precond_Mat)  == NULL)
+   if ((pcg_data -> precond_Mat)  == NULL)
    {
       (pcg_data -> precond_Mat)  = A;
       precond_Mat = (pcg_data -> precond_Mat) ;
@@ -365,7 +365,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
    // preconditioning matrix
-   void	          *precond_Mat  = (pcg_data -> precond_Mat) ;
+   void            *precond_Mat  = (pcg_data -> precond_Mat) ;
    HYPRE_Int       print_level  = (pcg_data -> print_level);
    HYPRE_Int       logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
