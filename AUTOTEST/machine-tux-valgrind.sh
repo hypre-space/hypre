@@ -44,7 +44,6 @@ ronolob="-ams -ij -sstruct -sstructmat -struct -structmat"
 eo=""
 # From tux master: ro="-ams -ij -sstruct -struct -lobpcg"
 
-RDF: TODO today
 co="--enable-debug --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob -error -rt -valgrind
 ./renametest.sh basic $output_dir/basic--valgrind
