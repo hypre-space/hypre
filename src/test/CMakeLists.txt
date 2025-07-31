@@ -29,7 +29,7 @@ set(TEST_SRCS
 add_hypre_executables("${TEST_SRCS}")
 
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
-#add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
+add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
 
 # Copy test input files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default
