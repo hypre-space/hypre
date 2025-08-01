@@ -6,9 +6,11 @@
 
 # Print the defined function names in the object files of the current directory.
 #
-# The script uses 'nm' and searches for functions labeled with 'T'.
+# The script uses 'nm' and searches for functions labeled with 'T', i.e.,
+# symbol is in the text (code) section and is globally visible.
 
 # This prevents unmatched patterns from expanding (e.g., when there are no .obj files)
 shopt -s nullglob
 
-nm -P *.o *.obj | grep ' T ' | awk '{print $1}' | sed 's/^_//' | sed 's/_$//'
+# Use awk to avoid issues with spacing
+nm -P *.o *.obj | awk '$2 == "T" {print $1}' | sed -e 's/_$//'

@@ -41,7 +41,9 @@ make distclean
 ./configure --enable-debug
 make -s -j
 
-echo "FUNCTION CHECK:"
+echo -e "********************"
+echo -e "*  FUNCTION CHECK  *"
+echo -e "********************\n"
 for i in $DIRS
 do
     echo -ne "Checking $i ... "
