@@ -1,8 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+# Exit immediately on any error (even in functions or pipelines),
+# and print the failing command and line number for easier debugging.
+set -eE -o pipefail
+trap 'echo "Error at line $LINENO: $BASH_COMMAND"; exit 1' ERR
 
 ## Should be run from src directory
 # Loops over directories with multiprecision files and generates code.
@@ -33,6 +38,5 @@ DIRS="\
 for i in $DIRS
 do
     echo "Writing multiprecision code for $i ..."
-    (cd $i; mup_code)
+    (cd $i; ./mup_code)
 done
-

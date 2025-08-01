@@ -29,7 +29,8 @@ autom4te.cache
 *.TVD.v4breakpoints*
 src/TAGS
 hypre/
-install/
+build*/
+install*/
 AUTOTEST/*.dir
 out/
 .vscode
@@ -61,6 +62,7 @@ src/test/ij_mv
 src/test/ij_mv.exe
 src/test/ij_mm
 src/test/ij_mm.exe
+src/test/ij_mp
 src/test/sstruct
 src/test/sstruct.exe
 src/test/sstructmat
@@ -71,6 +73,9 @@ src/test/structmat
 src/test/structmat.exe
 src/test/struct_migrate
 src/test/struct_migrate.exe
+src/test/test_mp
+src/test/test_mp_pcg
+src/test/test_mp_pcg_3d
 src/test/zboxloop
 src/test/zboxloop.exe
 src/examples/ex[0-9]
