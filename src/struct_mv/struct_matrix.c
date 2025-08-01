@@ -809,7 +809,7 @@ hypre_StructMatrixNeedResize( hypre_StructMatrix *matrix,
       /* resize if no current data space (cdata_space) */
       need_resize = 1;
    }
-   else if ( !hypre_BoxArraysEqual(data_space, cdata_space) )
+   else if (!hypre_BoxArraysEqual(data_space, cdata_space))
    {
       /* resize if data_space is no the same as cdata_space (note that we check
        * equality here, which we need for StructMatmult()) */
@@ -1287,14 +1287,23 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
 HYPRE_Int
 hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
+                                  HYPRE_Int           zero_init,
                                   HYPRE_Complex      *data   )
 {
    if (data == NULL)
    {
-      /* TODO (VPM): we should be able to just do hypre_TAlloc, but that worsens PFMG convergence */
-      data = hypre_CTAlloc(HYPRE_Complex,
-                           hypre_StructMatrixDataSize(matrix),
-                           hypre_StructMatrixMemoryLocation(matrix));
+      if (zero_init)
+      {
+         data = hypre_CTAlloc(HYPRE_Complex,
+                              hypre_StructMatrixDataSize(matrix),
+                              hypre_StructMatrixMemoryLocation(matrix));
+      }
+      else
+      {
+         data = hypre_TAlloc(HYPRE_Complex,
+                             hypre_StructMatrixDataSize(matrix),
+                             hypre_StructMatrixMemoryLocation(matrix));
+      }
       hypre_StructMatrixDataAlloced(matrix) = 1;
    }
    else
@@ -1313,7 +1322,7 @@ HYPRE_Int
 hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 {
    hypre_StructMatrixInitializeShell(matrix);
-   hypre_StructMatrixInitializeData(matrix, NULL);
+   hypre_StructMatrixInitializeData(matrix, 1, NULL);
 
    return hypre_error_flag;
 }

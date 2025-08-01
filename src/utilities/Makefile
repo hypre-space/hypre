@@ -72,13 +72,13 @@ FILES =\
  caliper_instrumentation.c
 
 CUFILES=\
+ device_markers.c\
  device_utils.c\
  general.c\
  handle.c\
  int_array_device.c\
  memory.c\
  omp_device.c\
- nvtx.c\
  stl_ops.c
 
 # Mixed precision files
@@ -97,7 +97,7 @@ COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

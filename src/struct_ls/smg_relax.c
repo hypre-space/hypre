@@ -424,7 +424,7 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
       temp_vec = hypre_StructVectorCreate(hypre_StructVectorComm(b),
                                           hypre_StructVectorGrid(b));
       hypre_StructVectorSetNumGhost(temp_vec, hypre_StructVectorNumGhost(b));
-      hypre_StructVectorInitialize(temp_vec);
+      hypre_StructVectorInitialize(temp_vec, 1);
       hypre_StructVectorAssemble(temp_vec);
       (relax_data -> temp_vec) = temp_vec;
    }

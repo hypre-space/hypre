@@ -59,7 +59,7 @@ HYPRE_StructVectorSetStride(HYPRE_StructVector vector,
 HYPRE_Int
 HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 {
-   return ( hypre_StructVectorInitialize(vector) );
+   return ( hypre_StructVectorInitialize(vector, 1) );
 }
 
 /*--------------------------------------------------------------------------

@@ -1537,7 +1537,7 @@ main( hypre_int argc,
 
          for (i = 0; i < reps; i++)
          {
-            hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+            hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
          }
          reps = 0;
 
@@ -2927,7 +2927,7 @@ main( hypre_int argc,
 
          for (i = 0; i < imax; i++)
          {
-            hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+            hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
          }
          /* this counts mult-adds */
          hypre_IncFLOPCount(7 * N * imax);

@@ -185,6 +185,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                  HYPRE_Complex       Pconst2 )
 {
 #define HYPRE_UNROLL_MAXDEPTH 7
+#define HYPRE_DECLARE_2VARS(n)                             \
+    HYPRE_Complex *Ap##n = NULL;                           \
+    HYPRE_Int      As##n = 0
 #define HYPRE_UPDATE_VALUES(n)                             \
     do {                                                   \
         if      ((As##n) == 0)       mid[Pi] += Ap##n[Ai]; \
@@ -207,22 +210,62 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
 
-   HYPRE_Complex         *Ap0 = NULL, *Ap1 = NULL;
-   HYPRE_Complex         *Ap2 = NULL, *Ap3 = NULL;
-   HYPRE_Complex         *Ap4 = NULL, *Ap5 = NULL, *Ap6 = NULL;
-   HYPRE_Complex         *Pp1 = NULL, *Pp2 = NULL;
-   HYPRE_Int              As0 = 0, As1 = 0, As2 = 0, As3 = 0;
-   HYPRE_Int              As4 = 0, As5 = 0, As6 = 0;
    HYPRE_Int              P_dbox_volume;
-   HYPRE_Complex         *mid;
+   HYPRE_Complex         *Pp1, *Pp2, *mid;
 
-   HYPRE_Int              i, k, si;
-   HYPRE_Int              vdepth, depth, vsi[HYPRE_UNROLL_MAXDEPTH];
+   HYPRE_Complex         *Ap_l0 = NULL, *Ap_r0 = NULL, *Ap_m0 = NULL;
+   HYPRE_Complex         *Ap_l1 = NULL, *Ap_r1 = NULL, *Ap_m1 = NULL;
+   HYPRE_Complex         *Ap_l2 = NULL, *Ap_r2 = NULL, *Ap_m2 = NULL;
+   HYPRE_Complex         *Ap_l3 = NULL, *Ap_r3 = NULL, *Ap_m3 = NULL;
+   HYPRE_Complex         *Ap_l4 = NULL, *Ap_r4 = NULL, *Ap_m4 = NULL;
+   HYPRE_Complex         *Ap_l5 = NULL, *Ap_r5 = NULL, *Ap_m5 = NULL;
+   HYPRE_Complex         *Ap_l6 = NULL, *Ap_r6 = NULL, *Ap_m6 = NULL;
+   HYPRE_Complex         *Ap_l7 = NULL, *Ap_r7 = NULL, *Ap_m7 = NULL;
+   HYPRE_Complex         *Ap_l8 = NULL, *Ap_r8 = NULL, *Ap_m8 = NULL;
+
+   HYPRE_Int              i, l, r, m, k, si;
+   HYPRE_Int              depth, vdepth, vsi[HYPRE_UNROLL_MAXDEPTH];
+   HYPRE_Int              msi[A_stencil_size];
+   HYPRE_Int              lsi[A_stencil_size];
+   HYPRE_Int              rsi[A_stencil_size];
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
+   HYPRE_DECLARE_2VARS(0);
+   HYPRE_DECLARE_2VARS(1);
+   HYPRE_DECLARE_2VARS(2);
+   HYPRE_DECLARE_2VARS(3);
+   HYPRE_DECLARE_2VARS(4);
+   HYPRE_DECLARE_2VARS(5);
+   HYPRE_DECLARE_2VARS(6);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
+
+   /* Gather stencil indices */
+   for (i = 0, l = 0, r = 0, m = 0; i < A_stencil_size; i++)
+   {
+      if (!hypre_StructMatrixConstEntry(A, i))
+      {
+         if (hypre_IndexD(A_stencil_shape[i], cdir) == 0)
+         {
+            msi[m++] = i;
+         }
+         if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc1)
+         {
+            lsi[l++] = i;
+         }
+         else if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc2)
+         {
+            rsi[r++] = i;
+         }
+      }
+   }
+
+#if defined(DEBUG_PFMG)
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l ,r, m);
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
+#endif
 
    /* Off-diagonal entries are variable */
    compute_box = hypre_BoxCreate(ndim);
@@ -253,189 +296,310 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-      /* Allocate array for storing center coefficient */
-      P_dbox_volume = hypre_BoxVolume(P_dbox);
-      mid = hypre_TAlloc(HYPRE_Complex, P_dbox_volume, memory_location);
-
-      /* Phase 1: Set initial coefficient values in P */
-      hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+      if (1 && l == 1 && r == 1 && m == 5)
       {
-         mid[Pi] = Pconst0;
-         Pp1[Pi] = Pconst1;
-         Pp2[Pi] = Pconst2;
-      }
-      hypre_BoxLoop1End(Pi);
-
-      /* Phase 2: Update coefficients in P with variable coefficients from A */
-      for (si = 0; si < A_stencil_size; si += HYPRE_UNROLL_MAXDEPTH)
-      {
-         depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (A_stencil_size - si));
-         for (k = 0, vdepth = 0; k < depth; k++)
+         /* Load data pointers - Left: 1 | Right: 1 | Middle: 5 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
          {
-            if (!hypre_StructMatrixConstEntry(A, si + k))
+            HYPRE_Complex center = Pconst0 + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] + Ap_m4[Ai];
+            if (center)
             {
-               vsi[vdepth++] = si + k;
+               Pp1[Pi] = (Pconst1 - Ap_l0[Ai]) / center;
+               Pp2[Pi] = (Pconst2 - Ap_r0[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else if (1 && l == 3 && r == 3 && m == 9)
+      {
+         /* Load data pointers - Left: 3 | Right: 3 | Middle: 9 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_l1 = hypre_StructMatrixBoxData(A, i, lsi[1]);
+         Ap_l2 = hypre_StructMatrixBoxData(A, i, lsi[2]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_r1 = hypre_StructMatrixBoxData(A, i, rsi[1]);
+         Ap_r2 = hypre_StructMatrixBoxData(A, i, rsi[2]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         Ap_m5 = hypre_StructMatrixBoxData(A, i, msi[5]);
+         Ap_m6 = hypre_StructMatrixBoxData(A, i, msi[6]);
+         Ap_m7 = hypre_StructMatrixBoxData(A, i, msi[7]);
+         Ap_m8 = hypre_StructMatrixBoxData(A, i, msi[8]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
+         {
+            HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
+                                   Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
+
+            if (center)
+            {
+               Pp1[Pi] = (Pconst1 - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai]) / center;
+               Pp2[Pi] = (Pconst2 - Ap_r0[Ai] - Ap_r1[Ai] - Ap_r2[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else if (1 && l == 9 && r == 9 && m == 9)
+      {
+         /* Load data pointers - Left: 9 | Right: 9 | Middle: 9 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_l1 = hypre_StructMatrixBoxData(A, i, lsi[1]);
+         Ap_l2 = hypre_StructMatrixBoxData(A, i, lsi[2]);
+         Ap_l3 = hypre_StructMatrixBoxData(A, i, lsi[3]);
+         Ap_l4 = hypre_StructMatrixBoxData(A, i, lsi[4]);
+         Ap_l5 = hypre_StructMatrixBoxData(A, i, lsi[5]);
+         Ap_l6 = hypre_StructMatrixBoxData(A, i, lsi[6]);
+         Ap_l7 = hypre_StructMatrixBoxData(A, i, lsi[7]);
+         Ap_l8 = hypre_StructMatrixBoxData(A, i, lsi[8]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_r1 = hypre_StructMatrixBoxData(A, i, rsi[1]);
+         Ap_r2 = hypre_StructMatrixBoxData(A, i, rsi[2]);
+         Ap_r3 = hypre_StructMatrixBoxData(A, i, rsi[3]);
+         Ap_r4 = hypre_StructMatrixBoxData(A, i, rsi[4]);
+         Ap_r5 = hypre_StructMatrixBoxData(A, i, rsi[5]);
+         Ap_r6 = hypre_StructMatrixBoxData(A, i, rsi[6]);
+         Ap_r7 = hypre_StructMatrixBoxData(A, i, rsi[7]);
+         Ap_r8 = hypre_StructMatrixBoxData(A, i, rsi[8]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         Ap_m5 = hypre_StructMatrixBoxData(A, i, msi[5]);
+         Ap_m6 = hypre_StructMatrixBoxData(A, i, msi[6]);
+         Ap_m7 = hypre_StructMatrixBoxData(A, i, msi[7]);
+         Ap_m8 = hypre_StructMatrixBoxData(A, i, msi[8]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
+         {
+            HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
+                                   Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
+
+            if (center)
+            {
+               Pp1[Pi] = (Pconst1   - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai] - Ap_l3[Ai] -
+                          Ap_l4[Ai] - Ap_l5[Ai] - Ap_l6[Ai] - Ap_l7[Ai] - Ap_l8[Ai]) / center;
+               Pp2[Pi] = (Pconst2   - Ap_r0[Ai] - Ap_r1[Ai] - Ap_r2[Ai] - Ap_r3[Ai] -
+                          Ap_r4[Ai] - Ap_r5[Ai] - Ap_r6[Ai] - Ap_r7[Ai] - Ap_r8[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else
+      {
+         /* Allocate array for storing center coefficient */
+         P_dbox_volume = hypre_BoxVolume(P_dbox);
+         mid = hypre_TAlloc(HYPRE_Complex, P_dbox_volume, memory_location);
+
+         /* Phase 1: Set initial coefficient values in P */
+         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+         {
+            mid[Pi] = Pconst0;
+            Pp1[Pi] = Pconst1;
+            Pp2[Pi] = Pconst2;
+         }
+         hypre_BoxLoop1End(Pi);
+
+         /* Phase 2: Update coefficients in P with variable coefficients from A */
+         for (si = 0; si < A_stencil_size; si += HYPRE_UNROLL_MAXDEPTH)
+         {
+            depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (A_stencil_size - si));
+            for (k = 0, vdepth = 0; k < depth; k++)
+            {
+               if (!hypre_StructMatrixConstEntry(A, si + k))
+               {
+                  vsi[vdepth++] = si + k;
+               }
+            }
+
+            /* Exit loop if there are no variable stencil coefficients left */
+            if (!vdepth)
+            {
+               continue;
+            }
+
+            switch (vdepth)
+            {
+               case 7:
+                  Ap6 = hypre_StructMatrixBoxData(A, i, vsi[6]);
+                  As6 = hypre_IndexD(A_stencil_shape[vsi[6]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 6:
+                  Ap5 = hypre_StructMatrixBoxData(A, i, vsi[5]);
+                  As5 = hypre_IndexD(A_stencil_shape[vsi[5]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 5:
+                  Ap4 = hypre_StructMatrixBoxData(A, i, vsi[4]);
+                  As4 = hypre_IndexD(A_stencil_shape[vsi[4]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 4:
+                  Ap3 = hypre_StructMatrixBoxData(A, i, vsi[3]);
+                  As3 = hypre_IndexD(A_stencil_shape[vsi[3]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 3:
+                  Ap2 = hypre_StructMatrixBoxData(A, i, vsi[2]);
+                  As2 = hypre_IndexD(A_stencil_shape[vsi[2]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 2:
+                  Ap1 = hypre_StructMatrixBoxData(A, i, vsi[1]);
+                  As1 = hypre_IndexD(A_stencil_shape[vsi[1]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 1:
+                  Ap0 = hypre_StructMatrixBoxData(A, i, vsi[0]);
+                  As0 = hypre_IndexD(A_stencil_shape[vsi[0]], cdir);
+            }
+
+            switch (vdepth)
+            {
+               case 7:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 6:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 5:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 4:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 3:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 2:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 1:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
             }
          }
 
-         /* Exit loop if there are no variable stencil coefficients left */
-         if (!vdepth)
+         /* Phase 3: set final coefficients */
+         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
          {
-            continue;
+            if (mid[Pi])
+            {
+               /* Average out prolongation coefficients */
+               Pp1[Pi] /= mid[Pi];
+               Pp2[Pi] /= mid[Pi];
+            }
+            else
+            {
+               /* For some reason the interpolation coefficients sum to zero */
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
          }
+         hypre_BoxLoop1End(Pi);
 
-         switch (vdepth)
-         {
-            case 7:
-               Ap6 = hypre_StructMatrixBoxData(A, i, vsi[6]);
-               As6 = hypre_IndexD(A_stencil_shape[vsi[6]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               Ap5 = hypre_StructMatrixBoxData(A, i, vsi[5]);
-               As5 = hypre_IndexD(A_stencil_shape[vsi[5]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               Ap4 = hypre_StructMatrixBoxData(A, i, vsi[4]);
-               As4 = hypre_IndexD(A_stencil_shape[vsi[4]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               Ap3 = hypre_StructMatrixBoxData(A, i, vsi[3]);
-               As3 = hypre_IndexD(A_stencil_shape[vsi[3]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               Ap2 = hypre_StructMatrixBoxData(A, i, vsi[2]);
-               As2 = hypre_IndexD(A_stencil_shape[vsi[2]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               Ap1 = hypre_StructMatrixBoxData(A, i, vsi[1]);
-               As1 = hypre_IndexD(A_stencil_shape[vsi[1]], cdir);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               Ap0 = hypre_StructMatrixBoxData(A, i, vsi[0]);
-               As0 = hypre_IndexD(A_stencil_shape[vsi[0]], cdir);
-         }
-
-         switch (vdepth)
-         {
-            case 7:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(6);
-                  HYPRE_UPDATE_VALUES(5);
-                  HYPRE_UPDATE_VALUES(4);
-                  HYPRE_UPDATE_VALUES(3);
-                  HYPRE_UPDATE_VALUES(2);
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 6:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(5);
-                  HYPRE_UPDATE_VALUES(4);
-                  HYPRE_UPDATE_VALUES(3);
-                  HYPRE_UPDATE_VALUES(2);
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 5:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(4);
-                  HYPRE_UPDATE_VALUES(3);
-                  HYPRE_UPDATE_VALUES(2);
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 4:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(3);
-                  HYPRE_UPDATE_VALUES(2);
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 3:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(2);
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 2:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(1);
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-
-            case 1:
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   A_dbox, Astart, Astride, Ai,
-                                   P_dbox, Pstart, Pstride, Pi);
-               {
-                  HYPRE_UPDATE_VALUES(0);
-               }
-               hypre_BoxLoop2End(Ai, Pi);
-               break;
-         }
+         /* Free memory */
+         hypre_TFree(mid, memory_location);
       }
-
-      /* Phase 3: set final coefficients */
-      hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-      {
-         if (mid[Pi])
-         {
-            /* Average out prolongation coefficients */
-            Pp1[Pi] /= mid[Pi];
-            Pp2[Pi] /= mid[Pi];
-         }
-         else
-         {
-            /* For some reason the interpolation coefficients sum to zero */
-            Pp1[Pi] = 0.0;
-            Pp2[Pi] = 0.0;
-         }
-      }
-      hypre_BoxLoop1End(Pi);
-
-      /* Free memory */
-      hypre_TFree(mid, memory_location);
    }
 
    /* Free memory */

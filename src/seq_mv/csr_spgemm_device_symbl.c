@@ -144,7 +144,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    *rownnz_exact_ptr = !HYPRE_THRUST_CALL( any_of,
                                            d_rf,
                                            d_rf + m,
-                                           thrust::identity<char>() );
+                                           HYPRE_THRUST_IDENTITY(char) );
 #endif
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
@@ -231,7 +231,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
@@ -340,7 +340,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);

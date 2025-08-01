@@ -652,14 +652,25 @@ hypre_StructVectorInitializeData( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorInitialize( hypre_StructVector *vector )
+hypre_StructVectorInitialize( hypre_StructVector *vector,
+                              HYPRE_Int           zero_init )
 {
    HYPRE_Complex *data;
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),
-                        hypre_StructVectorMemoryLocation(vector));
+   if (zero_init)
+   {
+      data = hypre_CTAlloc(HYPRE_Complex,
+                           hypre_StructVectorDataSize(vector),
+                           hypre_StructVectorMemoryLocation(vector));
+   }
+   else
+   {
+      data = hypre_TAlloc(HYPRE_Complex,
+                          hypre_StructVectorDataSize(vector),
+                          hypre_StructVectorMemoryLocation(vector));
+   }
 
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
@@ -1572,12 +1583,15 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
 
    /* Set vector values */
-   HYPRE_StructVectorInitialize(vector);
+   hypre_StructVectorInitialize(vector, 0);
    vi = 0;
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
-      HYPRE_StructVectorSetBoxValues(vector, hypre_BoxIMin(box), hypre_BoxIMax(box), &values[vi]);
+      HYPRE_StructVectorSetBoxValues(vector,
+                                     hypre_BoxIMin(box),
+                                     hypre_BoxIMax(box),
+                                     &values[vi]);
       vi += hypre_BoxVolume(box);
    }
 

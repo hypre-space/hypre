@@ -181,7 +181,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
             sdata = smatvec_data[vi][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);
-            hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy);
+            hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy, sy);
          }
          else
          {
@@ -196,7 +196,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
                sdata = smatvec_data[vi][vj];
                sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
                sx = hypre_SStructPVectorSVector(px, vj);
-               hypre_StructMatvecCompute(sdata, alpha, sA, sx, 1.0, sy);
+               hypre_StructMatvecCompute(sdata, alpha, sA, sx, 1.0, sy, sy);
             }
          }
       }

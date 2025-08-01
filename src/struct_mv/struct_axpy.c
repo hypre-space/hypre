@@ -15,25 +15,31 @@
 #include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
- * The vectors x and y may have different base grids, but the grid boxes for
- * each vector (defined by grid, stride, nboxes, boxnums) must be the same.
+ * z = alpha * x + beta * y
+ *
+ * The vectors x, y, and z may have different base grids, but the grid boxes
+ * for each vector (defined by grid, stride, nboxes, boxnums) must be the same.
  * Only nboxes is checked, the rest is assumed to be true.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructAxpy( HYPRE_Complex       alpha,
-                  hypre_StructVector *x,
-                  hypre_StructVector *y     )
+hypre_StructVectorAxpy( HYPRE_Complex       alpha,
+                        hypre_StructVector *x,
+                        HYPRE_Complex       beta,
+                        hypre_StructVector *y,
+                        hypre_StructVector *z )
 {
-   HYPRE_Int         ndim = hypre_StructVectorNDim(x);
+   HYPRE_Int         ndim   = hypre_StructVectorNDim(x);
+   HYPRE_Int         nboxes = hypre_StructVectorNBoxes(x);
 
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
+   hypre_Box        *z_data_box;
 
    HYPRE_Complex    *xp;
    HYPRE_Complex    *yp;
+   HYPRE_Complex    *zp;
 
-   HYPRE_Int         nboxes;
    hypre_Box        *loop_box;
    hypre_Index       loop_size;
    hypre_IndexRef    start;
@@ -41,22 +47,19 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
    HYPRE_Int         i;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   nboxes = hypre_StructVectorNBoxes(x);
-
-   /* Return if nboxes is not the same for x and y */
-   if (nboxes != hypre_StructVectorNBoxes(y))
+   /* Return if x, y, or z do not have the same numbers of boxes */
+   if (hypre_StructVectorNBoxes(x) != hypre_StructVectorNBoxes(y) ||
+       hypre_StructVectorNBoxes(x) != hypre_StructVectorNBoxes(z))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "StructAxpy: nboxes for x and y do not match!");
-
-      HYPRE_ANNOTATE_FUNC_END;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "nboxes for x, y or z do not match!");
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("Axpy");
+
    loop_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(ustride, 1);
-
    for (i = 0; i < nboxes; i++)
    {
       hypre_StructVectorGridBoxCopy(x, i, loop_box);
@@ -64,39 +67,68 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
       x_data_box = hypre_StructVectorGridDataBox(x, i);
       y_data_box = hypre_StructVectorGridDataBox(y, i);
+      z_data_box = hypre_StructVectorGridDataBox(z, i);
 
       xp = hypre_StructVectorGridData(x, i);
       yp = hypre_StructVectorGridData(y, i);
+      zp = hypre_StructVectorGridData(z, i);
 
       hypre_BoxGetSize(loop_box, loop_size);
 
-#if 0
-      HYPRE_BOXLOOP (
-         hypre_BoxLoop2Begin, (ndim, loop_size,
-                               x_data_box, start, ustride, xi,
-                               y_data_box, start, ustride, yi),
+#define DEVICE_VAR is_device_ptr(xp,yp,zp)
+      if (hypre_BoxesEqual(x_data_box, y_data_box) &&
+          hypre_BoxesEqual(x_data_box, z_data_box))
       {
-         yp[yi] += alpha * xp[xi];
-      },
-      hypre_BoxLoop2End, (xi, yi) )
-
-#else
-
-#define DEVICE_VAR is_device_ptr(yp,xp)
-      hypre_BoxLoop2Begin(ndim, loop_size,
-                          x_data_box, start, ustride, xi,
-                          y_data_box, start, ustride, yi);
-      {
-         yp[yi] += alpha * xp[xi];
+         if (alpha != 0.0 && beta != 0.0)
+         {
+            hypre_BoxLoop1Begin(ndim, loop_size, x_data_box, start, ustride, xi)
+            {
+               zp[xi] = alpha * xp[xi] + beta * yp[xi];
+            }
+            hypre_BoxLoop1End(xi);
+         }
+         else if (alpha != 0.0 && beta == 0.0)
+         {
+            hypre_BoxLoop1Begin(ndim, loop_size, x_data_box, start, ustride, xi)
+            {
+               zp[xi] = alpha * xp[xi];
+            }
+            hypre_BoxLoop1End(xi);
+         }
+         else if (alpha == 0.0 && beta != 0.0)
+         {
+            hypre_BoxLoop1Begin(ndim, loop_size, x_data_box, start, ustride, xi)
+            {
+               zp[xi] = beta * yp[xi];
+            }
+            hypre_BoxLoop1End(xi);
+         }
+         else if (alpha == 0.0 && beta == 0.0)
+         {
+            hypre_BoxLoop1Begin(ndim, loop_size, x_data_box, start, ustride, xi)
+            {
+               zp[xi] = 0.0;
+            }
+            hypre_BoxLoop1End(xi);
+         }
       }
-      hypre_BoxLoop2End(xi, yi);
+      else
+      {
+         hypre_BoxLoop3Begin(ndim, loop_size,
+                             x_data_box, start, ustride, xi,
+                             y_data_box, start, ustride, yi,
+                             z_data_box, start, ustride, zi)
+         {
+            zp[zi] = alpha * xp[xi] + beta * yp[yi];
+         }
+         hypre_BoxLoop3End(xi, yi, zi);
+      }
 #undef DEVICE_VAR
-
-#endif
    }
 
    hypre_BoxDestroy(loop_box);
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

@@ -19,11 +19,7 @@
 #if defined (HYPRE_USING_GPU)
 
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
 struct functor
-#else
-struct functor : public thrust::binary_function<T, T, T>
-#endif
 {
    T scale;
 

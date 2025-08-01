@@ -155,7 +155,7 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
       /* a resize was needed */
       need_computepkg = 1;
    }
-   else if ( !hypre_BoxArraysEqual(data_space, (matvec_data -> data_space)) )
+   else if (!hypre_BoxArraysEqual(data_space, (matvec_data -> data_space)))
    {
       /* the data space has changed */
       need_computepkg = 1;
@@ -315,7 +315,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_StructMatrix *A,
                            hypre_StructVector *x,
                            HYPRE_Complex       beta,
-                           hypre_StructVector *y )
+                           hypre_StructVector *y,
+                           hypre_StructVector *z )
 {
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
 
@@ -332,19 +333,17 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
 
-   hypre_BoxArray          *boxes;
    hypre_Index              loop_size, origin, stride;
    hypre_IndexRef           start;
 
-   HYPRE_Complex            temp;
    HYPRE_Int                compute_i, i, j, si, se;
    HYPRE_Int                cnentries, vnentries;
    HYPRE_Int                centries[nentries], ventries[nentries];
 
-   hypre_Box               *A_data_box, *x_data_box, *y_data_box;
-   HYPRE_Complex           *xp, *yp;
-   HYPRE_Int                Ab, xb, yb;
-   hypre_Index              Adstride, xdstride, ydstride, ustride;
+   hypre_Box               *A_data_box, *x_data_box, *y_data_box, *z_data_box;
+   HYPRE_Complex           *xp;
+   HYPRE_Int                Ab, xb, yb, zb;
+   hypre_Index              Adstride, xdstride, ydstride, zdstride, ustride;
 
    HYPRE_Int                ran_nboxes;
    HYPRE_Int               *ran_boxnums;
@@ -353,9 +352,21 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_StructVector      *x_tmp = NULL;
 
    /*-----------------------------------------------------------------------
+    * Do (alpha == 0.0) computation
+    *-----------------------------------------------------------------------*/
+
+   if (alpha == 0.0)
+   {
+      hypre_StructVectorAxpy(alpha, y, beta, y, z);
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("Matvec");
 
 #if 0
    /* RDF: Should not need this if the boundaries were cleared initially */
@@ -380,38 +391,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    compute_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(ustride, 1);
 
-   /*-----------------------------------------------------------------------
-    * Do (alpha == 0.0) computation
-    *-----------------------------------------------------------------------*/
-
-   if (alpha == 0.0)
-   {
-      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-      hypre_ForBoxI(i, boxes)
-      {
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
-         hypre_StructVectorMapDataBox(y, compute_box);
-         hypre_BoxGetSize(compute_box, loop_size);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-         start = hypre_BoxIMin(compute_box);
-         yp = hypre_StructVectorBoxData(y, i);
-
-#define DEVICE_VAR is_device_ptr(yp)
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] *= beta;
-         }
-         hypre_BoxLoop1End(yi);
-#undef DEVICE_VAR
-      }
-      hypre_BoxDestroy(compute_box);
-
-      HYPRE_ANNOTATE_FUNC_END;
-
-      return hypre_error_flag;
-   }
-
    if (x == y)
    {
       x_tmp = hypre_StructVectorClone(y);
@@ -435,50 +414,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             xp = hypre_StructVectorData(x);
             hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
-
-            /*--------------------------------------------------------------
-             * Initialize y = -(beta/alpha)*y and multiply everything by -alpha
-             * at the end.  This optimizes the matvec for residual computations
-             * where alpha=-1 and beta=1.
-             *--------------------------------------------------------------*/
-
-            temp = -(beta / alpha);
-            if (temp != 1.0)
-            {
-               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Init");
-               boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-               hypre_ForBoxI(i, boxes)
-               {
-                  hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
-                  hypre_StructVectorMapDataBox(y, compute_box);
-                  hypre_BoxGetSize(compute_box, loop_size);
-                  y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-                  start = hypre_BoxIMin(compute_box);
-                  yp = hypre_StructVectorBoxData(y, i);
-
-#define DEVICE_VAR is_device_ptr(yp)
-                  if (temp == 0.0)
-                  {
-                     hypre_BoxLoop1Begin(ndim, loop_size,
-                                         y_data_box, start, ustride, yi);
-                     {
-                        yp[yi] = 0.0;
-                     }
-                     hypre_BoxLoop1End(yi);
-                  }
-                  else
-                  {
-                     hypre_BoxLoop1Begin(ndim, loop_size,
-                                         y_data_box, start, ustride, yi);
-                     {
-                        yp[yi] *= temp;
-                     }
-                     hypre_BoxLoop1End(yi);
-                  }
-#undef DEVICE_VAR
-               }
-               HYPRE_ANNOTATE_REGION_END("%s", "Computation-Init");
-            }
          }
          break;
 
@@ -491,20 +426,24 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       }
 
       /*--------------------------------------------------------------------
-       * y += A*x (or A^T*x)
+       * z = beta * y + alpha * A*x (or A^T*x)
        *--------------------------------------------------------------------*/
 
       hypre_StructMatrixGetStencilStride(A, stride);
       hypre_CopyToIndex(stride, ndim, Adstride);
       hypre_StructMatrixMapDataStride(A, Adstride);
+
       hypre_CopyToIndex(stride, ndim, xdstride);
       hypre_MapToFineIndex(xdstride, NULL, xfstride, ndim);
       hypre_StructVectorMapDataStride(x, xdstride);
+
       hypre_CopyToIndex(stride, ndim, ydstride);
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
 
+      hypre_CopyToIndex(stride, ndim, zdstride);
+      hypre_MapToCoarseIndex(zdstride, NULL, ran_stride, ndim);
+
       xb = 0;
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Ax");
       for (i = 0; i < ran_nboxes; i++)
       {
          HYPRE_Int   *Aids = hypre_StructMatrixBoxIDs(A);
@@ -516,18 +455,21 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
          /* The corresponding box IDs for the following boxnums should match */
          Ab = ran_boxnums[i];
+
          /* Rebase ensures that all box ids in A are also in x */
          while (xids[xb] != Aids[Ab])
          {
             xb++;
          }
          yb = hypre_StructVectorBoxnum(y, i);
+         zb = hypre_StructVectorBoxnum(z, i);
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xb);
 
          A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), Ab);
          x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), xb);
          y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), yb);
+         z_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(z), zb);
 
          /* Get stencil spaces - then do unrolling for entries in each */
          hypre_StructMatrixGetStSpaces(A, transpose, &num_ss, &se_sspaces, &ss_origins, stride);
@@ -560,51 +502,40 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                start = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               /* Operate on constant coefficients */
-               hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb, transpose, cnentries, centries,
-                                                 start, stride, loop_size, xfstride, ran_stride,
-                                                 xdstride, ydstride,
-                                                 x_data_box, y_data_box);
+               if (cnentries == 1 && vnentries > 0)
+               {
+                  /* One constant and an arbitrary number of variable coefficients */
+                  hypre_StructMatvecCompute_core_VCC(alpha, A, x, beta, y, z,
+                                                     Ab, xb, yb, zb, transpose,
+                                                     centries[0], vnentries, ventries,
+                                                     start, stride, loop_size, xfstride, ran_stride,
+                                                     Adstride, xdstride, ydstride, zdstride,
+                                                     A_data_box, x_data_box, y_data_box, z_data_box);
+               }
+               else
+               {
+                  /* Operate on constant coefficients */
+                  hypre_StructMatvecCompute_core_CC(alpha, A, x, beta, y, z,
+                                                    Ab, xb, yb, zb, transpose,
+                                                    cnentries, centries,
+                                                    start, stride, loop_size, xfstride, ran_stride,
+                                                    xdstride, ydstride, zdstride,
+                                                    x_data_box, y_data_box, z_data_box);
 
-               /* Operate on variable coefficients */
-               hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb, transpose, vnentries, ventries,
-                                                 start, stride, loop_size, xfstride, ran_stride,
-                                                 Adstride, xdstride, ydstride,
-                                                 A_data_box, x_data_box, y_data_box);
-
+                  /* Operate on variable coefficients */
+                  hypre_StructMatvecCompute_core_VC(alpha, A, x, beta, y, z,
+                                                    Ab, xb, yb, zb, transpose,
+                                                    vnentries, ventries,
+                                                    start, stride, loop_size, xfstride, ran_stride,
+                                                    Adstride, xdstride, ydstride, zdstride,
+                                                    A_data_box, x_data_box, y_data_box, z_data_box);
+               }
             } /* hypre_ForBoxI */
          } /* for stencil space s */
 
          hypre_TFree(se_sspaces, HYPRE_MEMORY_HOST);
          hypre_TFree(ss_origins, HYPRE_MEMORY_HOST);
       }
-      HYPRE_ANNOTATE_REGION_END("%s", "Computation-Ax");
-   }
-
-   temp = -alpha;
-   if (temp != 1.0)
-   {
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Scale");
-      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-      hypre_ForBoxI(i, boxes)
-      {
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
-         hypre_StructVectorMapDataBox(y, compute_box);
-         hypre_BoxGetSize(compute_box, loop_size);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-         start = hypre_BoxIMin(compute_box);
-         yp = hypre_StructVectorBoxData(y, i);
-
-#define DEVICE_VAR is_device_ptr(yp)
-         hypre_BoxLoop1Begin(ndim, loop_size,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] *= temp;
-         }
-         hypre_BoxLoop1End(yi);
-#undef DEVICE_VAR
-      }
-      HYPRE_ANNOTATE_REGION_END("%s", "Computation-Scale");
    }
 
    if (x_tmp)
@@ -620,6 +551,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    }
    hypre_BoxDestroy(compute_box);
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -639,7 +571,7 @@ hypre_StructMatvec( HYPRE_Complex       alpha,
 
    matvec_data = hypre_StructMatvecCreate();
    hypre_StructMatvecSetup(matvec_data, A, x);
-   hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y);
+   hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y, y);
    hypre_StructMatvecDestroy(matvec_data);
 
    return hypre_error_flag;
@@ -660,7 +592,7 @@ hypre_StructMatvecT( HYPRE_Complex       alpha,
    matvec_data = hypre_StructMatvecCreate();
    hypre_StructMatvecSetTranspose(matvec_data, 1);
    hypre_StructMatvecSetup(matvec_data, A, x);
-   hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y);
+   hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y, y);
    hypre_StructMatvecDestroy(matvec_data);
 
    return hypre_error_flag;

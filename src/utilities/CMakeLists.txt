@@ -24,6 +24,7 @@ set(SRCS
   ap.c
   log.c
   complex.c
+  device_markers.c
   device_utils.c
   error.c
   general.c
@@ -39,7 +40,6 @@ set(SRCS
   mmio.c
   mpi_comm_f2c.c
   multiprecision.c
-  nvtx.c
   omp_device.c
   prefix_sum.c
   printf.c
@@ -64,13 +64,13 @@ target_sources(${PROJECT_NAME}
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    device_markers.c
     device_utils.c
     general.c
     handle.c
     int_array_device.c
     memory.c
     memory_tracker.c
-    nvtx.c
     omp_device.c
     stl_ops.c
     HYPRE_handle.c
