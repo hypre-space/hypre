@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -44,8 +44,6 @@ make -s -j
 echo "FUNCTION CHECK:"
 for i in $DIRS
 do
-    echo "Checking $i ...   "
+    echo -ne "Checking $i ... "
     (cd $i; $scriptpath/config/mup_check_dir.sh)
 done
-
-
