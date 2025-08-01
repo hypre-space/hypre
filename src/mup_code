@@ -44,5 +44,5 @@ process_directory() {
 
 export -f process_directory
 
-# Use xargs for parallel execution with number of CPU cores
-echo "$DIRS" | tr ' ' '\n' | xargs -P "$(nproc)" -I {} bash -c 'process_directory "$1"' _ {}
+# Use xargs for parallel execution with number of CPU cores (4 by default)
+echo "$DIRS" | tr ' ' '\n' | xargs -P "${NPROC:-4}" -I {} bash -c 'process_directory "$1"' _ {}
