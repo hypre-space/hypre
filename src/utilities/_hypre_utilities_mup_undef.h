@@ -46,8 +46,6 @@
 #undef HYPRE_SetUseGpuRand
 #undef HYPRE_Version
 #undef HYPRE_VersionNumber
-#undef _hypre_Free
-#undef _hypre_MAlloc
 #undef hypre_BeginTiming_fcn
 #undef hypre_BigBinarySearch
 #undef hypre_BigLowerBound
@@ -234,6 +232,8 @@
 #undef hypre_UnorderedIntSetCopyToArray
 #undef hypre_UnorderedIntSetCreate
 #undef hypre_UnorderedIntSetDestroy
+#undef hypre__Free
+#undef hypre__MAlloc
 #undef hypre_big_merge_sort
 #undef hypre_big_sort_and_create_inverse_map
 #undef hypre_bind_device

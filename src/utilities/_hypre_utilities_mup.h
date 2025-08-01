@@ -20,20 +20,6 @@ extern "C" {
  ******************************************************************************/
 
 
-void
-_hypre_Free_flt( void *ptr, hypre_MemoryLocation location );
-void
-_hypre_Free_dbl( void *ptr, hypre_MemoryLocation location );
-void
-_hypre_Free_long_dbl( void *ptr, hypre_MemoryLocation location );
-
-void *
-_hypre_MAlloc_flt( size_t size, hypre_MemoryLocation location );
-void *
-_hypre_MAlloc_dbl( size_t size, hypre_MemoryLocation location );
-void *
-_hypre_MAlloc_long_dbl( size_t size, hypre_MemoryLocation location );
-
 HYPRE_Int
 hypre_BeginTiming_fcn_flt( HYPRE_Int time_index );
 HYPRE_Int
@@ -1321,6 +1307,20 @@ void
 hypre_UnorderedIntSetDestroy_dbl( hypre_UnorderedIntSet *s );
 void
 hypre_UnorderedIntSetDestroy_long_dbl( hypre_UnorderedIntSet *s );
+
+void
+hypre__Free_flt( void *ptr, hypre_MemoryLocation location );
+void
+hypre__Free_dbl( void *ptr, hypre_MemoryLocation location );
+void
+hypre__Free_long_dbl( void *ptr, hypre_MemoryLocation location );
+
+void *
+hypre__MAlloc_flt( size_t size, hypre_MemoryLocation location );
+void *
+hypre__MAlloc_dbl( size_t size, hypre_MemoryLocation location );
+void *
+hypre__MAlloc_long_dbl( size_t size, hypre_MemoryLocation location );
 
 void
 hypre_big_merge_sort_flt( HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted );

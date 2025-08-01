@@ -16,22 +16,6 @@
 
 /*--------------------------------------------------------------------------*/
 
-void
-_hypre_Free( void *ptr, hypre_MemoryLocation location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(_hypre_Free)( ptr, location );
-}
-
-/*--------------------------------------------------------------------------*/
-
-void *
-_hypre_MAlloc( size_t size, hypre_MemoryLocation location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(_hypre_MAlloc)( size, location );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_BeginTiming_fcn( HYPRE_Int time_index )
 {
@@ -1500,6 +1484,22 @@ void
 hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_UnorderedIntSetDestroy)( s );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre__Free( void *ptr, hypre_MemoryLocation location )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre__Free)( ptr, location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void *
+hypre__MAlloc( size_t size, hypre_MemoryLocation location )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre__MAlloc)( size, location );
 }
 
 /*--------------------------------------------------------------------------*/
