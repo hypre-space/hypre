@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -300,4 +300,3 @@ cat >> $MUP_HEADER <<@
 @
 
 rm -f ${OUTP}_fixed_int.h ${OUTP}_functions_int.h ${OUTP}_pre_int.h
-

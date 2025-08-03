@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -241,4 +241,3 @@ mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.mvT0.4 
 
 # variable diagonal
 mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mvT0.4
-

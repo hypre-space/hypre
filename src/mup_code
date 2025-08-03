@@ -1,11 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Exit immediately on any error (even in functions or pipelines),
+# and print the failing command and line number for easier debugging.
+set -eE -o pipefail
+trap 'echo "Error at line $LINENO: $BASH_COMMAND"; exit 1' ERR
+
 ## Should be run from src directory
-# Loops over directories with multiprecision files and generates code.
+# Loops over directories with multiprecision files and generates code in parallel.
 
 DIRS="\
  IJ_mv\
@@ -30,9 +35,14 @@ DIRS="\
  utilities\
 "
 
-for i in $DIRS
-do
-    echo "Writing multiprecision code for $i ..."
-    (cd $i; mup_code)
-done
+# Function to process a single directory
+process_directory() {
+    local dir="$1"
+    echo "Writing multiprecision code for $dir ..."
+    (cd "$dir" && ./mup_code)
+}
 
+export -f process_directory
+
+# Use xargs for parallel execution with number of CPU cores (4 by default)
+echo "$DIRS" | tr ' ' '\n' | xargs -P "${NPROC:-4}" -I {} bash -c 'process_directory "$1"' _ {}

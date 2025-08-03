@@ -149,10 +149,10 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 }                                                                                                   \
 )
 
-#define _hypre_TAlloc(type, count, location)                                                        \
+#define hypre__TAlloc(type, count, location)                                                        \
 (                                                                                                   \
 {                                                                                                   \
-   void *ptr = _hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                           \
+   void *ptr = hypre__MAlloc((size_t)(sizeof(type) * (count)), location);                           \
                                                                                                     \
    hypre_MemoryTrackerInsert1("malloc", ptr, sizeof(type)*(count), location,                        \
                               __FILE__, __func__, __LINE__);                                        \
@@ -160,10 +160,10 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 }                                                                                                   \
 )
 
-#define _hypre_TFree(ptr, location)                                                                 \
+#define hypre__TFree(ptr, location)                                                                 \
 (                                                                                                   \
 {                                                                                                   \
-   _hypre_Free((void *)ptr, location);                                                              \
+   hypre__Free((void *)ptr, location);                                                              \
                                                                                                     \
    hypre_MemoryTrackerInsert1("free", ptr, (size_t) -1, location,                                   \
                              __FILE__, __func__, __LINE__);                                         \
@@ -173,4 +173,3 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 
 #endif /* #if defined(HYPRE_USING_MEMORY_TRACKER) */
 #endif /* #ifndef hypre_MEMORY_TRACKER_HEADER */
-

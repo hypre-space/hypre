@@ -1,5 +1,3 @@
-_hypre_Free
-_hypre_MAlloc
 hypre_BeginTiming_fcn
 hypre_BigBinarySearch
 hypre_BigLowerBound
@@ -186,6 +184,8 @@ hypre_UnorderedIntMapDestroy
 hypre_UnorderedIntSetCopyToArray
 hypre_UnorderedIntSetCreate
 hypre_UnorderedIntSetDestroy
+hypre__Free
+hypre__MAlloc
 hypre_big_merge_sort
 hypre_big_sort_and_create_inverse_map
 hypre_bind_device

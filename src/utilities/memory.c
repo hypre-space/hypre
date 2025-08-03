@@ -450,7 +450,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, hypre_MemoryLocation location
 }
 
 void *
-_hypre_MAlloc(size_t size, hypre_MemoryLocation location)
+hypre__MAlloc(size_t size, hypre_MemoryLocation location)
 {
    return hypre_MAlloc_core(size, 0, location);
 }
@@ -592,7 +592,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
 }
 
 void
-_hypre_Free(void *ptr, hypre_MemoryLocation location)
+hypre__Free(void *ptr, hypre_MemoryLocation location)
 {
    hypre_Free_core(ptr, location);
 }
