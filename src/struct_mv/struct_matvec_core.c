@@ -14,11 +14,15 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
-#define UNROLL_MAXDEPTH 27
+#define HYPRE_UNROLL_MAXDEPTH 27
 
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below
  *--------------------------------------------------------------------------*/
+
+#define HYPRE_DECLARE_OFFSETS(n)   \
+   HYPRE_Complex *Ap##n   = NULL;  \
+   HYPRE_Int      xoff##n = 0
 
 #define HYPRE_MAP_A_OFFSET(offset)                       \
    hypre_StructMatrixMapDataIndex(A, offset);            \
@@ -50,7 +54,20 @@
    HYPRE_MAP_A_OFFSET(offset);                                       \
    Ap += hypre_BoxOffsetDistance(A_data_box, offset);
 
-/* Individual */
+#define HYPRE_LOAD_CAX(transpose, n)                                 \
+   if (transpose) {                                                  \
+      HYPRE_SET_CAX_TRANS(Ap##n, xoff##n, entries[si + n])           \
+   } else {                                                          \
+      HYPRE_SET_CAX(Ap##n, xoff##n, entries[si + n])                 \
+   }
+
+#define HYPRE_LOAD_AX(transpose, n)                                  \
+   if (transpose) {                                                  \
+      HYPRE_SET_AX_TRANS(Ap##n, xoff##n, entries[si + n])            \
+   } else {                                                          \
+      HYPRE_SET_AX(Ap##n, xoff##n, entries[si + n])                  \
+   }
+
 #define HYPRE_CALC_AX(n)        \
    Ap##n[Ai] * xp[xi + xoff##n]
 
@@ -62,6 +79,251 @@
 
 #define HYPRE_CALC_CAX_ADD(n)    \
    Ap##n[0] * xp[xi + xoff##n] +
+
+/* Sequence macros for declaring offset variables */
+#define HYPRE_DECLARE_OFFSETS_UP_TO_27 \
+   HYPRE_DECLARE_OFFSETS(0);     \
+   HYPRE_DECLARE_OFFSETS(1);     \
+   HYPRE_DECLARE_OFFSETS(2);     \
+   HYPRE_DECLARE_OFFSETS(3);     \
+   HYPRE_DECLARE_OFFSETS(4);     \
+   HYPRE_DECLARE_OFFSETS(5);     \
+   HYPRE_DECLARE_OFFSETS(6);     \
+   HYPRE_DECLARE_OFFSETS(7);     \
+   HYPRE_DECLARE_OFFSETS(8);     \
+   HYPRE_DECLARE_OFFSETS(9);     \
+   HYPRE_DECLARE_OFFSETS(10);    \
+   HYPRE_DECLARE_OFFSETS(11);    \
+   HYPRE_DECLARE_OFFSETS(12);    \
+   HYPRE_DECLARE_OFFSETS(13);    \
+   HYPRE_DECLARE_OFFSETS(14);    \
+   HYPRE_DECLARE_OFFSETS(15);    \
+   HYPRE_DECLARE_OFFSETS(16);    \
+   HYPRE_DECLARE_OFFSETS(17);    \
+   HYPRE_DECLARE_OFFSETS(18);    \
+   HYPRE_DECLARE_OFFSETS(19);    \
+   HYPRE_DECLARE_OFFSETS(20);    \
+   HYPRE_DECLARE_OFFSETS(21);    \
+   HYPRE_DECLARE_OFFSETS(22);    \
+   HYPRE_DECLARE_OFFSETS(23);    \
+   HYPRE_DECLARE_OFFSETS(24);    \
+   HYPRE_DECLARE_OFFSETS(25);    \
+   HYPRE_DECLARE_OFFSETS(26)
+
+/* Sequence macros for loading matrix entries */
+#define HYPRE_LOAD_AX_UP_TO_1(t) \
+   HYPRE_LOAD_AX(t, 0) \
+
+#define HYPRE_LOAD_AX_UP_TO_2(t) \
+   HYPRE_LOAD_AX(t, 1) \
+   HYPRE_LOAD_AX_UP_TO_1(t)
+
+#define HYPRE_LOAD_AX_UP_TO_3(t) \
+   HYPRE_LOAD_AX(t, 2) \
+   HYPRE_LOAD_AX_UP_TO_2(t)
+
+#define HYPRE_LOAD_AX_UP_TO_4(t) \
+   HYPRE_LOAD_AX(t, 3) \
+   HYPRE_LOAD_AX_UP_TO_3(t)
+
+#define HYPRE_LOAD_AX_UP_TO_5(t) \
+   HYPRE_LOAD_AX(t, 4) \
+   HYPRE_LOAD_AX_UP_TO_4(t)
+
+#define HYPRE_LOAD_AX_UP_TO_6(t) \
+   HYPRE_LOAD_AX(t, 5) \
+   HYPRE_LOAD_AX_UP_TO_5(t)
+
+#define HYPRE_LOAD_AX_UP_TO_7(t) \
+   HYPRE_LOAD_AX(t, 6) \
+   HYPRE_LOAD_AX_UP_TO_6(t)
+
+#define HYPRE_LOAD_AX_UP_TO_8(t) \
+   HYPRE_LOAD_AX(t, 7) \
+   HYPRE_LOAD_AX_UP_TO_7(t)
+
+#define HYPRE_LOAD_AX_UP_TO_9(t) \
+   HYPRE_LOAD_AX(t, 8) \
+   HYPRE_LOAD_AX_UP_TO_8(t)
+
+#define HYPRE_LOAD_AX_UP_TO_10(t) \
+   HYPRE_LOAD_AX(t, 9) \
+   HYPRE_LOAD_AX_UP_TO_9(t)
+
+#define HYPRE_LOAD_AX_UP_TO_11(t) \
+   HYPRE_LOAD_AX(t, 10) \
+   HYPRE_LOAD_AX_UP_TO_10(t)
+
+#define HYPRE_LOAD_AX_UP_TO_12(t) \
+   HYPRE_LOAD_AX(t, 11) \
+   HYPRE_LOAD_AX_UP_TO_11(t)
+
+#define HYPRE_LOAD_AX_UP_TO_13(t) \
+   HYPRE_LOAD_AX(t, 12) \
+   HYPRE_LOAD_AX_UP_TO_12(t)
+
+#define HYPRE_LOAD_AX_UP_TO_14(t) \
+   HYPRE_LOAD_AX(t, 13) \
+   HYPRE_LOAD_AX_UP_TO_13(t)
+
+#define HYPRE_LOAD_AX_UP_TO_15(t) \
+   HYPRE_LOAD_AX(t, 14) \
+   HYPRE_LOAD_AX_UP_TO_14(t)
+
+#define HYPRE_LOAD_AX_UP_TO_16(t) \
+   HYPRE_LOAD_AX(t, 15) \
+   HYPRE_LOAD_AX_UP_TO_15(t)
+
+#define HYPRE_LOAD_AX_UP_TO_17(t) \
+   HYPRE_LOAD_AX(t, 16) \
+   HYPRE_LOAD_AX_UP_TO_16(t)
+
+#define HYPRE_LOAD_AX_UP_TO_18(t) \
+   HYPRE_LOAD_AX(t, 17) \
+   HYPRE_LOAD_AX_UP_TO_17(t)
+
+#define HYPRE_LOAD_AX_UP_TO_19(t) \
+   HYPRE_LOAD_AX(t, 18) \
+   HYPRE_LOAD_AX_UP_TO_18(t)
+
+#define HYPRE_LOAD_AX_UP_TO_20(t) \
+   HYPRE_LOAD_AX(t, 19) \
+   HYPRE_LOAD_AX_UP_TO_19(t)
+
+#define HYPRE_LOAD_AX_UP_TO_21(t) \
+   HYPRE_LOAD_AX(t, 20) \
+   HYPRE_LOAD_AX_UP_TO_20(t)
+
+#define HYPRE_LOAD_AX_UP_TO_22(t) \
+   HYPRE_LOAD_AX(t, 21) \
+   HYPRE_LOAD_AX_UP_TO_21(t)
+
+#define HYPRE_LOAD_AX_UP_TO_23(t) \
+   HYPRE_LOAD_AX(t, 22) \
+   HYPRE_LOAD_AX_UP_TO_22(t)
+
+#define HYPRE_LOAD_AX_UP_TO_24(t) \
+   HYPRE_LOAD_AX(t, 23) \
+   HYPRE_LOAD_AX_UP_TO_23(t)
+
+#define HYPRE_LOAD_AX_UP_TO_25(t) \
+   HYPRE_LOAD_AX(t, 24) \
+   HYPRE_LOAD_AX_UP_TO_24(t)
+
+#define HYPRE_LOAD_AX_UP_TO_26(t) \
+   HYPRE_LOAD_AX(t, 25) \
+   HYPRE_LOAD_AX_UP_TO_25(t)
+
+#define HYPRE_LOAD_AX_UP_TO_27(t) \
+   HYPRE_LOAD_AX(t, 26) \
+   HYPRE_LOAD_AX_UP_TO_26(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_1(t) \
+   HYPRE_LOAD_CAX(t, 0) \
+
+#define HYPRE_LOAD_CAX_UP_TO_2(t) \
+   HYPRE_LOAD_CAX(t, 1) \
+   HYPRE_LOAD_CAX_UP_TO_1(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_3(t) \
+   HYPRE_LOAD_CAX(t, 2) \
+   HYPRE_LOAD_CAX_UP_TO_2(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_4(t) \
+   HYPRE_LOAD_CAX(t, 3) \
+   HYPRE_LOAD_CAX_UP_TO_3(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_5(t) \
+   HYPRE_LOAD_CAX(t, 4) \
+   HYPRE_LOAD_CAX_UP_TO_4(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_6(t) \
+   HYPRE_LOAD_CAX(t, 5) \
+   HYPRE_LOAD_CAX_UP_TO_5(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_7(t) \
+   HYPRE_LOAD_CAX(t, 6) \
+   HYPRE_LOAD_CAX_UP_TO_6(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_8(t) \
+   HYPRE_LOAD_CAX(t, 7) \
+   HYPRE_LOAD_CAX_UP_TO_7(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_9(t) \
+   HYPRE_LOAD_CAX(t, 8) \
+   HYPRE_LOAD_CAX_UP_TO_8(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_10(t) \
+   HYPRE_LOAD_CAX(t, 9) \
+   HYPRE_LOAD_CAX_UP_TO_9(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_11(t) \
+   HYPRE_LOAD_CAX(t, 10) \
+   HYPRE_LOAD_CAX_UP_TO_10(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_12(t) \
+   HYPRE_LOAD_CAX(t, 11) \
+   HYPRE_LOAD_CAX_UP_TO_11(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_13(t) \
+   HYPRE_LOAD_CAX(t, 12) \
+   HYPRE_LOAD_CAX_UP_TO_12(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_14(t) \
+   HYPRE_LOAD_CAX(t, 13) \
+   HYPRE_LOAD_CAX_UP_TO_13(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_15(t) \
+   HYPRE_LOAD_CAX(t, 14) \
+   HYPRE_LOAD_CAX_UP_TO_14(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_16(t) \
+   HYPRE_LOAD_CAX(t, 15) \
+   HYPRE_LOAD_CAX_UP_TO_15(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_17(t) \
+   HYPRE_LOAD_CAX(t, 16) \
+   HYPRE_LOAD_CAX_UP_TO_16(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_18(t) \
+   HYPRE_LOAD_CAX(t, 17) \
+   HYPRE_LOAD_CAX_UP_TO_17(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_19(t) \
+   HYPRE_LOAD_CAX(t, 18) \
+   HYPRE_LOAD_CAX_UP_TO_18(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_20(t) \
+   HYPRE_LOAD_CAX(t, 19) \
+   HYPRE_LOAD_CAX_UP_TO_19(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_21(t) \
+   HYPRE_LOAD_CAX(t, 20) \
+   HYPRE_LOAD_CAX_UP_TO_20(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_22(t) \
+   HYPRE_LOAD_CAX(t, 21) \
+   HYPRE_LOAD_CAX_UP_TO_21(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_23(t) \
+   HYPRE_LOAD_CAX(t, 22) \
+   HYPRE_LOAD_CAX_UP_TO_22(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_24(t) \
+   HYPRE_LOAD_CAX(t, 23) \
+   HYPRE_LOAD_CAX_UP_TO_23(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_25(t) \
+   HYPRE_LOAD_CAX(t, 24) \
+   HYPRE_LOAD_CAX_UP_TO_24(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_26(t) \
+   HYPRE_LOAD_CAX(t, 25) \
+   HYPRE_LOAD_CAX_UP_TO_25(t)
+
+#define HYPRE_LOAD_CAX_UP_TO_27(t) \
+   HYPRE_LOAD_CAX(t, 26) \
+   HYPRE_LOAD_CAX_UP_TO_26(t)
 
 /* Sequence macros for various matrix/vector multiplication components */
 #define HYPRE_CALC_AX_ADD_UP_TO_1 \
@@ -206,6 +468,78 @@
    HYPRE_CALC_CAX_ADD(8) \
    HYPRE_CALC_CAX_ADD_UP_TO_8
 
+#define HYPRE_CALC_CAX_ADD_UP_TO_10 \
+   HYPRE_CALC_CAX_ADD(9) \
+   HYPRE_CALC_CAX_ADD_UP_TO_9
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_11 \
+   HYPRE_CALC_CAX_ADD(10) \
+   HYPRE_CALC_CAX_ADD_UP_TO_10
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_12 \
+   HYPRE_CALC_CAX_ADD(11) \
+   HYPRE_CALC_CAX_ADD_UP_TO_11
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_13 \
+   HYPRE_CALC_CAX_ADD(12) \
+   HYPRE_CALC_CAX_ADD_UP_TO_12
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_14 \
+   HYPRE_CALC_CAX_ADD(13) \
+   HYPRE_CALC_CAX_ADD_UP_TO_13
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_15 \
+   HYPRE_CALC_CAX_ADD(14) \
+   HYPRE_CALC_CAX_ADD_UP_TO_14
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_16 \
+   HYPRE_CALC_CAX_ADD(15) \
+   HYPRE_CALC_CAX_ADD_UP_TO_15
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_17 \
+   HYPRE_CALC_CAX_ADD(16) \
+   HYPRE_CALC_CAX_ADD_UP_TO_16
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_18 \
+   HYPRE_CALC_CAX_ADD(17) \
+   HYPRE_CALC_CAX_ADD_UP_TO_17
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_19 \
+   HYPRE_CALC_CAX_ADD(18) \
+   HYPRE_CALC_CAX_ADD_UP_TO_18
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_20 \
+   HYPRE_CALC_CAX_ADD(19) \
+   HYPRE_CALC_CAX_ADD_UP_TO_19
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_21 \
+   HYPRE_CALC_CAX_ADD(20) \
+   HYPRE_CALC_CAX_ADD_UP_TO_20
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_22 \
+   HYPRE_CALC_CAX_ADD(21) \
+   HYPRE_CALC_CAX_ADD_UP_TO_21
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_23 \
+   HYPRE_CALC_CAX_ADD(22) \
+   HYPRE_CALC_CAX_ADD_UP_TO_22
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_24 \
+   HYPRE_CALC_CAX_ADD(23) \
+   HYPRE_CALC_CAX_ADD_UP_TO_23
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_25 \
+   HYPRE_CALC_CAX_ADD(24) \
+   HYPRE_CALC_CAX_ADD_UP_TO_24
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_26 \
+   HYPRE_CALC_CAX_ADD(25) \
+   HYPRE_CALC_CAX_ADD_UP_TO_25
+
+#define HYPRE_CALC_CAX_ADD_UP_TO_27 \
+   HYPRE_CALC_CAX_ADD(26) \
+   HYPRE_CALC_CAX_ADD_UP_TO_26
+
 /*--------------------------------------------------------------------------
  * z = beta * y + alpha * A*x
  *
@@ -238,22 +572,16 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
                                    hypre_Box          *y_data_box,
                                    hypre_Box          *z_data_box)
 {
+#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
 
    hypre_Index           xdstart, ydstart, zdstart;
    hypre_Index           offset;
-
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
-   HYPRE_Complex        *xp = NULL, *yp = NULL, *zp = NULL;
-   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
-   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
-   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
-
-   HYPRE_Int             si, depth;
+   HYPRE_Int             si = 0, depth;
+   HYPRE_Complex        *xp, *yp, *zp;
+   HYPRE_DECLARE_OFFSETS_UP_TO_27;
 
    /* Exit early if no stencil entries fall in this category */
    if (!nentries)
@@ -282,191 +610,107 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
    hypre_CopyToIndex(start, ndim, zdstart);
    hypre_MapToCoarseIndex(zdstart, NULL, ran_stride, ndim);
 
-#define DEVICE_VAR is_device_ptr(xp,yp,zp)
-   for (si = 0; si < nentries; si += 9)
+   /* Initialize output vector in the first pass */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_CAX_UP_TO_##n(transpose);                                     \
+      hypre_BoxLoop3Begin(ndim, loop_size,                                     \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          y_data_box, ydstart, ydstride, yi,                   \
+                          z_data_box, zdstart, zdstride, zi);                  \
+      {                                                                        \
+         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_##n);      \
+      }                                                                        \
+      hypre_BoxLoop3End(xi, yi, zi);                                           \
+      break;
+
+   depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
+   switch (depth)
    {
-      depth = hypre_min(9, (nentries - si));
+      HYPRE_CORE_CASE(27);
+      HYPRE_CORE_CASE(26);
+      HYPRE_CORE_CASE(25);
+      HYPRE_CORE_CASE(24);
+      HYPRE_CORE_CASE(23);
+      HYPRE_CORE_CASE(22);
+      HYPRE_CORE_CASE(21);
+      HYPRE_CORE_CASE(20);
+      HYPRE_CORE_CASE(19);
+      HYPRE_CORE_CASE(18);
+      HYPRE_CORE_CASE(17);
+      HYPRE_CORE_CASE(16);
+      HYPRE_CORE_CASE(15);
+      HYPRE_CORE_CASE(14);
+      HYPRE_CORE_CASE(13);
+      HYPRE_CORE_CASE(12);
+      HYPRE_CORE_CASE(11);
+      HYPRE_CORE_CASE(10);
+      HYPRE_CORE_CASE(9);
+      HYPRE_CORE_CASE(8);
+      HYPRE_CORE_CASE(7);
+      HYPRE_CORE_CASE(6);
+      HYPRE_CORE_CASE(5);
+      HYPRE_CORE_CASE(4);
+      HYPRE_CORE_CASE(3);
+      HYPRE_CORE_CASE(2);
+      HYPRE_CORE_CASE(1);
 
-      if (!transpose)
-      {
-         switch (depth)
-         {
-            case 9:
-               HYPRE_SET_CAX(Ap8, xoff8, entries[si + 8]);
-               HYPRE_FALLTHROUGH;
+      case 0:
+         break;
+   }
 
-            case 8:
-               HYPRE_SET_CAX(Ap7, xoff7, entries[si + 7]);
-               HYPRE_FALLTHROUGH;
+   /* Update output vector with remaining A*x components if any */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_CAX_UP_TO_##n(transpose);                                     \
+      hypre_BoxLoop2Begin(ndim, loop_size,                                     \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          z_data_box, zdstart, zdstride, zi);                  \
+      {                                                                        \
+         zp[zi] += alpha * (HYPRE_CALC_CAX_ADD_UP_TO_##n);                     \
+      }                                                                        \
+      hypre_BoxLoop2End(xi, zi);                                               \
+      break;
 
-            case 7:
-               HYPRE_SET_CAX(Ap6, xoff6, entries[si + 6]);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               HYPRE_SET_CAX(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               HYPRE_SET_CAX(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_CAX(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_CAX(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_CAX(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_CAX(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-      }
-      else
-      {
-         switch (depth)
-         {
-            case 9:
-               HYPRE_SET_CAX_TRANS(Ap8, xoff8, entries[si + 8]);
-               HYPRE_FALLTHROUGH;
-
-            case 8:
-               HYPRE_SET_CAX_TRANS(Ap7, xoff7, entries[si + 7]);
-               HYPRE_FALLTHROUGH;
-
-            case 7:
-               HYPRE_SET_CAX_TRANS(Ap6, xoff6, entries[si + 6]);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               HYPRE_SET_CAX_TRANS(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               HYPRE_SET_CAX_TRANS(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_CAX_TRANS(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_CAX_TRANS(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_CAX_TRANS(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_CAX_TRANS(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-      }
+   for (si = depth; si < nentries; si += HYPRE_UNROLL_MAXDEPTH)
+   {
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries - si));
 
       switch (depth)
       {
-         case 9:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_9);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 8:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_8);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 7:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_7);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 6:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_6);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 5:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_5);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 4:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_4);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 3:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_3);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 2:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_2);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
-
-         case 1:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_1);
-            }
-            hypre_BoxLoop3End(xi, yi, zi);
+         HYPRE_CORE_CASE(27);
+         HYPRE_CORE_CASE(26);
+         HYPRE_CORE_CASE(25);
+         HYPRE_CORE_CASE(24);
+         HYPRE_CORE_CASE(23);
+         HYPRE_CORE_CASE(22);
+         HYPRE_CORE_CASE(21);
+         HYPRE_CORE_CASE(20);
+         HYPRE_CORE_CASE(19);
+         HYPRE_CORE_CASE(18);
+         HYPRE_CORE_CASE(17);
+         HYPRE_CORE_CASE(16);
+         HYPRE_CORE_CASE(15);
+         HYPRE_CORE_CASE(14);
+         HYPRE_CORE_CASE(13);
+         HYPRE_CORE_CASE(12);
+         HYPRE_CORE_CASE(11);
+         HYPRE_CORE_CASE(10);
+         HYPRE_CORE_CASE(9);
+         HYPRE_CORE_CASE(8);
+         HYPRE_CORE_CASE(7);
+         HYPRE_CORE_CASE(6);
+         HYPRE_CORE_CASE(5);
+         HYPRE_CORE_CASE(4);
+         HYPRE_CORE_CASE(3);
+         HYPRE_CORE_CASE(2);
+         HYPRE_CORE_CASE(1);
 
          case 0:
             break;
@@ -497,6 +741,7 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
                                    HYPRE_Int           yb,
                                    HYPRE_Int           zb,
                                    HYPRE_Int           transpose,
+                                   HYPRE_Int           only_Ax,
                                    HYPRE_Int           nentries,
                                    HYPRE_Int          *entries,
                                    hypre_IndexRef      start,
@@ -513,33 +758,16 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
                                    hypre_Box          *y_data_box,
                                    hypre_Box          *z_data_box )
 {
+#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
 
    hypre_Index           Adstart, xdstart, ydstart, zdstart;
    hypre_Index           offset;
-
+   HYPRE_Int             si = 0, depth;
    HYPRE_Complex        *xp, *yp, *zp;
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
-   HYPRE_Complex        *Ap9 = NULL, *Ap10 = NULL, *Ap11 = NULL;
-   HYPRE_Complex        *Ap12 = NULL, *Ap13 = NULL, *Ap14 = NULL;
-   HYPRE_Complex        *Ap15 = NULL, *Ap16 = NULL, *Ap17 = NULL;
-   HYPRE_Complex        *Ap18 = NULL, *Ap19 = NULL, *Ap20 = NULL;
-   HYPRE_Complex        *Ap21 = NULL, *Ap22 = NULL, *Ap23 = NULL;
-   HYPRE_Complex        *Ap24 = NULL, *Ap25 = NULL, *Ap26 = NULL;
-   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
-   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
-   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
-   HYPRE_Int             xoff9 = 0, xoff10 = 0, xoff11 = 0;
-   HYPRE_Int             xoff12 = 0, xoff13 = 0, xoff14 = 0;
-   HYPRE_Int             xoff15 = 0, xoff16 = 0, xoff17 = 0;
-   HYPRE_Int             xoff18 = 0, xoff19 = 0, xoff20 = 0;
-   HYPRE_Int             xoff21 = 0, xoff22 = 0, xoff23 = 0;
-   HYPRE_Int             xoff24 = 0, xoff25 = 0, xoff26 = 0;
-   HYPRE_Int             si, depth;
+   HYPRE_DECLARE_OFFSETS_UP_TO_27;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
@@ -570,569 +798,110 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
    hypre_CopyToIndex(start, ndim, zdstart);
    hypre_MapToCoarseIndex(zdstart, NULL, ran_stride, ndim);
 
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
-   for (si = 0; si < nentries; si += UNROLL_MAXDEPTH)
+   /* Initialize output vector in the first pass */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_AX_UP_TO_##n(transpose);                                      \
+      hypre_BoxLoop4Begin(ndim, loop_size,                                     \
+                          A_data_box, Adstart, Adstride, Ai,                   \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          y_data_box, ydstart, ydstride, yi,                   \
+                          z_data_box, zdstart, zdstride, zi)                   \
+      {                                                                        \
+         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n);       \
+      }                                                                        \
+      hypre_BoxLoop4End(Ai, xi, yi, zi)                                        \
+      break;
+
+   /* The flag "only_Ax" indicates that "beta * yp" has been computed previously (by the CC kernel) */
+   depth = only_Ax ? 0 : hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
+   switch (depth)
    {
-      depth = hypre_min(UNROLL_MAXDEPTH, (nentries - si));
+      HYPRE_CORE_CASE(27);
+      HYPRE_CORE_CASE(26);
+      HYPRE_CORE_CASE(25);
+      HYPRE_CORE_CASE(24);
+      HYPRE_CORE_CASE(23);
+      HYPRE_CORE_CASE(22);
+      HYPRE_CORE_CASE(21);
+      HYPRE_CORE_CASE(20);
+      HYPRE_CORE_CASE(19);
+      HYPRE_CORE_CASE(18);
+      HYPRE_CORE_CASE(17);
+      HYPRE_CORE_CASE(16);
+      HYPRE_CORE_CASE(15);
+      HYPRE_CORE_CASE(14);
+      HYPRE_CORE_CASE(13);
+      HYPRE_CORE_CASE(12);
+      HYPRE_CORE_CASE(11);
+      HYPRE_CORE_CASE(10);
+      HYPRE_CORE_CASE(9);
+      HYPRE_CORE_CASE(8);
+      HYPRE_CORE_CASE(7);
+      HYPRE_CORE_CASE(6);
+      HYPRE_CORE_CASE(5);
+      HYPRE_CORE_CASE(4);
+      HYPRE_CORE_CASE(3);
+      HYPRE_CORE_CASE(2);
+      HYPRE_CORE_CASE(1);
 
-      if (!transpose)
-      {
-         switch (depth)
-         {
-            case 27:
-               HYPRE_SET_AX(Ap26, xoff26, entries[si + 26]);
-               HYPRE_FALLTHROUGH;
+      case 0:
+         break;
+   }
 
-            case 26:
-               HYPRE_SET_AX(Ap25, xoff25, entries[si + 25]);
-               HYPRE_FALLTHROUGH;
+   /* Update output vector with remaining A*x components if any */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_AX_UP_TO_##n(transpose);                                      \
+      hypre_BoxLoop3Begin(ndim, loop_size,                                     \
+                          A_data_box, Adstart, Adstride, Ai,                   \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          z_data_box, zdstart, zdstride, zi);                  \
+      {                                                                        \
+         zp[zi] += alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n);                      \
+      }                                                                        \
+      hypre_BoxLoop3End(Ai, xi, zi);                                           \
+      break;
 
-            case 25:
-               HYPRE_SET_AX(Ap24, xoff24, entries[si + 24]);
-               HYPRE_FALLTHROUGH;
-
-            case 24:
-               HYPRE_SET_AX(Ap23, xoff23, entries[si + 23]);
-               HYPRE_FALLTHROUGH;
-
-            case 23:
-               HYPRE_SET_AX(Ap22, xoff22, entries[si + 22]);
-               HYPRE_FALLTHROUGH;
-
-            case 22:
-               HYPRE_SET_AX(Ap21, xoff21, entries[si + 21]);
-               HYPRE_FALLTHROUGH;
-
-            case 21:
-               HYPRE_SET_AX(Ap20, xoff20, entries[si + 20]);
-               HYPRE_FALLTHROUGH;
-
-            case 20:
-               HYPRE_SET_AX(Ap19, xoff19, entries[si + 19]);
-               HYPRE_FALLTHROUGH;
-
-            case 19:
-               HYPRE_SET_AX(Ap18, xoff18, entries[si + 18]);
-               HYPRE_FALLTHROUGH;
-
-            case 18:
-               HYPRE_SET_AX(Ap17, xoff17, entries[si + 17]);
-               HYPRE_FALLTHROUGH;
-
-            case 17:
-               HYPRE_SET_AX(Ap16, xoff16, entries[si + 16]);
-               HYPRE_FALLTHROUGH;
-
-            case 16:
-               HYPRE_SET_AX(Ap15, xoff15, entries[si + 15]);
-               HYPRE_FALLTHROUGH;
-
-            case 15:
-               HYPRE_SET_AX(Ap14, xoff14, entries[si + 14]);
-               HYPRE_FALLTHROUGH;
-
-            case 14:
-               HYPRE_SET_AX(Ap13, xoff13, entries[si + 13]);
-               HYPRE_FALLTHROUGH;
-
-            case 13:
-               HYPRE_SET_AX(Ap12, xoff12, entries[si + 12]);
-               HYPRE_FALLTHROUGH;
-
-            case 12:
-               HYPRE_SET_AX(Ap11, xoff11, entries[si + 11]);
-               HYPRE_FALLTHROUGH;
-
-            case 11:
-               HYPRE_SET_AX(Ap10, xoff10, entries[si + 10]);
-               HYPRE_FALLTHROUGH;
-
-            case 10:
-               HYPRE_SET_AX(Ap9, xoff9, entries[si + 9]);
-               HYPRE_FALLTHROUGH;
-
-            case 9:
-               HYPRE_SET_AX(Ap8, xoff8, entries[si + 8]);
-               HYPRE_FALLTHROUGH;
-
-            case 8:
-               HYPRE_SET_AX(Ap7, xoff7, entries[si + 7]);
-               HYPRE_FALLTHROUGH;
-
-            case 7:
-               HYPRE_SET_AX(Ap6, xoff6, entries[si + 6]);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               HYPRE_SET_AX(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               HYPRE_SET_AX(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_AX(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_AX(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_AX(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_AX(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-      }
-      else
-      {
-         switch (depth)
-         {
-            case 27:
-               HYPRE_SET_AX_TRANS(Ap26, xoff26, entries[si + 26]);
-               HYPRE_FALLTHROUGH;
-
-            case 26:
-               HYPRE_SET_AX_TRANS(Ap25, xoff25, entries[si + 25]);
-               HYPRE_FALLTHROUGH;
-
-            case 25:
-               HYPRE_SET_AX_TRANS(Ap24, xoff24, entries[si + 24]);
-               HYPRE_FALLTHROUGH;
-
-            case 24:
-               HYPRE_SET_AX_TRANS(Ap23, xoff23, entries[si + 23]);
-               HYPRE_FALLTHROUGH;
-
-            case 23:
-               HYPRE_SET_AX_TRANS(Ap22, xoff22, entries[si + 22]);
-               HYPRE_FALLTHROUGH;
-
-            case 22:
-               HYPRE_SET_AX_TRANS(Ap21, xoff21, entries[si + 21]);
-               HYPRE_FALLTHROUGH;
-
-            case 21:
-               HYPRE_SET_AX_TRANS(Ap20, xoff20, entries[si + 20]);
-               HYPRE_FALLTHROUGH;
-
-            case 20:
-               HYPRE_SET_AX_TRANS(Ap19, xoff19, entries[si + 19]);
-               HYPRE_FALLTHROUGH;
-
-            case 19:
-               HYPRE_SET_AX_TRANS(Ap18, xoff18, entries[si + 18]);
-               HYPRE_FALLTHROUGH;
-
-            case 18:
-               HYPRE_SET_AX_TRANS(Ap17, xoff17, entries[si + 17]);
-               HYPRE_FALLTHROUGH;
-
-            case 17:
-               HYPRE_SET_AX_TRANS(Ap16, xoff16, entries[si + 16]);
-               HYPRE_FALLTHROUGH;
-
-            case 16:
-               HYPRE_SET_AX_TRANS(Ap15, xoff15, entries[si + 15]);
-               HYPRE_FALLTHROUGH;
-
-            case 15:
-               HYPRE_SET_AX_TRANS(Ap14, xoff14, entries[si + 14]);
-               HYPRE_FALLTHROUGH;
-
-            case 14:
-               HYPRE_SET_AX_TRANS(Ap13, xoff13, entries[si + 13]);
-               HYPRE_FALLTHROUGH;
-
-            case 13:
-               HYPRE_SET_AX_TRANS(Ap12, xoff12, entries[si + 12]);
-               HYPRE_FALLTHROUGH;
-
-            case 12:
-               HYPRE_SET_AX_TRANS(Ap11, xoff11, entries[si + 11]);
-               HYPRE_FALLTHROUGH;
-
-            case 11:
-               HYPRE_SET_AX_TRANS(Ap10, xoff10, entries[si + 10]);
-               HYPRE_FALLTHROUGH;
-
-            case 10:
-               HYPRE_SET_AX_TRANS(Ap9, xoff9, entries[si + 9]);
-               HYPRE_FALLTHROUGH;
-
-            case 9:
-               HYPRE_SET_AX_TRANS(Ap8, xoff8, entries[si + 8]);
-               HYPRE_FALLTHROUGH;
-
-            case 8:
-               HYPRE_SET_AX_TRANS(Ap7, xoff7, entries[si + 7]);
-               HYPRE_FALLTHROUGH;
-
-            case 7:
-               HYPRE_SET_AX_TRANS(Ap6, xoff6, entries[si + 6]);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               HYPRE_SET_AX_TRANS(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               HYPRE_SET_AX_TRANS(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_AX_TRANS(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_AX_TRANS(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_AX_TRANS(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_AX_TRANS(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-      }
+   for (si = depth; si < nentries; si += HYPRE_UNROLL_MAXDEPTH)
+   {
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries - si));
 
       switch (depth)
       {
-         case 27:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_27);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 26:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_26);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 25:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_25);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 24:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_24);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 23:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_23);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 22:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_22);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 21:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_21);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 20:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_20);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 19:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_19);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 18:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_18);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 17:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_17);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 16:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_16);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 15:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_15);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 14:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_14);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 13:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_13);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 12:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_12);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 11:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_11);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 10:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_10);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 9:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_9);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 8:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_8);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 7:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_7);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 6:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_6);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 5:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_5);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 4:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_4);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 3:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_3);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 2:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_2);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
-
-         case 1:
-            hypre_BoxLoop4Begin(ndim, loop_size,
-                                A_data_box, Adstart, Adstride, Ai,
-                                x_data_box, xdstart, xdstride, xi,
-                                y_data_box, ydstart, ydstride, yi,
-                                z_data_box, zdstart, zdstride, zi);
-            {
-               zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_1);
-            }
-            hypre_BoxLoop4End(Ai, xi, yi, zi);
-            break;
+         HYPRE_CORE_CASE(27);
+         HYPRE_CORE_CASE(26);
+         HYPRE_CORE_CASE(25);
+         HYPRE_CORE_CASE(24);
+         HYPRE_CORE_CASE(23);
+         HYPRE_CORE_CASE(22);
+         HYPRE_CORE_CASE(21);
+         HYPRE_CORE_CASE(20);
+         HYPRE_CORE_CASE(19);
+         HYPRE_CORE_CASE(18);
+         HYPRE_CORE_CASE(17);
+         HYPRE_CORE_CASE(16);
+         HYPRE_CORE_CASE(15);
+         HYPRE_CORE_CASE(14);
+         HYPRE_CORE_CASE(13);
+         HYPRE_CORE_CASE(12);
+         HYPRE_CORE_CASE(11);
+         HYPRE_CORE_CASE(10);
+         HYPRE_CORE_CASE(9);
+         HYPRE_CORE_CASE(8);
+         HYPRE_CORE_CASE(7);
+         HYPRE_CORE_CASE(6);
+         HYPRE_CORE_CASE(5);
+         HYPRE_CORE_CASE(4);
+         HYPRE_CORE_CASE(3);
+         HYPRE_CORE_CASE(2);
+         HYPRE_CORE_CASE(1);
 
          case 0:
             break;
@@ -1181,21 +950,16 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_Box          *y_data_box,
                                     hypre_Box          *z_data_box )
 {
+#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
 
    hypre_Index           Adstart, xdstart, ydstart, zdstart;
    hypre_Index           offset;
-
+   HYPRE_Int             si = 0, depth;
    HYPRE_Complex        *xp, *yp, *zp;
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL;
-   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
-   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
-   HYPRE_Int             xoff6 = 0;
-   HYPRE_Int             si, depth;
+   HYPRE_DECLARE_OFFSETS_UP_TO_27;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VCC");
@@ -1226,288 +990,119 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    hypre_CopyToIndex(start, ndim, zdstart);
    hypre_MapToCoarseIndex(zdstart, NULL, ran_stride, ndim);
 
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6)
-   for (si = 0; si < nentries; si += 6)
+   /* Initialize output vector in the first pass
+       - Ap26 refers to the constant coefficient entries
+       - Ap[0-25] refer to the variable coefficient entries */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      if (transpose) {                                                         \
+         HYPRE_SET_AX_TRANS(Ap26, xoff26, centry)                              \
+      } else {                                                                 \
+         HYPRE_SET_AX(Ap26, xoff26, centry)                                    \
+      }                                                                        \
+      HYPRE_LOAD_AX_UP_TO_##n(transpose);                                      \
+      hypre_BoxLoop4Begin(ndim, loop_size,                                     \
+                          A_data_box, Adstart, Adstride, Ai,                   \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          y_data_box, ydstart, ydstride, yi,                   \
+                          z_data_box, zdstart, zdstride, zi)                   \
+      {                                                                        \
+         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD(26) + HYPRE_CALC_AX_ADD_UP_TO_##n); \
+      }                                                                        \
+      hypre_BoxLoop4End(Ai, xi, yi, zi)                                        \
+      break;
+
+   /* We use "-1" to reserve space for the constant coefficient entry */
+   depth = hypre_min(HYPRE_UNROLL_MAXDEPTH - 1, nentries);
+   switch (depth)
    {
-      depth = hypre_min(6, (nentries - si));
+      HYPRE_CORE_CASE(26);
+      HYPRE_CORE_CASE(25);
+      HYPRE_CORE_CASE(24);
+      HYPRE_CORE_CASE(23);
+      HYPRE_CORE_CASE(22);
+      HYPRE_CORE_CASE(21);
+      HYPRE_CORE_CASE(20);
+      HYPRE_CORE_CASE(19);
+      HYPRE_CORE_CASE(18);
+      HYPRE_CORE_CASE(17);
+      HYPRE_CORE_CASE(16);
+      HYPRE_CORE_CASE(15);
+      HYPRE_CORE_CASE(14);
+      HYPRE_CORE_CASE(13);
+      HYPRE_CORE_CASE(12);
+      HYPRE_CORE_CASE(11);
+      HYPRE_CORE_CASE(10);
+      HYPRE_CORE_CASE(9);
+      HYPRE_CORE_CASE(8);
+      HYPRE_CORE_CASE(7);
+      HYPRE_CORE_CASE(6);
+      HYPRE_CORE_CASE(5);
+      HYPRE_CORE_CASE(4);
+      HYPRE_CORE_CASE(3);
+      HYPRE_CORE_CASE(2);
+      HYPRE_CORE_CASE(1);
 
-      if (!transpose)
+      case 0:
+         break;
+   }
+
+   /* Update output vector with remaining A*x components if any */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_AX_UP_TO_##n(transpose);                                      \
+      hypre_BoxLoop3Begin(ndim, loop_size,                                     \
+                          A_data_box, Adstart, Adstride, Ai,                   \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          z_data_box, zdstart, zdstride, zi);                  \
+      {                                                                        \
+         zp[zi] += alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n);                      \
+      }                                                                        \
+      hypre_BoxLoop3End(Ai, xi, zi);                                           \
+      break;
+
+   for (si = depth; si < nentries; si += (HYPRE_UNROLL_MAXDEPTH - 1))
+   {
+      depth = hypre_min((HYPRE_UNROLL_MAXDEPTH - 1), (nentries - si));
+
+      switch (depth)
       {
-         switch (depth)
-         {
-            case 6:
-               HYPRE_SET_AX(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
+         HYPRE_CORE_CASE(26);
+         HYPRE_CORE_CASE(25);
+         HYPRE_CORE_CASE(24);
+         HYPRE_CORE_CASE(23);
+         HYPRE_CORE_CASE(22);
+         HYPRE_CORE_CASE(21);
+         HYPRE_CORE_CASE(20);
+         HYPRE_CORE_CASE(19);
+         HYPRE_CORE_CASE(18);
+         HYPRE_CORE_CASE(17);
+         HYPRE_CORE_CASE(16);
+         HYPRE_CORE_CASE(15);
+         HYPRE_CORE_CASE(14);
+         HYPRE_CORE_CASE(13);
+         HYPRE_CORE_CASE(12);
+         HYPRE_CORE_CASE(11);
+         HYPRE_CORE_CASE(10);
+         HYPRE_CORE_CASE(9);
+         HYPRE_CORE_CASE(8);
+         HYPRE_CORE_CASE(7);
+         HYPRE_CORE_CASE(6);
+         HYPRE_CORE_CASE(5);
+         HYPRE_CORE_CASE(4);
+         HYPRE_CORE_CASE(3);
+         HYPRE_CORE_CASE(2);
+         HYPRE_CORE_CASE(1);
 
-            case 5:
-               HYPRE_SET_AX(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_AX(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_AX(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_AX(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_AX(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-
-         /* Load constant coefficient in the first loop */
-         if (si < 6)
-         {
-            HYPRE_SET_CAX(Ap6, xoff6, centry);
-         }
-      }
-      else
-      {
-         switch (depth)
-         {
-            case 7:
-               HYPRE_SET_AX_TRANS(Ap6, xoff6, entries[si + 6]);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               HYPRE_SET_AX_TRANS(Ap5, xoff5, entries[si + 5]);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               HYPRE_SET_AX_TRANS(Ap4, xoff4, entries[si + 4]);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               HYPRE_SET_AX_TRANS(Ap3, xoff3, entries[si + 3]);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               HYPRE_SET_AX_TRANS(Ap2, xoff2, entries[si + 2]);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               HYPRE_SET_AX_TRANS(Ap1, xoff1, entries[si + 1]);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               HYPRE_SET_AX_TRANS(Ap0, xoff0, entries[si + 0]);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-
-         /* Load constant coefficient in the first loop */
-         if (si < 6)
-         {
-            HYPRE_SET_CAX_TRANS(Ap6, xoff6, centry);
-         }
-      }
-
-      if (si < 6)
-      {
-         switch (depth)
-         {
-            case 6:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap1[Ai] * xp[xi + xoff1] +
-                              Ap2[Ai] * xp[xi + xoff2] +
-                              Ap3[Ai] * xp[xi + xoff3] +
-                              Ap4[Ai] * xp[xi + xoff4] +
-                              Ap5[Ai] * xp[xi + xoff5] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 5:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap1[Ai] * xp[xi + xoff1] +
-                              Ap2[Ai] * xp[xi + xoff2] +
-                              Ap3[Ai] * xp[xi + xoff3] +
-                              Ap4[Ai] * xp[xi + xoff4] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 4:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap1[Ai] * xp[xi + xoff1] +
-                              Ap2[Ai] * xp[xi + xoff2] +
-                              Ap3[Ai] * xp[xi + xoff3] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 3:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap1[Ai] * xp[xi + xoff1] +
-                              Ap2[Ai] * xp[xi + xoff2] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 2:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap1[Ai] * xp[xi + xoff1] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 1:
-               hypre_BoxLoop4Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   y_data_box, ydstart, ydstride, yi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] = beta * yp[yi] +
-                    alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                              Ap6[0]  * xp[xi + xoff6] );
-               }
-               hypre_BoxLoop4End(Ai, xi, yi, zi);
-               break;
-
-            case 0:
-               break;
-         } /* switch (depth) */
-      }
-      else
-      {
-         switch (depth)
-         {
-            case 6:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                                      Ap1[Ai] * xp[xi + xoff1] +
-                                      Ap2[Ai] * xp[xi + xoff2] +
-                                      Ap3[Ai] * xp[xi + xoff3] +
-                                      Ap4[Ai] * xp[xi + xoff4] +
-                                      Ap5[Ai] * xp[xi + xoff5] );
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 5:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                                      Ap1[Ai] * xp[xi + xoff1] +
-                                      Ap2[Ai] * xp[xi + xoff2] +
-                                      Ap3[Ai] * xp[xi + xoff3] +
-                                      Ap4[Ai] * xp[xi + xoff4] );
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 4:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                                      Ap1[Ai] * xp[xi + xoff1] +
-                                      Ap2[Ai] * xp[xi + xoff2] +
-                                      Ap3[Ai] * xp[xi + xoff3] );
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 3:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                                      Ap1[Ai] * xp[xi + xoff1] +
-                                      Ap2[Ai] * xp[xi + xoff2] );
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 2:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * ( Ap0[Ai] * xp[xi + xoff0] +
-                                      Ap1[Ai] * xp[xi + xoff1] );
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 1:
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, Adstart, Adstride, Ai,
-                                   x_data_box, xdstart, xdstride, xi,
-                                   z_data_box, zdstart, zdstride, zi);
-               {
-                  zp[zi] += alpha * Ap0[Ai] * xp[xi + xoff0];
-               }
-               hypre_BoxLoop3End(Ai, xi, zi);
-               break;
-
-            case 0:
-               break;
-         } /* switch (depth) */
-      } /* if (si < 6) */
+         case 0:
+            break;
+      } /* switch (depth) */
    } /* for si */
 #undef DEVICE_VAR
 

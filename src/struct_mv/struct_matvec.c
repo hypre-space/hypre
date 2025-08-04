@@ -525,7 +525,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   /* Operate on variable coefficients */
                   hypre_StructMatvecCompute_core_VC(alpha, A, x, beta, y, z,
                                                     Ab, xb, yb, zb, transpose,
-                                                    vnentries, ventries,
+                                                    (cnentries > 0), vnentries, ventries,
                                                     start, stride, loop_size, xfstride, ran_stride,
                                                     Adstride, xdstride, ydstride, zdstride,
                                                     A_data_box, x_data_box, y_data_box, z_data_box);
