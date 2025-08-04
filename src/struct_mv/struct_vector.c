@@ -1583,7 +1583,7 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
 
    /* Set vector values */
-   hypre_StructVectorInitialize(vector, 0);
+   hypre_StructVectorInitialize(vector, 1);
    vi = 0;
    hypre_ForBoxI(i, boxes)
    {

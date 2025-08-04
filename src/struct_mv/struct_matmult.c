@@ -1067,7 +1067,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    {
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
-      hypre_StructVectorInitialize(mask, 1); // XABC
+      hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
       boxnums = hypre_StructVectorBoxnums(mask);
