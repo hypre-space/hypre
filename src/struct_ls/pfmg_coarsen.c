@@ -550,9 +550,9 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
       {
          HYPRE_CXYZ_DEFINE_SIGN;
 
-         w_data_0[wi] += sign * (HYPRE_CAP_SUM_UP_TO_9(0));
-         w_data_1[wi] += sign * (HYPRE_CAP_SUM_UP_TO_9(1));
-         w_data_2[wi] += sign * (HYPRE_CAP_SUM_UP_TO_9(2));
+         w_data_0[wi] = sign * (HYPRE_CAP_SUM_UP_TO_9(0));
+         w_data_1[wi] = sign * (HYPRE_CAP_SUM_UP_TO_9(1));
+         w_data_2[wi] = sign * (HYPRE_CAP_SUM_UP_TO_9(2));
       }
       hypre_BoxLoop2End(Ai, wi);
    }
@@ -570,9 +570,9 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
       {
          HYPRE_CXYZ_DEFINE_SIGN;
 
-         w_data_0[wi] += sign * (HYPRE_CAP_SUM_UP_TO_2(0));
-         w_data_1[wi] += sign * (HYPRE_CAP_SUM_UP_TO_2(1));
-         w_data_2[wi] += sign * (HYPRE_CAP_SUM_UP_TO_2(2));
+         w_data_0[wi] = sign * (HYPRE_CAP_SUM_UP_TO_2(0));
+         w_data_1[wi] = sign * (HYPRE_CAP_SUM_UP_TO_2(1));
+         w_data_2[wi] = sign * (HYPRE_CAP_SUM_UP_TO_2(2));
       }
       hypre_BoxLoop2End(Ai, wi);
    }
@@ -611,6 +611,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_8(d));
                   }
@@ -624,6 +625,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_7(d));
                   }
@@ -637,6 +639,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_6(d));
                   }
@@ -650,6 +653,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_5(d));
                   }
@@ -663,6 +667,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_4(d));
                   }
@@ -676,6 +681,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_3(d));
                   }
@@ -689,6 +695,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_2(d));
                   }
@@ -702,6 +709,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                                       w_dbox, start, ustride, wi);
                   {
                      HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
 
                      w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_1(d));
                   }

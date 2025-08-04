@@ -414,6 +414,7 @@
 #undef hypre_SemiRestrictCreate
 #undef hypre_SemiRestrictDestroy
 #undef hypre_SemiRestrictSetup
+#undef hypre_StructDiagScale
 #undef hypre_StructInterpAssemble
 #undef hypre_StructJacobiCreate
 #undef hypre_StructJacobiDestroy

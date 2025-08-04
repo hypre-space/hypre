@@ -809,6 +809,14 @@ hypre_BoxVolume( hypre_Box *box )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxesEqual( hypre_Box *box1, hypre_Box *box2 )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoxesEqual)( box1, box2 );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CoarsenBox( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CoarsenBox)( box, origin, stride );
@@ -1681,14 +1689,6 @@ hypre_StructAssumedPartitionPrint( const char *filename, hypre_StructAssumedPart
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructAxpy( HYPRE_Complex alpha, hypre_StructVector *x, hypre_StructVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructAxpy)( alpha, x, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructCoarsen( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int prune, hypre_StructGrid **cgrid_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructCoarsen)( fgrid, origin, stride, prune, cgrid_ptr );
@@ -1977,9 +1977,9 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a, HYPRE_Int
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_fuse( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride )
+hypre_StructMatmultCompute_fuse( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride, hypre_StructMatrix *M )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatmultCompute_fuse)( nterms, a, na, ndim, loop_size, fdbox, fdstart, fdstride, cdbox, cdstart, cdstride, Mdbox, Mdstart, Mdstride );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatmultCompute_fuse)( nterms, a, na, ndim, loop_size, stencil_size, fdbox, fdstart, fdstride, cdbox, cdstart, cdstride, Mdbox, Mdstart, Mdstride, M );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2241,9 +2241,9 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix, HYPRE_Complex *data )
+hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix, HYPRE_Int zero_init, HYPRE_Complex *data )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixInitializeData)( matrix, data );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixInitializeData)( matrix, zero_init, data );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2537,25 +2537,33 @@ hypre_StructMatvec( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVect
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatvecCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y )
+hypre_StructMatvecCompute( void *matvec_vdata, HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y, hypre_StructVector *z )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute)( matvec_vdata, alpha, A, x, beta, y );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute)( matvec_vdata, alpha, A, x, beta, y, z );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *x_data_box, hypre_Box *y_data_box )
+hypre_StructMatvecCompute_core_CC( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute_core_CC)( A, x, y, Ab, xb, yb, transpose, nentries, entries, start, stride, loop_size, xfstride, ran_stride, xdstride, ydstride, x_data_box, y_data_box );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute_core_CC)( alpha, A, x, beta, y, z, Ab, xb, yb, zb, transpose, nentries, entries, start, stride, loop_size, xfstride, ran_stride, xdstride, ydstride, zdstride, x_data_box, y_data_box, z_data_box );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A, hypre_StructVector *x, hypre_StructVector *y, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box )
+hypre_StructMatvecCompute_core_VC( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute_core_VC)( A, x, y, Ab, xb, yb, transpose, nentries, entries, start, stride, loop_size, xfstride, ran_stride, Adstride, xdstride, ydstride, A_data_box, x_data_box, y_data_box );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute_core_VC)( alpha, A, x, beta, y, z, Ab, xb, yb, zb, transpose, nentries, entries, start, stride, loop_size, xfstride, ran_stride, Adstride, xdstride, ydstride, zdstride, A_data_box, x_data_box, y_data_box, z_data_box );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_VCC( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int centry, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatvecCompute_core_VCC)( alpha, A, x, beta, y, z, Ab, xb, yb, zb, transpose, centry, nentries, entries, start, stride, loop_size, xfstride, ran_stride, Adstride, xdstride, ydstride, zdstride, A_data_box, x_data_box, y_data_box, z_data_box );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2689,6 +2697,14 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructVectorAxpy( HYPRE_Complex alpha, hypre_StructVector *x, HYPRE_Complex beta, hypre_StructVector *y, hypre_StructVector *z )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorAxpy)( alpha, x, beta, y, z );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorClearAllValues)( vector );
@@ -2777,9 +2793,9 @@ hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector, hypre_Stru
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorInitialize( hypre_StructVector *vector )
+hypre_StructVectorInitialize( hypre_StructVector *vector, HYPRE_Int zero_init )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorInitialize)( vector );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorInitialize)( vector, zero_init );
 }
 
 /*--------------------------------------------------------------------------*/

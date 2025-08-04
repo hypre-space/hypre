@@ -13,4 +13,4 @@
 shopt -s nullglob
 
 # Use awk to avoid issues with spacing
-nm -P *.o *.obj | awk '$2 == "T" {print $1}' | sed -e 's/^_//' -e 's/_$//'
+nm -P *.o *.obj | awk '$2 == "T" {print $1}' | sed -e 's/_$//'

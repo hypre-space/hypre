@@ -1769,6 +1769,14 @@ hypre_SemiRestrictSetup( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructDiagScale( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructDiagScale)( A, y, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructInterpAssemble( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructInterpAssemble)( A, P, P_stored_as_transpose, cdir, index, stride );
