@@ -50,10 +50,6 @@
    approximate inverse preconditioners.  *SIAM J. Sci. Comput.*,
    21:1804--1822, 2000.
 
-.. [ClEA1999] R. L. Clay et al.  An annotated reference guide to the Finite
-   Element Interface (FEI) specification, Version 1.0.  Technical Report
-   SAND99-8229, Sandia National Laboratories, Livermore, CA, 1999.
-
 .. [CMakeWeb] CMake, a cross-platform open-source build system.
    `http://www.cmake.org/ <http://www.cmake.org/>`_.
 
@@ -149,9 +145,6 @@
    FSAIPACK: A Software Package for High-Performance Factored Sparse Approximate Inverse
    Preconditioning. *ACM T. Math. Software*, 41(2):1–-26, 2015.
    `https://doi.org/10.1145/2629475 <https://doi.org/10.1145/2629475>`_.
-
-.. [JoLe2006] J. Jones and B. Lee.  A multigrid method for variable coefficient
-   maxwell's equations.  *SIAM J. Sci. Comput.*, 27:1689--1708, 2006.
 
 .. [McCo1989] S. F. McCormick.  *Multilevel Adaptive Methods for Partial
    Differential Equations*, volume 6 of *Frontiers in Applied Mathematics*.

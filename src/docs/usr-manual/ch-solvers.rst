@@ -13,46 +13,42 @@ Solvers and Preconditioners
 There are several solvers available in hypre via different conceptual
 interfaces:
 
-   ===========  =======  =======  =======  =======
+   ===========  =======  =======  =======
    :math:`\;`   System Interfaces
-   -----------  ----------------------------------
-   Solvers      Struct   SStruct    FEI      IJ
-   ===========  =======  =======  =======  =======
+   -----------  -------------------------
+   Solvers      Struct   SStruct    IJ
+   ===========  =======  =======  =======
    Jacobi          X        X
    SMG             X        X
    PFMG            X        X
    Split                    X
    SysPFMG                  X
-   FAC                      X
-   Maxwell                  X
-   BoomerAMG                X        X        X
-   AMS                      X        X        X
-   ADS                      X        X        X
-   MLI                      X        X        X
-   MGR                                        X
-   FSAI                                       X
-   ParaSails                X        X        X
-   ILU                                        X
-   Euclid                   X        X        X
-   PILUT                    X        X        X
-   PCG             X        X        X        X
-   GMRES           X        X        X        X
-   FlexGMRES       X        X        X        X
-   LGMRES          X        X                 X
-   BiCGSTAB        X        X        X        X
-   Hybrid          X        X        X        X
-   LOBPCG          X        X                 X
-   ===========  =======  =======  =======  =======
+   SSAMG                    X
+   BoomerAMG                X        X
+   AMS                      X        X
+   ADS                      X        X
+   MGR                               X
+   FSAI                              X
+   ParaSails                X        X
+   ILU                               X
+   Euclid                   X        X
+   PILUT                    X        X
+   PCG             X        X        X
+   GMRES           X        X        X
+   FlexGMRES       X        X        X
+   LGMRES          X        X        X
+   BiCGSTAB        X        X        X
+   Hybrid          X        X        X
+   LOBPCG          X        X        X
+   ===========  =======  =======  =======
 
-Note that there are a few additional solvers and preconditioners not mentioned
-in the table that can be used only through the FEI interface and are described
-in Paragraph 6.14.  The procedure for setup and use of solvers and
-preconditioners is largely the same. We will refer to them both as solvers in
-the sequel except when noted.  In normal usage, the preconditioner is chosen and
-constructed before the solver, and then handed to the solver as part of the
-solver's setup.  In the following, we assume the most common usage pattern in
-which a single linear system is set up and then solved with a single righthand
-side. We comment later on considerations for other usage patterns.
+The procedure for setup and use of solvers and preconditioners is largely the
+same.  We will refer to them both as solvers in the sequel except when noted.
+In normal usage, the preconditioner is chosen and constructed before the solver,
+and then handed to the solver as part of the solver's setup.  In the following,
+we assume the most common usage pattern in which a single linear system is set
+up and then solved with a single righthand side. We comment later on
+considerations for other usage patterns.
 
 
 **Setup:**
@@ -145,13 +141,10 @@ be found in Chapter :ref:`ch-API`.
 
    solvers-smg-pfmg
    solvers-split
-   solvers-fac
-   solvers-maxwell
    solvers-hybrid
    solvers-boomeramg
    solvers-ams
    solvers-ads
-   solvers-mli
    solvers-mgr
    solvers-fsai
    solvers-parasails
@@ -159,4 +152,3 @@ be found in Chapter :ref:`ch-API`.
    solvers-euclid
    solvers-pilut
    solvers-lobpcg
-   solvers-fei
