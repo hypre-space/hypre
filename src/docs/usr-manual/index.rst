@@ -21,6 +21,7 @@ Documentation for hypre
    ch-sstruct
    ch-ij
    ch-solvers
+   ch-mprecision
    ch-misc
    ch-references
 
