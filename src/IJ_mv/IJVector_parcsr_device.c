@@ -24,17 +24,22 @@
 template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
 {
-   typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
+#if defined(HYPRE_USING_SYCL)
+   typedef std::tuple<T1, T2> Tuple;
+#else
+   typedef thrust::tuple<T1, T2> Tuple;
+#endif
+
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
    {
 #if defined(HYPRE_USING_SYCL)
-      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
-                              std::get<1>(x) + std::get<1>(y) );
+      using namespace std;
 #else
-      return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
-                                 thrust::get<1>(x) + thrust::get<1>(y) );
+      using namespace thrust;
 #endif
+      return make_tuple( hypre_max(get<0>(x), get<0>(y)),
+                                   get<1>(x) + get<1>(y) );
    }
 };
 
@@ -101,7 +106,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                                      I,                                                          /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                       /* values_output */
                                      std::equal_to<HYPRE_BigInt>(),                              /* binary_pred */
-                                     hypre_IJVectorAssembleFunctor()                             /* binary_op */);
+                                     hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()        /* binary_op */);
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
