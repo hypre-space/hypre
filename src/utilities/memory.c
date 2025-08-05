@@ -196,13 +196,25 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
    {
+#if CUDART_VERSION >= 13000
+      cudaMemLocation loc = {cudaMemLocationTypeDevice, hypre_HandleDevice(hypre_handle())};
+      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, loc, 0,
+                                            hypre_HandleComputeStream(hypre_handle())) );
+#else
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
                                             hypre_HandleComputeStream(hypre_handle())) );
+#endif
    }
    else if (location == hypre_MEMORY_HOST)
    {
+#if CUDART_VERSION >= 13000
+      cudaMemLocation loc = {cudaMemLocationTypeHost, cudaCpuDeviceId};
+      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, loc, 0,
+                                            hypre_HandleComputeStream(hypre_handle())) );
+#else
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
                                             hypre_HandleComputeStream(hypre_handle())) );
+#endif
    }
 
 #elif defined(HYPRE_USING_HIP)
