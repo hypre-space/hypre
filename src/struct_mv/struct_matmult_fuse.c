@@ -4090,6 +4090,8 @@ hypre_StructMatmultCompute_fuse_c( HYPRE_Int            nprod,
    return hypre_error_flag;
 }
 
+#if defined (HYPRE_FUSE_FCC_FC_F)
+
 /*--------------------------------------------------------------------------
  * Compute the fused product for FCC, FC and F terms combined
  *--------------------------------------------------------------------------*/
@@ -4332,6 +4334,7 @@ hypre_StructMatmultCompute_fuse_fcc_fc_f( HYPRE_Int            nprod_fcc,
 
    return hypre_error_flag;
 }
+#endif
 
 #if defined(USE_FUSE_SORT)
 /*--------------------------------------------------------------------------
@@ -4509,12 +4512,14 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    HYPRE_Complex   cprod[8][na];
    hypre_3Cptrs    tptrs[8][na];
    hypre_1Cptr     mptrs[8][na];
+#if defined(HYPRE_FUSE_FCC_FC_F)
    hypre_1Cptr     mmptrs[Mnum_values];
+#endif
    HYPRE_Int       mentries[8][na];
 
    HYPRE_Int       ptype = 0, nf, nc, nt;
-   HYPRE_Int       e, i, k, m, t;
-   HYPRE_Int       combined_fcc_fc_f;
+   HYPRE_Int       i, k, t;
+   HYPRE_Int       combined_fcc_fc_f = 0;
 
    /* Sanity check */
    if (nterms > 3)
@@ -4633,21 +4638,6 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
       nprod[ptype]++;
    } /* loop i < na*/
 
-   /* Build pointers to M data arrays */
-   for (e = 0, m = 0; e < stencil_size; e++)
-   {
-      for (i = 0; i < na; i++)
-      {
-         if (a[i].mentry != e)
-         {
-            continue;
-         }
-
-         mmptrs[m++] = a[i].mptr;
-         i = na;
-      }
-   }
-
 #if defined(USE_FUSE_SORT)
    for (i = 0; i < 8; i++)
    {
@@ -4671,6 +4661,22 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Sum: %d (%d BoxLoops)\n", t, k);
 #endif
 
+#if defined(HYPRE_FUSE_FCC_FC_F)
+   /* Build pointers to M data arrays */
+   for (k = 0, t = 0; k < stencil_size; k++)
+   {
+      for (i = 0; i < na; i++)
+      {
+         if (a[i].mentry != k)
+         {
+            continue;
+         }
+
+         mmptrs[t++] = a[i].mptr;
+         i = na;
+      }
+   }
+
    /* Call fully fused (combined) functions */
    hypre_StructMatmultCompute_fuse_fcc_fc_f(nprod[2], cprod[2], tptrs[2], mptrs[2], mentries[2],
                                             nprod[4], cprod[4], tptrs[4], mptrs[4], mentries[4],
@@ -4681,6 +4687,7 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
                                             Mdbox, Mdstart, Mdstride,
                                             Mnum_values, mmptrs,
                                             &combined_fcc_fc_f);
+#endif
 
    /* Call individual fuse functions */
    if (!combined_fcc_fc_f)
