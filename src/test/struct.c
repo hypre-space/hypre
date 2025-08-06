@@ -208,6 +208,13 @@ main( hypre_int argc,
 #endif
    HYPRE_Int gpu_aware_mpi = 0;
 
+#if defined (HYPRE_USING_UMPIRE)
+   size_t umpire_dev_pool_size    = 4LL * 1024LL * 1024LL * 1024LL; // 4 GiB
+   size_t umpire_uvm_pool_size    = 4LL * 1024LL * 1024LL * 1024LL; // 4 GiB
+   size_t umpire_pinned_pool_size = 4LL * 1024LL * 1024LL * 1024LL; // 4 GiB
+   size_t umpire_host_pool_size   = 4LL * 1024LL * 1024LL * 1024LL; // 4 GiB
+#endif
+
    //HYPRE_Int device_level = -2;
 
    /*-----------------------------------------------------------
@@ -663,6 +670,28 @@ main( hypre_int argc,
          arg_index++;
          gpu_aware_mpi = atoi(argv[arg_index++]);
       }
+#if defined (HYPRE_USING_UMPIRE)
+      else if ( strcmp(argv[arg_index], "-umpire_dev_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_dev_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_uvm_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_uvm_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_pinned_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_pinned_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_host_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_host_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+#endif
       /* end lobpcg */
       else
       {
@@ -685,6 +714,19 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
    HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
+
+#if defined(HYPRE_USING_UMPIRE)
+   /* Setup Umpire pools */
+   HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
+   HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
+   HYPRE_SetUmpireHostPoolName("HYPRE_HOST_POOL_TEST");
+   HYPRE_SetUmpirePinnedPoolName("HYPRE_PINNED_POOL_TEST");
+
+   HYPRE_SetUmpireDevicePoolSize(umpire_dev_pool_size);
+   HYPRE_SetUmpireUMPoolSize(umpire_uvm_pool_size);
+   HYPRE_SetUmpireHostPoolSize(umpire_host_pool_size);
+   HYPRE_SetUmpirePinnedPoolSize(umpire_pinned_pool_size);
+#endif
 
    /* begin lobpcg */
    if ( solver_id == 0 && lobpcgFlag )
@@ -787,6 +829,12 @@ main( hypre_int argc,
       hypre_printf("                        0 - (default) No messaging.\n");
       hypre_printf("                        1 - Display memory usage statistics for each MPI rank.\n");
       hypre_printf("                        2 - Display aggregate memory usage statistics over MPI ranks.\n");
+#if defined (HYPRE_USING_UMPIRE)
+      hypre_printf("  -umpire_dev_pool_size <val>      : device memory pool size (GiB)\n");
+      hypre_printf("  -umpire_uvm_pool_size <val>      : device unified virtual memory pool size (GiB)\n");
+      hypre_printf("  -umpire_pinned_pool_size <val>   : pinned memory pool size (GiB)\n");
+      hypre_printf("  -umpire_host_pool_size <val>     : host memory pool size (GiB)\n");
+#endif
       hypre_printf("\n");
 
       /* begin lobpcg */
