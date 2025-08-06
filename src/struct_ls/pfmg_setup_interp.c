@@ -184,6 +184,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                  HYPRE_Complex       Pconst1,
                                  HYPRE_Complex       Pconst2 )
 {
+#if defined(HYPRE_UNROLL_MAXDEPTH)
+#undef HYPRE_UNROLL_MAXDEPTH
+#endif
 #define HYPRE_UNROLL_MAXDEPTH 7
 #define HYPRE_DECLARE_2VARS(n)                             \
     HYPRE_Complex *Ap##n = NULL;                           \

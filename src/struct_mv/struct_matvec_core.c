@@ -14,7 +14,14 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
+#if !defined(HYPRE_UNROLL_MAXDEPTH) ||\
+     defined(HYPRE_UNROLL_MAXDEPTH) && HYPRE_UNROLL_MAXDEPTH > 27
+#if defined(HYPRE_USING_GPU)
 #define HYPRE_UNROLL_MAXDEPTH 27
+#else
+#define HYPRE_UNROLL_MAXDEPTH 21
+#endif
+#endif
 
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below

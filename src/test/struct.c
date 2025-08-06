@@ -32,15 +32,23 @@
 
 /* end lobpcg */
 
-HYPRE_Int SetStencilBndry(HYPRE_StructMatrix A, HYPRE_StructGrid grid, HYPRE_Int *period );
-HYPRE_Int SetValuesMatrix(HYPRE_StructMatrix A,
-                          HYPRE_StructGrid   grid,
-                          HYPRE_Real         cx,
-                          HYPRE_Real         cy,
-                          HYPRE_Real         cz,
-                          HYPRE_Real         conx,
-                          HYPRE_Real         cony,
-                          HYPRE_Real         conz);
+HYPRE_Int SetStencilOffsets_1dim_3pt(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_2dim_5pt(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_3dim_7pt(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_3dim_27pt(HYPRE_Int ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_1dim_3pt_sym(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_2dim_5pt_sym(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_3dim_7pt_sym(HYPRE_Int  ***offsets_ptr);
+HYPRE_Int SetStencilOffsets_3dim_27pt_sym(HYPRE_Int ***offsets_ptr);
+HYPRE_Int SetStencilBndry(HYPRE_StructMatrix  A,
+                          HYPRE_StructStencil stencil,
+                          HYPRE_StructGrid    grid,
+                          HYPRE_Int          *period);
+HYPRE_Int SetValuesMatrix(HYPRE_StructMatrix A, HYPRE_StructGrid grid,
+                          HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
+                          HYPRE_Real conx, HYPRE_Real cony, HYPRE_Real conz);
+HYPRE_Int SetValuesCrossMatrix(HYPRE_StructMatrix A, HYPRE_StructGrid grid,
+                               HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz);
 HYPRE_Int SetValuesVector(hypre_StructGrid   *grid,
                           hypre_StructVector *zvector,
                           HYPRE_Int          *period,
@@ -123,6 +131,8 @@ main( hypre_int argc,
    HYPRE_Int           constant_coefficient = 0;
    HYPRE_Int          *stencil_entries;
    HYPRE_Int           stencil_size;
+   HYPRE_Int           stencil_size_set;
+   HYPRE_Int           stored_stencil_size;
    HYPRE_Int           stencil_diag_entry;
 
    HYPRE_StructGrid    grid = NULL;
@@ -247,6 +257,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    dim = 3;
+   stencil_size = 7;
 
    skip  = 0;
    sym  = 1;
@@ -377,6 +388,12 @@ main( hypre_int argc,
       {
          arg_index++;
          dim = atoi(argv[arg_index++]);
+      }
+      else if (strcmp(argv[arg_index], "-27pt") == 0)
+      {
+         arg_index++;
+         stencil_size = 27;
+         stencil_size_set = 1;
       }
       else if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
@@ -695,6 +712,7 @@ main( hypre_int argc,
       hypre_printf("  -c <cx> <cy> <cz>   : diffusion coefficients\n");
       hypre_printf("  -convect <x> <y> <z>: convection coefficients\n");
       hypre_printf("  -d <dim>            : problem dimension (2 or 3)\n");
+      hypre_printf("  -27pt               : use 27-points stencil\n");
       hypre_printf("  -fromfile <name>    : prefix name for matrixfiles\n");
       hypre_printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
       hypre_printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
@@ -848,6 +866,33 @@ main( hypre_int argc,
       sym = 0;
    }
 
+   /* Calculate stencil size */
+   if (!stencil_size_set)
+   {
+      switch (dim)
+      {
+         case 3:
+            stencil_size = 7;
+            break;
+
+         case 2:
+            stencil_size = 5;
+            break;
+
+         case 1:
+            stencil_size = 3;
+            break;
+
+         default:
+            if (myid == 0)
+            {
+               hypre_printf("Unsupported dimension: %d\n", dim);
+               hypre_MPI_Abort(comm, 1);
+            }
+      }
+   }
+   stored_stencil_size = (stencil_size - sym) / (1 + sym) + sym;
+
    /*-----------------------------------------------------------
     * Print driver parameters
     *-----------------------------------------------------------*/
@@ -884,6 +929,8 @@ main( hypre_int argc,
          hypre_printf("  (cx, cy, cz)     = (%f, %f, %f)\n", cx, cy, cz);
          hypre_printf("  (conx,cony,conz) = (%f, %f, %f)\n", conx, cony, conz);
          hypre_printf("  (n_pre, n_post)  = (%d, %d)\n", n_pre, n_post);
+         hypre_printf("  stsize           = %d\n", stencil_size);
+         hypre_printf("  stored_stsize    = %d\n", stored_stencil_size);
          hypre_printf("  dim              = %d\n", dim);
          hypre_printf("  skip             = %d\n", skip);
          hypre_printf("  sym              = %d\n", sym);
@@ -924,7 +971,7 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       /*-----------------------------------------------------------
-       * Set up the stencil structure (7 points) when matrix is NOT read from file
+       * Set up the stencil structure when matrix is NOT read from file
        * Set up the grid structure used when NO files are read
        *-----------------------------------------------------------*/
 
@@ -932,62 +979,40 @@ main( hypre_int argc,
       {
          case 1:
             nblocks = bx;
-            if (sym)
+            if (sym && stencil_size == 3)
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 2, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
+               SetStencilOffsets_1dim_3pt_sym(&offsets);
+            }
+            else if (!sym && stencil_size == 3)
+            {
+               SetStencilOffsets_1dim_3pt(&offsets);
             }
             else
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 3, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
-               offsets[2] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-               offsets[2][0] = 1;
+               hypre_printf("Stencil size not implemented!");
+               hypre_MPI_Abort(comm, 1);
             }
+
             /* compute p from P and myid */
             p = myid % P;
             break;
 
          case 2:
             nblocks = bx * by;
-            if (sym)
+            if (sym && stencil_size == 5)
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 3, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[0][1] = 0;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
-               offsets[1][1] = -1;
-               offsets[2] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[2][0] = 0;
-               offsets[2][1] = 0;
+               SetStencilOffsets_2dim_5pt_sym(&offsets);
+            }
+            else if (!sym && stencil_size == 5)
+            {
+               SetStencilOffsets_2dim_5pt(&offsets);
             }
             else
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 5, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[0][1] = 0;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
-               offsets[1][1] = -1;
-               offsets[2] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[2][0] = 0;
-               offsets[2][1] = 0;
-               offsets[3] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[3][0] = 1;
-               offsets[3][1] = 0;
-               offsets[4] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-               offsets[4][0] = 0;
-               offsets[4][1] = 1;
+               hypre_printf("Stencil size not implemented!");
+               hypre_MPI_Abort(comm, 1);
             }
+
             /* compute p,q from P,Q and myid */
             p = myid % P;
             q = (( myid - p) / P) % Q;
@@ -995,58 +1020,28 @@ main( hypre_int argc,
 
          case 3:
             nblocks = bx * by * bz;
-            if (sym)
+            if (sym && stencil_size == 7)
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 4, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[0][1] = 0;
-               offsets[0][2] = 0;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
-               offsets[1][1] = -1;
-               offsets[1][2] = 0;
-               offsets[2] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[2][0] = 0;
-               offsets[2][1] = 0;
-               offsets[2][2] = -1;
-               offsets[3] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[3][0] = 0;
-               offsets[3][1] = 0;
-               offsets[3][2] = 0;
+               SetStencilOffsets_3dim_7pt_sym(&offsets);
+            }
+            else if (!sym && stencil_size == 7)
+            {
+               SetStencilOffsets_3dim_7pt(&offsets);
+            }
+            else if (sym && stencil_size == 27)
+            {
+               SetStencilOffsets_3dim_27pt_sym(&offsets);
+            }
+            else if (!sym && stencil_size == 27)
+            {
+               SetStencilOffsets_3dim_27pt(&offsets);
             }
             else
             {
-               offsets = hypre_CTAlloc(HYPRE_Int*, 7, HYPRE_MEMORY_HOST);
-               offsets[0] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[0][0] = -1;
-               offsets[0][1] = 0;
-               offsets[0][2] = 0;
-               offsets[1] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[1][0] = 0;
-               offsets[1][1] = -1;
-               offsets[1][2] = 0;
-               offsets[2] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[2][0] = 0;
-               offsets[2][1] = 0;
-               offsets[2][2] = -1;
-               offsets[3] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[3][0] = 0;
-               offsets[3][1] = 0;
-               offsets[3][2] = 0;
-               offsets[4] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[4][0] = 1;
-               offsets[4][1] = 0;
-               offsets[4][2] = 0;
-               offsets[5] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[5][0] = 0;
-               offsets[5][1] = 1;
-               offsets[5][2] = 0;
-               offsets[6] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-               offsets[6][0] = 0;
-               offsets[6][1] = 0;
-               offsets[6][2] = 1;
+               hypre_printf("Stencil size not implemented!");
+               hypre_MPI_Abort(comm, 1);
             }
+
             /* compute p,q,r from P,Q,R and myid */
             p = myid % P;
             q = (( myid - p) / P) % Q;
@@ -1065,8 +1060,8 @@ main( hypre_int argc,
        * which is always the case for read_fromfile_param == 0
        *-----------------------------------------------------------*/
 
-      HYPRE_StructStencilCreate(dim, (2 - sym)*dim + 1, &stencil);
-      for (s = 0; s < (2 - sym)*dim + 1; s++)
+      HYPRE_StructStencilCreate(dim, stored_stencil_size, &stencil);
+      for (s = 0; s < stored_stencil_size; s++)
       {
          HYPRE_StructStencilSetEntry(stencil, s, offsets[s]);
       }
@@ -1214,11 +1209,12 @@ main( hypre_int argc,
 
          HYPRE_StructMatrixCreate(comm, grid, stencil, &A);
 
-         if ( solver_id == 3 || solver_id == 4 ||
+         if ( solver_id == 3  || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 )
          {
-            stencil_size  = hypre_StructStencilSize(stencil);
-            stencil_entries = hypre_CTAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
+            stencil_size    = hypre_StructStencilSize(stencil);
+            stencil_entries = hypre_CTAlloc(HYPRE_Int, stencil_size,
+                                            HYPRE_MEMORY_HOST);
             if (solver_id == 3 || solver_id == 13)
             {
                for (i = 0; i < stencil_size; ++i)
@@ -1260,13 +1256,20 @@ main( hypre_int argc,
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
 
-         SetValuesMatrix(A, grid, cx, cy, cz, conx, cony, conz);
+         if (stencil_size != 27)
+         {
+            SetValuesMatrix(A, grid, cx, cy, cz, conx, cony, conz);
+         }
+         else
+         {
+            SetValuesCrossMatrix(A, grid, cx, cy, cz);
+         }
 
          /* Zero out stencils reaching to real boundary.
             But in constant coefficient case, no special stencils! */
          if (constant_coefficient == 0)
          {
-            SetStencilBndry(A, grid, periodic);
+            SetStencilBndry(A, stencil, grid, periodic);
          }
 
          /* Assemble matrix */
@@ -1336,13 +1339,19 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               if (stencil_size != 27)
+               {
+                  SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               }
+               else
+               {
+                  SetValuesCrossMatrix(A, readgrid, cx, cy, cz);
+               }
 
                /* Zero out stencils reaching to real boundary */
-
                if (constant_coefficient == 0)
                {
-                  SetStencilBndry(A, readgrid, readperiodic);
+                  SetStencilBndry(A, stencil, readgrid, readperiodic);
                }
                HYPRE_StructMatrixAssemble(A);
             }
@@ -1374,12 +1383,19 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               if (stencil_size != 27)
+               {
+                  SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               }
+               else
+               {
+                  SetValuesCrossMatrix(A, readgrid, cx, cy, cz);
+               }
 
                /* Zero out stencils reaching to real boundary */
                if (constant_coefficient == 0)
                {
-                  SetStencilBndry(A, readgrid, readperiodic);
+                  SetStencilBndry(A, stencil, readgrid, readperiodic);
                }
                HYPRE_StructMatrixAssemble(A);
             }
@@ -1409,13 +1425,19 @@ main( hypre_int argc,
                 * Fill in the matrix elements
                 *-----------------------------------------------------------*/
 
-               SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               if (stencil_size != 27)
+               {
+                  SetValuesMatrix(A, readgrid, cx, cy, cz, conx, cony, conz);
+               }
+               else
+               {
+                  SetValuesCrossMatrix(A, readgrid, cx, cy, cz);
+               }
 
                /* Zero out stencils reaching to real boundary */
-
                if (constant_coefficient == 0)
                {
-                  SetStencilBndry(A, readgrid, readperiodic);
+                  SetStencilBndry(A, stencil, readgrid, readperiodic);
                }
                HYPRE_StructMatrixAssemble(A);
             }
@@ -1537,7 +1559,7 @@ main( hypre_int argc,
 
          for (i = 0; i < reps; i++)
          {
-            hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
+            hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, b);
          }
          reps = 0;
 
@@ -2951,7 +2973,7 @@ main( hypre_int argc,
       HYPRE_StructVectorDestroy(x);
       HYPRE_StructVectorDestroy(res);
 
-      for (i = 0; i < (2 - sym)*dim + 1; i++)
+      for (i = 0; i < stored_stencil_size; i++)
       {
          hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
       }
@@ -2959,7 +2981,7 @@ main( hypre_int argc,
    }
 
 #if defined(HYPRE_USING_KOKKOS)
-   Kokkos::finalize ();
+   Kokkos::finalize();
 #endif
 
    /* Finalize Hypre */
@@ -2985,6 +3007,243 @@ main( hypre_int argc,
 #endif
 
    return (0);
+}
+
+/* Macro for allocating and setting a 1D stencil offset */
+#define ALLOC_AND_SET_OFFSET1(i, o1)                            \
+   offsets[i] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST); \
+   offsets[i][0] = o1
+
+/* Macro for allocating and setting a 2D stencil offset */
+#define ALLOC_AND_SET_OFFSET2(i, o1, o2)                        \
+   offsets[i] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST); \
+   offsets[i][0] = o1;                                          \
+   offsets[i][1] = o2
+
+/* Macro for allocating and setting a 3D stencil offset */
+#define ALLOC_AND_SET_OFFSET3(i, o1, o2, o3)                    \
+   offsets[i] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST); \
+   offsets[i][0] = o1;                                          \
+   offsets[i][1] = o2;                                          \
+   offsets[i][2] = o3
+
+/*-------------------------------------------------------------------------
+ * Set 1D offsets for 3-pt stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_1dim_3pt( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 3, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET1(0, -1);
+   ALLOC_AND_SET_OFFSET1(1,  0);
+   ALLOC_AND_SET_OFFSET1(2,  1);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 1D offsets for 3-pt symmetric stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_1dim_3pt_sym( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 2, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET1(0, -1);
+   ALLOC_AND_SET_OFFSET1(1,  0);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 2D offsets for 5-pt stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_2dim_5pt( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 5, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET2(0, -1,  0);
+   ALLOC_AND_SET_OFFSET2(1,  0, -1);
+   ALLOC_AND_SET_OFFSET2(2,  0,  0);
+   ALLOC_AND_SET_OFFSET2(3,  1,  0);
+   ALLOC_AND_SET_OFFSET2(4,  0,  1);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 2D offsets for 5-pt symmetric stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_2dim_5pt_sym( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 3, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET2(0, -1,  0);
+   ALLOC_AND_SET_OFFSET2(1,  0, -1);
+   ALLOC_AND_SET_OFFSET2(2,  0,  0);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 3D offsets for 7-pt stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_3dim_7pt( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 7, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET3(0, -1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(1,  0, -1,  0);
+   ALLOC_AND_SET_OFFSET3(2,  0,  0, -1);
+   ALLOC_AND_SET_OFFSET3(3,  0,  0,  0);
+   ALLOC_AND_SET_OFFSET3(4,  1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(5,  0,  1,  0);
+   ALLOC_AND_SET_OFFSET3(6,  0,  0,  1);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 3D offsets for 7-pt symmetric stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_3dim_7pt_sym( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 4, HYPRE_MEMORY_HOST);
+
+   ALLOC_AND_SET_OFFSET3(0, -1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(1,  0, -1,  0);
+   ALLOC_AND_SET_OFFSET3(2,  0,  0, -1);
+   ALLOC_AND_SET_OFFSET3(3,  0,  0,  0);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 3D offsets for 27-pt stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_3dim_27pt( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 27, HYPRE_MEMORY_HOST);
+
+   /* k = -1 */
+   ALLOC_AND_SET_OFFSET3(0,   0,  0, -1);
+   ALLOC_AND_SET_OFFSET3(1,  -1,  0, -1);
+   ALLOC_AND_SET_OFFSET3(2,   1,  0, -1);
+   ALLOC_AND_SET_OFFSET3(3,  -1, -1, -1);
+   ALLOC_AND_SET_OFFSET3(4,   0, -1, -1);
+   ALLOC_AND_SET_OFFSET3(5,   1, -1, -1);
+   ALLOC_AND_SET_OFFSET3(6,  -1,  1, -1);
+   ALLOC_AND_SET_OFFSET3(7,   0,  1, -1);
+   ALLOC_AND_SET_OFFSET3(8,   1,  1, -1);
+
+   /* k = 0 */
+   ALLOC_AND_SET_OFFSET3(9,   0,  0,  0);
+   ALLOC_AND_SET_OFFSET3(10, -1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(11,  1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(12, -1, -1,  0);
+   ALLOC_AND_SET_OFFSET3(13,  0, -1,  0);
+   ALLOC_AND_SET_OFFSET3(14,  1, -1,  0);
+   ALLOC_AND_SET_OFFSET3(15, -1,  1,  0);
+   ALLOC_AND_SET_OFFSET3(16,  0,  1,  0);
+   ALLOC_AND_SET_OFFSET3(17,  1,  1,  0);
+
+   /* k = 1 */
+   ALLOC_AND_SET_OFFSET3(18,  0,  0,  1);
+   ALLOC_AND_SET_OFFSET3(19, -1,  0,  1);
+   ALLOC_AND_SET_OFFSET3(20,  1,  0,  1);
+   ALLOC_AND_SET_OFFSET3(21, -1, -1,  1);
+   ALLOC_AND_SET_OFFSET3(22,  0, -1,  1);
+   ALLOC_AND_SET_OFFSET3(23,  1, -1,  1);
+   ALLOC_AND_SET_OFFSET3(24, -1,  1,  1);
+   ALLOC_AND_SET_OFFSET3(25,  0,  1,  1);
+   ALLOC_AND_SET_OFFSET3(26,  1,  1,  1);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Set 3D offsets for 27-pt symmetric stencil
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetStencilOffsets_3dim_27pt_sym( HYPRE_Int ***offsets_ptr )
+{
+   HYPRE_Int **offsets;
+
+   offsets = hypre_CTAlloc(HYPRE_Int*, 14, HYPRE_MEMORY_HOST);
+
+   /* Diagonal point */
+   ALLOC_AND_SET_OFFSET3(0,   0,  0,  0);
+
+   /* k = 0 */
+   ALLOC_AND_SET_OFFSET3(1,  -1,  0,  0);
+   ALLOC_AND_SET_OFFSET3(2,  -1, -1,  0);
+   ALLOC_AND_SET_OFFSET3(3,   0, -1,  0);
+   ALLOC_AND_SET_OFFSET3(4,   1, -1,  0);
+
+   /* k = -1 */
+   ALLOC_AND_SET_OFFSET3(5,   0,  0, -1);
+   ALLOC_AND_SET_OFFSET3(6,  -1,  0, -1);
+   ALLOC_AND_SET_OFFSET3(7,   1,  0, -1);
+   ALLOC_AND_SET_OFFSET3(8,  -1, -1, -1);
+   ALLOC_AND_SET_OFFSET3(9,   0, -1, -1);
+   ALLOC_AND_SET_OFFSET3(10,  1, -1, -1);
+   ALLOC_AND_SET_OFFSET3(11, -1,  1, -1);
+   ALLOC_AND_SET_OFFSET3(12,  0,  1, -1);
+   ALLOC_AND_SET_OFFSET3(13,  1,  1, -1);
+
+   /* Set output pointer */
+   *offsets_ptr = offsets;
+
+   return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -3553,6 +3812,408 @@ SetValuesMatrix( HYPRE_StructMatrix A,
    return ierr;
 }
 
+/*-------------------------------------------------------------------------
+ * Adds values to matrix based on 27pt (3d) stencil
+ *
+ * Models a diffusion equation with cross-derivative terms:
+ *
+ *  c_x  d²u/dx²  + c_y  d²u/dy²  + c_z  d²u/dz² +
+ *  c_xy d²u/dxdy + c_xz d²u/dxdz + c_yz d²u/dydz = 0
+ *
+ * The cross coefficients are computed as the geometric average
+ * of neighboring directional diffusion coefficients.
+ *-------------------------------------------------------------------------*/
+
+HYPRE_Int
+SetValuesCrossMatrix( HYPRE_StructMatrix A,
+                      HYPRE_StructGrid   grid,
+                      HYPRE_Real         cx,
+                      HYPRE_Real         cy,
+                      HYPRE_Real         cz )
+{
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+#endif
+
+   HYPRE_Int            *stencil_indices;
+   HYPRE_Int             stencil_size;
+   HYPRE_Int             constant_coefficient;
+   hypre_BoxArray       *boxes;
+   hypre_Box            *box;
+   HYPRE_Real           *vvalues = NULL, *vvalues_h = NULL;
+   HYPRE_Real           *cvalues = NULL, *cvalues_h = NULL;
+   HYPRE_Int             i, d, s, bi = 0;
+   hypre_IndexRef        ilower, iupper;
+   HYPRE_Real            center, cxy, cxz, cyz;
+   HYPRE_Int             volume, max_volume, max_size;
+   HYPRE_Int             ndim, sym;
+   HYPRE_Int             ierr = 0;
+
+   boxes =  hypre_StructGridBoxes(grid);
+   ndim  =  hypre_StructGridNDim(grid);
+   sym   =  hypre_StructMatrixSymmetric(A);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+
+   if (ndim != 3)
+   {
+      hypre_printf("%s valid only in 3D\n!", __func__);
+      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
+   }
+
+   bi = 0;
+
+   cxy = hypre_sqrt(cx * cy) / 4.0;
+   cxz = hypre_sqrt(cx * cz) / 4.0;
+   cyz = hypre_sqrt(cy * cz) / 4.0;
+   center = 2.0 * (cx + cy + cz);
+
+   stencil_size = (sym) ? 14 : 27;
+   stencil_indices = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
+   for (s = 0; s < stencil_size; s++)
+   {
+      stencil_indices[s] = s;
+   }
+
+   /* Compute max. volume among boxes, so we allocate values only once */
+   max_volume = 0;
+   hypre_ForBoxI(bi, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, bi);
+      max_volume = hypre_max(max_volume, hypre_BoxVolume(box));
+   }
+   max_size = max_volume * stencil_size;
+
+   /* Allocate value arrays */
+   if (constant_coefficient == 0)
+   {
+      vvalues_h = hypre_TAlloc(HYPRE_Real, max_size, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
+      vvalues   = hypre_TAlloc(HYPRE_Real, max_size, memory_location);
+#endif
+   }
+   else if (constant_coefficient == 1)
+   {
+      cvalues_h = hypre_TAlloc(HYPRE_Real, stencil_size, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
+      cvalues   = hypre_TAlloc(HYPRE_Real, stencil_size, memory_location);
+#endif
+   }
+   else if (constant_coefficient == 2)
+   {
+      cvalues_h = hypre_TAlloc(HYPRE_Real, stencil_size - 1, HYPRE_MEMORY_HOST);
+      vvalues_h = hypre_TAlloc(HYPRE_Real, max_volume, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
+      cvalues   = hypre_TAlloc(HYPRE_Real, stencil_size - 1, memory_location);
+      vvalues   = hypre_TAlloc(HYPRE_Real, max_volume, memory_location);
+#endif
+   }
+
+#if !defined(HYPRE_USING_GPU)
+   vvalues = vvalues_h;
+   cvalues = cvalues_h;
+#endif
+
+   if (sym)
+   {
+      if (constant_coefficient == 0)
+      {
+         hypre_ForBoxI(bi, boxes)
+         {
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+
+            for (d = 0; d < volume; d++)
+            {
+               i = stencil_size * d;
+
+               /* Follow the order given by SetStencilOffsets_3dim_27pt_sym */
+               vvalues_h[i +  0] = center;  /* ( 0,  0,  0) */
+               vvalues_h[i +  1] = -cx;     /* (-1,  0,  0) */
+               vvalues_h[i +  2] = -cxy;    /* (-1, -1,  0) */
+               vvalues_h[i +  3] = -cy;     /* ( 0, -1,  0) */
+               vvalues_h[i +  4] = +cxy;    /* ( 1, -1,  0) */
+               vvalues_h[i +  5] = -cz;     /* ( 0,  0, -1) */
+               vvalues_h[i +  6] = -cxz;    /* (-1,  0, -1) */
+               vvalues_h[i +  7] = +cxz;    /* ( 1,  0, -1) */
+               vvalues_h[i +  8] = 0.0;     /* (-1, -1, -1) */
+               vvalues_h[i +  9] = -cyz;    /* ( 0, -1, -1) */
+               vvalues_h[i + 10] = 0.0;     /* ( 1, -1, -1) */
+               vvalues_h[i + 11] = 0.0;     /* (-1,  1, -1) */
+               vvalues_h[i + 12] = +cyz;    /* ( 0,  1, -1) */
+               vvalues_h[i + 13] = 0.0;     /* ( 1,  1, -1) */
+            }
+
+#if defined(HYPRE_USING_GPU)
+            hypre_TMemcpy(vvalues, vvalues_h, HYPRE_Real, stencil_size * volume,
+                          memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+            ilower = hypre_BoxIMin(box);
+            iupper = hypre_BoxIMax(box);
+            HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
+                                           stencil_indices, vvalues);
+         }
+      }
+      else if (constant_coefficient == 1)
+      {
+         cvalues[0]  = center;  /* ( 0,  0,  0) */
+         cvalues[1]  = -cx;     /* (-1,  0,  0) */
+         cvalues[2]  = -cxy;    /* (-1, -1,  0) */
+         cvalues[3]  = -cy;     /* ( 0, -1,  0) */
+         cvalues[4]  = +cxy;    /* ( 1, -1,  0) */
+         cvalues[5]  = -cz;     /* ( 0,  0, -1) */
+         cvalues[6]  = -cxz;    /* (-1,  0, -1) */
+         cvalues[7]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues[8]  = 0.0;     /* (-1, -1, -1) */
+         cvalues[9]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues[10] = 0.0;     /* ( 1, -1, -1) */
+         cvalues[11] = 0.0;     /* (-1,  1, -1) */
+         cvalues[12] = +cyz;    /* ( 0,  1, -1) */
+         cvalues[13] = 0.0;     /* ( 1,  1, -1) */
+
+#if defined(HYPRE_USING_GPU)
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size,
+                       memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+         if (hypre_BoxArraySize(boxes) > 0)
+         {
+            HYPRE_StructMatrixSetConstantValues(A, stencil_size, stencil_indices,
+                                                cvalues);
+         }
+      }
+      else
+      {
+         hypre_assert(constant_coefficient == 2);
+
+         cvalues[0]  = -cx;     /* (-1,  0,  0) */
+         cvalues[1]  = -cxy;    /* (-1, -1,  0) */
+         cvalues[2]  = -cy;     /* ( 0, -1,  0) */
+         cvalues[3]  = +cxy;    /* ( 1, -1,  0) */
+         cvalues[4]  = -cz;     /* ( 0,  0, -1) */
+         cvalues[5]  = -cxz;    /* (-1,  0, -1) */
+         cvalues[6]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues[7]  = 0.0;     /* (-1, -1, -1) */
+         cvalues[8]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues[9]  = 0.0;     /* ( 1, -1, -1) */
+         cvalues[10] = 0.0;     /* (-1,  1, -1) */
+         cvalues[11] = +cyz;    /* ( 0,  1, -1) */
+         cvalues[12] = 0.0;     /* ( 1,  1, -1) */
+
+#if defined(HYPRE_USING_GPU)
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size - 1,
+                       memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+         if (hypre_BoxArraySize(boxes) > 0)
+         {
+            HYPRE_StructMatrixSetConstantValues(A,
+                                                stencil_size - 1,
+                                                stencil_indices + 1,
+                                                cvalues);
+         }
+
+         hypre_ForBoxI(bi, boxes)
+         {
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+
+            for (i = 0; i < volume; i++)
+            {
+               vvalues_h[i] = center;
+            }
+
+#if defined(HYPRE_USING_GPU)
+            hypre_TMemcpy(vvalues, vvalues_h, HYPRE_Real, volume,
+                          memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+            ilower = hypre_BoxIMin(box);
+            iupper = hypre_BoxIMax(box);
+            HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
+                                           stencil_indices, vvalues);
+         }
+      }
+   }
+   else
+   {
+      if (constant_coefficient == 0)
+      {
+         hypre_ForBoxI(bi, boxes)
+         {
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+
+            for (d = 0; d < volume; d++)
+            {
+               i = stencil_size * d;
+
+               /* Follow the order given by SetStencilOffsets_3dim_27pt */
+               vvalues_h[i +  0] = -cz;     /* ( 0,  0, -1) */
+               vvalues_h[i +  1] = -cxz;    /* (-1,  0, -1) */
+               vvalues_h[i +  2] = +cxz;    /* ( 1,  0, -1) */
+               vvalues_h[i +  3] = 0.0;     /* (-1, -1, -1) */
+               vvalues_h[i +  4] = -cyz;    /* ( 0, -1, -1) */
+               vvalues_h[i +  5] = 0.0;     /* ( 1, -1, -1) */
+               vvalues_h[i +  6] = 0.0;     /* (-1,  1, -1) */
+               vvalues_h[i +  7] = +cyz;    /* ( 0,  1, -1) */
+               vvalues_h[i +  8] = 0.0;     /* ( 1,  1, -1) */
+
+               vvalues_h[i +  9] = center;  /* ( 0,  0,  0) */
+               vvalues_h[i + 10] = -cx;     /* (-1,  0,  0) */
+               vvalues_h[i + 11] = -cx;     /* ( 1,  0,  0) */
+               vvalues_h[i + 12] = -cxy;    /* (-1, -1,  0) */
+               vvalues_h[i + 13] = -cy;     /* ( 0, -1,  0) */
+               vvalues_h[i + 14] = +cxy;    /* ( 1, -1,  0) */
+               vvalues_h[i + 15] = +cxy;    /* (-1,  1,  0) */
+               vvalues_h[i + 16] = -cy;     /* ( 0,  1,  0) */
+               vvalues_h[i + 17] = -cxy;    /* ( 1,  1,  0) */
+
+               vvalues_h[i + 18] = -cz;     /* ( 0,  0,  1) */
+               vvalues_h[i + 19] = +cxz;    /* (-1,  0,  1) */
+               vvalues_h[i + 20] = -cxz;    /* ( 1,  0,  1) */
+               vvalues_h[i + 21] = 0.0;     /* (-1, -1,  1) */
+               vvalues_h[i + 22] = +cyz;    /* ( 0, -1,  1) */
+               vvalues_h[i + 23] = 0.0;     /* ( 1, -1,  1) */
+               vvalues_h[i + 24] = 0.0;     /* (-1,  1,  1) */
+               vvalues_h[i + 25] = -cyz;    /* ( 0,  1,  1) */
+               vvalues_h[i + 26] = 0.0;     /* ( 1,  1,  1) */
+            }
+
+#if defined(HYPRE_USING_GPU)
+            hypre_TMemcpy(vvalues, vvalues_h, HYPRE_Real, stencil_size * volume,
+                          memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+            ilower = hypre_BoxIMin(box);
+            iupper = hypre_BoxIMax(box);
+            HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
+                                           stencil_indices, vvalues);
+         }
+      }
+      else if (constant_coefficient == 1)
+      {
+         cvalues_h[0]  = -cz;     /* ( 0,  0, -1) */
+         cvalues_h[1]  = -cxz;    /* (-1,  0, -1) */
+         cvalues_h[2]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues_h[3]  = 0.0;     /* (-1, -1, -1) */
+         cvalues_h[4]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues_h[5]  = 0.0;     /* ( 1, -1, -1) */
+         cvalues_h[6]  = 0.0;     /* (-1,  1, -1) */
+         cvalues_h[7]  = +cyz;    /* ( 0,  1, -1) */
+         cvalues_h[8]  = 0.0;     /* ( 1,  1, -1) */
+         cvalues_h[9]  = center;  /* ( 0,  0,  0) */
+         cvalues_h[10] = -cx;     /* (-1,  0,  0) */
+         cvalues_h[11] = -cx;     /* ( 1,  0,  0) */
+         cvalues_h[12] = -cxy;    /* (-1, -1,  0) */
+         cvalues_h[13] = -cy;     /* ( 0, -1,  0) */
+         cvalues_h[14] = +cxy;    /* ( 1, -1,  0) */
+         cvalues_h[15] = +cxy;    /* (-1,  1,  0) */
+         cvalues_h[16] = -cy;     /* ( 0,  1,  0) */
+         cvalues_h[17] = -cxy;    /* ( 1,  1,  0) */
+         cvalues_h[18] = -cz;     /* ( 0,  0,  1) */
+         cvalues_h[19] = +cxz;    /* (-1,  0,  1) */
+         cvalues_h[20] = -cxz;    /* ( 1,  0,  1) */
+         cvalues_h[21] = 0.0;     /* (-1, -1,  1) */
+         cvalues_h[22] = +cyz;    /* ( 0, -1,  1) */
+         cvalues_h[23] = 0.0;     /* ( 1, -1,  1) */
+         cvalues_h[24] = 0.0;     /* (-1,  1,  1) */
+         cvalues_h[25] = -cyz;    /* ( 0,  1,  1) */
+         cvalues_h[26] = 0.0;     /* ( 1,  1,  1) */
+
+#if defined(HYPRE_USING_GPU)
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size,
+                       memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+         if (hypre_BoxArraySize(boxes) > 0)
+         {
+            HYPRE_StructMatrixSetConstantValues(A, stencil_size, stencil_indices,
+                                                cvalues);
+         }
+      }
+      else
+      {
+         hypre_assert(constant_coefficient == 2);
+
+         for (s = 0; s < 9; s++) { stencil_indices[s] = s; }
+         for (s = 0; s < 8; s++) { stencil_indices[s + 9] = s + 10; }
+         for (s = 0; s < 9; s++) { stencil_indices[s + 17] = s + 18; }
+
+         cvalues_h[0]  = -cz;     /* ( 0,  0, -1) */
+         cvalues_h[1]  = -cxz;    /* (-1,  0, -1) */
+         cvalues_h[2]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues_h[3]  = 0.0;     /* (-1, -1, -1) */
+         cvalues_h[4]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues_h[5]  = 0.0;     /* ( 1, -1, -1) */
+         cvalues_h[6]  = 0.0;     /* (-1,  1, -1) */
+         cvalues_h[7]  = +cyz;    /* ( 0,  1, -1) */
+         cvalues_h[8]  = 0.0;     /* ( 1,  1, -1) */
+         cvalues_h[9]  = -cx;     /* (-1,  0,  0) */
+         cvalues_h[10] = -cx;     /* ( 1,  0,  0) */
+         cvalues_h[11] = -cxy;    /* (-1, -1,  0) */
+         cvalues_h[12] = -cy;     /* ( 0, -1,  0) */
+         cvalues_h[13] = +cxy;    /* ( 1, -1,  0) */
+         cvalues_h[14] = +cxy;    /* (-1,  1,  0) */
+         cvalues_h[15] = -cy;     /* ( 0,  1,  0) */
+         cvalues_h[16] = -cxy;    /* ( 1,  1,  0) */
+         cvalues_h[17] = -cz;     /* ( 0,  0,  1) */
+         cvalues_h[18] = +cxz;    /* (-1,  0,  1) */
+         cvalues_h[19] = -cxz;    /* ( 1,  0,  1) */
+         cvalues_h[20] = 0.0;     /* (-1, -1,  1) */
+         cvalues_h[21] = +cyz;    /* ( 0, -1,  1) */
+         cvalues_h[22] = 0.0;     /* ( 1, -1,  1) */
+         cvalues_h[23] = 0.0;     /* (-1,  1,  1) */
+         cvalues_h[24] = -cyz;    /* ( 0,  1,  1) */
+         cvalues_h[25] = 0.0;     /* ( 1,  1,  1) */
+
+#if defined(HYPRE_USING_GPU)
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size - 1,
+                       memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+         if (hypre_BoxArraySize(boxes) > 0)
+         {
+            HYPRE_StructMatrixSetConstantValues(A, stencil_size - 1, stencil_indices,
+                                                cvalues_h);
+         }
+
+         /* center is variable */
+         stencil_indices[0] = 9; /* refers to center */
+         hypre_ForBoxI(bi, boxes)
+         {
+            box    = hypre_BoxArrayBox(boxes, bi);
+            volume = hypre_BoxVolume(box);
+
+            for (i = 0; i < volume; i++)
+            {
+               vvalues_h[i] = center;
+            }
+
+#if defined(HYPRE_USING_GPU)
+            hypre_TMemcpy(vvalues, vvalues_h, HYPRE_Real, volume,
+                          memory_location, HYPRE_MEMORY_HOST);
+#endif
+
+            ilower = hypre_BoxIMin(box);
+            iupper = hypre_BoxIMax(box);
+            HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1, stencil_indices,
+                                           vvalues);
+         }
+      }
+   }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_TFree(cvalues, memory_location);
+   hypre_TFree(vvalues, memory_location);
+#endif
+   hypre_TFree(stencil_indices, HYPRE_MEMORY_HOST);
+   hypre_TFree(cvalues_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(vvalues_h, HYPRE_MEMORY_HOST);
+
+   return ierr;
+}
+
 /*********************************************************************************
  * this function sets to zero the stencil entries that are on the boundary
  * Grid, matrix and the period are needed.
@@ -3560,6 +4221,7 @@ SetValuesMatrix( HYPRE_StructMatrix A,
 
 HYPRE_Int
 SetStencilBndry( HYPRE_StructMatrix  A,
+                 HYPRE_StructStencil stencil,
                  HYPRE_StructGrid    grid,
                  HYPRE_Int          *period )
 {
@@ -3574,9 +4236,30 @@ SetStencilBndry( HYPRE_StructMatrix  A,
    hypre_Box            *box;
    hypre_Box            *bbox;
    HYPRE_Real           *values;
-   HYPRE_Int             ndim;
-   HYPRE_Int             stencil_indices[1] = {0};
+   HYPRE_Int             ndim, sym;
    HYPRE_Int             constant_coefficient;
+   HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int             stencil_indices[1] = {0};
+   HYPRE_Int             stencil_sizes_27pt_neg[3] = {9, 9, 9};
+   HYPRE_Int             stencil_indices_27pt_neg[3][9] =
+     {{1, 3, 6, 10, 12, 15, 19, 21, 24},
+      {3, 4, 5, 12, 13, 14, 21, 22, 23},
+      {0, 1, 2, 3, 4, 5, 6, 7, 8}};
+   HYPRE_Int             stencil_sizes_27pt_pos[3] = {9, 9, 9};
+   HYPRE_Int             stencil_indices_27pt_pos[3][9] =
+     {{2, 5, 8, 11, 14, 17, 20, 23, 26},
+      {6, 7, 8, 15, 16, 17, 24, 25, 26},
+      {18, 19, 20, 21, 22, 23, 24, 25, 26}};
+   HYPRE_Int             stencil_sizes_27pt_sym_neg[3] = {5, 6, 9};
+   HYPRE_Int             stencil_indices_27pt_sym_neg[3][9] =
+     {{1, 2, 6, 8, 11, -1, -1, -1, -1},
+      {2, 3, 4, 8, 9, 10, -1, -1, -1},
+      {5, 6, 7, 8, 9, 10, 11, 12, 13}};
+   HYPRE_Int             stencil_sizes_27pt_sym_pos[3] = {4, 3, 0};
+   HYPRE_Int             stencil_indices_27pt_sym_pos[3][4] =
+     {{4, 7, 10, 13},
+      {11, 12, 13, -1},
+      {-1, -1, -1, -1}};
 
    boxes  = hypre_StructGridBoxes(grid);
    bbox   = hypre_StructGridBoundingBox(grid);
@@ -3584,6 +4267,7 @@ SetStencilBndry( HYPRE_StructMatrix  A,
    iend   = hypre_BoxIMax(bbox);
    size   = hypre_StructGridNumBoxes(grid);
    ndim   = hypre_StructGridNDim(grid);
+   sym    =  hypre_StructMatrixSymmetric(A);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if ( constant_coefficient > 0 ) { return 1; }
@@ -3623,9 +4307,26 @@ SetStencilBndry( HYPRE_StructMatrix  A,
             {
                j = iupper[ib][d];
                iupper[ib][d] = istart[d];
-               stencil_indices[0] = d;
-               HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
-                                              1, stencil_indices, values);
+               if (stencil_size != 14 && stencil_size != 27)
+               {
+                  stencil_indices[0] = d;
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 1, stencil_indices, values);
+               }
+               else if (stencil_size == 14 && ndim == 3 && sym)
+               {
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 stencil_sizes_27pt_sym_neg[d],
+                                                 stencil_indices_27pt_sym_neg[d],
+                                                 values);
+               }
+               else if (stencil_size == 27 && ndim == 3 && !sym)
+               {
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 stencil_sizes_27pt_neg[d],
+                                                 stencil_indices_27pt_neg[d],
+                                                 values);
+               }
                iupper[ib][d] = j;
             }
 
@@ -3633,9 +4334,26 @@ SetStencilBndry( HYPRE_StructMatrix  A,
             {
                j = ilower[ib][d];
                ilower[ib][d] = iend[d];
-               stencil_indices[0] = ndim + 1 + d;
-               HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
-                                              1, stencil_indices, values);
+               if (stencil_size != 14 && stencil_size != 27)
+               {
+                  stencil_indices[0] = ndim + 1 + d;
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 1, stencil_indices, values);
+               }
+               else if (stencil_size == 14 && ndim == 3 && sym)
+               {
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 stencil_sizes_27pt_sym_pos[d],
+                                                 stencil_indices_27pt_sym_pos[d],
+                                                 values);
+               }
+               else if (stencil_size == 27 && ndim == 3 && !sym)
+               {
+                  HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                                 stencil_sizes_27pt_pos[d],
+                                                 stencil_indices_27pt_pos[d],
+                                                 values);
+               }
                ilower[ib][d] = j;
             }
 

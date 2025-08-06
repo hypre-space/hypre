@@ -9,7 +9,7 @@
 #include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
-#ifdef HYPRE_UNROLL_MAXDEPTH
+#if defined(HYPRE_UNROLL_MAXDEPTH)
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
 #define HYPRE_UNROLL_MAXDEPTH 9
