@@ -8,20 +8,31 @@ set(HDRS
   HYPRE_distributed_matrix_mv.h
   HYPRE_distributed_matrix_protos.h
   HYPRE_distributed_matrix_types.h
+  internal_protos.h
 )
 
-set(SRCS
+# Add MUP headers
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  list(APPEND HDRS
+    _hypre_distributed_matrix_mup_def.h
+  )
+endif()
+
+# Regular sources
+set(REGULAR_SRCS
   distributed_matrix.c
   distributed_matrix_ISIS.c
-  distributed_matrix_parcsr.c
   distributed_matrix_PETSc.c
+  distributed_matrix_parcsr.c
   HYPRE_distributed_matrix.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
-)
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("distributed_matrix" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

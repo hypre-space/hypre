@@ -592,3 +592,65 @@ function(print_option_status)
 
   message(STATUS "")
 endfunction()
+
+# Macro for setting up mixed precision compilation (must be defined before subdirectories)
+macro(setup_mixed_precision_compilation module_name)
+  set(options "")
+  set(oneValueArgs "")
+  set(multiValueArgs SRCS)
+  cmake_parse_arguments(REGULAR "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(NOT REGULAR_SRCS)
+    message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
+  endif()
+
+  # Create object libraries for each precision
+  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_def  OBJECT ${REGULAR_SRCS})
+
+  # Set precision-specific compile definitions
+  target_compile_definitions(${module_name}_flt PRIVATE MP_BUILD_SINGLE=1)
+  target_compile_definitions(${module_name}_dbl PRIVATE MP_BUILD_DOUBLE=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+  target_compile_definitions(${module_name}_def PRIVATE MP_BUILD_DEFAULT=1)
+
+  # Set include directories and link libraries for all precision variants
+  foreach(precision IN ITEMS flt dbl ldbl def)
+    target_include_directories(${module_name}_${precision} PRIVATE
+      ${CMAKE_SOURCE_DIR}
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_SOURCE_DIR}/utilities
+      ${CMAKE_SOURCE_DIR}/blas
+      ${CMAKE_SOURCE_DIR}/lapack
+      ${CMAKE_SOURCE_DIR}/seq_mv
+      ${CMAKE_SOURCE_DIR}/seq_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_ls
+      ${CMAKE_SOURCE_DIR}/IJ_mv
+      ${CMAKE_SOURCE_DIR}/krylov
+      ${CMAKE_SOURCE_DIR}/struct_mv
+      ${CMAKE_SOURCE_DIR}/sstruct_mv
+      ${CMAKE_SOURCE_DIR}/struct_ls
+      ${CMAKE_SOURCE_DIR}/sstruct_ls
+      ${CMAKE_SOURCE_DIR}/distributed_matrix
+      ${CMAKE_SOURCE_DIR}/matrix_matrix
+      ${CMAKE_SOURCE_DIR}/multivector
+    )
+    # Link to MPI if it's enabled
+    if(HYPRE_ENABLE_MPI)
+      target_link_libraries(${module_name}_${precision} PRIVATE MPI::MPI_C)
+    endif()
+  endforeach()
+
+  # Add the precision object files to the main target
+  target_sources(${PROJECT_NAME} PRIVATE
+    $<TARGET_OBJECTS:${module_name}_flt>
+    $<TARGET_OBJECTS:${module_name}_dbl>
+    $<TARGET_OBJECTS:${module_name}_ldbl>
+    $<TARGET_OBJECTS:${module_name}_def>
+  )
+endmacro()

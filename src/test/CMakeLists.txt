@@ -25,6 +25,15 @@ set(TEST_SRCS
   ij_assembly.c
 )
 
+# Mixed precision test executables (only built when mixed precision is enabled)
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  set(MP_TEST_SRCS
+    test_mp_pcg.c
+    test_mp_pcg_3d.c
+  )
+  add_hypre_executables("${MP_TEST_SRCS}")
+endif()
+
 # Build each executable
 add_hypre_executables("${TEST_SRCS}")
 
