@@ -3606,7 +3606,7 @@ hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_size(comm, &nprocs);
 
    /* take care of the diagonal part (sequential elimination) */
-   hypre_CSRMatrixEliminateRowsColsDiag(A_diag, nrows, rows);
+   hypre_CSRMatrixEliminateRowsCols(A_diag, nrows, rows);
 
    /* Parallel case */
    if (nprocs > 1)

@@ -601,18 +601,18 @@ hypre_ParCSRMatrixCopy_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_
 HYPRE_Int
 hypre_ParCSRMatrixCopy_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_flt( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_dbl( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_long_dbl( hypre_ParCSRMatrix *A );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_flt( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_dbl( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_long_dbl( hypre_ParCSRMatrix *A );
 
 void

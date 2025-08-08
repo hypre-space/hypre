@@ -62,6 +62,7 @@
 #undef hypre_CSRMatrixDestroy
 #undef hypre_CSRMatrixDiagScale
 #undef hypre_CSRMatrixDiagScaleHost
+#undef hypre_CSRMatrixEliminateRowsCols
 #undef hypre_CSRMatrixExtractDiagonal
 #undef hypre_CSRMatrixExtractDiagonalHost
 #undef hypre_CSRMatrixFnorm

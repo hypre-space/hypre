@@ -1445,9 +1445,9 @@ hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixEliminateRowsColsDiag(hypre_CSRMatrix *A,
-                                     HYPRE_Int        nrows,
-                                     HYPRE_Int       *rows)
+hypre_CSRMatrixEliminateRowsCols(hypre_CSRMatrix *A,
+                                 HYPRE_Int        nrows,
+                                 HYPRE_Int       *rows)
 {
    HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int        *A_i  = hypre_CSRMatrixI(A);
