@@ -781,10 +781,28 @@ HYPRE_BoomerAMGGetAdditive( HYPRE_Solver solver, HYPRE_Int *additive )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetCoarsenCutFactor_pre( precision, solver, coarsen_cut_factor );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType( HYPRE_Solver solver, HYPRE_Int *coarsen_type )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGGetCoarsenType_pre( precision, solver, coarsen_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver, HYPRE_Int *type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetConvergeType_pre( precision, solver, type );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -853,10 +871,28 @@ HYPRE_BoomerAMGGetDomainType( HYPRE_Solver solver, HYPRE_Int *domain_type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGGetFCycle( HYPRE_Solver solver, HYPRE_Int *fcycle )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetFCycle_pre( precision, solver, fcycle );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions( HYPRE_Solver solver, HYPRE_Int *filter_functions )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGGetFilterFunctions_pre( precision, solver, filter_functions );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR( HYPRE_Solver solver, void *filter_threshold )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetFilterThresholdR_pre( precision, solver, filter_threshold );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -997,10 +1033,28 @@ HYPRE_BoomerAMGGetPMaxElmts( HYPRE_Solver solver, HYPRE_Int *P_max_elmts )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType( HYPRE_Solver solver, HYPRE_Int *post_interp_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetPostInterpType_pre( precision, solver, post_interp_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *print_level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGGetPrintLevel_pre( precision, solver, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant( HYPRE_Solver solver, HYPRE_Int *redundant )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetRedundant_pre( precision, solver, redundant );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1019,6 +1073,15 @@ HYPRE_BoomerAMGGetSchwarzRlxWeight( HYPRE_Solver solver, void *schwarz_rlx_weigh
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGGetSchwarzRlxWeight_pre( precision, solver, schwarz_rlx_weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold( HYPRE_Solver solver, HYPRE_Int *seq_threshold )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGGetSeqThreshold_pre( precision, solver, seq_threshold );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1141,6 +1204,15 @@ HYPRE_BoomerAMGSetAddLastLvl( HYPRE_Solver solver, HYPRE_Int add_last_lvl )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetAddPMaxElmts_pre( precision, solver, add_P_max_elmts );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxType( HYPRE_Solver solver, HYPRE_Int add_rlx_type )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -1154,6 +1226,15 @@ HYPRE_BoomerAMGSetAddRelaxWt( HYPRE_Solver solver, hypre_long_double add_rlx_wt 
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGSetAddRelaxWt_pre( precision, solver, add_rlx_wt );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor( HYPRE_Solver solver, hypre_long_double add_trunc_factor )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetAddTruncFactor_pre( precision, solver, add_trunc_factor );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1762,6 +1843,15 @@ HYPRE_BoomerAMGSetISType( HYPRE_Solver solver, HYPRE_Int IS_type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine( HYPRE_Solver solver, HYPRE_Int num_refine )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetInterpRefine_pre( precision, solver, num_refine );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGSetInterpType( HYPRE_Solver solver, HYPRE_Int interp_type )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -2018,6 +2108,15 @@ HYPRE_BoomerAMGSetNodalDiag( HYPRE_Solver solver, HYPRE_Int nodal_diag )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGSetNodalDiag_pre( precision, solver, nodal_diag );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels( HYPRE_Solver solver, HYPRE_Int nodal_levels )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetNodalLevels_pre( precision, solver, nodal_levels );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2315,6 +2414,15 @@ HYPRE_BoomerAMGSetSimple( HYPRE_Solver solver, HYPRE_Int addlvl )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGSetSimple_pre( precision, solver, addlvl );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors( HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetSmoothInterpVectors_pre( precision, solver, smooth_interp_vectors );
 }
 
 /*--------------------------------------------------------------------------*/

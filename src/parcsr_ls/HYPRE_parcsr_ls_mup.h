@@ -853,6 +853,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetAdditive( HYPRE_Solver solver, HYPRE_Int *additive );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor_flt( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
+HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor_dbl( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
+HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor_long_dbl( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
+HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType_flt( HYPRE_Solver solver, HYPRE_Int *coarsen_type );
 HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType_dbl( HYPRE_Solver solver, HYPRE_Int *coarsen_type );
@@ -860,6 +869,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType_long_dbl( HYPRE_Solver solver, HYPRE_Int *coarsen_type );
 HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType( HYPRE_Solver solver, HYPRE_Int *coarsen_type );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType_flt( HYPRE_Solver solver, HYPRE_Int *type );
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType_dbl( HYPRE_Solver solver, HYPRE_Int *type );
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType_long_dbl( HYPRE_Solver solver, HYPRE_Int *type );
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver, HYPRE_Int *type );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNnzAP_flt( HYPRE_Solver solver, hypre_float *cum_nnz_AP );
@@ -925,6 +943,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetDomainType( HYPRE_Solver solver, HYPRE_Int *domain_type );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetFCycle_flt( HYPRE_Solver solver, HYPRE_Int *fcycle );
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle_dbl( HYPRE_Solver solver, HYPRE_Int *fcycle );
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle_long_dbl( HYPRE_Solver solver, HYPRE_Int *fcycle );
+HYPRE_Int
+HYPRE_BoomerAMGGetFCycle( HYPRE_Solver solver, HYPRE_Int *fcycle );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions_flt( HYPRE_Solver solver, HYPRE_Int *filter_functions );
 HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions_dbl( HYPRE_Solver solver, HYPRE_Int *filter_functions );
@@ -932,6 +959,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions_long_dbl( HYPRE_Solver solver, HYPRE_Int *filter_functions );
 HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions( HYPRE_Solver solver, HYPRE_Int *filter_functions );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR_flt( HYPRE_Solver solver, hypre_float *filter_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR_dbl( HYPRE_Solver solver, hypre_double *filter_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR_long_dbl( HYPRE_Solver solver, hypre_long_double *filter_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR( HYPRE_Solver solver, void *filter_threshold );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetFinalRelativeResidualNorm_flt( HYPRE_Solver solver, hypre_float *rel_resid_norm );
@@ -1069,6 +1105,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetPMaxElmts( HYPRE_Solver solver, HYPRE_Int *P_max_elmts );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType_flt( HYPRE_Solver solver, HYPRE_Int *post_interp_type );
+HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType_dbl( HYPRE_Solver solver, HYPRE_Int *post_interp_type );
+HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType_long_dbl( HYPRE_Solver solver, HYPRE_Int *post_interp_type );
+HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType( HYPRE_Solver solver, HYPRE_Int *post_interp_type );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *print_level );
 HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *print_level );
@@ -1076,6 +1121,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int *print_level );
 HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *print_level );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant_flt( HYPRE_Solver solver, HYPRE_Int *redundant );
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant_dbl( HYPRE_Solver solver, HYPRE_Int *redundant );
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant_long_dbl( HYPRE_Solver solver, HYPRE_Int *redundant );
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant( HYPRE_Solver solver, HYPRE_Int *redundant );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetResidual_flt( HYPRE_Solver solver, HYPRE_ParVector *residual );
@@ -1094,6 +1148,15 @@ HYPRE_Int
 HYPRE_BoomerAMGGetSchwarzRlxWeight_long_dbl( HYPRE_Solver solver, hypre_long_double *schwarz_rlx_weight );
 HYPRE_Int
 HYPRE_BoomerAMGGetSchwarzRlxWeight( HYPRE_Solver solver, void *schwarz_rlx_weight );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold_flt( HYPRE_Solver solver, HYPRE_Int *seq_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold_dbl( HYPRE_Solver solver, HYPRE_Int *seq_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold_long_dbl( HYPRE_Solver solver, HYPRE_Int *seq_threshold );
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold( HYPRE_Solver solver, HYPRE_Int *seq_threshold );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetSimple_flt( HYPRE_Solver solver, HYPRE_Int *simple );
@@ -1213,6 +1276,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetAddLastLvl( HYPRE_Solver solver, HYPRE_Int add_last_lvl );
 
 HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts_flt( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts_dbl( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts_long_dbl( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
+
+HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxType_flt( HYPRE_Solver solver, HYPRE_Int add_rlx_type );
 HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxType_dbl( HYPRE_Solver solver, HYPRE_Int add_rlx_type );
@@ -1229,6 +1301,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxWt_long_dbl( HYPRE_Solver solver, hypre_long_double add_rlx_wt );
 HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxWt( HYPRE_Solver solver, hypre_long_double add_rlx_wt );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor_flt( HYPRE_Solver solver, hypre_float add_trunc_factor );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor_dbl( HYPRE_Solver solver, hypre_double add_trunc_factor );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor_long_dbl( HYPRE_Solver solver, hypre_long_double add_trunc_factor );
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor( HYPRE_Solver solver, hypre_long_double add_trunc_factor );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetAdditive_flt( HYPRE_Solver solver, HYPRE_Int addlvl );
@@ -1834,6 +1915,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetISType( HYPRE_Solver solver, HYPRE_Int IS_type );
 
 HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine_flt( HYPRE_Solver solver, HYPRE_Int num_refine );
+HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine_dbl( HYPRE_Solver solver, HYPRE_Int num_refine );
+HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine_long_dbl( HYPRE_Solver solver, HYPRE_Int num_refine );
+HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine( HYPRE_Solver solver, HYPRE_Int num_refine );
+
+HYPRE_Int
 HYPRE_BoomerAMGSetInterpType_flt( HYPRE_Solver solver, HYPRE_Int interp_type );
 HYPRE_Int
 HYPRE_BoomerAMGSetInterpType_dbl( HYPRE_Solver solver, HYPRE_Int interp_type );
@@ -2093,6 +2183,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetNodalDiag_long_dbl( HYPRE_Solver solver, HYPRE_Int nodal_diag );
 HYPRE_Int
 HYPRE_BoomerAMGSetNodalDiag( HYPRE_Solver solver, HYPRE_Int nodal_diag );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels_flt( HYPRE_Solver solver, HYPRE_Int nodal_levels );
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels_dbl( HYPRE_Solver solver, HYPRE_Int nodal_levels );
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels_long_dbl( HYPRE_Solver solver, HYPRE_Int nodal_levels );
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels( HYPRE_Solver solver, HYPRE_Int nodal_levels );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetNonGalerkTol_flt( HYPRE_Solver solver, HYPRE_Int nongalerk_num_tol, hypre_float *nongalerk_tol );
@@ -2390,6 +2489,15 @@ HYPRE_Int
 HYPRE_BoomerAMGSetSimple_long_dbl( HYPRE_Solver solver, HYPRE_Int addlvl );
 HYPRE_Int
 HYPRE_BoomerAMGSetSimple( HYPRE_Solver solver, HYPRE_Int addlvl );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors_flt( HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors );
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors_dbl( HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors );
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors_long_dbl( HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors );
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors( HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetSmoothNumLevels_flt( HYPRE_Solver solver, HYPRE_Int smooth_num_levels );
@@ -5889,7 +5997,13 @@ HYPRE_Int
 HYPRE_BoomerAMGGetAdditive_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *additive );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetCoarsenCutFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetCoarsenType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *coarsen_type );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *type );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cum_nnz_AP );
@@ -5913,7 +6027,13 @@ HYPRE_Int
 HYPRE_BoomerAMGGetDomainType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *domain_type );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetFCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *fcycle );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetFilterFunctions_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *filter_functions );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *filter_threshold );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *rel_resid_norm );
@@ -5961,13 +6081,22 @@ HYPRE_Int
 HYPRE_BoomerAMGGetPMaxElmts_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *P_max_elmts );
 
 HYPRE_Int
+HYPRE_BoomerAMGGetPostInterpType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *post_interp_type );
+
+HYPRE_Int
 HYPRE_BoomerAMGGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *print_level );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *redundant );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetResidual_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParVector *residual );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetSchwarzRlxWeight_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *schwarz_rlx_weight );
+
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *seq_threshold );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetSimple_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *simple );
@@ -6009,10 +6138,16 @@ HYPRE_Int
 HYPRE_BoomerAMGSetAddLastLvl_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int add_last_lvl );
 
 HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
+
+HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int add_rlx_type );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetAddRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double add_rlx_wt );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double add_trunc_factor );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetAdditive_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int addlvl );
@@ -6216,6 +6351,9 @@ HYPRE_Int
 HYPRE_BoomerAMGSetISType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int IS_type );
 
 HYPRE_Int
+HYPRE_BoomerAMGSetInterpRefine_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int num_refine );
+
+HYPRE_Int
 HYPRE_BoomerAMGSetInterpType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int interp_type );
 
 HYPRE_Int
@@ -6301,6 +6439,9 @@ HYPRE_BoomerAMGSetNodal_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYP
 
 HYPRE_Int
 HYPRE_BoomerAMGSetNodalDiag_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int nodal_diag );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNodalLevels_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int nodal_levels );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetNonGalerkTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int nongalerk_num_tol, void *nongalerk_tol );
@@ -6400,6 +6541,9 @@ HYPRE_BoomerAMGSetSetupType_pre( HYPRE_Precision precision, HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetSimple_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int addlvl );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSmoothInterpVectors_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int smooth_interp_vectors );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetSmoothNumLevels_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int smooth_num_levels );
