@@ -13,7 +13,7 @@
  * though most of the definitions are not intended for users.  Because of this,
  * a mix of capital and lower-case hypre prefixes are used.
  *****************************************************************************/
- 
+
 #ifndef MULTIPRECISION_UTILITIES_HEADER
 #define MULTIPRECISION_UTILITIES_HEADER
 
@@ -62,12 +62,6 @@
 #ifndef HYPRE_LONG_DOUBLE
 #define HYPRE_LONG_DOUBLE 1
 #endif
-
-#elif defined(MP_BUILD_DEFAULT)
-
-#define hypre_MP_BUILD 1
-#define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, ignore)  /* Avoid prototype conflicts */
-#define HYPRE_FIXEDPRECISION_FUNC(a) a
 
 #else
 
@@ -139,4 +133,3 @@
 #endif
 
 #endif
-
