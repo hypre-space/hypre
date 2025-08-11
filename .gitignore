@@ -78,6 +78,9 @@ src/test/test_mp_pcg
 src/test/test_mp_pcg_3d
 src/test/zboxloop
 src/test/zboxloop.exe
+src/test/test_mp
+src/test/test_mp_pcg
+src/test/test_mp_pcg_3d
 src/examples/ex[0-9]
 src/examples/ex[0-9].exe
 src/examples/ex1[0-8]

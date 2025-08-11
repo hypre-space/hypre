@@ -7,7 +7,7 @@
 
 #include "_hypre_utilities.h"
 
-#ifdef HYPRE_MIXED_PRECISION
+#if defined(HYPRE_MIXED_PRECISION)
 
 /* Global variable for default runtime precision */
 /* No guard is needed since this file is only compiled once */

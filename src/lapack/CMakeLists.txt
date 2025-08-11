@@ -7,7 +7,8 @@ set(HDRS
   _hypre_lapack.h
 )
 
-set(SRCS
+# Regular sources
+set(REGULAR_SRCS
   dbdsqr.c
   dgebd2.c
   dgebrd.c
@@ -83,17 +84,19 @@ set(SRCS
   xerbla.c
 )
 
-# Turn optimization off for this file
+# Turn optimization off for dlamch.c
 if (MSVC)
   set_source_files_properties (dlamch.c PROPERTIES COMPILE_FLAGS /Od)
 else ()
   set_source_files_properties (dlamch.c PROPERTIES COMPILE_FLAGS -O0)
 endif ()
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
-)
+if (HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("lapack" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
