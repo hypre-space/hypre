@@ -4,22 +4,35 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
+  HYPRE_error_f.h
   HYPRE_utilities.h
   _hypre_utilities.h
   _hypre_utilities.hpp
-  HYPRE_error_f.h
   fortran.h
   fortran_matrix.h
+  multiprecision.h
 )
 
-set(SRCS
+# Add MUP headers
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  list(APPEND HDRS
+    HYPRE_utilities_mup.h
+    _hypre_mup_def.h
+    _hypre_utilities_mup.h
+    _hypre_utilities_mup_def.h
+    _hypre_utilities_mup_undef.h
+  )
+endif()
+
+# Regular sources
+set(REGULAR_SRCS
+  F90_HYPRE_error.c
+  F90_HYPRE_general.c
   HYPRE_handle.c
   HYPRE_version.c
   amg_linklist.c
   binsearch.c
   exchange_data.c
-  F90_HYPRE_error.c
-  F90_HYPRE_general.c
   fortran_matrix.c
   ap.c
   log.c
@@ -27,22 +40,16 @@ set(SRCS
   device_markers.c
   device_utils.c
   error.c
-  general.c
-  handle.c
   int_array.c
-  int_array_device.c
   hopscotch_hash.c
   matrix_stats.c
   magma.c
-  memory.c
   memory_tracker.c
   merge_sort.c
   mmio.c
   mpi_comm_f2c.c
-  multiprecision.c
   omp_device.c
   prefix_sum.c
-  printf.c
   qsort.c
   unique.c
   utilities.c
@@ -50,17 +57,38 @@ set(SRCS
   qsplit.c
   random.c
   state.c
-  stl_ops.c
   threading.c
   timer.c
   timing.c
+  general.c
+  handle.c
+  int_array_device.c
+  memory.c
+  omp_device.c
+  nvtx.c
+  stl_ops.c
   caliper_instrumentation.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
+# Mixed precision sources
+set(MUP_SRCS
+  multiprecision.c
+  mup_fixed.c
+  mup_functions.c
+  mup_pre.c
+  printf.c
 )
+
+if (HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("utilities" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  list(APPEND REGULAR_SRCS
+    multiprecision.c
+    printf.c
+  )
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS

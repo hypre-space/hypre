@@ -489,6 +489,7 @@ HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memo
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,
                                  HYPRE_Int new_num_cols, HYPRE_Int new_num_nonzeros );
+HYPRE_Int hypre_CSRMatrixEliminateRowsCols(hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows);
 
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]

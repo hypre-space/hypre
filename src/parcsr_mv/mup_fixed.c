@@ -680,7 +680,7 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int 
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice( hypre_ParCSRMatrix *A )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopyColMapOffdToDevice)( A );
@@ -688,7 +688,7 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice( hypre_ParCSRMatrix *A )
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost( hypre_ParCSRMatrix *A )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopyColMapOffdToHost)( A );
