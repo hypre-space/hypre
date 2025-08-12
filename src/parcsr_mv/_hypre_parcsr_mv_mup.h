@@ -678,6 +678,13 @@ hypre_ParCSRMatrixDropSmallEntriesHost_dbl( hypre_ParCSRMatrix *A, hypre_double 
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesHost_long_dbl( hypre_ParCSRMatrix *A, hypre_long_double tol, HYPRE_Int type );
 
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_flt( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_dbl( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+
 hypre_CSRMatrix *
 hypre_ParCSRMatrixExtractAExt_flt( hypre_ParCSRMatrix *A, HYPRE_Int data, HYPRE_BigInt **pA_ext_row_map );
 hypre_CSRMatrix *
