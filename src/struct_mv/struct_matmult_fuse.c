@@ -4505,16 +4505,17 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
                                  hypre_Index  Mdstride,
                                  hypre_StructMatrix *M )
 {
-   HYPRE_Int       Mnum_values = hypre_StructMatrixNumValues(M);
-   HYPRE_Int       Mdata_size  = hypre_StructMatrixDataSize(M);
+   HYPRE_Int       Mdata_size    = hypre_StructMatrixDataSize(M);
+   HYPRE_Int       Mvdata_offset = hypre_StructMatrixVDataOffset(M);
+#if defined(HYPRE_FUSE_FCC_FC_F)
+   HYPRE_Int       Mnum_values   = hypre_StructMatrixNumValues(M);
+   hypre_1Cptr     mmptrs[Mnum_values];
+#endif
 
    HYPRE_Int       nprod[8] = {0};
    HYPRE_Complex   cprod[8][na];
    hypre_3Cptrs    tptrs[8][na];
    hypre_1Cptr     mptrs[8][na];
-#if defined(HYPRE_FUSE_FCC_FC_F)
-   hypre_1Cptr     mmptrs[Mnum_values];
-#endif
    HYPRE_Int       mentries[8][na];
 
    HYPRE_Int       ptype = 0, nf, nc, nt;
@@ -4694,7 +4695,7 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    {
       /* First, we need to initialize Mptrs to zeroes */
       hypre_Memset((void *) hypre_StructMatrixVData(M), 0.0,
-                   sizeof(HYPRE_Complex) * (Mdata_size - Mnum_values),
+                   sizeof(HYPRE_Complex) * (Mdata_size - Mvdata_offset),
                    hypre_StructMatrixMemoryLocation(M));
 
       hypre_StructMatmultCompute_fuse_fcc(nprod[2], cprod[2], tptrs[2],

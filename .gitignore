@@ -3,11 +3,9 @@
 *.o_flt
 *.o_dbl
 *.o_ldbl
-*.o_def
 *.obj_flt
 *.obj_dbl
 *.obj_ldbl
-*.obj_def
 *.a
 *.so
 *.out.*

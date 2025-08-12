@@ -131,7 +131,7 @@ main( hypre_int argc,
    HYPRE_Int           constant_coefficient = 0;
    HYPRE_Int          *stencil_entries;
    HYPRE_Int           stencil_size;
-   HYPRE_Int           stencil_size_set;
+   HYPRE_Int           stencil_size_set = 0;
    HYPRE_Int           stored_stencil_size;
    HYPRE_Int           stencil_diag_entry;
 
@@ -1037,7 +1037,7 @@ main( hypre_int argc,
             }
             else
             {
-               hypre_printf("Stencil size not implemented!");
+               hypre_printf("Stencil size not implemented!\n");
                hypre_MPI_Abort(comm, 1);
             }
 
@@ -1057,7 +1057,7 @@ main( hypre_int argc,
             }
             else
             {
-               hypre_printf("Stencil size not implemented!");
+               hypre_printf("Stencil size not implemented!\n");
                hypre_MPI_Abort(comm, 1);
             }
 
@@ -1086,7 +1086,7 @@ main( hypre_int argc,
             }
             else
             {
-               hypre_printf("Stencil size not implemented!");
+               hypre_printf("Stencil size not implemented!\n");
                hypre_MPI_Abort(comm, 1);
             }
 

@@ -151,41 +151,30 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 
    hypre_SStructPGrid         *pgrid;
    hypre_StructMatrix         *sA;
-   hypre_StructVector         *sx;
-   hypre_StructVector         *sb;
-   hypre_StructVector         *sy;
+   hypre_StructVector         *sx, *sb, *sy;
    HYPRE_Int                   vi, vj, active;
    void                       *sdata;
-
-   /* Copy b to y */
-   for (vi = 0; vi < nvars; vi++)
-   {
-      sb = hypre_SStructPVectorSVector(pb, vi);
-      sy = hypre_SStructPVectorSVector(py, vi);
-
-      hypre_StructCopy(sb, sy);
-   }
 
    for (vi = 0; vi < nvars; vi++)
    {
       pgrid  = hypre_SStructPMatrixPGrid(pA);
       active = hypre_SStructPGridActive(pgrid, vi);
+      sb     = hypre_SStructPVectorSVector(pb, vi);
+      sy     = hypre_SStructPVectorSVector(py, vi);
 
       if (active)
       {
-         sy = hypre_SStructPVectorSVector(py, vi);
-
          /* diagonal block computation */
          if (smatvec_data[vi][vi] != NULL)
          {
             sdata = smatvec_data[vi][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);
-            hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sy, sy);
+            hypre_StructMatvecCompute(sdata, alpha, sA, sx, beta, sb, sy);
          }
          else
          {
-            hypre_StructScale(beta, sy);
+            hypre_StructVectorAxpy(0.0, sb, beta, sb, sy);
          }
 
          /* off-diagonal block computation */
@@ -199,6 +188,10 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
                hypre_StructMatvecCompute(sdata, alpha, sA, sx, 1.0, sy, sy);
             }
          }
+      }
+      else
+      {
+         hypre_StructVectorAxpy(0.0, sb, beta, sb, sy);
       }
    }
 
@@ -330,13 +323,10 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
    void                     *pdata;
    hypre_SStructPMatrix     *pA;
-   hypre_SStructPVector     *px;
-   hypre_SStructPVector     *pb;
-   hypre_SStructPVector     *py;
+   hypre_SStructPVector     *px, *pb, *py;
 
    hypre_ParCSRMatrix       *parcsrA = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_ParVector          *parx;
-   hypre_ParVector          *pary;
+   hypre_ParVector          *parx, *parb, *pary;
 
    HYPRE_Int                 x_object_type = hypre_SStructVectorObjectType(x);
    HYPRE_Int                 A_object_type = hypre_SStructMatrixObjectType(A);
@@ -393,25 +383,22 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          }
 
          /* dummy functions since there is nothing to restore  */
-
-         hypre_SStructVectorRestore(x, NULL);
+         hypre_SStructVectorRestore(x, parx);
          hypre_SStructVectorRestore(y, pary);
-
-         parx = NULL;
       }
       hypre_GpuProfilingPopRange();
    }
    else if (x_object_type == HYPRE_PARCSR)
    {
       hypre_SStructVectorConvert(x, &parx);
+      hypre_SStructVectorConvert(b, &parb);
       hypre_SStructVectorConvert(y, &pary);
 
-      hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, beta, pary);
+      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, parcsrA, parx, beta, parb, pary);
 
-      hypre_SStructVectorRestore(x, NULL);
+      hypre_SStructVectorRestore(x, parx);
+      hypre_SStructVectorRestore(b, parb);
       hypre_SStructVectorRestore(y, pary);
-
-      parx = NULL;
    }
 
    hypre_GpuProfilingPopRange();

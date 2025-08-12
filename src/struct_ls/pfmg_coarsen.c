@@ -20,7 +20,7 @@
     (A_diag[Ai] < 0.0 ? 1.0 : -1.0)
 
 #define HYPRE_AP_DECLARE(n)     \
-  HYPRE_Complex *Ap##n##_d, *Ap##n##_0, *Ap##n##_1, *Ap##n##_2
+  HYPRE_Complex *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
 
 #define HYPRE_AP_LOAD(n, d)     \
   Ap##n##_##d = hypre_StructMatrixBoxData(A, Ab, entries[d][n])
@@ -34,16 +34,20 @@
 #define HYPRE_CAP_EVAL(n, d)    \
   Ap##n##_##d[0]
 
-#define HYPRE_AP_DECLARE_UP_TO_9 \
-  HYPRE_AP_DECLARE(0);           \
-  HYPRE_AP_DECLARE(1);           \
-  HYPRE_AP_DECLARE(2);           \
-  HYPRE_AP_DECLARE(3);           \
-  HYPRE_AP_DECLARE(4);           \
-  HYPRE_AP_DECLARE(5);           \
-  HYPRE_AP_DECLARE(6);           \
-  HYPRE_AP_DECLARE(7);           \
+#define HYPRE_AP_DECLARE_UP_TO_9  \
+  HYPRE_AP_DECLARE(0);            \
+  HYPRE_AP_DECLARE(1);            \
+  HYPRE_AP_DECLARE(2);            \
+  HYPRE_AP_DECLARE(3);            \
+  HYPRE_AP_DECLARE(4);            \
+  HYPRE_AP_DECLARE(5);            \
+  HYPRE_AP_DECLARE(6);            \
+  HYPRE_AP_DECLARE(7);            \
   HYPRE_AP_DECLARE(8)
+
+#define HYPRE_AP_DECLARE_UP_TO_10 \
+  HYPRE_AP_DECLARE_UP_TO_9;       \
+  HYPRE_AP_DECLARE(9)
 
 #define HYPRE_AP_LOAD_UP_TO_1(d) \
   HYPRE_AP_LOAD(0, d)
@@ -80,6 +84,10 @@
   HYPRE_AP_LOAD_UP_TO_8(d);      \
   HYPRE_AP_LOAD(8, d)
 
+#define HYPRE_AP_LOAD_UP_TO_10(d) \
+  HYPRE_AP_LOAD_UP_TO_9(d);       \
+  HYPRE_AP_LOAD(9, d)
+
 #define HYPRE_CAP_LOAD_UP_TO_1(d) \
   HYPRE_CAP_LOAD(0, d)
 
@@ -114,6 +122,10 @@
 #define HYPRE_CAP_LOAD_UP_TO_9(d) \
   HYPRE_CAP_LOAD_UP_TO_8(d);      \
   HYPRE_CAP_LOAD(8, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_10(d) \
+  HYPRE_CAP_LOAD_UP_TO_9(d);       \
+  HYPRE_CAP_LOAD(9, d)
 
 #define HYPRE_AP_SUM_UP_TO_1(d) \
   HYPRE_AP_EVAL(0, d)
@@ -150,6 +162,10 @@
   HYPRE_AP_SUM_UP_TO_8(d) +     \
   HYPRE_AP_EVAL(8, d)
 
+#define HYPRE_AP_SUM_UP_TO_10(d) \
+  HYPRE_AP_SUM_UP_TO_9(d) +      \
+  HYPRE_AP_EVAL(9, d)
+
 #define HYPRE_CAP_SUM_UP_TO_1(d) \
   HYPRE_CAP_EVAL(0, d)
 
@@ -184,6 +200,10 @@
 #define HYPRE_CAP_SUM_UP_TO_9(d) \
   HYPRE_CAP_SUM_UP_TO_8(d) +     \
   HYPRE_CAP_EVAL(8, d)
+
+#define HYPRE_CAP_SUM_UP_TO_10(d) \
+  HYPRE_CAP_SUM_UP_TO_9(d) +      \
+  HYPRE_CAP_EVAL(9, d)
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -232,7 +252,7 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
 
    HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
    HYPRE_Complex        *A_diag = NULL;
-   HYPRE_AP_DECLARE_UP_TO_9;
+   HYPRE_AP_DECLARE_UP_TO_10;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
@@ -267,7 +287,27 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    /* Compute w_data pointers by summing contributions from A.
       Specialization is used for common stencil sizes to optimize for performance.
       A generic fallback algorithm is used otherwise */
-   if (ndim == 3 && nentries[0] == 9 && nentries[1] == 9 && nentries[2] == 9)
+   if (ndim == 3 && nentries[0] == 10 && nentries[1] == 10 && nentries[2] == 10)
+   {
+      /* Load Ap pointers (10, 10, 10) */
+      HYPRE_AP_LOAD_UP_TO_10(0);
+      HYPRE_AP_LOAD_UP_TO_10(1);
+      HYPRE_AP_LOAD_UP_TO_10(2);
+
+      /* Compute w_data */
+      hypre_BoxLoop2Begin(ndim, loop_size,
+                          A_dbox, start, ustride, Ai,
+                          w_dbox, start, ustride, wi);
+      {
+         HYPRE_CXYZ_DEFINE_SIGN;
+
+         w_data_0[wi] = sign * (HYPRE_AP_SUM_UP_TO_10(0));
+         w_data_1[wi] = sign * (HYPRE_AP_SUM_UP_TO_10(1));
+         w_data_2[wi] = sign * (HYPRE_AP_SUM_UP_TO_10(2));
+      }
+      hypre_BoxLoop2End(Ai, wi);
+   }
+   else if (ndim == 3 && nentries[0] == 9 && nentries[1] == 9 && nentries[2] == 9)
    {
       /* Load Ap pointers (9, 9, 9) */
       HYPRE_AP_LOAD_UP_TO_9(0);
@@ -319,6 +359,20 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
 
             switch (depth)
             {
+               case 10:
+                  HYPRE_AP_LOAD_UP_TO_10(d);
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, start, ustride, Ai,
+                                      w_dbox, start, ustride, wi);
+                  {
+                     HYPRE_CXYZ_DEFINE_SIGN;
+                     if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }
+
+                     w_data_d[wi] += sign * (HYPRE_AP_SUM_UP_TO_10(d));
+                  }
+                  hypre_BoxLoop2End(Ai, wi);
+                  break;
+
                case 9:
                   HYPRE_AP_LOAD_UP_TO_9(d);
                   hypre_BoxLoop2Begin(ndim, loop_size,

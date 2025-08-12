@@ -157,7 +157,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_GpuProfilingPushRange("Residual");
 
-      hypre_StructMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
+      hypre_StructMatvecCompute(matvec_data_l[0],
+                                -1.0, A_l[0], x_l[0],
+                                1.0,  b_l[0], r_l[0]);
 
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
@@ -198,7 +200,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          hypre_GpuProfilingPushRange("Restriction");
 
-         hypre_StructMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0, b_l[1], b_l[1]);
+         hypre_StructMatvecCompute(restrict_data_l[0],
+                                   1.0, RT_l[0], r_l[0],
+                                   0.0, b_l[1],  b_l[1]);
 
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
@@ -249,7 +253,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
                hypre_GpuProfilingPushRange("Residual");
 
-               hypre_StructMatvecCompute(matvec_data_l[l], -1.0, A_l[l], x_l[l], 1.0, b_l[l], r_l[l]);
+               hypre_StructMatvecCompute(matvec_data_l[l],
+                                         -1.0, A_l[l], x_l[l],
+                                         1.0,  b_l[l], r_l[l]);
 
                hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Residual");
@@ -265,7 +271,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_GpuProfilingPushRange("Restriction");
 
-            hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l + 1], b_l[l + 1]);
+            hypre_StructMatvecCompute(restrict_data_l[l],
+                                      1.0, RT_l[l],    r_l[l],
+                                      0.0, b_l[l + 1], b_l[l + 1]);
 
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
@@ -331,7 +339,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_GpuProfilingPushRange("Interpolation");
 
-            hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 1.0, x_l[l], x_l[l]);
+            hypre_StructMatvecCompute(interp_data_l[l],
+                                      1.0, P_l[l], x_l[l + 1],
+                                      1.0, x_l[l], x_l[l]);
 
             hypre_GpuProfilingPopRange();
             hypre_GpuProfilingPopRange();
@@ -380,7 +390,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
 
-         hypre_StructMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 1.0, x_l[0], x_l[0]);
+         hypre_StructMatvecCompute(interp_data_l[0],
+                                   1.0, P_l[0], x_l[1],
+                                   1.0, x_l[0], x_l[0]);
 
          hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();

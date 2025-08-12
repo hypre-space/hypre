@@ -187,7 +187,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 #if defined(HYPRE_UNROLL_MAXDEPTH)
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
-#define HYPRE_UNROLL_MAXDEPTH 7
+#define HYPRE_UNROLL_MAXDEPTH 9
 #define HYPRE_DECLARE_2VARS(n)                             \
     HYPRE_Complex *Ap##n = NULL;                           \
     HYPRE_Int      As##n = 0
@@ -240,6 +240,8 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
    HYPRE_DECLARE_2VARS(4);
    HYPRE_DECLARE_2VARS(5);
    HYPRE_DECLARE_2VARS(6);
+   HYPRE_DECLARE_2VARS(7);
+   HYPRE_DECLARE_2VARS(8);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
@@ -253,7 +255,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
          {
             msi[m++] = i;
          }
-         if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc1)
+         else if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc1)
          {
             lsi[l++] = i;
          }
@@ -452,6 +454,16 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
             switch (vdepth)
             {
+               case 9:
+                  Ap8 = hypre_StructMatrixBoxData(A, i, vsi[8]);
+                  As8 = hypre_IndexD(A_stencil_shape[vsi[8]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 8:
+                  Ap7 = hypre_StructMatrixBoxData(A, i, vsi[7]);
+                  As7 = hypre_IndexD(A_stencil_shape[vsi[7]], cdir);
+                  HYPRE_FALLTHROUGH;
+
                case 7:
                   Ap6 = hypre_StructMatrixBoxData(A, i, vsi[6]);
                   As6 = hypre_IndexD(A_stencil_shape[vsi[6]], cdir);
@@ -489,6 +501,41 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
             switch (vdepth)
             {
+               case 9:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(8);
+                     HYPRE_UPDATE_VALUES(7);
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 8:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(7);
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
                case 7:
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       A_dbox, Astart, Astride, Ai,
