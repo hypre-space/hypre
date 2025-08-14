@@ -15,8 +15,10 @@ years.  For example, the autotools option ``--enable-single`` or the CMake
 option ``-DHYPRE_SINGLE=ON`` will produce a single precision library.
 
 Starting in hypre version 3.0, multiple precision and mixed precision support
-are provided at runtime.  To turn this on, use ``--enable-mixed-precision``
-(autotools) or ``-DHYPRE_ENABLE_MIXED_PRECISION=ON`` (CMake).
+are provided at runtime.  To turn this on, use
+
+- ``--enable-mixed-precision`` (autotools)
+- ``-DHYPRE_ENABLE_MIXED_PRECISION=ON`` (CMake)
 
 With the above, users can compile, link, and run as before without changes to
 their code.  To access runtime precision, there are several levels of support
