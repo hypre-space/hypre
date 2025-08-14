@@ -14,7 +14,7 @@ Features of mixed precision library configuration include:
 * Existing user code runs as before without requiring modification.
 * All compile-time precisions are available at runtime.
 * Precision can be set globally at runtime and requires only minimal changes to existing user code (to manage real-valued data).
-* Precision can be assigned to objects (e.g., matrices) which in turn determines the computational precision of related methods (e.g., Matvec). [Future feature]
+* Precision can be assigned to objects (e.g., matrices) which in turn determines the precision of related methods (e.g., Matvec). [Future feature]
 * Additional mixed precision solvers are available.
 
 ### Basic structure
