@@ -153,6 +153,14 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CSRMatrixEliminateRowsCols( hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixEliminateRowsCols)( A, nrows, rows );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixExtractDiagonal)( A, d, type );

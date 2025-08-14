@@ -601,18 +601,18 @@ hypre_ParCSRMatrixCopy_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_
 HYPRE_Int
 hypre_ParCSRMatrixCopy_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_flt( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_dbl( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_long_dbl( hypre_ParCSRMatrix *A );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_flt( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_dbl( hypre_ParCSRMatrix *A );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_long_dbl( hypre_ParCSRMatrix *A );
 
 void
@@ -677,6 +677,13 @@ HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesHost_dbl( hypre_ParCSRMatrix *A, hypre_double tol, HYPRE_Int type );
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesHost_long_dbl( hypre_ParCSRMatrix *A, hypre_long_double tol, HYPRE_Int type );
+
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_flt( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_dbl( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
 
 hypre_CSRMatrix *
 hypre_ParCSRMatrixExtractAExt_flt( hypre_ParCSRMatrix *A, HYPRE_Int data, HYPRE_BigInt **pA_ext_row_map );

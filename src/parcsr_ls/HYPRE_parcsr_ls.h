@@ -208,6 +208,9 @@ HYPRE_Int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetConvergeType(HYPRE_Solver solver,
                                          HYPRE_Int    type);
 
+HYPRE_Int HYPRE_BoomerAMGGetConvergeType(HYPRE_Solver solver,
+                                         HYPRE_Int   *type);
+
 /**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
@@ -271,6 +274,9 @@ HYPRE_Int HYPRE_BoomerAMGGetMaxLevels ( HYPRE_Solver solver, HYPRE_Int *max_leve
 HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor(HYPRE_Solver solver,
                                              HYPRE_Int    coarsen_cut_factor);
 
+HYPRE_Int HYPRE_BoomerAMGGetCoarsenCutFactor(HYPRE_Solver solver,
+                                             HYPRE_Int   *coarsen_cut_factor);
+
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
  * For 2D Laplace operators, 0.25 is a good value, for 3D Laplace
@@ -299,6 +305,9 @@ HYPRE_Int HYPRE_BoomerAMGGetStrongThresholdR ( HYPRE_Solver solver, HYPRE_Real *
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR(HYPRE_Solver solver,
                                              HYPRE_Real   filter_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGGetFilterThresholdR(HYPRE_Solver solver,
+                                             HYPRE_Real  *filter_threshold);
 
 /**
  * (Optional) Deprecated. This routine now has no effect.
@@ -447,11 +456,18 @@ HYPRE_Int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
                                       HYPRE_Int    nodal_diag);
 
+/**
+ * (Optional) Sets the number of levels on which nodal coarsening should be
+ * performed (nodal coarsening requires that numFunctions be set to something
+ * other than 1). The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNodalLevels(HYPRE_Solver solver,
+                                        HYPRE_Int    nodal_levels);
 
-/*
+/**
  * (Optional) Sets whether to keep same sign in S for nodal > 0
  * The default is 0, i.e., discard those elements.
- */
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign(HYPRE_Solver solver,
                                          HYPRE_Int    keep_same_sign);
 
@@ -485,6 +501,14 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                        HYPRE_Int    interp_type);
+
+/**
+ * (Optional) Sets the number of Jacobi interpolation improvement steps.
+ * Each improvement step smooths the interpolation matrix
+ * and generally reduces the operator complexity. The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpRefine(HYPRE_Solver solver,
+                                         HYPRE_Int    num_refine);
 
 /**
  * (Optional) Defines a truncation factor for the interpolation. The default is 0.
@@ -582,6 +606,14 @@ HYPRE_Int HYPRE_BoomerAMGSetInterpVecVariant (HYPRE_Solver solver,
                                               HYPRE_Int    var );
 
 /**
+ * (Optional) Controls whether to apply smoothing to the interpolation vectors
+ * used in GMG interpolation. Set to 1 to enable smoothing, 0 to disable.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSmoothInterpVectors(HYPRE_Solver solver,
+                                                HYPRE_Int    smooth_interp_vectors);
+
+/**
  * (Optional) Defines the maximal elements per row for Q, the additional
  * columns added to the original interpolation matrix P, to reduce complexity.
  * The default is no truncation.
@@ -620,15 +652,17 @@ HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
 
-HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver, HYPRE_Int *cycle_type );
+HYPRE_Int HYPRE_BoomerAMGGetCycleType(HYPRE_Solver solver, HYPRE_Int *cycle_type);
 
 /**
  * (Optional) Specifies the use of Full multigrid cycle.
  * The default is 0.
  **/
-HYPRE_Int
-HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
-                          HYPRE_Int    fcycle  );
+HYPRE_Int HYPRE_BoomerAMGSetFCycle(HYPRE_Solver solver,
+                                   HYPRE_Int    fcycle );
+
+HYPRE_Int HYPRE_BoomerAMGGetFCycle(HYPRE_Solver solver,
+                                   HYPRE_Int   *fcycle);
 
 /**
  * (Optional) Defines use of an additive V(1,1)-cycle using the
@@ -642,7 +676,7 @@ HYPRE_BoomerAMGSetFCycle( HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
                                      HYPRE_Int    addlvl);
 
-HYPRE_Int HYPRE_BoomerAMGGetAdditive ( HYPRE_Solver solver, HYPRE_Int *additive );
+HYPRE_Int HYPRE_BoomerAMGGetAdditive(HYPRE_Solver solver, HYPRE_Int *additive);
 
 /**
  * (Optional) Defines use of an additive V(1,1)-cycle using the
@@ -708,6 +742,22 @@ HYPRE_Int HYPRE_BoomerAMGSetAddRelaxType(HYPRE_Solver solver,
                                          HYPRE_Int    add_rlx_type);
 
 /**
+ * (Optional) Sets the maximum number of elements per row for additive
+ * interpolation matrices. This controls sparsity of P in additive cycles.
+ * The default is 0 (no limit).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts(HYPRE_Solver solver,
+                                         HYPRE_Int    add_P_max_elmts);
+
+/**
+ * (Optional) Sets the truncation factor for additive interpolation.
+ * Elements in P smaller than (truncation factor * max element in row)
+ * are dropped. The default is 0.0 (no truncation).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
+                                           HYPRE_Real   add_trunc_factor);
+
+/**
  * (Optional) Defines the relaxation weight used for Jacobi within the
  * (mult)additive or simple cycle portion.
  * The default is 1.
@@ -723,12 +773,19 @@ HYPRE_Int HYPRE_BoomerAMGSetAddRelaxWt(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
                                          HYPRE_Int    seq_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGGetSeqThreshold(HYPRE_Solver solver,
+                                         HYPRE_Int   *seq_threshold);
+
 /**
  * (Optional) operates switch for redundancy. Needs to be used with
  * HYPRE_BoomerAMGSetSeqThreshold. Default is 0, i.e. no redundancy.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
                                       HYPRE_Int    redundant);
+
+HYPRE_Int HYPRE_BoomerAMGGetRedundant(HYPRE_Solver solver,
+                                      HYPRE_Int   *redundant);
 
 /**
  * (Optional) Defines the number of sweeps for the fine and coarse grid,
@@ -1542,6 +1599,58 @@ HYPRE_Int HYPRE_BoomerAMGSetSabs (HYPRE_Solver solver,
                                   HYPRE_Int Sabs );
 
 HYPRE_Int HYPRE_BoomerAMGGetMaxRowSum ( HYPRE_Solver solver, HYPRE_Real *max_row_sum );
+
+/**
+ * (Optional) Switches on use of Jacobi interpolation after computing
+ * an original interpolation
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetPostInterpType(HYPRE_Solver solver,
+                                           HYPRE_Int    post_interp_type);
+
+HYPRE_Int HYPRE_BoomerAMGGetPostInterpType(HYPRE_Solver solver,
+                                           HYPRE_Int   *post_interp_type);
+
+/**
+ * (Optional) Sets a truncation threshold for Jacobi interpolation.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetJacobiTruncThreshold(HYPRE_Solver solver,
+                                                 HYPRE_Real   jacobi_trunc_threshold);
+
+HYPRE_Int HYPRE_BoomerAMGGetJacobiTruncThreshold ( HYPRE_Solver solver,
+                                                   HYPRE_Real *jacobi_trunc_threshold );
+
+/**
+ * (Optional) Defines the number of relaxation steps for CR
+ * The default is 2.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
+                                            HYPRE_Int    num_CR_relax_steps);
+
+/**
+ * (Optional) Defines convergence rate for CR
+ * The default is 0.7.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
+                                   HYPRE_Real   CR_rate);
+
+/**
+ * (Optional) Defines strong threshold for CR
+ * The default is 0.0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
+                                       HYPRE_Real   CR_strong_th);
+
+/**
+ * (Optional) Defines whether to use CG
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
+                                    HYPRE_Int    CR_use_CG);
+
+/**
+ * (Optional) Defines the Type of independent set algorithm used for CR
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
+                                   HYPRE_Int    IS_type);
 
 /**@}*/
 
@@ -3603,14 +3712,14 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetCycleType(HYPRE_Solver solver,
                                HYPRE_Int    cycle_type);
 
-/*
+/**
  *
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxType(HYPRE_Solver  solver,
                                    HYPRE_Int    *grid_relax_type);
 
-/*
+/**
  *
  **/
 HYPRE_Int
@@ -5043,54 +5152,10 @@ hypre_GenerateCoordinates(MPI_Comm  comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/**
- * (Optional) Switches on use of Jacobi interpolation after computing
- * an original interpolation
- **/
-HYPRE_Int HYPRE_BoomerAMGSetPostInterpType(HYPRE_Solver solver,
-                                           HYPRE_Int    post_interp_type);
 
-/**
- * (Optional) Sets a truncation threshold for Jacobi interpolation.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetJacobiTruncThreshold(HYPRE_Solver solver,
-                                                 HYPRE_Real   jacobi_trunc_threshold);
 
-HYPRE_Int HYPRE_BoomerAMGGetJacobiTruncThreshold ( HYPRE_Solver solver,
-                                                   HYPRE_Real *jacobi_trunc_threshold );
 
-/**
- * (Optional) Defines the number of relaxation steps for CR
- * The default is 2.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
-                                            HYPRE_Int    num_CR_relax_steps);
 
-/**
- * (Optional) Defines convergence rate for CR
- * The default is 0.7.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
-                                   HYPRE_Real   CR_rate);
-
-/**
- * (Optional) Defines strong threshold for CR
- * The default is 0.0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
-                                       HYPRE_Real   CR_strong_th);
-
-/**
- * (Optional) Defines whether to use CG
- **/
-HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
-                                    HYPRE_Int    CR_use_CG);
-
-/**
- * (Optional) Defines the Type of independent set algorithm used for CR
- **/
-HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
-                                   HYPRE_Int    IS_type);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

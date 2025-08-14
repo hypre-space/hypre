@@ -65,6 +65,7 @@
 #define hypre_CSRMatrixDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixDestroy )
 #define hypre_CSRMatrixDiagScale HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixDiagScale )
 #define hypre_CSRMatrixDiagScaleHost HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixDiagScaleHost )
+#define hypre_CSRMatrixEliminateRowsCols HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixEliminateRowsCols )
 #define hypre_CSRMatrixExtractDiagonal HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixExtractDiagonal )
 #define hypre_CSRMatrixExtractDiagonalHost HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixExtractDiagonalHost )
 #define hypre_CSRMatrixFnorm HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixFnorm )

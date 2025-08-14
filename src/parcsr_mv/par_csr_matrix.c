@@ -3508,7 +3508,7 @@ hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A,
  * Copies col_map_offd to host memory
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -3528,13 +3528,15 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
 #else
    HYPRE_UNUSED_VAR(A);
 #endif
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * Copies col_map_offd to device memory
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
 {
 #if defined(HYPRE_USING_GPU)
@@ -3554,4 +3556,140 @@ hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
 #else
    HYPRE_UNUSED_VAR(A);
 #endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Eliminates specified (local) rows and corresponding columns in the parallel
+ * matrix A by:
+ *
+ *   - Zeroing out all nonzero entries in the specified local rows of A
+ *     (both diagonal and off-diagonal blocks), and setting their diagonal
+ *     entries to 1.0.
+ *   - Zeroing out all entries in the columns corresponding to the specified
+ *     rows, including those that appear as off-diagonal columns in other
+ *     MPI ranks.
+ *
+ * This can be used to impose essential (Dirichlet) boundary conditions
+ * in parallel, where the eliminated rows and columns correspond to fixed
+ * degrees of freedom.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
+                                    HYPRE_Int           nrows,
+                                    HYPRE_Int          *rows)
+{
+   MPI_Comm                comm       = hypre_ParCSRMatrixComm(A);
+   hypre_CSRMatrix        *A_diag     = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix        *A_offd     = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int              *A_offd_i   = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int              *A_offd_j   = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Complex          *A_offd_a   = hypre_CSRMatrixData(A_offd);
+
+   HYPRE_Int               diag_nrows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int               offd_ncols = hypre_CSRMatrixNumCols(A_offd);
+
+   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommPkg    *comm_pkg;
+   HYPRE_Int               num_sends, *int_buf_data;
+   HYPRE_Int               index, start;
+   HYPRE_Int               i, j, k;
+
+   HYPRE_Int              *eliminate_row;
+   HYPRE_Int              *eliminate_col;
+
+   HYPRE_Int               nprocs, ncols;
+   HYPRE_Int              *cols;
+
+   hypre_MPI_Comm_size(comm, &nprocs);
+
+   /* take care of the diagonal part (sequential elimination) */
+   hypre_CSRMatrixEliminateRowsCols(A_diag, nrows, rows);
+
+   /* Parallel case */
+   if (nprocs > 1)
+   {
+      /* make sure A has a communication package */
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      if (!comm_pkg)
+      {
+         hypre_MatvecCommPkgCreate(A);
+         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      }
+
+      /* Eliminate the off-diagonal rows */
+      for (i = 0; i < nrows; i++)
+      {
+         for (j = A_offd_i[rows[i]]; j < A_offd_i[rows[i] + 1]; j++)
+         {
+            A_offd_a[j] = 0.0;
+         }
+      }
+
+      eliminate_row = hypre_CTAlloc(HYPRE_Int, diag_nrows, HYPRE_MEMORY_HOST);
+      eliminate_col = hypre_CTAlloc(HYPRE_Int, offd_ncols, HYPRE_MEMORY_HOST);
+
+      /* which of the local rows are to be eliminated */
+      for (i = 0; i < nrows; i++)
+      {
+         eliminate_row[rows[i]] = 1;
+      }
+
+      /* use a Matvec communication pattern to find (in eliminate_col)
+         which of the local offd columns are to be eliminated */
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                   HYPRE_MEMORY_HOST);
+      for (i = 0, index = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+         {
+            k = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
+            int_buf_data[index++] = eliminate_row[k];
+         }
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, eliminate_col);
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+
+      /* set the array cols */
+      for (i = 0, ncols = 0; i < offd_ncols; i++)
+      {
+         if (eliminate_col[i])
+         {
+            ncols++;
+         }
+      }
+
+      cols = hypre_CTAlloc(HYPRE_Int, ncols, HYPRE_MEMORY_HOST);
+      for (i = 0, ncols = 0; i < offd_ncols; i++)
+      {
+         if (eliminate_col[i])
+         {
+            cols[ncols++] = i;
+         }
+      }
+
+      /* Free memory */
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(eliminate_row, HYPRE_MEMORY_HOST);
+      hypre_TFree(eliminate_col, HYPRE_MEMORY_HOST);
+
+      /* eliminate the off-diagonal columns */
+      for (i = 0; i < hypre_CSRMatrixNumNonzeros(A_offd); i++)
+      {
+         if (hypre_BinarySearch(cols, A_offd_j[i], ncols) != -1)
+         {
+            A_offd_a[i] = 0.0;
+         }
+      }
+
+      /* Free memory */
+      hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
 }

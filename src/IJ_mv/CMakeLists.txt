@@ -12,7 +12,18 @@ set(HDRS
   IJ_vector.h
 )
 
-set(SRCS
+# Add MUP headers when mixed precision is enabled
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  list(APPEND HDRS
+    HYPRE_IJ_mv_mup.h
+    _hypre_IJ_mv_mup.h
+    _hypre_IJ_mv_mup_def.h
+    _hypre_IJ_mv_mup_undef.h
+  )
+endif()
+
+# Regular sources
+set(REGULAR_SRCS
   aux_parcsr_matrix.c
   aux_par_vector.c
   F90_HYPRE_IJMatrix.c
@@ -29,10 +40,19 @@ set(SRCS
   IJVector_parcsr_device.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
+# Mixed precision sources
+set(MUP_SRCS
+  mup_fixed.c
+  mup_functions.c
+  mup_pre.c
 )
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("IJ_mv" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS

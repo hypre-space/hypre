@@ -18,6 +18,7 @@ hypre_CSRMatrixDeleteZeros
 hypre_CSRMatrixDestroy
 hypre_CSRMatrixDiagScale
 hypre_CSRMatrixDiagScaleHost
+hypre_CSRMatrixEliminateRowsCols
 hypre_CSRMatrixExtractDiagonal
 hypre_CSRMatrixExtractDiagonalHost
 hypre_CSRMatrixFnorm

@@ -3,12 +3,19 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-set(PILUT_HDRS
+set(HDRS
   HYPRE_DistributedMatrixPilutSolver_protos.h
   HYPRE_DistributedMatrixPilutSolver_types.h
+  DistributedMatrixPilutSolver.h
+  const.h
+  ilu.h
+  internal_protos.h
+  macros.h
+  struct.h
 )
 
-set(PILUT_SRCS
+# Sources that need multi-precision compilation (FILES from Makefile)
+set(MUP_SRCS
   comm.c
   debug.c
   distributed_qsort.c
@@ -23,10 +30,16 @@ set(PILUT_SRCS
   util.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${PILUT_SRCS}
-          ${PILUT_HDRS}
+# Sources that don't need multi-precision compilation (none for pilut)
+set(REGULAR_SRCS
 )
 
-convert_filenames_to_full_paths(PILUT_HDRS)
-set(HDRS ${HDRS} ${PILUT_HDRS} PARENT_SCOPE)
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("pilut" SRCS "${MUP_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${REGULAR_SRCS} ${HDRS})
+endif()
+
+convert_filenames_to_full_paths(HDRS)
+set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

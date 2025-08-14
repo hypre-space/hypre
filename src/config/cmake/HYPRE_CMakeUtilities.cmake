@@ -500,15 +500,43 @@ endfunction()
 
 # Function to add a distclean target
 function(add_hypre_target_distclean)
+  set(DISTCLEAN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/DistcleanScript.cmake")
+
+  file(WRITE ${DISTCLEAN_SCRIPT} "
+  # Remove everything in the build directory except .git, .gitignore, and this script
+  file(GLOB build_items RELATIVE \"${CMAKE_BINARY_DIR}\" \"${CMAKE_BINARY_DIR}/*\")
+  foreach(item \${build_items})
+    if(NOT item STREQUAL \".git\" AND
+       NOT item STREQUAL \".gitignore\" AND
+       NOT item STREQUAL \"${CMAKE_MATCH_1}\")
+      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${CMAKE_BINARY_DIR}/\${item}\")
+        file(REMOVE_RECURSE \"${CMAKE_BINARY_DIR}/\${item}\")
+      endif()
+    endif()
+  endforeach()
+
+  # Remove build artifacts in the source tree
+  set(patterns
+    \"*.o\" \"*.mod\" \"*~\"
+    \"test/*.out*\" \"test/*.err*\"
+    \"examples/ex[0-9]\" \"examples/ex1[0-9]\"
+    \"test/ij\" \"test/struct\" \"test/structmat\"
+    \"test/sstruct\" \"test/ams_driver\"
+    \"test/struct_migrate\" \"test/ij_assembly\"
+  )
+  foreach(pat \${patterns})
+    file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
+    foreach(m \${matches})
+      file(REMOVE_RECURSE \"${CMAKE_SOURCE_DIR}/\${m}\")
+    endforeach()
+  endforeach()
+
+  # Remove the script itself
+  file(REMOVE \"${DISTCLEAN_SCRIPT}\")
+  ")
+
   add_custom_target(distclean
-    COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.o" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.mod" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*~" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.out*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.err*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/examples -type f -name "ex[0-9]" -name "ex[10-19]" -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -type f -name "ij|struct|sstruct|ams_driver|maxwell_unscalled|struct_migrate|sstruct_fac|ij_assembly" -delete
+    COMMAND ${CMAKE_COMMAND} -P ${DISTCLEAN_SCRIPT}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
@@ -592,3 +620,62 @@ function(print_option_status)
 
   message(STATUS "")
 endfunction()
+
+# Macro for setting up mixed precision compilation (must be defined before subdirectories)
+macro(setup_mixed_precision_compilation module_name)
+  set(options "")
+  set(oneValueArgs "")
+  set(multiValueArgs SRCS)
+  cmake_parse_arguments(REGULAR "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(NOT REGULAR_SRCS)
+    message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
+  endif()
+
+  # Create object libraries for each precision
+  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+
+  # Set precision-specific compile definitions
+  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1)
+  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+
+  # Set include directories and link libraries for all precision variants
+  foreach(precision IN ITEMS flt dbl ldbl)
+    target_include_directories(${module_name}_${precision} PRIVATE
+      ${CMAKE_SOURCE_DIR}
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_SOURCE_DIR}/utilities
+      ${CMAKE_SOURCE_DIR}/blas
+      ${CMAKE_SOURCE_DIR}/lapack
+      ${CMAKE_SOURCE_DIR}/seq_mv
+      ${CMAKE_SOURCE_DIR}/seq_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_ls
+      ${CMAKE_SOURCE_DIR}/IJ_mv
+      ${CMAKE_SOURCE_DIR}/krylov
+      ${CMAKE_SOURCE_DIR}/struct_mv
+      ${CMAKE_SOURCE_DIR}/sstruct_mv
+      ${CMAKE_SOURCE_DIR}/struct_ls
+      ${CMAKE_SOURCE_DIR}/sstruct_ls
+      ${CMAKE_SOURCE_DIR}/distributed_matrix
+      ${CMAKE_SOURCE_DIR}/matrix_matrix
+      ${CMAKE_SOURCE_DIR}/multivector
+    )
+    # Link to MPI if it's enabled
+    if(HYPRE_ENABLE_MPI)
+      target_link_libraries(${module_name}_${precision} PRIVATE MPI::MPI_C)
+    endif()
+  endforeach()
+
+  # Add the precision object files to the main target
+  target_sources(${PROJECT_NAME} PRIVATE
+    $<TARGET_OBJECTS:${module_name}_flt>
+    $<TARGET_OBJECTS:${module_name}_dbl>
+    $<TARGET_OBJECTS:${module_name}_ldbl>
+  )
+endmacro()

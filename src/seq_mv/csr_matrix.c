@@ -1437,6 +1437,57 @@ hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 }
 
 /*--------------------------------------------------------------------------
+ * Eliminates specified rows and columns in a sequential CSR matrix A by:
+ *
+ *  - Setting all entries in the specified columns to zero.
+ *  - Setting all entries in the specified rows to zero,
+ *    except the diagonal which is set to 1.0.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixEliminateRowsCols(hypre_CSRMatrix *A,
+                                 HYPRE_Int        nrows,
+                                 HYPRE_Int       *rows)
+{
+   HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int        *A_i  = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j  = hypre_CSRMatrixJ(A);
+   HYPRE_Real       *A_a  = hypre_CSRMatrixData(A);
+
+   HYPRE_Int         i, j;
+   HYPRE_Int         irow;
+
+   /* Remove the columns */
+   for (i = 0; i < nnz; i++)
+   {
+      irow = hypre_BinarySearch(rows, A_j[i], nrows);
+      if (irow != -1)
+      {
+         A_a[i] = 0.0;
+      }
+   }
+
+   /* Remove the rows and set the diagonal equal to 1 */
+   for (i = 0; i < nrows; i++)
+   {
+      irow = rows[i];
+      for (j = A_i[irow]; j < A_i[irow + 1]; j++)
+      {
+         if (A_j[j] == irow)
+         {
+            A_a[j] = 1.0;
+         }
+         else
+         {
+            A_a[j] = 0.0;
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixPrefetch
  *--------------------------------------------------------------------------*/
 

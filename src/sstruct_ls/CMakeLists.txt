@@ -6,9 +6,21 @@
 set(HDRS
   HYPRE_sstruct_ls.h
   _hypre_sstruct_ls.h
+  sys_pfmg.h
 )
 
-set(SRCS
+# Add MUP headers when mixed precision is enabled
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  list(APPEND HDRS
+    HYPRE_sstruct_ls_mup.h
+    _hypre_sstruct_ls_mup.h
+    _hypre_sstruct_ls_mup_def.h
+    _hypre_sstruct_ls_mup_undef.h
+  )
+endif()
+
+# Regular sources
+set(REGULAR_SRCS
   F90_HYPRE_sstruct_bicgstab.c
   F90_HYPRE_sstruct_gmres.c
   F90_HYPRE_sstruct_flexgmres.c
@@ -29,12 +41,12 @@ set(SRCS
   HYPRE_sstruct_ssamg.c
   krylov.c
   krylov_sstruct.c
-  node_relax.c
   sys_pfmg.c
   sys_pfmg_relax.c
   sys_pfmg_setup.c
   sys_pfmg_setup_interp.c
   sys_pfmg_solve.c
+  node_relax.c
   ssamg.c
   ssamg_csolver.c
   ssamg_interp.c
@@ -46,10 +58,19 @@ set(SRCS
   ssamg_uinterp.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
+# Mixed precision sources
+set(MUP_SRCS
+  mup_fixed.c
+  mup_functions.c
+  mup_pre.c
 )
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("sstruct_ls" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
