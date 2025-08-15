@@ -65,7 +65,6 @@ set(REGULAR_SRCS
   int_array_device.c
   memory.c
   omp_device.c
-  nvtx.c
   stl_ops.c
   caliper_instrumentation.c
 )
