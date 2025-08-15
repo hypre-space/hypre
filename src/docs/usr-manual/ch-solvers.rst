@@ -141,6 +141,7 @@ be found in Chapter :ref:`ch-API`.
 
    solvers-smg-pfmg
    solvers-split
+   solvers-ssamg
    solvers-hybrid
    solvers-boomeramg
    solvers-ams
