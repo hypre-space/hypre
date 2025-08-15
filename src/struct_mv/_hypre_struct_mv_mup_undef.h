@@ -291,7 +291,6 @@
 #undef hypre_StructAssumedPartitionGetProcsFromBox
 #undef hypre_StructAssumedPartitionGetRegionsFromProc
 #undef hypre_StructAssumedPartitionPrint
-#undef hypre_StructAxpy
 #undef hypre_StructCoarsen
 #undef hypre_StructCoarsenAP
 #undef hypre_StructCommunicationFinalize
@@ -344,6 +343,7 @@
 #undef hypre_StructMatmultCompute_fuse_f
 #undef hypre_StructMatmultCompute_fuse_fc
 #undef hypre_StructMatmultCompute_fuse_fcc
+#undef hypre_StructMatmultCompute_fuse_fcc_fc_f
 #undef hypre_StructMatmultCompute_fuse_ff
 #undef hypre_StructMatmultCompute_fuse_ffc
 #undef hypre_StructMatmultCompute_fuse_fff
@@ -421,6 +421,7 @@
 #undef hypre_StructMatvecCompute
 #undef hypre_StructMatvecCompute_core_CC
 #undef hypre_StructMatvecCompute_core_VC
+#undef hypre_StructMatvecCompute_core_VCC
 #undef hypre_StructMatvecCreate
 #undef hypre_StructMatvecDestroy
 #undef hypre_StructMatvecResize
@@ -438,6 +439,7 @@
 #undef hypre_StructStencilRef
 #undef hypre_StructStencilSymmetrize
 #undef hypre_StructVectorAssemble
+#undef hypre_StructVectorAxpy
 #undef hypre_StructVectorClearAllValues
 #undef hypre_StructVectorClearBoundGhostValues
 #undef hypre_StructVectorClearBoxValues

@@ -699,7 +699,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                   data,
                                   data + ne,
                                   edge_bc,
-                                  thrust::identity<HYPRE_Int>(),
+                                  HYPRE_THRUST_IDENTITY(HYPRE_Int),
                                   0.0 );
 #endif
             }
@@ -707,10 +707,12 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 #endif
             {
                for (j = 0; j < ne; j++)
+               {
                   if (edge_bc[j])
                   {
                      data[j] = 0.0;
                   }
+               }
             }
             hypre_AMEDiscrDivFreeComponent(esolver, vi);
          }

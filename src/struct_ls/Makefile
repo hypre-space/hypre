@@ -36,7 +36,6 @@ FILES =\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
- hybrid.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
  HYPRE_struct_flexgmres.c\
@@ -46,6 +45,7 @@ FILES =\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
+ hybrid.c\
  pcg_struct.c\
  pfmg.c\
  pfmg_relax.c\
@@ -59,9 +59,10 @@ FILES =\
  smg_solve.c
 
 CUFILES =\
- cyclic_reduction.c\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
+ cyclic_reduction.c\
+ diagscale.c\
  jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
@@ -93,7 +94,7 @@ COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

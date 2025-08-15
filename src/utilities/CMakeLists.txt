@@ -37,6 +37,8 @@ set(REGULAR_SRCS
   ap.c
   log.c
   complex.c
+  device_markers.c
+  device_utils.c
   error.c
   int_array.c
   hopscotch_hash.c
@@ -46,7 +48,6 @@ set(REGULAR_SRCS
   merge_sort.c
   mmio.c
   mpi_comm_f2c.c
-  nvtx.c
   omp_device.c
   prefix_sum.c
   qsort.c
@@ -59,13 +60,11 @@ set(REGULAR_SRCS
   threading.c
   timer.c
   timing.c
-  device_utils.c
   general.c
   handle.c
   int_array_device.c
   memory.c
   omp_device.c
-  nvtx.c
   stl_ops.c
   caliper_instrumentation.c
 )
@@ -92,13 +91,13 @@ endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    device_markers.c
     device_utils.c
     general.c
     handle.c
     int_array_device.c
     memory.c
     memory_tracker.c
-    nvtx.c
     omp_device.c
     stl_ops.c
     HYPRE_handle.c

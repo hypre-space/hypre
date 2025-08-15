@@ -16,7 +16,6 @@
  * are not guaranteed to stay clear as needed in the constant coefficient case.
  * So, below we clear the values of r_l and e_l before computing the residual
  * and calling interpolation.
- *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -141,26 +140,31 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_StructVectorClearAllValues(r_l[0]);
       }
 
-      /* fine grid pre-relaxation */
+      /* Fine grid pre-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_GpuProfilingPushRange("Relaxation");
+
       hypre_PFMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_PFMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_PFMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_PFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
+
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
-      /* compute fine grid residual (b - Ax) */
+      /* Compute fine grid residual (r = b - Ax) */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_GpuProfilingPushRange("Residual");
-      hypre_StructCopy(b_l[0], r_l[0]);
-      hypre_StructMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+
+      hypre_StructMatvecCompute(matvec_data_l[0],
+                                -1.0, A_l[0], x_l[0],
+                                1.0,  b_l[0], r_l[0]);
+
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
-      /* convergence check */
+      /* Convergence check */
       if (tol > 0.0)
       {
          r_dot_r = hypre_StructInnerProd(r_l[0], r_l[0]);
@@ -178,7 +182,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
          }
 
-         /* always do at least 1 V-cycle */
+         /* Always do at least 1 V-cycle */
          if ((r_dot_r / b_dot_b < eps) && (i > 0))
          {
             if ( ((rel_change) && (e_dot_e / x_dot_x) < eps) || (!rel_change) )
@@ -192,10 +196,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
       if (num_levels > 1)
       {
-         /* restrict fine grid residual */
+         /* Restrict fine grid residual */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          hypre_GpuProfilingPushRange("Restriction");
-         hypre_StructMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0, b_l[1]);
+
+         hypre_StructMatvecCompute(restrict_data_l[0],
+                                   1.0, RT_l[0], r_l[0],
+                                   0.0, b_l[1],  b_l[1]);
+
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
@@ -229,36 +237,44 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             if (active_l[l])
             {
-               /* pre-relaxation */
+               /* Pre-relaxation */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
                hypre_GpuProfilingPushRange("Relaxation");
+
                hypre_PFMGRelaxSetPreRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
                hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
-               /* compute residual (b - Ax) */
+               /* Compute residual (r = b - Ax) */
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
                hypre_GpuProfilingPushRange("Residual");
-               hypre_StructCopy(b_l[l], r_l[l]);
+
                hypre_StructMatvecCompute(matvec_data_l[l],
-                                         -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+                                         -1.0, A_l[l], x_l[l],
+                                         1.0,  b_l[l], r_l[l]);
+
                hypre_GpuProfilingPopRange();
                HYPRE_ANNOTATE_REGION_END("%s", "Residual");
             }
             else
             {
-               /* inactive level, set x=0, so r=(b-Ax)=b */
+               /* Inactive level, set x=0, so r = (b - Ax) = b */
                hypre_StructVectorSetConstantValues(x_l[l], 0.0);
                hypre_StructCopy(b_l[l], r_l[l]);
             }
 
-            /* restrict residual */
+            /* Restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_GpuProfilingPushRange("Restriction");
-            hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l + 1]);
+
+            hypre_StructMatvecCompute(restrict_data_l[l],
+                                      1.0, RT_l[l],    r_l[l],
+                                      0.0, b_l[l + 1], b_l[l + 1]);
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
@@ -319,11 +335,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_StructVectorClearAllValues(e_l[l]);
             }
 
-            /* interpolate error and correct (x = x + Pe_c) */
+            /* Interpolate error and correct (x = x + Pe_c) */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_GpuProfilingPushRange("Interpolation");
-            hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 0.0, e_l[l]);
-            hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+
+            hypre_StructMatvecCompute(interp_data_l[l],
+                                      1.0, P_l[l], x_l[l + 1],
+                                      1.0, x_l[l], x_l[l]);
+
             hypre_GpuProfilingPopRange();
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
@@ -346,7 +365,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
                hypre_GpuProfilingPushRange("Relaxation");
 
-               /* post-relaxation */
+               /* Post-relaxation */
                hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
@@ -367,12 +386,13 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorClearAllValues(e_l[0]);
          }
 
-         /* interpolate error and correct on fine grid (x = x + Pe_c) */
+         /* Interpolate error and correct on fine grid (x = x + Pe_c) */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
 
-         hypre_StructMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0, e_l[0]);
-         hypre_StructAxpy(1.0, e_l[0], x_l[0]);
+         hypre_StructMatvecCompute(interp_data_l[0],
+                                   1.0, P_l[0], x_l[1],
+                                   1.0, x_l[0], x_l[0]);
 
          hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
@@ -390,7 +410,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_GpuProfilingPushRange(marker_name);
       }
 
-      /* part of convergence check */
+      /* Part of convergence check */
       if ((tol > 0.0) && (rel_change))
       {
          if (num_levels > 1)
@@ -405,7 +425,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
       }
 
-      /* fine grid post-relaxation */
+      /* Fine grid post-relaxation */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
       hypre_GpuProfilingPushRange("Relaxation");
       hypre_PFMGRelaxSetPostRelax(relax_data_l[0]);

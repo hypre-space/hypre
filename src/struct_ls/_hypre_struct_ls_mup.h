@@ -1554,6 +1554,13 @@ HYPRE_Int
 hypre_SemiRestrictSetup_long_dbl( void *restrict_vdata, hypre_StructMatrix *R, HYPRE_Int R_stored_as_transpose, hypre_StructVector *r, hypre_StructVector *rc, hypre_Index cindex, hypre_Index findex, hypre_Index stride );
 
 HYPRE_Int
+hypre_StructDiagScale_flt( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+HYPRE_Int
+hypre_StructDiagScale_dbl( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+HYPRE_Int
+hypre_StructDiagScale_long_dbl( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+
+HYPRE_Int
 hypre_StructInterpAssemble_flt( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );
 HYPRE_Int
 hypre_StructInterpAssemble_dbl( hypre_StructMatrix *A, hypre_StructMatrix *P, HYPRE_Int P_stored_as_transpose, HYPRE_Int cdir, hypre_Index index, hypre_Index stride );

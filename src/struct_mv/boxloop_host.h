@@ -26,8 +26,12 @@
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif
+#ifndef OMP0
 #define OMP0 Pragma(omp parallel for HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#endif
+#ifndef OMP1
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#endif
 #else /* #if defined(HYPRE_USING_OPENMP) */
 #define OMP0
 #define OMP1
@@ -392,4 +396,3 @@
 #endif
 
 #endif /* #ifndef HYPRE_BOXLOOP_HOST_HEADER */
-

@@ -39,7 +39,7 @@
 #cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
 
 /* Use Thrust par_nosync policy */
-#cmakedefine HYPRE_ENABLE_THRUST_ASYNC 1
+#cmakedefine HYPRE_ENABLE_THRUST_NOSYNC 1
 
 /* Use GPU-aware MPI */
 #cmakedefine HYPRE_USING_GPU_AWARE_MPI 1

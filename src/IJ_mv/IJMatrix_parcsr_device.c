@@ -297,30 +297,26 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor
 {
-   template<typename Tuple1, typename Tuple2>
-   auto operator()(const Tuple1& x, const Tuple2& y ) const
-   {
-      return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
-                     std::get<1>(x) + std::get<1>(y) );
-   }
-};
+#if defined(HYPRE_USING_SYCL)
+   typedef std::tuple<T1, T2> Tuple;
 #else
-template<typename T1, typename T2>
-struct hypre_IJMatrixAssembleFunctor : public
-   thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-{
    typedef thrust::tuple<T1, T2> Tuple;
+#endif
 
-   __device__ Tuple operator()(const Tuple& x, const Tuple& y )
+   __device__ Tuple operator()(const Tuple& x, const Tuple& y ) const
    {
-      return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
-                                 thrust::get<1>(x) + thrust::get<1>(y) );
+#if defined(HYPRE_USING_SYCL)
+      using namespace std;
+#else
+      using namespace thrust;
+#endif
+      return make_tuple( hypre_max(get<0>(x), get<0>(y)),
+                                 get<1>(x) + get<1>(y) );
    }
 };
-#endif
 
 /* This helper routine is used in hypre_IJMatrixAssembleParCSRDevice on on-proc entries:
  * 1. sort (X0, A0) with key (I0, J0)
@@ -392,7 +388,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
                                      oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
                                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
-                                     hypre_IJMatrixAssembleFunctor()                               /* binary_op */);
+                                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
 
    *Nptr = std::get<0>(new_end.first.base()) - I;
 #else
@@ -406,7 +402,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
-   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X, thrust::identity<char>(), 0.0);
+   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X, HYPRE_THRUST_IDENTITY(char), 0.0);
 
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
@@ -434,38 +430,30 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor2
 {
-   template<typename Tuple1, typename Tuple2>
-   __device__ auto operator()(const Tuple1& x, const Tuple2& y) const
-   {
-      const char          tx = std::get<0>(x);
-      const char          ty = std::get<0>(y);
-      const HYPRE_Complex vx = std::get<1>(x);
-      const HYPRE_Complex vy = std::get<1>(y);
-      const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
-      return Tuple1(char(0), vz);
-   }
-};
+#if defined(HYPRE_USING_SYCL)
+   typedef std::tuple<T1, T2> Tuple;
 #else
-template<typename T1, typename T2>
-struct hypre_IJMatrixAssembleFunctor2 : public
-   thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-{
    typedef thrust::tuple<T1, T2> Tuple;
+#endif
 
-   __device__ Tuple operator()(const Tuple& x, const Tuple& y)
+   __device__ Tuple operator()(const Tuple& x, const Tuple& y) const
    {
-      const char          tx = thrust::get<0>(x);
-      const char          ty = thrust::get<0>(y);
-      const HYPRE_Complex vx = thrust::get<1>(x);
-      const HYPRE_Complex vy = thrust::get<1>(y);
+#if defined(HYPRE_USING_SYCL)
+      using namespace std;
+#else
+      using namespace thrust;
+#endif
+      const char          tx = get<0>(x);
+      const char          ty = get<0>(y);
+      const HYPRE_Complex vx = get<1>(x);
+      const HYPRE_Complex vy = get<1>(y);
       const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
-      return thrust::make_tuple(0, vz);
+      return make_tuple(0, vz);
    }
 };
-#endif
 
 /*--------------------------------------------------------------------------
  * This helper routine is for combining new entries with existing CSR.
@@ -502,7 +490,7 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int      *Nptr,
                                      oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
                                      std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
-                                     hypre_IJMatrixAssembleFunctor2()                        /* binary_op */);
+                                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
 
    HYPRE_Int N = std::get<0>(new_end.first.base()) - I;
 #else
@@ -601,7 +589,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
-   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X0, thrust::identity<char>(), 0.0);
+   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X0, HYPRE_THRUST_IDENTITY(char), 0.0);
 
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
@@ -632,7 +620,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
                                       thrust::make_zip_iterator(thrust::make_tuple(I + Nt, J + Nt, A + Nt)),
                                       A,
                                       thrust::make_zip_iterator(thrust::make_tuple(I0, J0, A0)),
-                                      thrust::identity<HYPRE_Complex>() );
+                                      HYPRE_THRUST_IDENTITY(HYPRE_Complex) );
 
    *N1 = thrust::get<0>(new_end2.get_iterator_tuple()) - I0;
 #endif
@@ -721,7 +709,7 @@ hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
                             is_on_proc,                                                         /* stencil */
                             thrust::make_zip_iterator(thrust::make_tuple(off_proc_i,      off_proc_j,      off_proc_data,
                                                                          off_proc_sora)),       /* result */
-                            thrust::not1(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)) );
 
          hypre_assert(thrust::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
 
@@ -733,7 +721,7 @@ hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
                             thrust::make_zip_iterator(thrust::make_tuple(stack_i + nelms, stack_j + nelms, stack_data + nelms,
                                                                          stack_sora + nelms)),  /* last */
                             is_on_proc,                                                         /* stencil */
-                            thrust::not1(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)) );
 
          hypre_assert(thrust::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
 #endif

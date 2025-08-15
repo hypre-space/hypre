@@ -320,19 +320,19 @@ hypre_SMGSetup( void               *smg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(PT_l[l], data);
+      hypre_StructMatrixInitializeData(PT_l[l], 1, data);
       data += hypre_StructMatrixDataSize(PT_l[l]);
 
 #if 0
       /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
-         hypre_StructMatrixInitializeData(R_l[l], data);
+         hypre_StructMatrixInitializeData(R_l[l], 1, data);
          data += hypre_StructMatrixDataSize(R_l[l]);
       }
 #endif
 
-      hypre_StructMatrixInitializeData(A_l[l + 1], data);
+      hypre_StructMatrixInitializeData(A_l[l + 1], 1, data);
       data += hypre_StructMatrixDataSize(A_l[l + 1]);
 
       hypre_StructVectorInitializeData(b_l[l + 1], data);

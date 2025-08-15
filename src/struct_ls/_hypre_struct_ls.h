@@ -73,6 +73,9 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
+/* diagscale.c */
+HYPRE_Int hypre_StructDiagScale( hypre_StructMatrix *A, hypre_StructVector *y, hypre_StructVector *x );
+
 /* jacobi.c */
 void *hypre_StructJacobiCreate ( MPI_Comm comm );
 HYPRE_Int hypre_StructJacobiDestroy ( void *jacobi_vdata );

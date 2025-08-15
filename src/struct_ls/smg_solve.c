@@ -263,7 +263,8 @@ hypre_SMGSolve( void               *smg_vdata,
          {
             /* interpolate error and correct (x = x + Pe_c) */
             hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l + 1], e_l[l]);
-            hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+            hypre_StructVectorAxpy(1.0, e_l[l], 1.0, x_l[l], x_l[l]);
+
 #if DEBUG
             if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {

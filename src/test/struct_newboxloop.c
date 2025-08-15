@@ -839,7 +839,7 @@ main( hypre_int argc,
 
       for ( rep = 0; rep < reps; ++rep )
       {
-         hypre_StructAxpy(2.0, b, x);
+         hypre_StructVectorAxpy(2.0, b, 1.0, x, x);
       }
       //gettimeofday(&tstop,NULL);
       hypre_EndTiming(time_index);
@@ -873,7 +873,7 @@ main( hypre_int argc,
 
       for ( rep = 0; rep < reps; ++rep )
       {
-         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
       }
       //gettimeofday(&tstop,NULL);
       hypre_EndTiming(time_index);
@@ -986,7 +986,7 @@ main( hypre_int argc,
 
       for (i = 0; i < imax; i++)
       {
-         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
       }
       /* this counts mult-adds */
       hypre_IncFLOPCount(7 * N * imax);

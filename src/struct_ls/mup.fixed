@@ -223,6 +223,7 @@ hypre_SemiRestrict
 hypre_SemiRestrictCreate
 hypre_SemiRestrictDestroy
 hypre_SemiRestrictSetup
+hypre_StructDiagScale
 hypre_StructInterpAssemble
 hypre_StructJacobiCreate
 hypre_StructJacobiDestroy
