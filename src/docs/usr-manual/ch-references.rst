@@ -167,6 +167,9 @@
    partial differential equations with highly discontinuous and anisotropic
    coefficients.  *SIAM J. Sci. Comput.*, 20(1):228--242, 1998.
 
+.. [MaFaYa23] V. A. P. Magri, R. Falgout and U. M. Yang. A new semistructured
+   algebraic multigrid method. *SIAM J. Sci. Comput.*, 45(3):S439-S460, 2023.
+
 .. [Stue1999] K. Stüben.  Algebraic multigrid (AMG): an introduction with
    applications.  In U. Trottenberg, C. Oosterlee, and A. Schüller, editors,
    *Multigrid*. Academic Press, 2001.
