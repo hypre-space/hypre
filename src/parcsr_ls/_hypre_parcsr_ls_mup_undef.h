@@ -1464,7 +1464,6 @@
 #undef hypre_MGRCoarseParms
 #undef hypre_MGRCoarsen
 #undef hypre_MGRColLumpedRestrict
-#undef hypre_MGRComputeAlgebraicFixedStress
 #undef hypre_MGRCreate
 #undef hypre_MGRCreateFrelaxVcycleData
 #undef hypre_MGRCreateGSElimData
@@ -1475,10 +1474,7 @@
 #undef hypre_MGRDestroyGSElimData
 #undef hypre_MGRFrelaxVcycle
 #undef hypre_MGRGetCoarseGridConvergenceFactor
-#undef hypre_MGRGetCoarseGridMatrix
 #undef hypre_MGRGetCoarseGridName
-#undef hypre_MGRGetCoarseGridRHS
-#undef hypre_MGRGetCoarseGridSolution
 #undef hypre_MGRGetFRelaxName
 #undef hypre_MGRGetFinalRelativeResidualNorm
 #undef hypre_MGRGetGlobalRelaxName
@@ -1582,7 +1578,6 @@
 #undef hypre_ParCSRMatrixFillSmooth
 #undef hypre_ParCSRMatrixFixZeroRows
 #undef hypre_ParCSRMatrixFixZeroRowsHost
-#undef hypre_ParCSRMatrixLeftScale
 #undef hypre_ParCSRMatrixNormFro
 #undef hypre_ParCSRMatrixResNormFro
 #undef hypre_ParCSRMatrixScaledNorm

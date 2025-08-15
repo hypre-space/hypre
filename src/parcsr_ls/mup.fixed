@@ -794,7 +794,6 @@ hypre_MGRBuildRestrict
 hypre_MGRCoarseParms
 hypre_MGRCoarsen
 hypre_MGRColLumpedRestrict
-hypre_MGRComputeAlgebraicFixedStress
 hypre_MGRCreate
 hypre_MGRCreateFrelaxVcycleData
 hypre_MGRCreateGSElimData
@@ -805,10 +804,7 @@ hypre_MGRDestroyFrelaxVcycleData
 hypre_MGRDestroyGSElimData
 hypre_MGRFrelaxVcycle
 hypre_MGRGetCoarseGridConvergenceFactor
-hypre_MGRGetCoarseGridMatrix
 hypre_MGRGetCoarseGridName
-hypre_MGRGetCoarseGridRHS
-hypre_MGRGetCoarseGridSolution
 hypre_MGRGetFRelaxName
 hypre_MGRGetFinalRelativeResidualNorm
 hypre_MGRGetGlobalRelaxName
@@ -912,7 +908,6 @@ hypre_ParCSRMatrixExtractBlockDiagHost
 hypre_ParCSRMatrixFillSmooth
 hypre_ParCSRMatrixFixZeroRows
 hypre_ParCSRMatrixFixZeroRowsHost
-hypre_ParCSRMatrixLeftScale
 hypre_ParCSRMatrixNormFro
 hypre_ParCSRMatrixResNormFro
 hypre_ParCSRMatrixScaledNorm

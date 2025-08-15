@@ -7,11 +7,7 @@
 
 #include "_hypre_parcsr_mv.h"
 
-void hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix * P,
-                               hypre_ParCSRMatrix * C, HYPRE_Int * CF_marker );
-void hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix * P, HYPRE_Int * CF_marker );
-
-void hypre_ParMatmul_RowSizes_Marked(
+HYPRE_Int hypre_ParMatmul_RowSizes_Marked(
    HYPRE_Int ** C_diag_i, HYPRE_Int ** C_offd_i, HYPRE_Int ** B_marker,
    HYPRE_Int * A_diag_i, HYPRE_Int * A_diag_j,
    HYPRE_Int * A_offd_i, HYPRE_Int * A_offd_j,
@@ -221,6 +217,7 @@ void hypre_ParMatmul_RowSizes_Marked(
    *C_offd_size = jj_count_offd;
 
    /* End of First Pass */
+   return hypre_error_flag;
 }
 
 hypre_ParCSRMatrix * hypre_ParMatmul_FC(
@@ -789,7 +786,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
 
 }
 
-void hypre_ParMatScaleDiagInv_F(
+HYPRE_Int hypre_ParMatScaleDiagInv_F(
    hypre_ParCSRMatrix * C,
    hypre_ParCSRMatrix * A,
    HYPRE_Complex weight,
@@ -875,6 +872,7 @@ void hypre_ParMatScaleDiagInv_F(
       }
    }
 
+   return hypre_error_flag;
 }
 
 hypre_ParCSRMatrix * hypre_ParMatMinus_F(
@@ -1087,24 +1085,27 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
                jg = Pnew_col_map_offd[j];
                Pnew_offd_data[m] = 0;
                if ( num_cols_offd_C )
+               {
                   for ( mc = C_offd_i[i1]; mc < C_offd_i[i1 + 1]; ++mc )
                   {
                      jC = C_offd_j[mc];
                      jCg = C_col_map_offd[jC];
                      if ( jCg == jg ) { Pnew_offd_data[m] -= C_offd_data[mc]; }
                   }
+               }
                if ( num_cols_offd_P )
+               {
                   for ( mp = P_offd_i[i1]; mp < P_offd_i[i1 + 1]; ++mp )
                   {
                      jP = P_offd_j[mp];
                      jPg = P_col_map_offd[jP];
                      if ( jPg == jg ) { Pnew_offd_data[m] += P_offd_data[mp]; }
                   }
+               }
             }
          }
       }
    }
-
 
    hypre_TFree(Pnew_j2m, HYPRE_MEMORY_HOST);
 
@@ -1112,8 +1113,9 @@ hypre_ParCSRMatrix * hypre_ParMatMinus_F(
 }
 
 /* fine (marked <0 ) rows of Pnew set to 0 */
-void  hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix * P,
-                                HYPRE_Int * CF_marker )
+HYPRE_Int
+hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix * P,
+                          HYPRE_Int * CF_marker )
 {
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
@@ -1138,6 +1140,7 @@ void  hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix * P,
       }
    }
    if ( num_cols_offd_P )
+   {
       for ( i1 = 0; i1 < num_rows_offd_P; i1++ )
       {
          if ( CF_marker[i1] < 0 )  /* Fine rows only */
@@ -1148,13 +1151,16 @@ void  hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix * P,
             }
          }
       }
+   }
 
+   return hypre_error_flag;
 }
 
 /* coarse (marked >=0) rows of P copied from C Both matrices have the same sizes. */
-void hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix * P,
-                               hypre_ParCSRMatrix * C,
-                               HYPRE_Int * CF_marker )
+HYPRE_Int
+hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix * P,
+                          hypre_ParCSRMatrix * C,
+                          HYPRE_Int * CF_marker )
 {
    hypre_CSRMatrix *C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrix *C_offd = hypre_ParCSRMatrixOffd(C);
@@ -1184,6 +1190,7 @@ void hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix * P,
       }
    }
    if ( num_cols_offd_C )
+   {
       for ( i1 = 0; i1 < num_rows_offd_C; i1++ )
       {
          if ( CF_marker[i1] >= 0 )  /* Coarse rows only */
@@ -1194,156 +1201,7 @@ void hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix * P,
             }
          }
       }
-
-}
-
-/* RDF: Commented out due to issues with complex types and comparisons that
- * don't make sense anyway.  The function wasn't being used, either. */
-#if 0
-
-/* Delete any matrix entry C(i,j) for which the corresponding entry P(i,j)
-   doesn't exist - but only for "fine" rows C(i)<0 This is done as a purely
-   local computation - C and P must have the same data distribution (among
-   processors).  */
-void hypre_ParCSRMatrixDropEntries( hypre_ParCSRMatrix * C,
-                                    hypre_ParCSRMatrix * P,
-                                    HYPRE_Int * CF_marker )
-{
-   hypre_CSRMatrix *C_diag = hypre_ParCSRMatrixDiag(C);
-   hypre_CSRMatrix *C_offd = hypre_ParCSRMatrixOffd(C);
-   HYPRE_Complex   *C_diag_data = hypre_CSRMatrixData(C_diag);
-   HYPRE_Int       *C_diag_i = hypre_CSRMatrixI(C_diag);
-   HYPRE_Int       *C_diag_j = hypre_CSRMatrixJ(C_diag);
-   HYPRE_Complex   *C_offd_data = hypre_CSRMatrixData(C_offd);
-   HYPRE_Int       *C_offd_i = hypre_CSRMatrixI(C_offd);
-   HYPRE_Int       *C_offd_j = hypre_CSRMatrixJ(C_offd);
-   hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
-   HYPRE_Int       *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int       *P_diag_j = hypre_CSRMatrixJ(P_diag);
-   HYPRE_Int       *P_offd_i = hypre_CSRMatrixI(P_offd);
-   HYPRE_Int       *P_offd_j = hypre_CSRMatrixJ(P_offd);
-   HYPRE_Int       *new_C_diag_i;
-   HYPRE_Int       *new_C_offd_i;
-   HYPRE_Int        num_rows_diag_C = hypre_CSRMatrixNumRows(C_diag);
-   HYPRE_Int        num_rows_offd_C = hypre_CSRMatrixNumCols(C_offd);
-   HYPRE_Int        num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(C_diag);
-   HYPRE_Int        num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(C_offd);
-   HYPRE_Complex    vmax = 0.0;
-   HYPRE_Complex    vmin = 0.0;
-   HYPRE_Complex    v, old_sum, new_sum, scale;
-   HYPRE_Int        i1, m, m1d, m1o, jC, mP, keep;
-
-   /* Repack the i,j,and data arrays of C so as to discard those elements for which
-      there is no corresponding element in P.
-      Elements of Coarse rows (CF_marker>=0) are always kept.
-      The arrays are not re-allocated, so there will generally be unused space
-      at the ends of the arrays. */
-   new_C_diag_i = hypre_CTAlloc( HYPRE_Int,  num_rows_diag_C + 1, HYPRE_MEMORY_HOST);
-   new_C_offd_i = hypre_CTAlloc( HYPRE_Int,  num_rows_offd_C + 1, HYPRE_MEMORY_HOST);
-   m1d = C_diag_i[0];
-   m1o = C_offd_i[0];
-   for ( i1 = 0; i1 < num_rows_diag_C; i1++ )
-   {
-      old_sum = 0;
-      new_sum = 0;
-      for ( m = C_diag_i[i1]; m < C_diag_i[i1 + 1]; ++m )
-      {
-         v = C_diag_data[m];
-         jC = C_diag_j[m];
-         old_sum += v;
-         /* Do we know anything about the order of P_diag_j?  It would be better
-            not to search through it all here.  If we know nothing, some
-            ordering or index scheme will be needed for efficiency (worth doing
-            iff this function gets called at all ) (may2006: this function is no
-            longer called) */
-         keep = 0;
-         for ( mP = P_diag_i[i1]; mP < P_diag_i[i1 + 1]; ++mP )
-         {
-            if ( jC == P_diag_j[m] )
-            {
-               keep = 1;
-               break;
-            }
-         }
-         if ( CF_marker[i1] >= 0 || keep == 1 )
-         {
-            /* keep v in C */
-            new_sum += v;
-            C_diag_j[m1d] = C_diag_j[m];
-            C_diag_data[m1d] = C_diag_data[m];
-            ++m1d;
-         }
-         else
-         {
-            /* discard v */
-            --num_nonzeros_diag;
-         }
-      }
-      for ( m = C_offd_i[i1]; m < C_offd_i[i1 + 1]; ++m )
-      {
-         v = C_offd_data[m];
-         jC = C_diag_j[m];
-         old_sum += v;
-         keep = 0;
-         for ( mP = P_offd_i[i1]; mP < P_offd_i[i1 + 1]; ++mP )
-         {
-            if ( jC == P_offd_j[m] )
-            {
-               keep = 1;
-               break;
-            }
-         }
-         if ( CF_marker[i1] >= 0 || v >= vmax || v <= vmin ) /* RDF: Always true!? */
-         {
-            /* keep v in C */
-            new_sum += v;
-            C_offd_j[m1o] = C_offd_j[m];
-            C_offd_data[m1o] = C_offd_data[m];
-            ++m1o;
-         }
-         else
-         {
-            /* discard v */
-            --num_nonzeros_offd;
-         }
-      }
-
-      new_C_diag_i[i1 + 1] = m1d;
-      if ( i1 < num_rows_offd_C ) { new_C_offd_i[i1 + 1] = m1o; }
-
-      /* rescale to keep row sum the same */
-      if (new_sum != 0) { scale = old_sum / new_sum; }
-      else { scale = 1.0; }
-      for ( m = new_C_diag_i[i1]; m < new_C_diag_i[i1 + 1]; ++m )
-      {
-         C_diag_data[m] *= scale;
-      }
-      if ( i1 < num_rows_offd_C ) /* this test fails when there is no offd block */
-         for ( m = new_C_offd_i[i1]; m < new_C_offd_i[i1 + 1]; ++m )
-         {
-            C_offd_data[m] *= scale;
-         }
-
    }
 
-   for ( i1 = 1; i1 <= num_rows_diag_C; i1++ )
-   {
-      C_diag_i[i1] = new_C_diag_i[i1];
-      if ( i1 < num_rows_offd_C ) { C_offd_i[i1] = new_C_offd_i[i1]; }
-   }
-   hypre_TFree( new_C_diag_i, HYPRE_MEMORY_HOST);
-   if ( num_rows_offd_C > 0 ) { hypre_TFree( new_C_offd_i, HYPRE_MEMORY_HOST); }
-
-   hypre_CSRMatrixNumNonzeros(C_diag) = num_nonzeros_diag;
-   hypre_CSRMatrixNumNonzeros(C_offd) = num_nonzeros_offd;
-   /*  SetNumNonzeros, SetDNumNonzeros are global, need hypre_MPI_Allreduce.
-       I suspect, but don't know, that other parts of hypre do not assume that
-       the correct values have been set.
-       hypre_ParCSRMatrixSetNumNonzeros( C );
-       hypre_ParCSRMatrixSetDNumNonzeros( C );*/
-   hypre_ParCSRMatrixNumNonzeros( C ) = 0;
-   hypre_ParCSRMatrixDNumNonzeros( C ) = 0.0;
+   return hypre_error_flag;
 }
-
-#endif

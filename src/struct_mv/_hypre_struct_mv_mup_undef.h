@@ -481,7 +481,6 @@
 #undef hypre_StructVectorSetRandomValues
 #undef hypre_StructVectorSetStride
 #undef hypre_StructVectorSetValues
-#undef hypre_StructVectorUnMapCommInfo
 #undef hypre_StructVectorUnMapDataBox
 #undef hypre_StructVectorUnMapDataIndex
 #undef hypre_StructVectorUnMapDataStride

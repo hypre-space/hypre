@@ -615,11 +615,11 @@ hypre_ParCSRMatrixCopyColMapOffdToHost_dbl( hypre_ParCSRMatrix *A );
 HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToHost_long_dbl( hypre_ParCSRMatrix *A );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopy_C_flt( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopy_C_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopy_C_long_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
 
 hypre_ParCSRMatrix *
@@ -1035,11 +1035,11 @@ hypre_ParCSRMatrixUnion_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 hypre_ParCSRMatrix *
 hypre_ParCSRMatrixUnion_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixZero_F_flt( hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParCSRMatrixZero_F_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParCSRMatrixZero_F_long_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker );
 
 hypre_ParCSRMatrix *
@@ -1070,11 +1070,11 @@ hypre_ParMatMinus_F_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int
 hypre_ParCSRMatrix *
 hypre_ParMatMinus_F_long_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
 
-void
+HYPRE_Int
 hypre_ParMatScaleDiagInv_F_flt( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, hypre_float weight, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParMatScaleDiagInv_F_dbl( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, hypre_double weight, HYPRE_Int *CF_marker );
-void
+HYPRE_Int
 hypre_ParMatScaleDiagInv_F_long_dbl( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, hypre_long_double weight, HYPRE_Int *CF_marker );
 
 hypre_ParCSRMatrix *
@@ -1098,11 +1098,11 @@ hypre_ParMatmul_RowSizes_dbl( HYPRE_MemoryLocation memory_location, HYPRE_Int **
 void
 hypre_ParMatmul_RowSizes_long_dbl( HYPRE_MemoryLocation memory_location, HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int *rownnz_A, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j, HYPRE_Int *B_offd_i, HYPRE_Int *B_offd_j, HYPRE_Int *B_ext_diag_i, HYPRE_Int *B_ext_diag_j, HYPRE_Int *B_ext_offd_i, HYPRE_Int *B_ext_offd_j, HYPRE_Int *map_B_to_C, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rownnz_A, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int allsquare, HYPRE_Int num_cols_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int num_cols_offd_C );
 
-void
+HYPRE_Int
 hypre_ParMatmul_RowSizes_Marked_flt( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int **B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j, HYPRE_Int *B_offd_i, HYPRE_Int *B_offd_j, HYPRE_Int *B_ext_diag_i, HYPRE_Int *B_ext_diag_j, HYPRE_Int *B_ext_offd_i, HYPRE_Int *B_ext_offd_j, HYPRE_Int *map_B_to_C, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int allsquare, HYPRE_Int num_cols_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int num_cols_offd_C, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
-void
+HYPRE_Int
 hypre_ParMatmul_RowSizes_Marked_dbl( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int **B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j, HYPRE_Int *B_offd_i, HYPRE_Int *B_offd_j, HYPRE_Int *B_ext_diag_i, HYPRE_Int *B_ext_diag_j, HYPRE_Int *B_ext_offd_i, HYPRE_Int *B_ext_offd_j, HYPRE_Int *map_B_to_C, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int allsquare, HYPRE_Int num_cols_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int num_cols_offd_C, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
-void
+HYPRE_Int
 hypre_ParMatmul_RowSizes_Marked_long_dbl( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int **B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j, HYPRE_Int *B_offd_i, HYPRE_Int *B_offd_j, HYPRE_Int *B_ext_diag_i, HYPRE_Int *B_ext_diag_j, HYPRE_Int *B_ext_offd_i, HYPRE_Int *B_ext_offd_j, HYPRE_Int *map_B_to_C, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int allsquare, HYPRE_Int num_cols_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int num_cols_offd_C, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
 
 hypre_ParVector *
