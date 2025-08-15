@@ -417,6 +417,7 @@
 #define hypre_SemiRestrictCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_SemiRestrictCreate )
 #define hypre_SemiRestrictDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_SemiRestrictDestroy )
 #define hypre_SemiRestrictSetup HYPRE_FIXEDPRECISION_FUNC ( hypre_SemiRestrictSetup )
+#define hypre_StructDiagScale HYPRE_FIXEDPRECISION_FUNC ( hypre_StructDiagScale )
 #define hypre_StructInterpAssemble HYPRE_FIXEDPRECISION_FUNC ( hypre_StructInterpAssemble )
 #define hypre_StructJacobiCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_StructJacobiCreate )
 #define hypre_StructJacobiDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_StructJacobiDestroy )

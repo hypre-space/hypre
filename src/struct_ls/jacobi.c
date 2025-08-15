@@ -172,6 +172,8 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
     * Initialize some things and deal with special cases
     *----------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("Jacobi");
    hypre_BeginTiming(jacobi_data -> time_index);
 
    hypre_StructMatrixDestroy(jacobi_data -> A);
@@ -193,6 +195,8 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
       }
 
       hypre_EndTiming(jacobi_data -> time_index);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -218,7 +222,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    if (zero_guess)
    {
       /* Compute x <-- weight D^-1 b */
-
+      hypre_GpuProfilingPushRange("Dinv");
       for (i = 0; i < nboxes; i++)
       {
          hypre_StructVectorGridBoxCopy(x, i, loop_box);
@@ -259,14 +263,14 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
             hypre_BoxLoop3End(Ai, xi, ri);
          }
       }
+      hypre_GpuProfilingPopRange();
 
       iter = iter + 1;
 
-      if ( tol > 0.0 )
+      if (tol > 0.0)
       {
          /* Compute residual and check convergence */
-         hypre_StructCopy(b, r);
-         hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, r);
+         hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, r);
          rsumsq = hypre_StructInnerProd(r, r);
          if ( (rsumsq / bsumsq) < tol2 )
          {
@@ -282,13 +286,10 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    while (iter < max_iter)
    {
       /* Compute residual */
-
-      hypre_StructCopy(b, r);
-      /* Matvec is optimized for residual computations: alpha = -1, beta = 1 */
-      hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, r);
+      hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, r);
 
       /* Compute x <-- x + weight D^-1 r */
-
+      hypre_GpuProfilingPushRange("Dinv");
       for (i = 0; i < nboxes; i++)
       {
          hypre_StructVectorGridBoxCopy(x, i, loop_box);
@@ -319,24 +320,46 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          else
          {
             /* Variable coefficient case */
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                A_data_box, start, ustride, Ai,
-                                x_data_box, start, ustride, xi,
-                                r_data_box, start, ustride, ri);
+            if (hypre_BoxesEqual(A_data_box, x_data_box) &&
+                hypre_BoxesEqual(x_data_box, r_data_box))
             {
-               xp[xi] += weight * rp[ri] / Ap[Ai];
+               hypre_BoxLoop1Begin(ndim, loop_size, x_data_box, start, ustride, xi);
+               {
+                  xp[xi] += weight * rp[xi] / Ap[xi];
+               }
+               hypre_BoxLoop1End(xi);
             }
-            hypre_BoxLoop3End(Ai, xi, ri);
+            else if (hypre_BoxesEqual(x_data_box, r_data_box))
+            {
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi);
+               {
+                  xp[xi] += weight * rp[xi] / Ap[Ai];
+               }
+               hypre_BoxLoop2End(Ai, xi);
+            }
+            else
+            {
+               hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, start, ustride, Ai,
+                                   x_data_box, start, ustride, xi,
+                                   r_data_box, start, ustride, ri);
+               {
+                  xp[xi] += weight * rp[ri] / Ap[Ai];
+               }
+               hypre_BoxLoop3End(Ai, xi, ri);
+            }
          }
       }
+      hypre_GpuProfilingPopRange();
 
       iter = iter + 1;
 
       if ( tol > 0.0 )
       {
          /* Compute residual and check convergence */
-         hypre_StructCopy(b, r);
-         hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, r);
+         hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, r);
          rsumsq = hypre_StructInnerProd(r, r);
          if ( (rsumsq / bsumsq) < tol2 )
          {
@@ -359,6 +382,8 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
 
    hypre_IncFLOPCount(jacobi_data -> flops);
    hypre_EndTiming(jacobi_data -> time_index);
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

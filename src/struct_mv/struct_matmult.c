@@ -1067,7 +1067,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    {
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
-      hypre_StructVectorInitialize(mask);
+      hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
       boxnums = hypre_StructVectorBoxnums(mask);
@@ -1292,6 +1292,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_IndexRef             offsetref;   /* offset for constant coefficient stencil entries */
    hypre_IndexRef             shift;       /* stencil shift from center for st_term */
    hypre_IndexRef             stride;
+   HYPRE_Int                  zero_init;
 
    /* Boxloop variables */
    hypre_Index                fdstart,  cdstart,  Mdstart;  /* data starts */
@@ -1312,8 +1313,21 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("StructMatmultCompute");
 
+   /* Set flag for initializing matrix/vector entries to zeroes */
+#if defined(HYPRE_USING_GPU)
+   if (exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      /* Initialize to zeroes when NOT using the fused kernel implementation. */
+      zero_init = !(nterms == 3 && kernel_type == 1);
+   }
+   else
+#endif
+   {
+      zero_init = 1;
+   }
+
    /* Allocate the data for M */
-   hypre_StructMatrixInitializeData(M, NULL);
+   hypre_StructMatrixInitializeData(M, zero_init, NULL);
 
    /* Create work arrays on host memory for storing constant coefficients */
    A_const = hypre_TAlloc(HYPRE_Complex*, nmatrices + 1, HYPRE_MEMORY_HOST);
@@ -1514,10 +1528,11 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
          case 3:
             if (kernel_type == 1)
             {
-               hypre_StructMatmultCompute_fuse(nterms, a, na, ndim, loop_size,
+               hypre_StructMatmultCompute_fuse(nterms, a, na, ndim,
+                                               loop_size, stencil_size,
                                                fdbox, fdstart, fdstride,
                                                cdbox, cdstart, cdstride,
-                                               Mdbox, Mdstart, Mdstride);
+                                               Mdbox, Mdstart, Mdstride, M);
             }
             else
             {
@@ -1537,6 +1552,14 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
             break;
       }
    } /* end loop over matrix M range boxes */
+
+   /* Trigger uninitialized values */
+#if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_GPU)
+   for (i = 0; i < hypre_StructMatrixDataSize(M); i++)
+   {
+      hypre_assert(hypre_StructMatrixData(M)[i] == hypre_StructMatrixData(M)[i]);
+   }
+#endif
 
    /* Free memory */
    hypre_BoxDestroy(loop_box);

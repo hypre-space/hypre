@@ -120,12 +120,18 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Real local_result;
    HYPRE_Real global_result;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("InnerProd");
+
    local_result = hypre_StructInnerProdLocal(x, y);
 
    hypre_MPI_Allreduce(&local_result, &global_result, 1, HYPRE_MPI_REAL, hypre_MPI_SUM,
                        hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2 * hypre_StructVectorGlobalSize(x));
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return global_result;
 }

@@ -21,14 +21,17 @@ hypre_SStructPAxpy( HYPRE_Complex         alpha,
                     hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
-   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
-   HYPRE_Int var;
+   HYPRE_Int     nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int     var;
+   HYPRE_Complex beta = 1.0;
 
    for (var = 0; var < nvars; var++)
    {
-      hypre_StructAxpy(alpha,
-                       hypre_SStructPVectorSVector(px, var),
-                       hypre_SStructPVectorSVector(py, var));
+      hypre_StructVectorAxpy(alpha,
+                             hypre_SStructPVectorSVector(px, var),
+                             beta,
+                             hypre_SStructPVectorSVector(py, var),
+                             hypre_SStructPVectorSVector(py, var));
    }
 
    return hypre_error_flag;
@@ -72,6 +75,10 @@ hypre_SStructPVectorPointwiseDivpy( HYPRE_Complex         alpha,
 }
 
 /*--------------------------------------------------------------------------
+ * TODO:
+ *  - Change to SStructVectorAxpy
+ *  - Add beta and z arguments (z = beta * y + alpha * x)
+ *  - Update hypre_SStructPAxpy to hypre_SStructVectorPAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

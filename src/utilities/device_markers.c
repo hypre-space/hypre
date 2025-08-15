@@ -17,8 +17,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-#include "nvToolsExt.h"
-#include "nvToolsExtCudaRt.h"
+#include "nvtx3/nvToolsExt.h"
 
 /* 16 named colors by HTML 4.01. Repalce white with Orange */
 typedef enum

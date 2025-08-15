@@ -60,7 +60,6 @@ FILES =\
  sys_pfmg_solve.c\
  ssamg.c\
  ssamg_csolver.c\
- ssamg_interp.c\
  ssamg_stats.c\
  ssamg_setup.c\
  ssamg_setup_rap.c\
@@ -68,6 +67,7 @@ FILES =\
 
 CUFILES =\
  node_relax.c\
+ ssamg_interp.c\
  ssamg_relax.c\
  ssamg_uinterp.c
 

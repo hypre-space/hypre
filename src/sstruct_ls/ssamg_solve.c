@@ -161,8 +161,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       /* compute fine grid residual (r = b - Ax) */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_GpuProfilingPushRange("Residual");
-      hypre_SStructMatvecCompute(matvec_data_l[0], -1.0,
-                                 A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
+
+      hypre_SStructMatvecCompute(matvec_data_l[0],
+                                 -1.0, A_l[0], x_l[0],
+                                 1.0,  b_l[0], r_l[0]);
+
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
@@ -203,8 +206,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          /* restrict fine grid residual */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
          hypre_GpuProfilingPushRange("Restriction");
-         hypre_SStructMatvecCompute(restrict_data_l[0], 1.0,
-                                    RT_l[0], r_l[0], 0.0, b_l[1], b_l[1]);
+
+         hypre_SStructMatvecCompute(restrict_data_l[0],
+                                    1.0, RT_l[0], r_l[0],
+                                    0.0, b_l[1],  b_l[1]);
+
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #ifdef DEBUG_SOLVE
@@ -230,18 +236,23 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* pre-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             hypre_GpuProfilingPushRange("Relaxation");
+
             hypre_SSAMGRelaxSetPreRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 1);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
             /* compute residual (r = b - Ax) */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
             hypre_GpuProfilingPushRange("Residual");
-            hypre_SStructMatvecCompute(matvec_data_l[l], -1.0,
-                                       A_l[l], x_l[l], 1.0, b_l[l], r_l[l]);
+
+            hypre_SStructMatvecCompute(matvec_data_l[l],
+                                       -1.0, A_l[l], x_l[l],
+                                       1.0,  b_l[l], r_l[l]);
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
@@ -251,8 +262,11 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_GpuProfilingPushRange("Restriction");
-            hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
-                                       RT_l[l], r_l[l], 0.0, b_l[l + 1], b_l[l + 1]);
+
+            hypre_SStructMatvecCompute(restrict_data_l[l],
+                                       1.0, RT_l[l],    r_l[l],
+                                       0.0, b_l[l + 1], b_l[l + 1]);
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #ifdef DEBUG_SOLVE
@@ -289,12 +303,13 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
-            /* TODO: Can we simplify the next two calls? */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_GpuProfilingPushRange("Interpolation");
-            hypre_SStructMatvecCompute(interp_data_l[l], 1.0,
-                                       P_l[l], x_l[l + 1], 0.0, e_l[l], e_l[l]);
-            hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
+
+            hypre_SStructMatvecCompute(interp_data_l[l],
+                                       1.0, P_l[l], x_l[l + 1],
+                                       1.0, x_l[l], x_l[l]);
+
             hypre_GpuProfilingPopRange();
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
@@ -315,10 +330,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* post-relaxation */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             hypre_GpuProfilingPushRange("Relaxation");
+
             hypre_SSAMGRelaxSetPostRelax(relax_data_l[l]);
             hypre_SSAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SSAMGRelaxSetZeroGuess(relax_data_l[l], 0);
             hypre_SSAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 
@@ -327,13 +344,12 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
-         /* TODO: Can we simplify the next two calls? */
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
 
-         hypre_SStructMatvecCompute(interp_data_l[0], 1.0,
-                                    P_l[0], x_l[1], 0.0, e_l[0], e_l[0]);
-         hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
+         hypre_SStructMatvecCompute(interp_data_l[0],
+                                    1.0, P_l[0], x_l[1],
+                                    1.0, x_l[0], x_l[0]);
 
          hypre_GpuProfilingPopRange();
          //hypre_GpuProfilingPopRange();

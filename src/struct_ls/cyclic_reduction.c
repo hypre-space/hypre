@@ -621,7 +621,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
       x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
-      hypre_StructVectorInitialize(x_l[l + 1]);
+      hypre_StructVectorInitialize(x_l[l + 1], 1);
       hypre_StructVectorAssemble(x_l[l + 1]);
    }
 

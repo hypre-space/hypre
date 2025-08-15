@@ -9,10 +9,340 @@
 #include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
-#ifdef HYPRE_UNROLL_MAXDEPTH
+#if defined(HYPRE_UNROLL_MAXDEPTH)
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
-#define HYPRE_UNROLL_MAXDEPTH 9
+#define HYPRE_UNROLL_MAXDEPTH 18
+
+#define HYPRE_CXYZ_DEFINE_SIGN         \
+  HYPRE_Real sign = diag_is_constant ? \
+    (A_diag[0]  < 0.0 ? 1.0 : -1.0) :  \
+    (A_diag[Ai] < 0.0 ? 1.0 : -1.0)
+
+#define HYPRE_AP_DECLARE(n)     \
+  HYPRE_Complex *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
+
+#define HYPRE_AP_LOAD(n, d)     \
+  Ap##n##_##d = hypre_StructMatrixBoxData(A, Ab, entries[d][k + n])
+
+#define HYPRE_CAP_LOAD(n, d)    \
+  Ap##n##_##d = hypre_StructMatrixConstData(A, entries[d][k + n])
+
+#define HYPRE_AP_EVAL(n, d)     \
+  Ap##n##_##d[Ai]
+
+#define HYPRE_CAP_EVAL(n, d)    \
+  Ap##n##_##d[0]
+
+#define HYPRE_AP_DECLARE_UP_TO_9  \
+  HYPRE_AP_DECLARE(0);            \
+  HYPRE_AP_DECLARE(1);            \
+  HYPRE_AP_DECLARE(2);            \
+  HYPRE_AP_DECLARE(3);            \
+  HYPRE_AP_DECLARE(4);            \
+  HYPRE_AP_DECLARE(5);            \
+  HYPRE_AP_DECLARE(6);            \
+  HYPRE_AP_DECLARE(7);            \
+  HYPRE_AP_DECLARE(8)
+
+#define HYPRE_AP_DECLARE_UP_TO_10 \
+  HYPRE_AP_DECLARE_UP_TO_9;       \
+  HYPRE_AP_DECLARE(9)
+
+#define HYPRE_AP_DECLARE_UP_TO_18 \
+  HYPRE_AP_DECLARE_UP_TO_10;      \
+  HYPRE_AP_DECLARE(10);           \
+  HYPRE_AP_DECLARE(11);           \
+  HYPRE_AP_DECLARE(12);           \
+  HYPRE_AP_DECLARE(13);           \
+  HYPRE_AP_DECLARE(14);           \
+  HYPRE_AP_DECLARE(15);           \
+  HYPRE_AP_DECLARE(16);           \
+  HYPRE_AP_DECLARE(17)
+
+#define HYPRE_AP_LOAD_UP_TO_1(d) \
+  HYPRE_AP_LOAD(0, d)
+
+#define HYPRE_AP_LOAD_UP_TO_2(d) \
+  HYPRE_AP_LOAD_UP_TO_1(d);      \
+  HYPRE_AP_LOAD(1, d)
+
+#define HYPRE_AP_LOAD_UP_TO_3(d) \
+  HYPRE_AP_LOAD_UP_TO_2(d);      \
+  HYPRE_AP_LOAD(2, d)
+
+#define HYPRE_AP_LOAD_UP_TO_4(d) \
+  HYPRE_AP_LOAD_UP_TO_3(d);      \
+  HYPRE_AP_LOAD(3, d)
+
+#define HYPRE_AP_LOAD_UP_TO_5(d) \
+  HYPRE_AP_LOAD_UP_TO_4(d);      \
+  HYPRE_AP_LOAD(4, d)
+
+#define HYPRE_AP_LOAD_UP_TO_6(d) \
+  HYPRE_AP_LOAD_UP_TO_5(d);      \
+  HYPRE_AP_LOAD(5, d)
+
+#define HYPRE_AP_LOAD_UP_TO_7(d) \
+  HYPRE_AP_LOAD_UP_TO_6(d);      \
+  HYPRE_AP_LOAD(6, d)
+
+#define HYPRE_AP_LOAD_UP_TO_8(d) \
+  HYPRE_AP_LOAD_UP_TO_7(d);      \
+  HYPRE_AP_LOAD(7, d)
+
+#define HYPRE_AP_LOAD_UP_TO_9(d) \
+  HYPRE_AP_LOAD_UP_TO_8(d);      \
+  HYPRE_AP_LOAD(8, d)
+
+#define HYPRE_AP_LOAD_UP_TO_10(d) \
+  HYPRE_AP_LOAD_UP_TO_9(d);       \
+  HYPRE_AP_LOAD(9, d)
+
+#define HYPRE_AP_LOAD_UP_TO_11(d) \
+  HYPRE_AP_LOAD_UP_TO_10(d);      \
+  HYPRE_AP_LOAD(10, d)
+
+#define HYPRE_AP_LOAD_UP_TO_12(d) \
+  HYPRE_AP_LOAD_UP_TO_11(d);      \
+  HYPRE_AP_LOAD(11, d)
+
+#define HYPRE_AP_LOAD_UP_TO_13(d) \
+  HYPRE_AP_LOAD_UP_TO_12(d);      \
+  HYPRE_AP_LOAD(12, d)
+
+#define HYPRE_AP_LOAD_UP_TO_14(d) \
+  HYPRE_AP_LOAD_UP_TO_13(d);      \
+  HYPRE_AP_LOAD(13, d)
+
+#define HYPRE_AP_LOAD_UP_TO_15(d) \
+  HYPRE_AP_LOAD_UP_TO_14(d);      \
+  HYPRE_AP_LOAD(14, d)
+
+#define HYPRE_AP_LOAD_UP_TO_16(d) \
+  HYPRE_AP_LOAD_UP_TO_15(d);      \
+  HYPRE_AP_LOAD(15, d)
+
+#define HYPRE_AP_LOAD_UP_TO_17(d) \
+  HYPRE_AP_LOAD_UP_TO_16(d);      \
+  HYPRE_AP_LOAD(16, d)
+
+#define HYPRE_AP_LOAD_UP_TO_18(d) \
+  HYPRE_AP_LOAD_UP_TO_17(d);      \
+  HYPRE_AP_LOAD(17, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_1(d) \
+  HYPRE_CAP_LOAD(0, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_2(d) \
+  HYPRE_CAP_LOAD_UP_TO_1(d);      \
+  HYPRE_CAP_LOAD(1, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_3(d) \
+  HYPRE_CAP_LOAD_UP_TO_2(d);      \
+  HYPRE_CAP_LOAD(2, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_4(d) \
+  HYPRE_CAP_LOAD_UP_TO_3(d);      \
+  HYPRE_CAP_LOAD(3, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_5(d) \
+  HYPRE_CAP_LOAD_UP_TO_4(d);      \
+  HYPRE_CAP_LOAD(4, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_6(d) \
+  HYPRE_CAP_LOAD_UP_TO_5(d);      \
+  HYPRE_CAP_LOAD(5, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_7(d) \
+  HYPRE_CAP_LOAD_UP_TO_6(d);      \
+  HYPRE_CAP_LOAD(6, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_8(d) \
+  HYPRE_CAP_LOAD_UP_TO_7(d);      \
+  HYPRE_CAP_LOAD(7, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_9(d) \
+  HYPRE_CAP_LOAD_UP_TO_8(d);      \
+  HYPRE_CAP_LOAD(8, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_10(d) \
+  HYPRE_CAP_LOAD_UP_TO_9(d);       \
+  HYPRE_CAP_LOAD(9, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_11(d) \
+  HYPRE_CAP_LOAD_UP_TO_10(d);      \
+  HYPRE_CAP_LOAD(10, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_12(d) \
+  HYPRE_CAP_LOAD_UP_TO_11(d);      \
+  HYPRE_CAP_LOAD(11, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_13(d) \
+  HYPRE_CAP_LOAD_UP_TO_12(d);      \
+  HYPRE_CAP_LOAD(12, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_14(d) \
+  HYPRE_CAP_LOAD_UP_TO_13(d);      \
+  HYPRE_CAP_LOAD(13, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_15(d) \
+  HYPRE_CAP_LOAD_UP_TO_14(d);      \
+  HYPRE_CAP_LOAD(14, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_16(d) \
+  HYPRE_CAP_LOAD_UP_TO_15(d);      \
+  HYPRE_CAP_LOAD(15, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_17(d) \
+  HYPRE_CAP_LOAD_UP_TO_16(d);      \
+  HYPRE_CAP_LOAD(16, d)
+
+#define HYPRE_CAP_LOAD_UP_TO_18(d) \
+  HYPRE_CAP_LOAD_UP_TO_17(d);      \
+  HYPRE_CAP_LOAD(17, d)
+
+#define HYPRE_AP_SUM_UP_TO_1(d) \
+  HYPRE_AP_EVAL(0, d)
+
+#define HYPRE_AP_SUM_UP_TO_2(d) \
+  HYPRE_AP_SUM_UP_TO_1(d) +     \
+  HYPRE_AP_EVAL(1, d)
+
+#define HYPRE_AP_SUM_UP_TO_3(d) \
+  HYPRE_AP_SUM_UP_TO_2(d) +     \
+  HYPRE_AP_EVAL(2, d)
+
+#define HYPRE_AP_SUM_UP_TO_4(d) \
+  HYPRE_AP_SUM_UP_TO_3(d) +     \
+  HYPRE_AP_EVAL(3, d)
+
+#define HYPRE_AP_SUM_UP_TO_5(d) \
+  HYPRE_AP_SUM_UP_TO_4(d) +     \
+  HYPRE_AP_EVAL(4, d)
+
+#define HYPRE_AP_SUM_UP_TO_6(d) \
+  HYPRE_AP_SUM_UP_TO_5(d) +     \
+  HYPRE_AP_EVAL(5, d)
+
+#define HYPRE_AP_SUM_UP_TO_7(d) \
+  HYPRE_AP_SUM_UP_TO_6(d) +     \
+  HYPRE_AP_EVAL(6, d)
+
+#define HYPRE_AP_SUM_UP_TO_8(d) \
+  HYPRE_AP_SUM_UP_TO_7(d) +     \
+  HYPRE_AP_EVAL(7, d)
+
+#define HYPRE_AP_SUM_UP_TO_9(d) \
+  HYPRE_AP_SUM_UP_TO_8(d) +     \
+  HYPRE_AP_EVAL(8, d)
+
+#define HYPRE_AP_SUM_UP_TO_10(d) \
+  HYPRE_AP_SUM_UP_TO_9(d) +      \
+  HYPRE_AP_EVAL(9, d)
+
+#define HYPRE_AP_SUM_UP_TO_11(d) \
+  HYPRE_AP_SUM_UP_TO_10(d) +     \
+  HYPRE_AP_EVAL(10, d)
+
+#define HYPRE_AP_SUM_UP_TO_12(d) \
+  HYPRE_AP_SUM_UP_TO_11(d) +     \
+  HYPRE_AP_EVAL(11, d)
+
+#define HYPRE_AP_SUM_UP_TO_13(d) \
+  HYPRE_AP_SUM_UP_TO_12(d) +     \
+  HYPRE_AP_EVAL(12, d)
+
+#define HYPRE_AP_SUM_UP_TO_14(d) \
+  HYPRE_AP_SUM_UP_TO_13(d) +     \
+  HYPRE_AP_EVAL(13, d)
+
+#define HYPRE_AP_SUM_UP_TO_15(d) \
+  HYPRE_AP_SUM_UP_TO_14(d) +     \
+  HYPRE_AP_EVAL(14, d)
+
+#define HYPRE_AP_SUM_UP_TO_16(d) \
+  HYPRE_AP_SUM_UP_TO_15(d) +     \
+  HYPRE_AP_EVAL(15, d)
+
+#define HYPRE_AP_SUM_UP_TO_17(d) \
+  HYPRE_AP_SUM_UP_TO_16(d) +     \
+  HYPRE_AP_EVAL(16, d)
+
+#define HYPRE_AP_SUM_UP_TO_18(d) \
+  HYPRE_AP_SUM_UP_TO_17(d) +     \
+  HYPRE_AP_EVAL(17, d)
+
+#define HYPRE_CAP_SUM_UP_TO_1(d) \
+  HYPRE_CAP_EVAL(0, d)
+
+#define HYPRE_CAP_SUM_UP_TO_2(d) \
+  HYPRE_CAP_SUM_UP_TO_1(d) +     \
+  HYPRE_CAP_EVAL(1, d)
+
+#define HYPRE_CAP_SUM_UP_TO_3(d) \
+  HYPRE_CAP_SUM_UP_TO_2(d) +     \
+  HYPRE_CAP_EVAL(2, d)
+
+#define HYPRE_CAP_SUM_UP_TO_4(d) \
+  HYPRE_CAP_SUM_UP_TO_3(d) +     \
+  HYPRE_CAP_EVAL(3, d)
+
+#define HYPRE_CAP_SUM_UP_TO_5(d) \
+  HYPRE_CAP_SUM_UP_TO_4(d) +     \
+  HYPRE_CAP_EVAL(4, d)
+
+#define HYPRE_CAP_SUM_UP_TO_6(d) \
+  HYPRE_CAP_SUM_UP_TO_5(d) +     \
+  HYPRE_CAP_EVAL(5, d)
+
+#define HYPRE_CAP_SUM_UP_TO_7(d) \
+  HYPRE_CAP_SUM_UP_TO_6(d) +     \
+  HYPRE_CAP_EVAL(6, d)
+
+#define HYPRE_CAP_SUM_UP_TO_8(d) \
+  HYPRE_CAP_SUM_UP_TO_7(d) +     \
+  HYPRE_CAP_EVAL(7, d)
+
+#define HYPRE_CAP_SUM_UP_TO_9(d) \
+  HYPRE_CAP_SUM_UP_TO_8(d) +     \
+  HYPRE_CAP_EVAL(8, d)
+
+#define HYPRE_CAP_SUM_UP_TO_10(d) \
+  HYPRE_CAP_SUM_UP_TO_9(d) +      \
+  HYPRE_CAP_EVAL(9, d)
+
+#define HYPRE_CAP_SUM_UP_TO_11(d) \
+  HYPRE_CAP_SUM_UP_TO_10(d) +     \
+  HYPRE_CAP_EVAL(10, d)
+
+#define HYPRE_CAP_SUM_UP_TO_12(d) \
+  HYPRE_CAP_SUM_UP_TO_11(d) +     \
+  HYPRE_CAP_EVAL(11, d)
+
+#define HYPRE_CAP_SUM_UP_TO_13(d) \
+  HYPRE_CAP_SUM_UP_TO_12(d) +     \
+  HYPRE_CAP_EVAL(12, d)
+
+#define HYPRE_CAP_SUM_UP_TO_14(d) \
+  HYPRE_CAP_SUM_UP_TO_13(d) +     \
+  HYPRE_CAP_EVAL(13, d)
+
+#define HYPRE_CAP_SUM_UP_TO_15(d) \
+  HYPRE_CAP_SUM_UP_TO_14(d) +     \
+  HYPRE_CAP_EVAL(14, d)
+
+#define HYPRE_CAP_SUM_UP_TO_16(d) \
+  HYPRE_CAP_SUM_UP_TO_15(d) +     \
+  HYPRE_CAP_EVAL(15, d)
+
+#define HYPRE_CAP_SUM_UP_TO_17(d) \
+  HYPRE_CAP_SUM_UP_TO_16(d) +     \
+  HYPRE_CAP_EVAL(16, d)
+
+#define HYPRE_CAP_SUM_UP_TO_18(d) \
+  HYPRE_CAP_SUM_UP_TO_17(d) +     \
+  HYPRE_CAP_EVAL(17, d)
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -55,237 +385,149 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
                               hypre_Box          *w_dbox,
                               HYPRE_Complex     **w_data)
 {
-#define DEVICE_VAR is_device_ptr(A_diag,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
-
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
-   HYPRE_Int             d;
+   HYPRE_Int             k = 0, d, depth;
 
-   HYPRE_Complex        *w_datad;
+   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
    HYPRE_Complex        *A_diag = NULL;
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_AP_DECLARE_UP_TO_18;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
 
+   hypre_SetIndex(ustride, 1);
+
+   /* Set A_diag pointer */
    A_diag = (diag_is_constant) ?
             hypre_StructMatrixConstData(A, diag_entry) :
             hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
-   hypre_SetIndex(ustride, 1);
-   for (d = 0; d < ndim; d++)
+   /* Set w_data pointers */
+   switch (ndim)
    {
-      w_datad = w_data[d];
-      switch (nentries[d])
+      case 3:
+        w_data_2 = w_data[2];
+        HYPRE_FALLTHROUGH;
+
+      case 2:
+        w_data_1 = w_data[1];
+        HYPRE_FALLTHROUGH;
+
+      case 1:
+        w_data_0 = w_data[0];
+        break;
+
+      default:
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+        return hypre_error_flag;
+   }
+
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(a0, a1, a2)                        \
+   /* Load Ap pointers */                                  \
+   HYPRE_AP_LOAD_UP_TO_##a0(0);                            \
+   HYPRE_AP_LOAD_UP_TO_##a1(1);                            \
+   HYPRE_AP_LOAD_UP_TO_##a2(2);                            \
+                                                           \
+   /* Compute w_data */                                    \
+   hypre_BoxLoop2Begin(ndim, loop_size,                    \
+                       A_dbox, start, ustride, Ai,         \
+                       w_dbox, start, ustride, wi);        \
+   {                                                       \
+      HYPRE_CXYZ_DEFINE_SIGN;                              \
+                                                           \
+      w_data_0[wi] = sign * (HYPRE_AP_SUM_UP_TO_##a0(0));  \
+      w_data_1[wi] = sign * (HYPRE_AP_SUM_UP_TO_##a1(1));  \
+      w_data_2[wi] = sign * (HYPRE_AP_SUM_UP_TO_##a2(2));  \
+   }                                                       \
+   hypre_BoxLoop2End(Ai, wi)
+
+   /* Compute w_data pointers by summing contributions from A.
+      Specialization is used for common stencil sizes to optimize for performance.
+      A generic fallback algorithm is used otherwise */
+   if (ndim == 3 && nentries[0] == 18 && nentries[1] == 18 && nentries[2] == 18)
+   {
+      HYPRE_CORE_CASE(18, 18, 18);
+   }
+   else if (ndim == 3 && nentries[0] == 10 && nentries[1] == 10 && nentries[2] == 10)
+   {
+      HYPRE_CORE_CASE(10, 10, 10);
+   }
+   else if (ndim == 3 && nentries[0] == 9 && nentries[1] == 9 && nentries[2] == 9)
+   {
+      HYPRE_CORE_CASE(9, 9, 9);
+   }
+   else if (ndim == 3 && nentries[0] == 2 && nentries[1] == 2 && nentries[2] == 2)
+   {
+      HYPRE_CORE_CASE(2, 2, 2);
+   }
+   else
+   {
+      /* Fallback to general algorithm */
+      for (d = 0; d < ndim; d++)
       {
-         case 9:
-            Ap8 = hypre_StructMatrixBoxData(A, Ab, entries[d][8]);
-            HYPRE_FALLTHROUGH;
+         w_data_d = w_data[d];
+         for (k = 0; k < nentries[d]; k += HYPRE_UNROLL_MAXDEPTH)
+         {
+            depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries[d] - k));
 
-         case 8:
-            Ap7 = hypre_StructMatrixBoxData(A, Ab, entries[d][7]);
-            HYPRE_FALLTHROUGH;
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                               \
+           case n:                                                       \
+              HYPRE_AP_LOAD_UP_TO_##n(d);                                \
+              hypre_BoxLoop2Begin(ndim, loop_size,                       \
+                                  A_dbox, start, ustride, Ai,            \
+                                  w_dbox, start, ustride, wi);           \
+              {                                                          \
+                 HYPRE_CXYZ_DEFINE_SIGN;                                 \
+                 if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }  \
+                                                                         \
+                 w_data_d[wi] += sign * (HYPRE_AP_SUM_UP_TO_##n(d));     \
+              }                                                          \
+              hypre_BoxLoop2End(Ai, wi);                                 \
+              break
 
-         case 7:
-            Ap6 = hypre_StructMatrixBoxData(A, Ab, entries[d][6]);
-            HYPRE_FALLTHROUGH;
+            switch (depth)
+            {
+               HYPRE_CORE_CASE(18);
+               HYPRE_CORE_CASE(17);
+               HYPRE_CORE_CASE(16);
+               HYPRE_CORE_CASE(15);
+               HYPRE_CORE_CASE(14);
+               HYPRE_CORE_CASE(13);
+               HYPRE_CORE_CASE(12);
+               HYPRE_CORE_CASE(11);
+               HYPRE_CORE_CASE(10);
+               HYPRE_CORE_CASE(9);
+               HYPRE_CORE_CASE(8);
+               HYPRE_CORE_CASE(7);
+               HYPRE_CORE_CASE(6);
+               HYPRE_CORE_CASE(5);
+               HYPRE_CORE_CASE(4);
+               HYPRE_CORE_CASE(3);
+               HYPRE_CORE_CASE(2);
+               HYPRE_CORE_CASE(1);
 
-         case 6:
-            Ap5 = hypre_StructMatrixBoxData(A, Ab, entries[d][5]);
-            HYPRE_FALLTHROUGH;
-
-         case 5:
-            Ap4 = hypre_StructMatrixBoxData(A, Ab, entries[d][4]);
-            HYPRE_FALLTHROUGH;
-
-         case 4:
-            Ap3 = hypre_StructMatrixBoxData(A, Ab, entries[d][3]);
-            HYPRE_FALLTHROUGH;
-
-         case 3:
-            Ap2 = hypre_StructMatrixBoxData(A, Ab, entries[d][2]);
-            HYPRE_FALLTHROUGH;
-
-         case 2:
-            Ap1 = hypre_StructMatrixBoxData(A, Ab, entries[d][1]);
-            HYPRE_FALLTHROUGH;
-
-         case 1:
-            Ap0 = hypre_StructMatrixBoxData(A, Ab, entries[d][0]);
-            HYPRE_FALLTHROUGH;
-
-         case 0:
-            break;
+               default:
+                  break;
+            }
+         }
       }
 
-      /* Compute row sums */
-      switch (nentries[d])
-      {
-         case 9:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai] + Ap8[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 8:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 7:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 6:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 5:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 4:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 3:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 2:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 1:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * Ap0[Ai];
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 0:
-            break;
-      } /* switch (nentries) */
+#if defined(DEBUG_CXYZ)
+      hypre_printf("ndim = %d | nentries[0] = %d | nentries[1] = %d | nentries[2] = %d\n",
+                   ndim, nentries[0], nentries[1], nentries[2]);
+#endif
+   }
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncComputeStream();
+   hypre_SyncComputeStream();
 #endif
-   } /* for (d = 0; d < ndim; d++) */
-#undef DEVICE_VAR
-
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -311,17 +553,13 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                               hypre_Box          *w_dbox,
                               HYPRE_Complex     **w_data)
 {
-#define DEVICE_VAR is_device_ptr(A_diag,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
-
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
-   HYPRE_Int             d, all_zero;
+   HYPRE_Int             k = 0, d, depth, all_zero;
 
-   HYPRE_Complex        *w_datad;
+   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
    HYPRE_Complex        *A_diag = NULL;
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_AP_DECLARE_UP_TO_9;
 
    /* Exit if there are no constant coefficients */
    all_zero = 1;
@@ -341,220 +579,116 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("CC");
 
+   hypre_SetIndex(ustride, 1);
    A_diag = (diag_is_constant) ?
             hypre_StructMatrixConstData(A, diag_entry) :
             hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
-   hypre_SetIndex(ustride, 1);
-   for (d = 0; d < ndim; d++)
+   /* Set w_data pointers */
+   switch (ndim)
    {
-      w_datad = w_data[d];
-      switch (nentries[d])
+      case 3:
+        w_data_2 = w_data[2];
+        HYPRE_FALLTHROUGH;
+
+      case 2:
+        w_data_1 = w_data[1];
+        HYPRE_FALLTHROUGH;
+
+      case 1:
+        w_data_0 = w_data[0];
+        break;
+
+      default:
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+        return hypre_error_flag;
+   }
+
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(a0, a1, a2)                        \
+   /* Load Ap pointers */                                  \
+   HYPRE_CAP_LOAD_UP_TO_##a0(0);                           \
+   HYPRE_CAP_LOAD_UP_TO_##a1(1);                           \
+   HYPRE_CAP_LOAD_UP_TO_##a2(2);                           \
+                                                           \
+   /* Compute w_data */                                    \
+   hypre_BoxLoop2Begin(ndim, loop_size,                    \
+                       A_dbox, start, ustride, Ai,         \
+                       w_dbox, start, ustride, wi);        \
+   {                                                       \
+      HYPRE_CXYZ_DEFINE_SIGN;                              \
+                                                           \
+      w_data_0[wi] = sign * (HYPRE_CAP_SUM_UP_TO_##a0(0)); \
+      w_data_1[wi] = sign * (HYPRE_CAP_SUM_UP_TO_##a1(1)); \
+      w_data_2[wi] = sign * (HYPRE_CAP_SUM_UP_TO_##a2(2)); \
+   }                                                       \
+   hypre_BoxLoop2End(Ai, wi)
+
+   /* Compute w_data pointers by summing contributions from A.
+      Specialization is used for common stencil sizes to optimize for performance.
+      A generic fallback algorithm is used otherwise */
+   if (ndim == 3 && nentries[0] == 9 && nentries[1] == 9 && nentries[2] == 9)
+   {
+      HYPRE_CORE_CASE(9, 9, 9);
+   }
+   else if (ndim == 3 && nentries[0] == 2 && nentries[1] == 2 && nentries[2] == 2)
+   {
+      HYPRE_CORE_CASE(2, 2, 2);
+   }
+   else
+   {
+      /* Fallback to generic algorithm */
+      for (d = 0; d < ndim; d++)
       {
-         case 9:
-            Ap8 = hypre_StructMatrixConstData(A, entries[d][8]);
-            HYPRE_FALLTHROUGH;
+         w_data_d = w_data[d];
 
-         case 8:
-            Ap7 = hypre_StructMatrixConstData(A, entries[d][7]);
-            HYPRE_FALLTHROUGH;
+         /* Compute row sums */
+         for (k = 0; k < nentries[d]; k += HYPRE_UNROLL_MAXDEPTH)
+         {
+            depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries[d] - k));
 
-         case 7:
-            Ap6 = hypre_StructMatrixConstData(A, entries[d][6]);
-            HYPRE_FALLTHROUGH;
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                               \
+           case n:                                                       \
+              HYPRE_CAP_LOAD_UP_TO_##n(d);                               \
+              hypre_BoxLoop2Begin(ndim, loop_size,                       \
+                                  A_dbox, start, ustride, Ai,            \
+                                  w_dbox, start, ustride, wi);           \
+              {                                                          \
+                 HYPRE_CXYZ_DEFINE_SIGN;                                 \
+                 if (k < HYPRE_UNROLL_MAXDEPTH) { w_data_d[wi] = 0.0; }  \
+                                                                         \
+                 w_data_d[wi] += sign * (HYPRE_CAP_SUM_UP_TO_##n(d));    \
+              }                                                          \
+              hypre_BoxLoop2End(Ai, wi);                                 \
+              break
 
-         case 6:
-            Ap5 = hypre_StructMatrixConstData(A, entries[d][5]);
-            HYPRE_FALLTHROUGH;
-
-         case 5:
-            Ap4 = hypre_StructMatrixConstData(A, entries[d][4]);
-            HYPRE_FALLTHROUGH;
-
-         case 4:
-            Ap3 = hypre_StructMatrixConstData(A, entries[d][3]);
-            HYPRE_FALLTHROUGH;
-
-         case 3:
-            Ap2 = hypre_StructMatrixConstData(A, entries[d][2]);
-            HYPRE_FALLTHROUGH;
-
-         case 2:
-            Ap1 = hypre_StructMatrixConstData(A, entries[d][1]);
-            HYPRE_FALLTHROUGH;
-
-         case 1:
-            Ap0 = hypre_StructMatrixConstData(A, entries[d][0]);
-            HYPRE_FALLTHROUGH;
-
-         case 0:
-            break;
-      }
-
-      /* Compute row sums */
-      switch (nentries[d])
-      {
-         case 9:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
+            switch (depth)
             {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
+               HYPRE_CORE_CASE(9);
+               HYPRE_CORE_CASE(8);
+               HYPRE_CORE_CASE(7);
+               HYPRE_CORE_CASE(6);
+               HYPRE_CORE_CASE(5);
+               HYPRE_CORE_CASE(4);
+               HYPRE_CORE_CASE(3);
+               HYPRE_CORE_CASE(2);
+               HYPRE_CORE_CASE(1);
 
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0] + Ap4[0] + Ap5[0] +
-                                         Ap6[0] + Ap7[0] + Ap8[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 8:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0] + Ap4[0] + Ap5[0] +
-                                         Ap6[0] + Ap7[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 7:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0] + Ap4[0] + Ap5[0] +
-                                         Ap6[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 6:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0] + Ap4[0] + Ap5[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 5:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0] + Ap4[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 4:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
-                                         Ap3[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 3:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 2:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0]);
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 1:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                A_dbox, start, ustride, Ai,
-                                w_dbox, start, ustride, wi);
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * Ap0[0];
-
-               w_datad[wi] += temp;
-            }
-            hypre_BoxLoop2End(Ai, wi);
-            break;
-
-         case 0:
-            break;
-      } /* switch (nentries) */
+               default:
+                  break;
+            } /* switch (nentries) */
+         }
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncComputeStream();
+         hypre_SyncComputeStream();
 #endif
-   } /* for (d = 0; d < ndim; d++) */
+      } /* for (d = 0; d < ndim; d++) */
+   }
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
@@ -592,12 +726,11 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    hypre_Box             *w_dbox;
 
    HYPRE_Int              d, i, k, si;
-   HYPRE_Int              depth;
    HYPRE_Int              cdepth[HYPRE_MAXDIM];
    HYPRE_Int              vdepth[HYPRE_MAXDIM];
-   HYPRE_Int              csi[HYPRE_MAXDIM][HYPRE_UNROLL_MAXDEPTH];
-   HYPRE_Int              vsi[HYPRE_MAXDIM][HYPRE_UNROLL_MAXDEPTH];
    HYPRE_Int             *entries[HYPRE_MAXDIM];
+   HYPRE_Int              csi[HYPRE_MAXDIM][stencil_size];
+   HYPRE_Int              vsi[HYPRE_MAXDIM][stencil_size];
    HYPRE_Int              diag_is_constant;
 
 #if defined(HYPRE_USING_GPU)
@@ -630,7 +763,42 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
       {
          hypre_StructVectorNumGhost(work[d])[i] = hypre_StructMatrixNumGhost(A)[i];
       }
-      hypre_StructVectorInitialize(work[d]);
+      hypre_StructVectorInitialize(work[d], 0);
+   }
+
+   /* Initialize csi/vsi stencil pointers */
+   for (d = 0; d < ndim; d++)
+   {
+      cdepth[d] = vdepth[d] = 0;
+      for (k = 0; k < stencil_size; k++)
+      {
+         csi[d][k] = vsi[d][k] = 0;
+      }
+   }
+
+   /* Setup csi/vsi stencil pointers */
+   for (si = 0; si < stencil_size; si++)
+   {
+      if (hypre_StructMatrixConstEntry(A, si))
+      {
+         for (d = 0; d < ndim; d++)
+         {
+            if (hypre_IndexD(stencil_shape[si], d) != 0)
+            {
+               csi[d][cdepth[d]++] = const_indices[si];
+            }
+         }
+      }
+      else
+      {
+         for (d = 0; d < ndim; d++)
+         {
+            if (hypre_IndexD(stencil_shape[si], d) != 0)
+            {
+               vsi[d][vdepth[d]++] = si;
+            }
+         }
+      }
    }
 
    /*----------------------------------------------------------
@@ -650,102 +818,165 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          w_data[d] = hypre_StructVectorBoxData(work[d], i);
       }
 
-      for (si = 0; si < stencil_size; si += HYPRE_UNROLL_MAXDEPTH)
-      {
-         depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (stencil_size - si));
-         for (d = 0; d < ndim; d++)
-         {
-            cdepth[d] = vdepth[d] = 0;
-            for (k = 0; k < depth; k++)
-            {
-               csi[d][k] = vsi[d][k] = 0;
-            }
-         }
-
-         for (k = 0; k < depth; k++)
-         {
-            if (hypre_StructMatrixConstEntry(A, si + k))
-            {
-               if (hypre_IndexD(stencil_shape[si + k], 0) != 0)
-               {
-                  csi[0][cdepth[0]++] = const_indices[si + k];
-               }
-               if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
-               {
-                  csi[1][cdepth[1]++] = const_indices[si + k];
-               }
-               if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
-               {
-                  csi[2][cdepth[2]++] = const_indices[si + k];
-               }
-            }
-            else
-            {
-               if (hypre_IndexD(stencil_shape[si + k], 0) != 0)
-               {
-                  vsi[0][vdepth[0]++] = si + k;
-               }
-               if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
-               {
-                  vsi[1][vdepth[1]++] = si + k;
-               }
-               if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
-               {
-                  vsi[2][vdepth[2]++] = si + k;
-               }
-            }
-         }
-
-         /* Collect pointers to variable stencil entries */
-         for (d = 0; d < ndim; d++)
-         {
-            entries[d] = vsi[d];
-         }
-
-         /* Compute variable coefficient contributions */
-         hypre_PFMGComputeCxyz_core_VC(A, i, diag_is_constant, diag_entry,
-                                       vdepth, entries, start, loop_size,
-                                       A_dbox, w_dbox, w_data);
-
-         /* Collect pointers to constant stencil entries */
-         for (d = 0; d < ndim; d++)
-         {
-            entries[d] = csi[d];
-         }
-
-         /* Compute constant coefficient contributions */
-         hypre_PFMGComputeCxyz_core_CC(A, i, diag_is_constant, diag_entry,
-                                       cdepth, entries, start, loop_size,
-                                       A_dbox, w_dbox, w_data);
-      }
-
-      /* Compute cxyz/sqcxyz */
+      /* Collect pointers to variable stencil entries */
       for (d = 0; d < ndim; d++)
       {
+         entries[d] = vsi[d];
+      }
+
+      /* Compute variable coefficient contributions */
+      hypre_PFMGComputeCxyz_core_VC(A, i, diag_is_constant, diag_entry,
+                                    vdepth, entries, start, loop_size,
+                                    A_dbox, w_dbox, w_data);
+
+      /* Collect pointers to constant stencil entries */
+      for (d = 0; d < ndim; d++)
+      {
+         entries[d] = csi[d];
+      }
+
+      /* Compute constant coefficient contributions */
+      hypre_PFMGComputeCxyz_core_CC(A, i, diag_is_constant, diag_entry,
+                                    cdepth, entries, start, loop_size,
+                                    A_dbox, w_dbox, w_data);
+
+
+      /* Compute cxyz/sqcxyz */
+      hypre_GpuProfilingPushRange("Reduction");
+      if (ndim == 3)
+      {
 #if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
-         HYPRE_Real cdb   = cxyz[d];
-         HYPRE_Real sqcdb = sqcxyz[d];
+         /* TODO: Use a single BoxLoopReduction */
+         HYPRE_Real cdb_0 = cxyz[0], cdb_1 = cxyz[1], cdb_2 = cxyz[2];
+         HYPRE_Real sqcdb_0 = sqcxyz[0], sqcdb_1 = sqcxyz[1], sqcdb_2 = sqcxyz[2];
 
          hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
-                                      start, ustride, wi, cdb)
+                                      start, ustride, wi, cdb_0)
          {
-            cdb += w_data[d][wi];
+            cdb_0 += w_data[0][wi];
          }
-         hypre_BoxLoop1ReductionEnd(wi, cdb)
+         hypre_BoxLoop1ReductionEnd(wi, cdb_0)
 
          hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
-                                      start, ustride, wi, sqcdb)
+                                      start, ustride, wi, cdb_1)
          {
-            sqcdb += hypre_squared(w_data[d][wi]);
+            cdb_1 += w_data[1][wi];
          }
-         hypre_BoxLoop1ReductionEnd(wi, sqcdb)
+         hypre_BoxLoop1ReductionEnd(wi, cdb_1)
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, cdb_2)
+         {
+            cdb_2 += w_data[2][wi];
+         }
+         hypre_BoxLoop1ReductionEnd(wi, cdb_2)
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sqcdb_0)
+         {
+            sqcdb_0 += hypre_squared(w_data[0][wi]);
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sqcdb_0)
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sqcdb_1)
+         {
+            sqcdb_1 += hypre_squared(w_data[1][wi]);
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sqcdb_1)
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sqcdb_2)
+         {
+            sqcdb_2 += hypre_squared(w_data[2][wi]);
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sqcdb_2)
 #else
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         HYPRE_Real2 d2(cxyz[d], sqcxyz[d]);
-         ReduceSum<HYPRE_Real2> sum2(d2);
+         HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
+         ReduceSum<HYPRE_double6> sum6(d6);
 #else
-         HYPRE_Real cdb   = cxyz[d];
-         HYPRE_Real sqcdb = sqcxyz[d];
+         HYPRE_Real cdb_0 = cxyz[0], cdb_1 = cxyz[1], cdb_2 = cxyz[2];
+         HYPRE_Real sqcdb_0 = sqcxyz[0], sqcdb_1 = sqcxyz[1], sqcdb_2 = sqcxyz[2];
+
+#if defined(HYPRE_BOX_REDUCTION)
+#undef HYPRE_BOX_REDUCTION
+#endif
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#define HYPRE_BOX_REDUCTION map(tofrom:cdb_0,cdb_1,cdb_2,sqcdb_0,sqcdb_1,sqcdb_2) reduction(+:cdb_0,cdb_1,cdb_2,sqcdb_0,sqcdb_1,sqcdb_2)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:cdb_0,cdb_1,cdb_2,sqcdb_0,sqcdb_1,sqcdb_2)
+#endif
+
+#endif
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sum6)
+         {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            HYPRE_double6 temp6(w_data[0][wi], w_data[1][wi], w_data[2][wi],
+                                hypre_squared(w_data[0][wi]),
+                                hypre_squared(w_data[1][wi]),
+                                hypre_squared(w_data[2][wi]));
+            sum6 += temp6;
+#else
+            cdb_0 += w_data[0][wi];
+            cdb_1 += w_data[1][wi];
+            cdb_2 += w_data[2][wi];
+
+            sqcdb_0 += hypre_squared(w_data[0][wi]);
+            sqcdb_1 += hypre_squared(w_data[1][wi]);
+            sqcdb_2 += hypre_squared(w_data[2][wi]);
+#endif
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sum6)
+#endif
+
+#if !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+         HYPRE_double6 temp6 = (HYPRE_double6) sum6;
+         cxyz[0]   = temp6.x;
+         cxyz[1]   = temp6.y;
+         cxyz[2]   = temp6.z;
+         sqcxyz[0] = temp6.u;
+         sqcxyz[1] = temp6.v;
+         sqcxyz[2] = temp6.w;
+#else
+         cxyz[0]   = (HYPRE_Real) cdb_0;
+         cxyz[1]   = (HYPRE_Real) cdb_1;
+         cxyz[2]   = (HYPRE_Real) cdb_2;
+         sqcxyz[0] = (HYPRE_Real) sqcdb_0;
+         sqcxyz[1] = (HYPRE_Real) sqcdb_1;
+         sqcxyz[2] = (HYPRE_Real) sqcdb_2;
+#endif
+      }
+      else
+      {
+         for (d = 0; d < ndim; d++)
+         {
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
+            HYPRE_Real cdb   = cxyz[d];
+            HYPRE_Real sqcdb = sqcxyz[d];
+
+            hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                         start, ustride, wi, cdb)
+            {
+               cdb += w_data[d][wi];
+            }
+            hypre_BoxLoop1ReductionEnd(wi, cdb)
+
+            hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                         start, ustride, wi, sqcdb)
+            {
+               sqcdb += hypre_squared(w_data[d][wi]);
+            }
+            hypre_BoxLoop1ReductionEnd(wi, sqcdb)
+#else
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            HYPRE_Real2 d2(cxyz[d], sqcxyz[d]);
+            ReduceSum<HYPRE_Real2> sum2(d2);
+#else
+            HYPRE_Real cdb   = cxyz[d];
+            HYPRE_Real sqcdb = sqcxyz[d];
 
 #if defined(HYPRE_BOX_REDUCTION)
 #undef HYPRE_BOX_REDUCTION
@@ -758,29 +989,31 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
 #endif
 
 #endif
-         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
-                                      start, ustride, wi, sum2)
-         {
+            hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                         start, ustride, wi, sum2)
+            {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-            HYPRE_Real2 temp2(w_data[d][wi], hypre_squared(w_data[d][wi]));
-            sum2  += temp2;
+               HYPRE_Real2 temp2(w_data[d][wi], hypre_squared(w_data[d][wi]));
+               sum2  += temp2;
 #else
-            cdb   += w_data[d][wi];
-            sqcdb += hypre_squared(w_data[d][wi]);
+               cdb   += w_data[d][wi];
+               sqcdb += hypre_squared(w_data[d][wi]);
 #endif
-         }
-         hypre_BoxLoop1ReductionEnd(wi, sum2)
+            }
+            hypre_BoxLoop1ReductionEnd(wi, sum2)
 #endif
 
 #if !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-         HYPRE_Real2 temp2 = (HYPRE_Real2) sum2;
-         cxyz[d]   = temp2.x;
-         sqcxyz[d] = temp2.y;
+            HYPRE_Real2 temp2 = (HYPRE_Real2) sum2;
+            cxyz[d]   = temp2.x;
+            sqcxyz[d] = temp2.y;
 #else
-         cxyz[d]   = (HYPRE_Real) cdb;
-         sqcxyz[d] = (HYPRE_Real) sqcdb;
+            cxyz[d]   = (HYPRE_Real) cdb;
+            sqcxyz[d] = (HYPRE_Real) sqcdb;
 #endif
-      } /* for (d = 0; d < ndim; d++) */
+         } /* for (d = 0; d < ndim; d++) */
+      }
+      hypre_GpuProfilingPopRange(); // "Reduction"
    } /* hypre_ForBoxI(i, compute_boxes) */
 
    /* Free work arrays */

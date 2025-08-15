@@ -131,7 +131,7 @@ hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
    for (var = 0; var < nvars; var++)
    {
       svector = hypre_SStructPVectorSVector(pvector, var);
-      hypre_StructVectorInitialize(svector);
+      hypre_StructVectorInitialize(svector, 1);
       if (vartypes[var] > 0)
       {
          /* needed to get AddTo accumulation correct between processors */

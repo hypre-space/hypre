@@ -388,6 +388,13 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
 #endif
 
+/* Resolve deprecated warnings about thrust::identity */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 200802)
+#define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
+#endif
+
 using namespace thrust::placeholders;
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -684,8 +691,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_sgetrf_batched
@@ -745,8 +757,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_dgetrf_batched

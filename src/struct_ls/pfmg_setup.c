@@ -71,6 +71,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
    HYPRE_Int             v_memory_mode  = 2;
+   HYPRE_Int             zero_init;
 
    char                  region_name[1024];
 #if DEBUG
@@ -88,6 +89,21 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    {
       v_memory_mode = 0;
    }
+
+   /* Set flag for initializing matrix/vector entries to zeroes */
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_StructMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      zero_init = 0;
+   }
+   else
+#endif
+   {
+      zero_init = 1;
+   }
+
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
@@ -163,7 +179,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetMemoryMode(tx_l[0], v_memory_mode);
    hypre_StructVectorSetNumGhost(tx_l[0], x_num_ghost);
-   hypre_StructVectorInitialize(tx_l[0]);
+   hypre_StructVectorInitialize(tx_l[0], zero_init);
    hypre_StructVectorAssemble(tx_l[0]);
 
    //   /* RDF AP Debug */
@@ -179,8 +195,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      //HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
-
       cdir = cdir_l[l];
 
       hypre_PFMGSetCIndex(cdir, cindex);
@@ -219,12 +233,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
       else
       {
-         hypre_StructMatrixInitialize(P_l[l]);
+         hypre_StructMatrixInitializeShell(P_l[l]);
+         hypre_StructMatrixInitializeData(P_l[l], zero_init, NULL);
          hypre_PFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
          if (nonsymmetric_cycle)
          {
-            hypre_StructMatrixInitialize(RT_l[l]);
+            hypre_StructMatrixInitializeShell(RT_l[l]);
+            hypre_StructMatrixInitializeData(RT_l[l], zero_init, NULL);
             hypre_PFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
          }
 #endif
@@ -234,8 +250,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructGridAssemble(grid_l[l + 1]);
 
          A_l[l + 1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l + 1], cdir, rap_type);
-         hypre_StructMatrixInitialize(A_l[l + 1]);
-         hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l + 1]);
+         hypre_StructMatrixInitializeShell(A_l[l + 1]);
+         hypre_StructMatrixInitializeData(A_l[l + 1], zero_init, NULL);
+         hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
+                              cdir, cindex, stride, rap_type,
+                              A_l[l + 1]);
       }
 
       //      /* RDF AP Debug */
@@ -244,22 +263,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       b_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(b_l[l + 1], b_num_ghost);
-      hypre_StructVectorInitialize(b_l[l + 1]);
+      hypre_StructVectorInitialize(b_l[l + 1], zero_init);
       hypre_StructVectorAssemble(b_l[l + 1]);
 
       x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetMemoryMode(x_l[l + 1], v_memory_mode);
       hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
-      hypre_StructVectorInitialize(x_l[l + 1]);
+      hypre_StructVectorInitialize(x_l[l + 1], zero_init);
       hypre_StructVectorAssemble(x_l[l + 1]);
 
       tx_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetMemoryMode(tx_l[l + 1], v_memory_mode);
       hypre_StructVectorSetNumGhost(tx_l[l + 1], x_num_ghost);
-      hypre_StructVectorInitialize(tx_l[l + 1]);
+      hypre_StructVectorInitialize(tx_l[l + 1], zero_init);
       hypre_StructVectorAssemble(tx_l[l + 1]);
-
-      //HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_REGION_END("%s", region_name);
@@ -279,12 +296,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       if (rap_type == 0)
       {
-         hypre_StructMatrixInitializeData(P_l[l], NULL);
+         hypre_StructMatrixInitializeData(P_l[l], zero_init, NULL);
          hypre_PFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
          if (nonsymmetric_cycle)
          {
-            hypre_StructMatrixInitializeData(RT_l[l], NULL);
+            hypre_StructMatrixInitializeData(RT_l[l], zero_init, NULL);
             hypre_PFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
          }
 #endif

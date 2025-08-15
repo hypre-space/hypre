@@ -456,7 +456,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
                   {
                      sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
                      sx = hypre_SStructPVectorSVector(px, vj);
-                     hypre_StructMatvecCompute(sdata, -1.0, sA, sx, 1.0, sy);
+                     hypre_StructMatvecCompute(sdata, -1.0, sA, sx, 1.0, sy, sy);
                   }
                }
             }
