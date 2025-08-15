@@ -152,6 +152,7 @@
 #undef hypre_ParCSRMatrixDiagScaleHost
 #undef hypre_ParCSRMatrixDropSmallEntries
 #undef hypre_ParCSRMatrixDropSmallEntriesHost
+#undef hypre_ParCSRMatrixEliminateRowsCols
 #undef hypre_ParCSRMatrixExtractAExt
 #undef hypre_ParCSRMatrixExtractBExt
 #undef hypre_ParCSRMatrixExtractBExt_Arrays

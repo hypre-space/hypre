@@ -140,6 +140,13 @@ HYPRE_Int
 hypre_CSRMatrixDiagScale_long_dbl( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd );
 
 HYPRE_Int
+hypre_CSRMatrixEliminateRowsCols_flt( hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_CSRMatrixEliminateRowsCols_dbl( hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+HYPRE_Int
+hypre_CSRMatrixEliminateRowsCols_long_dbl( hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows );
+
+HYPRE_Int
 hypre_CSRMatrixExtractDiagonal_flt( hypre_CSRMatrix *A, hypre_float *d, HYPRE_Int type );
 HYPRE_Int
 hypre_CSRMatrixExtractDiagonal_dbl( hypre_CSRMatrix *A, hypre_double *d, HYPRE_Int type );

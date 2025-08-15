@@ -155,6 +155,7 @@
 #define hypre_ParCSRMatrixDiagScaleHost HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixDiagScaleHost )
 #define hypre_ParCSRMatrixDropSmallEntries HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixDropSmallEntries )
 #define hypre_ParCSRMatrixDropSmallEntriesHost HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixDropSmallEntriesHost )
+#define hypre_ParCSRMatrixEliminateRowsCols HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixEliminateRowsCols )
 #define hypre_ParCSRMatrixExtractAExt HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixExtractAExt )
 #define hypre_ParCSRMatrixExtractBExt HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixExtractBExt )
 #define hypre_ParCSRMatrixExtractBExt_Arrays HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixExtractBExt_Arrays )

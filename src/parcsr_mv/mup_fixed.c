@@ -768,6 +768,14 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol, H
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ParCSRMatrixEliminateRowsCols( hypre_ParCSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixEliminateRowsCols)( A, nrows, rows );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_CSRMatrix *
 hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A, HYPRE_Int data, HYPRE_BigInt **pA_ext_row_map )
 {
