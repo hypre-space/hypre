@@ -1551,8 +1551,10 @@ HYPRE_Int hypre_AMGHybridSetKDim ( void *AMGhybrid_vdata, HYPRE_Int k_dim );
 HYPRE_Int hypre_AMGHybridSetStopCrit ( void *AMGhybrid_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_AMGHybridSetTwoNorm ( void *AMGhybrid_vdata, HYPRE_Int two_norm );
 HYPRE_Int hypre_AMGHybridSetRelChange ( void *AMGhybrid_vdata, HYPRE_Int rel_change );
-HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata, HYPRE_Int (*pcg_precond_solve )(void*, void*,
-                                                                                       void*, void*), HYPRE_Int (*pcg_precond_setup )(void*, void*, void*, void*), void *pcg_precond );
+HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata,
+                                      HYPRE_Int (*solve)(void*, void*, void*, void*),
+                                      HYPRE_Int (*setup)(void*, void*, void*, void*),
+                                      void *pcg_precond );
 HYPRE_Int hypre_AMGHybridSetLogging ( void *AMGhybrid_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_AMGHybridSetPrintLevel ( void *AMGhybrid_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_AMGHybridSetStrongThreshold ( void *AMGhybrid_vdata, HYPRE_Real strong_threshold );
@@ -1693,7 +1695,6 @@ HYPRE_Int hypre_index_of_minimum ( HYPRE_BigInt *data, HYPRE_Int n );
 void hypre_swap_int ( HYPRE_BigInt *data, HYPRE_Int a, HYPRE_Int b );
 void hypre_initialize_vecs ( HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc,
                              HYPRE_BigInt *offd_ftc, HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF );
-/*HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found , HYPRE_Int num_cols_A_offd , HYPRE_Int *A_ext_i , HYPRE_Int *A_ext_j, HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j, HYPRE_Int *CF_marker_offd );*/
 HYPRE_Int hypre_exchange_marker(hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *IN_marker,
                                 HYPRE_Int *OUT_marker);
 HYPRE_Int hypre_exchange_interp_data( HYPRE_Int **CF_marker_offd, HYPRE_Int **dof_func_offd,
@@ -2850,8 +2851,6 @@ HYPRE_Int hypre_MGRSetReservedCpointsLevelToKeep( void *mgr_vdata, HYPRE_Int lev
 HYPRE_Int hypre_MGRSetMaxGlobalSmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetGlobalSmoothType( void *mgr_vdata, HYPRE_Int iter_type );
 HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void *mgr_vdata, HYPRE_Int nonCptToFptFlag );
-//HYPRE_Int hypre_MGRInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
-//HYPRE_Int hypre_MGRUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
                                                   HYPRE_Int num_points, HYPRE_Int point_type,
                                                   HYPRE_Int *CF_marker, HYPRE_Int diag_size,
@@ -2889,16 +2888,10 @@ HYPRE_Int hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
 HYPRE_Int hypre_BlockDiagInvLapack( HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int hypre_MGRBlockRelaxSetup( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                     HYPRE_Real **diaginvptr );
-//HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
-//                           HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Int method, hypre_ParVector *Vtemp,
-//                           hypre_ParVector *Ztemp);
 HYPRE_Int hypre_block_jacobi_solve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                     hypre_ParVector *u, HYPRE_Int blk_size,
                                     HYPRE_Int method, HYPRE_Real *diaginv,
                                     hypre_ParVector *Vtemp );
-//HYPRE_Int hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
-//HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
-//hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker,
                                 HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag,
                                 hypre_ParCSRMatrix **A_ff_ptr );

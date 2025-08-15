@@ -109,24 +109,6 @@ hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypre_StructVectorUnMapCommInfo( hypre_StructVector *vector,
-                                 hypre_CommInfo     *comm_info )
-{
-   HYPRE_Int  ndim = hypre_StructVectorNDim(vector);
-
-   /* Map the comm_info boxes only if the vector does not have a unit stride */
-   if (!hypre_IndexEqual(hypre_StructVectorStride(vector), 1, ndim))
-   {
-      hypre_CommInfoRefine(comm_info, NULL, hypre_StructVectorStride(vector));
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
 hypre_StructVector *
 hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )

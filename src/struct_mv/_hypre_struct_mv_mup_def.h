@@ -484,7 +484,6 @@
 #define hypre_StructVectorSetRandomValues HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorSetRandomValues )
 #define hypre_StructVectorSetStride HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorSetStride )
 #define hypre_StructVectorSetValues HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorSetValues )
-#define hypre_StructVectorUnMapCommInfo HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorUnMapCommInfo )
 #define hypre_StructVectorUnMapDataBox HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorUnMapDataBox )
 #define hypre_StructVectorUnMapDataIndex HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorUnMapDataIndex )
 #define hypre_StructVectorUnMapDataStride HYPRE_FIXEDPRECISION_FUNC ( hypre_StructVectorUnMapDataStride )

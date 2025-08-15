@@ -696,7 +696,7 @@ hypre_ParCSRMatrixCopyColMapOffdToHost( hypre_ParCSRMatrix *A )
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopy_C)( P, C, CF_marker );
@@ -1176,7 +1176,7 @@ hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParCSRMatrixZero_F( hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixZero_F)( P, CF_marker );
@@ -1216,7 +1216,7 @@ hypre_ParMatMinus_F( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParMatScaleDiagInv_F( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, HYPRE_Complex weight, HYPRE_Int *CF_marker )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParMatScaleDiagInv_F)( C, A, weight, CF_marker );
@@ -1248,7 +1248,7 @@ hypre_ParMatmul_RowSizes( HYPRE_MemoryLocation memory_location, HYPRE_Int **C_di
 
 /*--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_ParMatmul_RowSizes_Marked( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int **B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j, HYPRE_Int *B_offd_i, HYPRE_Int *B_offd_j, HYPRE_Int *B_ext_diag_i, HYPRE_Int *B_ext_diag_j, HYPRE_Int *B_ext_offd_i, HYPRE_Int *B_ext_offd_j, HYPRE_Int *map_B_to_C, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int allsquare, HYPRE_Int num_cols_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_Int num_cols_offd_C, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParMatmul_RowSizes_Marked)( C_diag_i, C_offd_i, B_marker, A_diag_i, A_diag_j, A_offd_i, A_offd_j, B_diag_i, B_diag_j, B_offd_i, B_offd_j, B_ext_diag_i, B_ext_diag_j, B_ext_offd_i, B_ext_offd_j, map_B_to_C, C_diag_size, C_offd_size, num_rows_diag_A, num_cols_offd_A, allsquare, num_cols_diag_B, num_cols_offd_B, num_cols_offd_C, CF_marker, dof_func, dof_func_offd );
