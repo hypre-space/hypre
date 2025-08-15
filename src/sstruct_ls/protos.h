@@ -181,10 +181,6 @@ HYPRE_Int hypre_SysPFMGRelaxSetTempVec ( void *sys_pfmg_relax_vdata, hypre_SStru
 HYPRE_Int hypre_SysPFMGSetup ( void *sys_pfmg_vdata, hypre_SStructMatrix *A_in,
                                hypre_SStructVector *b_in, hypre_SStructVector *x_in );
 HYPRE_Int hypre_SysPFMGZeroDiagonal( hypre_SStructPMatrix *A );
-#if 0
-HYPRE_Int hypre_SysStructCoarsen ( hypre_SStructPGrid *fgrid, hypre_Index index, hypre_Index stride,
-                                   HYPRE_Int prune, hypre_SStructPGrid **cgrid_ptr );
-#endif
 
 /* sys_pfmg_setup_interp.c */
 hypre_SStructPMatrix *hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A, HYPRE_Int cdir,
