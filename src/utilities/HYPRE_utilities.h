@@ -43,14 +43,11 @@ extern "C" {
  * @{
  **/
 
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
+/*===== BEGIN 1 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 
-/**
- * @name BigInt
- *
- * @{
- **/
+/*--------------------------------------------------------------------------
+ * BigInt and MixedInt
+ *--------------------------------------------------------------------------*/
 
 #include <limits.h>
 
@@ -97,16 +94,9 @@ typedef int HYPRE_Int;
 #define HYPRE_INT_MIN INT_MIN
 #endif
 
-/**@}*/
-
 /*--------------------------------------------------------------------------
+ * Real and Complex Types
  *--------------------------------------------------------------------------*/
-
-/**
- * @name Real and Complex Types
- *
- * @{
- **/
 
 #include <float.h>
 
@@ -174,7 +164,24 @@ typedef double       hypre_double;
 typedef float        hypre_float;
 typedef long double  hypre_long_double;
 
-/**@}*/
+/*--------------------------------------------------------------------------
+ * Sequential MPI stuff
+ *--------------------------------------------------------------------------*/
+
+#ifdef HYPRE_SEQUENTIAL
+typedef HYPRE_Int MPI_Comm;
+#endif
+
+/*--------------------------------------------------------------------------
+ * HYPRE AP user functions
+ *--------------------------------------------------------------------------*/
+
+/* Checks whether the AP is on */
+/* TODO (VPM): this function is provided for backwards compatibility
+   and will be removed in a future release */
+HYPRE_Int HYPRE_AssumedPartitionCheck(void);
+
+/*===== END 1 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -210,6 +217,10 @@ HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
 HYPRE_Int
 HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 
+/**@}*/
+
+/*===== BEGIN 2 - IGNORE CODE IN DOCS =====*/  /*! \cond */
+
 /* RDF: This probably needs to be renamed to something like HYPRE_COMPILE_PRECISION */
 #ifndef HYPRE_OBJECT_PRECISION
 #if defined(HYPRE_SINGLE)
@@ -244,15 +255,7 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 #define hypre_DEFINE_GLOBAL 1
 #endif
 
-/**@}*/
-
-/*--------------------------------------------------------------------------
- * Sequential MPI stuff
- *--------------------------------------------------------------------------*/
-
-#ifdef HYPRE_SEQUENTIAL
-typedef HYPRE_Int MPI_Comm;
-#endif
+/*===== END 2 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -442,15 +445,6 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
                      HYPRE_Int  *single_ptr );
 
 /**@}*/
-
-/*--------------------------------------------------------------------------
- * HYPRE AP user functions
- *--------------------------------------------------------------------------*/
-
-/* Checks whether the AP is on */
-/* TODO (VPM): this function is provided for backwards compatibility
-   and will be removed in a future release */
-HYPRE_Int HYPRE_AssumedPartitionCheck(void);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -723,6 +717,8 @@ HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 /**@}*/
 /**@}*/
 
+/*===== BEGIN 3 - IGNORE CODE IN DOCS =====*/  /*! \cond */
+
 /*--------------------------------------------------------------------------
  * Base objects
  *--------------------------------------------------------------------------*/
@@ -755,6 +751,8 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
+/*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 #ifdef __cplusplus
 }
