@@ -2361,12 +2361,7 @@ hypre_StructMatrixReadData( FILE               *file,
    /* Move values to the device memory if necessary and free host values */
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-      vi = 0;
-      hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-         vi += num_values * hypre_BoxVolume(box);
-      }
+      vi = hypre_BoxArrayVolume(boxes) * num_values;
       values = hypre_TAlloc(HYPRE_Complex, vi, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(values, h_values, HYPRE_Complex, vi,
                     memory_location, HYPRE_MEMORY_HOST);
