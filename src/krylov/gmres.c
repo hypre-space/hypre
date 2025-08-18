@@ -1469,23 +1469,6 @@ hypre_GMRESSetPrecond( void  *gmres_vdata,
    return hypre_error_flag;
 }
 
-
-/*--------------------------------------------------------------------------
- * hypre_precond_setup)(void*, void*, void*, void*),
-                       void  *precond_data )
-{
-   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
-   hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
-
-
-   (gmres_functions -> precond)        = precond;
-   (gmres_functions -> precond_setup)  = precond_setup;
-   (gmres_data -> precond_data)        = precond_data;
-
-   return hypre_error_flag;
-}
-*/
-
 /*--------------------------------------------------------------------------
  * hypre_GMRESGetPrecond
  *--------------------------------------------------------------------------*/

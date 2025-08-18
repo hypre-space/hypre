@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * Mixed precision hypre_SeqVectorCopy
+ * Mixed precision hypre_SeqVectorCopy -- TODO: Needs GPU support - DOK
  * copies data from x to y
  * if size of x is larger than y only the first size_y elements of x are
  * copied to y
@@ -44,48 +44,6 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
    HYPRE_Int      i;
 
    size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
-   /*
-     HYPRE_Int      ierr = 0;
-     if(precision == HYPRE_REAL_SINGLE)
-      {
-         hypre_double *x_data = hypre_VectorData(x);
-         hypre_float *y_data = hypre_VectorData(y);
-   #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-   #endif
-            for (i = 0; i < size; i++)
-               y_data[i] = (hypre_float)x_data[i];
-      }
-      else if(precision == HYPRE_REAL_DOUBLE)
-      {
-         hypre_float *x_data = (hypre_float *)hypre_VectorData(x);
-         hypre_double *y_data = hypre_VectorData(y);
-   #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-   #endif
-   //         for (i = 0; i < size; i++)
-   //            y_data[i] = (hypre_double)x_data[i];
-            for (i = 0; i < size; i++)
-   //            (hypre_VectorData(y))[i] = (hypre_double)(hypre_VectorData(x))[i];
-               ((hypre_double *)y->data)[i] = (hypre_double)((hypre_float *)(x->data))[i];
-      }
-      else if(precision == HYPRE_REAL_LONGDOUBLE)
-      {
-         hypre_double *x_data = hypre_VectorData(x);
-         hypre_long_double *y_data = hypre_VectorData(y);
-   #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-   #endif
-            for (i = 0; i < size; i++)
-               y_data[i] = (hypre_long_double)x_data[i];
-      }
-      else
-      {
-            hypre_printf_dbl("Error: Undefined precision type for Vector Copy! \n");
-            ierr = 2;
-      }
-   */
-
 
    switch (precision)
    {
@@ -131,7 +89,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 }
 
 /*--------------------------------------------------------------------------
- * Mixed-precision hypre_SeqVectorAxpy
+ * Mixed-precision hypre_SeqVectorAxpy -- TODO: Needs GPU support - DOK
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
