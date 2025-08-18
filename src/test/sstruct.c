@@ -2284,7 +2284,7 @@ PrintUsage( char *progname,
       hypre_printf("  -x0one             : initial solution (x0) has unit components \n");
       hypre_printf("  -x0rand            : initial solution (x0) has random components \n");
       hypre_printf("  -xone              : solution (x) is vector with unit components\n");
-      hypre_printf("  -tol <val>         : convergence tolerance (def 1e-9)\n");
+      hypre_printf("  -tol <val>         : convergence tolerance (def 1e-6)\n");
       hypre_printf("  -solver_type <ID>  : Solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
@@ -2410,7 +2410,7 @@ PrintUsage( char *progname,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real *
-hypre_MPDataAlloc(HYPRE_Int count, HYPRE_MemoryLocation location)
+hypre_MuPDataAlloc(HYPRE_Int count, HYPRE_MemoryLocation location)
 {
    void *data = NULL;
 
@@ -2434,7 +2434,7 @@ hypre_MPDataAlloc(HYPRE_Int count, HYPRE_MemoryLocation location)
 }
 
 void
-hypre_MPDataMemcpy(void *dst, void *src, HYPRE_Int count,
+hypre_MuPDataMemcpy(void *dst, void *src, HYPRE_Int count,
                    HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src)
 {
    HYPRE_Precision precision;
@@ -2455,7 +2455,7 @@ hypre_MPDataMemcpy(void *dst, void *src, HYPRE_Int count,
 }
 
 void
-hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
+hypre_MuPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
 {
    HYPRE_Int i;
 
@@ -2495,7 +2495,7 @@ hypre_MPDataCopyToMP(void *dst, HYPRE_Real *src, HYPRE_Int count)
 }
 
 void
-hypre_MPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
+hypre_MuPDataCopyFromMP(HYPRE_Real *dst, void *src, HYPRE_Int count)
 {
    HYPRE_Int i;
 
@@ -2835,7 +2835,8 @@ main( hypre_int argc,
    vis = 0;
    seed = 1;
    old_default = 0;
-
+   
+   /* runtime precision */
    precision_id = -1;
 
    /*-----------------------------------------------------------
@@ -3411,6 +3412,7 @@ main( hypre_int argc,
       /* end lobpcg */
       else if ( strcmp(argv[arg_index], "-precision") == 0 )
       {
+         /* runtime precision */
          arg_index++;
          precision_id = atoi(argv[arg_index++]);
       }
@@ -3821,8 +3823,8 @@ main( hypre_int argc,
 
          /* Allocate values buffer on host and device memory */
          values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
-         h_values = hypre_MPDataAlloc(values_size, HYPRE_MEMORY_HOST);
-         d_values = hypre_MPDataAlloc(values_size, memory_location);
+         h_values = hypre_MuPDataAlloc(values_size, HYPRE_MEMORY_HOST);
+         d_values = hypre_MuPDataAlloc(values_size, memory_location);
 
          /* TODO (VPM): Implement HYPRE_SStructMatrixSetSymmetric(A, 1); */
          for (i = 0; i < data.symmetric_num; i++)
@@ -3852,8 +3854,8 @@ main( hypre_int argc,
                         values[j] = data.stencil_values[s][i];
                      }
 
-                     hypre_MPDataCopyToMP(h_values, values, values_size);
-                     hypre_MPDataMemcpy(d_values, h_values, values_size,
+                     hypre_MuPDataCopyToMP(h_values, values, values_size);
+                     hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                         memory_location, HYPRE_MEMORY_HOST);
 
                      for (box = 0; box < pdata.nboxes; box++)
@@ -3872,8 +3874,8 @@ main( hypre_int argc,
          {
             /* FEMStencilSetRow: add to stencil values */
 #if 0    // Use AddFEMValues
-            hypre_MPDataCopyToMP(h_values, data.fem_values, data.fem_nsparse);
-            hypre_MPDataMemcpy(d_values, h_values, data.fem_nsparse,
+            hypre_MuPDataCopyToMP(h_values, data.fem_values, data.fem_nsparse);
+            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nsparse,
                                memory_location, HYPRE_MEMORY_HOST);
 
             for (part = 0; part < data.nparts; part++)
@@ -3904,8 +3906,8 @@ main( hypre_int argc,
                hypre_TMemcpy(&values[j], data.fem_values, HYPRE_Real, data.fem_nsparse,
                              HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             }
-            hypre_MPDataCopyToMP(h_values, values, data.fem_nsparse * data.max_boxsize);
-            hypre_MPDataMemcpy(d_values, h_values, data.fem_nsparse * data.max_boxsize,
+            hypre_MuPDataCopyToMP(h_values, values, data.fem_nsparse * data.max_boxsize);
+            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nsparse * data.max_boxsize,
                                memory_location, HYPRE_MEMORY_HOST);
             for (part = 0; part < data.nparts; part++)
             {
@@ -3944,14 +3946,14 @@ main( hypre_int argc,
                {
                   values[j] = pdata.graph_values[box];
                }
-               hypre_MPDataCopyToMP(h_values, values, pdata.graph_boxsizes[box]);
+               hypre_MuPDataCopyToMP(h_values, values, pdata.graph_boxsizes[box]);
                HYPRE_SStructMatrixSetBoxValues(A, part,
                                                pdata.graph_ilowers[box], pdata.graph_iuppers[box],
                                                pdata.graph_vars[box],
                                                1, &pdata.graph_entries[box], h_values);
 #else
-               hypre_MPDataCopyToMP(h_values, &pdata.graph_values[box], 1);
-               hypre_MPDataMemcpy(d_values, h_values, 1, memory_location, HYPRE_MEMORY_HOST);
+               hypre_MuPDataCopyToMP(h_values, &pdata.graph_values[box], 1);
+               hypre_MuPDataMemcpy(d_values, h_values, 1, memory_location, HYPRE_MEMORY_HOST);
                for (index[2] = pdata.graph_ilowers[box][2];
                     index[2] <= pdata.graph_iuppers[box][2];
                     index[2] += pdata.graph_strides[box][2])
@@ -3986,8 +3988,8 @@ main( hypre_int argc,
                   values[j] = pdata.matset_values[box];
                }
 
-               hypre_MPDataCopyToMP(h_values, values, values_size);
-               hypre_MPDataMemcpy(d_values, h_values, values_size,
+               hypre_MuPDataCopyToMP(h_values, values, values_size);
+               hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                   memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructMatrixSetBoxValues(A, part,
@@ -4012,8 +4014,8 @@ main( hypre_int argc,
                      values[j] = pdata.matadd_values[box][entry];
                   }
 
-                  hypre_MPDataCopyToMP(h_values, values, values_size);
-                  hypre_MPDataMemcpy(d_values, h_values, values_size,
+                  hypre_MuPDataCopyToMP(h_values, values, values_size);
+                  hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                      memory_location, HYPRE_MEMORY_HOST);
 
                   HYPRE_SStructMatrixAddToBoxValues(A, part,
@@ -4049,8 +4051,8 @@ main( hypre_int argc,
                   }
                }
 
-               hypre_MPDataCopyToMP(h_values, values, values_size);
-               hypre_MPDataMemcpy(d_values, h_values, values_size,
+               hypre_MuPDataCopyToMP(h_values, values, values_size);
+               hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                   memory_location, HYPRE_MEMORY_HOST);
 
                for (index[2] = pdata.fem_matadd_ilowers[box][2];
@@ -4141,8 +4143,8 @@ main( hypre_int argc,
             }
          }
 
-         hypre_MPDataCopyToMP(h_values, values, values_size);
-         hypre_MPDataMemcpy(d_values, h_values, values_size,
+         hypre_MuPDataCopyToMP(h_values, values, values_size);
+         hypre_MuPDataMemcpy(d_values, h_values, values_size,
                             memory_location, HYPRE_MEMORY_HOST);
 
          for (part = 0; part < data.nparts; part++)
@@ -4163,8 +4165,8 @@ main( hypre_int argc,
          if (data.fem_rhs_true)
          {
 #if 0    // Use AddFEMValues
-            hypre_MPDataCopyToMP(h_values, data.fem_rhs_values, data.fem_nvars);
-            hypre_MPDataMemcpy(d_values, h_values, data.fem_nvars,
+            hypre_MuPDataCopyToMP(h_values, data.fem_rhs_values, data.fem_nvars);
+            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
                                memory_location, HYPRE_MEMORY_HOST);
 
             for (part = 0; part < data.nparts; part++)
@@ -4195,8 +4197,8 @@ main( hypre_int argc,
                hypre_TMemcpy(&values[j], data.fem_rhs_values, HYPRE_Real,
                              data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
             }
-            hypre_MPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
-            hypre_MPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
+            hypre_MuPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
+            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
                                memory_location, HYPRE_MEMORY_HOST);
             for (part = 0; part < data.nparts; part++)
             {
@@ -4223,8 +4225,8 @@ main( hypre_int argc,
                   values[j] = pdata.rhsadd_values[box];
                }
 
-               hypre_MPDataCopyToMP(h_values, values, values_size);
-               hypre_MPDataMemcpy(d_values, h_values, values_size,
+               hypre_MuPDataCopyToMP(h_values, values, values_size);
+               hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                   memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructVectorAddToBoxValues(b, part,
@@ -4240,8 +4242,8 @@ main( hypre_int argc,
             pdata = data.pdata[part];
             for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
             {
-               hypre_MPDataCopyToMP(h_values, pdata.fem_rhsadd_values[box], data.fem_nvars);
-               hypre_MPDataMemcpy(d_values, h_values, data.fem_nvars,
+               hypre_MuPDataCopyToMP(h_values, pdata.fem_rhsadd_values[box], data.fem_nvars);
+               hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
                                   memory_location, HYPRE_MEMORY_HOST);
                for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
                     index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
@@ -4294,8 +4296,8 @@ main( hypre_int argc,
                            SetCosineVector(scale, ilower, iupper, values);
                            size = BoxVolume(ilower, iupper);
 
-                           hypre_MPDataCopyToMP(h_values, values, size);
-                           hypre_MPDataMemcpy(d_values, h_values, size,
+                           hypre_MuPDataCopyToMP(h_values, values, size);
+                           hypre_MuPDataMemcpy(d_values, h_values, size,
                                               memory_location, HYPRE_MEMORY_HOST);
 
                            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, d_values);
@@ -4362,7 +4364,7 @@ main( hypre_int argc,
       } /* if (read_fromfile_flag & 0x2) */
 
       HYPRE_SStructInnerProd(b, b, tmp_norm_ptr);
-      hypre_MPDataCopyFromMP(&rhs_norm, tmp_norm_ptr, 1);
+      hypre_MuPDataCopyFromMP(&rhs_norm, tmp_norm_ptr, 1);
       rhs_norm = hypre_sqrt(rhs_norm);
 
       /*-----------------------------------------------------------
@@ -4402,7 +4404,7 @@ main( hypre_int argc,
       } /* if (read_fromfile_flag & 0x4) */
 
       HYPRE_SStructInnerProd(x, x, tmp_norm_ptr);
-      hypre_MPDataCopyFromMP(&x0_norm, tmp_norm_ptr, 1);
+      hypre_MuPDataCopyFromMP(&x0_norm, tmp_norm_ptr, 1);
       x0_norm = hypre_sqrt(x0_norm);
 
       /*-----------------------------------------------------------
@@ -4525,8 +4527,8 @@ main( hypre_int argc,
                      values[j] = stencil_values[i];
                   }
 
-                  hypre_MPDataCopyToMP(h_values, values, values_size);
-                  hypre_MPDataMemcpy(d_values, h_values, values_size,
+                  hypre_MuPDataCopyToMP(h_values, values, values_size);
+                  hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                      memory_location, HYPRE_MEMORY_HOST);
 
                   for (box = 0; box < pdata.nboxes; box++)
@@ -6646,7 +6648,7 @@ main( hypre_int argc,
          {
             final_res_norm = 0.0;
          }
-         hypre_MPDataCopyToMP(final_res_norm_ptr, &final_res_norm, 1); // RDF: See above
+         hypre_MuPDataCopyToMP(final_res_norm_ptr, &final_res_norm, 1); // RDF: See above
          HYPRE_StructVectorDestroy(sr);
 
          HYPRE_StructCycRedDestroy(struct_solver);
@@ -7597,7 +7599,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorCopy(b, r);
          HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
          HYPRE_SStructInnerProd(r, r, tmp_norm_ptr);
-         hypre_MPDataCopyFromMP(&real_res_norm, tmp_norm_ptr, 1);
+         hypre_MuPDataCopyFromMP(&real_res_norm, tmp_norm_ptr, 1);
          real_res_norm = hypre_sqrt(real_res_norm);
          if (rhs_norm > 0)
          {
@@ -7609,7 +7611,7 @@ main( hypre_int argc,
        * Print the solution and other info
        *-----------------------------------------------------------*/
 
-      hypre_MPDataCopyFromMP(&final_res_norm, final_res_norm_ptr, 1);
+      hypre_MuPDataCopyFromMP(&final_res_norm, final_res_norm_ptr, 1);
 
       if (print_system)
       {

@@ -5,24 +5,6 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/******************************************************************************
- *
- * NOTE: The following routines are currently only used as follows in hypre, and
- * also appear in '_hypre_struct_mv.h':
- *
- * hypre_BoxBoundaryG
- * struct_mv/box_boundary.c
- * struct_mv/struct_vector.c
- * sstruct_ls/maxwell_grad.c
- * sstruct_ls/maxwell_TV_setup.c
- *
- * hypre_BoxBoundaryDG
- * struct_mv/box_boundary.c
- * sstruct_ls/maxwell_grad.c
- * sstruct_ls/maxwell_PNedelec_bdy.c
- *
- *****************************************************************************/
-
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
@@ -136,7 +118,6 @@ hypre_BoxBoundaryDG( hypre_Box *box,
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * Intersect a surface of 'box' with the physical boundary.  A stencil offset
