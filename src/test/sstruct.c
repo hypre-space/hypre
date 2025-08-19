@@ -2367,9 +2367,6 @@ PrintUsage( char *progname,
       hypre_printf("\n");
       hypre_printf("  -vrand <val>       : compute <val> eigenpairs using random initial vectors (default 1)\n");
       hypre_printf("\n");
-      hypre_printf("  -seed <val>        : use <val> as the seed for the pseudo-random number generator\n");
-      hypre_printf("                       (default seed is based on the time of the run)\n");
-      hypre_printf("\n");
       hypre_printf("  -orthchk           : check eigenvectors for orthonormality\n");
       hypre_printf("\n");
       hypre_printf("  -verb <val>        : verbosity level\n");
@@ -2681,7 +2678,6 @@ main( hypre_int argc,
    HYPRE_SStructSolver      lobpcg_solver;
 
    HYPRE_Int                lobpcgFlag = 0;
-   HYPRE_Int                lobpcgSeed = 0;
    HYPRE_Int                blockSize = 1;
    HYPRE_Int                verbosity = 1;
    HYPRE_Int                iterations;
@@ -3372,12 +3368,6 @@ main( hypre_int argc,
          /* lobpcg: block size */
          arg_index++;
          blockSize = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-seed") == 0 )
-      {
-         /* lobpcg: seed for srand */
-         arg_index++;
-         lobpcgSeed = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-itr") == 0 )
       {
@@ -5184,9 +5174,9 @@ main( hypre_int argc,
                                                                  x );
             eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
 
-            if (lobpcgSeed)
+            if (seed)
             {
-               mv_MultiVectorSetRandom(eigenvectors, lobpcgSeed);
+               mv_MultiVectorSetRandom(eigenvectors, seed);
             }
             else
             {
@@ -5373,9 +5363,9 @@ main( hypre_int argc,
                                                                  x );
             eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
 
-            if (lobpcgSeed)
+            if (seed)
             {
-               mv_MultiVectorSetRandom(eigenvectors, lobpcgSeed);
+               mv_MultiVectorSetRandom(eigenvectors, seed);
             }
             else
             {
