@@ -1060,13 +1060,22 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    HYPRE_Complex *data      = hypre_StructVectorData(vector);
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
    HYPRE_Int      i;
-
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_Memset(data, 0.0, data_size * sizeof(HYPRE_Complex), memory_location);
+   }
+   else
+#endif
+   {
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < data_size; i++)
-   {
-      data[i] = 0.0;
+      for (i = 0; i < data_size; i++)
+      {
+         data[i] = 0.0;
+      }
    }
 
    return hypre_error_flag;
