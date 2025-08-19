@@ -62,9 +62,7 @@ mv -f check-case.??? $output_dir
 # Basic build and run tests
 mo="-j test"
 ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
-ronolob="-ams -ij -sstruct -sstructmat -struct -structmat"
 eo=""
-# From tux master: ro="-ams -ij -sstruct -struct -lobpcg"
 
 co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -106,7 +104,6 @@ co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
 ./renametest.sh basic $output_dir/basic--enable-maxdim=4
-# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
 
 co="--enable-complex --enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -138,19 +135,18 @@ co="--enable-longdouble --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
 co="--enable-debug CC=mpiCC"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-debug-cpp
 # From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 
 co="--enable-bigint --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic--enable-bigint
 # From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 
 co="--enable-debug --enable-mixed-precision"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic--mixed-precision
-# Add lobpcg: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 
 # RDF: Not ready to run the -sstruct-mixed tests yet
 #
@@ -161,13 +157,12 @@ co="--enable-debug --enable-mixed-precision"
 
 # RDF: This is currently in 'machine-tux-valgrind.sh'.
 # co="--enable-debug --with-print-errors"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob -error -rt -valgrind
+# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
 # ./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
 mo="-j"
 ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
-ronolob="-ams -ij -sstruct -sstructmat -struct -structmat"
 eo=""
 
 co=""
@@ -191,14 +186,12 @@ co="-DHYPRE_LONG_DOUBLE=ON"
 ./renametest.sh cmake $output_dir/cmake-longdouble
 
 co="-DCMAKE_BUILD_TYPE=Debug"
-./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ronolob
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-debug
-# Add lobpcg: ./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 
 co="-DHYPRE_BIGINT=ON"
-./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ronolob
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-bigint
-# Add lobpcg: ./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex
