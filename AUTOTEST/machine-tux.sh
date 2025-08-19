@@ -114,17 +114,15 @@ mv basic.tmp basic.err
 ./renametest.sh basic $output_dir/basic--enable-complex
 # From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -complex
 
-# RDF: Threads are a problem at the moment
-#
-# co="--with-openmp"
-# RO="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
-# ./renametest.sh basic $output_dir/basic--with-openmp
-# 
-# co="--with-openmp --enable-hopscotch"
-# RO="-ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
-# ./renametest.sh basic $output_dir/basic--with-concurrent-hopscotch
+co="--with-openmp"
+RO="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-openmp
+
+co="--with-openmp --enable-hopscotch"
+RO="-ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-concurrent-hopscotch
 
 co="--enable-single --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
@@ -148,12 +146,10 @@ co="--enable-debug --enable-mixed-precision"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic--mixed-precision
 
-# RDF: Not ready to run the -sstruct-mixed tests yet
-#
-# co="--enable-mixedint --enable-debug"
-# RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
-# ./renametest.sh basic $output_dir/basic--enable-mixedint
+co="--enable-mixedint --enable-debug"
+RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--enable-mixedint
 
 # RDF: This is currently in 'machine-tux-valgrind.sh'.
 # co="--enable-debug --with-print-errors"
