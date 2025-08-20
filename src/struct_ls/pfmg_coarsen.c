@@ -937,9 +937,9 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          cxyz[0]   = temp6.x;
          cxyz[1]   = temp6.y;
          cxyz[2]   = temp6.z;
-         sqcxyz[0] = temp6.u;
+         sqcxyz[0] = temp6.w;
          sqcxyz[1] = temp6.v;
-         sqcxyz[2] = temp6.w;
+         sqcxyz[2] = temp6.u;
 #else
          cxyz[0]   = (HYPRE_Real) cdb_0;
          cxyz[1]   = (HYPRE_Real) cdb_1;
