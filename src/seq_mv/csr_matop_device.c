@@ -1555,6 +1555,11 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
 
    hypre_GpuProfilingPushRange("CSRMatrixComputeRowSum");
 
+   if (nrownnz < nrows)
+   {
+      hypre_Memset(row_sum, 0, nrows * sizeof(HYPRE_Complex), HYPRE_MEMORY_DEVICE);
+   }
+
    if (nrownnz < nrows && CF_i && CF_j)
    {
       if (type == 0)
