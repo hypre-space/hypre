@@ -42,7 +42,6 @@ mo="-j test"
 ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
 ronolob="-ams -ij -sstruct -sstructmat -struct -structmat"
 eo=""
-# From tux master: ro="-ams -ij -sstruct -struct -lobpcg"
 
 co="--enable-debug --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ronolob -error -rt -valgrind

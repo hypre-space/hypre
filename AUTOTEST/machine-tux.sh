@@ -97,9 +97,8 @@ co="--enable-shared"
 ./renametest.sh basic $output_dir/basic--enable-shared
 
 co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
-# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
@@ -133,14 +132,12 @@ co="--enable-longdouble --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
 co="--enable-debug CC=mpiCC"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug-cpp
-# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 
 co="--enable-bigint --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 ./renametest.sh basic $output_dir/basic--enable-bigint
-# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 
 co="--enable-debug --enable-mixed-precision"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
