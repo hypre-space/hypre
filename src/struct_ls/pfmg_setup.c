@@ -96,7 +96,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      zero_init = 0;
+      /* WM: debug - this is screwing things up on lassen? */
+      /* zero_init = 0; */
+      zero_init = 1;
    }
    else
 #endif
