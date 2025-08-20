@@ -893,8 +893,8 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          hypre_BoxLoop1ReductionEnd(wi, sqcdb_2)
 #else
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
-         ReduceSum<HYPRE_double6> sum6(d6);
+         HYPRE_Real6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
+         ReduceSum<HYPRE_Real6> sum6(d6);
 #else
          HYPRE_Real cdb_0 = cxyz[0], cdb_1 = cxyz[1], cdb_2 = cxyz[2];
          HYPRE_Real sqcdb_0 = sqcxyz[0], sqcdb_1 = sqcxyz[1], sqcdb_2 = sqcxyz[2];
@@ -914,10 +914,10 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                                       start, ustride, wi, sum6)
          {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-            HYPRE_double6 temp6(w_data[0][wi], w_data[1][wi], w_data[2][wi],
-                                hypre_squared(w_data[0][wi]),
-                                hypre_squared(w_data[1][wi]),
-                                hypre_squared(w_data[2][wi]));
+            HYPRE_Real6 temp6(w_data[0][wi], w_data[1][wi], w_data[2][wi],
+                              hypre_squared(w_data[0][wi]),
+                              hypre_squared(w_data[1][wi]),
+                              hypre_squared(w_data[2][wi]));
             sum6 += temp6;
 #else
             cdb_0 += w_data[0][wi];
@@ -933,13 +933,13 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
 #endif
 
 #if !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-         HYPRE_double6 temp6 = (HYPRE_double6) sum6;
-         cxyz[0]   = temp6.x;
-         cxyz[1]   = temp6.y;
-         cxyz[2]   = temp6.z;
-         sqcxyz[0] = temp6.w;
-         sqcxyz[1] = temp6.v;
-         sqcxyz[2] = temp6.u;
+         HYPRE_Real6 temp6 = (HYPRE_Real6) sum6;
+         cxyz[0]   = temp6.u;
+         cxyz[1]   = temp6.v;
+         cxyz[2]   = temp6.w;
+         sqcxyz[0] = temp6.x;
+         sqcxyz[1] = temp6.y;
+         sqcxyz[2] = temp6.z;
 #else
          cxyz[0]   = (HYPRE_Real) cdb_0;
          cxyz[1]   = (HYPRE_Real) cdb_1;
