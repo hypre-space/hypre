@@ -310,7 +310,7 @@ int main (int argc, char *argv[])
 
       HYPRE_Solver amg_solver;
       HYPRE_BoomerAMGCreate_flt(&amg_solver);
-      HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
+      HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 3); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
       HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
@@ -330,9 +330,13 @@ int main (int argc, char *argv[])
 
       /* step 2: compute residual */
       /* This copy routine will copy from single precision, par_x, to double precision, par_xb */
-
+         float rprod0=0.;
+         HYPRE_ParVectorInnerProd_flt(par_x, par_x, &rprod0);
+         printf("rprod0 = %f\n",rprod0);
       HYPRE_ParVectorCopy_mp(par_x, par_xb);
-
+         double rprod1=0.;
+         HYPRE_ParVectorInnerProd_dbl(par_xb, par_xb, &rprod1);
+         printf("rprod1 = %f\n",rprod1);
       //HYPRE_ParVectorPrint_flt( par_x, "par_x.flt");
       //HYPRE_ParVectorPrint_dbl( par_xb, "par_x.dbl");
       //exit(0);
@@ -358,7 +362,7 @@ int main (int argc, char *argv[])
          rprod = 0.;
          HYPRE_ParVectorInnerProd_dbl(hres, hres, &rprod);
          rnrm[i] = rprod;
-         //printf("rprod = %f\n",rprod);
+         printf("rprod = %f\n",rprod);
          /*=====================*/
 
          /* step 4: solver for error in single precision */

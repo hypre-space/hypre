@@ -28,8 +28,8 @@
  * copied to y
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
-                        hypre_Vector_mp *y )
+hypre_SeqVectorCopy_mp( hypre_Vector *x,
+                        hypre_Vector *y )
 {
    /*
    #ifdef HYPRE_PROFILE
@@ -43,7 +43,14 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 
    HYPRE_Int      i;
 
+   /* Generic pointer type */
+   void               *xp, *yp;
+
    size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
+
+   /* Implicit conversion to generic data type (void pointer) */
+   xp = hypre_VectorData(x);
+   yp = hypre_VectorData(y);
 
    switch (precision)
    {
@@ -53,7 +60,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_float *)hypre_VectorData(y))[i] = (hypre_float)((hypre_double *)hypre_VectorData(x))[i];
+            ((hypre_float *)yp)[i] = (hypre_float)((hypre_double *)xp)[i];
          }
          break;
       case HYPRE_REAL_DOUBLE:
@@ -62,7 +69,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_double *)hypre_VectorData(y))[i] = (hypre_double)((hypre_float *)hypre_VectorData(x))[i];
+            ((hypre_double *)yp)[i] = (hypre_double)((hypre_float *)xp)[i];
          }
          break;
       case HYPRE_REAL_LONGDOUBLE:
@@ -71,8 +78,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_long_double *)hypre_VectorData(y))[i] = (hypre_long_double)((hypre_double *)
-                                                                                hypre_VectorData(x))[i];
+            ((hypre_long_double *)yp)[i] = (hypre_long_double)((hypre_double *)xp)[i];
          }
          break;
       default:
@@ -94,8 +100,8 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
 
 HYPRE_Int
 hypre_SeqVectorAxpy_mp( hypre_double alpha,
-                        hypre_Vector_mp *x,
-                        hypre_Vector_mp *y     )
+                        hypre_Vector *x,
+                        hypre_Vector *y     )
 {
    /*
    #ifdef HYPRE_PROFILE
@@ -105,9 +111,16 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
    /* determine type of output vector data  ==> Precision of y. */
    HYPRE_Precision precision = hypre_VectorPrecision (y);
 
+   void               *xp, *yp;
+   
    HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Int      i;
+
    size *= hypre_VectorNumVectors(x);
+
+   /* Implicit conversion to generic data type (void pointer) */
+   xp = hypre_VectorData(x);
+   yp = hypre_VectorData(y);   
 
    switch (precision)
    {
@@ -117,8 +130,7 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_float *)hypre_VectorData(y))[i] += (hypre_float)(alpha * ((hypre_double *)hypre_VectorData(
-                                                                                 x))[i]);
+            ((hypre_float *)yp)[i] += (hypre_float)(alpha * ((hypre_double *)xp)[i]);
          }
          break;
       case HYPRE_REAL_DOUBLE:
@@ -127,8 +139,7 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_double *)hypre_VectorData(y))[i] += (hypre_double)(alpha * ((hypre_float *)hypre_VectorData(
-                                                                                   x))[i]);
+            ((hypre_double *)yp)[i] += (hypre_double)(alpha * ((hypre_float *)xp)[i]);
          }
          break;
       case HYPRE_REAL_LONGDOUBLE:
@@ -137,8 +148,7 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
 #endif
          for (i = 0; i < size; i++)
          {
-            ((hypre_long_double *)hypre_VectorData(y))[i] += (hypre_long_double)(alpha * ((
-                                                                                             hypre_double *)hypre_VectorData(x))[i]);
+            ((hypre_long_double *)yp)[i] += (hypre_long_double)(alpha * ((hypre_double *)xp)[i]);
          }
          break;
       default:

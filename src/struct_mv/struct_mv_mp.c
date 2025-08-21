@@ -28,12 +28,13 @@
  * copied to y
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
-                           hypre_StructVector_mp *y )
+hypre_StructVectorCopy_mp( hypre_StructVector *x,
+                           hypre_StructVector *y )
 {
    /* determine type of output vector data  ==> Precision of y. */
    HYPRE_Precision precision = hypre_StructVectorPrecision (y);
 
+   /* Generic pointer type */
    void               *xp, *yp;
 
    HYPRE_Int           i, size;
@@ -43,6 +44,8 @@ hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
     *-----------------------------------------------------------------------*/
 
    size = hypre_StructVectorDataSize(x);
+
+   /* Implicit conversion to generic data type (void pointer) */
    xp = hypre_StructVectorData(x);
    yp = hypre_StructVectorData(y);
 

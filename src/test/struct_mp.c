@@ -10,12 +10,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "_hypre_utilities.h"
+//#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_struct_mv.h"
-#include "HYPRE_struct_mv_mp.h"
+//#include "HYPRE_struct_mv_mp.h"
 #include "HYPRE_struct_ls.h"
-#include "_hypre_struct_ls.h"
+//#include "_hypre_struct_ls.h"
 #include "HYPRE_krylov.h"
 
 #define HYPRE_MFLOPS 0
@@ -132,8 +132,7 @@ main( hypre_int argc,
    HYPRE_Int           constant_coefficient = 0;
    HYPRE_Int          *stencil_entries;
    HYPRE_Int           stencil_size;
-   HYPRE_Int           diag_rank;
-   hypre_Index         diag_index;
+   HYPRE_Int           stencil_diag_entry;
 
    HYPRE_StructGrid    grid;
    HYPRE_StructGrid    readgrid;
@@ -454,61 +453,61 @@ main( hypre_int argc,
 
    if ( (print_usage) && (myid == 0) )
    {
-      hypre_printf_dbl("\n");
-      hypre_printf_dbl("Usage: %s [<options>]\n", argv[0]);
-      hypre_printf_dbl("\n");
-      hypre_printf_dbl("  -n <nx> <ny> <nz>   : problem size per block\n");
-      hypre_printf_dbl("  -istart <istart[0]> <istart[1]> <istart[2]> : start of box\n");
-      hypre_printf_dbl("  -P <Px> <Py> <Pz>   : processor topology\n");
-      hypre_printf_dbl("  -b <bx> <by> <bz>   : blocking per processor\n");
-      hypre_printf_dbl("  -p <px> <py> <pz>   : periodicity in each dimension\n");
-      hypre_printf_dbl("  -c <cx> <cy> <cz>   : diffusion coefficients\n");
-      hypre_printf_dbl("  -convect <x> <y> <z>: convection coefficients\n");
-      hypre_printf_dbl("  -d <dim>            : problem dimension (2 or 3)\n");
-      hypre_printf_dbl("  -fromfile <name>    : prefix name for matrixfiles\n");
-      hypre_printf_dbl("  -rhsfromfile <name> : prefix name for rhsfiles\n");
-      hypre_printf_dbl("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
-      hypre_printf_dbl("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
-      hypre_printf_dbl("  -solver <ID>        : solver ID\n");
-      hypre_printf_dbl("                        0  - SMG (default)\n");
-      hypre_printf_dbl("                        1  - PFMG\n");
-      hypre_printf_dbl("                        10 - CG with SMG precond\n");
-      hypre_printf_dbl("                        11 - CG with PFMG precond\n");
-      hypre_printf_dbl("                        15 - CG with single-prec SMG precond\n");
-      hypre_printf_dbl("                        16 - CG with single-prec PFMG precond\n");
-      hypre_printf_dbl("                        18 - CG with diagonal scaling\n");
-      hypre_printf_dbl("                        19 - CG\n");
-      hypre_printf_dbl("                        30 - GMRES with SMG precond\n");
-      hypre_printf_dbl("                        31 - GMRES with PFMG precond\n");
-      hypre_printf_dbl("                        35 - GMRES with single-prec SMG precond\n");
-      hypre_printf_dbl("                        36 - GMRES with single-prec PFMG precond\n");
-      hypre_printf_dbl("                        38 - GMRES with diagonal scaling\n");
-      hypre_printf_dbl("                        39 - GMRES\n");
-      hypre_printf_dbl("                        40 - BiCGSTAB with SMG precond\n");
-      hypre_printf_dbl("                        41 - BiCGSTAB with PFMG precond\n");
-      hypre_printf_dbl("                        45 - BiCGSTAB with single-prec SMG precond\n");
-      hypre_printf_dbl("                        46 - BiCGSTAB with single-prec PFMG precond\n");
-      hypre_printf_dbl("                        48 - BiCGSTAB with diagonal scaling\n");
-      hypre_printf_dbl("                        49 - BiCGSTAB\n");
-      hypre_printf_dbl("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
-      hypre_printf_dbl("  -rap <r>            : coarse grid operator type\n");
-      hypre_printf_dbl("                        0 - Galerkin (default)\n");
-      hypre_printf_dbl("                        1 - non-Galerkin ParFlow operators\n");
-      hypre_printf_dbl("                        2 - Galerkin, general operators\n");
-      hypre_printf_dbl("  -relax <r>          : relaxation type\n");
-      hypre_printf_dbl("                        0 - Jacobi\n");
-      hypre_printf_dbl("                        1 - Weighted Jacobi (default)\n");
-      hypre_printf_dbl("                        2 - R/B Gauss-Seidel\n");
-      hypre_printf_dbl("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
-      hypre_printf_dbl("  -w <jacobi weight>  : jacobi weight\n");
-      hypre_printf_dbl("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
-      hypre_printf_dbl("  -sym <s>            : symmetric storage (1) or not (0)\n");
-      hypre_printf_dbl("  -solver_type <ID>   : solver type for Hybrid\n");
-      hypre_printf_dbl("                        1 - PCG (default)\n");
-      hypre_printf_dbl("                        2 - GMRES\n");
-      hypre_printf_dbl("  -recompute <bool>   : Recompute residual in PCG?\n");
-      hypre_printf_dbl("  -cf <cf>            : convergence factor for Hybrid\n");
-      hypre_printf_dbl("\n");
+      hypre_printf("\n");
+      hypre_printf("Usage: %s [<options>]\n", argv[0]);
+      hypre_printf("\n");
+      hypre_printf("  -n <nx> <ny> <nz>   : problem size per block\n");
+      hypre_printf("  -istart <istart[0]> <istart[1]> <istart[2]> : start of box\n");
+      hypre_printf("  -P <Px> <Py> <Pz>   : processor topology\n");
+      hypre_printf("  -b <bx> <by> <bz>   : blocking per processor\n");
+      hypre_printf("  -p <px> <py> <pz>   : periodicity in each dimension\n");
+      hypre_printf("  -c <cx> <cy> <cz>   : diffusion coefficients\n");
+      hypre_printf("  -convect <x> <y> <z>: convection coefficients\n");
+      hypre_printf("  -d <dim>            : problem dimension (2 or 3)\n");
+      hypre_printf("  -fromfile <name>    : prefix name for matrixfiles\n");
+      hypre_printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
+      hypre_printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
+      hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
+      hypre_printf("  -solver <ID>        : solver ID\n");
+      hypre_printf("                        0  - SMG (default)\n");
+      hypre_printf("                        1  - PFMG\n");
+      hypre_printf("                        10 - CG with SMG precond\n");
+      hypre_printf("                        11 - CG with PFMG precond\n");
+      hypre_printf("                        15 - CG with single-prec SMG precond\n");
+      hypre_printf("                        16 - CG with single-prec PFMG precond\n");
+      hypre_printf("                        18 - CG with diagonal scaling\n");
+      hypre_printf("                        19 - CG\n");
+      hypre_printf("                        30 - GMRES with SMG precond\n");
+      hypre_printf("                        31 - GMRES with PFMG precond\n");
+      hypre_printf("                        35 - GMRES with single-prec SMG precond\n");
+      hypre_printf("                        36 - GMRES with single-prec PFMG precond\n");
+      hypre_printf("                        38 - GMRES with diagonal scaling\n");
+      hypre_printf("                        39 - GMRES\n");
+      hypre_printf("                        40 - BiCGSTAB with SMG precond\n");
+      hypre_printf("                        41 - BiCGSTAB with PFMG precond\n");
+      hypre_printf("                        45 - BiCGSTAB with single-prec SMG precond\n");
+      hypre_printf("                        46 - BiCGSTAB with single-prec PFMG precond\n");
+      hypre_printf("                        48 - BiCGSTAB with diagonal scaling\n");
+      hypre_printf("                        49 - BiCGSTAB\n");
+      hypre_printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
+      hypre_printf("  -rap <r>            : coarse grid operator type\n");
+      hypre_printf("                        0 - Galerkin (default)\n");
+      hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
+      hypre_printf("                        2 - Galerkin, general operators\n");
+      hypre_printf("  -relax <r>          : relaxation type\n");
+      hypre_printf("                        0 - Jacobi\n");
+      hypre_printf("                        1 - Weighted Jacobi (default)\n");
+      hypre_printf("                        2 - R/B Gauss-Seidel\n");
+      hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      hypre_printf("  -w <jacobi weight>  : jacobi weight\n");
+      hypre_printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
+      hypre_printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
+      hypre_printf("  -solver_type <ID>   : solver type for Hybrid\n");
+      hypre_printf("                        1 - PCG (default)\n");
+      hypre_printf("                        2 - GMRES\n");
+      hypre_printf("  -recompute <bool>   : Recompute residual in PCG?\n");
+      hypre_printf("  -cf <cf>            : convergence factor for Hybrid\n");
+      hypre_printf("\n");
    }
 
    if ( print_usage )
@@ -524,7 +523,7 @@ main( hypre_int argc,
    {
       if (myid == 0)
       {
-         hypre_printf_dbl("Error: PxQxR is more than the number of processors\n");
+         hypre_printf("Error: PxQxR is more than the number of processors\n");
       }
       exit(1);
    }
@@ -532,7 +531,7 @@ main( hypre_int argc,
    {
       if (myid == 0)
       {
-         hypre_printf_dbl("Warning: PxQxR is less than the number of processors\n");
+         hypre_printf("Warning: PxQxR is less than the number of processors\n");
       }
    }
 
@@ -540,7 +539,7 @@ main( hypre_int argc,
    {
       if (myid == 0)
       {
-         hypre_printf_dbl("Warning: Convection produces non-symmetric matrix\n");
+         hypre_printf("Warning: Convection produces non-symmetric matrix\n");
       }
       sym = 0;
    }
@@ -552,50 +551,50 @@ main( hypre_int argc,
    if (myid == 0 && sum == 0)
    {
 #if defined(HYPRE_DEVELOP_STRING) && defined(HYPRE_DEVELOP_BRANCH)
-      hypre_printf_dbl("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; the develop branch)\n\n",
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; the develop branch)\n\n",
                        HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
 
 #elif defined(HYPRE_DEVELOP_STRING) && !defined(HYPRE_DEVELOP_BRANCH)
-      hypre_printf_dbl("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; not the develop branch)\n\n",
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; not the develop branch)\n\n",
                        HYPRE_DEVELOP_STRING, HYPRE_BRANCH_NAME);
 
 #elif defined(HYPRE_RELEASE_VERSION)
-      hypre_printf_dbl("\nUsing HYPRE_RELEASE_VERSION: %s\n\n",
+      hypre_printf("\nUsing HYPRE_RELEASE_VERSION: %s\n\n",
                        HYPRE_RELEASE_VERSION);
 #endif
 
-      hypre_printf_dbl("Running with these driver parameters:\n");
-      hypre_printf_dbl("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
-      hypre_printf_dbl("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \
+      hypre_printf("Running with these driver parameters:\n");
+      hypre_printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
+      hypre_printf("  (istart[0],istart[1],istart[2]) = (%d, %d, %d)\n", \
                        istart[0], istart[1], istart[2]);
-      hypre_printf_dbl("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
-      hypre_printf_dbl("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
-      hypre_printf_dbl("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
-      hypre_printf_dbl("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
-      hypre_printf_dbl("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
-      hypre_printf_dbl("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
-      hypre_printf_dbl("  dim             = %d\n", dim);
-      hypre_printf_dbl("  skip            = %d\n", skip);
-      hypre_printf_dbl("  sym             = %d\n", sym);
-      hypre_printf_dbl("  rap             = %d\n", rap);
-      hypre_printf_dbl("  relax           = %d\n", relax);
-      hypre_printf_dbl("  solver ID       = %d\n", solver_id);
-      /* hypre_printf_dbl("  Device level    = %d\n", device_level); */
+      hypre_printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
+      hypre_printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
+      hypre_printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
+      hypre_printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      hypre_printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
+      hypre_printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
+      hypre_printf("  dim             = %d\n", dim);
+      hypre_printf("  skip            = %d\n", skip);
+      hypre_printf("  sym             = %d\n", sym);
+      hypre_printf("  rap             = %d\n", rap);
+      hypre_printf("  relax           = %d\n", relax);
+      hypre_printf("  solver ID       = %d\n", solver_id);
+      /* hypre_printf("  Device level    = %d\n", device_level); */
    }
 
    if (myid == 0 && sum > 0)
    {
-      hypre_printf_dbl("Running with these driver parameters:\n");
-      hypre_printf_dbl("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
-      hypre_printf_dbl("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
-      hypre_printf_dbl("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
-      hypre_printf_dbl("  dim             = %d\n", dim);
-      hypre_printf_dbl("  skip            = %d\n", skip);
-      hypre_printf_dbl("  sym             = %d\n", sym);
-      hypre_printf_dbl("  rap             = %d\n", rap);
-      hypre_printf_dbl("  relax           = %d\n", relax);
-      hypre_printf_dbl("  solver ID       = %d\n", solver_id);
-      hypre_printf_dbl("  the grid is read from  file \n");
+      hypre_printf("Running with these driver parameters:\n");
+      hypre_printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      hypre_printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
+      hypre_printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
+      hypre_printf("  dim             = %d\n", dim);
+      hypre_printf("  skip            = %d\n", skip);
+      hypre_printf("  sym             = %d\n", sym);
+      hypre_printf("  rap             = %d\n", rap);
+      hypre_printf("  relax           = %d\n", relax);
+      hypre_printf("  solver ID       = %d\n", solver_id);
+      hypre_printf("  the grid is read from  file \n");
 
    }
 
@@ -607,8 +606,8 @@ main( hypre_int argc,
 
    for ( rep = 0; rep < reps; ++rep )
    {
-      time_index = hypre_InitializeTiming_dbl("Struct Interface");
-      hypre_BeginTiming_dbl(time_index);
+      time_index = hypre_InitializeTiming("Struct Interface");
+      hypre_BeginTiming(time_index);
 
       /*-----------------------------------------------------------
        * Set up the stencil structure (7 points) when matrix is NOT read from file
@@ -916,20 +915,19 @@ main( hypre_int argc,
             }
             if ( solver_id == 4 || solver_id == 14)
             {
-               hypre_SetIndex3(diag_index, 0, 0, 0);
-               diag_rank = hypre_StructStencilElementRank_flt( stencil, diag_index );
-               //hypre_assert( stencil_size >= 1 );
-               if ( diag_rank == 0 )
+               stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
+               hypre_assert( stencil_size >= 1 );
+               if ( stencil_diag_entry == 0 )
                {
-                  stencil_entries[diag_rank] = 1;
+                  stencil_entries[stencil_diag_entry] = 1;
                }
                else
                {
-                  stencil_entries[diag_rank] = 0;
+                  stencil_entries[stencil_diag_entry] = 0;
                }
                for ( i = 0; i < stencil_size; ++i )
                {
-                  if ( i != diag_rank )
+                  if ( i != stencil_diag_entry )
                   {
                      stencil_entries[i] = i;
                   }
@@ -1006,16 +1004,16 @@ main( hypre_int argc,
 
       /* linear system complete  */
 
-      hypre_EndTiming_dbl(time_index);
+      hypre_EndTiming(time_index);
       if ( reps == 1 || (solver_id != 0 && solver_id != 1 && solver_id != 3 && solver_id != 4) )
       {
-         hypre_PrintTiming_dbl("Struct Interface", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_PrintTiming("Struct Interface", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
       }
       else if ( rep == reps - 1 )
       {
-         hypre_FinalizeTiming_dbl(time_index);
+         hypre_FinalizeTiming(time_index);
       }
 
       /*-----------------------------------------------------------
@@ -1037,8 +1035,8 @@ main( hypre_int argc,
 
       if (solver_id == 0)
       {
-         time_index = hypre_InitializeTiming_dbl("SMG Setup");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("SMG Setup");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructSMGCreate_dbl(MPI_COMM_WORLD, &solver);
          //HYPRE_StructSMGSetMemoryUse_dbl(solver, 0);
@@ -1062,36 +1060,36 @@ main( hypre_int argc,
          hypre_box_print = 0;
 #endif
 
-         hypre_EndTiming_dbl(time_index);
+         hypre_EndTiming(time_index);
          if ( reps == 1 )
          {
-            hypre_PrintTiming_dbl("Setup phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
          else if ( rep == reps - 1 )
          {
-            hypre_FinalizeTiming_dbl(time_index);
+            hypre_FinalizeTiming(time_index);
          }
 
-         time_index = hypre_InitializeTiming_dbl("SMG Solve");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("SMG Solve");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructSMGSolve_dbl(solver, A_dbl, b_dbl, x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
+         hypre_EndTiming(time_index);
          if ( reps == 1 )
          {
-            hypre_PrintTiming_dbl("Solve phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
          else if ( rep == reps - 1 )
          {
-            hypre_PrintTiming_dbl("Interface, Setup, and Solve times:",
+            hypre_PrintTiming("Interface, Setup, and Solve times:",
                                   hypre_MPI_COMM_WORLD );
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
 
          HYPRE_StructSMGGetNumIterations_dbl(solver, &num_iterations);
@@ -1105,8 +1103,8 @@ main( hypre_int argc,
 
       else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
       {
-         time_index = hypre_InitializeTiming_dbl("PFMG Setup");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("PFMG Setup");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructPFMGCreate_dbl(hypre_MPI_COMM_WORLD, &solver);
          /*HYPRE_StructPFMGSetMaxLevels_dbl( solver, 9 );*/
@@ -1132,37 +1130,37 @@ main( hypre_int argc,
 
          HYPRE_StructPFMGSetup_dbl(solver, A_dbl, b_dbl, x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
+         hypre_EndTiming(time_index);
          if ( reps == 1 )
          {
-            hypre_PrintTiming_dbl("Setup phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
          else if ( rep == reps - 1 )
          {
-            hypre_FinalizeTiming_dbl(time_index);
+            hypre_FinalizeTiming(time_index);
          }
 
-         time_index = hypre_InitializeTiming_dbl("PFMG Solve");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("PFMG Solve");
+         hypre_BeginTiming(time_index);
 
 
          HYPRE_StructPFMGSolve_dbl(solver, A_dbl, b_dbl, x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
+         hypre_EndTiming(time_index);
          if ( reps == 1 )
          {
-            hypre_PrintTiming_dbl("Solve phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
          else if ( rep == reps - 1 )
          {
-            hypre_PrintTiming_dbl("Interface, Setup, and Solve times",
+            hypre_PrintTiming("Interface, Setup, and Solve times",
                                   hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming_dbl(time_index);
-            hypre_ClearTiming_dbl();
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
          }
 
          HYPRE_StructPFMGGetNumIterations_dbl(solver, &num_iterations);
@@ -1176,8 +1174,8 @@ main( hypre_int argc,
 
       if ((solver_id > 9) && (solver_id < 20))
       {
-         time_index = hypre_InitializeTiming_dbl("PCG Setup");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("PCG Setup");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructPCGCreate_dbl(MPI_COMM_WORLD, &solver);
          HYPRE_PCGSetMaxIter_dbl( (HYPRE_Solver)solver, 100 );
@@ -1287,21 +1285,21 @@ main( hypre_int argc,
          HYPRE_PCGSetup_dbl( (HYPRE_Solver)solver,
                              (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl );
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Setup phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
-         time_index = hypre_InitializeTiming_dbl("PCG Solve");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("PCG Solve");
+         hypre_BeginTiming(time_index);
 
          HYPRE_PCGSolve_dbl( (HYPRE_Solver) solver,
                              (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Solve phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
          HYPRE_PCGGetNumIterations_dbl( (HYPRE_Solver)solver, &num_iterations );
          HYPRE_PCGGetFinalRelativeResidualNorm_dbl( (HYPRE_Solver)solver,
@@ -1332,8 +1330,8 @@ main( hypre_int argc,
 
       if ((solver_id > 29) && (solver_id < 40))
       {
-         time_index = hypre_InitializeTiming_dbl("GMRES Setup");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("GMRES Setup");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructGMRESCreate_dbl(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_GMRESSetKDim_dbl( (HYPRE_Solver) solver, 5 );
@@ -1438,21 +1436,21 @@ main( hypre_int argc,
          HYPRE_GMRESSetup_dbl ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl,
                                 (HYPRE_Vector)x_dbl );
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Setup phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
-         time_index = hypre_InitializeTiming_dbl("GMRES Solve");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("GMRES Solve");
+         hypre_BeginTiming(time_index);
 
          HYPRE_GMRESSolve_dbl
          ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Solve phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
          HYPRE_GMRESGetNumIterations_dbl( (HYPRE_Solver)solver, &num_iterations);
          HYPRE_GMRESGetFinalRelativeResidualNorm_dbl( (HYPRE_Solver)solver, &final_res_norm);
@@ -1482,8 +1480,8 @@ main( hypre_int argc,
 
       if ((solver_id > 39) && (solver_id < 50))
       {
-         time_index = hypre_InitializeTiming_dbl("BiCGSTAB Setup");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("BiCGSTAB Setup");
+         hypre_BeginTiming(time_index);
 
          HYPRE_StructBiCGSTABCreate_dbl(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_BiCGSTABSetMaxIter_dbl( (HYPRE_Solver)solver, 100 );
@@ -1586,21 +1584,21 @@ main( hypre_int argc,
          HYPRE_BiCGSTABSetup_dbl
          ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl );
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Setup phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
-         time_index = hypre_InitializeTiming_dbl("BiCGSTAB Solve");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("BiCGSTAB Solve");
+         hypre_BeginTiming(time_index);
 
          HYPRE_BiCGSTABSolve_dbl
          ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Solve phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
          HYPRE_BiCGSTABGetNumIterations_dbl( (HYPRE_Solver)solver, &num_iterations);
          HYPRE_BiCGSTABGetFinalRelativeResidualNorm_dbl( (HYPRE_Solver)solver, &final_res_norm);
@@ -1635,10 +1633,10 @@ main( hypre_int argc,
 
       if (myid == 0 && rep == reps - 1 )
       {
-         hypre_printf_dbl("\n");
-         hypre_printf_dbl("Iterations = %d\n", num_iterations);
-         hypre_printf_dbl("Final Relative Residual Norm = %e\n", final_res_norm);
-         hypre_printf_dbl("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
 #endif
@@ -1659,8 +1657,8 @@ main( hypre_int argc,
          matvec_data = hypre_StructMatvecCreate_dbl();
          hypre_StructMatvecSetup_dbl(matvec_data, A, x);
 
-         time_index = hypre_InitializeTiming_dbl("Matvec");
-         hypre_BeginTiming_dbl(time_index);
+         time_index = hypre_InitializeTiming("Matvec");
+         hypre_BeginTiming(time_index);
 
          for (i = 0; i < imax; i++)
          {
@@ -1669,10 +1667,10 @@ main( hypre_int argc,
          /* this counts mult-adds */
          hypre_IncFLOPCount_dbl(7 * N * imax);
 
-         hypre_EndTiming_dbl(time_index);
-         hypre_PrintTiming_dbl("Matvec time", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming_dbl(time_index);
-         hypre_ClearTiming_dbl();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Matvec time", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
 
          hypre_StructMatvecDestroy_dbl(matvec_data);
       }
@@ -1705,7 +1703,7 @@ main( hypre_int argc,
    {
       if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
       {
-         hypre_printf_dbl("Error: nonzero GPU memory allocated with the HOST mode\n");
+         hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
          //hypre_assert(0);
       }
    }
