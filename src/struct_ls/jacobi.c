@@ -156,9 +156,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    HYPRE_Int               ndim             = hypre_StructMatrixNDim(A);
 
    hypre_Box              *A_data_box, *x_data_box, *r_data_box;
-
    HYPRE_Real             *Ap, *xp, *rp;
-   HYPRE_Real              Ap0, scale;
 
    HYPRE_Int               nboxes;
    hypre_Box              *loop_box;
@@ -168,8 +166,6 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
 
    HYPRE_Int               iter, i, stencil_diag;
    HYPRE_Real              bsumsq, rsumsq;
-
-   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(A);
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -236,7 +232,6 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          r_data_box = hypre_StructVectorGridDataBox(b, i); /* r = b */
 
          Ap = hypre_StructMatrixBoxData(A, i, stencil_diag);
-         hypre_TMemcpy(&Ap0, Ap, HYPRE_Real, 1, HYPRE_MEMORY_HOST, memory_location);
          xp = hypre_StructVectorGridData(x, i);
          rp = hypre_StructVectorGridData(b, i); /* r = b */
 
@@ -245,12 +240,11 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
-            scale = weight / Ap0;
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 x_data_box, start, ustride, xi,
                                 r_data_box, start, ustride, ri);
             {
-               xp[xi] = scale * rp[ri];
+               xp[xi] = weight * rp[ri] / Ap[0];
             }
             hypre_BoxLoop2End(xi, ri);
          }
@@ -304,7 +298,6 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          r_data_box = hypre_StructVectorGridDataBox(r, i);
 
          Ap = hypre_StructMatrixBoxData(A, i, stencil_diag);
-         hypre_TMemcpy(&Ap0, Ap, HYPRE_Real, 1, HYPRE_MEMORY_HOST, memory_location);
          xp = hypre_StructVectorGridData(x, i);
          rp = hypre_StructVectorGridData(r, i);
 
@@ -313,12 +306,11 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
-            scale = weight / Ap0;
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 x_data_box, start, ustride, xi,
                                 r_data_box, start, ustride, ri);
             {
-               xp[xi] += scale * rp[ri];
+               xp[xi] += weight * rp[ri] / Ap[0];
             }
             hypre_BoxLoop2End(xi, ri);
          }

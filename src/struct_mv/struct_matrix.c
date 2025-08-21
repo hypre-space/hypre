@@ -1300,9 +1300,10 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
       }
       else
       {
-         data = hypre_TAlloc(HYPRE_Complex,
-                             hypre_StructMatrixDataSize(matrix),
-                             hypre_StructMatrixMemoryLocation(matrix));
+         /* TODO (VPM): TAlloc leads to regressions on TEST_struct/emptyproc */
+         data = hypre_CTAlloc(HYPRE_Complex,
+                              hypre_StructMatrixDataSize(matrix),
+                              hypre_StructMatrixMemoryLocation(matrix));
       }
       hypre_StructMatrixDataAlloced(matrix) = 1;
    }
