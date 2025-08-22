@@ -90,7 +90,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       v_memory_mode = 0;
    }
 
-   /* Set flag for initializing matrix/vector entries to zeroes */
+   /* Set flag for initializing matrix/vector entries to zeroes
+
+      TODO (VPM): due to TEST_struct regressions, this feature is
+      disabled internally despite the value of zero_init being set below */
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_StructMatrixMemoryLocation(A) );
 

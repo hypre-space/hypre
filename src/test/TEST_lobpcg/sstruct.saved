@@ -3,70 +3,70 @@ Iterations = 24
 Final Relative Residual Norm = 6.429522e-07
 
 # Output file: sstruct.out.10.lobpcg.1
-Eigenvalue lambda   1.34880853089918e+00
-Residual   1.40515754419491e-04
+Eigenvalue lambda   1.34880851291473e+00
+Residual   1.13196753319469e-04
 
 # Output file: sstruct.out.10.lobpcg.4
 Eigenvalue lambda   1.34880848246852e+00
-Eigenvalue lambda   1.36560847743334e+00
-Eigenvalue lambda   1.47908699641636e+00
-Eigenvalue lambda   1.49589925873578e+00
-Residual   1.88411068757809e-06
-Residual   1.92352730596892e-06
-Residual   2.62402461132032e-06
-Residual   5.33772292781341e-06
+Eigenvalue lambda   1.36560847743297e+00
+Eigenvalue lambda   1.47908699641157e+00
+Eigenvalue lambda   1.49589925873675e+00
+Residual   2.14854604026010e-06
+Residual   1.89806100160513e-06
+Residual   2.46922306733655e-06
+Residual   5.84373095134963e-06
 
 # Output file: sstruct.out.11.lobpcg
 Iterations = 24
-Final Relative Residual Norm = 6.654613e-07
+Final Relative Residual Norm = 6.481534e-07
 
 # Output file: sstruct.out.11.lobpcg.1
-Eigenvalue lambda   1.34880853049719e+00
-Residual   1.27609473238620e-04
+Eigenvalue lambda   1.34880851659709e+00
+Residual   1.22612932523255e-04
 
 # Output file: sstruct.out.11.lobpcg.4
-Eigenvalue lambda   1.34880848246868e+00
-Eigenvalue lambda   1.36560847743149e+00
-Eigenvalue lambda   1.47908699638228e+00
-Eigenvalue lambda   1.49589925867103e+00
-Residual   2.34138563461796e-06
-Residual   2.11050112612293e-06
-Residual   2.34272528133832e-06
-Residual   4.55132485053271e-06
+Eigenvalue lambda   1.34880848246889e+00
+Eigenvalue lambda   1.36560847743071e+00
+Eigenvalue lambda   1.47908699641205e+00
+Eigenvalue lambda   1.49589925867474e+00
+Residual   1.73448122329495e-06
+Residual   2.12909870577413e-06
+Residual   2.40566912021764e-06
+Residual   4.35706514638339e-06
 
 # Output file: sstruct.out.18.lobpcg
 Iterations = 25
 Final Relative Residual Norm = 9.124482e-07
 
 # Output file: sstruct.out.18.lobpcg.1
-Eigenvalue lambda   1.34880848247421e+00
-Residual   1.68760664468992e-06
+Eigenvalue lambda   1.34880848247212e+00
+Residual   1.17777152772256e-06
 
 # Output file: sstruct.out.18.lobpcg.4
-Eigenvalue lambda   1.34880848246833e+00
-Eigenvalue lambda   1.36560847743301e+00
-Eigenvalue lambda   1.47908699641137e+00
-Eigenvalue lambda   1.49589925871590e+00
-Residual   7.29467860779249e-07
-Residual   9.62135023675930e-07
-Residual   1.05238502112812e-06
-Residual   1.42836272383011e-06
+Eigenvalue lambda   1.34880848246843e+00
+Eigenvalue lambda   1.36560847743469e+00
+Eigenvalue lambda   1.47908699642327e+00
+Eigenvalue lambda   1.49589925872068e+00
+Residual   2.18677284345479e-06
+Residual   1.21745237775613e-06
+Residual   1.94409509845416e-06
+Residual   2.29794079627551e-06
 
 # Output file: sstruct.out.19.lobpcg
 Iterations = 25
 Final Relative Residual Norm = 9.124482e-07
 
 # Output file: sstruct.out.19.lobpcg.1
-Eigenvalue lambda   1.34880848247421e+00
-Residual   1.68760664640186e-06
+Eigenvalue lambda   1.34880848247213e+00
+Residual   1.17777152797459e-06
 
 # Output file: sstruct.out.19.lobpcg.4
-Eigenvalue lambda   1.34880848246915e+00
-Eigenvalue lambda   1.36560847743475e+00
-Eigenvalue lambda   1.47908699641975e+00
-Eigenvalue lambda   1.49589925875392e+00
-Residual   7.29467866482847e-07
-Residual   9.62135024900930e-07
-Residual   1.05238500241244e-06
-Residual   1.42836275555007e-06
+Eigenvalue lambda   1.34880848246839e+00
+Eigenvalue lambda   1.36560847743003e+00
+Eigenvalue lambda   1.47908699641827e+00
+Eigenvalue lambda   1.49589925871966e+00
+Residual   2.18677282105352e-06
+Residual   1.21745237200013e-06
+Residual   1.94409507254891e-06
+Residual   2.29794060640330e-06
 

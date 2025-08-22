@@ -649,9 +649,10 @@ hypre_StructVectorInitialize( hypre_StructVector *vector,
    }
    else
    {
-      data = hypre_TAlloc(HYPRE_Complex,
-                          hypre_StructVectorDataSize(vector),
-                          hypre_StructVectorMemoryLocation(vector));
+      /* TODO (VPM): TAlloc leads to regressions on TEST_struct/emptyproc */
+      data = hypre_CTAlloc(HYPRE_Complex,
+                           hypre_StructVectorDataSize(vector),
+                           hypre_StructVectorMemoryLocation(vector));
    }
 
    hypre_StructVectorInitializeData(vector, data);
@@ -1060,17 +1061,20 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    HYPRE_Complex *data      = hypre_StructVectorData(vector);
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
    HYPRE_Int      i;
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_Memset(data, 0.0, data_size * sizeof(HYPRE_Complex), memory_location);
+      hypre_Memset((void*) data, 0.0,
+                   (size_t) (data_size) * sizeof(HYPRE_Complex),
+                   memory_location);
    }
    else
 #endif
    {
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < data_size; i++)
       {
