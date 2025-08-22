@@ -3565,21 +3565,21 @@ SetValuesMatrix( HYPRE_StructMatrix A,
          switch (ndim)
          {
             case 1:
-               cvalues[0] = west;
-               cvalues[1] = center;
+               cvalues_h[0] = west;
+               cvalues_h[1] = center;
                break;
 
             case 2:
-               cvalues[0] = west;
-               cvalues[1] = south;
-               cvalues[2] = center;
+               cvalues_h[0] = west;
+               cvalues_h[1] = south;
+               cvalues_h[2] = center;
                break;
 
             case 3:
-               cvalues[0] = west;
-               cvalues[1] = south;
-               cvalues[2] = bottom;
-               cvalues[3] = center;
+               cvalues_h[0] = west;
+               cvalues_h[1] = south;
+               cvalues_h[2] = bottom;
+               cvalues_h[3] = center;
                break;
          }
 
