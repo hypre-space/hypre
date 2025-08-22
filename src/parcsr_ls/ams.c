@@ -695,7 +695,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                             [] (const auto & x) {return !x;}, 1.0 );
 #else
          HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
-                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)), 1.0 );
+                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), 1.0 );
 #endif
       }
       else

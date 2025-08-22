@@ -1395,14 +1395,12 @@ hypreGPUKernel_CSRRowSumCF( hypre_DeviceItem            &item,
                             HYPRE_Complex                scal,
                             HYPRE_Int                    set)
 {
-   HYPRE_Int row_i = compressed ?
-                     ir[hypre_gpu_get_grid_warp_id<1, 1>(item)] :
-                     hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (hypre_gpu_get_grid_warp_id<1, 1>(item) >= nrows)
+   HYPRE_Int wid = hypre_gpu_get_grid_warp_id<1, 1>(item);
+   if (wid >= nrows)
    {
       return;
    }
+   HYPRE_Int row_i = compressed ? ir[wid] : wid;
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
@@ -1469,14 +1467,13 @@ hypreGPUKernel_CSRRowSum( hypre_DeviceItem            &item,
                           HYPRE_Complex                scal,
                           HYPRE_Int                    set)
 {
-   HYPRE_Int row_i = compressed ?
-                     ir[hypre_gpu_get_grid_warp_id<1, 1>(item)] :
-                     hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (hypre_gpu_get_grid_warp_id<1, 1>(item) >= nrows)
+   HYPRE_Int wid = hypre_gpu_get_grid_warp_id<1, 1>(item);
+   if (wid >= nrows)
    {
       return;
    }
+
+   HYPRE_Int row_i = compressed ? ir[wid] : wid;
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
@@ -1554,6 +1551,11 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrownnz, "warp", bDim);
 
    hypre_GpuProfilingPushRange("CSRMatrixComputeRowSum");
+
+   if (nrownnz < nrows && set)
+   {
+      hypre_Memset(row_sum, 0, nrows * sizeof(HYPRE_Complex), HYPRE_MEMORY_DEVICE);
+   }
 
    if (nrownnz < nrows && CF_i && CF_j)
    {
