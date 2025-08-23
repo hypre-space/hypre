@@ -15,7 +15,7 @@
 /* oneAPI DPL headers */
 /* NOTE: these must be included before standard C++ headers */
 
-/* WM: this is a workaround for a bug in oneDPL reduce by segment */
+/* WM: workaround - this is a workaround for a bug in oneDPL reduce by segment */
 #define ONEDPL_WORKAROUND_FOR_IGPU_64BIT_REDUCTION 1
 
 #include <oneapi/dpl/execution>
@@ -277,6 +277,25 @@ void hypreSycl_stable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 value
                       zipped_begin,
                       zipped_begin + n,
    [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+}
+
+// WM: workaround - A workaround for a bug in inclusive_scan and exclusive_scan in oneDPL with oneAPI 2025.0
+// and oneAPI 2025.1.
+template <class To, class F>
+struct func_converter
+{
+    template <typename... Args>
+    To operator()(Args&&... args) const
+    {
+        return To(f(std::forward<Args>(args)...));
+    }
+    F f;
+};
+
+template <class To, class F>
+auto make_func_converter(F f)
+{
+    return func_converter<To, F>{std::move(f)};
 }
 
 #endif

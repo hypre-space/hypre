@@ -144,16 +144,27 @@ find_and_add_rocm_library(rocrand)
 find_and_add_rocm_library(rocsolver)
 
 if(HYPRE_ENABLE_GPU_PROFILING)
-  set(HYPRE_USING_ROCTRACER ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_ROCTX ON CACHE BOOL "" FORCE)
   find_library(ROCTRACER_LIBRARY
      NAMES libroctracer64.so
      PATHS ${HIP_PATH}/lib ${HIP_PATH}/lib64
      NO_DEFAULT_PATH)
   if(ROCTRACER_LIBRARY)
-    message(STATUS "ROCm tracer library found in ${ROCTRACER_LIBRARY}")
+    message(STATUS "ROCTracer library found in ${ROCTRACER_LIBRARY}")
     list(APPEND ROCM_LIBS ${ROCTRACER_LIBRARY})
   else()
-    message(WARNING "ROCm tracer library not found. GPU profiling may not work correctly.")
+    message(WARNING "ROCTracer library not found. GPU profiling may not work correctly.")
+  endif()
+
+  find_library(ROCTX_LIBRARY
+     NAMES libroctx64.so
+     PATHS ${HIP_PATH}/lib ${HIP_PATH}/lib64
+     NO_DEFAULT_PATH)
+  if(ROCTX_LIBRARY)
+    message(STATUS "ROC-TX library found in ${ROCTX_LIBRARY}")
+    list(APPEND ROCM_LIBS ${ROCTX_LIBRARY})
+  else()
+    message(WARNING "ROC-TX library not found. GPU profiling may not work correctly.")
   endif()
 endif()
 

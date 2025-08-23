@@ -1004,4 +1004,121 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * Constructs a classical restriction operator as R = [Wr I] on GPU.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildRFromWrDevice(hypre_IntArray      *C_map,
+                            hypre_IntArray      *F_map,
+                            hypre_ParCSRMatrix  *Wr,
+                            hypre_ParCSRMatrix  *R)
+{
+   /* Input matrix variables */
+   hypre_CSRMatrix       *Wr_diag          = hypre_ParCSRMatrixDiag(Wr);
+   HYPRE_Int             *Wr_diag_i        = hypre_CSRMatrixI(Wr_diag);
+   HYPRE_Int             *Wr_diag_j        = hypre_CSRMatrixJ(Wr_diag);
+   HYPRE_Complex         *Wr_diag_a        = hypre_CSRMatrixData(Wr_diag);
+   HYPRE_Int              Wr_diag_num_rows = hypre_CSRMatrixNumRows(Wr_diag);
+   HYPRE_Int             *C_map_data       = hypre_IntArrayData(C_map);
+   HYPRE_Int             *F_map_data       = hypre_IntArrayData(F_map);
+
+   /* Output matrix */
+   hypre_CSRMatrix       *R_diag           = hypre_ParCSRMatrixDiag(R);
+   HYPRE_Int             *R_diag_i         = hypre_CSRMatrixI(R_diag);
+   HYPRE_Int             *R_diag_j         = hypre_CSRMatrixJ(R_diag);
+   HYPRE_Complex         *R_diag_a         = hypre_CSRMatrixData(R_diag);
+
+   HYPRE_Int              nrows            = Wr_diag_num_rows;
+
+   /* 1. Compute row lengths: 1 (for I) + nnz in Wr row */
+   HYPRE_Int *row_lengths = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator<HYPRE_Int> row_begin(0);
+   HYPRE_ONEDPL_CALL(std::transform,
+                     row_begin, row_begin + nrows,
+                     row_lengths,
+                     [ = ](HYPRE_Int i)
+   {
+      return (1 + Wr_diag_i[i + 1] - Wr_diag_i[i]);
+   });
+#else
+   HYPRE_THRUST_CALL(transform,
+                     thrust::make_counting_iterator<HYPRE_Int>(0),
+                     thrust::make_counting_iterator<HYPRE_Int>(nrows),
+                     row_lengths,
+                     [ = ] __device__ (HYPRE_Int i)
+   {
+      return (1 + Wr_diag_i[i + 1] - Wr_diag_i[i]);
+   });
+#endif
+
+   /* 2. Inclusive scan to get R_diag_i */
+   HYPRE_Int zero = 0;
+   hypre_TMemcpy(R_diag_i, &zero, HYPRE_Int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::inclusive_scan,
+                     row_lengths, row_lengths + nrows,
+                     R_diag_i + 1);
+#else
+   HYPRE_THRUST_CALL(inclusive_scan,
+                     row_lengths, row_lengths + nrows,
+                     R_diag_i + 1);
+#endif
+
+   // 3. Fill R_diag_j and R_diag_a in parallel, one row per thread
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::for_each,
+                     row_begin, row_begin + nrows,
+                     [ = ](HYPRE_Int i)
+   {
+      HYPRE_Int r_offset = R_diag_i[i];
+
+      /* I part */
+      R_diag_j[r_offset] = C_map_data[i];
+      R_diag_a[r_offset] = 1.0;
+      r_offset++;
+
+      /* Wr part */
+      for (HYPRE_Int jj = Wr_diag_i[i]; jj < Wr_diag_i[i + 1]; jj++)
+      {
+         R_diag_j[r_offset] = F_map_data[Wr_diag_j[jj]];
+         R_diag_a[r_offset] = Wr_diag_a[jj];
+         r_offset++;
+      }
+   });
+#else
+   HYPRE_THRUST_CALL(for_each,
+                     thrust::make_counting_iterator<HYPRE_Int>(0),
+                     thrust::make_counting_iterator<HYPRE_Int>(nrows),
+                     [ = ] __device__ (HYPRE_Int i)
+   {
+      HYPRE_Int r_offset = R_diag_i[i];
+
+      /* I part */
+      R_diag_j[r_offset] = C_map_data[i];
+      R_diag_a[r_offset] = 1.0;
+      r_offset++;
+
+      /* Wr part */
+      for (HYPRE_Int jj = Wr_diag_i[i]; jj < Wr_diag_i[i + 1]; jj++)
+      {
+         R_diag_j[r_offset] = F_map_data[Wr_diag_j[jj]];
+         R_diag_a[r_offset] = Wr_diag_a[jj];
+         r_offset++;
+      }
+   });
+#endif
+
+   /* 4. Free row_lengths */
+   hypre_TFree(row_lengths, HYPRE_MEMORY_DEVICE);
+
+   /* 5. Sync compute stream so that R_diag is ready for use */
+   hypre_SyncComputeStream();
+
+   return hypre_error_flag;
+}
+
 #endif

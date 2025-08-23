@@ -131,7 +131,11 @@ hypre_SeqVectorSetData( hypre_Vector  *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetOwnsTags
+ * Set an ownership flag about the tags array.
+ *
+ *  0: vector tags point to the user-input tags, vector does not own tags
+ *  1: vector tags is created and user-input tags copied into it, vector owns the tags
+ *  2: vector tags point to the user-input tags, vector owns the tags
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -145,7 +149,6 @@ hypre_SeqVectorSetOwnsTags( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetNumTags
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -159,11 +162,8 @@ hypre_SeqVectorSetNumTags( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetTags
- *
- * Sets tags array to a SeqVector.
- * If owns_tags is true, allocates and copies tags.
- * Otherwise, just points to the input tags array.
+ * Set tags array to a SeqVector. See hypre_SeqVectorSetOwnsTags for
+ * ownership logic.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -172,6 +172,7 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
                         HYPRE_Int             *tags )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
+   HYPRE_Int  owns_tags = hypre_VectorOwnsTags(vector);
    HYPRE_Int *new_tags;
 
    /* Return if tags array does not exist */
@@ -183,7 +184,7 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
       return hypre_error_flag;
    }
 
-   if (hypre_VectorOwnsTags(vector))
+   if (owns_tags == 1)
    {
       /* Deallocate existing tags if present */
       if (hypre_VectorTags(vector))
@@ -204,6 +205,12 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
    }
    else
    {
+      /* Deallocate existing tags if present */
+      if (hypre_VectorTags(vector) && owns_tags == 2)
+      {
+         hypre_TFree(hypre_VectorTags(vector), hypre_VectorMemoryLocation(vector));
+      }
+
       /* Just point to the input tags array */
       hypre_VectorTags(vector) = tags;
 
@@ -214,6 +221,65 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Memory location mismatch!");
       }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetValuesTaggedHost( hypre_Vector  *vector,
+                                    HYPRE_Complex *values )
+{
+   HYPRE_Int   size = hypre_VectorSize(vector);
+   HYPRE_Int  *tags = hypre_VectorTags(vector);
+   HYPRE_Int   i;
+
+   /* Setup scaling vector */
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      hypre_VectorEntryI(vector, i) = values[tags[i]];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetValuesTagged( hypre_Vector  *vector,
+                                HYPRE_Complex *values )
+{
+   /* Sanity checks */
+   if (hypre_VectorNumVectors(vector) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_vectors > 1 not implemented!");
+      return hypre_error_flag;
+   }
+
+   if ((!hypre_VectorTags(vector) && hypre_VectorSize(vector) > 0) || hypre_VectorNumTags(vector) < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "This function is valid only for tagged vectors");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(vector));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorSetValuesTaggedDevice(vector, values);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorSetValuesTaggedHost(vector, values);
    }
 
    return hypre_error_flag;
@@ -295,18 +361,20 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorResize
  *
- * Resize a sequential vector when changing its number of components.
+ * Resize a sequential vector when changing its number of components or
+ * local size.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SeqVectorResize( hypre_Vector *vector,
+                       HYPRE_Int     size_in,
                        HYPRE_Int     num_vectors_in )
 {
    HYPRE_Int  method        = hypre_VectorMultiVecStorageMethod(vector);
    HYPRE_Int  size          = hypre_VectorSize(vector);
    HYPRE_Int  num_vectors   = hypre_VectorNumVectors(vector);
    HYPRE_Int  total_size    = num_vectors * size;
-   HYPRE_Int  total_size_in = num_vectors_in * size;
+   HYPRE_Int  total_size_in = num_vectors_in * size_in;
 
    /* Reallocate data array */
    if (total_size_in > total_size)
@@ -320,10 +388,11 @@ hypre_SeqVectorResize( hypre_Vector *vector,
    }
 
    /* Update vector info */
+   hypre_VectorSize(vector) = size_in;
    hypre_VectorNumVectors(vector) = num_vectors_in;
    if (method == 0)
    {
-      hypre_VectorVectorStride(vector) = size;
+      hypre_VectorVectorStride(vector) = size_in;
       hypre_VectorIndexStride(vector)  = 1;
    }
    else if (method == 1)
@@ -993,21 +1062,21 @@ hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyHost
+ * hypre_SeqVectorPointwiseDivpyHost
  *
  * if marker != NULL: only for marker[i] == marker_val
  *
  * TODO:
- *        1) Change to hypre_SeqVectorElmdivpyMarkedHost?
+ *        1) Change to hypre_SeqVectorPointwiseDivpyMarkedHost?
  *        2) Add vecstride/idxstride variables
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
-                             hypre_Vector *b,
-                             hypre_Vector *y,
-                             HYPRE_Int    *marker,
-                             HYPRE_Int     marker_val )
+hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
+                                   hypre_Vector *b,
+                                   hypre_Vector *y,
+                                   HYPRE_Int    *marker,
+                                   HYPRE_Int     marker_val )
 {
    HYPRE_Complex   *x_data        = hypre_VectorData(x);
    HYPRE_Complex   *b_data        = hypre_VectorData(b);
@@ -1128,17 +1197,17 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyMarked
+ * hypre_SeqVectorPointwiseDivpyMarked
  *
  * Computes: y[i] = y[i] + x[i] / b[i] for marker[i] = marker_val
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
-                               hypre_Vector *b,
-                               hypre_Vector *y,
-                               HYPRE_Int    *marker,
-                               HYPRE_Int     marker_val)
+hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x,
+                                     hypre_Vector *b,
+                                     hypre_Vector *y,
+                                     HYPRE_Int    *marker,
+                                     HYPRE_Int     marker_val)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
@@ -1185,12 +1254,12 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
                                                       hypre_VectorMemoryLocation(b) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_SeqVectorElmdivpyDevice(x, b, y, marker, marker_val);
+      hypre_SeqVectorPointwiseDivpyDevice(x, b, y, marker, marker_val);
    }
    else
 #endif
    {
-      hypre_SeqVectorElmdivpyHost(x, b, y, marker, marker_val);
+      hypre_SeqVectorPointwiseDivpyHost(x, b, y, marker, marker_val);
    }
 
 #ifdef HYPRE_PROFILE
@@ -1201,7 +1270,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpy
+ * hypre_SeqVectorPointwiseDivpy
  *
  * Computes: y = y + x ./ b
  *
@@ -1211,11 +1280,11 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpy( hypre_Vector *x,
-                         hypre_Vector *b,
-                         hypre_Vector *y )
+hypre_SeqVectorPointwiseDivpy( hypre_Vector *x,
+                               hypre_Vector *b,
+                               hypre_Vector *y )
 {
-   return hypre_SeqVectorElmdivpyMarked(x, b, y, NULL, -1);
+   return hypre_SeqVectorPointwiseDivpyMarked(x, b, y, NULL, -1);
 }
 
 /*--------------------------------------------------------------------------
@@ -1466,74 +1535,241 @@ hypre_SeqVectorSumElts( hypre_Vector *v )
    return sum;
 }
 
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorPointwiseProduct
+ *--------------------------------------------------------------------------*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-/* y[i] = max(alpha*x[i], beta*y[i]) */
 HYPRE_Int
-hypre_SeqVectorMax( HYPRE_Complex alpha,
-                    hypre_Vector *x,
-                    HYPRE_Complex beta,
-                    hypre_Vector *y     )
+hypre_SeqVectorPointwiseProductHost( hypre_Vector *x,
+                                     hypre_Vector *y,
+                                     hypre_Vector *z )
 {
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
-#endif
-
+   HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Complex *z_data = hypre_VectorData(z);
+   HYPRE_Int      i;
 
-   size *= hypre_VectorNumVectors(x);
-
-   //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
-   //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
-
-   thrust::maximum<HYPRE_Complex> mx;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_THRUST_CALL( transform,
-                      thrust::make_transform_iterator(x_data,        alpha * _1),
-                      thrust::make_transform_iterator(x_data + size, alpha * _1),
-                      thrust::make_transform_iterator(y_data,        beta  * _1),
-                      y_data,
-                      mx );
-#else
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
-#elif defined(HYPRE_USING_OPENMP)
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   /* Element-wise multiplication z[i] = y[i] * x[i] */
+#if defined (HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i)
 #endif
    for (i = 0; i < size; i++)
    {
-      y_data[i] += hypre_max(alpha * x_data[i], beta * y_data[i]);
+      z_data[i] = y_data[i] * x_data[i];
    }
-
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
-   hypre_SyncComputeStream();
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
-#endif
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorPointwiseDivision
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseDivisionHost( hypre_Vector *x,
+                                      hypre_Vector *y,
+                                      hypre_Vector *z )
+{
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Complex *z_data = hypre_VectorData(z);
+   HYPRE_Int      i;
+
+   /* Element-wise division z[i] = y[i] / x[i] */
+#if defined (HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i)
 #endif
+   for (i = 0; i < size; i++)
+   {
+      hypre_assert(x_data[i] != 0.0);
+
+      z_data[i] = y_data[i] / x_data[i];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorPointwiseInverse
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseInverseHost( hypre_Vector *x,
+                                     hypre_Vector *y )
+{
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i)
+#endif
+   for (i = 0; i < size; i++)
+   {
+      hypre_assert(x_data[i] != 0.0);
+      y_data[i] = 1.0 / x_data[i];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise product of two vectors: z[i] = x[i] * y[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseProduct( hypre_Vector  *x,
+                                 hypre_Vector  *y,
+                                 hypre_Vector **z_ptr )
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Complex  x_size = hypre_VectorSize(x);
+   HYPRE_Complex  y_size = hypre_VectorSize(y);
+   HYPRE_Complex  z_size = hypre_VectorSize(*z_ptr);
+
+   /* Check if vectors are initialized */
+   if ((!x_data && !x_size) || (!y_data && !y_size))
+   {
+      return hypre_error_flag;
+   }
+
+   /* Check if vectors are initialized */
+   if ((!x_data && x_size) || (!y_data && y_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors have different sizes!");
+      return hypre_error_flag;
+   }
+
+   /* Check if vectors have same size */
+   if (y_size != x_size || (*z_ptr && y_size != z_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors have different sizes!");
+      return hypre_error_flag;
+   }
+
+   /* Create and initialize z if it doesn't exist, or resize it */
+   if (!*z_ptr)
+   {
+      *z_ptr = hypre_SeqVectorCreate(hypre_VectorSize(x));
+      hypre_SeqVectorInitialize_v2(*z_ptr, hypre_VectorMemoryLocation(x));
+   }
+   else if (*z_ptr != y)
+   {
+      /* No-op if z has the same size as x */
+      hypre_SeqVectorResize(*z_ptr, hypre_VectorSize(x), hypre_VectorNumVectors(x));
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_SeqVectorPointwiseProductDevice(x, y, *z_ptr);
+   }
+   else
+#endif
+   {
+      return hypre_SeqVectorPointwiseProductHost(x, y, *z_ptr);
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise division of two vectors: z[i] = y[i] / x[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseDivision( hypre_Vector  *x,
+                                  hypre_Vector  *y,
+                                  hypre_Vector **z_ptr )
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+
+   /* Check if vectors are initialized */
+   if (!x_data || !y_data)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors are not initialized!");
+      return hypre_error_flag;
+   }
+
+   /* Check if vectors have same size */
+   if (hypre_VectorSize(y) != hypre_VectorSize(x) ||
+       (*z_ptr && hypre_VectorSize(y) != hypre_VectorSize(*z_ptr)))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors have different sizes!");
+      return hypre_error_flag;
+   }
+
+   /* Create and initialize z if it doesn't exist, or resize it */
+   if (!*z_ptr)
+   {
+      *z_ptr = hypre_SeqVectorCreate(hypre_VectorSize(x));
+      hypre_SeqVectorInitialize_v2(*z_ptr, hypre_VectorMemoryLocation(x));
+   }
+   else if (*z_ptr != y)
+   {
+      /* No-op if z has the same size as x */
+      hypre_SeqVectorResize(*z_ptr, hypre_VectorSize(x), hypre_VectorNumVectors(x));
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_SeqVectorPointwiseDivisionDevice(x, y, *z_ptr);
+   }
+   else
+#endif
+   {
+      return hypre_SeqVectorPointwiseDivisionHost(x, y, *z_ptr);
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise inverse of a vector: y[i] = 1.0 / x[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseInverse( hypre_Vector  *x,
+                                 hypre_Vector **y_ptr )
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+
+   /* Check if vector is initialized */
+   if (!x_data)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vector is not initialized!");
+      return hypre_error_flag;
+   }
+
+   /* Create and initialize z if it doesn't exist, or resize it */
+   if (!*y_ptr)
+   {
+      *y_ptr = hypre_SeqVectorCreate(hypre_VectorSize(x));
+      hypre_SeqVectorInitialize_v2(*y_ptr, hypre_VectorMemoryLocation(x));
+   }
+   else if (*y_ptr != x)
+   {
+      /* No-op if y has the same size as x */
+      hypre_SeqVectorResize(*y_ptr, hypre_VectorSize(x), hypre_VectorNumVectors(x));
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(x));
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_SeqVectorPointwiseInverseDevice(x, *y_ptr);
+   }
+   else
+#endif
+   {
+      return hypre_SeqVectorPointwiseInverseHost(x, *y_ptr);
+   }
+}
