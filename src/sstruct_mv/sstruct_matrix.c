@@ -1416,8 +1416,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                {
                   //hypre_assert(ndim <= 3);
 
-                  HYPRE_Int rs_0, rs_1, rs_2;
-                  HYPRE_Int cs_0, cs_1, cs_2;
+                  HYPRE_Int rs_0 = 0, rs_1 = 0, rs_2 = 0;
+                  HYPRE_Int cs_0 = 0, cs_1 = 0, cs_2 = 0;
 
                   if (ndim > 0)
                   {

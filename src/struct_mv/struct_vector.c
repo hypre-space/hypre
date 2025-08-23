@@ -725,6 +725,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
 #define DEVICE_VAR is_device_ptr(vecp,values)
                hypre_LoopBegin(1, k)
                {
+                  HYPRE_UNUSED_VAR(k);
                   *vecp += *values;
                }
                hypre_LoopEnd()
@@ -946,6 +947,7 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
 #define DEVICE_VAR is_device_ptr(vecp)
             hypre_LoopBegin(1, k)
             {
+               HYPRE_UNUSED_VAR(k);
                *vecp = 0.0;
             }
             hypre_LoopEnd()
