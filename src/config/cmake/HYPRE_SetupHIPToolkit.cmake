@@ -16,6 +16,7 @@ elseif(EXISTS "/opt/rocm")
 else()
   message(FATAL_ERROR "ROCM_PATH or HIP_PATH not set. Please set one of them to point to your ROCm installation.")
 endif()
+set(CMAKE_HIP_COMPILER_ROCM_ROOT ${HIP_PATH})
 message(STATUS "Using ROCm installation: ${HIP_PATH}")
 
 # Add HIP_PATH to CMAKE_PREFIX_PATH
