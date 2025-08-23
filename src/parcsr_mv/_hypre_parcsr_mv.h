@@ -24,6 +24,10 @@ extern "C" {
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
 #define HYPRE_PAR_CSR_COMMUNICATION_HEADER
 
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+#include "mpi_advance.h"
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRCommPkg:
  *   Structure containing information for doing communications
@@ -60,6 +64,9 @@ typedef struct
    void                 *recv_data_buffer;
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   MPIX_Request         *Xrequest;
+#endif
 } hypre_ParCSRCommHandle;
 
 typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
@@ -67,6 +74,11 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 typedef struct _hypre_ParCSRCommPkg
 {
    MPI_Comm                          comm;
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   MPIX_Comm                        *neighbor_comm;
+   MPIX_Topo                        *neighbor_topo;
+   MPIX_Topo                        *neighborT_topo;
+#endif
    HYPRE_Int                         num_components;
    HYPRE_Int                         num_sends;
    HYPRE_Int                        *send_procs;
@@ -76,6 +88,11 @@ typedef struct _hypre_ParCSRCommPkg
    HYPRE_Int                         num_recvs;
    HYPRE_Int                        *recv_procs;
    HYPRE_Int                        *recv_vec_starts;
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   HYPRE_Int                         use_neighbor;
+   long                             *global_send_indices;
+   long                             *global_recv_indices;
+#endif
    /* remote communication information */
    hypre_MPI_Datatype               *send_mpi_types;
    hypre_MPI_Datatype               *recv_mpi_types;
@@ -811,6 +828,12 @@ HYPRE_Int hypre_RangeFillResponseIJDetermineRecvProcs ( void *p_recv_contact_buf
 HYPRE_Int hypre_FillResponseIJDetermineSendProcs ( void *p_recv_contact_buf, HYPRE_Int contact_size,
                                                    HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf,
                                                    HYPRE_Int *response_message_size );
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+void hypre_ParCSRCreateCommGraph( HYPRE_BigInt first_col_diag,
+                                  HYPRE_BigInt *col_map_offd,
+                                  MPI_Comm comm,
+                                  hypre_ParCSRCommPkg *comm_pkg );
+#endif
 
 /* numbers.c */
 hypre_NumbersNode *hypre_NumbersNewNode ( void );

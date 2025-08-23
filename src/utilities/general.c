@@ -62,6 +62,10 @@ hypre_HandleCreate(void)
 #endif
 #endif
 
+#if defined(HYPRE_USING_NODE_AWARE_MPI)
+   hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle_) = 0;
+#endif
+
    return hypre_handle_;
 }
 

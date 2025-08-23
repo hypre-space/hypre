@@ -78,6 +78,12 @@ typedef struct
 #if defined(HYPRE_USING_MAGMA)
    magma_queue_t          magma_queue;
 #endif
+
+#if defined(HYPRE_USING_NODE_AWARE_MPI)
+   /* level at which to begin using node aware optimization */
+   HYPRE_Int              node_aware_switchover_threshold;
+#endif
+
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
@@ -144,5 +150,9 @@ typedef struct
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
+
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+#define hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle)   ((hypre_handle) -> node_aware_switchover_threshold)
+#endif
 
 #endif
