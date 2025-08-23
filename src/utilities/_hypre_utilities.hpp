@@ -422,13 +422,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if HYPRE_WARP_SIZE == 32
-#define HYPRE_WARP_BITSHIFT      5
-#define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
-
-#elif HYPRE_WARP_SIZE == 64
+#if HYPRE_WARP_SIZE == 64 ||\
+  (defined(HYPRE_USING_HIP) && HIP_VERSION > 60500000 && !defined(HIP_DISABLE_WARP_SYNC_BUILTINS))
 #define HYPRE_WARP_BITSHIFT      6
 #define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
+
+#elif HYPRE_WARP_SIZE == 32
+#define HYPRE_WARP_BITSHIFT      5
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
 
 #else
 #error "Unsupported value for HYPRE_WARP_SIZE"
@@ -1349,8 +1350,8 @@ void hypre_gpu_atomicAdd(hypre_int pos, T* address, T val)
    atomicAdd((T*)(address + pos), val);
 }
 
-// There are no *_sync functions in HIP < 7.0
-#if (defined(HYPRE_USING_HIP) && HIP_VERSION < 70000000)
+// There are no *_sync functions in HIP < 6.5
+#if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000 || defined(HIP_DISABLE_WARP_SYNC_BUILTINS))
 
 template <typename T>
 static __device__ __forceinline__
@@ -1391,12 +1392,13 @@ hypre_int __any_sync(unsigned mask, hypre_int predicate)
    return __any(predicate);
 }
 
-#endif // if (defined(HYPRE_USING_HIP) && HIP_VERSION < 70000000)
+#endif // if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000)
 
 static __device__ __forceinline__
 hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
-#if defined(HYPRE_USING_CUDA) || (defined(HYPRE_USING_HIP) && HIP_VERSION >= 70000000)
+#if defined(HYPRE_USING_CUDA) ||\
+  (defined(HYPRE_USING_HIP) && HIP_VERSION >= 60500000 && !defined(HIP_DISABLE_WARP_SYNC_BUILTINS))
    return __ballot_sync(mask, predicate);
 #else
    return __ballot(predicate);
