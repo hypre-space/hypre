@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_pilut_mup_def.h"
+#endif
+
 /* HYPRE_DistributedMatrixPilutSolver.c */
 HYPRE_Int HYPRE_NewDistributedMatrixPilutSolver( MPI_Comm comm , HYPRE_DistributedMatrix matrix , HYPRE_DistributedMatrixPilutSolver *new_solver );
 HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver( HYPRE_DistributedMatrixPilutSolver in_ptr );
@@ -20,10 +24,7 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutS
 
 /* comm.c */
 HYPRE_Int hypre_GlobalSEMax( HYPRE_Int value , MPI_Comm hypre_MPI_Context );
-HYPRE_Int hypre_GlobalSEMin( HYPRE_Int value , MPI_Comm hypre_MPI_Context );
 HYPRE_Int hypre_GlobalSESum( HYPRE_Int value , MPI_Comm hypre_MPI_Context );
-HYPRE_Real hypre_GlobalSEMaxDouble( HYPRE_Real value , MPI_Comm hypre_MPI_Context );
-HYPRE_Real hypre_GlobalSEMinDouble( HYPRE_Real value , MPI_Comm hypre_MPI_Context );
 HYPRE_Real hypre_GlobalSESumDouble( HYPRE_Real value , MPI_Comm hypre_MPI_Context );
 
 /* debug.c */
@@ -101,13 +102,6 @@ void hypre_SetUpFactor( DataDistType *ddist , FactorMatType *ldu , HYPRE_Int max
 
 /* util.c */
 HYPRE_Int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals );
-void hypre_IdxIncSort( HYPRE_Int n , HYPRE_Int *idx , HYPRE_Real *val );
-void hypre_ValDecSort( HYPRE_Int n , HYPRE_Int *idx , HYPRE_Real *val );
-HYPRE_Int hypre_CompactIdx( HYPRE_Int n , HYPRE_Int *idx , HYPRE_Real *val );
-void hypre_PrintIdxVal( HYPRE_Int n , HYPRE_Int *idx , HYPRE_Real *val );
-HYPRE_Int hypre_DecKeyValueCmp( const void *v1 , const void *v2 );
-void hypre_SortKeyValueNodesDec( KeyValueType *nodes , HYPRE_Int n );
 HYPRE_Int hypre_sasum( HYPRE_Int n , HYPRE_Int *x );
 void hypre_sincsort( HYPRE_Int n , HYPRE_Int *a );
 void hypre_sdecsort( HYPRE_Int n , HYPRE_Int *a );
-

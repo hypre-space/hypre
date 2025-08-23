@@ -13,39 +13,6 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructVectorSetRandomValues
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
-(hypre_F90_Obj *vector,
- hypre_F90_Int *seed,
- hypre_F90_Int *ierr)
-{
-   *ierr = (hypre_F90_Int)
-           ( hypre_StructVectorSetRandomValues(
-                (hypre_StructVector *) vector,
-                hypre_F90_PassInt (seed) ));
-}
-
-
-/*--------------------------------------------------------------------------
- * HYPRE_StructSetRandomValues
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
-(hypre_F90_Obj *vector,
- hypre_F90_Int *seed,
- hypre_F90_Int *ierr)
-{
-   *ierr = (hypre_F90_Int)
-           ( hypre_StructSetRandomValues(
-                (hypre_StructVector *) vector,
-                hypre_F90_PassInt (seed) ));
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_StructSetupInterpreter
  *--------------------------------------------------------------------------*/
 

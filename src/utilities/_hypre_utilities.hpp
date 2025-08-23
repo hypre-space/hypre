@@ -4,6 +4,9 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_utilities_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -385,6 +388,13 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
 #endif
 
+/* Resolve deprecated warnings about thrust::identity */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 200802)
+#define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
+#endif
+
 using namespace thrust::placeholders;
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -682,8 +692,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_sgetrf_batched
@@ -743,8 +758,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_dgetrf_batched
@@ -2371,73 +2391,102 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
-struct HYPRE_double4
+struct HYPRE_Real2
 {
-   HYPRE_Real x, y, z, w;
+   HYPRE_Real x, y;
 
    __host__ __device__
-   HYPRE_double4() {}
+   HYPRE_Real2() {}
 
    __host__ __device__
-   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   HYPRE_Real2(HYPRE_Real x1, HYPRE_Real x2)
    {
       x = x1;
       y = x2;
-      z = x3;
-      w = x4;
    }
 
    __host__ __device__
    void operator=(HYPRE_Real val)
    {
-      x = y = z = w = val;
+      x = y = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_double4 rhs)
+   void operator+=(HYPRE_Real2 rhs)
    {
       x += rhs.x;
       y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
    }
 
 };
 
-struct HYPRE_double6
+struct HYPRE_Real4
 {
-   HYPRE_Real x, y, z, w, u, v;
+   HYPRE_Real u, v, w, x;
 
    __host__ __device__
-   HYPRE_double6() {}
+   HYPRE_Real4() {}
 
    __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
-                 HYPRE_Real x5, HYPRE_Real x6)
+   HYPRE_Real4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
    {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-      u = x5;
-      v = x6;
+      u = x1;
+      v = x2;
+      w = x3;
+      x = x4;
    }
 
    __host__ __device__
    void operator=(HYPRE_Real val)
    {
-      x = y = z = w = u = v = val;
+      u = v = w = x = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_double6 rhs)
+   void operator+=(HYPRE_Real4 rhs)
    {
+      u += rhs.u;
+      v += rhs.v;
+      w += rhs.w;
+      x += rhs.x;
+   }
+
+};
+
+struct HYPRE_Real6
+{
+   HYPRE_Real u, v, w, x, y, z;
+
+   __host__ __device__
+   HYPRE_Real6() {}
+
+   __host__ __device__
+   HYPRE_Real6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3,
+               HYPRE_Real x4, HYPRE_Real x5, HYPRE_Real x6)
+   {
+      u = x1;
+      v = x2;
+      w = x3;
+      x = x4;
+      y = x5;
+      z = x6;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      u = v = w = x = y = z = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_Real6 rhs)
+   {
+      u += rhs.u;
+      v += rhs.v;
+      w += rhs.w;
       x += rhs.x;
       y += rhs.y;
       z += rhs.z;
-      w += rhs.w;
-      u += rhs.u;
-      v += rhs.v;
    }
 
 };
@@ -2456,32 +2505,45 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 }
 
 __inline__ __host__ __device__
-HYPRE_double4 warpReduceSum(HYPRE_double4 val)
+HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
       val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
       val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-      val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
    }
 #endif
    return val;
 }
 
 __inline__ __host__ __device__
-HYPRE_double6 warpReduceSum(HYPRE_double6 val)
+HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
+      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+      val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+   }
+#endif
+   return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_Real6 warpReduceSum(HYPRE_Real6 val)
+{
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
       val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
       val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
       val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
-      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
    }
 #endif
    return val;
@@ -2603,9 +2665,9 @@ struct ReduceSum
    {
       if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
-         /* allocate for the max size for reducing double6 type */
+         /* allocate for the max size for reducing HYPRE_Real6 type */
          hypre_HandleReduceBuffer(hypre_handle()) =
-            hypre_TAlloc(HYPRE_double6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
+            hypre_TAlloc(HYPRE_Real6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
@@ -3510,6 +3572,17 @@ struct hypre_cub_CachingDeviceAllocator
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "_hypre_utilities_mup.h"
+#endif
 #endif
 
 #endif

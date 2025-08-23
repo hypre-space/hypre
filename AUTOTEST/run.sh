@@ -15,7 +15,7 @@ case $1 in
    $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
    where: {src_dir}  is the hypre source directory
-          -<test>    run <test>  (test = ams, fac, ij, sstruct, struct)
+          -<test>    run <test>  (test = ams, ij, sstruct, struct)
           -all       run all tests (default behavior)
           -h|-help   prints this usage information and exits
 
@@ -51,7 +51,7 @@ done
 
 # If no tests were specified, run all tests
 if [ "$tests" = "" ]; then
-   tests="-ams -fac -ij -sstruct -struct"
+   tests="-ams -ij -sstruct -struct"
 fi
 
 # Setup

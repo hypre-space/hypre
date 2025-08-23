@@ -24,6 +24,10 @@
 #include <omp.h>
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_utilities_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,6 +35,7 @@ extern "C" {
 /*--------------------------------------------------------------------------
  * Big int stuff
  *--------------------------------------------------------------------------*/
+#include <limits.h>
 
 #if defined(HYPRE_BIGINT)
 typedef long long int HYPRE_BigInt;
@@ -43,6 +48,8 @@ typedef long long int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
+#define HYPRE_INT_MAX LLONG_MAX
+#define HYPRE_INT_MIN LLONG_MIN
 
 #elif defined(HYPRE_MIXEDINT)
 typedef long long int HYPRE_BigInt;
@@ -55,6 +62,8 @@ typedef int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
 #define HYPRE_MPI_INT MPI_INT
+#define HYPRE_INT_MAX INT_MAX
+#define HYPRE_INT_MIN INT_MIN
 
 #else /* default */
 typedef int HYPRE_BigInt;
@@ -67,6 +76,8 @@ typedef int HYPRE_Int;
 
 #define HYPRE_MPI_BIG_INT MPI_INT
 #define HYPRE_MPI_INT MPI_INT
+#define HYPRE_INT_MAX INT_MAX
+#define HYPRE_INT_MIN INT_MIN
 #endif
 
 /*--------------------------------------------------------------------------
@@ -130,6 +141,67 @@ typedef double _Complex HYPRE_Complex;
 #else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
+#endif
+
+/* This allows us to avoid using 'float', 'double', and 'longdouble' in hypre.
+ * NOTE: This must be defined here in the external header file for use in the
+ * mixed precision code. */
+typedef double       hypre_double;
+typedef float        hypre_float;
+typedef long double  hypre_long_double;
+
+/*--------------------------------------------------------------------------
+ * Multiprecision
+ *--------------------------------------------------------------------------*/
+
+/* object precision options and API are available to users at all times */
+
+typedef enum
+{
+   HYPRE_REAL_SINGLE,
+   HYPRE_REAL_DOUBLE,
+   HYPRE_REAL_LONGDOUBLE
+
+} HYPRE_Precision;
+
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
+
+/* RDF: This probably needs to be renamed to something like HYPRE_COMPILE_PRECISION */
+#ifndef HYPRE_OBJECT_PRECISION
+#if defined(HYPRE_SINGLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
+#elif defined(HYPRE_LONG_DOUBLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
+#else
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+#endif
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+
+#ifdef hypre_DEFINE_GLOBAL_MP
+#define hypre_DEFINE_GLOBAL 1
+#endif
+
+#ifndef HYPRE_CURRENTPRECISION_FUNC
+#if defined(HYPRE_SINGLE)
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##_flt
+#elif defined(HYPRE_LONG_DOUBLE)
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##long_dbl
+#else
+#define HYPRE_CURRENTPRECISION_FUNC(a) a##_dbl
+#endif
+#endif
+
+#endif
+
+/* need to define this when not mixed precision */
+#ifndef HYPRE_MIXED_PRECISION
+#define hypre_DEFINE_GLOBAL 1
 #endif
 
 /*--------------------------------------------------------------------------
@@ -592,6 +664,17 @@ typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "HYPRE_utilities_mup.h"
+#endif
 #endif
 
 #endif

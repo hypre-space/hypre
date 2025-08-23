@@ -38,7 +38,37 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision vector_precision;
+#endif
+
 } hypre_Vector;
+
+typedef struct
+{
+   void        *data;
+   HYPRE_Int             size;      /* Number of elements of a single vector component */
+   HYPRE_Int             component; /* Index of a multivector component
+                                    (used for set/get routines )*/
+   HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
+   HYPRE_MemoryLocation  memory_location; /* memory location of data array */
+
+   /* For multivectors...*/
+   HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
+   HYPRE_Int   multivec_storage_method;
+   /* ...if 0, store colwise v0[0], v0[1], ..., v1[0], v1[1], ... v2[0]... */
+   /* ...if 1, store rowwise v0[0], v1[0], ..., v0[1], v1[1], ... */
+   /* With colwise storage, vj[i] = data[ j*size + i]
+      With rowwise storage, vj[i] = data[ j + num_vectors*i] */
+   HYPRE_Int  vecstride, idxstride;
+   /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision vector_precision;
+#endif
+
+} hypre_Vector_mp;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Vector structure
@@ -59,5 +89,9 @@ typedef struct
 #define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
 #define hypre_VectorEntryIJ(vector, i, j) \
    ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
+
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 #endif

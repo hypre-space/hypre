@@ -32,24 +32,48 @@ HYPRE_StructStencilCreate( HYPRE_Int            dim,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructStencilSetElement
+ * HYPRE_StructStencilSetEntry
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructStencilSetEntry( HYPRE_StructStencil  stencil,
+                             HYPRE_Int            entry,
+                             HYPRE_Int           *offset )
+{
+   hypre_Index  *shape;
+   HYPRE_Int     d;
+   HYPRE_Int     is_diag = 1;
+
+   shape = hypre_StructStencilShape(stencil);
+   hypre_SetIndex(shape[entry], 0);
+   for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
+   {
+      hypre_IndexD(shape[entry], d) = offset[d];
+
+      if (is_diag && offset[d] != 0)
+      {
+         is_diag = 0;
+      }
+   }
+
+   if (is_diag)
+   {
+      hypre_StructStencilDiagEntry(stencil) = entry;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * OBSOLETE
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
-                               HYPRE_Int            element_index,
+                               HYPRE_Int            entry,
                                HYPRE_Int           *offset )
 {
-   hypre_Index  *shape;
-   HYPRE_Int     d;
-
-   shape = hypre_StructStencilShape(stencil);
-   hypre_SetIndex(shape[element_index], 0);
-   for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
-   {
-      hypre_IndexD(shape[element_index], d) = offset[d];
-   }
-
+   HYPRE_StructStencilSetEntry(stencil, entry, offset);
    return hypre_error_flag;
 }
 
@@ -62,4 +86,3 @@ HYPRE_StructStencilDestroy( HYPRE_StructStencil stencil )
 {
    return ( hypre_StructStencilDestroy(stencil) );
 }
-

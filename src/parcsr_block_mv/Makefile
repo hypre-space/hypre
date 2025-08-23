@@ -54,6 +54,16 @@ DRIVER_FILES =
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+
+endif
+
 SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
@@ -61,8 +71,7 @@ SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
 
 driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
@@ -90,12 +99,12 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS}
 
 install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fR $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE_* $(HYPRE_LIB_INSTALL)/.
 
 clean:
 	rm -rf *.o libHYPRE_*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -f driver driver_matvec driver_matmul
 
 distclean: clean

@@ -195,7 +195,6 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructVector y,
                              HYPRE_SStructVector x      )
 {
-
    return ( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
                                         (HYPRE_StructMatrix) A,
                                         (HYPRE_StructVector) y,

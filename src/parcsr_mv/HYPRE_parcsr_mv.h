@@ -17,6 +17,10 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_parcsr_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,6 +52,8 @@ HYPRE_Int HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix matrix, MPI_Comm *comm )
 HYPRE_Int HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix matrix, HYPRE_BigInt *M, HYPRE_BigInt *N );
 HYPRE_Int HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix matrix,
                                                 HYPRE_BigInt **row_partitioning_ptr );
+HYPRE_Int HYPRE_ParCSRMatrixGetGlobalRowPartitioning ( HYPRE_ParCSRMatrix matrix,
+                                                       HYPRE_Int all_procs, HYPRE_BigInt **row_partitioning_ptr );
 HYPRE_Int HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix matrix,
                                                 HYPRE_BigInt **col_partitioning_ptr );
 HYPRE_Int HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix matrix, HYPRE_BigInt *row_start,
@@ -58,6 +64,8 @@ HYPRE_Int HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix matrix, HYPRE_BigInt 
                                         HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm, HYPRE_CSRMatrix A_CSR,
                                          HYPRE_BigInt *row_partitioning, HYPRE_BigInt *col_partitioning, HYPRE_ParCSRMatrix *matrix );
+HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning ( MPI_Comm comm, HYPRE_CSRMatrix A_CSR,
+                                                              HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_ParCSRMatrixMatvec( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
                                     HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
@@ -71,6 +79,8 @@ HYPRE_Int HYPRE_ParCSRMatrixComputeScalingTagged( HYPRE_ParCSRMatrix A, HYPRE_In
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size,
                                  HYPRE_BigInt *partitioning, HYPRE_ParVector *vector );
+HYPRE_Int HYPRE_ParMultiVectorCreate ( MPI_Comm comm, HYPRE_BigInt global_size,
+                                       HYPRE_BigInt *partitioning, HYPRE_Int number_vectors, HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorDestroy( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorRead( MPI_Comm comm, const char *file_name, HYPRE_ParVector *vector );
@@ -79,7 +89,9 @@ HYPRE_Int HYPRE_ParVectorPrintBinaryIJ( HYPRE_ParVector vector, const char *file
 HYPRE_Int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector, HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy( HYPRE_ParVector x, HYPRE_ParVector y );
+HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale( HYPRE_Complex value, HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
 HYPRE_Int HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                    HYPRE_ParVector *vector );
@@ -88,6 +100,18 @@ HYPRE_Int HYPRE_ParVectorGetValues( HYPRE_ParVector vector, HYPRE_Int num_values
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_parcsr_mv_mup_undef.h"
+#include "HYPRE_parcsr_mv_mup.h"
+#include "HYPRE_parcsr_mv_mp.h"
+#endif
 #endif
 
 #endif
