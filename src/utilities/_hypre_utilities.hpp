@@ -381,7 +381,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/version.h>
 
 /* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
-#define THRUST_VERSION_NOTFN 200700
+#define THRUST_VERSION_NOTFN 200600
 #if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
 #else
@@ -3586,4 +3586,3 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
-
