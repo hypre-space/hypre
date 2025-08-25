@@ -5,6 +5,13 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "HYPRE_config.h"
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_mup_def.h"
+#include "ij_helpers_mup.h"
+#include "ij_helpers_mup_def.h"
+#endif
+
 HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm,
                                       HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
                                       HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R,

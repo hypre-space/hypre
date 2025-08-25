@@ -63,13 +63,13 @@ LFLAGS =\
 HYPRE_DRIVERS =\
  ij.c\
  ij_assembly.c\
+ ij_mm.c\
  sstruct.c\
  sstructmat.c\
  struct.c\
  structmat.c\
  ams_driver.c\
  struct_migrate.c\
- ij_mm.c\
  zboxloop.c\
 
 HYPRE_MP_DRIVERS =\
@@ -103,6 +103,12 @@ HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
 
+ifeq (${MP_BUILD}, 1)
+   IJ_HELPER_OBJS = ij_helpers.o_flt ij_helpers.o_dbl ij_helpers.o_ldbl ij_helpers.o
+else
+   IJ_HELPER_OBJS = ij_helpers.o
+endif
+
 all: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
@@ -112,7 +118,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o *.obj *.csv
+	rm -f *.o *.o_flt *.o_dbl *.o_ldbl *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -139,19 +145,19 @@ distclean: clean
 ##################################################################
 
 # C
-ij: ij_helpers.o ij.o
+ij: ${IJ_HELPER_OBJS} ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $^ ${LFLAGS}
 
-ij_assembly: ij_helpers.o ij_assembly.o
+ij_assembly: ${IJ_HELPER_OBJS} ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $^ ${LFLAGS}
 
-ij_device: ij_helpers.o ij_device.o
+ij_device: ${IJ_HELPER_OBJS} ij_device.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $^ ${LFLAGS}
 
-ij_mm: ij_helpers.o ij_mm.o
+ij_mm: ${IJ_HELPER_OBJS} ij_mm.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $^ ${LFLAGS}
 
@@ -192,9 +198,9 @@ struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mp: ij_helpers.o ij_mp.o
+ij_mp: ${IJ_HELPER_OBJS} ij_mp.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
+	${LINK_CC} -o $@ $^ ${LFLAGS}
 
 struct_mp: struct_mp.o
 	@echo  "Building" $@ "... "

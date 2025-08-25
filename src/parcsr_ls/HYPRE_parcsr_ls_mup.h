@@ -20,62 +20,6 @@ extern "C" {
  ******************************************************************************/
 
 
-HYPRE_ParCSRMatrix
-GenerateDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
-
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_float alpha, hypre_float eps );
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_double alpha, hypre_double eps );
-HYPRE_ParCSRMatrix
-GenerateRotate7pt_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, hypre_long_double alpha, hypre_long_double eps );
-
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_float eps, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_double eps, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix
-GenerateVarDifConv_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, hypre_long_double eps, HYPRE_ParVector *rhs_ptr );
-
-float*
-hypre_GenerateCoordinates_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-float*
-hypre_GenerateCoordinates_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-float*
-hypre_GenerateCoordinates_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use ../config/gen_code.sh to generate) ***/
 

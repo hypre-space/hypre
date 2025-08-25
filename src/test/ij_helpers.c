@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "ij_helpers.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
