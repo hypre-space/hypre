@@ -16,13 +16,11 @@ endif()
 
 # Define list of executables
 set(TEST_SRCS
-  ij.c
   sstruct.c
   struct.c
   structmat.c
   ams_driver.c
   struct_migrate.c
-  ij_assembly.c
 )
 
 # Mixed precision test executables (only built when mixed precision is enabled)
@@ -39,6 +37,10 @@ add_hypre_executables("${TEST_SRCS}")
 
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
 add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
+
+# Special treatment for ij drivers as they depend on ij_helpers (not an executable)
+add_hypre_executable("ij.c" "ij_helpers.c")
+add_hypre_executable("ij_assembly.c" "ij_helpers.c")
 
 # Copy test input files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default

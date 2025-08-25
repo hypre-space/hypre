@@ -22,7 +22,6 @@ endif()
 set(REGULAR_SRCS
   amg_hybrid.c
   aux_interp.c
-  F90_hypre_laplace.c
   F90_HYPRE_parcsr_amg.c
   F90_HYPRE_parcsr_bicgstab.c
   F90_HYPRE_parcsr_block.c
@@ -80,11 +79,9 @@ set(REGULAR_SRCS
   par_cgc_coarsen.c
   par_cheby.c
   par_coarse_parms.c
-  par_coordinates.c
   par_cr.c
   par_cycle.c
   par_add_cycle.c
-  par_difconv.c
   par_fsai.c
   par_fsai_setup.c
   par_fsai_solve.c
@@ -97,9 +94,6 @@ set(REGULAR_SRCS
   par_mod_lr_interp.c
   par_mod_multi_interp.c
   par_multi_interp.c
-  par_laplace_27pt.c
-  par_laplace_9pt.c
-  par_laplace.c
   par_lr_interp.c
   par_mgr.c
   par_mgr_coarsen.c
@@ -112,9 +106,6 @@ set(REGULAR_SRCS
   par_nodal_systems.c
   par_rap.c
   par_rap_communication.c
-  par_rotate_7pt.c
-  par_vardifconv.c
-  par_vardifconv_rs.c
   par_relax.c
   par_relax_more.c
   par_relax_interface.c
