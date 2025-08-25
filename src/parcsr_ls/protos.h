@@ -736,25 +736,6 @@ void hypre_BoomerAMGTruncateInterp ( hypre_ParCSRMatrix *P, HYPRE_Real eps, HYPR
 HYPRE_Int hypre_ParCSRMatrix_dof_func_offd ( hypre_ParCSRMatrix *A, HYPRE_Int num_functions,
                                              HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd );
 
-/* par_laplace_27pt.c */
-HYPRE_Int hypre_map3 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q,
-                       HYPRE_Int r, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part,
-                       HYPRE_BigInt *nz_part );
-
-/* par_laplace_9pt.c */
-HYPRE_BigInt hypre_map2 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q,
-                          HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
-
-/* par_laplace.c */
-HYPRE_BigInt hypre_map ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p,
-                         HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part,
-                         HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
-HYPRE_ParCSRMatrix GenerateSysLaplacian ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                          HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                          HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value );
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                               HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                               HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value );
 
 /* par_lr_interp.c */
 HYPRE_Int hypreDevice_extendWtoP ( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows,
@@ -1212,29 +1193,6 @@ HYPRE_Int hypre_BoomerAMGBuildPartialExtInterp ( hypre_ParCSRMatrix *A, HYPRE_In
                                                  hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global,
                                                  HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
                                                  HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
-
-/* par_vardifconv.c */
-HYPRE_Real afun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real bfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real cfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real dfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real efun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real ffun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real gfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real rfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real bndfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-
-/* par_vardifconv_rs.c */
-HYPRE_Real afun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real bfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real cfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real dfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real efun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real ffun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real gfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real rfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-HYPRE_Real bndfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
-
 
 /* pcg_par.c */
 void *hypre_ParKrylovCAlloc ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );

@@ -17,7 +17,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_utilities.h"
-//#include "_hypre_utilities.hpp"
+#include "ij_helpers.h"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
@@ -884,8 +884,3 @@ test_all(MPI_Comm             comm,
 
    return hypre_error_flag;
 }
-
-
-
-
-

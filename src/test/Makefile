@@ -139,13 +139,21 @@ distclean: clean
 ##################################################################
 
 # C
-ij: ij.o
+ij: ij_helpers.o ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
+	${LINK_CC} -o $@ $^ ${LFLAGS}
 
-ij_assembly: ij_assembly.o
+ij_assembly: ij_helpers.o ij_assembly.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
+	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+ij_device: ij_helpers.o ij_device.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+ij_mm: ij_helpers.o ij_mm.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $^ ${LFLAGS}
 
 # TODO (VPM): Update data structures on sstruct_helpers for GPUs
 # sstruct: sstruct_helpers.o sstruct.o
@@ -176,14 +184,6 @@ struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_device: ij_device.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-ij_mm: ij_mm.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
 zboxloop: zboxloop.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
@@ -192,7 +192,7 @@ struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mp: ij_mp.o
+ij_mp: ij_helpers.o ij_mp.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

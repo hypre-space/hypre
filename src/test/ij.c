@@ -7,7 +7,7 @@
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
- * Do `driver -help' for usage info.
+ * Do `./ij -help' for usage info.
  * This driver started from the driver for parcsr_linear_solvers, and it
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
@@ -25,6 +25,7 @@
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
+#include "ij_helpers.h"
 
 #if defined (HYPRE_USING_CUDA)
 #include <cuda_profiler_api.h>
@@ -92,16 +93,6 @@ HYPRE_Int BuildParRotate7pt (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE
                              HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParVarDifConv (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                               HYPRE_ParCSRMatrix *A_ptr, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                         HYPRE_BigInt nz,
-                                         HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                         HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                              HYPRE_BigInt nz,
-                                              HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                              HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
-                            HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 HYPRE_Int BuildParCoordinates (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int *coorddim_ptr, float **coord_ptr );
 
@@ -9833,6 +9824,36 @@ ReadParVectorFromFile( MPI_Comm             comm,
    return (0);
 }
 
+/**************************************************************************/
+
+static inline HYPRE_Int
+SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
+                  HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz,
+                  HYPRE_Int mtx_entry, HYPRE_Real *values)
+{
+   HYPRE_Int sz = num_fun * num_fun;
+
+   values[1 * sz + mtx_entry] = -vcx;
+   values[2 * sz + mtx_entry] = -vcy;
+   values[3 * sz + mtx_entry] = -vcz;
+   values[0 * sz + mtx_entry] = 0.0;
+
+   if (nx > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcx;
+   }
+   if (ny > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcy;
+   }
+   if (nz > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcz;
+   }
+
+   return 0;
+}
+
 /*----------------------------------------------------------------------
  * Build standard 7-point laplacian in 3D with grid and anisotropy.
  * Parameters given in command line.
@@ -11831,38 +11852,6 @@ BuildParVarDifConv( MPI_Comm             comm,
    return (0);
 }
 
-/**************************************************************************/
-
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
-                            HYPRE_Real vcx,
-                            HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
-{
-
-
-   HYPRE_Int sz = num_fun * num_fun;
-
-   values[1 * sz + mtx_entry] = -vcx;
-   values[2 * sz + mtx_entry] = -vcy;
-   values[3 * sz + mtx_entry] = -vcz;
-   values[0 * sz + mtx_entry] = 0.0;
-
-   if (nx > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcx;
-   }
-   if (ny > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcy;
-   }
-   if (nz > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcz;
-   }
-
-   return 0;
-
-}
-
 /*----------------------------------------------------------------------
  * Build coordinates for 1D/2D/3D
  *----------------------------------------------------------------------*/
@@ -11943,22 +11932,12 @@ BuildParCoordinates( MPI_Comm             comm,
    if (ny < 2) { coorddim--; }
    if (nz < 2) { coorddim--; }
 
-   if (coorddim > 0)
-   {
-      coordinates = hypre_GenerateCoordinates(comm, nx, ny, nz, P, Q, R, p, q, r, coorddim);
-   }
-   else
-   {
-      coordinates = NULL;
-   }
+   coordinates = GenerateCoordinates(nx, ny, nz, P, Q, R, p, q, r, coorddim);
 
    *coorddim_ptr = coorddim;
    *coord_ptr = coordinates;
    return (0);
 }
-
-
-/* begin lobpcg */
 
 /*----------------------------------------------------------------------
  * Build standard 7-point laplacian in 3D.
@@ -12077,5 +12056,3 @@ BuildParIsoLaplacian( MPI_Comm             comm,
 
    return (0);
 }
-
-/* end lobpcg */
