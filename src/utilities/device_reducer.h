@@ -223,11 +223,15 @@ OneBlockReduceKernel(hypre_DeviceItem &item,
                      T                *arr,
                      HYPRE_Int         N)
 {
+#if !defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(item);
+#endif
+
    T sum;
 
    sum = 0.0;
 
-   if (threadIdx.x < N)
+   if (threadIdx.x < (hypre_uint) N)
    {
       sum = arr[threadIdx.x];
    }

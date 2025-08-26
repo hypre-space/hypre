@@ -65,6 +65,7 @@ hypre_int get_num_groups(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_range(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return blockDim.z;
 #endif
 }
@@ -76,6 +77,7 @@ hypre_int get_group_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return threadIdx.z;
 #endif
 }
@@ -87,6 +89,7 @@ hypre_int get_group_lane_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);
 #else
+   HYPRE_UNUSED_VAR(item);
    return hypre_gpu_get_thread_id<2>(item);
 #endif
 }

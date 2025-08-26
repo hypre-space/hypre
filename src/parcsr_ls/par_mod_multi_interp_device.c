@@ -128,8 +128,8 @@ __global__ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item,
                                                          HYPRE_Int num_points,
                                                          HYPRE_Int color,
                                                          HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
-                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
-                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
+                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i,
+                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_data,
                                                          HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i,
                                                          HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *P_offd_j, HYPRE_Complex *P_offd_data,
                                                          HYPRE_Complex *row_sums );
@@ -1001,7 +1001,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int       *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int       *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real      *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
@@ -1203,10 +1202,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                         fine_to_coarse,
                         fine_to_coarse_offd,
                         A_diag_i,
-                        A_diag_j,
                         A_diag_data,
                         A_offd_i,
-                        A_offd_j,
                         A_offd_data,
                         Soc_diag_j,
                         Soc_offd_j,
@@ -1942,10 +1939,8 @@ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
                                               HYPRE_Int     *fine_to_coarse,
                                               HYPRE_Int     *fine_to_coarse_offd,
                                               HYPRE_Int     *A_diag_i,
-                                              HYPRE_Int     *A_diag_j,
                                               HYPRE_Complex *A_diag_data,
                                               HYPRE_Int     *A_offd_i,
-                                              HYPRE_Int     *A_offd_j,
                                               HYPRE_Complex *A_offd_data,
                                               HYPRE_Int     *Soc_diag_j,
                                               HYPRE_Int     *Soc_offd_j,
