@@ -16,6 +16,7 @@ API
    api-int-struct
    api-int-sstruct
    api-int-ij
+   api-mv-parcsr
    api-sol-struct
    api-sol-sstruct
    api-sol-parcsr
