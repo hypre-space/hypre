@@ -902,6 +902,7 @@ INPUT                  = \
 ../../struct_mv/HYPRE_struct_mv.h \
 ../../sstruct_mv/HYPRE_sstruct_mv.h \
 ../../IJ_mv/HYPRE_IJ_mv.h \
+../../parcsr_mv/HYPRE_parcsr_mv.h \
 ../../struct_ls/HYPRE_struct_ls.h \
 ../../sstruct_ls/HYPRE_sstruct_ls.h \
 ../../parcsr_ls/HYPRE_parcsr_ls.h \
