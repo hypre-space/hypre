@@ -4707,7 +4707,7 @@ main( hypre_int argc,
 #endif
 
       hypre_TFree(values, HYPRE_MEMORY_HOST);
-      hypre_TFree(h_values, memory_location);
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
       hypre_TFree(d_values, memory_location);
 
       /*-----------------------------------------------------------

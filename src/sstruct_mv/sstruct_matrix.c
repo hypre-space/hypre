@@ -875,15 +875,64 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
       nrows    = hypre_SStructGridLocalSize(grid);
    }
 
-   /* Set row sizes */
 #if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
+      /* Set max_size (row_sizes not needed for GPU execution) */
       row_sizes = NULL;
+      for (part = 0; part < nparts; part++)
+      {
+         pgrid = hypre_SStructGridPGrid(grid, part);
+         nvars = hypre_SStructPGridNVars(pgrid);
+
+         /* This part is active in the range grid */
+         for (var = 0; var < nvars; var++)
+         {
+            sgrid = hypre_SStructPGridSGrid(pgrid, var);
+
+            stencil = stencils[part][var];
+            split = hypre_SStructMatrixSplit(matrix, part, var);
+            nnzrow = 0;
+            for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+            {
+               if (split[entry] == -1)
+               {
+                  nnzrow++;
+               }
+            }
+#if 0
+            /* TODO: For now, assume stencil is full/complete */
+            if (hypre_SStructMatrixSymmetric(matrix))
+            {
+               nnzrow = 2 * nnzrow - 1;
+            }
+#endif
+            max_size = hypre_max(max_size, nnzrow);
+            if (nvneighbors[part][var])
+            {
+               max_size = hypre_max(max_size, hypre_SStructStencilSize(stencil));
+            }
+         } /* loop on variables */
+      } /* loop on parts */
+
+      /* GEC0902 essentially for each UVentry we figure out how many
+       * extra columns we need to add to the rowsizes */
+
+      /* RDF: THREAD? */
+      for (entry = 0; entry < nUventries; entry++)
+      {
+         mi = iUventries[entry];
+         m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+         if ((m > -1) && (m < nrows))
+         {
+            max_size = hypre_max(max_size, nnzrow + hypre_SStructUVEntryNUEntries(Uventries[mi]));
+         }
+      }
    }
    else
 #endif
    {
+      /* Set row_sizes and max_size */
       m = 0;
       ghost_box = hypre_BoxCreate(ndim);
       row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
