@@ -879,14 +879,14 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    m = 0;
    ghost_box = hypre_BoxCreate(ndim);
 #if defined(HYPRE_USING_GPU)
-   if (exec == HYPRE_EXEC_HOST)
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+      row_sizes = NULL;
    }
    else
 #endif
    {
-      row_sizes = NULL;
+      row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    }
    hypre_SetIndex(stride, 1);
    for (part = 0; part < nparts; part++)
