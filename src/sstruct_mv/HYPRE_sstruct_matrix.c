@@ -1573,7 +1573,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
                 * need to modify the io file to do that.  Alternatively, adding
                 * InitializeShell() and InitializeData() to SStructMatrix and
                 * PMatrix could provide another solution. */
-               hypre_TFree(hypre_StructMatrixData(smatrix), HYPRE_MEMORY_HOST);
+               hypre_TFree(hypre_StructMatrixData(smatrix), hypre_StructMatrixMemoryLocation(smatrix));
                hypre_StructMatrixReadData(file, smatrix);
             }
          }
