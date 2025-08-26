@@ -23,6 +23,7 @@ HYPRE_MultiblockMatrixLimitedDestroy
 HYPRE_MultiblockMatrixPrint
 HYPRE_MultiblockMatrixSetNumSubmatrices
 HYPRE_MultiblockMatrixSetSubmatrixType
+HYPRE_VectorCopy
 HYPRE_VectorCreate
 HYPRE_VectorDestroy
 HYPRE_VectorInitialize

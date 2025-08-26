@@ -32,12 +32,18 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
                            hypre_StructVector *y )
 {
    /* determine type of output vector data  ==> Precision of y. */
-   HYPRE_Precision precision = hypre_StructVectorPrecision (y);
+   HYPRE_Precision precision_y = hypre_StructVectorPrecision (y);
 
    /* Generic pointer type */
    void               *xp, *yp;
 
    HYPRE_Int           i, size;
+
+   /* Call standard vector copy if precisions match. */
+   if (precision_y == hypre_StructVectorPrecision (x))
+   {
+      return HYPRE_StructVectorCopy_pre(precision_y, (HYPRE_StructVector)x, (HYPRE_StructVector)y);
+   }
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -49,29 +55,85 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
    xp = hypre_StructVectorData(x);
    yp = hypre_StructVectorData(y);
 
-   switch (precision)
+   switch (hypre_StructVectorPrecision (x))
    {
       case HYPRE_REAL_SINGLE:
-         for (i = 0; i < size; i++)
+         switch (precision_y)
          {
-            ((hypre_float *)yp)[i] = (hypre_float)((hypre_double *)xp)[i];
+            case HYPRE_REAL_DOUBLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_double *)yp)[i] = (hypre_double)((hypre_float *)xp)[i];
+               }
+               break;
+            case HYPRE_REAL_LONGDOUBLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_long_double *)yp)[i] = (hypre_long_double)((hypre_float *)xp)[i];
+               }
+               break;
+            default:
+               break;
          }
          break;
       case HYPRE_REAL_DOUBLE:
-         for (i = 0; i < size; i++)
+         switch (precision_y)
          {
-            ((hypre_double *)yp)[i] = (hypre_double)((hypre_float *)xp)[i];
+            case HYPRE_REAL_SINGLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_float *)yp)[i] = (hypre_float)((hypre_double *)xp)[i];
+               }
+               break;
+            case HYPRE_REAL_LONGDOUBLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_long_double *)yp)[i] = (hypre_long_double)((hypre_double *)xp)[i];
+               }
+               break;
+            default:
+               break;
          }
          break;
       case HYPRE_REAL_LONGDOUBLE:
-         for (i = 0; i < size; i++)
+         switch (precision_y)
          {
-            ((hypre_long_double *)yp)[i] =
-               (hypre_long_double)((hypre_double *)xp)[i];
+            case HYPRE_REAL_SINGLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_float *)yp)[i] = (hypre_float)((hypre_long_double *)xp)[i];
+               }
+               break;            
+            case HYPRE_REAL_DOUBLE:
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < size; i++)
+               {
+                  ((hypre_double *)yp)[i] = (hypre_double)((hypre_long_double *)xp)[i];
+               }
+               break;
+            default:
+               break;
          }
-         break;
       default:
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
+         break;
    }
 
    /*

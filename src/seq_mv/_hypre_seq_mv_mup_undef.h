@@ -37,6 +37,7 @@
 #undef HYPRE_MultiblockMatrixPrint
 #undef HYPRE_MultiblockMatrixSetNumSubmatrices
 #undef HYPRE_MultiblockMatrixSetSubmatrixType
+#undef HYPRE_VectorCopy
 #undef HYPRE_VectorCreate
 #undef HYPRE_VectorDestroy
 #undef HYPRE_VectorInitialize
