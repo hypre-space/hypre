@@ -78,6 +78,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                         hypre_Index         findex,
                         hypre_Index         stride    )
 {
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+
    hypre_StructMatrix   *A_mask;
 
    hypre_StructStencil  *A_stencil;
@@ -200,7 +202,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
       hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
-      hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+      hypre_ComputePkgCreate(memory_location, compute_info,
+                             hypre_StructVectorDataSpace(x), 1,
                              fgrid, &compute_pkg);
 
       /*-----------------------------------------------------
@@ -290,4 +293,3 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    return hypre_error_flag;
 }
-

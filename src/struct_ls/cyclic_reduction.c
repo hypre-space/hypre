@@ -660,10 +660,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
       hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
-      hypre_ComputePkgCreate(compute_info,
+      hypre_ComputePkgCreate(memory_location, compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
                              grid_l[l], &down_compute_pkg_l[l]);
-      hypre_ComputePkgSetMemoryLocation(down_compute_pkg_l[l], memory_location);
 
       /* up-cycle */
       hypre_CreateComputeInfo(grid_l[l], ustride, hypre_StructMatrixStencil(A_l[l]),
@@ -671,10 +670,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
       hypre_ComputeInfoProjectComp(compute_info, findex, stride);
-      hypre_ComputePkgCreate(compute_info,
+      hypre_ComputePkgCreate(memory_location, compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
                              grid_l[l], &up_compute_pkg_l[l]);
-      hypre_ComputePkgSetMemoryLocation(up_compute_pkg_l[l], memory_location);
    }
 
    (cyc_red_data -> down_compute_pkg_l) = down_compute_pkg_l;
