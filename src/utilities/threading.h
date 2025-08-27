@@ -11,16 +11,18 @@
 #ifdef HYPRE_USING_OPENMP
 
 HYPRE_Int hypre_NumThreads( void );
+HYPRE_Int hypre_NumOptimalThreads( HYPRE_Int size );
+void      hypre_SetNumThreads(HYPRE_Int nt);
 HYPRE_Int hypre_NumActiveThreads( void );
 HYPRE_Int hypre_GetThreadNum( void );
-void      hypre_SetNumThreads(HYPRE_Int nt);
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_NumOptimalThreads(x) 1
+#define hypre_SetNumThreads(x)
 #define hypre_NumActiveThreads() 1
 #define hypre_GetThreadNum() 0
-#define hypre_SetNumThreads(x)
 
 #endif
 
