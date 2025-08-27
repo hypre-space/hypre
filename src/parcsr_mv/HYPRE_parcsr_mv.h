@@ -230,9 +230,6 @@ HYPRE_Int
 HYPRE_ParVectorSetRandomValues(HYPRE_ParVector vector,
                                HYPRE_Int       seed);
 
-HYPRE_Int
-HYPRE_ParVectorCopy(HYPRE_ParVector x,
-                    HYPRE_ParVector y);
 
 HYPRE_ParVector
 HYPRE_ParVectorCloneShallow(HYPRE_ParVector x);
@@ -252,24 +249,12 @@ HYPRE_ParVectorCloneShallow(HYPRE_ParVector x);
  **/
 
 /**
- * Compute a matrix-vector product y = alpha*A*x + beta*y.
+ * Copy a vector (y <-- x).
  **/
-HYPRE_Int
-HYPRE_ParCSRMatrixMatvec(HYPRE_Complex      alpha,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector    x,
-                         HYPRE_Complex      beta,
-                         HYPRE_ParVector    y);
 
-/**
- * Compute a transpose matrix-vector product y = alpha*A^T*x + beta*y.
- **/
 HYPRE_Int
-HYPRE_ParCSRMatrixMatvecT(HYPRE_Complex      alpha,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector    x,
-                          HYPRE_Complex      beta,
-                          HYPRE_ParVector    y);
+HYPRE_ParVectorCopy(HYPRE_ParVector x,
+                    HYPRE_ParVector y);
 
 /**
  * Scale a vector by \e value.
@@ -293,6 +278,27 @@ HYPRE_Int
 HYPRE_ParVectorInnerProd(HYPRE_ParVector  x,
                          HYPRE_ParVector  y,
                          HYPRE_Real      *prod);
+
+/**
+ * Compute a matrix-vector product y = alpha*A*x + beta*y.
+ **/
+HYPRE_Int
+HYPRE_ParCSRMatrixMatvec(HYPRE_Complex      alpha,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    x,
+                         HYPRE_Complex      beta,
+                         HYPRE_ParVector    y);
+
+/**
+ * Compute a transpose matrix-vector product y = alpha*A^T*x + beta*y.
+ **/
+HYPRE_Int
+HYPRE_ParCSRMatrixMatvecT(HYPRE_Complex      alpha,
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector    x,
+                          HYPRE_Complex      beta,
+                          HYPRE_ParVector    y);
+
 
 /*===== BEGIN 3 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 
@@ -321,7 +327,7 @@ HYPRE_ParVectorGetValues(HYPRE_ParVector vector,
                          HYPRE_BigInt   *indices,
                          HYPRE_Complex  *values);
 
-/*===== END 2 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
+/*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /**@}*/
 /**@}*/

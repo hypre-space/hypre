@@ -209,6 +209,19 @@ HYPRE_StructVectorAddToBoxValues2( HYPRE_StructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAxpy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorAxpy( HYPRE_Complex       alpha,
+                        HYPRE_StructVector  x,
+                        HYPRE_Complex       beta,
+                        HYPRE_StructVector  y )
+{
+   return hypre_StructVectorAxpy( alpha, x, beta, y, y );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorScaleValues
  *--------------------------------------------------------------------------*/
 

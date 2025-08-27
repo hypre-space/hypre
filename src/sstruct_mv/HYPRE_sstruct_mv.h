@@ -1448,35 +1448,7 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
                          const char          *filename,
                          HYPRE_SStructVector *vector_ptr );
 
-/**
- * Copy a vector (y <-- x).
- **/
-HYPRE_Int
-HYPRE_SStructVectorCopy(HYPRE_SStructVector x,
-                        HYPRE_SStructVector y);
 
-/**
- * Scale a vector (y <-- alpha*x).
- **/
-HYPRE_Int
-HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
-                         HYPRE_SStructVector y);
-
-/**
- * Compute \e result, the inner product of vectors \e x and \e y.
- **/
-HYPRE_Int
-HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
-                       HYPRE_SStructVector  y,
-                       HYPRE_Real          *result);
-
-/**
- * Add two vectors (y <-- alpha*x + y).
- **/
-HYPRE_Int
-HYPRE_SStructAxpy(HYPRE_Complex       alpha,
-                  HYPRE_SStructVector x,
-                  HYPRE_SStructVector y);
 
 HYPRE_Int HYPRE_SStructVectorPrintGLVis( HYPRE_SStructVector vector, const char *fileprefix );
 
@@ -1507,13 +1479,58 @@ HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
                            void                **rhs_object);
 
 /*@}*/
-/*@}*/
 
 /* Need to integrate these better into this header */
 
-HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha, HYPRE_SStructMatrix A,
-                                      HYPRE_SStructVector x, HYPRE_Complex beta,
+/**
+ * @name Matrix/vector interface
+ *
+ * @{
+ **/
+
+/**
+ * Copy a vector (y <-- x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorCopy(HYPRE_SStructVector x,
+                        HYPRE_SStructVector y);
+
+/**
+ * Scale a vector (y <-- alpha*x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
+                         HYPRE_SStructVector y);
+
+/**
+ * Add two vectors (y <-- alpha*x + y).
+ **/
+HYPRE_Int
+HYPRE_SStructAxpy(HYPRE_Complex       alpha,
+                  HYPRE_SStructVector x,
+                  HYPRE_SStructVector y);
+
+/**
+ * Compute \e result, the inner product of vectors \e x and \e y.
+ **/
+HYPRE_Int
+HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
+                       HYPRE_SStructVector  y,
+                       HYPRE_Real          *result);
+
+/**
+ * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
+ * Note that you can do a simple matrix-vector multiply by setting
+ * \f$\alpha=1\f$ and \f$\beta=0\f$.
+ **/
+HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha,
+                                      HYPRE_SStructMatrix A,
+                                      HYPRE_SStructVector x,
+                                      HYPRE_Complex beta,
                                       HYPRE_SStructVector y );
+
+/** @} */ // end of Matrix/vector interface
+/*@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

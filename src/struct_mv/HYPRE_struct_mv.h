@@ -453,37 +453,6 @@ HYPRE_Int HYPRE_StructMatrixRead( MPI_Comm             comm,
                                   HYPRE_Int           *num_ghost,
                                   HYPRE_StructMatrix  *matrix );
 
-/**
- * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
- * Note that you can do a simple matrix-vector multiply by setting
- * \f$\alpha=1\f$ and \f$\beta=0\f$.
- **/
-HYPRE_Int HYPRE_StructMatrixMatvec( HYPRE_Complex alpha,
-                                    HYPRE_StructMatrix A,
-                                    HYPRE_StructVector x,
-                                    HYPRE_Complex beta,
-                                    HYPRE_StructVector y );
-
-/**
- * Matvec transpose operation.  This operation is \f$y = \alpha A^T x + \beta y\f$.
- * Note that you can do a simple matrix-vector multiply by setting \f$\alpha=1\f$
- * and \f$\beta=0\f$.
- **/
-HYPRE_Int HYPRE_StructMatrixMatvecT( HYPRE_Complex alpha,
-                                     HYPRE_StructMatrix A,
-                                     HYPRE_StructVector x,
-                                     HYPRE_Complex beta,
-                                     HYPRE_StructVector y );
-
-/**
- * Matrix-matrix multiply.  Returns \f$C=AB\f$, \f$C=A^TB\f$, \f$C=AB^T\f$, or
- * \f$C=A^TB^T\f$, depending on the boolean arguments \e Atranspose and \e Btranspose.
- **/
-HYPRE_Int HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
-                                    HYPRE_Int           Atranspose,
-                                    HYPRE_StructMatrix  B,
-                                    HYPRE_Int           Btranspose,
-                                    HYPRE_StructMatrix *C );
 
 /*@}*/
 
@@ -673,6 +642,36 @@ HYPRE_Int HYPRE_StructVectorRead( MPI_Comm             comm,
 HYPRE_Int HYPRE_StructVectorClone( HYPRE_StructVector x,
                                    HYPRE_StructVector *y_ptr );
 
+
+/*@}*/
+
+/**
+ * @name Matrix/vector interface
+ *
+ * @{
+ **/
+
+/**
+ * Copy a vector (y <-- x).
+ **/
+HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x, 
+                                   HYPRE_StructVector y );
+
+/**
+ * Scale a vector by \e value.
+ **/
+HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector,
+                                          HYPRE_Complex factor );
+
+/**
+ * Compute y = y + alpha*x.
+ **/
+HYPRE_Int
+HYPRE_StructVectorAxpy( HYPRE_Complex       alpha,
+                        HYPRE_StructVector  x,
+                        HYPRE_Complex       beta,
+                        HYPRE_StructVector  y );
+
 /**
  * Compute \e result, the inner product of vectors \e x and \e y.
  **/
@@ -680,11 +679,40 @@ HYPRE_Int HYPRE_StructVectorInnerProd( HYPRE_StructVector  x,
                                        HYPRE_StructVector  y,
                                        HYPRE_Real         *result );
 
-/* Revisit these interface routines */
-HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector, HYPRE_Complex factor );
-HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x, HYPRE_StructVector y );
+/**
+ * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
+ * Note that you can do a simple matrix-vector multiply by setting
+ * \f$\alpha=1\f$ and \f$\beta=0\f$.
+ **/
 
-/*@}*/
+HYPRE_Int HYPRE_StructMatrixMatvec( HYPRE_Complex alpha,
+                                    HYPRE_StructMatrix A,
+                                    HYPRE_StructVector x,
+                                    HYPRE_Complex beta,
+                                    HYPRE_StructVector y );
+
+/**
+ * Matvec transpose operation.  This operation is \f$y = \alpha A^T x + \beta y\f$.
+ * Note that you can do a simple matrix-vector multiply by setting \f$\alpha=1\f$
+ * and \f$\beta=0\f$.
+ **/
+HYPRE_Int HYPRE_StructMatrixMatvecT( HYPRE_Complex alpha,
+                                     HYPRE_StructMatrix A,
+                                     HYPRE_StructVector x,
+                                     HYPRE_Complex beta,
+                                     HYPRE_StructVector y );
+
+/**
+ * Matrix-matrix multiply.  Returns \f$C=AB\f$, \f$C=A^TB\f$, \f$C=AB^T\f$, or
+ * \f$C=A^TB^T\f$, depending on the boolean arguments \e Atranspose and \e Btranspose.
+ **/
+HYPRE_Int HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
+                                    HYPRE_Int           Atranspose,
+                                    HYPRE_StructMatrix  B,
+                                    HYPRE_Int           Btranspose,
+                                    HYPRE_StructMatrix *C );
+
+/** @} */ // end of Matrix/vector interface
 /*@}*/
 
 /*--------------------------------------------------------------------------
