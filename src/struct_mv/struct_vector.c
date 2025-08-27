@@ -1567,15 +1567,31 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_StructGrid     *grid  = hypre_StructVectorGrid(vector);
    hypre_BoxArray       *boxes = hypre_StructGridBoxes(grid);
 
+   HYPRE_MemoryLocation  memory_location = hypre_StructVectorMemoryLocation(vector);
+
    hypre_Box            *box;
    HYPRE_Int             num_values;
-   HYPRE_Complex        *values;
+   HYPRE_Complex        *h_values, *values;
    HYPRE_Int            *value_ids;
    HYPRE_Int             i, vi;
 
    /* Read data from file */
    hypre_fscanf(file, "\nData:\n");
-   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
+   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &h_values);
+
+   /* Move data to the device memory if necessary and free host data */
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      vi = hypre_BoxArrayVolume(boxes) * num_values;
+      values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
+      hypre_TMemcpy(values, h_values, HYPRE_Complex, num_values,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      values = h_values;
+   }
 
    /* Set vector values */
    hypre_StructVectorInitialize(vector, 1);
@@ -1592,7 +1608,7 @@ hypre_StructVectorReadData( FILE               *file,
 
    /* Clean up */
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
