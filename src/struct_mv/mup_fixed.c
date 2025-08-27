@@ -1105,9 +1105,9 @@ hypre_ComputeInfoProjectSend( hypre_ComputeInfo *compute_info, hypre_Index index
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputePkgCreate( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr )
+hypre_ComputePkgCreate( HYPRE_MemoryLocation memory_location, hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputePkgCreate)( compute_info, data_space, num_values, grid, compute_pkg_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputePkgCreate)( memory_location, compute_info, data_space, num_values, grid, compute_pkg_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1116,14 +1116,6 @@ HYPRE_Int
 hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputePkgDestroy)( compute_pkg );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputePkgSetMemoryLocation)( compute_pkg, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/

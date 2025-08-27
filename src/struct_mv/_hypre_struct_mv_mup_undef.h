@@ -217,7 +217,6 @@
 #undef hypre_ComputeInfoProjectSend
 #undef hypre_ComputePkgCreate
 #undef hypre_ComputePkgDestroy
-#undef hypre_ComputePkgSetMemoryLocation
 #undef hypre_ConvertToCanonicalIndex
 #undef hypre_CopyBox
 #undef hypre_CopyIndex

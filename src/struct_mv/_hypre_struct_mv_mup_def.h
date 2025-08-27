@@ -220,7 +220,6 @@
 #define hypre_ComputeInfoProjectSend HYPRE_FIXEDPRECISION_FUNC ( hypre_ComputeInfoProjectSend )
 #define hypre_ComputePkgCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_ComputePkgCreate )
 #define hypre_ComputePkgDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_ComputePkgDestroy )
-#define hypre_ComputePkgSetMemoryLocation HYPRE_FIXEDPRECISION_FUNC ( hypre_ComputePkgSetMemoryLocation )
 #define hypre_ConvertToCanonicalIndex HYPRE_FIXEDPRECISION_FUNC ( hypre_ConvertToCanonicalIndex )
 #define hypre_CopyBox HYPRE_FIXEDPRECISION_FUNC ( hypre_CopyBox )
 #define hypre_CopyIndex HYPRE_FIXEDPRECISION_FUNC ( hypre_CopyIndex )
