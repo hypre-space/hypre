@@ -1817,8 +1817,8 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
    HYPRE_Real           *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
    HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
-   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-   HYPRE_Real           *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_bsw = NULL, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_csw = NULL, *rap_cse, *rap_cnw, *rap_cne;
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    HYPRE_Real           zero = 0.0;

@@ -1422,6 +1422,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 #define DEVICE_VAR is_device_ptr(matp, values)
                      hypre_LoopBegin(1, k)
                      {
+                        HYPRE_UNUSED_VAR(k);
                         *matp += values[s];
                      }
                      hypre_LoopEnd()
@@ -1438,13 +1439,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                                    memory_location, memory_location);
                      if (action == -2)
                      {
-#define DEVICE_VAR is_device_ptr(matp, values)
-                        hypre_LoopBegin(1, k)
-                        {
-                           *matp = 0.0;
-                        }
-                        hypre_LoopEnd()
-#undef DEVICE_VAR
+                        hypre_Memset((void*) matp, 0.0, sizeof(HYPRE_Complex), memory_location);
                      }
                   }
                }

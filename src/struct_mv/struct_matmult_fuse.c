@@ -4510,6 +4510,7 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    hypre_1Cptr     mmptrs[Mnum_values];
 #else
    HYPRE_UNUSED_VAR(M);
+   HYPRE_UNUSED_VAR(stencil_size);
 #endif
 
    HYPRE_Int       nprod[8] = {0};
