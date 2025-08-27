@@ -488,6 +488,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
 
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(A);
    MPI_Comm                comm        = (cyc_red_data -> comm);
    HYPRE_Int               cdir        = (cyc_red_data -> cdir);
    hypre_IndexRef          base_index  = (cyc_red_data -> base_index);
@@ -662,6 +663,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
                              grid_l[l], &down_compute_pkg_l[l]);
+      hypre_ComputePkgSetMemoryLocation(down_compute_pkg_l[l], memory_location);
 
       /* up-cycle */
       hypre_CreateComputeInfo(grid_l[l], ustride, hypre_StructMatrixStencil(A_l[l]),
@@ -672,6 +674,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
                              grid_l[l], &up_compute_pkg_l[l]);
+      hypre_ComputePkgSetMemoryLocation(up_compute_pkg_l[l], memory_location);
    }
 
    (cyc_red_data -> down_compute_pkg_l) = down_compute_pkg_l;
