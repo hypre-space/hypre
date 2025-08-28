@@ -1504,7 +1504,7 @@ HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
                          HYPRE_SStructVector y);
 
 /**
- * Add two vectors (y <-- alpha*x + y).
+ * Compute \f$y = y + \alpha x\f$.
  **/
 HYPRE_Int
 HYPRE_SStructVectorAxpy(HYPRE_Complex       alpha,

@@ -844,6 +844,24 @@ HYPRE_StructVectorAssemble_pre( HYPRE_Precision precision, HYPRE_StructVector ve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructVectorAxpy_flt( alpha, x, beta, y );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructVectorAxpy_dbl( alpha, x, beta, y );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructVectorAxpy_long_dbl( alpha, x, beta, y );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructVectorClone_pre( HYPRE_Precision precision, HYPRE_StructVector x, HYPRE_StructVector *y_ptr )
 {
    switch (precision)
@@ -1070,6 +1088,24 @@ HYPRE_StructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char
          return HYPRE_StructVectorRead_dbl( comm, filename, num_ghost, vector );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_StructVectorRead_long_dbl( comm, filename, num_ghost, vector );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructVector y )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructVectorScale_flt( alpha, y );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructVectorScale_dbl( alpha, y );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructVectorScale_long_dbl( alpha, y );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }

@@ -446,6 +446,15 @@ HYPRE_Int
 HYPRE_StructVectorAssemble( HYPRE_StructVector vector );
 
 HYPRE_Int
+HYPRE_StructVectorAxpy_flt( hypre_float alpha, HYPRE_StructVector x, hypre_float beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorAxpy_dbl( hypre_double alpha, HYPRE_StructVector x, hypre_double beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorAxpy_long_dbl( hypre_long_double alpha, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorAxpy( hypre_long_double alpha, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+
+HYPRE_Int
 HYPRE_StructVectorClone_flt( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 HYPRE_Int
 HYPRE_StructVectorClone_dbl( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
@@ -561,6 +570,15 @@ HYPRE_Int
 HYPRE_StructVectorRead_long_dbl( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost, HYPRE_StructVector *vector );
 HYPRE_Int
 HYPRE_StructVectorRead( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost, HYPRE_StructVector *vector );
+
+HYPRE_Int
+HYPRE_StructVectorScale_flt( hypre_float alpha, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorScale_dbl( hypre_double alpha, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorScale_long_dbl( hypre_long_double alpha, HYPRE_StructVector y );
+HYPRE_Int
+HYPRE_StructVectorScale( hypre_long_double alpha, HYPRE_StructVector y );
 
 HYPRE_Int
 HYPRE_StructVectorScaleValues_flt( HYPRE_StructVector vector, hypre_float factor );
@@ -784,6 +802,9 @@ HYPRE_Int
 HYPRE_StructVectorAssemble_pre( HYPRE_Precision precision, HYPRE_StructVector vector );
 
 HYPRE_Int
+HYPRE_StructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y );
+
+HYPRE_Int
 HYPRE_StructVectorClone_pre( HYPRE_Precision precision, HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 
 HYPRE_Int
@@ -821,6 +842,9 @@ HYPRE_StructVectorPrint_pre( HYPRE_Precision precision, const char *filename, HY
 
 HYPRE_Int
 HYPRE_StructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost, HYPRE_StructVector *vector );
+
+HYPRE_Int
+HYPRE_StructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_StructVector y );
 
 HYPRE_Int
 HYPRE_StructVectorScaleValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, hypre_long_double factor );

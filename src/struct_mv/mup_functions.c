@@ -430,6 +430,15 @@ HYPRE_StructVectorAssemble( HYPRE_StructVector vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructVectorAxpy( hypre_long_double alpha, HYPRE_StructVector x, hypre_long_double beta, HYPRE_StructVector y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructVectorAxpy_pre( precision, alpha, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructVectorClone( HYPRE_StructVector x, HYPRE_StructVector *y_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -542,6 +551,15 @@ HYPRE_StructVectorRead( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghos
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructVectorRead_pre( precision, comm, filename, num_ghost, vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorScale( hypre_long_double alpha, HYPRE_StructVector y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructVectorScale_pre( precision, alpha, y );
 }
 
 /*--------------------------------------------------------------------------*/

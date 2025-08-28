@@ -403,6 +403,15 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructMatrixMatmat_pre( precision, A, B, C );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixMatvec( hypre_long_double alpha, HYPRE_SStructMatrix A, HYPRE_SStructVector x, hypre_long_double beta, HYPRE_SStructVector y )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -628,6 +637,15 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorAxpy( hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructVectorAxpy_pre( precision, alpha, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructVectorCopy( HYPRE_SStructVector x, HYPRE_SStructVector y )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -713,6 +731,15 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorInitialize_pre( precision, vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorInnerProd( HYPRE_SStructVector x, HYPRE_SStructVector y, void *result )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructVectorInnerProd_pre( precision, x, y, result );
 }
 
 /*--------------------------------------------------------------------------*/

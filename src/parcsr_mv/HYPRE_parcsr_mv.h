@@ -29,7 +29,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @defgroup ParCSRInterface ParCSR System and Object Interface
+ * @defgroup ParCSRInterface ParCSR Object Interface
  *
  * Interface for ParCSR matrices and vectors. This is an interface for matrices
  * and vectors with object type HYPRE_PARCSR.
@@ -249,22 +249,21 @@ HYPRE_ParVectorCloneShallow(HYPRE_ParVector x);
  **/
 
 /**
- * Copy a vector (y <-- x).
+ * Copy vector x into y (\f$y \leftarrow x\f$).
  **/
-
 HYPRE_Int
 HYPRE_ParVectorCopy(HYPRE_ParVector x,
                     HYPRE_ParVector y);
 
 /**
- * Scale a vector by \e value.
+ * Scale a vector by \e alpha (\f$y \leftarrow \alpha y\f$).
  **/
 HYPRE_Int
 HYPRE_ParVectorScale(HYPRE_Complex   value,
                      HYPRE_ParVector x);
 
 /**
- * Compute y = y + alpha*x.
+ * Compute \f$y = y + \alpha x\f$.
  **/
 HYPRE_Int
 HYPRE_ParVectorAxpy(HYPRE_Complex   alpha,
@@ -272,7 +271,7 @@ HYPRE_ParVectorAxpy(HYPRE_Complex   alpha,
                     HYPRE_ParVector y);
 
 /**
- * Compute x^T*y.
+ * Compute \e result, the inner product of vectors \e x and \e y.
  **/
 HYPRE_Int
 HYPRE_ParVectorInnerProd(HYPRE_ParVector  x,
@@ -280,7 +279,7 @@ HYPRE_ParVectorInnerProd(HYPRE_ParVector  x,
                          HYPRE_Real      *result);
 
 /**
- * Compute a matrix-vector product y = alpha*A*x + beta*y.
+ * Compute a matrix-vector product \f$y = \alpha A x + \beta y\f$.
  **/
 HYPRE_Int
 HYPRE_ParCSRMatrixMatvec(HYPRE_Complex      alpha,
@@ -290,7 +289,7 @@ HYPRE_ParCSRMatrixMatvec(HYPRE_Complex      alpha,
                          HYPRE_ParVector    y);
 
 /**
- * Compute a transpose matrix-vector product y = alpha*A^T*x + beta*y.
+ * Compute a transpose matrix-vector product \f$y = \alpha A^T x + \beta y\f$.
  **/
 HYPRE_Int
 HYPRE_ParCSRMatrixMatvecT(HYPRE_Complex      alpha,

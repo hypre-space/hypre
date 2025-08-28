@@ -741,7 +741,7 @@ HYPRE_StructVectorInnerProd(HYPRE_StructVector  x,
                             HYPRE_Real         *result);
 
 /**
- * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
+ * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$.
  * Note that you can do a simple matrix-vector multiply by setting
  * \f$\alpha=1\f$ and \f$\beta=0\f$.
  **/

@@ -28,6 +28,7 @@
 #undef HYPRE_ParCSRMatrixGetRow
 #undef HYPRE_ParCSRMatrixGetRowPartitioning
 #undef HYPRE_ParCSRMatrixInitialize
+#undef HYPRE_ParCSRMatrixMatmat
 #undef HYPRE_ParCSRMatrixMatvec
 #undef HYPRE_ParCSRMatrixMatvecT
 #undef HYPRE_ParCSRMatrixPrint
