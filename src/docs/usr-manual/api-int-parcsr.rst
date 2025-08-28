@@ -4,11 +4,11 @@
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-.. _sec-ParCSR-MV-Interface:
+.. _sec-ParCSR-Interface:
 
-ParCSR Matrix and Vector Interface
+ParCSR Object Interface
 ==============================================================================
 
-.. doxygengroup:: ParCSRMatrixVectorInterface
+.. doxygengroup:: ParCSRInterface
    :project: hypre
 

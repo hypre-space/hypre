@@ -29,7 +29,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @defgroup ParCSRMatrixVectorInterface ParCSR Matrix/Vector Interface
+ * @defgroup ParCSRInterface ParCSR System and Object Interface
  *
  * Interface for ParCSR matrices and vectors. This is an interface for matrices
  * and vectors with object type HYPRE_PARCSR.
@@ -243,7 +243,7 @@ HYPRE_ParVectorCloneShallow(HYPRE_ParVector x);
  *--------------------------------------------------------------------------*/
 
 /**
- * @name Matrix/vector interface
+ * @name Basic Matrix/vector routines
  *
  * @{
  **/
@@ -267,9 +267,9 @@ HYPRE_ParVectorScale(HYPRE_Complex   value,
  * Compute y = y + alpha*x.
  **/
 HYPRE_Int
-HYPRE_ParVectorAxpy (HYPRE_Complex   alpha,
-                     HYPRE_ParVector x,
-                     HYPRE_ParVector y);
+HYPRE_ParVectorAxpy(HYPRE_Complex   alpha,
+                    HYPRE_ParVector x,
+                    HYPRE_ParVector y);
 
 /**
  * Compute x^T*y.
@@ -303,10 +303,9 @@ HYPRE_ParCSRMatrixMatvecT(HYPRE_Complex      alpha,
  * Matrix-matrix multiply.
  **/
 HYPRE_Int
-HYPRE_ParCSRMatrixMatmat( HYPRE_ParCSRMatrix  A,
-                          HYPRE_ParCSRMatrix  B,
-                          HYPRE_ParCSRMatrix *C );
-
+HYPRE_ParCSRMatrixMatmat(HYPRE_ParCSRMatrix  A,
+                         HYPRE_ParCSRMatrix  B,
+                         HYPRE_ParCSRMatrix *C);
 
 /*===== BEGIN 3 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 
@@ -338,6 +337,10 @@ HYPRE_ParVectorGetValues(HYPRE_ParVector vector,
 /*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /**@}*/
 
 #ifdef __cplusplus

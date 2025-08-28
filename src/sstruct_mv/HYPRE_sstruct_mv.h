@@ -25,7 +25,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @defgroup SStructSystemInterface SStruct System Interface
+ * @defgroup SStructInterface SStruct System and Object Interface
  *
  * A semi-structured-grid conceptual interface. This interface represents a
  * semi-structured-grid conceptual view of a linear system.
@@ -1452,7 +1452,7 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
 
 HYPRE_Int HYPRE_SStructVectorPrintGLVis( HYPRE_SStructVector vector, const char *fileprefix );
 
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1478,25 +1478,26 @@ HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
                            void                **matrix_object,
                            void                **rhs_object);
 
-/*@}*/
+/**@}*/
 
-/* Need to integrate these better into this header */
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 /**
- * @name Matrix/vector interface
+ * @name Basic Matrix/vector routines
  *
  * @{
  **/
 
 /**
- * Copy a vector (y <-- x).
+ * Copy vector x into y (\f$y \leftarrow x\f$).
  **/
 HYPRE_Int
 HYPRE_SStructVectorCopy(HYPRE_SStructVector x,
                         HYPRE_SStructVector y);
 
 /**
- * Scale a vector (y <-- alpha*x).
+ * Scale a vector by \e alpha (\f$y \leftarrow \alpha y\f$).
  **/
 HYPRE_Int
 HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
@@ -1523,25 +1524,27 @@ HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
  * Note that you can do a simple matrix-vector multiply by setting
  * \f$\alpha=1\f$ and \f$\beta=0\f$.
  **/
-HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha,
-                                      HYPRE_SStructMatrix A,
-                                      HYPRE_SStructVector x,
-                                      HYPRE_Complex beta,
-                                      HYPRE_SStructVector y );
+HYPRE_Int
+HYPRE_SStructMatrixMatvec(HYPRE_Complex       alpha,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector x,
+                          HYPRE_Complex       beta,
+                          HYPRE_SStructVector y);
 
 /**
  * Matrix-matrix multiply.
  **/
-HYPRE_Int HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix  A,
-                                     HYPRE_SStructMatrix  B,
-                                     HYPRE_SStructMatrix *C );
+HYPRE_Int
+HYPRE_SStructMatrixMatmat(HYPRE_SStructMatrix  A,
+                          HYPRE_SStructMatrix  B,
+                          HYPRE_SStructMatrix *C);
 
-
-/** @} */ // end of Matrix/vector interface
-/*@}*/
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/**@}*/
 
 #ifdef __cplusplus
 }
