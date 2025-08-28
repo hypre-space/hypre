@@ -299,6 +299,14 @@ HYPRE_ParCSRMatrixMatvecT(HYPRE_Complex      alpha,
                           HYPRE_Complex      beta,
                           HYPRE_ParVector    y);
 
+/**
+ * Matrix-matrix multiply.
+ **/
+HYPRE_Int
+HYPRE_ParCSRMatrixMatmat( HYPRE_ParCSRMatrix  A,
+                          HYPRE_ParCSRMatrix  B,
+                          HYPRE_ParCSRMatrix *C );
+
 
 /*===== BEGIN 3 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 

@@ -1529,6 +1529,14 @@ HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha,
                                       HYPRE_Complex beta,
                                       HYPRE_SStructVector y );
 
+/**
+ * Matrix-matrix multiply.
+ **/
+HYPRE_Int HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix  A,
+                                     HYPRE_SStructMatrix  B,
+                                     HYPRE_SStructMatrix *C );
+
+
 /** @} */ // end of Matrix/vector interface
 /*@}*/
 
