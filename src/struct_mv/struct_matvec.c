@@ -185,8 +185,7 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
       /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
       hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
       hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
-      hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
-      hypre_ComputePkgSetMemoryLocation(compute_pkg, memloc);
+      hypre_ComputePkgCreate(memloc, compute_info, data_space, 1, grid, &compute_pkg);
 
       /* Save compute_pkg */
       if ((matvec_data -> compute_pkg) != NULL)
