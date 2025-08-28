@@ -1614,6 +1614,8 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_ForceSyncComputeStream();
+
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       if (hypre_GetGpuAwareMPI())
@@ -1970,6 +1972,10 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
          }
       }
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_ForceSyncComputeStream();
+#endif
 
    /*--------------------------------------------------------------------
     * Free up communication handle

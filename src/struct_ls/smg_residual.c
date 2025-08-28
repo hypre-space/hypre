@@ -57,6 +57,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(A);
    hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
@@ -84,7 +85,8 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectComp(compute_info, base_index, base_stride);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------
@@ -308,4 +310,3 @@ hypre_SMGResidualDestroy( void *residual_vdata )
 
    return hypre_error_flag;
 }
-

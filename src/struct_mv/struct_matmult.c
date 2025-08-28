@@ -1314,7 +1314,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_GpuProfilingPushRange("StructMatmultCompute");
 
    /* Set flag for initializing matrix/vector entries to zeroes */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_FUSE_FCC_FC_F)
    if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       /* Initialize to zeroes when NOT using the fused kernel implementation. */

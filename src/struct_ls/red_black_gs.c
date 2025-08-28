@@ -74,6 +74,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
                        hypre_StructVector *b,
                        hypre_StructVector *x )
 {
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
    hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData *)relax_vdata;
    hypre_StructGrid      *grid       = hypre_StructMatrixGrid(A);
    hypre_StructStencil   *stencil    = hypre_StructMatrixStencil(A);
@@ -89,7 +90,8 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
     *----------------------------------------------------------*/
 
    hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------

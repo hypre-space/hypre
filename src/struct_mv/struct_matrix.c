@@ -1300,9 +1300,10 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
       }
       else
       {
-         data = hypre_TAlloc(HYPRE_Complex,
-                             hypre_StructMatrixDataSize(matrix),
-                             hypre_StructMatrixMemoryLocation(matrix));
+         /* TODO (VPM): TAlloc leads to regressions on TEST_struct/emptyproc */
+         data = hypre_CTAlloc(HYPRE_Complex,
+                              hypre_StructMatrixDataSize(matrix),
+                              hypre_StructMatrixMemoryLocation(matrix));
       }
       hypre_StructMatrixDataAlloced(matrix) = 1;
    }
@@ -1421,6 +1422,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 #define DEVICE_VAR is_device_ptr(matp, values)
                      hypre_LoopBegin(1, k)
                      {
+                        HYPRE_UNUSED_VAR(k);
                         *matp += values[s];
                      }
                      hypre_LoopEnd()
@@ -1437,13 +1439,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                                    memory_location, memory_location);
                      if (action == -2)
                      {
-#define DEVICE_VAR is_device_ptr(matp, values)
-                        hypre_LoopBegin(1, k)
-                        {
-                           *matp = 0.0;
-                        }
-                        hypre_LoopEnd()
-#undef DEVICE_VAR
+                        hypre_Memset((void*) matp, 0.0, sizeof(HYPRE_Complex), memory_location);
                      }
                   }
                }
@@ -2326,12 +2322,14 @@ hypre_StructMatrixReadData( FILE               *file,
 
    hypre_Box            *box;
    HYPRE_Int             num_values, num_cvalues;
-   HYPRE_Complex        *values, *cvalues, value;
+   HYPRE_Complex        *h_values, *values, *cvalues, value;
 #ifdef HYPRE_COMPLEX
    HYPRE_Complex         rvalue, ivalue;
 #endif
    HYPRE_Int            *value_ids, *cvalue_ids;
    HYPRE_Int             ci, i, vi;
+
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
 
 
    /* Read constant data from file */
@@ -2354,7 +2352,21 @@ hypre_StructMatrixReadData( FILE               *file,
 
    /* Read variable data from file */
    hypre_fscanf(file, "\nVariable Data:\n");
-   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
+   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &h_values);
+
+   /* Move values to the device memory if necessary and free host values */
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      vi = hypre_BoxArrayVolume(boxes) * num_values;
+      values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
+      hypre_TMemcpy(values, h_values, HYPRE_Complex, vi,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      values = h_values;
+   }
 
    /* Set matrix values */
    HYPRE_StructMatrixInitialize(matrix);
@@ -2372,7 +2384,7 @@ hypre_StructMatrixReadData( FILE               *file,
    hypre_TFree(cvalue_ids, HYPRE_MEMORY_HOST);
    hypre_TFree(cvalues, HYPRE_MEMORY_HOST);
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

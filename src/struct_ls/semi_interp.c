@@ -53,6 +53,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
 {
    HYPRE_UNUSED_VAR(xc);
 
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(P);
    hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
@@ -77,7 +78,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
    hypre_ComputeInfoProjectComp(compute_info, findex, stride);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(e), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(e), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------

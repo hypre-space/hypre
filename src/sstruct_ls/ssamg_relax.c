@@ -8,8 +8,6 @@
 #include "_hypre_sstruct_ls.h"
 #include "_hypre_struct_mv.hpp"
 
-#define MAX_DEPTH 10
-
 typedef struct hypre_SSAMGRelaxData_struct
 {
    MPI_Comm                comm;
@@ -478,6 +476,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    HYPRE_Real             *weights         = (relax_data -> weights);
    HYPRE_Int               ndim            = hypre_SStructMatrixNDim(A);
    HYPRE_Int               nparts          = hypre_SStructMatrixNParts(A);
+   HYPRE_MemoryLocation    memory_location = hypre_SStructMatrixMemoryLocation(A);
 
    MPI_Comm                comm;
    hypre_SStructGrid      *grid;
@@ -770,14 +769,14 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
                if (vi == -1)
                {
                   sx = hypre_SStructPVectorSVector(px, 0);
-                  hypre_ComputePkgCreate(compute_info,
+                  hypre_ComputePkgCreate(memory_location, compute_info,
                                          hypre_StructVectorDataSpace(sx),
                                          1, sgrid, &compute_pkgs[part][set]);
                }
                else
                {
                   sx = hypre_SStructPVectorSVector(px, vi);
-                  hypre_ComputePkgCreate(compute_info,
+                  hypre_ComputePkgCreate(memory_location, compute_info,
                                          hypre_StructVectorDataSpace(sx),
                                          1, sgrid, &svec_compute_pkgs[part][set][vi]);
                }
