@@ -226,6 +226,17 @@ HYPRE_StructVectorAxpy( HYPRE_Complex       alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructVectorScale( HYPRE_Complex       alpha,
+                         HYPRE_StructVector  y )
+{
+   return hypre_StructVectorScaleValues( y, alpha );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
                                HYPRE_Complex       factor )
 {

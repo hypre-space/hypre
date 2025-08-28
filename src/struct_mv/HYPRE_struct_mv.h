@@ -720,8 +720,8 @@ HYPRE_StructVectorCopy(HYPRE_StructVector x,
  * Scale a vector by \e alpha (\f$y \leftarrow \alpha y\f$).
  **/
 HYPRE_Int
-HYPRE_StructVectorScale(HYPRE_StructVector y,
-                        HYPRE_Complex      alpha);
+HYPRE_StructVectorScale(HYPRE_Complex      alpha,
+                        HYPRE_StructVector y);
 
 /**
  * Compute \f$y = y + \alpha x\f$.

@@ -1507,17 +1507,17 @@ HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
  * Add two vectors (y <-- alpha*x + y).
  **/
 HYPRE_Int
-HYPRE_SStructAxpy(HYPRE_Complex       alpha,
-                  HYPRE_SStructVector x,
-                  HYPRE_SStructVector y);
+HYPRE_SStructVectorAxpy(HYPRE_Complex       alpha,
+                        HYPRE_SStructVector x,
+                        HYPRE_SStructVector y);
 
 /**
  * Compute \e result, the inner product of vectors \e x and \e y.
  **/
 HYPRE_Int
-HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
-                       HYPRE_SStructVector  y,
-                       HYPRE_Real          *result);
+HYPRE_SStructVectorInnerProd(HYPRE_SStructVector  x,
+                             HYPRE_SStructVector  y,
+                             HYPRE_Real          *result);
 
 /**
  * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
@@ -1540,6 +1540,25 @@ HYPRE_SStructMatrixMatmat(HYPRE_SStructMatrix  A,
                           HYPRE_SStructMatrix *C);
 
 /**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*===== BEGIN 1 - IGNORE CODE IN DOCS =====*/  /*! \cond */
+
+/* Keep these for backward compatibility (for now) */
+
+HYPRE_Int
+HYPRE_SStructAxpy(HYPRE_Complex       alpha,
+                  HYPRE_SStructVector x,
+                  HYPRE_SStructVector y);
+
+HYPRE_Int
+HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
+                       HYPRE_SStructVector  y,
+                       HYPRE_Real          *result);
+
+/*===== END 1 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
