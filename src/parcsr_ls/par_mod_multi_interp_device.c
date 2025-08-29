@@ -996,7 +996,6 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i    = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j    = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int        n_fine      = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);

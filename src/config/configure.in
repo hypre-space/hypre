@@ -2431,30 +2431,36 @@ then
   then
     # Check for CDNA vs RDNA architecture
     AC_MSG_CHECKING([for GPU architecture using rocm-smi])
-    gfx_versions=$(rocm-smi --showproductname 2>/dev/null | grep 'gfx' | awk '{print $NF}' | tr '\n' ' ')
-    rocm_smi_cmd=$(rocm-smi --showproductname)
+    rocm_smi_cmd=$(rocm-smi --showproductname 2>/dev/null)
     rocm_smi_status=$?
+    gfx_versions=$(echo "$rocm_smi_cmd" | grep 'gfx' | awk '{print $NF}' | tr '\n' ' ')
 
     if test $rocm_smi_status -eq 0
     then
-      cdna_found=no
-      for gfx_version in $gfx_versions
-      do
-        case "$gfx_version" in
-          gfx9*)
-            cdna_found=yes
-            break
-            ;;
-        esac
-      done
-
-      if test "$cdna_found" = "yes"
+      if test -z "$gfx_versions"
       then
         hypre_warp_size=64
-        AC_MSG_RESULT([CDNA detected ($gfx_versions), setting warp size to 64])
+        AC_MSG_RESULT([no gfx version found in rocm-smi output, defaulting to warp size 64])
       else
-        hypre_warp_size=32
-        AC_MSG_RESULT([RDNA detected ($gfx_versions), setting warp size to 32])
+        cdna_found=no
+        for gfx_version in $gfx_versions
+        do
+          case "$gfx_version" in
+            gfx9* )
+              cdna_found=yes
+              break
+              ;;
+          esac
+        done
+
+        if test "$cdna_found" = "yes"
+        then
+          hypre_warp_size=64
+          AC_MSG_RESULT([CDNA detected ( $gfx_versions), setting warp size to 64])
+        else
+          hypre_warp_size=32
+          AC_MSG_RESULT([RDNA detected ( $gfx_versions), setting warp size to 32])
+        fi
       fi
     else
       hypre_warp_size=64

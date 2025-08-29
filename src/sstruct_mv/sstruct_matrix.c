@@ -853,7 +853,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
 
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, nnzrow;
+   HYPRE_Int               nrows, nnzrow = 0;
    HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
