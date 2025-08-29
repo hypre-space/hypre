@@ -412,10 +412,10 @@ HYPRE_StructVectorAddToBoxValues2( HYPRE_StructVector vector, HYPRE_Int *ilower,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructVectorAddToValues( HYPRE_StructVector vector, HYPRE_Int *index, hypre_long_double value )
+HYPRE_StructVectorAddToValues( HYPRE_StructVector vector, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_StructVectorAddToValues_pre( precision, vector, index, value );
+   return HYPRE_StructVectorAddToValues_pre( precision, vector, index, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -610,10 +610,10 @@ HYPRE_StructVectorSetStride( HYPRE_StructVector vector, HYPRE_Int *stride )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructVectorSetValues( HYPRE_StructVector vector, HYPRE_Int *index, hypre_long_double value )
+HYPRE_StructVectorSetValues( HYPRE_StructVector vector, HYPRE_Int *index, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_StructVectorSetValues_pre( precision, vector, index, value );
+   return HYPRE_StructVectorSetValues_pre( precision, vector, index, values );
 }
 
 
