@@ -65,6 +65,10 @@ using hypre_DeviceItem = void*;
 #define CUB_IGNORE_DEPRECATED_CPP_DIALECT
 #endif
 
+#if CUDART_VERSION >= 13000
+#define cudaMemPrefetchAsync(a0, a1, a2, a3) cudaMemPrefetchAsync(a0, a1, a2, 0, a3)
+#endif
+
 #ifndef CUSPARSE_VERSION
 #if defined(CUSPARSE_VER_MAJOR) && defined(CUSPARSE_VER_MINOR) && defined(CUSPARSE_VER_PATCH)
 #define CUSPARSE_VERSION (CUSPARSE_VER_MAJOR * 1000 + CUSPARSE_VER_MINOR *  100 + CUSPARSE_VER_PATCH)
