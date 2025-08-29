@@ -808,16 +808,16 @@ HYPRE_StructVectorAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_StructVe
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, hypre_long_double value )
+HYPRE_StructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_StructVectorAddToValues_flt( vector, index, value );
+         return HYPRE_StructVectorAddToValues_flt( vector, index, values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_StructVectorAddToValues_dbl( vector, index, value );
+         return HYPRE_StructVectorAddToValues_dbl( vector, index, values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_StructVectorAddToValues_long_dbl( vector, index, value );
+         return HYPRE_StructVectorAddToValues_long_dbl( vector, index, values );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
@@ -1204,16 +1204,16 @@ HYPRE_StructVectorSetStride_pre( HYPRE_Precision precision, HYPRE_StructVector v
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, hypre_long_double value )
+HYPRE_StructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, void *values )
 {
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_StructVectorSetValues_flt( vector, index, value );
+         return HYPRE_StructVectorSetValues_flt( vector, index, values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_StructVectorSetValues_dbl( vector, index, value );
+         return HYPRE_StructVectorSetValues_dbl( vector, index, values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_StructVectorSetValues_long_dbl( vector, index, value );
+         return HYPRE_StructVectorSetValues_long_dbl( vector, index, values );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
