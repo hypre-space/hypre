@@ -60,4 +60,4 @@ mv CMakeLists.txt.tmp CMakeLists.txt
 
 ##### Update release information in documentation
 
-#(cd docs; ./update-release.sh)
+(cd docs; ./update-release.sh)
