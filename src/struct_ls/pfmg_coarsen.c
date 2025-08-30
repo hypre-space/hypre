@@ -20,7 +20,7 @@
     (A_diag[Ai] < 0.0 ? 1.0 : -1.0)
 
 #define HYPRE_AP_DECLARE(n)     \
-  HYPRE_Complex *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
+  HYPRE_Real *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
 
 #define HYPRE_AP_LOAD(n, d)     \
   Ap##n##_##d = hypre_StructMatrixBoxData(A, Ab, entries[d][k + n])
@@ -383,14 +383,14 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
                               hypre_Box          *w_dbox,
-                              HYPRE_Complex     **w_data)
+                              HYPRE_Real        **w_data)
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
    HYPRE_Int             k = 0, d, depth;
 
-   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
-   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Real           *w_data_d, *w_data_0, *w_data_1, *w_data_2;
+   HYPRE_Real           *A_diag = NULL;
    HYPRE_AP_DECLARE_UP_TO_18;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -551,14 +551,14 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
                               hypre_Box          *w_dbox,
-                              HYPRE_Complex     **w_data)
+                              HYPRE_Real        **w_data)
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
    HYPRE_Int             k = 0, d, depth, all_zero;
 
-   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
-   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Real           *w_data_d, *w_data_0, *w_data_1, *w_data_2;
+   HYPRE_Real           *A_diag = NULL;
    HYPRE_AP_DECLARE_UP_TO_9;
 
    /* Exit if there are no constant coefficients */
@@ -722,7 +722,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    hypre_IndexRef         start;
 
    hypre_StructVector    *work[HYPRE_MAXDIM];
-   HYPRE_Complex         *w_data[HYPRE_MAXDIM];
+   HYPRE_Real            *w_data[HYPRE_MAXDIM];
    hypre_Box             *w_dbox;
 
    HYPRE_Int              d, i, k, si;
