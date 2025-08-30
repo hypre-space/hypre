@@ -29,7 +29,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
    hypre_IndexRef         start;
    hypre_Index            ustride;
 
-   HYPRE_Real            *Ap;
+   HYPRE_Complex         *Ap;
    hypre_Box             *A_dbox;
    HYPRE_Int              i;
    HYPRE_Real             diag_product = 0.0;
