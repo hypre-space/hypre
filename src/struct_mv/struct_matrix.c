@@ -13,6 +13,9 @@
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
+#ifdef HYPRE_COMPLEX
+#include <complex.h>
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -2742,7 +2745,7 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
    hypre_Box              *d_data_box;
    HYPRE_Int               stencil_diag;
    HYPRE_Int               i;
-   HYPRE_Real             *Ap, *dp;
+   HYPRE_Complex          *Ap, *dp;
 
    hypre_SetIndex(ustride, 1);
    hypre_ForBoxArrayI(i, boxes)

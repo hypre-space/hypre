@@ -12,6 +12,9 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#ifdef HYPRE_COMPLEX
+#include <complex.h>
+#endif
 
 /*--------------------------------------------------------------------------
  * Note: data array is expected to live on the host memory.
