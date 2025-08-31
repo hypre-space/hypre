@@ -197,7 +197,7 @@ hypre_using_memory_tracker=no
 
 hypre_test_using_host=no
 
-hypre_cxxstd=11
+hypre_cxxstd=17
 
 dnl *********************************************************************
 dnl * Initialize hypre-MAGMA variables
@@ -2699,7 +2699,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
         dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
         dnl from the configure line.
-        HIPCXXFLAGS="-x hip -fPIE -std=c++14 ${HIPCXXFLAGS}"
+        HIPCXXFLAGS="-x hip -fPIE -std=c++${hypre_cxxstd} ${HIPCXXFLAGS}"
 
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
