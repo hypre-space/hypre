@@ -118,7 +118,7 @@ struct hypreFunctor_NonzeroAboveTol
 {
    HYPRE_Real tol;
 
-   hypreFunctor_NonzeroAboveTol(double tol_) : tol(tol_) {}
+   hypreFunctor_NonzeroAboveTol(HYPRE_Real tol_) : tol(tol_) {}
 
    __host__ __device__
    bool operator()(const HYPRE_Complex& x) const
