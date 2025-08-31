@@ -105,13 +105,12 @@ co="--enable-maxdim=4 --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-maxdim=4
 
 co="--enable-complex --enable-maxdim=4 --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basic.dir/make.???
 grep -v make.err basic.err > basic.tmp
 mv basic.tmp basic.err
 ./renametest.sh basic $output_dir/basic--enable-complex
-# From tux master: ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -complex
 
 co="--with-openmp"
 RO="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
@@ -185,6 +184,10 @@ co="-DCMAKE_BUILD_TYPE=Debug"
 co="-DHYPRE_BIGINT=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-bigint
+
+co="-DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_MIXED_PRECISION=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-mixed-precision
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex

@@ -41,8 +41,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    hypre_CSRMatrix        *offd;
    HYPRE_Int              *diag_i;
    HYPRE_Int              *offd_i;
-   HYPRE_Complex          *diag_a;
-   HYPRE_Complex          *offd_a;
+   HYPRE_Real             *diag_a;
+   HYPRE_Real             *offd_a;
 
    hypre_IntArray          arr_diag_r;
    hypre_IntArray          arr_offd_r;
@@ -56,8 +56,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int              *global_min_entries = NULL;
    HYPRE_Int              *global_max_entries = NULL;
    HYPRE_Real             *global_avg_entries = NULL;
-   HYPRE_Complex          *global_min_rowsum = NULL;
-   HYPRE_Complex          *global_max_rowsum = NULL;
+   HYPRE_Real             *global_min_rowsum = NULL;
+   HYPRE_Real             *global_max_rowsum = NULL;
    HYPRE_Int              *global_num_boxes = NULL;
    HYPRE_Int              *global_num_dofs = NULL;
    HYPRE_Int              *global_num_ghrows = NULL;
@@ -71,9 +71,9 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int               min_stsize;
    HYPRE_Int               max_stsize;
    HYPRE_Real              avg_stsize;
-   HYPRE_Complex           min_rowsum;
-   HYPRE_Complex           max_rowsum;
-   HYPRE_Complex           rowsum;
+   HYPRE_Real              min_rowsum;
+   HYPRE_Real              max_rowsum;
+   HYPRE_Real              rowsum;
 
    HYPRE_Int               num_ghrows;
    HYPRE_Int               num_boxes;
@@ -111,8 +111,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       global_min_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_max_entries  = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_avg_entries  = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
-      global_min_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
-      global_max_rowsum   = hypre_CTAlloc(HYPRE_Complex, num_levels, HYPRE_MEMORY_HOST);
+      global_min_rowsum   = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
+      global_max_rowsum   = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       global_num_boxes    = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_num_dofs     = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
       global_num_ghrows   = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);

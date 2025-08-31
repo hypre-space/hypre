@@ -4185,7 +4185,7 @@ main( hypre_int argc,
             {
                j = i * data.fem_nvars;
                hypre_TMemcpy(&values[j], data.fem_rhs_values, HYPRE_Real,
-                             data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
+                             data.fem_nvars, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             }
             hypre_MuPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
             hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
@@ -4707,7 +4707,7 @@ main( hypre_int argc,
 #endif
 
       hypre_TFree(values, HYPRE_MEMORY_HOST);
-      hypre_TFree(h_values, memory_location);
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
       hypre_TFree(d_values, memory_location);
 
       /*-----------------------------------------------------------

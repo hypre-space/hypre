@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_structvectorsetvalues, HYPRE_STRUCTVECTORSETVALUES)
            ( HYPRE_StructVectorSetValues(
                 hypre_F90_PassObj (HYPRE_StructVector, vector),
                 hypre_F90_PassIntArray (grid_index),
-                hypre_F90_PassComplex (values)     ) );
+                hypre_F90_PassComplexRef (values)     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -117,7 +117,7 @@ hypre_F90_IFACE(hypre_structvectoraddtovalues, HYPRE_STRUCTVECTORADDTOVALUES)
            ( HYPRE_StructVectorAddToValues(
                 hypre_F90_PassObj (HYPRE_StructVector, vector),
                 hypre_F90_PassIntArray (grid_index),
-                hypre_F90_PassComplex (values)     ) );
+                hypre_F90_PassComplexRef (values)     ) );
 }
 
 /*--------------------------------------------------------------------------

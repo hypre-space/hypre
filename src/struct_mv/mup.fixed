@@ -136,7 +136,6 @@ hypre_ComputeInfoProjectRecv
 hypre_ComputeInfoProjectSend
 hypre_ComputePkgCreate
 hypre_ComputePkgDestroy
-hypre_ComputePkgSetMemoryLocation
 hypre_ConvertToCanonicalIndex
 hypre_CopyBox
 hypre_CopyIndex

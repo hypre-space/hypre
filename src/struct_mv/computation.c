@@ -277,7 +277,8 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
+hypre_ComputePkgCreate( HYPRE_MemoryLocation   memory_location,
+                        hypre_ComputeInfo     *compute_info,
                         hypre_BoxArray        *data_space,
                         HYPRE_Int              num_values,
                         hypre_StructGrid      *grid,
@@ -291,7 +292,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
                        data_space, data_space, num_values, NULL, 0,
                        hypre_StructGridComm(grid),
-                       HYPRE_MEMORY_HOST, &comm_pkg);
+                       memory_location, &comm_pkg);
    hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
@@ -305,19 +306,6 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_ComputeInfoDestroy(compute_info);
 
    *compute_pkg_ptr = compute_pkg;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Set the memory location of the underlying communication package
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg     *compute_pkg,
-                                   HYPRE_MemoryLocation  memory_location )
-{
-   hypre_ComputePkgMemoryLocation(compute_pkg) = memory_location;
 
    return hypre_error_flag;
 }

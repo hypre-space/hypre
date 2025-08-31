@@ -180,8 +180,8 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
    hypre_Box               *P_dbox;
 
    hypre_StructStencil     *P_stencil;
-   HYPRE_Complex           *Pp1, *Pp2;
-   HYPRE_Complex            Pconst0, Pconst1, Pconst2;
+   HYPRE_Real              *Pp1, *Pp2;
+   HYPRE_Real               Pconst0, Pconst1, Pconst2;
 
    hypre_Index              Pstart, Pstride;
    hypre_Index              origin, stride, loop_size;
@@ -191,8 +191,8 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                part, nvars;
    HYPRE_Int                box_id;
    HYPRE_Int                d, i, ii, j, vi;
-   HYPRE_Complex            one  = 1.0;
-   HYPRE_Complex            half = 0.5;
+   HYPRE_Real               one  = 1.0;
+   HYPRE_Real               half = 0.5;
 
    HYPRE_MemoryLocation     memory_location_P = hypre_SStructMatrixMemoryLocation(P);
 
@@ -225,7 +225,7 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
          P_stencil  = hypre_StructMatrixStencil(P_s);
 
          /* Set center coefficient to 1 */
-         hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 0), &one, HYPRE_Complex, 1,
+         hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 0), &one, HYPRE_Real, 1,
                        memory_location_P, HYPRE_MEMORY_HOST);
 
          /* If there are no off-diagonal entries, assemble the matrix and continue outer loop */
@@ -244,9 +244,9 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
          if (hypre_StructMatrixConstEntry(P_s, 1))
          {
             /* Off-diagonal entries are constant */
-            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 1), &half, HYPRE_Complex, 1,
+            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 1), &half, HYPRE_Real, 1,
                           memory_location_P, HYPRE_MEMORY_HOST);
-            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 2), &half, HYPRE_Complex, 1,
+            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 2), &half, HYPRE_Real, 1,
                           memory_location_P, HYPRE_MEMORY_HOST);
          }
          else
@@ -310,7 +310,7 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
                         {
                            hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                            {
-                              HYPRE_Complex center = Pp1[Pi] + Pp2[Pi];
+                              HYPRE_Real center = Pp1[Pi] + Pp2[Pi];
 
                               if (center)
                               {

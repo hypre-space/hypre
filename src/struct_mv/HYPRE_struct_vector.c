@@ -69,7 +69,7 @@ HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 HYPRE_Int
 HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
                              HYPRE_Int          *grid_index,
-                             HYPRE_Complex       values )
+                             HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
 
@@ -81,7 +81,7 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   hypre_StructVectorSetValues(vector, new_grid_index, &values, 0, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, values, 0, -1, 0);
 
    return hypre_error_flag;
 }
@@ -142,7 +142,7 @@ HYPRE_StructVectorSetBoxValues2( HYPRE_StructVector  vector,
 HYPRE_Int
 HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
                                HYPRE_Int          *grid_index,
-                               HYPRE_Complex       values )
+                               HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
 
@@ -154,7 +154,7 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   hypre_StructVectorSetValues(vector, new_grid_index, &values, 1, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, values, 1, -1, 0);
 
    return hypre_error_flag;
 }

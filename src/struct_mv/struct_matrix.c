@@ -13,6 +13,9 @@
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
+#ifdef HYPRE_COMPLEX
+#include <complex.h>
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1422,6 +1425,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
 #define DEVICE_VAR is_device_ptr(matp, values)
                      hypre_LoopBegin(1, k)
                      {
+                        HYPRE_UNUSED_VAR(k);
                         *matp += values[s];
                      }
                      hypre_LoopEnd()
@@ -1438,13 +1442,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                                    memory_location, memory_location);
                      if (action == -2)
                      {
-#define DEVICE_VAR is_device_ptr(matp, values)
-                        hypre_LoopBegin(1, k)
-                        {
-                           *matp = 0.0;
-                        }
-                        hypre_LoopEnd()
-#undef DEVICE_VAR
+                        hypre_Memset((void*) matp, 0.0, sizeof(HYPRE_Complex), memory_location);
                      }
                   }
                }
@@ -2363,7 +2361,7 @@ hypre_StructMatrixReadData( FILE               *file,
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       vi = hypre_BoxArrayVolume(boxes) * num_values;
-      values = hypre_TAlloc(HYPRE_Complex, vi, HYPRE_MEMORY_DEVICE);
+      values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
       hypre_TMemcpy(values, h_values, HYPRE_Complex, vi,
                     memory_location, HYPRE_MEMORY_HOST);
       hypre_TFree(h_values, HYPRE_MEMORY_HOST);
@@ -2747,7 +2745,7 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
    hypre_Box              *d_data_box;
    HYPRE_Int               stencil_diag;
    HYPRE_Int               i;
-   HYPRE_Real             *Ap, *dp;
+   HYPRE_Complex          *Ap, *dp;
 
    hypre_SetIndex(ustride, 1);
    hypre_ForBoxArrayI(i, boxes)

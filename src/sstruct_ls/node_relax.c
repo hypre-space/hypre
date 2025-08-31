@@ -432,14 +432,14 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
          if (vi == -1)
          {
-            hypre_ComputePkgCreate(compute_info,
+            hypre_ComputePkgCreate(memory_location, compute_info,
                                    hypre_StructVectorDataSpace(
                                       hypre_SStructPVectorSVector(x, 0)),
                                    1, sgrid, &compute_pkgs[p]);
          }
          else
          {
-            hypre_ComputePkgCreate(compute_info,
+            hypre_ComputePkgCreate(memory_location, compute_info,
                                    hypre_StructVectorDataSpace(
                                       hypre_SStructPVectorSVector(x, vi)),
                                    1, sgrid, &svec_compute_pkgs[p][vi]);
