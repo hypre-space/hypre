@@ -3378,7 +3378,7 @@ hypre_using_memory_tracker=no
 
 hypre_test_using_host=no
 
-hypre_cxxstd=11
+hypre_cxxstd=17
 
 hypre_using_magma=no
 hypre_user_gave_magma_inc=no
@@ -10927,7 +10927,7 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
            HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
         fi
 
-                                        HIPCXXFLAGS="-x hip -fPIE -std=c++14 ${HIPCXXFLAGS}"
+                                        HIPCXXFLAGS="-x hip -fPIE -std=c++${hypre_cxxstd} ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"
 then :
