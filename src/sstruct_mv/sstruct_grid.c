@@ -2895,6 +2895,8 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
                           hypre_Index         *periodic, // periodic data for each part
                           hypre_SStructGrid  **cgrid_ptr )
 {
+   HYPRE_UNUSED_VAR(periodic);
+
    MPI_Comm                 comm    = hypre_SStructGridComm(fgrid);
    HYPRE_Int                ndim    = hypre_SStructGridNDim(fgrid);
    HYPRE_Int                nparts  = hypre_SStructGridNParts(fgrid);
