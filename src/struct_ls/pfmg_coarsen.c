@@ -733,11 +733,6 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    HYPRE_Int              vsi[HYPRE_MAXDIM][stencil_size];
    HYPRE_Int              diag_is_constant;
 
-#if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
-   HYPRE_ExecutionPolicy  exec_policy     = hypre_GetExecPolicy1(memory_location);
-#endif
-
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PFMGComputeCxyz");
 
