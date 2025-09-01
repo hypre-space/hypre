@@ -2675,7 +2675,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
 #if !defined(HYPRE_USING_GPU)
-   HYPRE_Int              m = 0
+   HYPRE_Int              m = 0;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
 #endif
