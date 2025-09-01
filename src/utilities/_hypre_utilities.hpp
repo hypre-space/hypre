@@ -457,14 +457,19 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if HYPRE_WARP_SIZE == 64 ||\
-  (defined(HYPRE_USING_HIP) && HIP_VERSION > 60500000 && !defined(HIP_DISABLE_WARP_SYNC_BUILTINS))
+#if HYPRE_WARP_SIZE == 64
 #define HYPRE_WARP_BITSHIFT      6
 #define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
 
 #elif HYPRE_WARP_SIZE == 32
 #define HYPRE_WARP_BITSHIFT      5
+
+/* HIP 6.5 onwards requires masks to be 64-bit integers even when compiling for warp size 32 */
+#if defined(HYPRE_USING_HIP) && HIP_VERSION > 60500000 && !defined(HIP_DISABLE_WARP_SYNC_BUILTINS)
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
+#else
 #define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
+#endif
 
 #else
 #error "Unsupported value for HYPRE_WARP_SIZE"
