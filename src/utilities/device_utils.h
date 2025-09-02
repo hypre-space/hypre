@@ -65,10 +65,6 @@ using hypre_DeviceItem = void*;
 #define CUB_IGNORE_DEPRECATED_CPP_DIALECT
 #endif
 
-#if CUDART_VERSION >= 13000
-#define cudaMemPrefetchAsync(a0, a1, a2, a3) cudaMemPrefetchAsync(a0, a1, a2, 0, a3)
-#endif
-
 #ifndef CUSPARSE_VERSION
 #if defined(CUSPARSE_VER_MAJOR) && defined(CUSPARSE_VER_MINOR) && defined(CUSPARSE_VER_PATCH)
 #define CUSPARSE_VERSION (CUSPARSE_VER_MAJOR * 1000 + CUSPARSE_VER_MINOR *  100 + CUSPARSE_VER_PATCH)
@@ -117,6 +113,31 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_EXECUTION thrust::cuda::par_nosync
 #else
 #define HYPRE_THRUST_EXECUTION thrust::cuda::par
+#endif
+
+#if CUDART_VERSION >= 13000
+// Macro for device memory prefetching (CUDART 13.0+)
+#define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
+   do { \
+      cudaMemLocation loc = {cudaMemLocationTypeDevice, hypre_HandleDevice(hypre_handle())}; \
+      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+   } while (0)
+
+// Macro for host memory prefetching (CUDART 13.0+)
+#define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
+   do { \
+      cudaMemLocation loc = {cudaMemLocationTypeHost, cudaCpuDeviceId}; \
+      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+   } while (0)
+
+#else
+// Macro for device memory prefetching (< CUDART 13.0)
+#define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
+   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()), stream))
+
+// Macro for host memory prefetching (< CUDART 13.0)
+#define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
+   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId, stream))
 #endif
 
 #endif /* defined(HYPRE_USING_CUDA) */
