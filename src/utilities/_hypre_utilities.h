@@ -1961,21 +1961,16 @@ extern "C++"
 #ifndef HYPRE_GSELIM_H
 #define HYPRE_GSELIM_H
 
-#define hypre_gselim(A,x,n,error)                      \
+#define hypre_gselim(A,x,n)                            \
 {                                                      \
    HYPRE_Int    j,k,m;                                 \
    HYPRE_Real factor;                                  \
    HYPRE_Real divA;                                    \
-   error = 0;                                          \
    if (n == 1)  /* A is 1x1 */                         \
    {                                                   \
       if (A[0] != 0.0)                                 \
       {                                                \
          x[0] = x[0]/A[0];                             \
-      }                                                \
-      else                                             \
-      {                                                \
-         error++;                                      \
       }                                                \
    }                                                   \
    else/* A is nxn. Forward elimination */             \
