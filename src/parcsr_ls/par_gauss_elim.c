@@ -641,11 +641,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
          /* Run hypre's internal gaussian elimination */
-         hypre_gselim(A_work, b_vec, global_num_rows, ierr);
-         if (ierr != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
-         }
+         hypre_gselim(A_work, b_vec, global_num_rows);
 
          hypre_TMemcpy(u_data, b_data_h + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
