@@ -6,21 +6,10 @@
 # Enable CXX language
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(HYPRE_ENABLE_SYCL)
-  # We enforce the use of Intel's oneAPI DPC++/C++ Compiler
-  if(NOT CMAKE_CXX_COMPILER MATCHES "dpcpp|icpx")
-    message(FATAL_ERROR "SYCL requires DPC++ or Intel C++ compiler")
-  endif()
 
-  # Enforce C++17 at least for SYCL
-  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
-    set(CMAKE_CXX_STANDARD 17)
-  endif()
-else()
-  # Enforce C++14 at least for CUDA and HIP
-  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-    set(CMAKE_CXX_STANDARD 14)
-  endif()
+# Enforce C++17 at least
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 # Set C++ standard for HYPRE
