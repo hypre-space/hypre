@@ -174,8 +174,9 @@ main( hypre_int argc,
    void        *cx_slvr, *cy_slvr, *cz_slvr;   
    void        *conx_pc, *cony_pc, *conz_pc;
    void        *cx_pc, *cy_pc, *cz_pc;
-   size_t      slvr_size = sizeof(hypre_double);
-   size_t      pc_size = sizeof(hypre_float);
+   /* Size of solver and preconditioner data types */
+   size_t      slvr_size_t = sizeof(hypre_double);
+   size_t      pc_size_t = sizeof(hypre_float);
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -480,16 +481,19 @@ main( hypre_int argc,
                solver_precision = HYPRE_REAL_SINGLE;
                one_slvr = &one_flt;
                zero_slvr = &zero_flt;
+               slvr_size_t = sizeof(hypre_float);
                break;
             case 1:
                solver_precision = HYPRE_REAL_DOUBLE;
                one_slvr = &one_dbl;
                zero_slvr = &zero_dbl;
+               slvr_size_t = sizeof(hypre_double);
                break;
             case 2:
                solver_precision = HYPRE_REAL_LONGDOUBLE;
                one_slvr = &one_ldbl;
                zero_slvr = &zero_ldbl;
+               slvr_size_t = sizeof(hypre_long_double);
                break;
          }
       }
@@ -504,16 +508,19 @@ main( hypre_int argc,
                precond_precision = HYPRE_REAL_SINGLE;
                one_pc = &one_flt;
                zero_pc = &zero_flt;
+               pc_size_t = sizeof(hypre_float);
                break;
             case 1:
                precond_precision = HYPRE_REAL_DOUBLE;
                one_pc = &one_dbl;
                zero_pc = &zero_dbl;
+               pc_size_t = sizeof(hypre_double);
                break;
             case 2:
                precond_precision = HYPRE_REAL_LONGDOUBLE;
                one_pc = &one_ldbl;
                zero_pc = &zero_ldbl;
+               pc_size_t = sizeof(hypre_long_double);
                break;
          }      
       }
@@ -1083,8 +1090,8 @@ main( hypre_int argc,
                conz_pc = &params_ldbl[5];
                break;
          }         
-         AddValuesMatrix_mp(A_dbl, grid, cx_slvr, cy_slvr, cz_slvr, conx_slvr, cony_slvr, conz_slvr, sizeof(hypre_double));
-         AddValuesMatrix_mp(A_flt, grid, cx_pc, cy_pc, cz_pc, conx_pc, cony_pc, conz_pc, sizeof(hypre_float));
+         AddValuesMatrix_mp(A_dbl, grid, cx_slvr, cy_slvr, cz_slvr, conx_slvr, cony_slvr, conz_slvr, slvr_size_t);
+         AddValuesMatrix_mp(A_flt, grid, cx_pc, cy_pc, cz_pc, conx_pc, cony_pc, conz_pc, pc_size_t);
 
          /* Zero out stencils reaching to real boundary */
          /* But in constant coefficient case, no special stencils! */
@@ -1111,8 +1118,8 @@ main( hypre_int argc,
           *  sink of equal strength.  All other problems have rhs = 1.
           *-----------------------------------------------------------*/
 
-         AddValuesVector_mp(grid, b_dbl, periodic, one_slvr, sizeof(double));
-         AddValuesVector_mp(grid, b_flt, periodic, one_pc, sizeof(float));
+         AddValuesVector_mp(grid, b_dbl, periodic, one_slvr, slvr_size_t);
+         AddValuesVector_mp(grid, b_flt, periodic, one_pc, pc_size_t);
          HYPRE_StructVectorAssemble_pre( solver_precision,b_dbl);
          HYPRE_StructVectorAssemble_pre( precond_precision,b_flt);
 
@@ -1121,8 +1128,8 @@ main( hypre_int argc,
          HYPRE_StructVectorInitialize_pre( solver_precision,x_dbl);
          HYPRE_StructVectorInitialize_pre( precond_precision,x_flt);
        
-         AddValuesVector_mp(grid, x_dbl, periodx0, zero_slvr, sizeof(double));
-         AddValuesVector_mp(grid, x_flt, periodx0, zero_pc, sizeof(float));
+         AddValuesVector_mp(grid, x_dbl, periodx0, zero_slvr, slvr_size_t);
+         AddValuesVector_mp(grid, x_flt, periodx0, zero_pc, pc_size_t);
          HYPRE_StructVectorAssemble_pre(solver_precision,x_dbl);
          HYPRE_StructVectorAssemble_pre(precond_precision,x_flt);
 
@@ -2100,7 +2107,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
       else
       {
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values = hypre_CAlloc_flt((size_t)(stencil_size - 1), (size_t)sizeof(float ), HYPRE_MEMORY_HOST);
+         values = hypre_CAlloc((size_t)(stencil_size - 1), size, HYPRE_MEMORY_HOST);
          switch (dim)
          {
             case 1:
