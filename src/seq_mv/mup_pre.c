@@ -27,7 +27,7 @@ HYPRE_CSRMatrixCreate_pre( HYPRE_Precision precision, HYPRE_Int num_rows, HYPRE_
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixCreate_long_dbl( num_rows, num_cols, row_sizes );
       default:
-         { HYPRE_CSRMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_CSRMatrix value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -45,7 +45,7 @@ HYPRE_CSRMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_CSRMatrix matrix )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixDestroy_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -63,7 +63,7 @@ HYPRE_CSRMatrixGetNumRows_pre( HYPRE_Precision precision, HYPRE_CSRMatrix matrix
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixGetNumRows_long_dbl( matrix, num_rows );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -81,7 +81,7 @@ HYPRE_CSRMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_CSRMatrix matrix
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixInitialize_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -99,7 +99,7 @@ HYPRE_CSRMatrixPrint_pre( HYPRE_Precision precision, HYPRE_CSRMatrix matrix, cha
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixPrint_long_dbl( matrix, file_name );
       default:
-         hypre_printf("Unknown solver precision");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision");
    }
 }
 
@@ -117,7 +117,7 @@ HYPRE_CSRMatrixRead_pre( HYPRE_Precision precision, char *file_name )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_CSRMatrixRead_long_dbl( file_name );
       default:
-         { HYPRE_CSRMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_CSRMatrix value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -135,7 +135,7 @@ HYPRE_MappedMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_MappedMatrix ma
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixAssemble_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -153,7 +153,7 @@ HYPRE_MappedMatrixCreate_pre( HYPRE_Precision precision )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixCreate_long_dbl( );
       default:
-         { HYPRE_MappedMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_MappedMatrix value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -171,7 +171,7 @@ HYPRE_MappedMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_MappedMatrix mat
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixDestroy_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -189,7 +189,7 @@ HYPRE_MappedMatrixGetColIndex_pre( HYPRE_Precision precision, HYPRE_MappedMatrix
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixGetColIndex_long_dbl( matrix, j );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -207,7 +207,7 @@ HYPRE_MappedMatrixGetMatrix_pre( HYPRE_Precision precision, HYPRE_MappedMatrix m
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixGetMatrix_long_dbl( matrix );
       default:
-         { void * value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { void * value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -225,7 +225,7 @@ HYPRE_MappedMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_MappedMatrix 
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixInitialize_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -243,7 +243,7 @@ HYPRE_MappedMatrixLimitedDestroy_pre( HYPRE_Precision precision, HYPRE_MappedMat
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixLimitedDestroy_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -261,7 +261,7 @@ HYPRE_MappedMatrixPrint_pre( HYPRE_Precision precision, HYPRE_MappedMatrix matri
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixPrint_long_dbl( matrix );
       default:
-         hypre_printf("Unknown solver precision");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision");
    }
 }
 
@@ -279,7 +279,7 @@ HYPRE_MappedMatrixSetMapData_pre( HYPRE_Precision precision, HYPRE_MappedMatrix 
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixSetMapData_long_dbl( matrix, MapData );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -297,7 +297,7 @@ HYPRE_MappedMatrixSetMatrix_pre( HYPRE_Precision precision, HYPRE_MappedMatrix m
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MappedMatrixSetMatrix_long_dbl( matrix, matrix_data );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -315,7 +315,7 @@ HYPRE_MultiblockMatrixAssemble_pre( HYPRE_Precision precision, HYPRE_MultiblockM
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixAssemble_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -333,7 +333,7 @@ HYPRE_MultiblockMatrixCreate_pre( HYPRE_Precision precision )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixCreate_long_dbl( );
       default:
-         { HYPRE_MultiblockMatrix value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_MultiblockMatrix value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -351,7 +351,7 @@ HYPRE_MultiblockMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_MultiblockMa
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixDestroy_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -369,7 +369,7 @@ HYPRE_MultiblockMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_Multibloc
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixInitialize_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -387,7 +387,7 @@ HYPRE_MultiblockMatrixLimitedDestroy_pre( HYPRE_Precision precision, HYPRE_Multi
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixLimitedDestroy_long_dbl( matrix );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -405,7 +405,7 @@ HYPRE_MultiblockMatrixPrint_pre( HYPRE_Precision precision, HYPRE_MultiblockMatr
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixPrint_long_dbl( matrix );
       default:
-         hypre_printf("Unknown solver precision");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision");
    }
 }
 
@@ -423,7 +423,7 @@ HYPRE_MultiblockMatrixSetNumSubmatrices_pre( HYPRE_Precision precision, HYPRE_Mu
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixSetNumSubmatrices_long_dbl( matrix, n );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -441,7 +441,7 @@ HYPRE_MultiblockMatrixSetSubmatrixType_pre( HYPRE_Precision precision, HYPRE_Mul
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MultiblockMatrixSetSubmatrixType_long_dbl( matrix, j, type );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -459,7 +459,7 @@ HYPRE_VectorCopy_pre( HYPRE_Precision precision, HYPRE_Vector xvec, HYPRE_Vector
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorCopy_long_dbl( xvec, yvec );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -477,7 +477,7 @@ HYPRE_VectorCreate_pre( HYPRE_Precision precision, HYPRE_Int size )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorCreate_long_dbl( size );
       default:
-         { HYPRE_Vector value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Vector value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -495,7 +495,7 @@ HYPRE_VectorDestroy_pre( HYPRE_Precision precision, HYPRE_Vector vector )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorDestroy_long_dbl( vector );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -513,7 +513,7 @@ HYPRE_VectorInitialize_pre( HYPRE_Precision precision, HYPRE_Vector vector )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorInitialize_long_dbl( vector );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -531,7 +531,7 @@ HYPRE_VectorPrint_pre( HYPRE_Precision precision, HYPRE_Vector vector, char *fil
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorPrint_long_dbl( vector, file_name );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -549,7 +549,7 @@ HYPRE_VectorRead_pre( HYPRE_Precision precision, char *file_name )
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_VectorRead_long_dbl( file_name );
       default:
-         { HYPRE_Vector value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Vector value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
