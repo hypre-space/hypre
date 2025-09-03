@@ -10,8 +10,11 @@ set(HDRS
   _hypre_utilities.hpp
   fortran.h
   fortran_matrix.h
-  multiprecision.h
 )
+
+if(HYPRE_ENABLE_SYCL)
+  list(APPEND HDRS _hypre_onedpl.hpp)
+endif()
 
 # Add MUP headers
 if(HYPRE_ENABLE_MIXED_PRECISION)
@@ -21,6 +24,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     _hypre_utilities_mup.h
     _hypre_utilities_mup_def.h
     _hypre_utilities_mup_undef.h
+    multiprecision.h
   )
 endif()
 

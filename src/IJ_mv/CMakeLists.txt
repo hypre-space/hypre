@@ -4,12 +4,8 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
-  aux_parcsr_matrix.h
-  aux_par_vector.h
   HYPRE_IJ_mv.h
   _hypre_IJ_mv.h
-  IJ_matrix.h
-  IJ_vector.h
 )
 
 # Add MUP headers when mixed precision is enabled
