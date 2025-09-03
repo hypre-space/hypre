@@ -342,7 +342,6 @@
 #undef hypre_StructMatmultCompute_fuse_f
 #undef hypre_StructMatmultCompute_fuse_fc
 #undef hypre_StructMatmultCompute_fuse_fcc
-#undef hypre_StructMatmultCompute_fuse_fcc_fc_f
 #undef hypre_StructMatmultCompute_fuse_ff
 #undef hypre_StructMatmultCompute_fuse_ffc
 #undef hypre_StructMatmultCompute_fuse_fff
