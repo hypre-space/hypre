@@ -460,7 +460,7 @@ hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
    HYPRE_Int        nrows_A   = hypre_CSRMatrixNumRows(A);
    HYPRE_Int        ncols_A   = hypre_CSRMatrixNumCols(A);
    HYPRE_Int        nnzrows_A = hypre_CSRMatrixNumRownnz(A);
-   HYPRE_Int        nnzrows_B = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int        nnzrows_B = hypre_CSRMatrixNumRownnz(B);
 
    hypre_CSRMatrix *C = NULL;
 
