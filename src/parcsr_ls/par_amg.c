@@ -66,6 +66,7 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    rap2;
    HYPRE_Int    keepT;
    HYPRE_Int    modu_rap;
+   HYPRE_Int   use_aux_strength_mat;
 
    /* solve params */
    HYPRE_Int    min_iter;
@@ -304,6 +305,8 @@ hypre_BoomerAMGCreate( void )
    rap2 = 0;
    keepT = 0;
    modu_rap = 0;
+
+   use_aux_strength_mat = -1;
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
@@ -546,6 +549,8 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataKeepTranspose(amg_data)     = keepT;
    hypre_ParAMGDataModularizedMatMat(amg_data) = modu_rap;
 
+   hypre_ParAMGDataUseAuxStrengthMatrix(amg_data) = use_aux_strength_mat;
+
    /* information for preserving indices as coarse grid points */
    hypre_ParAMGDataCPointsMarker(amg_data)      = NULL;
    hypre_ParAMGDataCPointsLocalMarker(amg_data) = NULL;
@@ -562,6 +567,11 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataDSLUThreshold(amg_data) = 0;
    hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
 #endif
+
+   /* init complexity info */
+   hypre_ParAMGDataGridComplexity(amg_data) = -1.0;
+   hypre_ParAMGDataOperatorComplexity(amg_data) = -1.0;
+   hypre_ParAMGDataMemoryComplexity(amg_data) = -1.0;
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -5213,6 +5223,17 @@ hypre_BoomerAMGSetFPoints(void         *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetUseAuxStrengthMatrix( void       *data,
+                                        HYPRE_Int   use_aux_strength_mat)
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+   hypre_ParAMGDataUseAuxStrengthMatrix(amg_data) = use_aux_strength_mat;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetCumNnzAP( void       *data,
                             HYPRE_Real  cum_nnz_AP )
 {
@@ -5227,7 +5248,6 @@ hypre_BoomerAMGSetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-
 
 HYPRE_Int
 hypre_BoomerAMGGetCumNnzAP( void       *data,
@@ -5244,3 +5264,4 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
+
