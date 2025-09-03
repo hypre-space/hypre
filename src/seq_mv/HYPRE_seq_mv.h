@@ -79,6 +79,7 @@ HYPRE_Int HYPRE_VectorDestroy( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorInitialize( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorPrint( HYPRE_Vector vector, char *file_name );
 HYPRE_Vector HYPRE_VectorRead( char *file_name );
+HYPRE_Int HYPRE_VectorCopy( HYPRE_Vector  xvec, HYPRE_Vector  yvec);
 
 typedef enum HYPRE_TimerID
 {
