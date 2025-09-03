@@ -9,7 +9,6 @@
 #define HYPRE_STRUCT_LS_MP_HEADER
 
 #include "_hypre_struct_ls.h"
-#include "HYPRE_struct_mv_mp.h"
 
 /* Mixed precision function protos */
 

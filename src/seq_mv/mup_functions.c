@@ -231,6 +231,15 @@ HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, HYPRE_Int
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+HYPRE_VectorCopy( HYPRE_Vector xvec, HYPRE_Vector yvec )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_VectorCopy_pre( precision, xvec, yvec );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Vector
 HYPRE_VectorCreate( HYPRE_Int size )
 {

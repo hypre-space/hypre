@@ -2671,12 +2671,11 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzrow;
-   HYPRE_Int              nvalues, i, j, m;
+   HYPRE_Int              nvalues, i, j;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
-#if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
-#else
+#if !defined(HYPRE_USING_GPU)
+   HYPRE_Int              m = 0;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
 #endif
@@ -2695,7 +2694,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
 
    /* Set row sizes */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
-   nvalues = 0; m = 0;
+   nvalues = 0;
    hypre_SetIndex(stride, 1);
 #if !defined(HYPRE_USING_GPU)
    if (!*ij_Ahat_ptr)
@@ -2747,8 +2746,9 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                nvalues = hypre_max(nvalues, nnzrow * hypre_BoxVolume(convert_box));
             } /* Loop over convert_boxa[part][var] */
 
+#if !defined(HYPRE_USING_GPU)
             m += hypre_BoxVolume(ghost_box);
-
+#endif
          } /* Loop over grid_boxes */
       } /* Loop over vars */
    } /* Loop over parts */

@@ -8,11 +8,11 @@ Final Relative Residual Norm = 9.625406e-08
 
 # Output file: miller.out.2
 Iterations = 19
-Final Relative Residual Norm = 6.042250e-07
+Final Relative Residual Norm = 6.037448e-07
 
 # Output file: miller.out.3
 Iterations = 9
-Final Relative Residual Norm = 2.316976e-07
+Final Relative Residual Norm = 2.315749e-07
 
 # Output file: miller.out.10
 Iterations = 15
@@ -24,11 +24,11 @@ Final Relative Residual Norm = 4.230245e-07
 
 # Output file: miller.out.12
 Iterations = 15
-Final Relative Residual Norm = 6.819047e-07
+Final Relative Residual Norm = 6.811593e-07
 
 # Output file: miller.out.13
 Iterations = 7
-Final Relative Residual Norm = 6.195916e-07
+Final Relative Residual Norm = 6.183517e-07
 
 # Output file: miller.out.20
 Iterations = 18
