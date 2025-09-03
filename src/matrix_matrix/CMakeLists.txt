@@ -3,10 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-set(HDRS
-  HYPRE_matrix_matrix_protos.h
-  internal_protos.h
-)
+set(HDRS "")
 
 # Add MUP headers
 if(HYPRE_ENABLE_MIXED_PRECISION)

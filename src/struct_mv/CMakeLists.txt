@@ -7,20 +7,12 @@ set(HDRS
   HYPRE_struct_mv.h
   _hypre_struct_mv.h
   _hypre_struct_mv.hpp
-  assumed_part.h
-  box.h
-  box_manager.h
-  computation.h
-  struct_communication.h
-  struct_grid.h
-  struct_matrix.h
-  struct_stencil.h
-  struct_vector.h
 )
 
 # Add MUP headers when mixed precision is enabled
 if(HYPRE_ENABLE_MIXED_PRECISION)
   list(APPEND HDRS
+    HYPRE_struct_mv_mp.h
     HYPRE_struct_mv_mup.h
     _hypre_struct_mv_mup.h
     _hypre_struct_mv_mup_def.h

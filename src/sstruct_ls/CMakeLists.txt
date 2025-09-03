@@ -6,7 +6,6 @@
 set(HDRS
   HYPRE_sstruct_ls.h
   _hypre_sstruct_ls.h
-  sys_pfmg.h
 )
 
 # Add MUP headers when mixed precision is enabled
