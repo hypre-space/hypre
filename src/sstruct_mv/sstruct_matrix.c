@@ -853,7 +853,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
 
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, nnzrow;
+   HYPRE_Int               nrows, nnzrow = 0;
    HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
@@ -875,7 +875,9 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
       nrows    = hypre_SStructGridLocalSize(grid);
    }
 
-   /* Set row sizes */
+   /* Set row_sizes and max_size */
+   m = 0;
+   ghost_box = hypre_BoxCreate(ndim);
 #if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -884,37 +886,41 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    else
 #endif
    {
-      m = 0;
-      ghost_box = hypre_BoxCreate(ndim);
       row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-      hypre_SetIndex(stride, 1);
-      for (part = 0; part < nparts; part++)
+   }
+   hypre_SetIndex(stride, 1);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      /* This part is active in the range grid */
+      for (var = 0; var < nvars; var++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
 
-         /* This part is active in the range grid */
-         for (var = 0; var < nvars; var++)
+         stencil = stencils[part][var];
+         split = hypre_SStructMatrixSplit(matrix, part, var);
+         nnzrow = 0;
+         for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
          {
-            sgrid = hypre_SStructPGridSGrid(pgrid, var);
-
-            stencil = stencils[part][var];
-            split = hypre_SStructMatrixSplit(matrix, part, var);
-            nnzrow = 0;
-            for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+            if (split[entry] == -1)
             {
-               if (split[entry] == -1)
-               {
-                  nnzrow++;
-               }
+               nnzrow++;
             }
+         }
 #if 0
-            /* TODO: For now, assume stencil is full/complete */
-            if (hypre_SStructMatrixSymmetric(matrix))
-            {
-               nnzrow = 2 * nnzrow - 1;
-            }
+         /* TODO: For now, assume stencil is full/complete */
+         if (hypre_SStructMatrixSymmetric(matrix))
+         {
+            nnzrow = 2 * nnzrow - 1;
+         }
 #endif
+
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_HOST)
+#endif
+         {
             boxes = hypre_StructGridBoxes(sgrid);
             hypre_ForBoxI(b, boxes)
             {
@@ -935,31 +941,41 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
 
                m += hypre_BoxVolume(ghost_box);
             }
+         }
 
-            max_size = hypre_max(max_size, nnzrow);
-            if (nvneighbors[part][var])
-            {
-               max_size = hypre_max(max_size, hypre_SStructStencilSize(stencil));
-            }
-         } /* loop on variables */
-      } /* loop on parts */
-      hypre_BoxDestroy(ghost_box);
+         max_size = hypre_max(max_size, nnzrow);
+         if (nvneighbors[part][var])
+         {
+            max_size = hypre_max(max_size, hypre_SStructStencilSize(stencil));
+         }
+      } /* loop on variables */
+   } /* loop on parts */
+   hypre_BoxDestroy(ghost_box);
 
-      /* GEC0902 essentially for each UVentry we figure out how many
-       * extra columns we need to add to the rowsizes */
+   /* GEC0902 essentially for each UVentry we figure out how many
+    * extra columns we need to add to the rowsizes */
 
-      /* RDF: THREAD? */
-      for (entry = 0; entry < nUventries; entry++)
+   /* RDF: THREAD? */
+   for (entry = 0; entry < nUventries; entry++)
+   {
+      mi = iUventries[entry];
+      m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+      if ((m > -1) && (m < nrows))
       {
-         mi = iUventries[entry];
-         m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
-         if ((m > -1) && (m < nrows))
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_HOST)
+#endif
          {
             row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[mi]);
-            max_size = hypre_max(max_size, row_sizes[m]);
          }
+         max_size = hypre_max(max_size, nnzrow + hypre_SStructUVEntryNUEntries(Uventries[mi]));
       }
+   }
 
+#if defined(HYPRE_USING_GPU)
+   if (exec == HYPRE_EXEC_HOST)
+#endif
+   {
       /* ZTODO: Update row_sizes based on neighbor off-part couplings */
       HYPRE_IJMatrixSetRowSizes(ijmatrix, (const HYPRE_Int *) row_sizes);
       hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
@@ -1416,8 +1432,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                {
                   //hypre_assert(ndim <= 3);
 
-                  HYPRE_Int rs_0, rs_1, rs_2;
-                  HYPRE_Int cs_0, cs_1, cs_2;
+                  HYPRE_Int rs_0 = 0, rs_1 = 0, rs_2 = 0;
+                  HYPRE_Int cs_0 = 0, cs_1 = 0, cs_2 = 0;
 
                   if (ndim > 0)
                   {
@@ -2655,12 +2671,11 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzrow;
-   HYPRE_Int              nvalues, i, j, m;
+   HYPRE_Int              nvalues, i, j;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
-#if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
-#else
+#if !defined(HYPRE_USING_GPU)
+   HYPRE_Int              m = 0;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
 #endif
@@ -2679,7 +2694,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
 
    /* Set row sizes */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
-   nvalues = 0; m = 0;
+   nvalues = 0;
    hypre_SetIndex(stride, 1);
 #if !defined(HYPRE_USING_GPU)
    if (!*ij_Ahat_ptr)
@@ -2731,8 +2746,9 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                nvalues = hypre_max(nvalues, nnzrow * hypre_BoxVolume(convert_box));
             } /* Loop over convert_boxa[part][var] */
 
+#if !defined(HYPRE_USING_GPU)
             m += hypre_BoxVolume(ghost_box);
-
+#endif
          } /* Loop over grid_boxes */
       } /* Loop over vars */
    } /* Loop over parts */

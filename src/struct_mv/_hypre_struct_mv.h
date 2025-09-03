@@ -2153,10 +2153,11 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_Index            stride,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr );
-HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space,
-                                   HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
-HYPRE_Int hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg *compute_pkg,
-                                             HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_ComputePkgCreate ( HYPRE_MemoryLocation memory_location,
+                                   hypre_ComputeInfo *compute_info,
+                                   hypre_BoxArray *data_space,
+                                   HYPRE_Int num_values, hypre_StructGrid *grid,
+                                   hypre_ComputePkg **compute_pkg_ptr );
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data,
                                              hypre_CommHandle **comm_handle_ptr );

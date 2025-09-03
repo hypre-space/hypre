@@ -695,7 +695,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                             [] (const auto & x) {return !x;}, 1.0 );
 #else
          HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
-                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)), 1.0 );
+                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), 1.0 );
 #endif
       }
       else
@@ -1908,7 +1908,7 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j;
 
-      HYPRE_Real *Gx_data, *Gy_data, *Gz_data;
+      HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
@@ -2265,19 +2265,22 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePixyz_copy, gDim, bDim,
-                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data,
+                              Gx_data, Gy_data, Gz_data,
                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
          }
          else
 #endif
          {
             if (G_offd_ncols)
+            {
                for (i = 0; i < G_offd_nrows + 1; i++)
                {
                   Pix_offd_I[i] = G_offd_I[i];
                   Piy_offd_I[i] = G_offd_I[i];
                   Piz_offd_I[i] = G_offd_I[i];
                }
+            }
 
             for (i = 0; i < G_offd_nnz; i++)
             {
@@ -2287,12 +2290,14 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < G_offd_nrows; i++)
+            {
                for (j = G_offd_I[i]; j < G_offd_I[i + 1]; j++)
                {
                   *Pix_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gx_data[i];
                   *Piy_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gy_data[i];
                   *Piz_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gz_data[i];
                }
+            }
          }
 
          for (i = 0; i < G_offd_ncols; i++)

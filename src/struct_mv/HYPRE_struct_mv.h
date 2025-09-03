@@ -540,7 +540,7 @@ HYPRE_Int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
  **/
 HYPRE_Int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
                                       HYPRE_Int          *index,
-                                      HYPRE_Complex       value);
+                                      HYPRE_Complex      *values);
 
 /**
  * Set vector coefficients to a constant value over the grid.
@@ -563,7 +563,7 @@ HYPRE_Int HYPRE_StructVectorSetRandomValues(HYPRE_StructVector  vector,
  **/
 HYPRE_Int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
                                         HYPRE_Int          *index,
-                                        HYPRE_Complex       value);
+                                        HYPRE_Complex      *values);
 
 /**
  * Set vector coefficients a box at a time.  The data in \e values is ordered

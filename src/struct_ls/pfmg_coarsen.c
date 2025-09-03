@@ -20,7 +20,7 @@
     (A_diag[Ai] < 0.0 ? 1.0 : -1.0)
 
 #define HYPRE_AP_DECLARE(n)     \
-  HYPRE_Complex *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
+  HYPRE_Real *Ap##n##_d = NULL, *Ap##n##_0 = NULL, *Ap##n##_1 = NULL, *Ap##n##_2 = NULL
 
 #define HYPRE_AP_LOAD(n, d)     \
   Ap##n##_##d = hypre_StructMatrixBoxData(A, Ab, entries[d][k + n])
@@ -383,14 +383,14 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
                               hypre_Box          *w_dbox,
-                              HYPRE_Complex     **w_data)
+                              HYPRE_Real        **w_data)
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
    HYPRE_Int             k = 0, d, depth;
 
-   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
-   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Real           *w_data_d, *w_data_0, *w_data_1, *w_data_2;
+   HYPRE_Real           *A_diag = NULL;
    HYPRE_AP_DECLARE_UP_TO_18;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -551,14 +551,14 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
                               hypre_Box          *w_dbox,
-                              HYPRE_Complex     **w_data)
+                              HYPRE_Real        **w_data)
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
    HYPRE_Int             k = 0, d, depth, all_zero;
 
-   HYPRE_Complex        *w_data_d, *w_data_0, *w_data_1, *w_data_2;
-   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Real           *w_data_d, *w_data_0, *w_data_1, *w_data_2;
+   HYPRE_Real           *A_diag = NULL;
    HYPRE_AP_DECLARE_UP_TO_9;
 
    /* Exit if there are no constant coefficients */
@@ -722,7 +722,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    hypre_IndexRef         start;
 
    hypre_StructVector    *work[HYPRE_MAXDIM];
-   HYPRE_Complex         *w_data[HYPRE_MAXDIM];
+   HYPRE_Real            *w_data[HYPRE_MAXDIM];
    hypre_Box             *w_dbox;
 
    HYPRE_Int              d, i, k, si;
@@ -732,11 +732,6 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    HYPRE_Int              csi[HYPRE_MAXDIM][stencil_size];
    HYPRE_Int              vsi[HYPRE_MAXDIM][stencil_size];
    HYPRE_Int              diag_is_constant;
-
-#if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
-   HYPRE_ExecutionPolicy  exec_policy     = hypre_GetExecPolicy1(memory_location);
-#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PFMGComputeCxyz");
@@ -893,8 +888,8 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          hypre_BoxLoop1ReductionEnd(wi, sqcdb_2)
 #else
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
-         ReduceSum<HYPRE_double6> sum6(d6);
+         HYPRE_Real6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
+         ReduceSum<HYPRE_Real6> sum6(d6);
 #else
          HYPRE_Real cdb_0 = cxyz[0], cdb_1 = cxyz[1], cdb_2 = cxyz[2];
          HYPRE_Real sqcdb_0 = sqcxyz[0], sqcdb_1 = sqcxyz[1], sqcdb_2 = sqcxyz[2];
@@ -914,10 +909,10 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                                       start, ustride, wi, sum6)
          {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-            HYPRE_double6 temp6(w_data[0][wi], w_data[1][wi], w_data[2][wi],
-                                hypre_squared(w_data[0][wi]),
-                                hypre_squared(w_data[1][wi]),
-                                hypre_squared(w_data[2][wi]));
+            HYPRE_Real6 temp6(w_data[0][wi], w_data[1][wi], w_data[2][wi],
+                              hypre_squared(w_data[0][wi]),
+                              hypre_squared(w_data[1][wi]),
+                              hypre_squared(w_data[2][wi]));
             sum6 += temp6;
 #else
             cdb_0 += w_data[0][wi];
@@ -933,13 +928,13 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
 #endif
 
 #if !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-         HYPRE_double6 temp6 = (HYPRE_double6) sum6;
-         cxyz[0]   = temp6.x;
-         cxyz[1]   = temp6.y;
-         cxyz[2]   = temp6.z;
-         sqcxyz[0] = temp6.u;
-         sqcxyz[1] = temp6.v;
-         sqcxyz[2] = temp6.w;
+         HYPRE_Real6 temp6 = (HYPRE_Real6) sum6;
+         cxyz[0]   = temp6.u;
+         cxyz[1]   = temp6.v;
+         cxyz[2]   = temp6.w;
+         sqcxyz[0] = temp6.x;
+         sqcxyz[1] = temp6.y;
+         sqcxyz[2] = temp6.z;
 #else
          cxyz[0]   = (HYPRE_Real) cdb_0;
          cxyz[1]   = (HYPRE_Real) cdb_1;

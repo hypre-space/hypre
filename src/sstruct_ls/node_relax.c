@@ -432,14 +432,14 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
          if (vi == -1)
          {
-            hypre_ComputePkgCreate(compute_info,
+            hypre_ComputePkgCreate(memory_location, compute_info,
                                    hypre_StructVectorDataSpace(
                                       hypre_SStructPVectorSVector(x, 0)),
                                    1, sgrid, &compute_pkgs[p]);
          }
          else
          {
-            hypre_ComputePkgCreate(compute_info,
+            hypre_ComputePkgCreate(memory_location, compute_info,
                                    hypre_StructVectorDataSpace(
                                       hypre_SStructPVectorSVector(x, vi)),
                                    1, sgrid, &svec_compute_pkgs[p][vi]);
@@ -694,7 +694,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
                {
-                  HYPRE_Int vi, vj, err;
+                  HYPRE_Int vi, vj;
                   HYPRE_Real A_loc[HYPRE_MAXVARS * HYPRE_MAXVARS] = {0};
                   HYPRE_Real x_loc[HYPRE_MAXVARS] = {0};
 
@@ -717,9 +717,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  hypre_gselim(A_loc, x_loc, nvars, err);
-                  (void) err;
-                  /* TODO (VPM): need a way to check error codes on device */
+                  hypre_gselim(A_loc, x_loc, nvars);
 
                   /*------------------------------------------------
                    * Copy solution from local storage.
@@ -902,7 +900,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
                {
-                  HYPRE_Int vi, vj, err;
+                  HYPRE_Int vi, vj;
                   /*
                   HYPRE_Real *A_loc = tA_loc + hypre_BoxLoopBlock() * nvars * nvars;
                   HYPRE_Real *x_loc = tx_loc + hypre_BoxLoopBlock() * nvars;
@@ -928,8 +926,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  hypre_gselim(A_loc, x_loc, nvars, err);
-                  (void) err;
+                  hypre_gselim(A_loc, x_loc, nvars);
 
                   /*------------------------------------------------
                    * Copy solution from local storage.

@@ -973,11 +973,11 @@ HYPRE_Int
 hypre_ComputeInfoProjectSend_long_dbl( hypre_ComputeInfo *compute_info, hypre_Index index, hypre_Index stride );
 
 HYPRE_Int
-hypre_ComputePkgCreate_flt( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+hypre_ComputePkgCreate_flt( HYPRE_MemoryLocation memory_location, hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
 HYPRE_Int
-hypre_ComputePkgCreate_dbl( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+hypre_ComputePkgCreate_dbl( HYPRE_MemoryLocation memory_location, hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
 HYPRE_Int
-hypre_ComputePkgCreate_long_dbl( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+hypre_ComputePkgCreate_long_dbl( HYPRE_MemoryLocation memory_location, hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
 
 HYPRE_Int
 hypre_ComputePkgDestroy_flt( hypre_ComputePkg *compute_pkg );
@@ -985,13 +985,6 @@ HYPRE_Int
 hypre_ComputePkgDestroy_dbl( hypre_ComputePkg *compute_pkg );
 HYPRE_Int
 hypre_ComputePkgDestroy_long_dbl( hypre_ComputePkg *compute_pkg );
-
-HYPRE_Int
-hypre_ComputePkgSetMemoryLocation_flt( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ComputePkgSetMemoryLocation_dbl( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ComputePkgSetMemoryLocation_long_dbl( hypre_ComputePkg *compute_pkg, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
 hypre_ConvertToCanonicalIndex_flt( hypre_Index index, hypre_Index stride, HYPRE_Int ndim );

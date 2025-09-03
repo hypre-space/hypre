@@ -4505,11 +4505,12 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
                                  hypre_Index  Mdstride,
                                  hypre_StructMatrix *M )
 {
-   HYPRE_Int       Mdata_size    = hypre_StructMatrixDataSize(M);
-   HYPRE_Int       Mvdata_offset = hypre_StructMatrixVDataOffset(M);
 #if defined(HYPRE_FUSE_FCC_FC_F)
    HYPRE_Int       Mnum_values   = hypre_StructMatrixNumValues(M);
    hypre_1Cptr     mmptrs[Mnum_values];
+#else
+   HYPRE_UNUSED_VAR(M);
+   HYPRE_UNUSED_VAR(stencil_size);
 #endif
 
    HYPRE_Int       nprod[8] = {0};
@@ -4693,11 +4694,6 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    /* Call individual fuse functions */
    if (!combined_fcc_fc_f)
    {
-      /* First, we need to initialize Mptrs to zeroes */
-      hypre_Memset((void *) hypre_StructMatrixVData(M), 0.0,
-                   sizeof(HYPRE_Complex) * (Mdata_size - Mvdata_offset),
-                   hypre_StructMatrixMemoryLocation(M));
-
       hypre_StructMatmultCompute_fuse_fcc(nprod[2], cprod[2], tptrs[2],
                                           mptrs[2], mentries[2],
                                           ndim, loop_size,

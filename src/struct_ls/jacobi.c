@@ -156,7 +156,6 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    HYPRE_Int               ndim             = hypre_StructMatrixNDim(A);
 
    hypre_Box              *A_data_box, *x_data_box, *r_data_box;
-
    HYPRE_Real             *Ap, *xp, *rp;
 
    HYPRE_Int               nboxes;
@@ -241,12 +240,11 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
-            HYPRE_Real scale = weight / Ap[0];
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 x_data_box, start, ustride, xi,
                                 r_data_box, start, ustride, ri);
             {
-               xp[xi] = scale * rp[ri];
+               xp[xi] = weight * rp[ri] / Ap[0];
             }
             hypre_BoxLoop2End(xi, ri);
          }
@@ -308,12 +306,11 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
-            HYPRE_Real scale = weight / Ap[0];
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 x_data_box, start, ustride, xi,
                                 r_data_box, start, ustride, ri);
             {
-               xp[xi] += scale * rp[ri];
+               xp[xi] += weight * rp[ri] / Ap[0];
             }
             hypre_BoxLoop2End(xi, ri);
          }

@@ -649,9 +649,10 @@ hypre_StructVectorInitialize( hypre_StructVector *vector,
    }
    else
    {
-      data = hypre_TAlloc(HYPRE_Complex,
-                          hypre_StructVectorDataSize(vector),
-                          hypre_StructVectorMemoryLocation(vector));
+      /* TODO (VPM): TAlloc leads to regressions on TEST_struct/emptyproc */
+      data = hypre_CTAlloc(HYPRE_Complex,
+                           hypre_StructVectorDataSize(vector),
+                           hypre_StructVectorMemoryLocation(vector));
    }
 
    hypre_StructVectorInitializeData(vector, data);
@@ -724,6 +725,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
 #define DEVICE_VAR is_device_ptr(vecp,values)
                hypre_LoopBegin(1, k)
                {
+                  HYPRE_UNUSED_VAR(k);
                   *vecp += *values;
                }
                hypre_LoopEnd()
@@ -945,6 +947,7 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
 #define DEVICE_VAR is_device_ptr(vecp)
             hypre_LoopBegin(1, k)
             {
+               HYPRE_UNUSED_VAR(k);
                *vecp = 0.0;
             }
             hypre_LoopEnd()
@@ -1061,12 +1064,24 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
    HYPRE_Int      i;
 
-#ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < data_size; i++)
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      data[i] = 0.0;
+      hypre_Memset((void*) data, 0.0,
+                   (size_t) (data_size) * sizeof(HYPRE_Complex),
+                   memory_location);
+   }
+   else
+#endif
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < data_size; i++)
+      {
+         data[i] = 0.0;
+      }
    }
 
    return hypre_error_flag;
@@ -1554,15 +1569,31 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_StructGrid     *grid  = hypre_StructVectorGrid(vector);
    hypre_BoxArray       *boxes = hypre_StructGridBoxes(grid);
 
+   HYPRE_MemoryLocation  memory_location = hypre_StructVectorMemoryLocation(vector);
+
    hypre_Box            *box;
    HYPRE_Int             num_values;
-   HYPRE_Complex        *values;
+   HYPRE_Complex        *h_values, *values;
    HYPRE_Int            *value_ids;
    HYPRE_Int             i, vi;
 
    /* Read data from file */
    hypre_fscanf(file, "\nData:\n");
-   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
+   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &h_values);
+
+   /* Move data to the device memory if necessary and free host data */
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      vi = hypre_BoxArrayVolume(boxes) * num_values;
+      values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
+      hypre_TMemcpy(values, h_values, HYPRE_Complex, vi,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_values, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      values = h_values;
+   }
 
    /* Set vector values */
    hypre_StructVectorInitialize(vector, 1);
@@ -1579,7 +1610,7 @@ hypre_StructVectorReadData( FILE               *file,
 
    /* Clean up */
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

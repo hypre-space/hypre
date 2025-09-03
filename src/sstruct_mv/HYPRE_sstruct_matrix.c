@@ -353,6 +353,17 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    box = hypre_BoxCreate(ndim);
    if (matrix_type == HYPRE_PARCSR)
    {
+      hypre_SStructGrid  *dom_grid = hypre_SStructGraphDomGrid(graph);
+
+      nrows = hypre_SStructGridLocalSize(grid);
+      ncols = hypre_SStructGridLocalSize(dom_grid);
+
+#if 0
+      // RDF: The following assumes a single base grid, which is what we want.
+      // However, the current code does not fully support the base grid idea.
+      // The above code allows full rectangular matrix support in the pure
+      // HYPRE_PARCSR setting (which is needed, for example, to build the
+      // gradient matrix in AMS).
       for (part = 0; part < nparts; part++)
       {
          pgrid = hypre_SStructGridPGrid(grid, part);
@@ -375,6 +386,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
             }
          }
       }
+#endif
    }
    else if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
@@ -1561,7 +1573,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
                 * need to modify the io file to do that.  Alternatively, adding
                 * InitializeShell() and InitializeData() to SStructMatrix and
                 * PMatrix could provide another solution. */
-               hypre_TFree(hypre_StructMatrixData(smatrix), HYPRE_MEMORY_HOST);
+               hypre_TFree(hypre_StructMatrixData(smatrix), hypre_StructMatrixMemoryLocation(smatrix));
                hypre_StructMatrixReadData(file, smatrix);
             }
          }

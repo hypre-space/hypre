@@ -705,6 +705,8 @@ void hypre_error_code_restore(void);
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #if defined(HYPRE_DEBUG)
+/* host assert */
+#define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
 /* device assert */
 #if defined(HYPRE_USING_CUDA)
 #define hypre_device_assert(EX) assert(EX)
@@ -713,11 +715,6 @@ void hypre_error_code_restore(void);
 #define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
 #elif defined(HYPRE_USING_SYCL)
 #define hypre_device_assert(EX) assert(EX)
-#endif
-#if defined(HYPRE_USING_GPU)
-#define hypre_assert(EX) hypre_device_assert(EX)
-#else
-#define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
 /* this is to silence compiler's unused variable warnings */
@@ -1964,21 +1961,16 @@ extern "C++"
 #ifndef HYPRE_GSELIM_H
 #define HYPRE_GSELIM_H
 
-#define hypre_gselim(A,x,n,error)                      \
+#define hypre_gselim(A,x,n)                            \
 {                                                      \
    HYPRE_Int    j,k,m;                                 \
    HYPRE_Real factor;                                  \
    HYPRE_Real divA;                                    \
-   error = 0;                                          \
    if (n == 1)  /* A is 1x1 */                         \
    {                                                   \
       if (A[0] != 0.0)                                 \
       {                                                \
          x[0] = x[0]/A[0];                             \
-      }                                                \
-      else                                             \
-      {                                                \
-         error++;                                      \
       }                                                \
    }                                                   \
    else/* A is nxn. Forward elimination */             \
