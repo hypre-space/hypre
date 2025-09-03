@@ -40,6 +40,7 @@
 #define HYPRE_MultiblockMatrixPrint HYPRE_MULTIPRECISION_FUNC ( HYPRE_MultiblockMatrixPrint )
 #define HYPRE_MultiblockMatrixSetNumSubmatrices HYPRE_MULTIPRECISION_FUNC ( HYPRE_MultiblockMatrixSetNumSubmatrices )
 #define HYPRE_MultiblockMatrixSetSubmatrixType HYPRE_MULTIPRECISION_FUNC ( HYPRE_MultiblockMatrixSetSubmatrixType )
+#define HYPRE_VectorCopy HYPRE_MULTIPRECISION_FUNC ( HYPRE_VectorCopy )
 #define HYPRE_VectorCreate HYPRE_MULTIPRECISION_FUNC ( HYPRE_VectorCreate )
 #define HYPRE_VectorDestroy HYPRE_MULTIPRECISION_FUNC ( HYPRE_VectorDestroy )
 #define HYPRE_VectorInitialize HYPRE_MULTIPRECISION_FUNC ( HYPRE_VectorInitialize )

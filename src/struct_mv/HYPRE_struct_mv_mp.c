@@ -25,8 +25,8 @@
 HYPRE_Int
 HYPRE_StructVectorCopy_mp( HYPRE_StructVector x, HYPRE_StructVector y )
 {
-   return ( hypre_StructVectorCopy_mp( (hypre_StructVector_mp *)x,
-                                       (hypre_StructVector_mp *)y ) );
+   return ( hypre_StructVectorCopy_mp( (hypre_StructVector *)x,
+                                       (hypre_StructVector *)y ) );
 }
 
 #endif

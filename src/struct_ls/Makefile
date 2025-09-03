@@ -87,8 +87,8 @@ CUFILES =\
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c
-# HYPRE_struct_ls_mp.c    # Add this later
+ mup_pre.c\
+ HYPRE_struct_ls_mp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

@@ -76,8 +76,9 @@ CUFILES =\
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c
-# RDF: We should also have these here: HYPRE_struct_mv_mp.c struct_mv_mp.c
+ mup_pre.c\
+ HYPRE_struct_mv_mp.c\
+ struct_mv_mp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
-  par_csr_block_matrix.h
-  csr_block_matrix.h
   _hypre_parcsr_block_mv.h
 )
 

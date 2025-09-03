@@ -4,8 +4,14 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
+  interpreter.h
   multivector.h
   temp_multivector.h
+  csr_matmultivec.h
+  par_csr_matmultivec.h
+  par_csr_pmvcomm.h
+  par_multivector.h
+  seq_multivector.h
 )
 
 # Add MUP headers

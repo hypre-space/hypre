@@ -6,11 +6,6 @@
 set(HDRS
   HYPRE_sstruct_mv.h
   _hypre_sstruct_mv.h
-  sstruct_graph.h
-  sstruct_grid.h
-  sstruct_matrix.h
-  sstruct_stencil.h
-  sstruct_vector.h
 )
 
 # Add MUP headers when mixed precision is enabled

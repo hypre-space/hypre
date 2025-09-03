@@ -44,6 +44,27 @@ add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default
                ${CMAKE_CURRENT_BINARY_DIR}/sstruct.in.default COPYONLY)
 
+# Install test drivers in ${CMAKE_INSTALL_PREFIX}/bin when tests are enabled
+if(HYPRE_BUILD_TESTS)
+  # Collect targets derived from source file names
+  set(HYPRE_TEST_DRIVER_TARGETS)
+  foreach(src_file ${TEST_SRCS})
+    get_filename_component(exec_name ${src_file} NAME_WE)
+    list(APPEND HYPRE_TEST_DRIVER_TARGETS ${exec_name})
+  endforeach()
+
+  # Mixed precision drivers when enabled
+  if(HYPRE_ENABLE_MIXED_PRECISION)
+    foreach(src_file ${MP_TEST_SRCS})
+      get_filename_component(exec_name ${src_file} NAME_WE)
+      list(APPEND HYPRE_TEST_DRIVER_TARGETS ${exec_name})
+    endforeach()
+  endif()
+
+  install(TARGETS ${HYPRE_TEST_DRIVER_TARGETS}
+          RUNTIME DESTINATION bin)
+endif()
+
 # Add check target
 find_program(BASH_PROGRAM bash)
 

@@ -10,7 +10,7 @@
 
 #if defined(HYPRE_MIXED_PRECISION)
 HYPRE_Int
-hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
-                           hypre_StructVector_mp *y );
+hypre_StructVectorCopy_mp( hypre_StructVector *x,
+                           hypre_StructVector *y );
 #endif
 
