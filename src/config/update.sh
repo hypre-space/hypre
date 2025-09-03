@@ -11,6 +11,15 @@ if [ "$currentdir" != "src" ]; then
   exit
 fi
 
+BUILD_DOCS=1
+for arg in "$@"; do
+  case "$arg" in
+    --no-docs|--skip-docs)
+      BUILD_DOCS=0
+      ;;
+  esac
+done
+
 source config/version.sh
 
 # Check that the version number is not smaller than before
@@ -60,4 +69,8 @@ mv CMakeLists.txt.tmp CMakeLists.txt
 
 ##### Update release information in documentation
 
-(cd docs; ./update-release.sh)
+if [ "$BUILD_DOCS" -eq 1 ]; then
+  (cd docs; ./update-release.sh)
+else
+  echo "Skipping docs update (pass without --no-docs/--skip-docs to enable)"
+fi

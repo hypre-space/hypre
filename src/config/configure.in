@@ -184,6 +184,11 @@ hypre_using_umpire_host=no
 hypre_using_umpire_device=no
 hypre_using_umpire_um=no
 hypre_using_umpire_pinned=no
+hypre_user_disabled_umpire=no
+hypre_user_gave_umpire_inc=no
+hypre_user_gave_umpire_lib=no
+hypre_user_gave_umpire_lib_dirs=no
+hypre_user_gave_umpire_libs=no
 hypre_warp_size=32
 
 hypre_using_caliper=no
@@ -1567,9 +1572,10 @@ AC_ARG_WITH(umpire,
 AS_HELP_STRING([--with-umpire],
                [Use Umpire Allocator for device and unified memory (default is NO).]),
 [case "${withval}" in
-    yes) hypre_using_umpire_device=yes
+    yes) hypre_using_umpire=yes
+         hypre_using_umpire_device=yes
          hypre_using_umpire_um=yes ;;
-    no) ;;
+    no)  hypre_user_disabled_umpire=yes ;;
     *) ;;
  esac],
 []
@@ -1583,7 +1589,7 @@ AS_HELP_STRING([--with-umpire-include=DIR],
 [for umpire_dir in $withval; do
 HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
 done;
-]
+hypre_user_gave_umpire_inc=yes]
 )
 
 AC_ARG_WITH(umpire-lib,
@@ -1593,7 +1599,7 @@ AS_HELP_STRING([--with-umpire-lib=LIBS],
 [for umpire_lib in $withval; do
        HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
  done;
-]
+ hypre_user_gave_umpire_lib=yes]
 )
 
 AC_ARG_WITH(umpire-libs,
@@ -1604,7 +1610,7 @@ AS_HELP_STRING([--with-umpire-libs=LIBS],
 [for umpire_lib in $withval; do
     HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
  done;
-]
+ hypre_user_gave_umpire_libs=yes]
 )
 
 AC_ARG_WITH(umpire-lib-dirs,
@@ -1616,8 +1622,9 @@ AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
                 must be used together.]),
 [for umpire_lib_dir in $withval; do
     HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+    HYPRE_UMPIRE_RPATH="${HYPRE_UMPIRE_RPATH} -Wl,-rpath,${umpire_lib_dir}"
  done;
-]
+ hypre_user_gave_umpire_lib_dirs=yes]
 )
 
 dnl ***** MAGMA
@@ -2523,6 +2530,21 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Auto-enable Umpire for GPU backends (before AC_DEFINEs)
+dnl *********************************************************************
+if test "x$hypre_user_disabled_umpire" != "xyes"
+then
+  if test "x$hypre_using_umpire" != "xyes"
+  then
+    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+    then
+      hypre_using_umpire=yes
+      AC_MSG_NOTICE([Enabling Umpire automatically for GPU build (CUDA/HIP/SYCL) for performance and allocator features. Use --without-umpire to opt out.])
+    fi
+  fi
+fi
+
+dnl *********************************************************************
 dnl * Set umpire options
 dnl *********************************************************************
 if test "x$hypre_using_umpire_host" = "xyes"
@@ -2552,6 +2574,30 @@ fi
 if test "x$hypre_using_umpire" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_UMPIRE, 1, [Define to 1 if using UMPIRE])
+   if test "x$HYPRE_UMPIRE_RPATH" != "x"
+   then
+      LDFLAGS="${LDFLAGS} ${HYPRE_UMPIRE_RPATH}"
+      AC_MSG_NOTICE([Adding Umpire rpath to LDFLAGS: ${HYPRE_UMPIRE_RPATH}])
+   fi
+   if test "$hypre_user_gave_umpire_inc" != "yes" || \
+      test "$hypre_user_gave_umpire_lib" != "yes" && test "$hypre_user_gave_umpire_libs" != "yes" || \
+      test "$hypre_user_gave_umpire_lib_dirs" != "yes"
+   then
+      AC_MSG_ERROR([
+===============================================================
+Umpire has been enabled for GPU builds to improve performance.
+However, Umpire include and/or library paths were not provided.
+It is strongly recommended to specify Umpire locations to avoid
+reduced performance or build/link issues.
+
+Provide the following flags as appropriate:
+  --with-umpire-include="/path/to/umpire/include"
+  --with-umpire-lib-dirs="/path/to/umpire/lib"
+  --with-umpire-libs="umpire"  or  --with-umpire-lib="-lumpire"
+
+To opt out (not recommended), configure with --without-umpire.
+===============================================================])
+   fi
 fi
 
 dnl *********************************************************************
@@ -2789,6 +2835,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         else
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
@@ -2805,7 +2852,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         if test "$hypre_using_shared" = "yes"
         then
            SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
-           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+           BUILD_CC_SHARED="${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
