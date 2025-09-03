@@ -91,11 +91,11 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       print tab tab "default:" >> outc
       if(fret == "void")
       {
-         print tab tab tab "hypre_printf(\"Unknown solver precision\");"                       >> outc
+         print tab tab tab "hypre_error_w_msg(HYPRE_ERROR_GENERIC, \"Unknown solver precision\");" >> outc
       }
       else
       {
-         print tab tab tab "{ "fret" value = 0; hypre_printf(\"Unknown solver precision\"); return value; }" >> outc
+         print tab tab tab "{ "fret" value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, \"Unknown solver precision\"); return value; }" >> outc
       }
       print tab "}"                                                                            >> outc
       print "}\n"                                                                              >> outc
