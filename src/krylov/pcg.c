@@ -88,11 +88,15 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    pcg_data -> functions = pcg_functions;
 
    /* set defaults */
-   (pcg_data -> tol)          = 1.0e-06;
-   (pcg_data -> atolf)        = 0.0;
-   (pcg_data -> cf_tol)       = 0.0;
-   (pcg_data -> a_tol)        = 0.0;
-   (pcg_data -> rtol)         = 0.0;
+   hypre_conv_params *pcg_conv_params;
+   pcg_conv_params = hypre_CTAllocF(hypre_conv_params, 1, pcg_functions, HYPRE_MEMORY_HOST);
+   pcg_conv_params->tol       = 1.0e-6;
+   pcg_conv_params->atolf     = 0.0;
+   pcg_conv_params->cf_tol     = 0.0;
+   pcg_conv_params->a_tol     = 0.0;
+   pcg_conv_params->rtol     = 0.0;
+
+   (pcg_data -> conv_params)  = pcg_conv_params;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
@@ -174,6 +178,7 @@ hypre_PCGDestroy( void *pcg_vdata )
          (*(pcg_functions->DestroyVector))(pcg_data -> v);
          pcg_data -> v = NULL;
       }
+      hypre_TFreeF( pcg_data->conv_params, pcg_functions );
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
@@ -208,9 +213,10 @@ hypre_PCGSetup( void *pcg_vdata,
 {
    hypre_PCGData *pcg_data =  (hypre_PCGData *)pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
    HYPRE_Int            max_iter         = (pcg_data -> max_iter);
    HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
-   HYPRE_Real           rtol = (pcg_data -> rtol);
+   HYPRE_Real           rtol = (pcg_conv_params -> rtol);
    HYPRE_Int            two_norm = (pcg_data -> two_norm);
    HYPRE_Int            flex = (pcg_data -> flex);
    HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
@@ -322,12 +328,13 @@ hypre_PCGSolve( void *pcg_vdata,
 {
    hypre_PCGData  *pcg_data     =  (hypre_PCGData *)pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
 
-   HYPRE_Real      r_tol        = (pcg_data -> tol);
-   HYPRE_Real      a_tol        = (pcg_data -> a_tol);
-   HYPRE_Real      atolf        = (pcg_data -> atolf);
-   HYPRE_Real      cf_tol       = (pcg_data -> cf_tol);
-   HYPRE_Real      rtol         = (pcg_data -> rtol);
+   HYPRE_Real      r_tol        = (pcg_conv_params -> tol);
+   HYPRE_Real      a_tol        = (pcg_conv_params -> a_tol);
+   HYPRE_Real      atolf        = (pcg_conv_params -> atolf);
+   HYPRE_Real      cf_tol       = (pcg_conv_params -> cf_tol);
+   HYPRE_Real      rtol         = (pcg_conv_params -> rtol);
    HYPRE_Int       max_iter     = (pcg_data -> max_iter);
    HYPRE_Int       two_norm     = (pcg_data -> two_norm);
    HYPRE_Int       rel_change   = (pcg_data -> rel_change);
@@ -995,11 +1002,11 @@ hypre_PCGSolve( void *pcg_vdata,
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
    {
-      (pcg_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
+      (pcg_conv_params -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
    }
    else /* actually, we'll never get here... */
    {
-      (pcg_data -> rel_residual_norm) = 0.0;
+      (pcg_conv_params -> rel_residual_norm) = 0.0;
    }
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -1016,8 +1023,9 @@ hypre_PCGSetTol( void   *pcg_vdata,
                  HYPRE_Real  tol       )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
 
-   (pcg_data -> tol) = tol;
+   (pcg_conv_params -> tol) = tol;
 
    return hypre_error_flag;
 }
@@ -1027,8 +1035,9 @@ hypre_PCGGetTol( void   *pcg_vdata,
                  HYPRE_Real * tol       )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   *tol = (pcg_data -> tol);
+   *tol = (pcg_conv_params -> tol);
 
    return hypre_error_flag;
 }
@@ -1041,8 +1050,9 @@ hypre_PCGSetAbsoluteTol( void   *pcg_vdata,
                          HYPRE_Real  a_tol       )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   (pcg_data -> a_tol) = a_tol;
+   (pcg_conv_params -> a_tol) = a_tol;
 
    return hypre_error_flag;
 }
@@ -1052,8 +1062,9 @@ hypre_PCGGetAbsoluteTol( void   *pcg_vdata,
                          HYPRE_Real * a_tol       )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   *a_tol = (pcg_data -> a_tol);
+   *a_tol = (pcg_conv_params -> a_tol);
 
    return hypre_error_flag;
 }
@@ -1067,8 +1078,9 @@ hypre_PCGSetAbsoluteTolFactor( void   *pcg_vdata,
                                HYPRE_Real  atolf   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   (pcg_data -> atolf) = atolf;
+   (pcg_conv_params -> atolf) = atolf;
 
    return hypre_error_flag;
 }
@@ -1078,8 +1090,9 @@ hypre_PCGGetAbsoluteTolFactor( void   *pcg_vdata,
                                HYPRE_Real  * atolf   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   *atolf = (pcg_data -> atolf);
+   *atolf = (pcg_conv_params -> atolf);
 
    return hypre_error_flag;
 }
@@ -1093,8 +1106,9 @@ hypre_PCGSetResidualTol( void   *pcg_vdata,
                          HYPRE_Real  rtol   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   (pcg_data -> rtol) = rtol;
+   (pcg_conv_params -> rtol) = rtol;
 
    return hypre_error_flag;
 }
@@ -1104,8 +1118,9 @@ hypre_PCGGetResidualTol( void   *pcg_vdata,
                          HYPRE_Real  * rtol   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
 
-   *rtol = (pcg_data -> rtol);
+   *rtol = (pcg_conv_params -> rtol);
 
    return hypre_error_flag;
 }
@@ -1119,8 +1134,9 @@ hypre_PCGSetConvergenceFactorTol( void   *pcg_vdata,
                                   HYPRE_Real  cf_tol   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
 
-   (pcg_data -> cf_tol) = cf_tol;
+   (pcg_conv_params -> cf_tol) = cf_tol;
 
    return hypre_error_flag;
 }
@@ -1130,8 +1146,9 @@ hypre_PCGGetConvergenceFactorTol( void   *pcg_vdata,
                                   HYPRE_Real * cf_tol   )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);
 
-   *cf_tol = (pcg_data -> cf_tol);
+   *cf_tol = (pcg_conv_params -> cf_tol);
 
    return hypre_error_flag;
 }
@@ -1550,8 +1567,9 @@ hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
                                        HYPRE_Real *relative_residual_norm )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+   hypre_conv_params *pcg_conv_params = (hypre_conv_params *)(pcg_data->conv_params);   
 
-   HYPRE_Real     rel_residual_norm = (pcg_data -> rel_residual_norm);
+   HYPRE_Real     rel_residual_norm = (pcg_conv_params -> rel_residual_norm);
 
    *relative_residual_norm = rel_residual_norm;
 
