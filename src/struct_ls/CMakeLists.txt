@@ -6,14 +6,12 @@
 set(HDRS
   HYPRE_struct_ls.h
   _hypre_struct_ls.h
-  pfmg.h
-  red_black_gs.h
-  smg.h
 )
 
 # Add MUP headers when mixed precision is enabled
 if(HYPRE_ENABLE_MIXED_PRECISION)
   list(APPEND HDRS
+    HYPRE_struct_ls_mv.h
     HYPRE_struct_ls_mup.h
     _hypre_struct_ls_mup.h
     _hypre_struct_ls_mup_def.h

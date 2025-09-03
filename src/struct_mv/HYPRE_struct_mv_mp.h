@@ -24,8 +24,6 @@ extern "C" {
 
 HYPRE_Int HYPRE_StructVectorCopy_mp( HYPRE_StructVector x, HYPRE_StructVector y );
 
-//HYPRE_Int HYPRE_StructVectorConvert_mp( HYPRE_StructVector v, HYPRE_Precision new_precision );
-
 #ifdef __cplusplus
 }
 #endif

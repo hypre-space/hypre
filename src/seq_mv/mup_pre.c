@@ -447,6 +447,24 @@ HYPRE_MultiblockMatrixSetSubmatrixType_pre( HYPRE_Precision precision, HYPRE_Mul
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+HYPRE_VectorCopy_pre( HYPRE_Precision precision, HYPRE_Vector xvec, HYPRE_Vector yvec )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_VectorCopy_flt( xvec, yvec );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_VectorCopy_dbl( xvec, yvec );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_VectorCopy_long_dbl( xvec, yvec );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Vector
 HYPRE_VectorCreate_pre( HYPRE_Precision precision, HYPRE_Int size )
 {

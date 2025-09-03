@@ -247,6 +247,15 @@ HYPRE_MultiblockMatrixSetSubmatrixType_long_dbl( HYPRE_MultiblockMatrix matrix, 
 HYPRE_Int
 HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, HYPRE_Int j, HYPRE_Int type );
 
+HYPRE_Int
+HYPRE_VectorCopy_flt( HYPRE_Vector xvec, HYPRE_Vector yvec );
+HYPRE_Int
+HYPRE_VectorCopy_dbl( HYPRE_Vector xvec, HYPRE_Vector yvec );
+HYPRE_Int
+HYPRE_VectorCopy_long_dbl( HYPRE_Vector xvec, HYPRE_Vector yvec );
+HYPRE_Int
+HYPRE_VectorCopy( HYPRE_Vector xvec, HYPRE_Vector yvec );
+
 HYPRE_Vector
 HYPRE_VectorCreate_flt( HYPRE_Int size );
 HYPRE_Vector
@@ -374,6 +383,9 @@ HYPRE_MultiblockMatrixSetNumSubmatrices_pre( HYPRE_Precision precision, HYPRE_Mu
 
 HYPRE_Int
 HYPRE_MultiblockMatrixSetSubmatrixType_pre( HYPRE_Precision precision, HYPRE_MultiblockMatrix matrix, HYPRE_Int j, HYPRE_Int type );
+
+HYPRE_Int
+HYPRE_VectorCopy_pre( HYPRE_Precision precision, HYPRE_Vector xvec, HYPRE_Vector yvec );
 
 HYPRE_Vector
 HYPRE_VectorCreate_pre( HYPRE_Precision precision, HYPRE_Int size );

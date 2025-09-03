@@ -275,31 +275,6 @@ typedef struct
 
 } hypre_Vector;
 
-typedef struct
-{
-   void        *data;
-   HYPRE_Int             size;      /* Number of elements of a single vector component */
-   HYPRE_Int             component; /* Index of a multivector component
-                                    (used for set/get routines )*/
-   HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
-   HYPRE_MemoryLocation  memory_location; /* memory location of data array */
-
-   /* For multivectors...*/
-   HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
-   HYPRE_Int   multivec_storage_method;
-   /* ...if 0, store colwise v0[0], v0[1], ..., v1[0], v1[1], ... v2[0]... */
-   /* ...if 1, store rowwise v0[0], v1[0], ..., v0[1], v1[1], ... */
-   /* With colwise storage, vj[i] = data[ j*size + i]
-      With rowwise storage, vj[i] = data[ j + num_vectors*i] */
-   HYPRE_Int  vecstride, idxstride;
-   /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
-
-#if defined(HYPRE_MIXED_PRECISION)
-   HYPRE_Precision vector_precision;
-#endif
-
-} hypre_Vector_mp;
-
 /*--------------------------------------------------------------------------
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
@@ -714,13 +689,13 @@ HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_l
 
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int
-hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
-                        hypre_Vector_mp *y );
+hypre_SeqVectorCopy_mp( hypre_Vector *x,
+                        hypre_Vector *y );
 
 HYPRE_Int
 hypre_SeqVectorAxpy_mp( hypre_double alpha,
-                        hypre_Vector_mp *x,
-                        hypre_Vector_mp *y     );
+                        hypre_Vector *x,
+                        hypre_Vector *y     );
 
 #endif
 
