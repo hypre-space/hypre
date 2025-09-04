@@ -92,8 +92,8 @@ elseif(NOT HYPRE_ENABLE_UMPIRE AND HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
   # If user explicitly disables Umpire while enabling GPU, warn strongly but respect it
   message(WARNING
 "===============================================================
- Umpire is explicitly disabled while building hypre with GPUs.
- This is strongly not recommended for performance reasons.
- Enable it with -DHYPRE_ENABLE_UMPIRE=ON, or proceed at your own risk.
+ Umpire is explicitly disabled while building hypre for GPUs.
+ This is not recommended for performance reasons!
+ Enable it with -DHYPRE_ENABLE_UMPIRE=ON.
 ===============================================================")
 endif()

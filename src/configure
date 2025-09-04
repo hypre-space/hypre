@@ -10776,12 +10776,12 @@ printf "%s\n" "$as_me: WARNING: ================================================
 printf "%s\n" "$as_me: WARNING: ===============================================================" >&2;}
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ***************************************************************" >&5
 printf "%s\n" "$as_me: WARNING: ***************************************************************" >&2;}
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Umpire is explicitly disabled while building hypre with GPUs." >&5
-printf "%s\n" "$as_me: WARNING:  Umpire is explicitly disabled while building hypre with GPUs." >&2;}
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  This is strongly not recommended for performance reasons." >&5
-printf "%s\n" "$as_me: WARNING:  This is strongly not recommended for performance reasons." >&2;}
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Enable it with --with-umpire, or proceed at your own risk." >&5
-printf "%s\n" "$as_me: WARNING:  Enable it with --with-umpire, or proceed at your own risk." >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Umpire is explicitly disabled while building hypre for GPUs." >&5
+printf "%s\n" "$as_me: WARNING:  Umpire is explicitly disabled while building hypre for GPUs." >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  This is not recommended for performance reasons!" >&5
+printf "%s\n" "$as_me: WARNING:  This is not recommended for performance reasons!" >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Enable it with --with-umpire." >&5
+printf "%s\n" "$as_me: WARNING:  Enable it with --with-umpire." >&2;}
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ***************************************************************" >&5
 printf "%s\n" "$as_me: WARNING: ***************************************************************" >&2;}
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ===============================================================" >&5
