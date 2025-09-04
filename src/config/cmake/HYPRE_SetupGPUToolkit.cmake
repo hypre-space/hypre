@@ -78,3 +78,22 @@ elseif(HYPRE_ENABLE_SYCL)
 else()
   message(FATAL_ERROR "Neither CUDA nor HIP nor SYCL is enabled. Please enable one of them.")
 endif()
+
+# Checks involving Umpire
+if (NOT HYPRE_ENABLE_UMPIRE AND NOT HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
+  # Auto-enable Umpire if the user didn't do it explicitly
+  set(HYPRE_ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+  message(STATUS "Enabling Umpire automatically for GPU-enabled build due to performance and allocator features. Set -DHYPRE_ENABLE_UMPIRE=OFF to opt out.")
+
+elseif(NOT HYPRE_ENABLE_UMPIRE AND HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
+  # If user explicitly disables Umpire while enabling GPU, warn strongly but respect it
+  message(WARNING
+"===============================================================
+ Umpire is explicitly disabled while building hypre with GPUs.
+ This is strongly not recommended for performance reasons.
+ Enable it with -DHYPRE_ENABLE_UMPIRE=ON, or proceed at your own risk.
+===============================================================")
+endif()
