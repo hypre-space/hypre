@@ -926,6 +926,7 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    HYPRE_Int      *A_j          = hypre_CSRMatrixJ(A);
    HYPRE_BigInt   *A_big_j      = hypre_CSRMatrixBigJ(A);
    HYPRE_Complex  *A_data       = hypre_CSRMatrixData(A);
+   HYPRE_Int       owns_data    = hypre_CSRMatrixOwnsData(A);
 
    HYPRE_MemoryLocation old_memory_location = hypre_CSRMatrixMemoryLocation(A);
 
@@ -992,7 +993,10 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          B_data = hypre_TAlloc(HYPRE_Complex, num_nonzeros, memory_location);
          hypre_TMemcpy(B_data, A_data, HYPRE_Complex, num_nonzeros,
                        memory_location, old_memory_location);
-         hypre_TFree(A_data, old_memory_location);
+         if (owns_data)
+         {
+            hypre_TFree(A_data, old_memory_location);
+         }
          hypre_CSRMatrixData(A) = B_data;
       }
    }
