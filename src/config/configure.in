@@ -2544,6 +2544,23 @@ then
   fi
 fi
 
+dnl Warn if Umpire explicitly disabled while using a GPU backend
+if test "x$hypre_user_disabled_umpire" = "xyes"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  then
+    AC_MSG_WARN([===============================================================])
+    AC_MSG_WARN([===============================================================])
+    AC_MSG_WARN([***************************************************************])
+    AC_MSG_WARN([ Umpire is explicitly disabled while building hypre with GPUs.])
+    AC_MSG_WARN([ This is strongly not recommended for performance reasons.])
+    AC_MSG_WARN([ Enable it with --with-umpire, or proceed at your own risk.])
+    AC_MSG_WARN([***************************************************************])
+    AC_MSG_WARN([===============================================================])
+    AC_MSG_WARN([===============================================================])
+  fi
+fi
+
 dnl *********************************************************************
 dnl * Set umpire options
 dnl *********************************************************************
