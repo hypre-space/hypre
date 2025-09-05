@@ -932,8 +932,10 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMigrate
  *
- * Migrates matrix row pointer, column indices and data to memory_location
- * if it is different to the current one.
+ * Migrates the CSR matrix arrays (row pointer, column indices, optional
+ * row nnz, and data) to the given memory location. New arrays are
+ * allocated and copied if the location differs; old arrays are freed if
+ * owned. Updates the matrix to own the new arrays.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -972,9 +974,13 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    /* Update A's memory location */
    hypre_CSRMatrixMemoryLocation(A) = memory_location;
 
+   /* Only perform migration if the actual memory space differs */
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(old_memory_location) )
    {
+      /* A takes ownership of `j`, `bigj`, and `data` since they will be allocated */
+      hypre_CSRMatrixOwnsData(A) = 1;
+
       if (A_ri)
       {
          B_ri = hypre_TAlloc(HYPRE_Int, num_rownnz, memory_location);
