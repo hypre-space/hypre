@@ -7,8 +7,8 @@
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Enforce C++17 at least
-if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+# Use C++17 by default if not given by users
+if(NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
 
