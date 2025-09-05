@@ -10757,18 +10757,18 @@ if test "x$hypre_user_disabled_umpire" != "xyes"
 then
   if test "x$hypre_using_umpire" != "xyes"
   then
-    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
     then
       hypre_using_umpire=yes
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Enabling Umpire automatically for GPU build (CUDA/HIP/SYCL) for performance and allocator features. Use --without-umpire to opt out." >&5
-printf "%s\n" "$as_me: Enabling Umpire automatically for GPU build (CUDA/HIP/SYCL) for performance and allocator features. Use --without-umpire to opt out." >&6;}
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out." >&5
+printf "%s\n" "$as_me: Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out." >&6;}
     fi
   fi
 fi
 
 if test "x$hypre_user_disabled_umpire" = "xyes"
 then
-  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
   then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ***************************************************************" >&5
 printf "%s\n" "$as_me: WARNING: ***************************************************************" >&2;}

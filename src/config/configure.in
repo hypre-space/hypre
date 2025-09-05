@@ -2536,10 +2536,10 @@ if test "x$hypre_user_disabled_umpire" != "xyes"
 then
   if test "x$hypre_using_umpire" != "xyes"
   then
-    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
     then
       hypre_using_umpire=yes
-      AC_MSG_NOTICE([Enabling Umpire automatically for GPU build (CUDA/HIP/SYCL) for performance and allocator features. Use --without-umpire to opt out.])
+      AC_MSG_NOTICE([Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out.])
     fi
   fi
 fi
@@ -2547,7 +2547,7 @@ fi
 dnl Warn if Umpire explicitly disabled while using a GPU backend
 if test "x$hypre_user_disabled_umpire" = "xyes"
 then
-  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
   then
     AC_MSG_WARN([***************************************************************])
     AC_MSG_WARN([ Umpire is explicitly disabled while building hypre for GPUs.])
