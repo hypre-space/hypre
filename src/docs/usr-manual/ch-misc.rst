@@ -455,7 +455,7 @@ build systems.
      - ``--enable-onemklrand``
      - ``-DHYPRE_ENABLE_ONEMKLRAND=ON``
    * - | Umpire Support
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire``
      - ``-DHYPRE_ENABLE_UMPIRE=ON``
    * - | Umpire Unified Memory
@@ -463,7 +463,7 @@ build systems.
      - ``--with-umpire-um``
      - ``-DHYPRE_ENABLE_UMPIRE_UM=ON``
    * - | Umpire Device Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-device``
      - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
 
@@ -523,7 +523,7 @@ follow these steps:
 Enable either CUDA, HIP, or SYCL by setting the corresponding flag to ``ON`` and
 the others to ``OFF``.
 
-After installation, make sure to add the installation path to your environment
+After completion, make sure to add the installation path to your environment
 or provide it to hypre at configure time. For example:
 
 .. code-block:: bash
