@@ -58,6 +58,7 @@
 #undef HYPRE_StructVectorAddToBoxValues2
 #undef HYPRE_StructVectorAddToValues
 #undef HYPRE_StructVectorAssemble
+#undef HYPRE_StructVectorAxpy
 #undef HYPRE_StructVectorClone
 #undef HYPRE_StructVectorCopy
 #undef HYPRE_StructVectorCreate
@@ -71,6 +72,7 @@
 #undef HYPRE_StructVectorMigrate
 #undef HYPRE_StructVectorPrint
 #undef HYPRE_StructVectorRead
+#undef HYPRE_StructVectorScale
 #undef HYPRE_StructVectorScaleValues
 #undef HYPRE_StructVectorSetBoxValues
 #undef HYPRE_StructVectorSetBoxValues2

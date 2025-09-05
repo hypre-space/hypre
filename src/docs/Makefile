@@ -43,10 +43,15 @@ distclean: clean
 # Rules
 ##################################################################
 
+# Original target with PDF manual (the svg images are an issue)
+# usr: ref
+# 	@cd usr-manual; make html; make latexpdf
+# 	@mv usr-manual/_build/html usr-manual-html
+# 	@mv usr-manual/_build/latex/hypre.pdf usr-manual.pdf
+
 usr: ref
-	@cd usr-manual; make html; make latexpdf
+	@cd usr-manual; make html
 	@mv usr-manual/_build/html usr-manual-html
-	@mv usr-manual/_build/latex/hypre.pdf usr-manual.pdf
 
 ref:
 	@cd ref-manual; make

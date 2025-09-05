@@ -1024,6 +1024,17 @@ HYPRE_SStructVectorScale( HYPRE_Complex       alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorInnerProd( HYPRE_SStructVector x,
+                              HYPRE_SStructVector y,
+                              HYPRE_Real         *result )
+{
+   hypre_SStructInnerProd(x, y, result);
+
+   return hypre_error_flag;
+}
+
+/* For backward compatibility */
+HYPRE_Int
 HYPRE_SStructInnerProd( HYPRE_SStructVector x,
                         HYPRE_SStructVector y,
                         HYPRE_Real         *result )
@@ -1037,6 +1048,17 @@ HYPRE_SStructInnerProd( HYPRE_SStructVector x,
  * y = y + alpha*x for vectors y, x and scalar alpha
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+HYPRE_SStructVectorAxpy( HYPRE_Complex       alpha,
+                         HYPRE_SStructVector x,
+                         HYPRE_SStructVector y )
+{
+   hypre_SStructAxpy(alpha, x, y);
+
+   return hypre_error_flag;
+}
+
+/* For backward compatibility */
 HYPRE_Int
 HYPRE_SStructAxpy( HYPRE_Complex       alpha,
                    HYPRE_SStructVector x,

@@ -158,6 +158,15 @@ HYPRE_Int
 HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix );
 
 HYPRE_Int
+HYPRE_ParCSRMatrixMatmat_flt( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C );
+HYPRE_Int
+HYPRE_ParCSRMatrixMatmat_dbl( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C );
+HYPRE_Int
+HYPRE_ParCSRMatrixMatmat_long_dbl( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C );
+HYPRE_Int
+HYPRE_ParCSRMatrixMatmat( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C );
+
+HYPRE_Int
 HYPRE_ParCSRMatrixMatvec_flt( hypre_float alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x, hypre_float beta, HYPRE_ParVector y );
 HYPRE_Int
 HYPRE_ParCSRMatrixMatvec_dbl( hypre_double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x, hypre_double beta, HYPRE_ParVector y );
@@ -275,13 +284,13 @@ HYPRE_Int
 HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
 
 HYPRE_Int
-HYPRE_ParVectorInnerProd_flt( HYPRE_ParVector x, HYPRE_ParVector y, hypre_float *prod );
+HYPRE_ParVectorInnerProd_flt( HYPRE_ParVector x, HYPRE_ParVector y, hypre_float *result );
 HYPRE_Int
-HYPRE_ParVectorInnerProd_dbl( HYPRE_ParVector x, HYPRE_ParVector y, hypre_double *prod );
+HYPRE_ParVectorInnerProd_dbl( HYPRE_ParVector x, HYPRE_ParVector y, hypre_double *result );
 HYPRE_Int
-HYPRE_ParVectorInnerProd_long_dbl( HYPRE_ParVector x, HYPRE_ParVector y, hypre_long_double *prod );
+HYPRE_ParVectorInnerProd_long_dbl( HYPRE_ParVector x, HYPRE_ParVector y, hypre_long_double *result );
 HYPRE_Int
-HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, void *prod );
+HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, void *result );
 
 HYPRE_Int
 HYPRE_ParVectorPrint_flt( HYPRE_ParVector vector, const char *file_name );
@@ -400,6 +409,9 @@ HYPRE_Int
 HYPRE_ParCSRMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix matrix );
 
 HYPRE_Int
+HYPRE_ParCSRMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C );
+
+HYPRE_Int
 HYPRE_ParCSRMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x, hypre_long_double beta, HYPRE_ParVector y );
 
 HYPRE_Int
@@ -439,7 +451,7 @@ HYPRE_Int
 HYPRE_ParVectorInitialize_pre( HYPRE_Precision precision, HYPRE_ParVector vector );
 
 HYPRE_Int
-HYPRE_ParVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_ParVector x, HYPRE_ParVector y, void *prod );
+HYPRE_ParVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_ParVector x, HYPRE_ParVector y, void *result );
 
 HYPRE_Int
 HYPRE_ParVectorPrint_pre( HYPRE_Precision precision, HYPRE_ParVector vector, const char *file_name );

@@ -790,6 +790,24 @@ HYPRE_SStructMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_SStructMatri
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructMatrixMatmat_flt( A, B, C );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructMatrixMatmat_dbl( A, B, C );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructMatrixMatmat_long_dbl( A, B, C );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_SStructMatrix A, HYPRE_SStructVector x, hypre_long_double beta, HYPRE_SStructVector y )
 {
    switch (precision)
@@ -1240,6 +1258,24 @@ HYPRE_SStructVectorAssemble_pre( HYPRE_Precision precision, HYPRE_SStructVector 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructVectorAxpy_flt( alpha, x, y );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructVectorAxpy_dbl( alpha, x, y );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructVectorAxpy_long_dbl( alpha, x, y );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructVectorCopy_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y )
 {
    switch (precision)
@@ -1414,6 +1450,24 @@ HYPRE_SStructVectorInitialize_pre( HYPRE_Precision precision, HYPRE_SStructVecto
          return HYPRE_SStructVectorInitialize_long_dbl( vector );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y, void *result )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructVectorInnerProd_flt( x, y, result );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructVectorInnerProd_dbl( x, y, result );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructVectorInnerProd_long_dbl( x, y, result );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
 }
 
