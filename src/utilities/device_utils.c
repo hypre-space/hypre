@@ -2747,13 +2747,7 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   const hypre_int cuda_arch_actual_major  = cuda_arch_actual  / 100;
-   const hypre_int cuda_arch_compile_major = cuda_arch_compile / 100;
-   const hypre_int cuda_arch_actual_minor  = cuda_arch_actual  % 100;
-   const hypre_int cuda_arch_compile_minor = cuda_arch_compile % 100;
-
-   if (cuda_arch_actual_major != cuda_arch_compile_major ||
-       cuda_arch_actual_minor < cuda_arch_compile_minor)
+   if (cuda_arch_actual < cuda_arch_compile)
    {
       char msg[256];
 
@@ -2764,7 +2758,7 @@ hypre_CudaCompileFlagCheck()
       else
       {
          hypre_sprintf(msg,
-                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') is greater than device arch %d",
                        cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
       }
 
