@@ -2549,15 +2549,11 @@ if test "x$hypre_user_disabled_umpire" = "xyes"
 then
   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
   then
-    AC_MSG_WARN([===============================================================])
-    AC_MSG_WARN([===============================================================])
     AC_MSG_WARN([***************************************************************])
     AC_MSG_WARN([ Umpire is explicitly disabled while building hypre for GPUs.])
     AC_MSG_WARN([ This is not recommended for performance reasons!])
     AC_MSG_WARN([ Enable it with --with-umpire.])
     AC_MSG_WARN([***************************************************************])
-    AC_MSG_WARN([===============================================================])
-    AC_MSG_WARN([===============================================================])
   fi
 fi
 
@@ -2604,8 +2600,6 @@ then
 ===============================================================
 Umpire has been enabled for GPU builds to improve performance.
 However, Umpire include and/or library paths were not provided.
-It is strongly recommended to specify Umpire locations to avoid
-reduced performance or build/link issues.
 
 Provide the following flags as appropriate:
   --with-umpire-include="/path/to/umpire/include"
