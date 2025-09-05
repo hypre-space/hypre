@@ -33,8 +33,22 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------------
- * Big int stuff
  *--------------------------------------------------------------------------*/
+
+/**
+ * @defgroup Utilities Utilities
+ *
+ * Various utilities available in hypre.
+ *
+ * @{
+ **/
+
+/*===== BEGIN 1 - IGNORE CODE IN DOCS =====*/  /*! \cond */
+
+/*--------------------------------------------------------------------------
+ * BigInt and MixedInt
+ *--------------------------------------------------------------------------*/
+
 #include <limits.h>
 
 #if defined(HYPRE_BIGINT)
@@ -81,7 +95,7 @@ typedef int HYPRE_Int;
 #endif
 
 /*--------------------------------------------------------------------------
- * Real and Complex types
+ * Real and Complex Types
  *--------------------------------------------------------------------------*/
 
 #include <float.h>
@@ -151,11 +165,38 @@ typedef float        hypre_float;
 typedef long double  hypre_long_double;
 
 /*--------------------------------------------------------------------------
- * Multiprecision
+ * Sequential MPI stuff
  *--------------------------------------------------------------------------*/
+
+#ifdef HYPRE_SEQUENTIAL
+typedef HYPRE_Int MPI_Comm;
+#endif
+
+/*--------------------------------------------------------------------------
+ * HYPRE AP user functions
+ *--------------------------------------------------------------------------*/
+
+/* Checks whether the AP is on */
+/* TODO (VPM): this function is provided for backwards compatibility
+   and will be removed in a future release */
+HYPRE_Int HYPRE_AssumedPartitionCheck(void);
+
+/*===== END 1 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Multiprecision
+ *
+ * @{
+ **/
 
 /* object precision options and API are available to users at all times */
 
+/**
+ * Available precisions.
+ **/
 typedef enum
 {
    HYPRE_REAL_SINGLE,
@@ -164,11 +205,21 @@ typedef enum
 
 } HYPRE_Precision;
 
+/**
+ * Set the global default runtime precision.
+ **/
 HYPRE_Int
 HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
 
+/**
+ * Get the global default runtime precision.
+ **/
 HYPRE_Int
 HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
+
+/**@}*/
+
+/*===== BEGIN 2 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 
 /* RDF: This probably needs to be renamed to something like HYPRE_COMPILE_PRECISION */
 #ifndef HYPRE_OBJECT_PRECISION
@@ -204,17 +255,16 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 #define hypre_DEFINE_GLOBAL 1
 #endif
 
-/*--------------------------------------------------------------------------
- * Sequential MPI stuff
- *--------------------------------------------------------------------------*/
-
-#ifdef HYPRE_SEQUENTIAL
-typedef HYPRE_Int MPI_Comm;
-#endif
+/*===== END 2 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 /*--------------------------------------------------------------------------
- * HYPRE error codes
  *--------------------------------------------------------------------------*/
+
+/**
+ * @name Error Codes
+ *
+ * @{
+ **/
 
 #define HYPRE_ERROR_GENERIC         1   /* generic error */
 #define HYPRE_ERROR_MEMORY          2   /* unable to allocate memory */
@@ -225,89 +275,105 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_MAX_MSG_LEN        2048   /* longest message length */
 
 /*--------------------------------------------------------------------------
- * HYPRE init/finalize
+ * HYPRE error user functions
  *--------------------------------------------------------------------------*/
+
+/** Return an aggregate error code representing the collective status of all ranks **/
+HYPRE_Int HYPRE_GetGlobalError(MPI_Comm comm);
+
+/** Return the current hypre error flag **/
+HYPRE_Int HYPRE_GetError(void);
+
+/** Check if the given error flag contains the given error code **/
+HYPRE_Int HYPRE_CheckError(HYPRE_Int hypre_ierr, HYPRE_Int hypre_error_code);
+
+/**
+ * Return the index of the argument (counting from 1) where argument error
+ * (HYPRE_ERROR_ARG) has occured
+ **/
+HYPRE_Int HYPRE_GetErrorArg(void);
+
+/** Describe the given error flag in the given string **/
+void HYPRE_DescribeError(HYPRE_Int hypre_ierr, char *descr);
+
+/** Clear the hypre error flag **/
+HYPRE_Int HYPRE_ClearAllErrors(void);
+
+/** Clear the given error code from the hypre error flag **/
+HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
+
+/** Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer **/
+HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
+
+/**
+ * Set which error code messages to record for printing: code is an error code
+ * such as HYPRE_ERROR_CONV, code -1 = all codes, verbosity 0 = do not record
+ **/
+HYPRE_Int HYPRE_SetPrintErrorVerbosity(HYPRE_Int code, HYPRE_Int verbosity);
+
+/** Return a buffer of error messages and clear them in hypre **/
+HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
+
+/** Print the error messages and clear them in hypre **/
+HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
+
+/** Clear the error messages in hypre and free any related memory allocated **/
+HYPRE_Int HYPRE_ClearErrorMessages(void);
+
+/**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Initialize and Finalize
+ *
+ * @{
+ **/
 
 /**
  * (Required) Initializes the hypre library.
  **/
-
 HYPRE_Int HYPRE_Initialize(void);
 
 /**
  * (Required) Initializes the hypre library. This function is provided for backward compatibility.
  * Please, use HYPRE_Initialize instead.
  **/
-
 #define HYPRE_Init() HYPRE_Initialize()
 
 /**
  * (Optional) Initializes GPU features in the hypre library.
  **/
-
 HYPRE_Int HYPRE_DeviceInitialize(void);
 
 /**
  * (Required) Finalizes the hypre library.
  **/
-
 HYPRE_Int HYPRE_Finalize(void);
 
 /**
  * (Optional) Returns true if the hypre library has been initialized but not finalized yet.
  **/
-
 HYPRE_Int HYPRE_Initialized(void);
 
 /**
  * (Optional) Returns true if the hypre library has been finalized but not re-initialized yet.
  **/
-
 HYPRE_Int HYPRE_Finalized(void);
 
+/**@}*/
+
 /*--------------------------------------------------------------------------
- * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
-/* Return an aggregate error code representing the collective status of all ranks */
-HYPRE_Int HYPRE_GetGlobalError(MPI_Comm comm);
+/**
+ * @name Miscellaneous Information
+ *
+ * @{
+ **/
 
-/* Return the current hypre error flag */
-HYPRE_Int HYPRE_GetError(void);
-
-/* Check if the given error flag contains the given error code */
-HYPRE_Int HYPRE_CheckError(HYPRE_Int hypre_ierr, HYPRE_Int hypre_error_code);
-
-/* Return the index of the argument (counting from 1) where
-   argument error (HYPRE_ERROR_ARG) has occured */
-HYPRE_Int HYPRE_GetErrorArg(void);
-
-/* Describe the given error flag in the given string */
-void HYPRE_DescribeError(HYPRE_Int hypre_ierr, char *descr);
-
-/* Clears the hypre error flag */
-HYPRE_Int HYPRE_ClearAllErrors(void);
-
-/* Clears the given error code from the hypre error flag */
-HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
-
-/* Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer */
-HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
-
-/* Set which error code messages to record for printing: code is an error code
- * such as HYPRE_ERROR_CONV, code -1 = all codes, verbosity 0 = do not record */
-HYPRE_Int HYPRE_SetPrintErrorVerbosity(HYPRE_Int code, HYPRE_Int verbosity);
-
-/* Return a buffer of error messages and clear them in hypre */
-HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
-
-/* Print the error messages and clear them in hypre */
-HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
-
-/* Clear the error messages in hypre and free any related memory allocated */
-HYPRE_Int HYPRE_ClearErrorMessages(void);
-
-/* Print GPU information */
+/** Print GPU information **/
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
 /**
@@ -343,14 +409,20 @@ HYPRE_Int HYPRE_PrintDeviceInfo(void);
  *                      underlying operating system (e.g., Linux, macOS). However,
  *                      this function does not lead to correct memory usage statistics
  *                      on Windows platforms.
- */
-
+ **/
 HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level, const char *function,
                                  HYPRE_Int line);
 
+/**@}*/
+
 /*--------------------------------------------------------------------------
- * HYPRE Version routines
  *--------------------------------------------------------------------------*/
+
+/**
+ * @name Library Version Information
+ *
+ * @{
+ **/
 
 /* RDF: This macro is used by the FEI code.  Want to eventually remove. */
 #define HYPRE_VERSION "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
@@ -372,19 +444,18 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
                      HYPRE_Int  *patch_ptr,
                      HYPRE_Int  *single_ptr );
 
-/*--------------------------------------------------------------------------
- * HYPRE AP user functions
- *--------------------------------------------------------------------------*/
-
-/* Checks whether the AP is on */
-/* TODO (VPM): this function is provided for backwards compatibility
-   and will be removed in a future release */
-HYPRE_Int HYPRE_AssumedPartitionCheck(void);
+/**@}*/
 
 /*--------------------------------------------------------------------------
- * HYPRE memory location
  *--------------------------------------------------------------------------*/
 
+/**
+ * @name Memory Management
+ *
+ * @{
+ **/
+
+/** Memory location **/
 typedef enum _HYPRE_MemoryLocation
 {
    HYPRE_MEMORY_UNDEFINED = -1,
@@ -395,21 +466,27 @@ typedef enum _HYPRE_MemoryLocation
 /**
  * (Optional) Sets the default (abstract) memory location.
  **/
-
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
 
 /**
  * (Optional) Gets a pointer to the default (abstract) memory location.
  **/
-
 HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
 
 #include <stdlib.h>
 
+/**@}*/
+
 /*--------------------------------------------------------------------------
- * HYPRE execution policy
  *--------------------------------------------------------------------------*/
 
+/**
+ * @name Execution Policy
+ *
+ * @{
+ **/
+
+/** Execution Policy **/
 typedef enum _HYPRE_ExecutionPolicy
 {
    HYPRE_EXEC_UNDEFINED = -1,
@@ -420,24 +497,28 @@ typedef enum _HYPRE_ExecutionPolicy
 /**
  * (Optional) Sets the default execution policy.
  **/
-
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
 
 /**
  * (Optional) Gets a pointer to the default execution policy.
  **/
-
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
 
 /**
  * (Optional) Returns a string denoting the execution policy passed as input.
  **/
-
 const char* HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy);
 
+/**@}*/
+
 /*--------------------------------------------------------------------------
- * HYPRE UMPIRE
  *--------------------------------------------------------------------------*/
+
+/**
+ * @name Umpire and GPU Memory Pooling
+ *
+ * @{
+ **/
 
 /**
  * @brief Sets the size of the Umpire device memory pool.
@@ -511,16 +592,20 @@ HYPRE_Int HYPRE_SetUmpireHostPoolName(const char *pool_name);
  **/
 HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
 
-/*--------------------------------------------------------------------------
- * HYPRE GPU memory pool
- *--------------------------------------------------------------------------*/
-
+/** Set GPU memory pool size **/
 HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin,
                                      size_t max_cached_bytes);
 
+/**@}*/
+
 /*--------------------------------------------------------------------------
- * HYPRE handle
  *--------------------------------------------------------------------------*/
+
+/**
+ * @name Miscellaneous
+ *
+ * @{
+ **/
 
 /**
  * Sets the logging level for the HYPRE library.
@@ -592,6 +677,7 @@ HYPRE_Int HYPRE_SetSpMVUseVendor(HYPRE_Int use_vendor);
  * @return Returns hypre's global error code, where 0 indicates success.
  **/
 HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
+
 /* Backwards compatibility with HYPRE_SetSpGemmUseCusparse() */
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
 
@@ -610,7 +696,6 @@ HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
  *
  * @return Returns hypre's global error code, where 0 indicates success.
  **/
-
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
 
 /**
@@ -628,6 +713,11 @@ HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
  * @return Returns hypre's global error code, where 0 indicates success.
  **/
 HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
+
+/**@}*/
+/**@}*/
+
+/*===== BEGIN 3 - IGNORE CODE IN DOCS =====*/  /*! \cond */
 
 /*--------------------------------------------------------------------------
  * Base objects
@@ -661,6 +751,8 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
+/*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 #ifdef __cplusplus
 }

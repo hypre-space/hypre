@@ -449,3 +449,16 @@ HYPRE_ParCSRMatrixComputeScalingTagged(HYPRE_ParCSRMatrix   A,
                                                    type, memloc_tags, num_tags, tags,
                                                    (hypre_ParVector **) scaling_ptr) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixMatmat( HYPRE_ParCSRMatrix  A,
+                          HYPRE_ParCSRMatrix  B,
+                          HYPRE_ParCSRMatrix *C )
+{
+   *C = hypre_ParCSRMatMat(A, B);
+
+   return hypre_error_flag;
+}

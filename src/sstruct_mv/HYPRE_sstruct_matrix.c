@@ -1712,3 +1712,14 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix  A,
+                                     HYPRE_SStructMatrix  B,
+                                     HYPRE_SStructMatrix *C )
+{
+   hypre_SStructMatmat(A, B, C);
+
+   return hypre_error_flag;
+}

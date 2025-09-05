@@ -23,7 +23,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @defgroup IJSystemInterface IJ System Interface
+ * @defgroup IJInterface IJ System Interface
  *
  * A linear-algebraic conceptual interface. This interface represents a
  * linear-algebraic conceptual view of a linear system.  The 'I' and 'J' in the
@@ -745,6 +745,10 @@ HYPRE_Int HYPRE_IJVectorMigrate(HYPRE_IJVector       vector,
                                 HYPRE_MemoryLocation memory_location);
 
 /**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /**@}*/
 
 #ifdef __cplusplus

@@ -41,6 +41,7 @@ HYPRE_SStructMatrixGetGrid
 HYPRE_SStructMatrixGetObject
 HYPRE_SStructMatrixGetValues
 HYPRE_SStructMatrixInitialize
+HYPRE_SStructMatrixMatmat
 HYPRE_SStructMatrixMatvec
 HYPRE_SStructMatrixPrint
 HYPRE_SStructMatrixRead
@@ -66,6 +67,7 @@ HYPRE_SStructVectorAddToBoxValues
 HYPRE_SStructVectorAddToBoxValues2
 HYPRE_SStructVectorAddToValues
 HYPRE_SStructVectorAssemble
+HYPRE_SStructVectorAxpy
 HYPRE_SStructVectorCopy
 HYPRE_SStructVectorCreate
 HYPRE_SStructVectorDestroy
@@ -76,6 +78,7 @@ HYPRE_SStructVectorGetFEMValues
 HYPRE_SStructVectorGetObject
 HYPRE_SStructVectorGetValues
 HYPRE_SStructVectorInitialize
+HYPRE_SStructVectorInnerProd
 HYPRE_SStructVectorPrint
 HYPRE_SStructVectorPrintGLVis
 HYPRE_SStructVectorRead

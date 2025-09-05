@@ -329,9 +329,24 @@ hypre_F90_IFACE(hypre_sstructvectorscale, HYPRE_SSTRUCTVECTORSCALE)
 }
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructInnerProd
+ *  HYPRE_SStructVectorInnerProd
  *--------------------------------------------------------------------------*/
 
+void
+hypre_F90_IFACE(hypre_sstructvectorinnerprod, HYPRE_SSTRUCTVECTORINNERPROD)
+(hypre_F90_Obj *x,
+ hypre_F90_Obj *y,
+ hypre_F90_Complex *result,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SStructVectorInnerProd(
+               hypre_F90_PassObj (HYPRE_SStructVector, x),
+               hypre_F90_PassObj (HYPRE_SStructVector, y),
+               hypre_F90_PassComplexRef (result) ) );
+}
+
+/* For backward compatibility */
 void
 hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
 (hypre_F90_Obj *x,
@@ -347,9 +362,24 @@ hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
 }
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructAxpy
+ *  HYPRE_SStructVectorAxpy
  *--------------------------------------------------------------------------*/
 
+void
+hypre_F90_IFACE(hypre_sstructvectoraxpy, HYPRE_SSTRUCTVECTORAXPY)
+(hypre_F90_Complex *alpha,
+ hypre_F90_Obj *x,
+ hypre_F90_Obj *y,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SStructVectorAxpy(
+               hypre_F90_PassComplex (alpha),
+               hypre_F90_PassObj (HYPRE_SStructVector, x),
+               hypre_F90_PassObj (HYPRE_SStructVector, y) ) );
+}
+
+/* For backward compatibility */
 void
 hypre_F90_IFACE(hypre_sstructaxpy, HYPRE_SSTRUCTAXPY)
 (hypre_F90_Complex *alpha,

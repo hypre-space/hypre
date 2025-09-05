@@ -44,6 +44,7 @@ HYPRE_StructVectorAddToBoxValues
 HYPRE_StructVectorAddToBoxValues2
 HYPRE_StructVectorAddToValues
 HYPRE_StructVectorAssemble
+HYPRE_StructVectorAxpy
 HYPRE_StructVectorClone
 HYPRE_StructVectorCopy
 HYPRE_StructVectorCreate
@@ -57,6 +58,7 @@ HYPRE_StructVectorInnerProd
 HYPRE_StructVectorMigrate
 HYPRE_StructVectorPrint
 HYPRE_StructVectorRead
+HYPRE_StructVectorScale
 HYPRE_StructVectorScaleValues
 HYPRE_StructVectorSetBoxValues
 HYPRE_StructVectorSetBoxValues2
