@@ -514,8 +514,8 @@ follow these steps:
      -DENABLE_DOCS=OFF \
      -DENABLE_TESTS=OFF \
      -DCMAKE_BUILD_TYPE=Release \
-     -DCMAKE_INSTALL_LIBDIR=/path/to/umpire/install/lib \
-     -DCMAKE_INSTALL_PREFIX=/path/to/umpire/install
+     -DCMAKE_INSTALL_LIBDIR=/path-to-umpire-install/lib \
+     -DCMAKE_INSTALL_PREFIX=/path-to-umpire-install
 
    cmake --build build -j
    cmake --install build
@@ -528,8 +528,8 @@ or provide it to hypre at configure time. For example:
 
 .. code-block:: bash
 
-   ./configure --with-umpire-include=/path/to/umpire/install/include \
-               --with-umpire-lib-dirs=/path/to/umpire/install/lib \
+   ./configure --with-umpire-include=/path-to-umpire-install/include \
+               --with-umpire-lib-dirs=/path-to-umpire-install/lib \
                --with-umpire-libs="camp umpire" \
 
 or with CMake:
@@ -537,7 +537,7 @@ or with CMake:
 .. code-block:: bash
 
    cmake -DHYPRE_ENABLE_UMPIRE=ON \
-         -Dumpire_DIR=/path/to/umpire/install/lib/cmake/umpire \
+         -Dumpire_DIR=/path-to-umpire-install/lib/cmake/umpire \
          ../src
 
 Make Targets

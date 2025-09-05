@@ -2602,8 +2602,8 @@ Umpire has been enabled for GPU builds to improve performance.
 However, Umpire include and/or library paths were not provided.
 
 Provide the following flags as appropriate:
-  --with-umpire-include="/path/to/umpire/include"
-  --with-umpire-lib-dirs="/path/to/umpire/lib"
+  --with-umpire-include="/path-to-umpire-install/include"
+  --with-umpire-lib-dirs="/path-to-umpire-install/lib"
   --with-umpire-libs="umpire"  or  --with-umpire-lib="-lumpire"
 
 To opt out (not recommended), configure with --without-umpire.
