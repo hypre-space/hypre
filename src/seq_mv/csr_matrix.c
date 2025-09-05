@@ -998,7 +998,7 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          B_j = hypre_TAlloc(HYPRE_Int, num_nonzeros, memory_location);
          hypre_TMemcpy(B_j, A_j, HYPRE_Int, num_nonzeros,
                        memory_location, old_memory_location);
-         hypre_TFree(A_j, old_memory_location);
+         hypre_CSRMatrixJ(A) = B_j;
          if (owns_data)
          {
             hypre_TFree(A_j, old_memory_location);
