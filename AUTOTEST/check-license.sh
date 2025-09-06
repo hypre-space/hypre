@@ -45,6 +45,7 @@ egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif|png)$' |
   egrep -v '[.]/src/.*functions[.]saved$' |
   egrep -v '[.]/src/.*mup[.](exclude|fixed|functions|methods)$' |
   egrep -v '[.]/src/examples/docs' |
+  egrep -v '[.]/src/docs/wiki-dev' |
   egrep -v '[.]/src/test/TEST_.*'    > check-license.files
 
 # Add these file back to the list
