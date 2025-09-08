@@ -541,7 +541,7 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
    entries = hypre_TReAlloc(entries, hypre_BoxManEntry, max_nentries, HYPRE_MEMORY_HOST);
    ids = hypre_TReAlloc(ids, HYPRE_Int, max_nentries, HYPRE_MEMORY_HOST);
    procs =  hypre_TReAlloc(procs, HYPRE_Int, max_nentries, HYPRE_MEMORY_HOST);
-   info = (void *)hypre_ReAlloc((char *)info, max_nentries * info_size, HYPRE_MEMORY_HOST);
+   info = hypre_TReAlloc(info, char, max_nentries * info_size, HYPRE_MEMORY_HOST);
 
    /* update manager */
    hypre_BoxManMaxNEntries(manager) = max_nentries;
@@ -2718,7 +2718,7 @@ hypre_FillResponseBoxManAssemble2( void       *p_recv_contact_buf,
    {
       response_obj->send_response_storage =  num_my_entries;
       size =  entry_size_bytes * (response_obj->send_response_storage + overhead);
-      send_response_buf = hypre_ReAlloc( (char*)send_response_buf, size, HYPRE_MEMORY_HOST);
+      send_response_buf = hypre_TReAlloc(send_response_buf, char, size, HYPRE_MEMORY_HOST);
       *p_send_response_buf = send_response_buf;
    }
 
