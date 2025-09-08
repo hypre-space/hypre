@@ -351,6 +351,7 @@ when building for GPUs are:
 1. Only one GPU backend can be enabled at a time (CUDA, HIP, or SYCL)
 2. Some features like full support for 64-bit integers (`BigInt`) are not available
 3. Memory management options (device vs unified memory) affect solver availability
+4. Umpire is implicitly enabled by default when building with CUDA or HIP support
 
 The table below lists the available GPU-specific build options for both autotools and CMake
 build systems.
@@ -454,26 +455,29 @@ build systems.
      - ``--enable-onemklrand``
      - ``-DHYPRE_ENABLE_ONEMKLRAND=ON``
    * - | Umpire Support
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire``
      - ``-DHYPRE_ENABLE_UMPIRE=ON``
    * - | Umpire Unified Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-um``
      - ``-DHYPRE_ENABLE_UMPIRE_UM=ON``
    * - | Umpire Device Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-device``
      - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
 
-.. warning::
+.. note::
 
-   Allocations and deallocations of GPU memory can be slow. Memory pooling is a
-   common approach to reduce such overhead and improve performance. We recommend using
-   [Umpire]_ for memory management, which provides robust pooling capabilities for both
-   device and unified memory. For Umpire support, the Umpire library must be installed
-   and properly configured. See the note in the previous section for more details on
-   how to specify the installation path for dependency libraries.
+    Allocations and deallocations of GPU memory can be slow. Memory pooling is a common
+    approach to reduce such overhead and improve performance. For better performance,
+    [Umpire]_ is enabled by default for CUDA and HIP builds and provides robust pooling
+    capabilities for both device and unified memory.
+
+    For SYCL builds, Umpire remains optional and must be enabled explicitly.
+
+    For Umpire support, the Umpire library must be installed and properly configured. See
+    :ref:`umpire_build` for instructions on building Umpire from source.
 
 .. note::
 
@@ -483,6 +487,58 @@ build systems.
    memory, whereas only selected unstructured solvers can run with device memory.
    See :ref:`ch-boomeramg-gpu` for details. Some solver options for BoomerAMG
    require unified (managed) memory.
+
+.. _umpire_build:
+
+Building Umpire
+^^^^^^^^^^^^^^^
+
+If Umpire is not already available on your system, you can build it using
+`Spack <https://spack.io/>`_ or manually from source. To build from source,
+follow these steps:
+
+.. code-block:: bash
+
+   git clone https://github.com/LLNL/Umpire.git
+   cd Umpire
+   git submodule update --init
+
+   cmake -S . -B build \
+     -DUMPIRE_ENABLE_C=ON \
+     -DUMPIRE_ENABLE_TOOLS=OFF \
+     -DENABLE_CUDA=${ENABLE_CUDA} \
+     -DENABLE_HIP=${ENABLE_HIP} \
+     -DENABLE_SYCL=${ENABLE_SYCL} \
+     -DENABLE_BENCHMARKS=OFF \
+     -DENABLE_EXAMPLES=OFF \
+     -DENABLE_DOCS=OFF \
+     -DENABLE_TESTS=OFF \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DCMAKE_INSTALL_LIBDIR=/path-to-umpire-install/lib \
+     -DCMAKE_INSTALL_PREFIX=/path-to-umpire-install
+
+   cmake --build build -j
+   cmake --install build
+
+Enable either CUDA, HIP, or SYCL by setting the corresponding flag to ``ON`` and
+the others to ``OFF``.
+
+After completion, make sure to add the installation path to your environment
+or provide it to hypre at configure time. For example:
+
+.. code-block:: bash
+
+   ./configure --with-umpire-include=/path-to-umpire-install/include \
+               --with-umpire-lib-dirs=/path-to-umpire-install/lib \
+               --with-umpire-libs="camp umpire" \
+
+or with CMake:
+
+.. code-block:: bash
+
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -Dumpire_DIR=/path-to-umpire-install/lib/cmake/umpire \
+         ../src
 
 Make Targets
 =====================
