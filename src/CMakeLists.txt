@@ -287,7 +287,7 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic>)
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
@@ -433,13 +433,13 @@ set(HYPRE_NEEDS_CXX OFF CACHE INTERNAL "Flag to indicate if C++ is needed for TP
 
 # Setup third-party libraries (TPLs)
 setup_fei()
-setup_tpl_or_internal(blas)
-setup_tpl_or_internal(lapack)
+setup_tpl(umpire)
 setup_tpl(superlu)
 setup_tpl(dsuperlu)
 setup_tpl(magma)
 setup_tpl(caliper)
-setup_tpl(umpire)
+setup_tpl_or_internal(blas)
+setup_tpl_or_internal(lapack)
 
 # Some TPLs need C++ to be enabled (GPU already enables C++ by default)
 if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)

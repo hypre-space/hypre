@@ -73,8 +73,7 @@ most systems, however, hypre can be built by simply typing ``configure``
 followed by ``make``, or by using CMake [CMakeWeb]_.
 
 **Interfaces in multiple languages provide greater flexibility for
-applications:** hypre is written in C (with the exception of the FEI interface,
-which is written in C++) and provides an interface for Fortran users.
+applications:** hypre is written in C and provides an interface for Fortran users.
 
 
 .. _more-info:
@@ -165,7 +164,7 @@ terms of elements and element stiffness matrices. Finally, the right-most
 interface is the standard linear-algebraic (matrix rows/columns) way of viewing
 the linear problem.
 
-The hypre library currently supports four conceptual interfaces, and typically
+The hypre library currently supports three conceptual interfaces, and typically
 the appropriate choice for a given problem is fairly obvious, e.g. a
 structured-grid interface is clearly inappropriate for an unstructured-grid
 application.
@@ -182,13 +181,6 @@ application.
   grids in structured adaptive mesh refinement (AMR) applications, and overset
   grids.  This interface supports multiple unknowns per cell. See Chapter
   :ref:`ch-SStruct` for details.
-
-* **Finite Element Interface (FEI):** This is appropriate for users who form
-  their linear systems from a finite element discretization.  The interface
-  mirrors typical finite element data structures, including element stiffness
-  matrices.  Though this interface is provided in hypre, its definition was
-  determined elsewhere (please send email to Alan Williams william@sandia.gov
-  for more information). See Chapter :ref:`ch-FEI` for details.
 
 * **Linear-Algebraic System Interface (IJ):** This is the traditional
   linear-algebraic interface.  It can be used as a last resort by users for whom

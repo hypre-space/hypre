@@ -31,6 +31,7 @@
 #define HYPRE_ParCSRMatrixGetRow HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixGetRow )
 #define HYPRE_ParCSRMatrixGetRowPartitioning HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixGetRowPartitioning )
 #define HYPRE_ParCSRMatrixInitialize HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixInitialize )
+#define HYPRE_ParCSRMatrixMatmat HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixMatmat )
 #define HYPRE_ParCSRMatrixMatvec HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixMatvec )
 #define HYPRE_ParCSRMatrixMatvecT HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixMatvecT )
 #define HYPRE_ParCSRMatrixPrint HYPRE_MULTIPRECISION_FUNC ( HYPRE_ParCSRMatrixPrint )

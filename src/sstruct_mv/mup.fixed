@@ -204,6 +204,7 @@ hypre_sstructstencilsetentry
 hypre_sstructvectoraddtoboxvalu
 hypre_sstructvectoraddtovalues
 hypre_sstructvectorassemble
+hypre_sstructvectoraxpy
 hypre_sstructvectorcopy
 hypre_sstructvectorcreate
 hypre_sstructvectordestroy
@@ -212,6 +213,7 @@ hypre_sstructvectorgetboxvalues
 hypre_sstructvectorgetobject
 hypre_sstructvectorgetvalues
 hypre_sstructvectorinitialize
+hypre_sstructvectorinnerprod
 hypre_sstructvectorprint
 hypre_sstructvectorscale
 hypre_sstructvectorsetboxvalues

@@ -142,6 +142,15 @@ HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRMatrixMatmat( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRMatrixMatmat_pre( precision, A, B, C );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRMatrixMatvec( hypre_long_double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x, hypre_long_double beta, HYPRE_ParVector y )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -259,10 +268,10 @@ HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, void *prod )
+HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, void *result )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_ParVectorInnerProd_pre( precision, x, y, prod );
+   return HYPRE_ParVectorInnerProd_pre( precision, x, y, result );
 }
 
 /*--------------------------------------------------------------------------*/

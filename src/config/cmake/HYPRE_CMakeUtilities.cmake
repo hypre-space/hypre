@@ -5,6 +5,13 @@
 
 # Function to set hypre build options
 function(set_hypre_option category name description default_value)
+  # Detect if the user explicitly set this option via -D on the command line
+  if(DEFINED CACHE{${name}})
+    set(HYPRE_USER_SET_${name} ON CACHE INTERNAL "User explicitly set ${name}")
+  else()
+    set(HYPRE_USER_SET_${name} OFF CACHE INTERNAL "User explicitly set ${name}")
+  endif()
+
   option(${name} "${description}" ${default_value})
   if (${category} STREQUAL "CUDA" OR ${category} STREQUAL "HIP" OR ${category} STREQUAL "SYCL")
     if (HYPRE_ENABLE_${category} STREQUAL "ON")
@@ -271,6 +278,7 @@ function(setup_tpl LIBNAME)
         if(EXISTS ${lib})
           message(STATUS "${LIBNAME_UPPER} library found: ${lib}")
           get_filename_component(LIB_DIR "${lib}" DIRECTORY)
+          set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY BUILD_RPATH "${LIB_DIR}")
           set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY INSTALL_RPATH "${LIB_DIR}")
         else()
           message(WARNING "${LIBNAME_UPPER} library not found at specified path: ${lib}")
@@ -280,8 +288,8 @@ function(setup_tpl LIBNAME)
       target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_LIBRARIES})
       target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_INCLUDE_DIRS})
     else()
-      # Use find_package
-      find_package(${LIBNAME} REQUIRED CONFIG)
+      # Use find_package (prefer CONFIG). Provide clearer error for libraries when missing.
+      find_package(${LIBNAME} CONFIG)
       if(${LIBNAME}_FOUND)
         list(APPEND HYPRE_DEPENDENCY_DIRS "${${LIBNAME}_ROOT}")
         set(HYPRE_DEPENDENCY_DIRS "${HYPRE_DEPENDENCY_DIRS}" CACHE INTERNAL "" FORCE)
@@ -300,7 +308,11 @@ function(setup_tpl LIBNAME)
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
-        message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+          message(FATAL_ERROR "\n===============================================================\nUmpire has been enabled for GPU builds to improve performance; However, it could not be found by CMake.\nEnsure Umpire provides a CMake package config so find_package(umpire) succeeds via ONE of the following:\n -Dumpire_ROOT=\"/path-to-umpire-install\" or\n -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire/\".\nOr provide both options below:\n -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\nTo opt out (strongly not recommended), set -DHYPRE_ENABLE_UMPIRE=OFF.\n===============================================================")
+        else()
+          message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        endif()
       endif()
 
       # Display library info

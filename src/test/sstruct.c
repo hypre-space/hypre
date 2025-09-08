@@ -4330,7 +4330,7 @@ main( hypre_int argc,
                if (object_type == HYPRE_SSTRUCT)
                {
                   /* Apply A to x to yield righthand side */
-                  hypre_SStructMatvec(1.0, A, x, 0.0, b);
+                  HYPRE_SStructMatrixMatvec(1.0, A, x, 0.0, b);
                }
                else if (object_type == HYPRE_PARCSR)
                {
@@ -4340,7 +4340,7 @@ main( hypre_int argc,
                else if (object_type == HYPRE_STRUCT)
                {
                   /* Apply A to x to yield righthand side */
-                  hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
+                  HYPRE_StructMatrixMatvec(1.0, sA, sx, 0.0, sb);
                }
             }
 #endif
@@ -4353,7 +4353,7 @@ main( hypre_int argc,
          }
       } /* if (read_fromfile_flag & 0x2) */
 
-      HYPRE_SStructInnerProd(b, b, tmp_norm_ptr);
+      HYPRE_SStructVectorInnerProd(b, b, tmp_norm_ptr);
       hypre_MuPDataCopyFromMP(&rhs_norm, tmp_norm_ptr, 1);
       rhs_norm = hypre_sqrt(rhs_norm);
 
@@ -4393,7 +4393,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorAssemble(x);
       } /* if (read_fromfile_flag & 0x4) */
 
-      HYPRE_SStructInnerProd(x, x, tmp_norm_ptr);
+      HYPRE_SStructVectorInnerProd(x, x, tmp_norm_ptr);
       hypre_MuPDataCopyFromMP(&x0_norm, tmp_norm_ptr, 1);
       x0_norm = hypre_sqrt(x0_norm);
 
@@ -4647,7 +4647,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
 
          /* result is all 0's */
-         HYPRE_SStructAxpy(-2.0, b, x);
+         HYPRE_SStructVectorAxpy(-2.0, b, x);
          HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);
 
          /* result is 1's with 0's on some boundaries */
@@ -4702,7 +4702,7 @@ main( hypre_int argc,
          fclose(file);
 
          /* re-initializes x to 0 */
-         HYPRE_SStructAxpy(-1.0, b, x);
+         HYPRE_SStructVectorAxpy(-1.0, b, x);
       }
 #endif
 
@@ -6631,9 +6631,9 @@ main( hypre_int argc,
          HYPRE_StructVectorInitialize(sr);
          HYPRE_StructVectorAssemble(sr);
          HYPRE_StructVectorCopy(sb, sr);
-         hypre_StructMatvec(-1.0, sA, sx, 1.0, sr);
+         HYPRE_StructMatrixMatvec(-1.0, sA, sx, 1.0, sr);
          /* Using an inner product instead of a norm to help with testing */
-         final_res_norm = hypre_StructInnerProd(sr, sr);  // RDF: Add HYPRE_InnerProd
+         HYPRE_StructVectorInnerProd(sr, sr, &final_res_norm);
          if (final_res_norm < 1.0e-20)
          {
             final_res_norm = 0.0;
@@ -7588,7 +7588,7 @@ main( hypre_int argc,
       {
          HYPRE_SStructVectorCopy(b, r);
          HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
-         HYPRE_SStructInnerProd(r, r, tmp_norm_ptr);
+         HYPRE_SStructVectorInnerProd(r, r, tmp_norm_ptr);
          hypre_MuPDataCopyFromMP(&real_res_norm, tmp_norm_ptr, 1);
          real_res_norm = hypre_sqrt(real_res_norm);
          if (rhs_norm > 0)
@@ -7715,23 +7715,23 @@ main( hypre_int argc,
          /* Compute residual norm - this if/else is due to a bug in SStructMatvec */
          if (object_type == HYPRE_SSTRUCT)
          {
-            HYPRE_SStructInnerProd(b, b, &bnorm);
-            hypre_SStructMatvec(-1.0, A, xnew, 1.0, b);
-            HYPRE_SStructInnerProd(b, b, &rnorm);
+            HYPRE_SStructVectorInnerProd(b, b, &bnorm);
+            HYPRE_SStructMatrixMatvec(-1.0, A, xnew, 1.0, b);
+            HYPRE_SStructVectorInnerProd(b, b, &rnorm);
          }
          else if (object_type == HYPRE_PARCSR)
          {
-            bnorm = hypre_ParVectorInnerProd(par_b, par_b);
+            HYPRE_ParVectorInnerProd(par_b, par_b, &bnorm);
             HYPRE_SStructVectorGetObject(xnew, (void **) &par_xnew);
             HYPRE_ParCSRMatrixMatvec(-1.0, par_A, par_xnew, 1.0, par_b );
-            rnorm = hypre_ParVectorInnerProd(par_b, par_b);
+            HYPRE_ParVectorInnerProd(par_b, par_b, &rnorm);
          }
          else if (object_type == HYPRE_STRUCT)
          {
-            bnorm = hypre_StructInnerProd(sb, sb);
+            HYPRE_StructVectorInnerProd(sb, sb, &bnorm);
             HYPRE_SStructVectorGetObject(xnew, (void **) &sxnew);
-            hypre_StructMatvec(-1.0, sA, sxnew, 1.0, sb);
-            rnorm = hypre_StructInnerProd(sb, sb);
+            HYPRE_StructMatrixMatvec(-1.0, sA, sxnew, 1.0, sb);
+            HYPRE_StructVectorInnerProd(sb, sb, &rnorm);
          }
          bnorm = hypre_sqrt(bnorm);
          rnorm = hypre_sqrt(rnorm);
