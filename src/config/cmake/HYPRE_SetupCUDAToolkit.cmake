@@ -160,7 +160,7 @@ endif()
 
 # Check for Thrust headers
 find_path(THRUST_INCLUDE_DIR thrust/version.h
-  HINTS ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_INCLUDE_DIRS}/cuda-thrust
+  HINTS ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_INCLUDE_DIRS}/cccl ${CUDAToolkit_INCLUDE_DIRS}/cuda-thrust
   PATH_SUFFIXES thrust
   NO_DEFAULT_PATH
 )
