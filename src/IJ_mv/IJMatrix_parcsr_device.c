@@ -1147,14 +1147,13 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
          hypre_TMemcpy(temp_row_indexes + 1, ncols, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE,
                        HYPRE_MEMORY_DEVICE);
          hypre_Memset(temp_row_indexes, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
-         hypreDevice_IntegerExclusiveScan(nrows + 1, temp_row_indexes);
+         hypreDevice_IntegerInclusiveScan(nrows + 1, temp_row_indexes);
          d_row_indexes = temp_row_indexes;
       }
 
       hypre_TMemcpy(&num_nonzeros, d_row_indexes + nrows, HYPRE_Int, 1,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       extended_rows = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
-      extended_cols = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL(for_each,
@@ -1199,8 +1198,18 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
                HYPRE_Int        l_col   = g_col - col_start;
                const HYPRE_Int *p_begin = diag_j + diag_i[l_row];
                const HYPRE_Int *p_end   = diag_j + diag_i[l_row + 1];
-               const HYPRE_Int *p_found = thrust::lower_bound(thrust::seq, p_begin, p_end, l_col);
-               if (p_found < p_end && *p_found == l_col)
+               const HYPRE_Int *p_found = p_end;
+               if (p_begin != p_end)
+               {
+                  // device storage puts diagonal first. After the diagonal the row is sorted
+                  if (*p_begin == l_col) p_found = p_begin;
+                  else
+                  {
+                     p_found = thrust::lower_bound(thrust::seq, p_begin + 1, p_end, l_col);
+                     if (*p_found != l_col) p_found = p_end;
+                  }
+               }
+               if (p_found < p_end)
                {
                   HYPRE_Int offset = p_found - diag_j;
                   values[k] = diag_data[offset];
