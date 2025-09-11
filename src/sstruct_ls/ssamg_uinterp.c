@@ -302,7 +302,16 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                /* Free memory */
                for (j = 0; j < ndim; j++)
                {
-                  hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
+                  if (exec == HYPRE_EXEC_DEVICE)
+                  {
+                     hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
+                  }
+                  else
+#endif
+                  {
+                     hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+                  }
                }
             }
          }

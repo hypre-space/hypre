@@ -1263,6 +1263,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
 #endif
 
       hypre_TFree(extended_rows, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(extended_cols, HYPRE_MEMORY_DEVICE);
       hypre_TFree(temp_row_indexes, HYPRE_MEMORY_DEVICE);
    }
    else

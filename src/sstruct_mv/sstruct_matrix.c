@@ -1547,8 +1547,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
          }
          else
          {
-            /* TODO (VPM): This block is causing random issues with GPUs */
-#if !defined(HYPRE_USING_GPU)
             if (action == -2)
             {
                /* Zero out entries gotten */
@@ -1560,7 +1558,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                HYPRE_IJMatrixGetValues2(ijmatrix, nrows, ncols,
                                         rows, row_indexes, cols, ijvalues);
             }
-#endif
          }
 
       } /* end loop through boxman entries */
