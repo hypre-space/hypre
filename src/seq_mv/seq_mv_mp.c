@@ -183,7 +183,7 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < size; i++)
-         
+         { 
             ((hypre_float *)yp)[i] += (hypre_float)(alpha * ((hypre_double *)xp)[i]);
          }
          break;
@@ -253,7 +253,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)sizeof(hypre_long_double), memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
