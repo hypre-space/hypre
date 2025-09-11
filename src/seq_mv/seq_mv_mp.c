@@ -243,7 +243,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
             {
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -253,7 +253,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -272,7 +272,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -282,7 +282,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -301,7 +301,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -311,7 +311,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
                break;
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -327,7 +327,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
          default:
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
       }
-      hypre_Free_dbl(data, memory_location);
+      hypre_Free(data, memory_location);
       hypre_VectorData(v) = data_mp;
       hypre_VectorPrecision(v) = new_precision;
    }
@@ -361,7 +361,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
             {
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -371,7 +371,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -390,7 +390,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -400,7 +400,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -419,7 +419,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -429,7 +429,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
                break;
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -445,7 +445,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
          default:
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
       }
-      hypre_Free_dbl(data, memory_location);
+      hypre_Free(data, memory_location);
       hypre_CSRMatrixData(A) = data_mp;
       hypre_CSRMatrixPrecision(A) = new_precision;
    }
