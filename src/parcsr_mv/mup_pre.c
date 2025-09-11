@@ -279,7 +279,7 @@ HYPRE_ParCSRMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix A, H
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_ParCSRMatrixMatmat_long_dbl( A, B, C );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 

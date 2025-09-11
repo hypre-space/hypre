@@ -183,7 +183,7 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < size; i++)
-         {
+         
             ((hypre_float *)yp)[i] += (hypre_float)(alpha * ((hypre_double *)xp)[i]);
          }
          break;
@@ -213,6 +213,242 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
       hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
    #endif
    */
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert precision in a mixed precision vector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorConvert_mp (hypre_Vector *v,
+                           HYPRE_Precision new_precision)
+{
+   HYPRE_Precision precision = hypre_VectorPrecision (v);
+   void *data = hypre_VectorData(v);
+   void *data_mp = NULL;
+   HYPRE_Int size = hypre_VectorSize(v);
+   HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(v);
+   HYPRE_Int i;
+
+   if (new_precision == precision)
+      return hypre_error_flag;
+   else
+   {
+      switch (precision)
+      {
+         case HYPRE_REAL_SINGLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_DOUBLE:
+               {
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_float *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_LONGDOUBLE:
+               {
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)sizeof(hypre_long_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_float *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         case HYPRE_REAL_DOUBLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_SINGLE:
+               {
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_double *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_LONGDOUBLE:
+               {
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_double *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         case HYPRE_REAL_LONGDOUBLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_SINGLE:
+               {
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_long_double *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_DOUBLE:
+               {
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_long_double *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         default:
+            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+      }
+      hypre_Free_dbl(data, memory_location);
+      hypre_VectorData(v) = data_mp;
+      hypre_VectorPrecision(v) = new_precision;
+   }
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert precision in a mixed precision matrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
+                           HYPRE_Precision new_precision)
+{
+   HYPRE_Precision precision = hypre_CSRMatrixPrecision (A);
+   void *data = hypre_CSRMatrixData(A);
+   void *data_mp = NULL;
+   HYPRE_Int size = hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)];
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_Int i;
+
+   if (new_precision == precision)
+      return hypre_error_flag;
+   else
+   {
+      switch (precision)
+      {
+         case HYPRE_REAL_SINGLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_DOUBLE:
+               {
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_float *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_LONGDOUBLE:
+               {
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_float *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         case HYPRE_REAL_DOUBLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_SINGLE:
+               {
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_double *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_LONGDOUBLE:
+               {
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_double *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         case HYPRE_REAL_LONGDOUBLE:
+         {
+            switch (new_precision)
+            {
+               case HYPRE_REAL_SINGLE:
+               {
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_long_double *) data)[i];
+               }
+               break;
+               case HYPRE_REAL_DOUBLE:
+               {
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+                  for (i = 0; i < size; i++)
+                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_long_double *) data)[i];
+               }
+               break;
+               default:
+                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            }
+         }
+         break;
+         default:
+            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+      }
+      hypre_Free_dbl(data, memory_location);
+      hypre_CSRMatrixData(A) = data_mp;
+      hypre_CSRMatrixPrecision(A) = new_precision;
+   }
    return hypre_error_flag;
 }
 
