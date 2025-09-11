@@ -4161,7 +4161,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncComputeStream();
    }
 #endif
 
