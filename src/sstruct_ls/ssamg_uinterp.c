@@ -114,7 +114,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
             hypre_CSRMatrixSetRownnz(A_uo);
          }
          max_num_rownnz = hypre_CSRMatrixNumRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_uo);
-         nonzero_rows   = hypre_TAlloc(HYPRE_Int, max_num_rownnz, memory_location);
+         nonzero_rows   = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
          HYPRE_THRUST_CALL(merge,
                            hypre_CSRMatrixRownnz(A_ud),
                            hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
@@ -169,7 +169,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   /* Get ALL the indices */
                   for (j = 0; j < ndim; j++)
                   {
-                     all_indices[j] = hypre_CTAlloc(HYPRE_Int, vol, memory_location);
+                     all_indices[j] = hypre_CTAlloc(HYPRE_Int, vol, HYPRE_MEMORY_DEVICE);
                   }
 
                   hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
@@ -196,7 +196,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
 #else
                   /* Get the nonzero rows for this box */
                   box_nnzrows     = hypre_TAlloc(HYPRE_Int, vol,
-                                                 memory_location);
+                                                 HYPRE_MEMORY_DEVICE);
                   box_nnzrows_end = HYPRE_THRUST_CALL(copy_if,
                                                       nonzero_rows,
                                                       nonzero_rows_end,
@@ -213,7 +213,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   for (j = 0; j < ndim; j++)
                   {
                      indices[j] = hypre_CTAlloc(HYPRE_Int, num_indices,
-                                                memory_location);
+                                                HYPRE_MEMORY_DEVICE);
                   }
 
                   /* Gather indices at non-zero rows of A_u */
@@ -229,9 +229,9 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   /* Free memory */
                   for (j = 0; j < ndim; j++)
                   {
-                     hypre_TFree(all_indices[j], memory_location);
+                     hypre_TFree(all_indices[j], HYPRE_MEMORY_DEVICE);
                   }
-                  hypre_TFree(box_nnzrows, memory_location);
+                  hypre_TFree(box_nnzrows, HYPRE_MEMORY_DEVICE);
 
 #endif // defined(HYPRE_USING_SYCL)
                }
@@ -241,7 +241,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   num_indices = 0;
                   for (j = 0; j < ndim; j++)
                   {
-                     indices[j] = hypre_CTAlloc(HYPRE_Int, vol, memory_location);
+                     indices[j] = hypre_CTAlloc(HYPRE_Int, vol, HYPRE_MEMORY_HOST);
                   }
 
                   /* TODO: re-enable box loop reduction with OpenMP */
@@ -302,7 +302,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                /* Free memory */
                for (j = 0; j < ndim; j++)
                {
-                  hypre_TFree(indices[j], memory_location);
+                  hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
                }
             }
          }
@@ -352,9 +352,10 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
 
       /* Get CF splitting */
       CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u),
-                                memory_location);
+                                hypre_HandleMemoryLocation(hypre_handle()));
 
       /* Initialize CF_marker to all C-point (F-points marked below) */
+      /* WM: TODO - note that GPU execution requires unified memory! CF_marker, etc. */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
       {
          CF_marker[i] = 1;
@@ -445,10 +446,12 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
          sparsity pattern inside the structured part
          WM: todo - add other interpolation options (align interp_type parameter
          with BoomerAMG numbering) */
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(A_aug));
       }
+#endif
       hypre_BoomerAMGBuildInterp(A_aug,
                                  CF_marker,
                                  A_aug, /* WM: todo - do I need to do any strength measure here? */
@@ -530,11 +533,11 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
       /* Clean up */
       HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_aug);
-      hypre_TFree(CF_marker, memory_location);
+      hypre_TFree(CF_marker, hypre_HandleMemoryLocation(hypre_handle()));
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_TFree(nonzero_rows, memory_location);
+         hypre_TFree(nonzero_rows, HYPRE_MEMORY_DEVICE);
       }
 #endif
    }
