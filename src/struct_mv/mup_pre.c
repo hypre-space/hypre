@@ -855,7 +855,7 @@ HYPRE_StructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, 
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_StructVectorAxpy_long_dbl( alpha, x, beta, y );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 
@@ -1107,7 +1107,7 @@ HYPRE_StructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha,
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_StructVectorScale_long_dbl( alpha, y );
       default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
 }
 

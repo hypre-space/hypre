@@ -26,4 +26,22 @@ HYPRE_ParVectorCopy_mp( HYPRE_ParVector x,
                                     (hypre_ParVector *) y ) );
 }
 
+HYPRE_Int
+HYPRE_ParVectorConvert_mp( HYPRE_ParVector v,
+                           HYPRE_Precision new_precision)
+{
+   hypre_ParVectorConvert_mp( (hypre_ParVector *) v,
+                              new_precision );
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_ParCSRMatrixConvert_mp( HYPRE_ParCSRMatrix A,
+                              HYPRE_Precision new_precision)
+{
+   hypre_ParCSRMatrixConvert_mp( (hypre_ParCSRMatrix *) A,
+                                 new_precision );
+   return hypre_error_flag;
+}
+
 #endif

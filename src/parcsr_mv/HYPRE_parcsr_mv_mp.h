@@ -22,6 +22,10 @@ extern "C" {
 
 HYPRE_Int HYPRE_ParVectorCopy_mp( HYPRE_ParVector x, HYPRE_ParVector y );
 
+HYPRE_Int HYPRE_ParVectorConvert_mp( HYPRE_ParVector v, HYPRE_Precision new_precision );
+
+HYPRE_Int HYPRE_ParCSRMatrixConvert_mp( HYPRE_ParCSRMatrix A, HYPRE_Precision new_precision );
+
 #ifdef __cplusplus
 }
 #endif
