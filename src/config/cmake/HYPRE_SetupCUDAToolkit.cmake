@@ -74,7 +74,9 @@ if(NOT TARGET cuda)
 endif()
 
 # Detection CUDA architecture if not given by the user
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES MATCHES "^[ \t\r\n]*$")
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
+   CMAKE_CUDA_ARCHITECTURES MATCHES "^[ \t\r\n]*$" OR
+   CMAKE_CUDA_ARCHITECTURES STREQUAL "52")  # CMake's default
   message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
 
   # Platform-specific NVIDIA smi command
