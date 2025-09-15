@@ -1143,7 +1143,7 @@ struct hypreFunctor_IJMatrixGetValues
             const HYPRE_Int *p_found = p_end;
             if (p_begin != p_end)
             {
-               /* Device assembly puts diag. first and sorts remaining columns in increasing order */
+               /* Device assembly puts diag first and sorts remaining columns in increasing order */
                if (*p_begin == l_col)
                {
                   p_found = p_begin;
