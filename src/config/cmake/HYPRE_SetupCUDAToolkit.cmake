@@ -74,7 +74,9 @@ if(NOT TARGET cuda)
 endif()
 
 # Detection CUDA architecture if not given by the user
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52")
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
+   CMAKE_CUDA_ARCHITECTURES MATCHES "^[ \t\r\n]*$" OR
+   CMAKE_CUDA_ARCHITECTURES STREQUAL "52")  # CMake's default
   message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
 
   # Platform-specific NVIDIA smi command
@@ -138,8 +140,7 @@ else()
   # Remove duplicates from the pre-set CMAKE_CUDA_ARCHITECTURES
   string(REPLACE "," ";" CUDA_ARCH_LIST "${CMAKE_CUDA_ARCHITECTURES}")
   list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
-  string(REPLACE ";" "," CUDA_ARCH_STR "${CUDA_ARCH_LIST}")
-  set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
+  set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_LIST}" CACHE STRING "Detected CUDA architectures" FORCE)
   message(STATUS "CMAKE_CUDA_ARCHITECTURES is already set to: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 

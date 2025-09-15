@@ -577,7 +577,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       counter[0] = 0;
       for (i = 0; i < nrows; i++)
       {
-         counter[i + 1] = counter[i] + ncols[i];
+         counter[i + 1] = counter[i] + ((ncols) ? ncols[i] : 1);
       }
 
       indx = 0;
@@ -597,7 +597,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                   hypre_printf ("Error! Not enough memory! HYPRE_IJMatrixGetValues\n");
                }
             }
-            if (ncols[i] < row_size)
+            if (ncols && ncols[i] < row_size)
             {
                warning = 1;
             }
@@ -629,7 +629,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
             }
          }
       }
-      if (warning)
+      if (warning && ncols)
       {
          for (i = 0; i < nrows; i++)
          {
@@ -648,7 +648,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = (ncols) ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;

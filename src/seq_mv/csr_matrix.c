@@ -932,8 +932,10 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMigrate
  *
- * Migrates matrix row pointer, column indices and data to memory_location
- * if it is different to the current one.
+ * Migrates the CSR matrix arrays (row pointer, column indices, optional
+ * row nnz, and data) to the given memory location. New arrays are
+ * allocated and copied if the location differs; old arrays are freed if
+ * owned. Updates the matrix to own the new arrays.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -944,6 +946,7 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    HYPRE_Int       num_rows     = hypre_CSRMatrixNumRows(A);
    HYPRE_Int       num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int       num_rownnz   = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int       owns_data    = hypre_CSRMatrixOwnsData(A);
    HYPRE_Int      *A_ri         = hypre_CSRMatrixRownnz(A);
    HYPRE_Int      *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int      *A_j          = hypre_CSRMatrixJ(A);
@@ -971,9 +974,13 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    /* Update A's memory location */
    hypre_CSRMatrixMemoryLocation(A) = memory_location;
 
+   /* Only perform migration if the actual memory space differs */
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(old_memory_location) )
    {
+      /* A takes ownership of `j`, `bigj`, and `data` since they will be allocated */
+      hypre_CSRMatrixOwnsData(A) = 1;
+
       if (A_ri)
       {
          B_ri = hypre_TAlloc(HYPRE_Int, num_rownnz, memory_location);
@@ -997,8 +1004,11 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          B_j = hypre_TAlloc(HYPRE_Int, num_nonzeros, memory_location);
          hypre_TMemcpy(B_j, A_j, HYPRE_Int, num_nonzeros,
                        memory_location, old_memory_location);
-         hypre_TFree(A_j, old_memory_location);
          hypre_CSRMatrixJ(A) = B_j;
+         if (owns_data)
+         {
+            hypre_TFree(A_j, old_memory_location);
+         }
       }
 
       if (A_big_j)
@@ -1006,8 +1016,11 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          B_big_j = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, memory_location);
          hypre_TMemcpy(B_big_j, A_big_j, HYPRE_BigInt, num_nonzeros,
                        memory_location, old_memory_location);
-         hypre_TFree(A_big_j, old_memory_location);
          hypre_CSRMatrixBigJ(A) = B_big_j;
+         if (owns_data)
+         {
+            hypre_TFree(A_big_j, old_memory_location);
+         }
       }
 
       if (A_data)
@@ -1015,8 +1028,11 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          B_data = hypre_TAlloc(HYPRE_Complex, num_nonzeros, memory_location);
          hypre_TMemcpy(B_data, A_data, HYPRE_Complex, num_nonzeros,
                        memory_location, old_memory_location);
-         hypre_TFree(A_data, old_memory_location);
          hypre_CSRMatrixData(A) = B_data;
+         if (owns_data)
+         {
+            hypre_TFree(A_data, old_memory_location);
+         }
       }
    }
 
