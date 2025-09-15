@@ -4,11 +4,11 @@
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-.. _sec-IJ-Interface:
+.. _sec-Utilities:
 
-IJ System Interface
+Utilities
 ==============================================================================
 
-.. doxygengroup:: IJInterface
+.. doxygengroup:: Utilities
    :project: hypre
 

@@ -3365,6 +3365,11 @@ hypre_using_umpire_host=no
 hypre_using_umpire_device=no
 hypre_using_umpire_um=no
 hypre_using_umpire_pinned=no
+hypre_user_disabled_umpire=no
+hypre_user_gave_umpire_inc=no
+hypre_user_gave_umpire_lib=no
+hypre_user_gave_umpire_lib_dirs=no
+hypre_user_gave_umpire_libs=no
 hypre_warp_size=32
 
 hypre_using_caliper=no
@@ -5127,9 +5132,10 @@ fi
 if test ${with_umpire+y}
 then :
   withval=$with_umpire; case "${withval}" in
-    yes) hypre_using_umpire_device=yes
+    yes) hypre_using_umpire=yes
+         hypre_using_umpire_device=yes
          hypre_using_umpire_um=yes ;;
-    no) ;;
+    no)  hypre_user_disabled_umpire=yes ;;
     *) ;;
  esac
 fi
@@ -5142,7 +5148,7 @@ then :
   withval=$with_umpire_include; for umpire_dir in $withval; do
 HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
 done;
-
+hypre_user_gave_umpire_inc=yes
 
 fi
 
@@ -5154,7 +5160,7 @@ then :
   withval=$with_umpire_lib; for umpire_lib in $withval; do
        HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
  done;
-
+ hypre_user_gave_umpire_lib=yes
 
 fi
 
@@ -5166,7 +5172,7 @@ then :
   withval=$with_umpire_libs; for umpire_lib in $withval; do
     HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
  done;
-
+ hypre_user_gave_umpire_libs=yes
 
 fi
 
@@ -5177,8 +5183,9 @@ if test ${with_umpire_lib_dirs+y}
 then :
   withval=$with_umpire_lib_dirs; for umpire_lib_dir in $withval; do
     HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+    HYPRE_UMPIRE_RPATH="${HYPRE_UMPIRE_RPATH} -Wl,-rpath,${umpire_lib_dir}"
  done;
-
+ hypre_user_gave_umpire_lib_dirs=yes
 
 fi
 
@@ -7735,11 +7742,11 @@ if test x$ac_prog_cxx_stdcxx = xno
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CXX option to enable C++11 features" >&5
 printf %s "checking for $CXX option to enable C++11 features... " >&6; }
-if test ${ac_cv_prog_cxx_cxx11+y}
+if test ${ac_cv_prog_cxx_11+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_cv_prog_cxx_cxx11=no
+  ac_cv_prog_cxx_11=no
 ac_save_CXX=$CXX
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -7781,11 +7788,11 @@ if test x$ac_prog_cxx_stdcxx = xno
 then :
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CXX option to enable C++98 features" >&5
 printf %s "checking for $CXX option to enable C++98 features... " >&6; }
-if test ${ac_cv_prog_cxx_cxx98+y}
+if test ${ac_cv_prog_cxx_98+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_cv_prog_cxx_cxx98=no
+  ac_cv_prog_cxx_98=no
 ac_save_CXX=$CXX
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -10746,6 +10753,36 @@ printf "%s\n" "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
          LINK_CC=${LINK_CXX}
    fi
 
+if test "x$hypre_user_disabled_umpire" != "xyes"
+then
+  if test "x$hypre_using_umpire" != "xyes"
+  then
+    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
+    then
+      hypre_using_umpire=yes
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out." >&5
+printf "%s\n" "$as_me: Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out." >&6;}
+    fi
+  fi
+fi
+
+if test "x$hypre_user_disabled_umpire" = "xyes"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
+  then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ***************************************************************" >&5
+printf "%s\n" "$as_me: WARNING: ***************************************************************" >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Umpire is explicitly disabled while building hypre for GPUs." >&5
+printf "%s\n" "$as_me: WARNING:  Umpire is explicitly disabled while building hypre for GPUs." >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  This is not recommended for performance reasons!" >&5
+printf "%s\n" "$as_me: WARNING:  This is not recommended for performance reasons!" >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:  Enable it with --with-umpire." >&5
+printf "%s\n" "$as_me: WARNING:  Enable it with --with-umpire." >&2;}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: ***************************************************************" >&5
+printf "%s\n" "$as_me: WARNING: ***************************************************************" >&2;}
+  fi
+fi
+
 if test "x$hypre_using_umpire_host" = "xyes"
 then
    hypre_using_umpire=yes
@@ -10783,6 +10820,29 @@ then
 
 printf "%s\n" "#define HYPRE_USING_UMPIRE 1" >>confdefs.h
 
+   if test "x$HYPRE_UMPIRE_RPATH" != "x"
+   then
+      LDFLAGS="${LDFLAGS} ${HYPRE_UMPIRE_RPATH}"
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: Adding Umpire rpath to LDFLAGS: ${HYPRE_UMPIRE_RPATH}" >&5
+printf "%s\n" "$as_me: Adding Umpire rpath to LDFLAGS: ${HYPRE_UMPIRE_RPATH}" >&6;}
+   fi
+   if test "$hypre_user_gave_umpire_inc" != "yes" || \
+      test "$hypre_user_gave_umpire_lib" != "yes" && test "$hypre_user_gave_umpire_libs" != "yes" || \
+      test "$hypre_user_gave_umpire_lib_dirs" != "yes"
+   then
+      as_fn_error $? "
+===============================================================
+Umpire has been enabled for GPU builds to improve performance.
+However, Umpire include and/or library paths were not provided.
+
+Provide the following flags as appropriate:
+  --with-umpire-include=\"/path-to-umpire-install/include\"
+  --with-umpire-lib-dirs=\"/path-to-umpire-install/lib\"
+  --with-umpire-libs=\"umpire\"  or  --with-umpire-lib=\"-lumpire\"
+
+To opt out (not recommended), configure with --without-umpire.
+===============================================================" "$LINENO" 5
+   fi
 fi
 
 if test "$hypre_using_cuda" = "yes"
@@ -11028,6 +11088,7 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
         else
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
                 if test "x${HYPRE_SYCL_TARGET}" != "x"
@@ -11042,7 +11103,7 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
                 if test "$hypre_using_shared" = "yes"
         then
            SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
-           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+           BUILD_CC_SHARED="${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
                 if test "$hypre_user_chose_cuflags" = "no"

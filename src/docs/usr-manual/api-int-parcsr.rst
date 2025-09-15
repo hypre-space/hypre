@@ -4,11 +4,11 @@
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-.. _sec-IJ-Interface:
+.. _sec-ParCSR-Interface:
 
-IJ System Interface
+ParCSR Object Interface
 ==============================================================================
 
-.. doxygengroup:: IJInterface
+.. doxygengroup:: ParCSRInterface
    :project: hypre
 

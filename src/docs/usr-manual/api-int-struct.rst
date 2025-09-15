@@ -4,11 +4,11 @@
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-.. _sec-Struct-System-Interface:
+.. _sec-Struct-Interface:
 
-Struct System Interface
+Struct System and Object Interface
 ==============================================================================
 
-.. doxygengroup:: StructSystemInterface
+.. doxygengroup:: StructInterface
    :project: hypre
 

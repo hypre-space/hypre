@@ -268,6 +268,24 @@ HYPRE_ParCSRMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B, HYPRE_ParCSRMatrix *C )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParCSRMatrixMatmat_flt( A, B, C );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParCSRMatrixMatmat_dbl( A, B, C );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParCSRMatrixMatmat_long_dbl( A, B, C );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x, hypre_long_double beta, HYPRE_ParVector y )
 {
    switch (precision)
@@ -502,16 +520,16 @@ HYPRE_ParVectorInitialize_pre( HYPRE_Precision precision, HYPRE_ParVector vector
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_ParVector x, HYPRE_ParVector y, void *prod )
+HYPRE_ParVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_ParVector x, HYPRE_ParVector y, void *result )
 {
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParVectorInnerProd_flt( x, y, prod );
+         return HYPRE_ParVectorInnerProd_flt( x, y, result );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParVectorInnerProd_dbl( x, y, prod );
+         return HYPRE_ParVectorInnerProd_dbl( x, y, result );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParVectorInnerProd_long_dbl( x, y, prod );
+         return HYPRE_ParVectorInnerProd_long_dbl( x, y, result );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
