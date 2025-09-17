@@ -64,7 +64,7 @@ typedef struct
    HYPRE_Int             num_nonzeros;
    hypre_int            *i_short;
    hypre_int            *j_short;
-   HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `j`, `big_j`, and `data'? */
    HYPRE_Int             pattern_only;    /* 1: data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
@@ -696,6 +696,14 @@ HYPRE_Int
 hypre_SeqVectorAxpy_mp( hypre_double alpha,
                         hypre_Vector *x,
                         hypre_Vector *y     );
+
+HYPRE_Int
+hypre_CSRMatrixConvert_mp ( hypre_CSRMatrix *A,
+                            HYPRE_Precision new_precision);
+
+HYPRE_Int
+hypre_SeqVectorConvert_mp ( hypre_Vector *v,
+                            HYPRE_Precision new_precision);
 
 #endif
 

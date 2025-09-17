@@ -37,13 +37,13 @@ endfunction()
 function(setup_git_version_info HYPRE_GIT_DIR)
   set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
   if (EXISTS "${HYPRE_GIT_DIR}")
-    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9
+    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9 --always
                     OUTPUT_VARIABLE develop_string
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     RESULT_VARIABLE git_result)
     if (git_result EQUAL 0)
       set(GIT_VERSION_FOUND TRUE PARENT_SCOPE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0 --always
                       OUTPUT_VARIABLE develop_lastag
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-list --count ${develop_lastag}..HEAD
