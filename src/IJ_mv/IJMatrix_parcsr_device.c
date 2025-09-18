@@ -1208,13 +1208,13 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
    HYPRE_Int          *offd_i           = hypre_CSRMatrixI(offd);
    HYPRE_Int          *offd_j           = hypre_CSRMatrixJ(offd);
    HYPRE_Complex      *offd_data        = hypre_CSRMatrixData(offd);
-   HYPRE_BigInt       *col_map_offd     = hypre_ParCSRMatrixDeviceColMapOffd(par_matrix);
 
    hypre_ParCSRMatrix *h_parcsr;
    HYPRE_IJMatrix      h_matrix;
    HYPRE_Int          *h_ncols;
    HYPRE_BigInt       *extended_rows;
    HYPRE_BigInt       *h_rows, *h_cols;
+   HYPRE_BigInt       *col_map_offd = NULL;
    HYPRE_Complex      *h_values;
    HYPRE_Int           i, num_nonzeros;
 
@@ -1276,6 +1276,9 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
 #endif
 
       hypreDevice_ComplexFilln(values, num_nonzeros, 0.0);
+
+      hypre_ParCSRMatrixCopyColMapOffdToDevice(par_matrix);
+      col_map_offd = hypre_ParCSRMatrixDeviceColMapOffd(par_matrix);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL(for_each,

@@ -1396,6 +1396,15 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    {
       HYPRE_ANNOTATE_FUNC_END;
       hypre_GpuProfilingPopRange();
+#if defined(HYPRE_USING_GPU)
+      if (exec_policy == HYPRE_EXEC_DEVICE)
+      {
+         for (m = 0; m < nmatrices + 1; m++)
+         {
+            hypre_TFree(A_const[m], HYPRE_MEMORY_HOST);
+         }
+      }
+#endif
       hypre_TFree(A_const, HYPRE_MEMORY_HOST);
 
       return hypre_error_flag;
@@ -1563,6 +1572,15 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
    /* Free memory */
    hypre_BoxDestroy(loop_box);
+#if defined(HYPRE_USING_GPU)
+   if (exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      for (m = 0; m < nmatrices + 1; m++)
+      {
+         hypre_TFree(A_const[m], HYPRE_MEMORY_HOST);
+      }
+   }
+#endif
    hypre_TFree(A_const, HYPRE_MEMORY_HOST);
 
    hypre_GpuProfilingPopRange();

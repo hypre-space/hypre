@@ -60,7 +60,6 @@ FILES="\
  ${TNAME}.out.48\
  ${TNAME}.out.49\
  ${TNAME}.out.50\
- ${TNAME}.out.51\
  ${TNAME}.out.52\
  ${TNAME}.out.53\
  ${TNAME}.out.56\
@@ -96,6 +95,9 @@ FILES="\
 # ${TNAME}.out.12\
 # ${TNAME}.out.13\
 # ${TNAME}.out.14\
+# ${TNAME}.out.51\
+# ${TNAME}.out.54\
+# ${TNAME}.out.55\
 
 for i in $FILES
 do
