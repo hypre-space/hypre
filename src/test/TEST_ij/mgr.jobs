@@ -1,0 +1,26 @@
+#
+# MGR and MGR-PCG
+#
+# coarse grid solver checks (1-level MGR == AMG (or coarse grid solver))
+# Also checks for keeping coarse nodes to coarsest level
+# coarse grid size in output should be ~ mgr_num_reserved_nodes
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes 0 > mgr.out.200
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes 100 > mgr.out.201
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 0 > mgr.out.202
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 100 > mgr.out.203
+# multi level MGR tests with different coarse grid type strategies
+# Fix non C points to F points with different F-relaxation methods (single/multilevel F-relaxation)
+# with/ without reserved coarse nodes
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > mgr.out.204
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 0 -mgr_num_reserved_nodes 100 > mgr.out.205
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 1 -mgr_num_reserved_nodes 0 > mgr.out.206
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 1 -mgr_num_reserved_nodes 100 > mgr.out.207
+# Not fixed non C points to F points with different F-relaxation methods (single/multilevel F-relaxation)
+# with/ without reserved coarse nodes
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > mgr.out.208
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 100 > mgr.out.209
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 1 -mgr_num_reserved_nodes 0 > mgr.out.210
+mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 1 -mgr_num_reserved_nodes 100 > mgr.out.211
+# MGR-PCG tests
+mpirun -np 2 ./ij -solver 71 -mgr_nlevels 0 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > mgr.out.212
+mpirun -np 2 ./ij -solver 71 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > mgr.out.213

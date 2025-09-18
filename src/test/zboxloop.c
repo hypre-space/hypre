@@ -36,7 +36,7 @@ main( hypre_int argc,
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
-   hypre_Index       loop_size, start, ustride, index, idx;
+   hypre_Index       loop_size, start, ustride, index;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -258,7 +258,6 @@ main( hypre_int argc,
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop0Begin(3, loop_size);
       {
-         (void) idx;
          d_xp1[0] += 1.0;
       }
       hypre_BoxLoop0End();

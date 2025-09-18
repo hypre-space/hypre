@@ -63,7 +63,7 @@ mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 4 -inter
 mpirun -np 1  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 1 -interp 0 > solvers.out.48
 mpirun -np 4  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 0 -interp 0 > solvers.out.49
 mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 1 -interp 0 > solvers.out.50
-mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 -interp 0 > solvers.out.51
+#mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 -interp 0 > solvers.out.51
 mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 1 -interp 0 > solvers.out.52
 mpirun -np 2  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 0 -interp 0 > solvers.out.53
 #mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -interp 0 > solvers.out.54

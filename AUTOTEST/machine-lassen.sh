@@ -61,7 +61,7 @@ eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
-# CUDA with UM in debug mode [ij, ams, struct, sstruct]
+# CUDA with UM in debug mode with print errors [error]
 co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-persistent --enable-debug --with-print-errors --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-error -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro

@@ -21,18 +21,6 @@ tail -17 ${TNAME}.out.110 | head -6 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-# IJ: MGR case nlevels < 1 and bsize < 2 should be the same
-#                    compare results
-#=============================================================================
-
-tail -17 ${TNAME}.out.200 | head -6 > ${TNAME}.mgr_testdata
-
-#=============================================================================
-
-tail -17 ${TNAME}.out.202 | head -6 > ${TNAME}.mgr_testdata.temp
-diff ${TNAME}.mgr_testdata ${TNAME}.mgr_testdata.temp >&2
-
-#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -156,52 +144,10 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-HOST=`hostname`
-case $HOST in
-   lassen*)
-      shift
-      FILES="\
-       ${TNAME}.out.200\
-       ${TNAME}.out.201\
-       ${TNAME}.out.202\
-       ${TNAME}.out.203\
-       ${TNAME}.out.212\
-       ${TNAME}.out.213\
-       ${TNAME}.out.404\
-       ${TNAME}.out.405\
-      "
-      # TODO: failing MGR tests on lassen
-       # ${TNAME}.out.204\
-       # ${TNAME}.out.205\
-       # ${TNAME}.out.206\
-       # ${TNAME}.out.207\
-       # ${TNAME}.out.208\
-       # ${TNAME}.out.209\
-       # ${TNAME}.out.210\
-       # ${TNAME}.out.211\
-      ;;
-   *)
-      shift
-      FILES="\
-       ${TNAME}.out.200\
-       ${TNAME}.out.201\
-       ${TNAME}.out.202\
-       ${TNAME}.out.203\
-       ${TNAME}.out.204\
-       ${TNAME}.out.205\
-       ${TNAME}.out.206\
-       ${TNAME}.out.207\
-       ${TNAME}.out.208\
-       ${TNAME}.out.209\
-       ${TNAME}.out.210\
-       ${TNAME}.out.211\
-       ${TNAME}.out.212\
-       ${TNAME}.out.213\
-       ${TNAME}.out.404\
-       ${TNAME}.out.405\
-      "
-      ;;
-esac
+FILES="\
+ ${TNAME}.out.404\
+ ${TNAME}.out.405\
+"
 
 for i in $FILES
 do
@@ -276,4 +222,3 @@ cat ${TNAME}.out.[a-z] > ${TNAME}.out
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
-rm -r ${TNAME}.mgr_testdata*
