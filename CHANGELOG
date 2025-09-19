@@ -7,7 +7,7 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
-Version 3.0.0 released 2025/09/19
+Version 3.0.0 released 2025/09/26
 
 - Major rewrite of the semi-structured code (Struct and SStruct)
   * Extended matrices to be rectangular (not just square as before)
