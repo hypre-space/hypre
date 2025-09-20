@@ -24,7 +24,6 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     _hypre_utilities_mup.h
     _hypre_utilities_mup_def.h
     _hypre_utilities_mup_undef.h
-    multiprecision.h
   )
 endif()
 
