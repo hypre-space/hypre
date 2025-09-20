@@ -1576,9 +1576,9 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
                                  hypre_Index                Mdstride )
 {
    HYPRE_Int       nprod[8];
-   HYPRE_Complex   cprod[8][na];
-   hypre_3Cptrs    tptrs[8][na];
-   hypre_1Cptr     mptrs[8][na];
+   HYPRE_Complex   cprod[8][HYPRE_MAX_MMTERMS];
+   hypre_3Cptrs    tptrs[8][HYPRE_MAX_MMTERMS];
+   hypre_1Cptr     mptrs[8][HYPRE_MAX_MMTERMS];
 
    HYPRE_Int       mentry, ptype = 0, nf, nc, nt;
    HYPRE_Int       e, p, i, k, t;
@@ -1683,8 +1683,18 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
                return hypre_error_flag;
          }
 
-         /* Set array values for product k of product type ptype */
+         /* Retrieve product index */
          k = nprod[ptype];
+         if (k >= HYPRE_MAX_MMTERMS)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Reached maximum allowed product index! Increase HYPRE_MAX_MMTERMS!");
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_FUNC_END;
+            return hypre_error_flag;
+         }
+
+         /* Set array values for k-th product of type "ptype" */
          cprod[ptype][k] = a[i].cprod;
          nf = nc = 0;
          for (t = 0; t < nterms; t++)
