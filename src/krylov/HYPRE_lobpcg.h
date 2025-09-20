@@ -10,7 +10,7 @@
 
 #include "HYPRE_krylov.h"
 
-#include "fortran_matrix.h"
+#include "_hypre_fortran_matrix.h"
 #include "multivector.h"
 #include "interpreter.h"
 #include "temp_multivector.h"

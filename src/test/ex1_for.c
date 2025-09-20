@@ -30,7 +30,7 @@
 #include "HYPRE_struct_ls.h"
 
 #ifdef HYPRE_FORTRAN
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #include "hypre_struct_fortran_test.h"
 #endif
 

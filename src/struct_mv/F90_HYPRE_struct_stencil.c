@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 #ifdef __cplusplus
 extern "C" {
