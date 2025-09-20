@@ -8,7 +8,7 @@
 #ifndef hypre_LOBPCG_HEADER
 #define hypre_LOBPCG_HEADER
 
-#include "multivector.h"
+#include "_hypre_lobpcg_multivector.h"
 #include "_hypre_fortran_matrix.h"
 #include "HYPRE_krylov.h"
 #include "HYPRE_lobpcg.h"

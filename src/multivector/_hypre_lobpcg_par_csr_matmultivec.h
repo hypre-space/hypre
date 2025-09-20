@@ -15,7 +15,7 @@
 #define PAR_CSR_MATMULTIVEC_HEADER
 
 #include "_hypre_parcsr_mv.h"
-#include "par_multivector.h"
+#include "_hypre_lobpcg_par_multivector.h"
 
 #ifdef __cplusplus
 extern "C" {

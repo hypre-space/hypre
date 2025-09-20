@@ -11,9 +11,9 @@
 #include "HYPRE_krylov.h"
 
 #include "_hypre_fortran_matrix.h"
-#include "multivector.h"
-#include "interpreter.h"
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_krylov_mup_def.h"
