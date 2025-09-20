@@ -4346,7 +4346,14 @@ hypre_fuse_order_bigints( HYPRE_Int      nprod,
                           HYPRE_BigInt  *bigints )
 {
    HYPRE_Int     k;
-   HYPRE_BigInt  tmp_bigints[nprod];
+   HYPRE_BigInt  tmp_bigints[HYPRE_MAX_MMTERMS];
+
+   if (nprod >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached maximum allowed product index! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag;
+   }
 
    for (k = 0; k < nprod; k++)
    {
@@ -4370,8 +4377,15 @@ hypre_fuse_order_ptrs( HYPRE_Int       nprod,
                        hypre_1Cptr    *mptrs )
 {
    HYPRE_Int     k, i;
-   hypre_3Cptrs  tmp_tptrs[nprod];
-   hypre_1Cptr   tmp_mptrs[nprod];
+   hypre_3Cptrs  tmp_tptrs[HYPRE_MAX_MMTERMS];
+   hypre_1Cptr   tmp_mptrs[HYPRE_MAX_MMTERMS];
+
+   if (nprod >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached maximum allowed product index! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag;
+   }
 
    for (k = 0; k < nprod; k++)
    {
@@ -4411,12 +4425,19 @@ hypre_fuse_sort( HYPRE_Int        nprod,
 
    HYPRE_Int       k;
    HYPRE_Complex  *minptrs[4];
-   HYPRE_BigInt    distances[4][nprod];
-   HYPRE_Int       order[nprod];
+   HYPRE_BigInt    distances[4][HYPRE_MAX_MMTERMS];
+   HYPRE_Int       order[HYPRE_MAX_MMTERMS];
 
    if ((nprod < 1) || (approach == 0))
    {
       return hypre_error_flag;
+   }
+
+   if (nprod >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached maximum allowed product index! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag
    }
 
    /* Get minimum pointer addresses */
@@ -4507,17 +4528,17 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
 {
 #if defined(HYPRE_FUSE_FCC_FC_F)
    HYPRE_Int       Mnum_values   = hypre_StructMatrixNumValues(M);
-   hypre_1Cptr     mmptrs[Mnum_values];
+   hypre_1Cptr     mmptrs[HYPRE_MAX_MMTERMS];
 #else
    HYPRE_UNUSED_VAR(M);
    HYPRE_UNUSED_VAR(stencil_size);
 #endif
 
    HYPRE_Int       nprod[8] = {0};
-   HYPRE_Complex   cprod[8][na];
-   hypre_3Cptrs    tptrs[8][na];
-   hypre_1Cptr     mptrs[8][na];
-   HYPRE_Int       mentries[8][na];
+   HYPRE_Complex   cprod[8][HYPRE_MAX_MMTERMS];
+   hypre_3Cptrs    tptrs[8][HYPRE_MAX_MMTERMS];
+   hypre_1Cptr     mptrs[8][HYPRE_MAX_MMTERMS];
+   HYPRE_Int       mentries[8][HYPRE_MAX_MMTERMS];
 
    HYPRE_Int       ptype = 0, nf, nc, nt;
    HYPRE_Int       i, k, t;
@@ -4613,8 +4634,18 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
             return hypre_error_flag;
       }
 
-      /* Set array values for product k of product type ptype */
+      /* Retrieve product index */
       k = nprod[ptype];
+      if (k >= HYPRE_MAX_MMTERMS)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Reached maximum allowed product index! Increase HYPRE_MAX_MMTERMS!");
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+
+      /* Set array values for k-th product of type "ptype" */
       cprod[ptype][k] = a[i].cprod;
       for (t = 0; t < nterms; t++)
       {

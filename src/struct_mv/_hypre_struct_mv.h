@@ -1773,6 +1773,11 @@ hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i),
 #ifndef hypre_STRUCT_MATMULT_HEADER
 #define hypre_STRUCT_MATMULT_HEADER
 
+/* Max. number of matrix-matrix multiplication terms */
+#ifndef HYPRE_MAX_MMTERMS
+#define HYPRE_MAX_MMTERMS 512
+#endif
+
 /*--------------------------------------------------------------------------
  * StructMatmultDataMH data structure
  *

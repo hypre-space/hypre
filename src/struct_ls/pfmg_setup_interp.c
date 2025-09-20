@@ -228,9 +228,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
    HYPRE_Int              i, l, r, m, k, si;
    HYPRE_Int              depth, vdepth, vsi[HYPRE_UNROLL_MAXDEPTH];
-   HYPRE_Int              msi[A_stencil_size];
-   HYPRE_Int              lsi[A_stencil_size];
-   HYPRE_Int              rsi[A_stencil_size];
+   HYPRE_Int              msi[HYPRE_MAX_MMTERMS];
+   HYPRE_Int              lsi[HYPRE_MAX_MMTERMS];
+   HYPRE_Int              rsi[HYPRE_MAX_MMTERMS];
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
    HYPRE_DECLARE_2VARS(0);
@@ -242,6 +242,14 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
    HYPRE_DECLARE_2VARS(6);
    HYPRE_DECLARE_2VARS(7);
    HYPRE_DECLARE_2VARS(8);
+
+   /* Sanity check */
+   if (A_stencil_size >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached max. stencil size! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
