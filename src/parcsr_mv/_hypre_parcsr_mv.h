@@ -8,7 +8,7 @@
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
 #include "_hypre_seq_block_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_parcsr_mv_mup_def.h"

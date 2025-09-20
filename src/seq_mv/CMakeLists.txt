@@ -6,7 +6,6 @@
 set(HDRS
   HYPRE_seq_mv.h
   _hypre_seq_mv.h
-  seq_mv.h
 )
 
 # Add MUP headers when mixed precision is enabled

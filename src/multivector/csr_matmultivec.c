@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "csr_multimatvec.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_lobpcg_seq_multivector.h"
 
 /*--------------------------------------------------------------------------

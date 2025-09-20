@@ -1690,7 +1690,7 @@ extern "C" {
 #include "_hypre_lobpcg.h"
 #include "IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_parcsr_ls.h"
 HYPRE_Solver	   lobHYPRESolver;
 HYPRE_ParCSRMatrix lobHYPREA;

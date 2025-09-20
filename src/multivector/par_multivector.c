@@ -16,7 +16,7 @@
 #include "_hypre_utilities.h"
 
 /* for temporary implementation of multivectorRead, multivectorPrint */
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_parcsr_mv.h"
 
 /*--------------------------------------------------------------------------

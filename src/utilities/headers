@@ -60,7 +60,7 @@ cat int_array.h                >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 cat hopscotch_hash.h           >> $INTERNAL_HEADER
 cat mmio.h                     >> $INTERNAL_HEADER
-cat fortran_matrix.h           >> $INTERNAL_HEADER
+cat _hypre_fortran_matrix.h    >> $INTERNAL_HEADER
 cat multiprecision.h           >> $INTERNAL_HEADER
 
 #===========================================================================

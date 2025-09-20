@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_GPU)

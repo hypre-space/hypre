@@ -74,7 +74,3 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 @
-
-# RDF: Remove this once 'seq_mv.h' is removed from hypre
-cp _hypre_seq_mv.h seq_mv.h
-
