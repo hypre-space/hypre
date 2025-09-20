@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_struct_ls.h"
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_temp_multivector.h"
 
 HYPRE_Int
 HYPRE_StructSetupInterpreter( mv_InterfaceInterpreter *i )

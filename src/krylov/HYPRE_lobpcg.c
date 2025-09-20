@@ -16,7 +16,7 @@
 
 #include "HYPRE_lobpcg.h"
 #include "_hypre_lobpcg.h"
-#include "interpreter.h"
+#include "_hypre_lobpcg_interpreter.h"
 
 HYPRE_Int
 HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,

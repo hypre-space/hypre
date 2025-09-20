@@ -7,9 +7,9 @@
 
 #include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
-#include "float.h"
+//#include "float.h"
 #include "ams.h"
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_temp_multivector.h"
 #include "_hypre_lobpcg.h"
 #include "ame.h"
 #include "_hypre_utilities.hpp"

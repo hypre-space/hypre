@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_multivector.h"
+#include "_hypre_lobpcg_seq_multivector.h"
 #include "_hypre_utilities.h"
 
 #include <stdlib.h>
@@ -559,4 +559,3 @@ hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int
 
    return 0;
 }
-

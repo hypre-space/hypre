@@ -21,8 +21,8 @@ CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 HEADERS =\
  amg_linklist.h\
  exchange_data.h\
- fortran.h\
- fortran_matrix.h\
+ _hypre_fortran.h\
+ _hypre_fortran_matrix.h\
  general.h\
  int_array.h\
  memory.h\
@@ -57,7 +57,6 @@ FILES =\
  memory_tracker.c\
  merge_sort.c\
  mmio.c\
- mpi_comm_f2c.c\
  prefix_sum.c\
  qsort.c\
  unique.c\
@@ -123,14 +122,13 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_fortran*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

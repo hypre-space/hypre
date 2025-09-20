@@ -9,7 +9,7 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_krylov.h"
 
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_temp_multivector.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef HYPRE_MIXED_PRECISION

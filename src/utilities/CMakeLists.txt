@@ -8,8 +8,8 @@ set(HDRS
   HYPRE_utilities.h
   _hypre_utilities.h
   _hypre_utilities.hpp
-  fortran.h
-  fortran_matrix.h
+  _hypre_fortran.h
+  _hypre_fortran_matrix.h
 )
 
 if(HYPRE_ENABLE_SYCL)
@@ -24,7 +24,6 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     _hypre_utilities_mup.h
     _hypre_utilities_mup_def.h
     _hypre_utilities_mup_undef.h
-    multiprecision.h
   )
 endif()
 
@@ -51,7 +50,6 @@ set(REGULAR_SRCS
   memory_tracker.c
   merge_sort.c
   mmio.c
-  mpi_comm_f2c.c
   omp_device.c
   prefix_sum.c
   qsort.c

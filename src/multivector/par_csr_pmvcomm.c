@@ -5,8 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "par_csr_pmvcomm.h"
-
+#include "_hypre_lobpcg_par_csr_pmvcomm.h"
 #include "_hypre_parcsr_mv.h"
 
 /*==========================================================================*/
@@ -135,4 +134,3 @@ hypre_ParCSRCommMultiHandleDestroy(hypre_ParCSRCommMultiHandle *comm_handle)
 
    return ierr;
 }
-

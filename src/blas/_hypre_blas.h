@@ -15,7 +15,7 @@
 #define HYPRE_BLAS_H
 
 #include "_hypre_utilities.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 #include <HYPRE_config.h>
 

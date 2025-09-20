@@ -6,8 +6,8 @@
  ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
-#include "interpreter.h"
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
 
 
 /* TODO: This does not belong here */

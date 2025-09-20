@@ -8,8 +8,8 @@
 #ifndef CSR_MULTIMATVEC_H
 #define CSR_MULTIMATVEC_H
 
-#include "seq_mv.h"
-#include "seq_multivector.h"
+#include "_hypre_seq_mv.h"
+#include "_hypre_lobpcg_seq_multivector.h"
 
 #ifdef __cplusplus
 extern "C" {

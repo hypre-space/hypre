@@ -14,8 +14,8 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- multivector.h\
- temp_multivector.h
+ _hypre_lobpcg_multivector.h\
+ _hypre_lobpcg_temp_multivector.h
 
 FILES =\
  multivector.c\

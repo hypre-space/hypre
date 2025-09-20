@@ -15,7 +15,7 @@
 #define HYPRE_LAPACK_H
 
 #include "_hypre_utilities.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_lapack_mup_def.h"

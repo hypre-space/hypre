@@ -11,7 +11,7 @@
 #define hypre_SEQ_BLOCK_MV_HEADER
 
 #include <HYPRE_config.h>
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_seq_block_mv_mup_def.h"
