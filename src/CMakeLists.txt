@@ -286,8 +286,8 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic>)
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror -Werror=vla>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE

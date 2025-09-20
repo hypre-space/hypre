@@ -703,9 +703,8 @@ AS_HELP_STRING([--with-strict-checking],
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant"
-    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
-    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
+    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla"
  elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
