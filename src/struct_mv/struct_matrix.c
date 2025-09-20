@@ -1679,7 +1679,10 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
                                      HYPRE_Complex      *values,
                                      HYPRE_Int           action )
 {
-   HYPRE_Int           *constant     = hypre_StructMatrixConstant(matrix);
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(matrix);
+#endif
+   HYPRE_Int           *constant        = hypre_StructMatrixConstant(matrix);
    HYPRE_Complex       *matp;
    HYPRE_Int            j, s;
 
@@ -1697,20 +1700,52 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix,
          hypre_error(HYPRE_ERROR_GENERIC);
       }
 
-      if (action > 0)
+#if defined(HYPRE_USING_GPU)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         *matp += values[s];
-      }
-      else if (action > -1)
-      {
-         *matp = values[s];
-      }
-      else /* action < 0 */
-      {
-         values[s] = *matp;
-         if (action == -2)
+         if (action > 0)
          {
-            *matp = 0;
+            hypre_LoopBegin(1, k)
+            {
+               HYPRE_UNUSED_VAR(k);
+               *matp += values[s];
+            }
+            hypre_LoopEnd()
+         }
+         else if (action > -1)
+         {
+            hypre_TMemcpy(matp, values + s, HYPRE_Complex, 1,
+                          memory_location, memory_location);
+         }
+         else /* action < 0 */
+         {
+            hypre_TMemcpy(values + s, matp, HYPRE_Complex, 1,
+                          memory_location, memory_location);
+            if (action == -2)
+            {
+               hypre_Memset((void*) matp, 0.0, sizeof(HYPRE_Complex),
+                            memory_location);
+            }
+         }
+      }
+      else
+#endif
+      {
+         if (action > 0)
+         {
+            *matp += values[s];
+         }
+         else if (action > -1)
+         {
+            *matp = values[s];
+         }
+         else /* action < 0 */
+         {
+            values[s] = *matp;
+            if (action == -2)
+            {
+               *matp = 0;
+            }
          }
       }
    }
