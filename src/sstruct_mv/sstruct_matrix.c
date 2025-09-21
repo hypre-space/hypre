@@ -989,12 +989,15 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    hypre_SStructMatrixTmpCoeffs(matrix)          = hypre_CTAlloc(HYPRE_Complex, max_size,
                                                                  HYPRE_MEMORY_HOST);
 #if defined (HYPRE_USING_GPU)
-   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+      hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+      hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+   }
 #endif
 
    HYPRE_IJMatrixInitialize_v2(ijmatrix, memory_location);
@@ -2559,6 +2562,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_Int               *ncols, *rowidx;
    HYPRE_BigInt            *rows, *cols;
    HYPRE_Complex           *values;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy    exec  = hypre_GetExecPolicy1(memory_location);
+#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("SStructMatrixToUMatrix");
@@ -2582,31 +2588,37 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
       values = hypre_TAlloc(HYPRE_Complex, nrows, memory_location);
 
 #if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
-      HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );
-      HYPRE_THRUST_CALL( sequence, rowidx, rowidx + nrows );
-      HYPRE_THRUST_CALL( sequence, rows, rows + nrows, sizes[0] );
-      HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
+         HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
+         HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );
+         HYPRE_THRUST_CALL( sequence, rowidx, rowidx + nrows );
+         HYPRE_THRUST_CALL( sequence, rows, rows + nrows, sizes[0] );
+         HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
 
 #elif defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
-      HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
-      hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
-      hypreSycl_sequence( rows, rows + nrows, sizes[0] );
-      hypreSycl_sequence( cols, cols + nrows, sizes[2] );
+         HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
+         HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
+         hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
+         hypreSycl_sequence( rows, rows + nrows, sizes[0] );
+         hypreSycl_sequence( cols, cols + nrows, sizes[2] );
 #endif
+      }
+      else
 #else
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < nrows; i++)
       {
-         ncols[i]  = 1;
-         rows[i]   = sizes[0] + i;
-         cols[i]   = sizes[2] + i;
-         rowidx[i] = i;
-         values[i] = 1.0;
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < nrows; i++)
+         {
+            ncols[i]  = 1;
+            rows[i]   = sizes[0] + i;
+            cols[i]   = sizes[2] + i;
+            rowidx[i] = i;
+            values[i] = 1.0;
+         }
       }
 #endif
 

@@ -181,10 +181,16 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    HYPRE_Int               nvars;
    HYPRE_Int               part, vi, vj;
    HYPRE_MemoryLocation    memory_location;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy   exec;
+#endif
 
    if (matrix)
    {
       memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+#if defined(HYPRE_USING_GPU)
+      exec = hypre_GetExecPolicy1(memory_location);
+#endif
 
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
@@ -233,9 +239,17 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), memory_location);
-         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), memory_location);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix), memory_location);
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+         }
+#endif
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
 
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
@@ -437,7 +451,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    iupper--; jupper--;
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
-   hypre_SStructUMatrixInitialize(matrix, HYPRE_MEMORY_DEVICE);
+   hypre_SStructUMatrixInitialize(matrix, hypre_HandleMemoryLocation(hypre_handle()));
 
    return hypre_error_flag;
 }
