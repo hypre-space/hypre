@@ -177,33 +177,30 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    HYPRE_Int           ****centries;
    hypre_Index            *dom_stride;
    hypre_Index            *ran_stride;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation    memory_location;
+#endif
 
    HYPRE_Int               nvars;
    HYPRE_Int               part, vi, vj;
-   HYPRE_MemoryLocation    memory_location;
-#if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy   exec;
-#endif
 
    if (matrix)
    {
-      memory_location = hypre_SStructMatrixMemoryLocation(matrix);
-#if defined(HYPRE_USING_GPU)
-      exec = hypre_GetExecPolicy1(memory_location);
-#endif
-
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
       {
-         graph          = hypre_SStructMatrixGraph(matrix);
-         splits         = hypre_SStructMatrixSplits(matrix);
-         nparts         = hypre_SStructMatrixNParts(matrix);
-         pmatrices      = hypre_SStructMatrixPMatrices(matrix);
-         symmetric      = hypre_SStructMatrixSymmetric(matrix);
-         num_centries   = hypre_SStructMatrixNumCEntries(matrix);
-         centries       = hypre_SStructMatrixCEntries(matrix);
-         dom_stride     = hypre_SStructMatrixDomainStride(matrix);
-         ran_stride     = hypre_SStructMatrixRangeStride(matrix);
+         graph           = hypre_SStructMatrixGraph(matrix);
+         splits          = hypre_SStructMatrixSplits(matrix);
+         nparts          = hypre_SStructMatrixNParts(matrix);
+         pmatrices       = hypre_SStructMatrixPMatrices(matrix);
+         symmetric       = hypre_SStructMatrixSymmetric(matrix);
+         num_centries    = hypre_SStructMatrixNumCEntries(matrix);
+         centries        = hypre_SStructMatrixCEntries(matrix);
+         dom_stride      = hypre_SStructMatrixDomainStride(matrix);
+         ran_stride      = hypre_SStructMatrixRangeStride(matrix);
+#if defined(HYPRE_USING_GPU)
+         memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+#endif
 
          for (part = 0; part < nparts; part++)
          {
@@ -240,7 +237,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-         if (exec == HYPRE_EXEC_DEVICE)
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
          {
             hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix),
                         HYPRE_MEMORY_DEVICE);

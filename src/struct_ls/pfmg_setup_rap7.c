@@ -414,6 +414,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
       {
          hypre_LoopBegin(1, k)
          {
+            HYPRE_UNUSED_VAR(k);
             rap_cb[0] = rap_ca[0] = a_cb[0] * pa[0];
             rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
             rap_cs[0] = rap_cn[0] = 2.0 * a_cs[0];
@@ -429,6 +430,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
          hypre_LoopBegin(1, k)
          {
+            HYPRE_UNUSED_VAR(k);
             rap_cb[0] = rap_ca[0] = 0.5 * a_cb[0];
             rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
             rap_cs[0] = rap_cn[0] = 2.0 * a_cs[0];

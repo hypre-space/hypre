@@ -26,14 +26,15 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                            hypre_SStructMatrix  *P,
                            HYPRE_Int             interp_type)
 {
-   HYPRE_Int                ndim       = hypre_SStructMatrixNDim(P);
-   hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(P);
-   hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
-   HYPRE_Int                nparts     = hypre_SStructGridNParts(grid);
+   HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(A);
+   HYPRE_Int                ndim            = hypre_SStructMatrixNDim(P);
+   hypre_SStructGraph      *graph           = hypre_SStructMatrixGraph(P);
+   hypre_SStructGrid       *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                nparts          = hypre_SStructGridNParts(grid);
 
-   hypre_ParCSRMatrix      *A_u        = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_CSRMatrix         *A_ud       = hypre_ParCSRMatrixDiag(A_u);
-   hypre_CSRMatrix         *A_uo       = hypre_ParCSRMatrixOffd(A_u);
+   hypre_ParCSRMatrix      *A_u             = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_CSRMatrix         *A_ud            = hypre_ParCSRMatrixDiag(A_u);
+   hypre_CSRMatrix         *A_uo            = hypre_ParCSRMatrixOffd(A_u);
    hypre_ParCSRMatrix      *A_aug;
    hypre_ParCSRMatrix      *P_u;
    hypre_CSRMatrix         *P_ud;
@@ -85,9 +86,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                 max_num_rownnz;
    HYPRE_Int                *nonzero_rows;
    HYPRE_Int                *nonzero_rows_end;
-
-   HYPRE_MemoryLocation      memory_location = hypre_SStructMatrixMemoryLocation(A);
-   HYPRE_ExecutionPolicy     exec            = hypre_GetExecPolicy1(memory_location);
+   HYPRE_ExecutionPolicy     exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
    /*-------------------------------------------------------
@@ -302,16 +301,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                /* Free memory */
                for (j = 0; j < ndim; j++)
                {
-#if defined(HYPRE_USING_GPU)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
-                  }
-                  else
-#endif
-                  {
-                     hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
-                  }
+                  hypre_TFree(indices[j], memory_location);
                }
             }
          }
@@ -343,7 +333,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                                       0,
                                       hypre_ParCSRMatrixNumRows(A_u),
                                       0);
-      hypre_ParCSRMatrixInitialize(zero);
+      hypre_ParCSRMatrixInitialize_v2(zero, memory_location);
       zero_diag = hypre_ParCSRMatrixDiag(zero);
       for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
       {
@@ -360,14 +350,23 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrixDestroy(A_bndry);
 
       /* Get CF splitting */
-      CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u),
-                                hypre_HandleMemoryLocation(hypre_handle()));
+      CF_marker = hypre_CTAlloc(HYPRE_Int,
+                                hypre_ParCSRMatrixNumRows(A_u),
+                                memory_location);
 
       /* Initialize CF_marker to all C-point (F-points marked below) */
-      /* WM: TODO - note that GPU execution requires unified memory! CF_marker, etc. */
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
       {
-         CF_marker[i] = 1;
+         hypreDevice_IntFilln(CF_marker, (size_t) hypre_ParCSRMatrixNumRows(A_u), 1);
+      }
+      else
+#endif
+      {
+         for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
+         {
+            CF_marker[i] = 1;
+         }
       }
 
       /* Loop over parts */
