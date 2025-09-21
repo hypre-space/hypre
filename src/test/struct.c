@@ -3318,7 +3318,7 @@ SetValuesVector( hypre_StructGrid   *grid,
    HYPRE_MemoryLocation  memory_location = hypre_StructVectorMemoryLocation(zvector);
 #endif
 
-   HYPRE_Int             ib, ierr = 0;
+   HYPRE_Int             ib;
    hypre_IndexRef        ilower, iupper;
    hypre_Box            *box;
    hypre_BoxArray       *boxes;
@@ -3394,7 +3394,7 @@ SetValuesVector( hypre_StructGrid   *grid,
    hypre_TFree(values, memory_location);
 #endif
 
-   return ierr;
+   return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -3430,7 +3430,6 @@ SetValuesMatrix( HYPRE_StructMatrix A,
    HYPRE_Real            east, west, north, south, top, bottom, center;
    HYPRE_Int             volume, max_volume;
    HYPRE_Int             ndim, sym;
-   HYPRE_Int             ierr = 0;
 
    boxes =  hypre_StructGridBoxes(grid);
    ndim  =  hypre_StructGridNDim(grid);
@@ -3822,7 +3821,7 @@ SetValuesMatrix( HYPRE_StructMatrix A,
 
          if (hypre_BoxArraySize(boxes) > 0)
          {
-            HYPRE_StructMatrixSetConstantValues(A, stencil_size - 1, stencil_indices, cvalues_h);
+            HYPRE_StructMatrixSetConstantValues(A, stencil_size - 1, stencil_indices, cvalues);
          }
 
          /* center is variable */
@@ -3857,7 +3856,7 @@ SetValuesMatrix( HYPRE_StructMatrix A,
    hypre_TFree(cvalues_h, HYPRE_MEMORY_HOST);
    hypre_TFree(vvalues_h, HYPRE_MEMORY_HOST);
 
-   return ierr;
+   return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -3895,7 +3894,6 @@ SetValuesCrossMatrix( HYPRE_StructMatrix A,
    HYPRE_Real            center, cxy, cxz, cyz;
    HYPRE_Int             volume, max_volume, max_size;
    HYPRE_Int             ndim, sym;
-   HYPRE_Int             ierr = 0;
 
    boxes =  hypre_StructGridBoxes(grid);
    ndim  =  hypre_StructGridNDim(grid);
@@ -4004,20 +4002,20 @@ SetValuesCrossMatrix( HYPRE_StructMatrix A,
       }
       else if (constant_coefficient == 1)
       {
-         cvalues[0]  = center;  /* ( 0,  0,  0) */
-         cvalues[1]  = -cx;     /* (-1,  0,  0) */
-         cvalues[2]  = -cxy;    /* (-1, -1,  0) */
-         cvalues[3]  = -cy;     /* ( 0, -1,  0) */
-         cvalues[4]  = +cxy;    /* ( 1, -1,  0) */
-         cvalues[5]  = -cz;     /* ( 0,  0, -1) */
-         cvalues[6]  = -cxz;    /* (-1,  0, -1) */
-         cvalues[7]  = +cxz;    /* ( 1,  0, -1) */
-         cvalues[8]  = 0.0;     /* (-1, -1, -1) */
-         cvalues[9]  = -cyz;    /* ( 0, -1, -1) */
-         cvalues[10] = 0.0;     /* ( 1, -1, -1) */
-         cvalues[11] = 0.0;     /* (-1,  1, -1) */
-         cvalues[12] = +cyz;    /* ( 0,  1, -1) */
-         cvalues[13] = 0.0;     /* ( 1,  1, -1) */
+         cvalues_h[0]  = center;  /* ( 0,  0,  0) */
+         cvalues_h[1]  = -cx;     /* (-1,  0,  0) */
+         cvalues_h[2]  = -cxy;    /* (-1, -1,  0) */
+         cvalues_h[3]  = -cy;     /* ( 0, -1,  0) */
+         cvalues_h[4]  = +cxy;    /* ( 1, -1,  0) */
+         cvalues_h[5]  = -cz;     /* ( 0,  0, -1) */
+         cvalues_h[6]  = -cxz;    /* (-1,  0, -1) */
+         cvalues_h[7]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues_h[8]  = 0.0;     /* (-1, -1, -1) */
+         cvalues_h[9]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues_h[10] = 0.0;     /* ( 1, -1, -1) */
+         cvalues_h[11] = 0.0;     /* (-1,  1, -1) */
+         cvalues_h[12] = +cyz;    /* ( 0,  1, -1) */
+         cvalues_h[13] = 0.0;     /* ( 1,  1, -1) */
 
 #if defined(HYPRE_USING_GPU)
          hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size,
@@ -4034,19 +4032,19 @@ SetValuesCrossMatrix( HYPRE_StructMatrix A,
       {
          hypre_assert(constant_coefficient == 2);
 
-         cvalues[0]  = -cx;     /* (-1,  0,  0) */
-         cvalues[1]  = -cxy;    /* (-1, -1,  0) */
-         cvalues[2]  = -cy;     /* ( 0, -1,  0) */
-         cvalues[3]  = +cxy;    /* ( 1, -1,  0) */
-         cvalues[4]  = -cz;     /* ( 0,  0, -1) */
-         cvalues[5]  = -cxz;    /* (-1,  0, -1) */
-         cvalues[6]  = +cxz;    /* ( 1,  0, -1) */
-         cvalues[7]  = 0.0;     /* (-1, -1, -1) */
-         cvalues[8]  = -cyz;    /* ( 0, -1, -1) */
-         cvalues[9]  = 0.0;     /* ( 1, -1, -1) */
-         cvalues[10] = 0.0;     /* (-1,  1, -1) */
-         cvalues[11] = +cyz;    /* ( 0,  1, -1) */
-         cvalues[12] = 0.0;     /* ( 1,  1, -1) */
+         cvalues_h[0]  = -cx;     /* (-1,  0,  0) */
+         cvalues_h[1]  = -cxy;    /* (-1, -1,  0) */
+         cvalues_h[2]  = -cy;     /* ( 0, -1,  0) */
+         cvalues_h[3]  = +cxy;    /* ( 1, -1,  0) */
+         cvalues_h[4]  = -cz;     /* ( 0,  0, -1) */
+         cvalues_h[5]  = -cxz;    /* (-1,  0, -1) */
+         cvalues_h[6]  = +cxz;    /* ( 1,  0, -1) */
+         cvalues_h[7]  = 0.0;     /* (-1, -1, -1) */
+         cvalues_h[8]  = -cyz;    /* ( 0, -1, -1) */
+         cvalues_h[9]  = 0.0;     /* ( 1, -1, -1) */
+         cvalues_h[10] = 0.0;     /* (-1,  1, -1) */
+         cvalues_h[11] = +cyz;    /* ( 0,  1, -1) */
+         cvalues_h[12] = 0.0;     /* ( 1,  1, -1) */
 
 #if defined(HYPRE_USING_GPU)
          hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size - 1,
@@ -4223,7 +4221,7 @@ SetValuesCrossMatrix( HYPRE_StructMatrix A,
          if (hypre_BoxArraySize(boxes) > 0)
          {
             HYPRE_StructMatrixSetConstantValues(A, stencil_size - 1, stencil_indices,
-                                                cvalues_h);
+                                                cvalues);
          }
 
          /* center is variable */
@@ -4259,7 +4257,7 @@ SetValuesCrossMatrix( HYPRE_StructMatrix A,
    hypre_TFree(cvalues_h, HYPRE_MEMORY_HOST);
    hypre_TFree(vvalues_h, HYPRE_MEMORY_HOST);
 
-   return ierr;
+   return 0;
 }
 
 /*********************************************************************************
@@ -4274,7 +4272,6 @@ SetStencilBndry( HYPRE_StructMatrix  A,
                  HYPRE_Int          *period )
 {
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
-   HYPRE_Int             ierr = 0;
    hypre_BoxArray       *boxes;
    HYPRE_Int             size, i, j, d, ib;
    HYPRE_Int           **ilower;
@@ -4419,5 +4416,5 @@ SetStencilBndry( HYPRE_StructMatrix  A,
    hypre_TFree(ilower, HYPRE_MEMORY_HOST);
    hypre_TFree(iupper, HYPRE_MEMORY_HOST);
 
-   return ierr;
+   return 0;
 }

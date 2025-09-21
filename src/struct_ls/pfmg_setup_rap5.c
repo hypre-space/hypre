@@ -196,8 +196,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    HYPRE_Real           *rap_cc, *rap_cw, *rap_ce;
    HYPRE_Real           *rap_cb, *rap_ca;
 
-   HYPRE_Real            center_int, center_bdy;
-
    HYPRE_Int             OffsetA;
    HYPRE_Int             OffsetP;
 
@@ -382,11 +380,13 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
       else if ( constant_coefficient == 1 )
       {
-         rap_cb[0] = rap_ca[0] = a_cb[0] * pa[0];
-
-         rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
-
-         rap_cc[0] = a_cc[0] - 2.0 * ( a_cw[0] - rap_cb[0] );
+         hypre_LoopBegin(1, k)
+         {
+            rap_cb[0] = rap_ca[0] = a_cb[0] * pa[0];
+            rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
+            rap_cc[0] = a_cc[0] - 2.0 * (a_cw[0] - rap_cb[0]);
+         }
+         hypre_LoopEnd()
       }
 
       else if ( constant_coefficient == 2 )
@@ -394,12 +394,12 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          /* NOTE: This does not reduce to either of the above operators unless
           * the row sum is zero and the interpolation weights are 1/2 */
 
-         rap_cb[0] = rap_ca[0] = 0.5 * a_cb[0];
-
-         rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
-
-         center_int = 3.0 * a_cb[0];
-         center_bdy = 0.5 * a_cb[0] + (a_cw[0] + a_cb[0]);
+         hypre_LoopBegin(1, k)
+         {
+            rap_cb[0] = rap_ca[0] = 0.5 * a_cb[0];
+            rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
+         }
+         hypre_LoopEnd()
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
@@ -408,7 +408,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
          {
-            rap_cc[iAc] = 2.0 * a_cc[iA] + center_int;
+            rap_cc[iAc] = 2.0 * a_cc[iA] + 3.0 * a_cb[0];
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -441,13 +441,12 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
             {
-               rap_cc[iAc] -= 0.5 * a_cc[iA] + center_bdy;
+               rap_cc[iAc] -= 0.5 * a_cc[iA] + 0.5 * a_cb[0] + (a_cw[0] + a_cb[0]);
             }
             hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
          }
       }
-
    } /* end ForBoxI */
 
    hypre_BoxDestroy(fcbox);
