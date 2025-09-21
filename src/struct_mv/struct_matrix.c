@@ -2360,7 +2360,9 @@ hypre_StructMatrixReadData( FILE               *file,
 
    hypre_Box            *box;
    HYPRE_Int             num_values, num_cvalues;
-   HYPRE_Complex        *h_values, *values, *cvalues, value;
+   HYPRE_Complex        *h_values, *values;
+   HYPRE_Complex        *h_cvalues, *cvalues;
+   HYPRE_Complex         value;
 #ifdef HYPRE_COMPLEX
    HYPRE_Complex         rvalue, ivalue;
 #endif
@@ -2369,12 +2371,15 @@ hypre_StructMatrixReadData( FILE               *file,
 
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
 
-
    /* Read constant data from file */
-   hypre_fscanf(file, "\nConstant Data:\n");
+   if (hypre_fscanf(file, "\nConstant Data:\n") != 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected wrong keyword!");
+      return hypre_error_flag;
+   }
    hypre_fscanf(file, "%d\n", &num_cvalues);
    cvalue_ids = hypre_TAlloc(HYPRE_Int, num_cvalues, HYPRE_MEMORY_HOST);
-   cvalues    = hypre_TAlloc(HYPRE_Complex, num_cvalues, HYPRE_MEMORY_HOST);
+   h_cvalues  = hypre_TAlloc(HYPRE_Complex, num_cvalues, HYPRE_MEMORY_HOST);
    for (ci = 0; ci < num_cvalues; ci++)
    {
 #ifdef HYPRE_COMPLEX
@@ -2384,29 +2389,40 @@ hypre_StructMatrixReadData( FILE               *file,
       hypre_fscanf(file, "*: (*; %d) %le\n", &i, &value);
 #endif
       cvalue_ids[ci] = i;
-      cvalues[ci] = value;
+      h_cvalues[ci] = value;
    }
-   HYPRE_StructMatrixSetConstantEntries(matrix, num_cvalues, cvalue_ids);
 
    /* Read variable data from file */
-   hypre_fscanf(file, "\nVariable Data:\n");
+   if (hypre_fscanf(file, "\nVariable Data:\n") != 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected wrong keyword!");
+      return hypre_error_flag;
+   }
    hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &h_values);
 
    /* Move values to the device memory if necessary and free host values */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
    {
       vi = hypre_BoxArrayVolume(boxes) * num_values;
-      values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
+      values  = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
+      cvalues = hypre_TAlloc(HYPRE_Complex, num_cvalues, memory_location);
       hypre_TMemcpy(values, h_values, HYPRE_Complex, vi,
                     memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(cvalues, h_cvalues, HYPRE_Complex, num_cvalues,
+                    memory_location, HYPRE_MEMORY_HOST);
       hypre_TFree(h_values, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_cvalues, HYPRE_MEMORY_HOST);
    }
    else
+#endif
    {
-      values = h_values;
+      values  = h_values;
+      cvalues = h_cvalues;
    }
 
    /* Set matrix values */
+   HYPRE_StructMatrixSetConstantEntries(matrix, num_cvalues, cvalue_ids);
    HYPRE_StructMatrixInitialize(matrix);
    HYPRE_StructMatrixSetConstantValues(matrix, num_cvalues, cvalue_ids, cvalues);
    vi = 0;
@@ -2420,9 +2436,9 @@ hypre_StructMatrixReadData( FILE               *file,
 
    /* Clean up */
    hypre_TFree(cvalue_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(cvalues, HYPRE_MEMORY_HOST);
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(cvalues, memory_location);
+   hypre_TFree(values, memory_location);
 
    return hypre_error_flag;
 }
