@@ -989,12 +989,15 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    hypre_SStructMatrixTmpCoeffs(matrix)          = hypre_CTAlloc(HYPRE_Complex, max_size,
                                                                  HYPRE_MEMORY_HOST);
 #if defined (HYPRE_USING_GPU)
-   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
-   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_size,
-                                                                 HYPRE_MEMORY_DEVICE);
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+      hypre_SStructMatrixTmpColCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+      hypre_SStructMatrixTmpCoeffsDevice(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_size,
+                                                                    HYPRE_MEMORY_DEVICE);
+   }
 #endif
 
    HYPRE_IJMatrixInitialize_v2(ijmatrix, memory_location);
@@ -2149,17 +2152,18 @@ HYPRE_Int
 hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                  HYPRE_Int           action )
 {
-   HYPRE_Int                nparts       = hypre_SStructMatrixNParts(A);
-   HYPRE_Int               *Sentries     = hypre_SStructMatrixSEntries(A);
-   HYPRE_SStructGraph       graph        = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid       *grid         = hypre_SStructGraphGrid(graph);
-   HYPRE_Int              **nvneighbors  = hypre_SStructGridNVNeighbors(grid);
-   HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
+   HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(A);
+   HYPRE_Int                nparts          = hypre_SStructMatrixNParts(A);
+   HYPRE_Int               *Sentries        = hypre_SStructMatrixSEntries(A);
+   HYPRE_SStructGraph       graph           = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid       *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_Int              **nvneighbors     = hypre_SStructGridNVNeighbors(grid);
+   HYPRE_Int                ndim            = hypre_SStructGridNDim(grid);
 
-   hypre_ParCSRMatrix      *A_u          = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_CSRMatrix         *A_ud         = hypre_ParCSRMatrixDiag(A_u);
-   hypre_CSRMatrix         *A_uo         = hypre_ParCSRMatrixOffd(A_u);
-   HYPRE_Int                num_rows     = hypre_CSRMatrixNumRows(A_ud);
+   hypre_ParCSRMatrix      *A_u             = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_CSRMatrix         *A_ud            = hypre_ParCSRMatrixDiag(A_u);
+   hypre_CSRMatrix         *A_uo            = hypre_ParCSRMatrixOffd(A_u);
+   HYPRE_Int                num_rows        = hypre_CSRMatrixNumRows(A_ud);
 
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix      *smatrix;
@@ -2181,8 +2185,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
    HYPRE_Complex           *values;
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation     memory_location  = hypre_SStructMatrixMemoryLocation(A);
-   HYPRE_ExecutionPolicy    exec             = hypre_GetExecPolicy1(memory_location);
+   HYPRE_ExecutionPolicy    exec = hypre_GetExecPolicy1(memory_location);
 
    HYPRE_Int                max_num_rownnz;
    HYPRE_Int               *nonzero_rows     = NULL;
@@ -2441,7 +2444,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                   hypre_BoxPrintDebug(msg, hypre_BoxArrayBox(indices_boxa, j));
 #endif
                   size   = hypre_BoxVolume(hypre_BoxArrayBox(indices_boxa, j)) * nSentries;
-                  values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
+                  values = hypre_CTAlloc(HYPRE_Complex, size, memory_location);
 
                   /* INIT values from the structured matrix if action = 0
                      (need current stencil values for entries that don't exist in U matrix) */
@@ -2483,7 +2486,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                   }
 
                   /* Free memory */
-                  hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+                  hypre_TFree(values, memory_location);
                }
                hypre_BoxArrayDestroy(indices_boxa);
                indices_boxa = NULL;
@@ -2559,6 +2562,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_Int               *ncols, *rowidx;
    HYPRE_BigInt            *rows, *cols;
    HYPRE_Complex           *values;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy    exec  = hypre_GetExecPolicy1(memory_location);
+#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("SStructMatrixToUMatrix");
@@ -2582,33 +2588,38 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
       values = hypre_TAlloc(HYPRE_Complex, nrows, memory_location);
 
 #if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
-      HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );
-      HYPRE_THRUST_CALL( sequence, rowidx, rowidx + nrows );
-      HYPRE_THRUST_CALL( sequence, rows, rows + nrows, sizes[0] );
-      HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
+         HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
+         HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );
+         HYPRE_THRUST_CALL( sequence, rowidx, rowidx + nrows );
+         HYPRE_THRUST_CALL( sequence, rows, rows + nrows, sizes[0] );
+         HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
 
 #elif defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
-      HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
-      hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
-      hypreSycl_sequence( rows, rows + nrows, sizes[0] );
-      hypreSycl_sequence( cols, cols + nrows, sizes[2] );
+         HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
+         HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
+         hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
+         hypreSycl_sequence( rows, rows + nrows, sizes[0] );
+         hypreSycl_sequence( cols, cols + nrows, sizes[2] );
 #endif
-#else
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < nrows; i++)
-      {
-         ncols[i]  = 1;
-         rows[i]   = sizes[0] + i;
-         cols[i]   = sizes[2] + i;
-         rowidx[i] = i;
-         values[i] = 1.0;
       }
+      else
 #endif
+      {
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < nrows; i++)
+         {
+            ncols[i]  = 1;
+            rows[i]   = sizes[0] + i;
+            cols[i]   = sizes[2] + i;
+            rowidx[i] = i;
+            values[i] = 1.0;
+         }
+      }
 
       HYPRE_IJMatrixSetValues2(ij_Ahat, nrows, ncols,
                                (const HYPRE_BigInt *) rows,
@@ -2676,11 +2687,12 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                                    hypre_IJMatrix       **ij_Ahat_ptr,
                                    hypre_BoxArray      ***convert_boxa)
 {
-   HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
-   HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
-   HYPRE_Int             *Sentries = hypre_SStructMatrixSEntries(A);
-   HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
+   HYPRE_Int              ndim            = hypre_SStructMatrixNDim(A);
+   HYPRE_Int              nparts          = hypre_SStructMatrixNParts(A);
+   HYPRE_Int             *Sentries        = hypre_SStructMatrixSEntries(A);
+   HYPRE_IJMatrix         ij_A            = hypre_SStructMatrixIJMatrix(A);
    HYPRE_MemoryLocation   memory_location = hypre_IJMatrixMemoryLocation(ij_A);
+
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
    hypre_SStructStencil  *stencil;
@@ -2691,9 +2703,9 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
 
    HYPRE_Int             *split;
    hypre_BoxArray        *grid_boxes;
-   hypre_Box             *box = hypre_BoxCreate(ndim);
-   hypre_Box             *grid_box;
+   hypre_Box             *box       = hypre_BoxCreate(ndim);
    hypre_Box             *ghost_box = hypre_BoxCreate(ndim);
+   hypre_Box             *grid_box;
    hypre_Box             *convert_box;
 
    hypre_Index            stride;
@@ -2708,10 +2720,11 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              nvalues, i, j;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
-#if !defined(HYPRE_USING_GPU)
    HYPRE_Int              m = 0;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy  exec  = hypre_GetExecPolicy1(memory_location);
 #endif
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
@@ -2730,12 +2743,16 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
    nvalues = 0;
    hypre_SetIndex(stride, 1);
-#if !defined(HYPRE_USING_GPU)
-   if (!*ij_Ahat_ptr)
-   {
-      row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
-   }
+#if defined(HYPRE_USING_GPU)
+   if (exec == HYPRE_EXEC_HOST)
 #endif
+   {
+      if (!*ij_Ahat_ptr)
+      {
+         row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+      }
+   }
+
    for (part = 0; part < nparts; part++)
    {
       pA    = hypre_SStructMatrixPMatrix(A, part);
@@ -2762,27 +2779,34 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
             {
                convert_box = hypre_BoxArrayBox(convert_boxa[part][var], j);
 
-#if !defined(HYPRE_USING_GPU)
-               if (!*ij_Ahat_ptr)
-               {
-                  /* WM: do I need to check whether there is a non-trivial
-                         intersection, or is that handled automatically? */
-                  hypre_IntersectBoxes(grid_box, convert_box, box);
-                  start = hypre_BoxIMin(box);
-                  hypre_BoxGetSize(box, loop_size);
-                  hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
-                  {
-                     row_sizes[m + mi] = nnzrow;
-                  }
-                  hypre_BoxLoop1End(mi);
-               }
+#if defined(HYPRE_USING_GPU)
+               if (exec == HYPRE_EXEC_HOST)
 #endif
+               {
+                  if (!*ij_Ahat_ptr)
+                  {
+                     /* WM: do I need to check whether there is a non-trivial
+                            intersection, or is that handled automatically? */
+                     hypre_IntersectBoxes(grid_box, convert_box, box);
+                     start = hypre_BoxIMin(box);
+                     hypre_BoxGetSize(box, loop_size);
+                     hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
+                     {
+                        row_sizes[m + mi] = nnzrow;
+                     }
+                     hypre_BoxLoop1End(mi);
+                  }
+               }
+
                nvalues = hypre_max(nvalues, nnzrow * hypre_BoxVolume(convert_box));
             } /* Loop over convert_boxa[part][var] */
 
-#if !defined(HYPRE_USING_GPU)
-            m += hypre_BoxVolume(ghost_box);
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_HOST)
 #endif
+            {
+               m += hypre_BoxVolume(ghost_box);
+            }
          } /* Loop over grid_boxes */
       } /* Loop over vars */
    } /* Loop over parts */
@@ -2804,7 +2828,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
          hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
          hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
       }
-      HYPRE_IJMatrixInitialize(ij_Ahat);
+      HYPRE_IJMatrixInitialize_v2(ij_Ahat, memory_location);
       HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
    }
 

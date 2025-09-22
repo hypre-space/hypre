@@ -1610,7 +1610,7 @@ hypre_StructVectorReadData( FILE               *file,
 
    /* Clean up */
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
-   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(values, memory_location);
 
    return hypre_error_flag;
 }

@@ -199,10 +199,15 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
    (mmdata -> comm_data)      = NULL;
    (mmdata -> comm_stencils)  = NULL;
 #if defined (HYPRE_USING_GPU)
-   (mmdata -> kernel_type)    = 1;
-#else
-   (mmdata -> kernel_type)    = 0;
+   if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+   {
+      (mmdata -> kernel_type) = 1;
+   }
+   else
 #endif
+   {
+      (mmdata -> kernel_type) = 0;
+   }
 
    *mmdata_ptr = mmdata;
 
@@ -275,10 +280,15 @@ hypre_StructMatmultSetKernelType( hypre_StructMatmultData  *mmdata,
    if (kernel_type == -1)
    {
 #if defined (HYPRE_USING_GPU)
-      (mmdata -> kernel_type) = 1;
-#else
-      (mmdata -> kernel_type) = 0;
+      if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+      {
+         (mmdata -> kernel_type) = 1;
+      }
+      else
 #endif
+      {
+         (mmdata -> kernel_type) = 0;
+      }
    }
    else if (kernel_type == 0 || kernel_type == 1)
    {
@@ -1757,11 +1767,18 @@ hypre_StructMatmatSetup( hypre_StructMatrix        *A,
    HYPRE_Int           nterms       = 2;
    HYPRE_Int           terms[3]     = {0, 1};
    HYPRE_Int           trans[2]     = {0, 0};
+   HYPRE_Int           kernel_type;
+
 #if defined (HYPRE_USING_GPU)
-   HYPRE_Int           kernel_type  = 1;
-#else
-   HYPRE_Int           kernel_type  = 0;
+   if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+   {
+      kernel_type = 1;
+   }
+   else
 #endif
+   {
+      kernel_type = 0;
+   }
 
    hypre_StructMatmultSetup(kernel_type, nmatrices, matrices,
                             nterms, terms, trans, mmdata_ptr, M_ptr);
@@ -1817,11 +1834,18 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+   HYPRE_Int                kernel_type;
+
 #if defined (HYPRE_USING_GPU)
-   HYPRE_Int                kernel_type = 1;
-#else
-   HYPRE_Int                kernel_type = 0;
+   if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+   {
+      kernel_type = 1;
+   }
+   else
 #endif
+   {
+      kernel_type = 0;
+   }
 
    hypre_StructMatrixPtAPSetup(kernel_type, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
@@ -1862,11 +1886,18 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+   HYPRE_Int                kernel_type;
+
 #if defined (HYPRE_USING_GPU)
-   HYPRE_Int                kernel_type = 1;
-#else
-   HYPRE_Int                kernel_type = 0;
+   if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+   {
+      kernel_type = 1;
+   }
+   else
 #endif
+   {
+      kernel_type = 0;
+   }
 
    hypre_StructMatrixRAPSetup(kernel_type, R, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
@@ -1907,11 +1938,18 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+   HYPRE_Int                kernel_type;
+
 #if defined (HYPRE_USING_GPU)
-   HYPRE_Int                kernel_type = 1;
-#else
-   HYPRE_Int                kernel_type = 0;
+   if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
+   {
+      kernel_type = 1;
+   }
+   else
 #endif
+   {
+      kernel_type = 0;
+   }
 
    hypre_StructMatrixRTtAPSetup(kernel_type, RT, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
