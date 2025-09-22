@@ -2370,6 +2370,9 @@ hypre_StructMatrixReadData( FILE               *file,
    HYPRE_Int             ci, i, vi;
 
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec_policy     = hypre_GetExecPolicy1(memory_location);
+#endif
 
    /* Read constant data from file */
    if (hypre_fscanf(file, "\nConstant Data:\n") != 0)
@@ -2402,7 +2405,7 @@ hypre_StructMatrixReadData( FILE               *file,
 
    /* Move values to the device memory if necessary and free host values */
 #if defined(HYPRE_USING_GPU)
-   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+   if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       vi = hypre_BoxArrayVolume(boxes) * num_values;
       values  = hypre_TAlloc(HYPRE_Complex, vi, memory_location);

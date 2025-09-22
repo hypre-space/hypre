@@ -121,7 +121,8 @@ hypre_ReadBoxArrayData( FILE             *file,
    hypre_fscanf(file, "%d\n", &num_values);
    hypre_SetIndex(stride, 1);
    value_ids = hypre_TAlloc(HYPRE_Int, num_values, HYPRE_MEMORY_HOST);
-   values    = hypre_TAlloc(HYPRE_Complex, num_values * hypre_BoxArrayVolume(box_array),
+   values    = hypre_TAlloc(HYPRE_Complex,
+                            num_values * hypre_BoxArrayVolume(box_array),
                             HYPRE_MEMORY_HOST);
    vi = 0;
    hypre_ForBoxI(i, box_array)

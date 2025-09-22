@@ -1570,6 +1570,9 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_BoxArray       *boxes = hypre_StructGridBoxes(grid);
 
    HYPRE_MemoryLocation  memory_location = hypre_StructVectorMemoryLocation(vector);
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec_policy     = hypre_GetExecPolicy1(memory_location);
+#endif
 
    hypre_Box            *box;
    HYPRE_Int             num_values;
@@ -1582,7 +1585,8 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &h_values);
 
    /* Move data to the device memory if necessary and free host data */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+#if defined(HYPRE_USING_GPU)
+   if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       vi = hypre_BoxArrayVolume(boxes) * num_values;
       values = hypre_TAlloc(HYPRE_Complex, vi, memory_location);
@@ -1591,6 +1595,7 @@ hypre_StructVectorReadData( FILE               *file,
       hypre_TFree(h_values, HYPRE_MEMORY_HOST);
    }
    else
+#endif
    {
       values = h_values;
    }
