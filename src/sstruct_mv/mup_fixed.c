@@ -136,7 +136,7 @@ hypre_SStructCopy( hypre_SStructVector *x, hypre_SStructVector *y )
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_BigInt
 hypre_SStructGraphFindBoxEndpt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphFindBoxEndpt)( graph, part, var, proc, endpt, boxi );
@@ -145,7 +145,7 @@ hypre_SStructGraphFindBoxEndpt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGraphFindSGridEndpts( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts )
+hypre_SStructGraphFindSGridEndpts( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGraphFindSGridEndpts)( graph, part, var, proc, endpt, endpts );
 }
