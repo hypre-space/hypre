@@ -421,7 +421,7 @@ typedef struct
    HYPRE_Int     to_var;
    HYPRE_Int     to_boxnum;      /* local box number */
    HYPRE_Int     to_proc;
-   HYPRE_Int     to_rank;
+   HYPRE_BigInt  to_rank;
 
 } hypre_SStructUEntry;
 
@@ -430,7 +430,7 @@ typedef struct
    HYPRE_Int            part;
    hypre_Index          index;
    HYPRE_Int            var;
-   HYPRE_Int            rank;
+   HYPRE_BigInt         rank;
    HYPRE_Int            nUentries;
    hypre_SStructUEntry *Uentries;
 
@@ -454,7 +454,7 @@ typedef struct hypre_SStructGraph_struct
    /* U-graph info: Entries are referenced via a local rank that comes from an
     * ordering of the local grid boxes with ghost zones added. */
    HYPRE_Int               nUventries; /* number of Uventries */
-   HYPRE_Int              *iUventries; /* rank indexes into Uventries */
+   HYPRE_BigInt           *iUventries; /* rank indexes into Uventries */
    hypre_SStructUVEntry  **Uventries;
    HYPRE_Int               Uvesize;    /* size of Uventries array */
    HYPRE_Int               Uemaxsize;  /* max size of Uentries */
@@ -905,10 +905,10 @@ HYPRE_Int hypre_SStructCopy ( hypre_SStructVector *x, hypre_SStructVector *y );
 HYPRE_Int hypre_SStructGraphRef ( hypre_SStructGraph *graph, hypre_SStructGraph **graph_ref );
 HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph, HYPRE_Int part,
                                             HYPRE_Int var, hypre_Index index, HYPRE_BigInt *rank );
-HYPRE_Int hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var,
-                                           HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
+HYPRE_BigInt hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var,
+                                              HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
 HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_Int part,
-                                              HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts );
+                                              HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 /* sstruct_grid.c */
 HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_Int ndim,

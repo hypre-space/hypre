@@ -522,8 +522,8 @@ hypre_SStructGridComputeGlobalSizes(hypre_SStructGrid  *grid)
    HYPRE_Int            part;
    HYPRE_Int            var, nvars;
    HYPRE_Int            ngrids;
-   HYPRE_Int            pglobal_size;
-   HYPRE_Int            global_size;
+   HYPRE_BigInt         global_size;
+   HYPRE_BigInt         pglobal_size;
    HYPRE_BigInt        *local_sizes;
    HYPRE_BigInt        *global_sizes;
 
