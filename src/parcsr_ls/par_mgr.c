@@ -930,7 +930,6 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
    HYPRE_Int             i, row, nc;
    HYPRE_Int             nloc            = hypre_ParCSRMatrixNumRows(A);
    HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-   HYPRE_ExecutionPolicy exec            = hypre_GetExecPolicy1(memory_location);
 
    /* If this is the last level, coarsen onto fixed coarse set */
    if (cflag)
@@ -973,7 +972,7 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
        * the initialized coarse nodes.
        */
 #if defined(HYPRE_USING_GPU)
-      if (exec == HYPRE_EXEC_DEVICE)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
          hypre_BoomerAMGCoarsenPMIS(S, A, 2, debug_flag, CF_marker_ptr);
       }
