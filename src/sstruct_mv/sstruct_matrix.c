@@ -836,7 +836,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    hypre_SStructGraph     *graph         = hypre_SStructMatrixGraph(matrix);
    hypre_SStructStencil ***stencils      = hypre_SStructGraphStencils(graph);
    HYPRE_Int               nUventries    = hypre_SStructGraphNUVEntries(graph);
-   HYPRE_Int              *iUventries    = hypre_SStructGraphIUVEntries(graph);
+   HYPRE_BigInt           *iUventries    = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry  **Uventries     = hypre_SStructGraphUVEntries(graph);
    HYPRE_Int               nparts        = hypre_SStructGraphNParts(graph);
    hypre_SStructGrid      *grid          = hypre_SStructGraphGrid(graph);
@@ -855,7 +855,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    HYPRE_Int               nvars;
    HYPRE_Int               nrows, nnzrow = 0;
    HYPRE_BigInt            rowstart;
-   HYPRE_Int               part, var, entry, b, m, mi;
+   HYPRE_Int               part, var, entry, b, m;
+   HYPRE_BigInt            iUventry;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_size = 0;
 
@@ -958,17 +959,18 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    /* RDF: THREAD? */
    for (entry = 0; entry < nUventries; entry++)
    {
-      mi = iUventries[entry];
-      m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+      iUventry = iUventries[entry];
+      m = (HYPRE_Int) (hypre_SStructUVEntryRank(Uventries[iUventry]) - rowstart);
       if ((m > -1) && (m < nrows))
       {
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_HOST)
 #endif
          {
-            row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[mi]);
+            row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[iUventry]);
          }
-         max_size = hypre_max(max_size, nnzrow + hypre_SStructUVEntryNUEntries(Uventries[mi]));
+         max_size = hypre_max(max_size,
+                              nnzrow + hypre_SStructUVEntryNUEntries(Uventries[iUventry]));
       }
    }
 

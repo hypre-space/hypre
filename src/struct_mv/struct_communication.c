@@ -18,7 +18,7 @@ FILE      *file;
 
 /* this computes a (large enough) size (in doubles) for the message prefix */
 #define hypre_CommPrefixSize(ne,nv)                                     \
-   ( (((1+ne+ne*nv)*sizeof(HYPRE_Int) + ne*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + 1 )
+   ( ((((size_t) (1+ne+ne*nv))*sizeof(HYPRE_Int) + ((size_t) ne)*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + (size_t) 1 )
 
 /*--------------------------------------------------------------------------
  * Create a communication package.  A grid-based description of a communication
@@ -877,7 +877,7 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
    hypre_CommType      *comm_type;
    hypre_CommBlock     *comm_block;
    HYPRE_Int            i, b, num_values, num_entries;
-   HYPRE_Int            buffer_size;
+   size_t               buffer_size;
 
    for (i = 0; i < num_sends; i++)
    {
@@ -889,8 +889,8 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
          num_entries = hypre_CommBlockNumEntries(comm_block);
          buffer_size = hypre_CommPrefixSize(num_entries, num_values);
 
-         hypre_CommBlockPfxsize(comm_block) = buffer_size;
-         hypre_CommPkgSendBufsize(comm_pkg) += buffer_size;
+         hypre_CommBlockPfxsize(comm_block) = (HYPRE_Int) buffer_size;
+         hypre_CommPkgSendBufsize(comm_pkg) += (HYPRE_Int) buffer_size;
       }
    }
 
@@ -907,8 +907,8 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
             num_entries = hypre_CommBlockBufsize(comm_block);
          }
          buffer_size = hypre_CommPrefixSize(num_entries, num_values);
-         hypre_CommBlockPfxsize(comm_block) = buffer_size;
-         hypre_CommPkgRecvBufsize(comm_pkg) += buffer_size;
+         hypre_CommBlockPfxsize(comm_block) = (HYPRE_Int) buffer_size;
+         hypre_CommPkgRecvBufsize(comm_pkg) += (HYPRE_Int) buffer_size;
       }
    }
 

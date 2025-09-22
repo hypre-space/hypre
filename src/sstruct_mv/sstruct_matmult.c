@@ -780,8 +780,8 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* Unstructured component variables */
    hypre_IJMatrix             *ij_M;
    hypre_IJMatrix             *ijmatrix;
-   HYPRE_Int                   ilower, iupper;
-   HYPRE_Int                   jlower, jupper;
+   HYPRE_BigInt                ilower, iupper;
+   HYPRE_BigInt                jlower, jupper;
 
    /* Input matrices variables */
    hypre_SStructPMatrix       *pmatrix;
@@ -1058,7 +1058,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrix         **ij_sA;
 
    HYPRE_Int                m, t;
-   HYPRE_Int                num_nonzeros_uP;
+   HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
 #if defined(HYPRE_USING_GPU)
