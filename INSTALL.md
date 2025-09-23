@@ -83,11 +83,35 @@ appropriate, then reconfigure/generate:
 
 - Windows VS: Change options, then click on 'Configure' then 'Generate'.
 
+Complete Build Instructions
+===========================
 
-ABI Compatibility
-=================
+For the latest, complete instructions (Autotools, CMake, GPU/Spack options, build
+targets, etc.), please refer to the User Manual on Read the Docs:
 
-The hypre team currently does nothing to ensure application binary interface
-(ABI) compatibility.  As a result, all releases (major, minor, or patch) should
-be treated as incompatible.
+- Documentation home: `https://hypre.readthedocs.io/en/latest/`
+- User Manual sections covering install/build (titles may vary):
+  - [General Information -- Building the library (Autotools and CMake)](https://hypre.readthedocs.io/en/latest/ch-misc.html#building-the-library)
+  - [Build System Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#build-system-options)
+  - [GPU Build Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#gpu-build-options)
+
+ABI Compatibility Policy
+========================
+
+hypre versions follow X.Y.Z. ABI compatibility is guaranteed across patch
+releases within the same major and minor (same X.Y). Minor and major releases
+may introduce ABI changes and are not guaranteed to be compatible.
+
+- Compatible (ABI-stable within same X.Y):
+  - 2.22.0 ↔ 2.22.1
+
+- Not guaranteed compatible:
+  - 2.32.z ↔ 2.31.z (minor version differs)
+  - 2.y.z  ↔ 3.y.z (major version differs)
+
+Recommendations:
+
+- If distributing binaries or building plugins, pin to an exact X.Y and allow
+  any Z.
+- When upgrading across X or Y, plan to rebuild and revalidate dependent binaries.
 
