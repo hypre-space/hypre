@@ -1,0 +1,56 @@
+# Output file: mgr.out.200
+MGR Iterations = 8
+Final Relative Residual Norm = 7.317392e-09
+
+# Output file: mgr.out.201
+MGR Iterations = 9
+Final Relative Residual Norm = 1.802890e-09
+
+# Output file: mgr.out.202
+MGR Iterations = 8
+Final Relative Residual Norm = 7.317392e-09
+
+# Output file: mgr.out.203
+MGR Iterations = 9
+Final Relative Residual Norm = 1.802890e-09
+
+# Output file: mgr.out.204
+    MGRCycle 51   1.393495e+150    838.671856     4.406617e+148 
+    MGRCycle 52   1.168685e+153    838.671856     3.695706e+151 
+    MGRCycle 53   inf    inf     inf 
+# Output file: mgr.out.205
+    MGRCycle 51   5.233386e+150    798.580422     1.654942e+149 
+    MGRCycle 52   3.882690e+153    741.907869     1.227815e+152 
+    MGRCycle 53   inf    inf     inf 
+# Output file: mgr.out.206
+    MGRCycle 51   1.349805e+150    834.998818     4.268459e+148 
+    MGRCycle 52   1.127086e+153    834.998819     3.564159e+151 
+    MGRCycle 53   inf    inf     inf 
+# Output file: mgr.out.207
+    MGRCycle 51   4.530936e+150    797.730746     1.432808e+149 
+    MGRCycle 52   3.342789e+153    737.770064     1.057083e+152 
+    MGRCycle 53   inf    inf     inf 
+# Output file: mgr.out.208
+               residual        factor       residual
+               --------        ------       --------
+    Initial    3.162278e+01                 1.000000e+00
+# Output file: mgr.out.209
+               residual        factor       residual
+               --------        ------       --------
+    Initial    3.162278e+01                 1.000000e+00
+# Output file: mgr.out.210
+               residual        factor       residual
+               --------        ------       --------
+    Initial    3.162278e+01                 1.000000e+00
+# Output file: mgr.out.211
+               residual        factor       residual
+               --------        ------       --------
+    Initial    3.162278e+01                 1.000000e+00
+# Output file: mgr.out.212
+Iterations = 11
+Final Relative Residual Norm = 3.738613e-09
+
+# Output file: mgr.out.213
+Iterations = 1
+Final Relative Residual Norm = 1.000000e+00
+
