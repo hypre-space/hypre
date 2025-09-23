@@ -89,11 +89,10 @@ Complete Build Instructions
 For the latest, complete instructions (Autotools, CMake, GPU/Spack options, build
 targets, etc.), please refer to the User Manual on Read the Docs:
 
-- Documentation home: `https://hypre.readthedocs.io/en/latest/`
-- User Manual sections covering install/build (titles may vary):
-  - [General Information -- Building the library (Autotools and CMake)](https://hypre.readthedocs.io/en/latest/ch-misc.html#building-the-library)
-  - [Build System Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#build-system-options)
-  - [GPU Build Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#gpu-build-options)
+- [Documentation home](https://hypre.readthedocs.io/en/latest)
+- [General Information -- Building the library (Autotools and CMake)](https://hypre.readthedocs.io/en/latest/ch-misc.html#building-the-library)
+- [Build System Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#build-system-options)
+- [GPU Build Options](https://hypre.readthedocs.io/en/latest/ch-misc.html#gpu-build-options)
 
 ABI Compatibility Policy
 ========================
@@ -106,7 +105,7 @@ may introduce ABI changes and are not guaranteed to be compatible.
   - 2.22.0 ↔ 2.22.1
 
 - Not guaranteed compatible:
-  - 2.32.z ↔ 2.31.z (minor version differs)
+  - 2.31.z ↔ 2.32.z (minor version differs)
   - 2.y.z  ↔ 3.y.z (major version differs)
 
 Recommendations:
@@ -114,4 +113,3 @@ Recommendations:
 - If distributing binaries or building plugins, pin to an exact X.Y and allow
   any Z.
 - When upgrading across X or Y, plan to rebuild and revalidate dependent binaries.
-
