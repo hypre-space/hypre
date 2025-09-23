@@ -266,6 +266,45 @@ function(setup_tpl LIBNAME)
   # Note we need to check for "USING" instead of "WITH" because
   # we want to allow for post-processing of build options via cmake
   if(HYPRE_USING_${LIBNAME_UPPER})
+    # If the TPL was already added as a subproject, prefer using the existing target
+    if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+      # Check if we are auto-fetching Umpire
+      maybe_build_umpire()
+
+      if(TARGET umpire::umpire)
+        # Link privately but propagate include directories so dependents see headers
+        target_link_libraries(${PROJECT_NAME} PRIVATE umpire::umpire)
+        get_target_property(_UMPIRE_INCLUDES umpire::umpire INTERFACE_INCLUDE_DIRECTORIES)
+        if(_UMPIRE_INCLUDES)
+          target_include_directories(${PROJECT_NAME} PUBLIC ${_UMPIRE_INCLUDES})
+        endif()
+        # Ensure C++ standard library is linked for non-MSVC toolchains
+        if(UNIX)
+          target_link_libraries(${PROJECT_NAME} PUBLIC stdc++)
+        endif()
+        message(STATUS "Found existing Umpire target: umpire::umpire")
+        set(${LIBNAME_UPPER}_FOUND TRUE PARENT_SCOPE)
+        set(HYPRE_NEEDS_CXX TRUE PARENT_SCOPE)
+        message(STATUS "Enabled support for using ${LIBNAME_UPPER}")
+        return()
+      elseif(TARGET umpire)
+        # Provide the standardized namespace alias if missing
+        add_library(umpire::umpire ALIAS umpire)
+        target_link_libraries(${PROJECT_NAME} PRIVATE umpire::umpire)
+        get_target_property(_UMPIRE_INCLUDES umpire INTERFACE_INCLUDE_DIRECTORIES)
+        if(_UMPIRE_INCLUDES)
+          target_include_directories(${PROJECT_NAME} PUBLIC ${_UMPIRE_INCLUDES})
+        endif()
+        if(UNIX)
+          target_link_libraries(${PROJECT_NAME} PUBLIC stdc++)
+        endif()
+        message(STATUS "Found existing Umpire target: umpire")
+        set(${LIBNAME_UPPER}_FOUND TRUE PARENT_SCOPE)
+        set(HYPRE_NEEDS_CXX TRUE PARENT_SCOPE)
+        message(STATUS "Enabled support for using ${LIBNAME_UPPER}")
+        return()
+      endif()
+    endif()
     if(TPL_${LIBNAME_UPPER}_LIBRARIES AND TPL_${LIBNAME_UPPER}_INCLUDE_DIRS)
       # Use specified TPL libraries and include dirs
       foreach(dir ${TPL_${LIBNAME_UPPER}_INCLUDE_DIRS})
@@ -296,20 +335,53 @@ function(setup_tpl LIBNAME)
 
         if(${LIBNAME} STREQUAL "caliper")
           set(HYPRE_NEEDS_CXX TRUE PARENT_SCOPE)
+        elseif(${LIBNAME} STREQUAL "umpire")
+          set(HYPRE_NEEDS_CXX TRUE PARENT_SCOPE)
         endif()
 
         if(TARGET ${LIBNAME}::${LIBNAME})
-          target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME}::${LIBNAME})
+          if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+            target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBNAME}::${LIBNAME})
+            get_target_property(_UMPIRE_INCLUDES ${LIBNAME}::${LIBNAME} INTERFACE_INCLUDE_DIRECTORIES)
+            if(_UMPIRE_INCLUDES)
+              target_include_directories(${PROJECT_NAME} PUBLIC ${_UMPIRE_INCLUDES})
+            endif()
+          else()
+            target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME}::${LIBNAME})
+          endif()
           message(STATUS "Found ${LIBNAME} target: ${LIBNAME}::${LIBNAME}")
         elseif(TARGET ${LIBNAME})
-          target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME})
+          if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+            target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBNAME})
+            get_target_property(_UMPIRE_INCLUDES ${LIBNAME} INTERFACE_INCLUDE_DIRECTORIES)
+            if(_UMPIRE_INCLUDES)
+              target_include_directories(${PROJECT_NAME} PUBLIC ${_UMPIRE_INCLUDES})
+            endif()
+          else()
+            target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME})
+          endif()
           message(STATUS "Found ${LIBNAME} target: ${LIBNAME}")
         else()
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
         if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
-          message(FATAL_ERROR "\n===============================================================\nUmpire has been enabled for GPU builds to improve performance; However, it could not be found by CMake.\nEnsure Umpire provides a CMake package config so find_package(umpire) succeeds via ONE of the following:\n -Dumpire_ROOT=\"/path-to-umpire-install\" or\n -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire/\".\nOr provide both options below:\n -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\nTo opt out (strongly not recommended), set -DHYPRE_ENABLE_UMPIRE=OFF.\n===============================================================")
+          message(FATAL_ERROR
+            "===============================================================\n"
+            "Umpire was requested but could not be found by CMake.\n"
+            "Try one of the following options (in this order):\n"
+            "  1) Auto-build Umpire (recommended):\n"
+            "     -DHYPRE_BUILD_UMPIRE=ON\n\n"
+            "  2) Provide a CMake package config for Umpire:\n"
+            "     -Dumpire_ROOT=\"/path-to-umpire-install\"   (or)\n"
+            "     -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire\"\n\n"
+            "  3) Provide explicit include and library paths:\n"
+            "     -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n"
+            "     -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\n\n"
+            "To opt out (not recommended for GPU builds), set:\n"
+            "  -DHYPRE_ENABLE_UMPIRE=OFF\n"
+            "==============================================================="
+          )
         else()
           message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
         endif()
@@ -374,6 +446,188 @@ function(setup_tpl_or_internal LIB_NAME)
   endif()
 endfunction()
 
+# Optionally fetch and build Umpire prior to configuring hypre's TPLs
+function(maybe_build_umpire)
+  if(NOT HYPRE_BUILD_UMPIRE)
+    return()
+  endif()
+
+  # Only auto-build Umpire when a GPU backend is enabled, unless the user explicitly enabled it
+  if(NOT (HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL))
+    if(NOT HYPRE_ENABLE_UMPIRE)
+      message(STATUS "Skipping Umpire auto-build: GPU backend is not enabled and HYPRE_ENABLE_UMPIRE is OFF")
+      return()
+    endif()
+  endif()
+
+  # If user already provided Umpire or it was added, skip
+  if(TPL_UMPIRE_LIBRARIES OR TPL_UMPIRE_INCLUDE_DIRS OR TARGET umpire::umpire OR TARGET umpire)
+    message(STATUS "Umpire already provided. Skipping auto-build.")
+    return()
+  endif()
+
+  # Respect explicit user disabling of Umpire; otherwise enable it for GPU builds only
+  if(NOT HYPRE_ENABLE_UMPIRE)
+    if(HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
+      if(NOT HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
+        set(HYPRE_ENABLE_UMPIRE ON CACHE BOOL "Use Umpire Allocator" FORCE)
+        set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+      else()
+        message(WARNING "HYPRE_BUILD_UMPIRE=ON but HYPRE_ENABLE_UMPIRE was explicitly set by user to OFF. Proceeding will enable it due to GPU build.")
+        set(HYPRE_ENABLE_UMPIRE ON CACHE BOOL "Use Umpire Allocator" FORCE)
+        set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+      endif()
+    endif()
+  endif()
+
+  include(FetchContent)
+
+  # Determine version/tag for Umpire
+  set(_umpire_tag "${HYPRE_UMPIRE_VERSION}")
+  if(_umpire_tag STREQUAL "latest")
+    # Default to a recent release if auto-detection is not desired here
+    set(_umpire_tag "v2025.09.0")
+  endif()
+
+  # Configure Umpire build options according to hypre needs (one canonical block)
+  set(UMPIRE_ENABLE_C              ON  CACHE BOOL "Enable C interface in Umpire" FORCE)
+  set(UMPIRE_ENABLE_TOOLS          OFF CACHE BOOL "Disable Umpire tools" FORCE)
+  set(ENABLE_BENCHMARKS            OFF CACHE BOOL "Disable Umpire benchmarks" FORCE)
+  set(ENABLE_EXAMPLES              OFF CACHE BOOL "Disable Umpire examples" FORCE)
+  set(ENABLE_DOCS                  OFF CACHE BOOL "Disable Umpire docs" FORCE)
+  set(ENABLE_TESTS                 OFF CACHE BOOL "Disable Umpire tests" FORCE)
+  set(ENABLE_CUDA ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
+  set(ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
+  set(ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
+
+  # Ensure Umpire installs to the same prefix as hypre
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Install prefix" FORCE)
+
+  # Ensure CUDA version is visible to BLT/camp in the subproject when CUDA is enabled
+  if(HYPRE_ENABLE_CUDA)
+    if(DEFINED CUDAToolkit_VERSION)
+      set(CUDA_VERSION "${CUDAToolkit_VERSION}" CACHE STRING "CUDA toolkit version for subprojects" FORCE)
+      set(CUDA_VERSION_STRING "${CUDAToolkit_VERSION}" CACHE STRING "CUDA toolkit version string for subprojects" FORCE)
+    elseif(DEFINED CMAKE_CUDA_COMPILER_VERSION)
+      set(CUDA_VERSION "${CMAKE_CUDA_COMPILER_VERSION}" CACHE STRING "CUDA toolkit version for subprojects" FORCE)
+      set(CUDA_VERSION_STRING "${CMAKE_CUDA_COMPILER_VERSION}" CACHE STRING "CUDA toolkit version string for subprojects" FORCE)
+    endif()
+    # Also ensure CUDA include dirs are visible to subprojects that compile host C++ with CUDA headers
+    if(DEFINED CUDAToolkit_INCLUDE_DIRS)
+      include_directories(BEFORE SYSTEM ${CUDAToolkit_INCLUDE_DIRS})
+    endif()
+  endif()
+
+  # Fetch Umpire with its submodules using FetchContent (populate only)
+  set(FETCHCONTENT_QUIET OFF)
+  FetchContent_Declare(
+    umpire
+    GIT_REPOSITORY https://github.com/LLNL/Umpire.git
+    GIT_TAG        ${_umpire_tag}
+    GIT_SHALLOW    TRUE
+    GIT_SUBMODULES blt;src/tpl/umpire/camp;src/tpl/umpire/fmt
+    GIT_PROGRESS   TRUE
+  )
+  FetchContent_Populate(umpire)
+
+  # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
+  set(_src_dir "${umpire_SOURCE_DIR}")
+  set(_bld_dir "${CMAKE_BINARY_DIR}/_deps/umpire-build")
+  file(MAKE_DIRECTORY "${_bld_dir}")
+  set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
+  if(EXISTS "${_umpire_cfg_in}")
+    string(REGEX MATCH "^v?([0-9]+)\.([0-9]+)\.([0-9]+)" _ver_match "${_umpire_tag}")
+    if(CMAKE_MATCH_COUNT GREATER 0)
+      set(_umaj "${CMAKE_MATCH_1}")
+      set(_umin "${CMAKE_MATCH_2}")
+      set(_upat "${CMAKE_MATCH_3}")
+      string(REGEX REPLACE "^0+" "" _umin "${_umin}")
+      if(_umin STREQUAL "")
+        set(_umin "0")
+      endif()
+      string(REGEX REPLACE "^0+" "" _upat "${_upat}")
+      if(_upat STREQUAL "")
+        set(_upat "0")
+      endif()
+      file(READ "${_umpire_cfg_in}" _cfg_content)
+      string(REPLACE "@Umpire_VERSION_MAJOR@" "${_umaj}" _cfg_content "${_cfg_content}")
+      string(REPLACE "@Umpire_VERSION_MINOR@" "${_umin}" _cfg_content "${_cfg_content}")
+      string(REPLACE "@Umpire_VERSION_PATCH@" "${_upat}" _cfg_content "${_cfg_content}")
+      file(WRITE "${_umpire_cfg_in}" "${_cfg_content}")
+      message(STATUS "Sanitized Umpire config.hpp.in version placeholders: ${_umaj}.${_umin}.${_upat}")
+    endif()
+  endif()
+
+  # Add Umpire as a subproject now that sources are sanitized
+  add_subdirectory("${_src_dir}" "${_bld_dir}")
+
+  # Ensure BLT 'cuda_runtime' interface resolves to CUDA::cudart so shared links do not emit legacy -lcuda_runtime
+  if(HYPRE_ENABLE_CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    if(TARGET cuda_runtime)
+      get_target_property(_iface cuda_runtime INTERFACE_LINK_LIBRARIES)
+      if(_iface)
+        set(_fixed_iface)
+        foreach(_lib IN LISTS _iface)
+          if(_lib STREQUAL "cuda_runtime")
+            list(APPEND _fixed_iface CUDA::cudart)
+          else()
+            list(APPEND _fixed_iface ${_lib})
+          endif()
+        endforeach()
+        set_target_properties(cuda_runtime PROPERTIES INTERFACE_LINK_LIBRARIES "${_fixed_iface}")
+      else()
+        target_link_libraries(cuda_runtime INTERFACE CUDA::cudart)
+      endif()
+      if(NOT TARGET blt::cuda_runtime)
+        add_library(blt::cuda_runtime ALIAS cuda_runtime)
+      endif()
+    else()
+      add_library(cuda_runtime INTERFACE IMPORTED)
+      target_link_libraries(cuda_runtime INTERFACE CUDA::cudart)
+      add_library(blt::cuda_runtime ALIAS cuda_runtime)
+    endif()
+
+    # Replace any legacy 'cuda_runtime' link items on umpire/camp targets with CUDA::cudart
+    foreach(_tgt IN ITEMS camp umpire umpire_resource umpire_strategy umpire_op umpire_event umpire_util umpire_interface)
+      if(TARGET ${_tgt})
+        get_target_property(_ll ${_tgt} LINK_LIBRARIES)
+        if(_ll)
+          set(_new_ll)
+          foreach(_l IN LISTS _ll)
+            if(_l STREQUAL "cuda_runtime")
+              list(APPEND _new_ll CUDA::cudart)
+            else()
+              list(APPEND _new_ll ${_l})
+            endif()
+          endforeach()
+          set_target_properties(${_tgt} PROPERTIES LINK_LIBRARIES "${_new_ll}")
+        endif()
+
+        get_target_property(_ill ${_tgt} INTERFACE_LINK_LIBRARIES)
+        if(_ill)
+          set(_new_ill)
+          foreach(_l IN LISTS _ill)
+            if(_l STREQUAL "cuda_runtime")
+              list(APPEND _new_ill CUDA::cudart)
+            else()
+              list(APPEND _new_ill ${_l})
+            endif()
+          endforeach()
+          set_target_properties(${_tgt} PROPERTIES INTERFACE_LINK_LIBRARIES "${_new_ill}")
+        endif()
+      endif()
+    endforeach()
+  endif()
+
+  # Create the namespaced alias if necessary for consistent linkage
+  if(TARGET umpire AND NOT TARGET umpire::umpire)
+    add_library(umpire::umpire ALIAS umpire)
+  endif()
+
+  message(STATUS "Umpire will be built from sources (tag: ${_umpire_tag}) and installed into: ${CMAKE_INSTALL_PREFIX}")
+endfunction()
+
 # Function to setup FEI (to be phased out)
 function(setup_fei)
   if (HYPRE_USING_FEI)
@@ -421,11 +675,17 @@ function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
     get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
   endif ()
 
-  # If CUDA is enabled, tag source files to be compiled with nvcc.
+  # If CUDA is enabled, only tag sources with .cu extension to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    get_filename_component(SRC_EXT ${SRC_FILENAME} EXT)
+    if (SRC_EXT STREQUAL ".cu")
+      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    endif ()
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+      get_filename_component(DEP_SRC_EXT ${DEP_SRC_FILENAME} EXT)
+      if (DEP_SRC_EXT STREQUAL ".cu")
+        set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+      endif ()
     endif ()
   endif ()
 
