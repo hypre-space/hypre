@@ -4,7 +4,6 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-
 # global variables
 BatchMode=0
 NoRun=0
@@ -129,6 +128,10 @@ function MpirunString
       tioga*)
          shift
          RunString="srun -n$1"
+         ;;
+      matrix*)
+         shift
+         RunString="srun -n$1 --exclusive"
          ;;
       node*)
          shift
@@ -530,7 +533,7 @@ do
          ;;
       -mpibind)
          shift
-         mpibind="mpibind"
+         mpibind="--mpibind=verbose:1"
          ;;
       -script)
          shift
