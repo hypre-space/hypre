@@ -52,7 +52,7 @@ configuration options on different platforms.  It does not actually build the
 code, but generates input for other "native" build systems such as Make (Unix
 platforms) or Visual Studio (Windows).  Here are the basic steps:
 
-1. First, ensure that CMake version 3.13.0 or later is installed on the system.
+1. First, ensure that CMake version 3.21.0 or later is installed on the system.
 
 2. To build the library, run CMake on the top-level HYPRE source directory to
    generate files appropriate for the native build system.  To prevent writing
@@ -97,19 +97,17 @@ targets, etc.), please refer to the User Manual on Read the Docs:
 ABI Compatibility Policy
 ========================
 
-hypre versions follow X.Y.Z. ABI compatibility is guaranteed across patch
-releases within the same major and minor (same X.Y). Minor and major releases
-may introduce ABI changes and are not guaranteed to be compatible.
+HYPRE versions follow the X.Y.Z scheme.
 
-- Compatible (ABI-stable within same X.Y):
-  - 2.22.0 ↔ 2.22.1
+- Patch releases (Z) are intended to be ABI-compatible within the same major and minor version (X.Y).
+- Major (X) and minor (Y) releases may introduce ABI changes and should not be assumed compatible.
 
-- Not guaranteed compatible:
+Examples:
+- Likely compatible: 2.22.0 ↔ 2.22.1 (same X.Y, patch-level updates).
+- Not necessarily compatible:
   - 2.31.z ↔ 2.32.z (minor version differs)
   - 2.y.z  ↔ 3.y.z (major version differs)
 
 Recommendations:
-
-- If distributing binaries or building plugins, pin to an exact X.Y and allow
-  any Z.
+- If distributing binaries or building plugins, pin to an exact X.Y and allow any Z.
 - When upgrading across X or Y, plan to rebuild and revalidate dependent binaries.
