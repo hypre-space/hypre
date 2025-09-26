@@ -1,0 +1,12 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+../config/gen_code.sh HYPRE_krylov.h _hypre_krylov.h mup
+../config/gen_code.sh HYPRE_lobpcg.h _hypre_lobpcg.h mup_lobpcg
+
+# remove duplicate files
+rm -f _hypre_lobpcg_mup_def.h
+rm -f _hypre_lobpcg_mup_undef.h

@@ -41,6 +41,7 @@
 #include <time.h>
 
 #include "HYPRE_lobpcg.h"
+#include "_hypre_lobpcg.h"
 
 /* max dt */
 #define DT_INF 1.0e30
@@ -104,11 +105,11 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny,
 HYPRE_Int BuildParCoordinates (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int *coorddim_ptr, float **coord_ptr );
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
-                                                   HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
+//                                                   HYPRE_Real rel_residual_norm);
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
-                                                HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
+//                                                HYPRE_Real rel_residual_norm);
 #ifdef __cplusplus
 }
 #endif
@@ -3006,33 +3007,6 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-   /* Read matrix to be passed to the preconditioner */
-   if (build_matrix_M == 1)
-   {
-      time_index = hypre_InitializeTiming("Auxiliary Operator");
-      hypre_BeginTiming(time_index);
-
-      ierr = HYPRE_IJMatrixRead( argv[build_matrix_M_arg_index], comm,
-                                 HYPRE_PARCSR, &ij_M );
-      if (ierr)
-      {
-         hypre_printf("ERROR: Problem reading in the auxiliary matrix B!\n");
-         exit(1);
-      }
-
-      HYPRE_IJMatrixGetObject(ij_M, &object);
-      parcsr_M = (HYPRE_ParCSRMatrix) object;
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Auxiliary Operator", comm);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   }
-   else
-   {
-      parcsr_M = parcsr_A;
-   }
-
    /* Check the ij interface - not necessary if one just wants to test solvers */
    if (test_ij && build_matrix_type > -1)
    {
@@ -4162,6 +4136,40 @@ main( hypre_int argc,
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
+    * Read matrix to be passed to the preconditioner
+    *
+    * NOTE: This section of code is here to ensure parcsr_A is fully determined
+    * before potentially assigning it to parcsr_M.  There is 'test_scaling' code
+    * below that also appears to change parcsr_A that may need attention.
+    *-----------------------------------------------------------*/
+
+   if (build_matrix_M == 1)
+   {
+      time_index = hypre_InitializeTiming("Auxiliary Operator");
+      hypre_BeginTiming(time_index);
+
+      ierr = HYPRE_IJMatrixRead( argv[build_matrix_M_arg_index], comm,
+                                 HYPRE_PARCSR, &ij_M );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the auxiliary matrix B!\n");
+         exit(1);
+      }
+
+      HYPRE_IJMatrixGetObject(ij_M, &object);
+      parcsr_M = (HYPRE_ParCSRMatrix) object;
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Auxiliary Operator", comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   }
+   else
+   {
+      parcsr_M = parcsr_A;
+   }
+
+   /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
@@ -4824,7 +4832,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
-				 free_dof_func = 0;
+         free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5138,7 +5146,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
-				 free_dof_func = 0;
+         free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5362,7 +5370,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-   				  free_dof_func = 0;
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -5563,7 +5571,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-   				  free_dof_func = 0;
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -5729,6 +5737,7 @@ main( hypre_int argc,
             {
                HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
             }
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
             HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
             HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
@@ -5736,7 +5745,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
          HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
@@ -8143,11 +8151,12 @@ main( hypre_int argc,
          hypre_printf("HYPRE_FlexGMRESGetPrecond got good precond\n");
       }
 
-
-      /* this is optional - could be a user defined one instead (see ex5.c)*/
-      HYPRE_FlexGMRESSetModifyPC( pcg_solver,
-                                  (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
-
+      // RDF: This is problematic right now with the multiprecision code because
+      // of the Real argument in the ModifyPCFcn.  Need to find a solution.
+      //
+      // /* this is optional - could be a user defined one instead (see ex5.c)*/
+      // HYPRE_FlexGMRESSetModifyPC( pcg_solver,
+      //                             (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
 
       HYPRE_FlexGMRESSetup
       (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
@@ -9311,9 +9320,10 @@ main( hypre_int argc,
       HYPRE_BoomerAMGCreate(&amg_solver);
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
          HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
       }
       else
       {
@@ -9335,6 +9345,7 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
          }
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
       }
@@ -9342,7 +9353,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-      HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       if (mgr_nlevels < 1 || mgr_bsize < 2)
       {
@@ -9639,7 +9649,7 @@ final:
       hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
    }
    /* AMG takes ownership of dof_func, so we free it explicitly only when not using AMG */
-	 if (free_dof_func)
+   if (free_dof_func)
    {
       hypre_TFree(dof_func, memory_location);
    }

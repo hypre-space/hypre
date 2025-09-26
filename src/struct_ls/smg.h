@@ -45,7 +45,6 @@ typedef struct
 
    HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
-   HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;

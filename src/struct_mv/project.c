@@ -5,79 +5,147 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/******************************************************************************
- *
- * Projection routines.
- *
- *****************************************************************************/
-
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ProjectBox:
- *   Projects a box onto a strided index space that contains the
- *   index `index' and has stride `stride'.
+ * Snap 'index' in the positive direction to the nearest point in the strided
+ * index space that contains index 'origin' and has stride 'stride'.
  *
- *   Note: An "empty" projection is represented by a box with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *
+ * This is equivalent to:
+ *    index = ceil( (index - origin) / stride ) * stride
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ProjectBox( hypre_Box    *box,
-                  hypre_Index   index,
-                  hypre_Index   stride )
+hypre_SnapIndexPos( hypre_Index    index,
+                    hypre_IndexRef origin,
+                    hypre_Index    stride,
+                    HYPRE_Int      ndim )
 {
-   HYPRE_Int  i, s, d, hl, hu, kl, ku, ndim = hypre_BoxNDim(box);
-
-   /*------------------------------------------------------
-    * project in all ndim dimensions
-    *------------------------------------------------------*/
+   HYPRE_Int  d, s;
 
    for (d = 0; d < ndim; d++)
    {
-
-      i = hypre_IndexD(index, d);
-      s = hypre_IndexD(stride, d);
-
-      hl = hypre_BoxIMinD(box, d) - i;
-      hu = hypre_BoxIMaxD(box, d) - i;
-
-      if ( hl <= 0 )
+      if (origin != NULL)
       {
-         kl = (HYPRE_Int) (hl / s);
+         s = (index[d] - origin[d]) % stride[d];
       }
       else
       {
-         kl = (HYPRE_Int) ((hl + (s - 1)) / s);
+         s = index[d] % stride[d];
       }
-
-      if ( hu >= 0 )
+      if (s > 0)
       {
-         ku = (HYPRE_Int) (hu / s);
+         index[d] += -s + stride[d];
       }
-      else
+      else if (s < 0)
       {
-         ku = (HYPRE_Int) ((hu - (s - 1)) / s);
+         index[d] += -s;
       }
-
-      hypre_BoxIMinD(box, d) = i + kl * s;
-      hypre_BoxIMaxD(box, d) = i + ku * s;
-
    }
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ProjectBoxArray:
+ * Snap 'index' in the negative direction to the nearest point in the strided
+ * index space that contains index 'origin' and has stride 'stride'.
  *
- *   Note: The dimensions of the modified box array are not changed.
- *   So, it is possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *
+ * This is equivalent to:
+ *    index = floor( (index - origin) / stride ) * stride
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SnapIndexNeg( hypre_Index    index,
+                    hypre_IndexRef origin,
+                    hypre_Index    stride,
+                    HYPRE_Int      ndim )
+{
+   HYPRE_Int  d, s;
+
+   for (d = 0; d < ndim; d++)
+   {
+      if (origin != NULL)
+      {
+         s = (index[d] - origin[d]) % stride[d];
+      }
+      else
+      {
+         s = index[d] % stride[d];
+      }
+      if (s > 0)
+      {
+         index[d] += -s;
+      }
+      else if (s < 0)
+      {
+         index[d] += -s - stride[d];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert 'index' to a canonical index in the interval [0, 'stride').
+ *
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ConvertToCanonicalIndex( hypre_Index    index,
+                               hypre_Index    stride,
+                               HYPRE_Int      ndim )
+{
+   HYPRE_Int  d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      index[d] %= stride[d];
+
+      if (index[d] < 0)
+      {
+         index[d] += stride[d];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Projects a box onto a strided index space that contains the index 'origin'
+ * and has stride 'stride'.
+ *
+ * An "empty" projection is represented by a box with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ProjectBox( hypre_Box      *box,
+                  hypre_IndexRef  origin,
+                  hypre_Index     stride )
+{
+   HYPRE_Int  ndim = hypre_BoxNDim(box);
+
+   hypre_SnapIndexPos(hypre_BoxIMin(box), origin, stride, ndim);
+   hypre_SnapIndexNeg(hypre_BoxIMax(box), origin, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * The dimensions of the modified box array are not changed.
+ * It is possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
-                       hypre_Index      index,
-                       hypre_Index      stride    )
+                       hypre_IndexRef   origin,
+                       hypre_Index      stride )
 {
    hypre_Box  *box;
    HYPRE_Int   i;
@@ -85,23 +153,22 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
    hypre_ForBoxI(i, box_array)
    {
       box = hypre_BoxArrayBox(box_array, i);
-      hypre_ProjectBox(box, index, stride);
+      hypre_ProjectBox(box, origin, stride);
    }
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ProjectBoxArrayArray:
- *
- *   Note: The dimensions of the modified box array-array are not changed.
- *   So, it is possible to have boxes with volume 0.
+ * The dimensions of the modified box array-array are not changed.
+ * It is possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
-                            hypre_Index           index,
-                            hypre_Index           stride          )
+                            hypre_IndexRef        origin,
+                            hypre_Index           stride )
 {
    hypre_BoxArray  *box_array;
    hypre_Box       *box;
@@ -113,10 +180,9 @@ hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
       hypre_ForBoxI(j, box_array)
       {
          box = hypre_BoxArrayBox(box_array, j);
-         hypre_ProjectBox(box, index, stride);
+         hypre_ProjectBox(box, origin, stride);
       }
    }
 
    return hypre_error_flag;
 }
-

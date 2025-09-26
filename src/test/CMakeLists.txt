@@ -14,22 +14,56 @@ if(NOT DEFINED HYPRE_CHECK_TOL)
   set(HYPRE_CHECK_TOL 1.0e-6)
 endif()
 
+# Define list of executables
 set(TEST_SRCS
   ij.c
   sstruct.c
   struct.c
+  structmat.c
   ams_driver.c
-  maxwell_unscaled.c
   struct_migrate.c
-  sstruct_fac.c
   ij_assembly.c
 )
 
-add_hypre_executables(TEST_SRCS)
+# Mixed precision test executables (only built when mixed precision is enabled)
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  set(MP_TEST_SRCS
+    test_mp_pcg.c
+    test_mp_pcg_3d.c
+  )
+  add_hypre_executables("${MP_TEST_SRCS}")
+endif()
+
+# Build each executable
+add_hypre_executables("${TEST_SRCS}")
+
+# Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
+add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
 
 # Copy test input files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default
                ${CMAKE_CURRENT_BINARY_DIR}/sstruct.in.default COPYONLY)
+
+# Install test drivers in ${CMAKE_INSTALL_PREFIX}/bin when tests are enabled
+if(HYPRE_BUILD_TESTS)
+  # Collect targets derived from source file names
+  set(HYPRE_TEST_DRIVER_TARGETS)
+  foreach(src_file ${TEST_SRCS})
+    get_filename_component(exec_name ${src_file} NAME_WE)
+    list(APPEND HYPRE_TEST_DRIVER_TARGETS ${exec_name})
+  endforeach()
+
+  # Mixed precision drivers when enabled
+  if(HYPRE_ENABLE_MIXED_PRECISION)
+    foreach(src_file ${MP_TEST_SRCS})
+      get_filename_component(exec_name ${src_file} NAME_WE)
+      list(APPEND HYPRE_TEST_DRIVER_TARGETS ${exec_name})
+    endforeach()
+  endif()
+
+  install(TARGETS ${HYPRE_TEST_DRIVER_TARGETS}
+          RUNTIME DESTINATION bin)
+endif()
 
 # Add check target
 find_program(BASH_PROGRAM bash)

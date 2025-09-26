@@ -56,6 +56,7 @@ typedef struct hypre_BoxArray_struct
    HYPRE_Int   size;          /* Size of box array */
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
    HYPRE_Int   ndim;          /* number of dimensions */
+   HYPRE_Int  *ids;           /* box identifiers */
 
 } hypre_BoxArray;
 
@@ -71,7 +72,9 @@ typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    HYPRE_Int         size;          /* Size of box array array */
+   HYPRE_Int         alloc_size;    /* Size of currently alloced space */
    HYPRE_Int         ndim;          /* number of dimensions */
+   HYPRE_Int        *ids;           /* box array identifiers */
 
 } hypre_BoxArrayArray;
 
@@ -115,6 +118,17 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_IndexDInBox(index, d, box) \
 ( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
   hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
+#define hypre_BoxSpanIndex(box, index)\
+{\
+   HYPRE_Int d;\
+   for (d = 0; d < hypre_BoxNDim(box); d++)\
+   {\
+      hypre_BoxIMinD(box, d) =\
+         hypre_min(hypre_BoxIMinD(box, d), hypre_IndexD(index, d));\
+      hypre_BoxIMaxD(box, d) =\
+         hypre_max(hypre_BoxIMaxD(box, d), hypre_IndexD(index, d));\
+   }\
+}
 
 /* The first hypre_CCBoxIndexRank is better style because it is similar to
    hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
@@ -137,6 +151,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
 #define hypre_BoxArrayNDim(box_array)      ((box_array) -> ndim)
+#define hypre_BoxArrayIDs(box_array)       ((box_array) -> ids)
+#define hypre_BoxArrayID(box_array, i)     ((box_array) -> ids[i])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArrayArray
@@ -148,8 +164,14 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 ((box_array_array) -> box_arrays[(i)])
 #define hypre_BoxArrayArraySize(box_array_array) \
 ((box_array_array) -> size)
+#define hypre_BoxArrayArrayAllocSize(box_array_array) \
+((box_array_array) -> alloc_size)
 #define hypre_BoxArrayArrayNDim(box_array_array) \
 ((box_array_array) -> ndim)
+#define hypre_BoxArrayArrayIDs(box_array_array) \
+((box_array_array) -> ids)
+#define hypre_BoxArrayArrayID(box_array_array, i) \
+((box_array_array) -> ids[i])
 
 /*--------------------------------------------------------------------------
  * Looping macros:
@@ -271,7 +293,10 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 }
 
 /* Use this before the For macros below to force only one block */
-#define zypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
+#define zypre_BoxLoopSetOneBlock() \
+hypre__num_blocks = 1;\
+hypre__div = hypre__tot;\
+hypre__mod = 0;
 
 /* Use this to get the block iteration inside a BoxLoop */
 #define zypre_BoxLoopBlock() hypre__block
@@ -341,57 +366,63 @@ dbox1, start1, stride1, i1,
  * Idea 2: Simple version of Idea 3 below
  *----------------------------------------*/
 
-N = 1;
-for (d = 0; d < ndim; d++)
+void Idea2()  /* This function line allows astyle to indent the following correctly */
 {
-N *= n[d];
-   i[d] = 0;
-   n[d] -= 2; /* this produces a simpler comparison below */
-}
-i[ndim] = 0;
-n[ndim] = 0;
-for (I = 0; I < N; I++)
-{
-/* loop body */
-
-for (d = 0; i[d] > n[d]; d++)
+   N = 1;
+   for (d = 0; d < ndim; d++)
    {
+      N *= n[d];
       i[d] = 0;
+      n[d] -= 2; /* this produces a simpler comparison below */
    }
-   i[d]++;
-   i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
-   i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   i[ndim] = 0;
+   n[ndim] = 0;
+   for (I = 0; I < N; I++)
+   {
+      /* loop body */
+
+      for (d = 0; i[d] > n[d]; d++)
+      {
+         i[d] = 0;
+      }
+      i[d]++;
+      i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
+      i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   }
 }
 
 /*----------------------------------------
  * Idea 3: Approach used in the box loops
  *----------------------------------------*/
 
-N = 1;
-for (d = 1; d < ndim; d++)
+void Idea3()  /* This function line allows astyle to indent the following correctly */
 {
-N *= n[d];
-   i[d] = 0;
-   n[d] -= 2; /* this produces a simpler comparison below */
-}
-i[ndim] = 0;
-n[ndim] = 0;
-for (J = 0; J < N; J++)
-{
-for (I = 0; I < n[0]; I++)
+   N = 1;
+   for (d = 1; d < ndim; d++)
    {
-      /* loop body */
-
-      i1 += s1[0];
-      i2 += s2[0];
-   }
-   for (d = 1; i[d] > n[d]; d++)
-   {
+      N *= n[d];
       i[d] = 0;
+      n[d] -= 2; /* this produces a simpler comparison below */
    }
-   i[d]++;
-   i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
-   i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   i[ndim] = 0;
+   n[ndim] = 0;
+   for (J = 0; J < N; J++)
+   {
+      for (I = 0; I < n[0]; I++)
+      {
+         /* loop body */
+
+         i1 += s1[0];
+         i2 += s2[0];
+      }
+      for (d = 1; i[d] > n[d]; d++)
+      {
+         i[d] = 0;
+      }
+      i[d]++;
+      i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
+      i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   }
 }
 
 #endif

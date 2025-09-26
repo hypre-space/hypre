@@ -9,8 +9,8 @@
 #include "../seq_mv/seq_mv.h"
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 #include "../parcsr_ls/_hypre_parcsr_ls.h"
-#include "../krylov/krylov.h"
-#include "par_csr_block_matrix.h"
+#include "../krylov/_hypre_krylov.h"
+#include "_hypre_parcsr_block_mv.h"
 
 extern HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr);
 

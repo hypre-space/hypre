@@ -23,6 +23,10 @@ cat > $INTERNAL_HEADER <<@
 #include <omp.h>
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_utilities_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +60,8 @@ cat int_array.h                >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 cat hopscotch_hash.h           >> $INTERNAL_HEADER
 cat mmio.h                     >> $INTERNAL_HEADER
+cat _hypre_fortran_matrix.h    >> $INTERNAL_HEADER
+cat multiprecision.h           >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
@@ -65,6 +71,17 @@ cat >> $INTERNAL_HEADER <<@
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "_hypre_utilities_mup.h"
+#endif
 #endif
 
 #endif
@@ -85,6 +102,11 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#include <HYPRE_config.h>
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_utilities_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -111,6 +133,17 @@ cat >> $INTERNAL_HEADER <<@
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "_hypre_utilities_mup.h"
+#endif
 #endif
 
 #endif

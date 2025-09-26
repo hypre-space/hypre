@@ -419,7 +419,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
                {
                   hypre_assert(p->ptr == entry->ptr);
                   entry->pair = p->index;
-                  hypre_assert(qf->data[p->index].pair == -1);
+                  //hypre_assert(qf->data[p->index].pair == -1); /* pair is an unsigned integer */
                   hypre_assert(qq[i].head - 1 == entry->index);
                   qf->data[p->index].pair = entry->index;
                   qf->data[p->index].nbytes = entry->nbytes;

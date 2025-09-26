@@ -79,6 +79,7 @@ void hypre_swap3_d_perm(HYPRE_Int  *v, HYPRE_Real  *w, HYPRE_Int  *z, HYPRE_Int 
 void hypre_BigSwap4_d ( HYPRE_Real *v, HYPRE_BigInt *w, HYPRE_Int *z, HYPRE_Int *y, HYPRE_Int i,
                         HYPRE_Int j );
 void hypre_swap_d ( HYPRE_Real *v, HYPRE_Int i, HYPRE_Int j );
+void hypre_qsortND( HYPRE_Int **v, HYPRE_Int ndim, HYPRE_Int left, HYPRE_Int right );
 void hypre_qsort0 ( HYPRE_Int *v, HYPRE_Int left, HYPRE_Int right );
 void hypre_qsort1 ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
 void hypre_BigQsort1 ( HYPRE_BigInt *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
@@ -108,6 +109,9 @@ void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const 
 void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n,
                            HYPRE_Int is_col_major);
 
+/* unique.c */
+HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
+
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values, HYPRE_Int *indices, HYPRE_Int list_length,
                                    HYPRE_Int NumberKept );
@@ -118,44 +122,17 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values, HYPRE_Int *indices, HYPRE
 /* HYPRE_CUDA_GLOBAL */ HYPRE_Real hypre_Rand ( void );
 
 /* prefix_sum.c */
-/**
- * Assumed to be called within an omp region.
- * Let x_i be the input of ith thread.
- * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
- * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
- * Note that always y_0 = 0
- *
- * @param workspace at least with length (nthreads+1)
- *                  workspace[tid] will contain result for tid
- *                  workspace[nthreads] will contain sum
- */
-void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
-/**
- * This version does prefix sum in pair.
- * Useful when we prefix sum of diag and offd in tandem.
- *
- * @param worksapce at least with length 2*(nthreads+1)
- *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
- *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
- */
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2,
-                           HYPRE_Int *workspace);
-/**
- * @param workspace at least with length 3*(nthreads+1)
- *                  workspace[3*tid:3*tid+3) will contain results for tid
- */
-void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2,
-                             HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
-
-/**
- * n prefix-sums together.
- * workspace[n*tid:n*(tid+1)) will contain results for tid
- * workspace[nthreads*tid:nthreads*(tid+1)) will contain sums
- *
- * @param workspace at least with length n*(nthreads+1)
- */
-void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
-                               HYPRE_Int *workspace);
+HYPRE_Int hypre_PrefixSumInt(HYPRE_Int nvals, HYPRE_Int *vals, HYPRE_Int *sums);
+HYPRE_Int hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
+HYPRE_Int hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1,
+                                HYPRE_Int *in_out2, HYPRE_Int *sum2,
+                                HYPRE_Int *workspace);
+HYPRE_Int hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1,
+                                  HYPRE_Int *in_out2, HYPRE_Int *sum2,
+                                  HYPRE_Int *in_out3, HYPRE_Int *sum3,
+                                  HYPRE_Int *workspace);
+HYPRE_Int hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
+                                    HYPRE_Int *workspace);
 
 /* hopscotch_hash.c */
 
@@ -384,6 +361,8 @@ HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 
 /* handle.c */
 HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
+HYPRE_Int hypre_SetLogLevelSaved( HYPRE_Int log_level_saved );
+HYPRE_Int hypre_RestoreLogLevel( void );
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );

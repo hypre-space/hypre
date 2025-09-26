@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "fortran_matrix.h"
+#include "_hypre_fortran_matrix.h"
 #include "_hypre_utilities.h"
 
 utilities_FortranMatrix*
@@ -828,4 +828,3 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
    fclose(fp);
    return 0;
 }
-

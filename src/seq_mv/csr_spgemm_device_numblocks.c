@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 #if defined(HYPRE_USING_GPU)
 

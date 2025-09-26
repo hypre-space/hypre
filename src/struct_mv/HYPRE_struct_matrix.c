@@ -39,6 +39,32 @@ HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* RDF: Need a good user interface for setting range/domain grids. Maybe a
+ * GridSetExtents approach would be the best approach. */
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetRangeStride(HYPRE_StructMatrix matrix,
+                                 HYPRE_Int         *range_stride)
+{
+   return ( hypre_StructMatrixSetRangeStride(matrix, range_stride) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetDomainStride(HYPRE_StructMatrix matrix,
+                                  HYPRE_Int         *domain_stride)
+{
+   return ( hypre_StructMatrixSetDomainStride(matrix, domain_stride) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix )
 {
@@ -216,8 +242,10 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int         *stencil_indices,
                                      HYPRE_Complex     *values )
 {
-   return hypre_StructMatrixSetConstantValues(
-             matrix, num_stencil_indices, stencil_indices, values, 0 );
+   hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
+                                       stencil_indices, values, 0 );
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -310,8 +338,10 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int         *stencil_indices,
                                        HYPRE_Complex     *values )
 {
-   return hypre_StructMatrixSetConstantValues(
-             matrix, num_stencil_indices, stencil_indices, values, 1 );
+   hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
+                                       stencil_indices, values, 1 );
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -327,27 +357,6 @@ HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
-                               HYPRE_Int          *num_ghost )
-{
-   return ( hypre_StructMatrixSetNumGhost(matrix, num_ghost) );
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
-{
-   *grid = hypre_StructMatrixGrid(matrix);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int           symmetric )
 {
@@ -357,25 +366,44 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * Call this function to declare that certain stencil points are constant
- * throughout the mesh.
- * - nentries is the number of array entries
- * - Each HYPRE_Int entries[i] is an index into the shape array of the stencil of the
- * matrix.
- * In the present version, only three possibilites are recognized:
- * - no entries constant                 (constant_coefficient==0)
- * - all entries constant                (constant_coefficient==1)
- * - all but the diagonal entry constant (constant_coefficient==2)
- * If something else is attempted, this function will return a nonzero error.
- * In the present version, if this function is called more than once, only
- * the last call will take effect.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
-                                                 HYPRE_Int           nentries,
-                                                 HYPRE_Int          *entries )
+HYPRE_Int
+HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
+                                      HYPRE_Int           nentries,
+                                      HYPRE_Int          *entries )
 {
-   return hypre_StructMatrixSetConstantEntries( matrix, nentries, entries );
+   hypre_StructMatrixSetConstantEntries(matrix, nentries, entries);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
+                                HYPRE_Int           transpose )
+{
+   HYPRE_Int resize;
+
+   hypre_StructMatrixSetTranspose(matrix, transpose, &resize);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
+                               HYPRE_Int          *num_ghost )
+{
+   HYPRE_Int resize;
+
+   hypre_StructMatrixSetNumGhost(matrix, num_ghost, &resize);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -422,6 +450,63 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
    return ( hypre_StructMatvec( alpha, (hypre_StructMatrix *) A,
                                 (hypre_StructVector *) x, beta,
                                 (hypre_StructVector *) y) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixMatvecT( HYPRE_Complex      alpha,
+                           HYPRE_StructMatrix A,
+                           HYPRE_StructVector x,
+                           HYPRE_Complex      beta,
+                           HYPRE_StructVector y     )
+{
+   return ( hypre_StructMatvecT( alpha, (hypre_StructMatrix *) A,
+                                 (hypre_StructVector *) x, beta,
+                                 (hypre_StructVector *) y) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
+                          HYPRE_Int           Atranspose,
+                          HYPRE_StructMatrix  B,
+                          HYPRE_Int           Btranspose,
+                          HYPRE_StructMatrix *C )
+{
+   HYPRE_Int           nmatrices     = 2;
+   hypre_StructMatrix *matrices[2]   = {A, B};
+   HYPRE_Int           nterms        = 2;
+   HYPRE_Int           terms[2]      = {0, 1};
+   HYPRE_Int           transposes[2] = {Atranspose, Btranspose};
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int           kernel_type   = 1;
+#else
+   HYPRE_Int           kernel_type   = 0;
+#endif
+
+   if (A == B)
+   {
+      nmatrices = 1;
+      terms[1] = 0;
+   }
+   hypre_StructMatmult(kernel_type, nmatrices, matrices, nterms, terms, transposes, C);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
+{
+   *grid = hypre_StructMatrixGrid(matrix);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

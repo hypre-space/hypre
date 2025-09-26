@@ -23,13 +23,7 @@ Iterations = 23
 Final Relative Residual Norm = 8.435286e-07
 
 # Output file: io.out.3P
-Iterations = 92
-Final Relative Residual Norm = 7.654048e-07
-
 # Output file: io.out.3R
-Iterations = 92
-Final Relative Residual Norm = 7.654048e-07
-
 # Output file: io.out.4P
 Iterations = 65
 Final Relative Residual Norm = 9.321074e-07
@@ -87,13 +81,7 @@ Iterations = 23
 Final Relative Residual Norm = 8.435286e-07
 
 # Output file: io.out.103P
-Iterations = 92
-Final Relative Residual Norm = 7.654048e-07
-
 # Output file: io.out.103R
-Iterations = 92
-Final Relative Residual Norm = 7.654048e-07
-
 # Output file: io.out.104P
 Iterations = 65
 Final Relative Residual Norm = 9.321074e-07

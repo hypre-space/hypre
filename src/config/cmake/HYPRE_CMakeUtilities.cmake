@@ -5,6 +5,13 @@
 
 # Function to set hypre build options
 function(set_hypre_option category name description default_value)
+  # Detect if the user explicitly set this option via -D on the command line
+  if(DEFINED CACHE{${name}})
+    set(HYPRE_USER_SET_${name} ON CACHE INTERNAL "User explicitly set ${name}")
+  else()
+    set(HYPRE_USER_SET_${name} OFF CACHE INTERNAL "User explicitly set ${name}")
+  endif()
+
   option(${name} "${description}" ${default_value})
   if (${category} STREQUAL "CUDA" OR ${category} STREQUAL "HIP" OR ${category} STREQUAL "SYCL")
     if (HYPRE_ENABLE_${category} STREQUAL "ON")
@@ -30,13 +37,13 @@ endfunction()
 function(setup_git_version_info HYPRE_GIT_DIR)
   set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
   if (EXISTS "${HYPRE_GIT_DIR}")
-    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9
+    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9 --always
                     OUTPUT_VARIABLE develop_string
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     RESULT_VARIABLE git_result)
     if (git_result EQUAL 0)
       set(GIT_VERSION_FOUND TRUE PARENT_SCOPE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0 --always
                       OUTPUT_VARIABLE develop_lastag
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-list --count ${develop_lastag}..HEAD
@@ -271,6 +278,7 @@ function(setup_tpl LIBNAME)
         if(EXISTS ${lib})
           message(STATUS "${LIBNAME_UPPER} library found: ${lib}")
           get_filename_component(LIB_DIR "${lib}" DIRECTORY)
+          set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY BUILD_RPATH "${LIB_DIR}")
           set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY INSTALL_RPATH "${LIB_DIR}")
         else()
           message(WARNING "${LIBNAME_UPPER} library not found at specified path: ${lib}")
@@ -280,8 +288,8 @@ function(setup_tpl LIBNAME)
       target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_LIBRARIES})
       target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_INCLUDE_DIRS})
     else()
-      # Use find_package
-      find_package(${LIBNAME} REQUIRED CONFIG)
+      # Use find_package (prefer CONFIG). Provide clearer error for libraries when missing.
+      find_package(${LIBNAME} CONFIG)
       if(${LIBNAME}_FOUND)
         list(APPEND HYPRE_DEPENDENCY_DIRS "${${LIBNAME}_ROOT}")
         set(HYPRE_DEPENDENCY_DIRS "${HYPRE_DEPENDENCY_DIRS}" CACHE INTERNAL "" FORCE)
@@ -300,7 +308,11 @@ function(setup_tpl LIBNAME)
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
-        message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+          message(FATAL_ERROR "\n===============================================================\nUmpire has been enabled for GPU builds to improve performance; However, it could not be found by CMake.\nEnsure Umpire provides a CMake package config so find_package(umpire) succeeds via ONE of the following:\n -Dumpire_ROOT=\"/path-to-umpire-install\" or\n -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire/\".\nOr provide both options below:\n -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\nTo opt out (strongly not recommended), set -DHYPRE_ENABLE_UMPIRE=OFF.\n===============================================================")
+        else()
+          message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        endif()
       endif()
 
       # Display library info
@@ -402,74 +414,104 @@ function(add_hypre_subdirectories DIRS)
   endforeach()
 endfunction()
 
-# A function to add each executable in the list to the build with the
-# correct flags, includes, and linkage.
-function(add_hypre_executables EXE_SRCS)
-  # Add one executable per cpp file
-  foreach(SRC_FILE IN LISTS ${EXE_SRCS})
-    get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
+# A function to add an executable to the build with the correct flags, includes, and linkage.
+function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
+  get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
+  if (DEP_SRC_FILE)
+    get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
+  endif ()
 
-    # If CUDA is enabled, tag source files to be compiled with nvcc.
-    if (HYPRE_USING_CUDA)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+  # If CUDA is enabled, tag source files to be compiled with nvcc.
+  if (HYPRE_USING_CUDA)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    if (DEP_SRC_FILE)
+       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
     endif ()
+  endif ()
 
-    # If HIP is enabled, tag source files to be compiled with hipcc/clang
-    if (HYPRE_USING_HIP)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+  # If HIP is enabled, tag source files to be compiled with hipcc/clang
+  if (HYPRE_USING_HIP)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+    if (DEP_SRC_FILE)
+       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE HIP)
     endif ()
+  endif ()
 
-    # If SYCL is enabled, tag source files to be compiled with dpcpp.
-    if (HYPRE_USING_SYCL)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+  # If SYCL is enabled, tag source files to be compiled with dpcpp.
+  if (HYPRE_USING_SYCL)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+    if (DEP_SRC_FILE)
+       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CXX)
     endif ()
+  endif ()
 
-    # Get executable name
-    string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
+  # Get executable name
+  string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
 
-    # Add the executable
+  # Add the executable, including DEP_SRC_FILE if provided
+  if (DEP_SRC_FILE)
+    add_executable(${EXE_NAME} ${SRC_FILE} ${DEP_SRC_FILE})
+  else ()
     add_executable(${EXE_NAME} ${SRC_FILE})
+  endif ()
 
-    # Link with HYPRE and inherit its compile properties
-    target_link_libraries(${EXE_NAME} PUBLIC HYPRE)
+  # Link with HYPRE and inherit its compile properties
+  target_link_libraries(${EXE_NAME} PUBLIC HYPRE)
 
-    # For Unix systems, also link with math library
-    if (UNIX)
-      target_link_libraries(${EXE_NAME} PUBLIC m)
+  # For Unix systems, also link with math library
+  if (UNIX)
+    target_link_libraries(${EXE_NAME} PUBLIC m)
+  endif ()
+
+  # Explicitly specify the linker
+  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+    set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  endif ()
+
+  # Turn on LTO if requested
+  if (HYPRE_ENABLE_LTO)
+    set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+  endif ()
+
+  # Inherit compile definitions and options from HYPRE target
+  get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
+  if (HYPRE_COMPILE_OPTS)
+    if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+      get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
+      target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
+    else ()
+      get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
+      target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
     endif ()
+  endif ()
 
-    # Explicitly specify the linker
-    if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
-      set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-    endif ()
+  # Copy executable to original source directory
+  add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
+  )
+endfunction()
 
-    # Turn on LTO if requested
-    if (HYPRE_ENABLE_LTO)
-      set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif ()
+# Function to process a list of executable source files
+function(add_hypre_executables EXE_SRCS)
+  # Support both usage styles:
+  #  - add_hypre_executables(EXAMPLE_SRCS)     -> variable name
+  #  - add_hypre_executables("${TEST_SRCS}")   -> expanded list content
+  set(_HYPRE_EXE_SRC_LIST)
+  if(EXE_SRCS MATCHES "\\.(c|cc|cxx|cpp|cu|cuf|f|f90)(;|$)")
+    list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+  else()
+    if(DEFINED ${EXE_SRCS})
+      list(APPEND _HYPRE_EXE_SRC_LIST ${${EXE_SRCS}})
+    else()
+      list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+    endif()
+  endif()
 
-    # Inherit compile definitions and options from HYPRE target
-    get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
-    #message(STATUS "${EXE_NAME}: ${HYPRE_COMPILE_OPTS}")
-    if (HYPRE_COMPILE_OPTS)
-      if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
-        get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
-        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
-        #message(STATUS "Added CXX compile options: ${CXX_OPTS} to ${EXE_NAME}")
-      else ()
-        get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
-        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
-        #message(STATUS "Added C compile options: ${C_OPTS} to ${EXE_NAME}")
-      endif ()
-    endif ()
-
-    # Copy executable to original source directory
-    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-  endforeach (SRC_FILE)
-endfunction ()
+  foreach(SRC_FILE IN LISTS _HYPRE_EXE_SRC_LIST)
+    add_hypre_executable(${SRC_FILE} "")
+  endforeach()
+endfunction()
 
 # Function to add a tags target if etags is found
 function(add_hypre_target_tags)
@@ -496,15 +538,43 @@ endfunction()
 
 # Function to add a distclean target
 function(add_hypre_target_distclean)
+  set(DISTCLEAN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/DistcleanScript.cmake")
+
+  file(WRITE ${DISTCLEAN_SCRIPT} "
+  # Remove everything in the build directory except .git, .gitignore, and this script
+  file(GLOB build_items RELATIVE \"${CMAKE_BINARY_DIR}\" \"${CMAKE_BINARY_DIR}/*\")
+  foreach(item \${build_items})
+    if(NOT item STREQUAL \".git\" AND
+       NOT item STREQUAL \".gitignore\" AND
+       NOT item STREQUAL \"${CMAKE_MATCH_1}\")
+      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${CMAKE_BINARY_DIR}/\${item}\")
+        file(REMOVE_RECURSE \"${CMAKE_BINARY_DIR}/\${item}\")
+      endif()
+    endif()
+  endforeach()
+
+  # Remove build artifacts in the source tree
+  set(patterns
+    \"*.o\" \"*.mod\" \"*~\"
+    \"test/*.out*\" \"test/*.err*\"
+    \"examples/ex[0-9]\" \"examples/ex1[0-9]\"
+    \"test/ij\" \"test/struct\" \"test/structmat\"
+    \"test/sstruct\" \"test/ams_driver\"
+    \"test/struct_migrate\" \"test/ij_assembly\"
+  )
+  foreach(pat \${patterns})
+    file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
+    foreach(m \${matches})
+      file(REMOVE_RECURSE \"${CMAKE_SOURCE_DIR}/\${m}\")
+    endforeach()
+  endforeach()
+
+  # Remove the script itself
+  file(REMOVE \"${DISTCLEAN_SCRIPT}\")
+  ")
+
   add_custom_target(distclean
-    COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.o" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.mod" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR} -name "*~" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.out*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.err*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/examples -type f -name "ex[0-9]" -name "ex[10-19]" -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -type f -name "ij|struct|sstruct|ams_driver|maxwell_unscalled|struct_migrate|sstruct_fac|ij_assembly" -delete
+    COMMAND ${CMAKE_COMMAND} -P ${DISTCLEAN_SCRIPT}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
@@ -588,3 +658,62 @@ function(print_option_status)
 
   message(STATUS "")
 endfunction()
+
+# Macro for setting up mixed precision compilation (must be defined before subdirectories)
+macro(setup_mixed_precision_compilation module_name)
+  set(options "")
+  set(oneValueArgs "")
+  set(multiValueArgs SRCS)
+  cmake_parse_arguments(REGULAR "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(NOT REGULAR_SRCS)
+    message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
+  endif()
+
+  # Create object libraries for each precision
+  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+
+  # Set precision-specific compile definitions
+  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1)
+  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+
+  # Set include directories and link libraries for all precision variants
+  foreach(precision IN ITEMS flt dbl ldbl)
+    target_include_directories(${module_name}_${precision} PRIVATE
+      ${CMAKE_SOURCE_DIR}
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_SOURCE_DIR}/utilities
+      ${CMAKE_SOURCE_DIR}/blas
+      ${CMAKE_SOURCE_DIR}/lapack
+      ${CMAKE_SOURCE_DIR}/seq_mv
+      ${CMAKE_SOURCE_DIR}/seq_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
+      ${CMAKE_SOURCE_DIR}/parcsr_ls
+      ${CMAKE_SOURCE_DIR}/IJ_mv
+      ${CMAKE_SOURCE_DIR}/krylov
+      ${CMAKE_SOURCE_DIR}/struct_mv
+      ${CMAKE_SOURCE_DIR}/sstruct_mv
+      ${CMAKE_SOURCE_DIR}/struct_ls
+      ${CMAKE_SOURCE_DIR}/sstruct_ls
+      ${CMAKE_SOURCE_DIR}/distributed_matrix
+      ${CMAKE_SOURCE_DIR}/matrix_matrix
+      ${CMAKE_SOURCE_DIR}/multivector
+    )
+    # Link to MPI if it's enabled
+    if(HYPRE_ENABLE_MPI)
+      target_link_libraries(${module_name}_${precision} PRIVATE MPI::MPI_C)
+    endif()
+  endforeach()
+
+  # Add the precision object files to the main target
+  target_sources(${PROJECT_NAME} PRIVATE
+    $<TARGET_OBJECTS:${module_name}_flt>
+    $<TARGET_OBJECTS:${module_name}_dbl>
+    $<TARGET_OBJECTS:${module_name}_ldbl>
+  )
+endmacro()
