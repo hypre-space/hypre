@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
@@ -33,6 +33,10 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    hypre_VectorMultiVecStorageMethod(vector) = 0;
    hypre_VectorOwnsData(vector)              = 1;
    hypre_VectorMemoryLocation(vector)        = hypre_HandleMemoryLocation(hypre_handle());
+
+#if defined(HYPRE_MIXED_PRECISION)
+   hypre_VectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
+#endif
 
    return vector;
 }

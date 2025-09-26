@@ -8,7 +8,7 @@
 #include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 #include "_hypre_utilities.hpp"
 
 #define DEBUG 0
@@ -1548,9 +1548,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if defined(HYPRE_USING_SYCL)
                      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
-                                                                             in_range<HYPRE_Int>(1, 2)),
+                                                                             make_func_converter<HYPRE_Int>(in_range<HYPRE_Int>(1, 2))),
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]) + local_num_vars,
-                                                                             in_range<HYPRE_Int>(1, 2)),
+                                                                             make_func_converter<HYPRE_Int>(in_range<HYPRE_Int>(1, 2))),
                                         tmp,
                                         HYPRE_Int(0) );
 
@@ -2886,7 +2886,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      A_H = hypre_ParCSRMatrixRAPKT(P, A_array[level],
-                                                   P, keepTranspose);
+                                                   P, keepTranspose, 1);
                   }
                   else
                   {
@@ -3072,7 +3072,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
                A_H = hypre_ParCSRMatrixRAPKT(P_array[level], A_array[level],
-                                             P_array[level], keepTranspose);
+                                             P_array[level], keepTranspose, 1);
             }
             else
             {
@@ -4038,7 +4038,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
-   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end  ", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 

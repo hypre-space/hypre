@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
@@ -423,6 +423,9 @@ hypre_SeqVectorPrefetch( hypre_Vector        *x,
    }
 
    hypre_MemPrefetch(x_data, sizeof(HYPRE_Complex) * total_size, memory_location);
+#else
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(memory_location);
 #endif
 
    return hypre_error_flag;

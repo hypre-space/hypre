@@ -51,8 +51,7 @@ struct globalC_functor
 };
 #else
 template<typename T>
-struct tuple_plus : public
-   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
+struct tuple_plus
 {
    __host__ __device__
    thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
@@ -63,8 +62,7 @@ struct tuple_plus : public
 };
 
 template<typename T>
-struct tuple_minus : public
-   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
+struct tuple_minus
 {
    __host__ __device__
    thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
@@ -74,8 +72,7 @@ struct tuple_minus : public
    }
 };
 
-struct local_equal_plus_constant : public
-   thrust::binary_function<HYPRE_BigInt, HYPRE_BigInt, HYPRE_BigInt>
+struct local_equal_plus_constant
 {
    HYPRE_BigInt _value;
 
@@ -131,8 +128,8 @@ __global__ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item,
                                                          HYPRE_Int num_points,
                                                          HYPRE_Int color,
                                                          HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
-                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
-                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
+                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i,
+                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_data,
                                                          HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i,
                                                          HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *P_offd_j, HYPRE_Complex *P_offd_data,
                                                          HYPRE_Complex *row_sums );
@@ -323,8 +320,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    equal<HYPRE_Int>(1) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,          equal<HYPRE_Int>(1)),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine, equal<HYPRE_Int>(1)),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 #else
@@ -527,7 +526,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             thrust::make_permutation_iterator(pass_marker, points_left),
                             thrust::make_permutation_iterator(pass_marker, points_left + remaining),
                             diag_shifts,
-                            thrust::identity<HYPRE_Int>(),
+                            HYPRE_THRUST_IDENTITY(HYPRE_Int),
                             current_pass + 1 );
 
          hypre_TMemcpy(points_left_old, points_left, HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE,
@@ -539,7 +538,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       pass_order + cnt_old,
-                                      thrust::identity<HYPRE_Int>() );
+                                      HYPRE_THRUST_IDENTITY(HYPRE_Int) );
 
          hypre_assert(new_end - pass_order == cnt);
 
@@ -548,7 +547,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       points_left,
-                                      HYPRE_THRUST_NOT(thrust::identity<HYPRE_Int>()) );
+                                      HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Int)) );
 #endif
 
          hypre_assert(new_end - points_left == cnt_rem);
@@ -997,12 +996,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i    = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j    = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int        n_fine      = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int       *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int       *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real      *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
@@ -1204,10 +1201,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                         fine_to_coarse,
                         fine_to_coarse_offd,
                         A_diag_i,
-                        A_diag_j,
                         A_diag_data,
                         A_offd_i,
-                        A_offd_j,
                         A_offd_data,
                         Soc_diag_j,
                         Soc_offd_j,
@@ -1595,8 +1590,10 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
-                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
+                      oneapi::dpl::make_transform_iterator(pass_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 
@@ -1638,9 +1635,9 @@ hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(pass_marker_offd,
-                                                           equal<HYPRE_Int>(color)),
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1,
-                                                           equal<HYPRE_Int>(color)),
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       fine_to_coarse_offd,
                       HYPRE_Int(0) );
 #else
@@ -1941,10 +1938,8 @@ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
                                               HYPRE_Int     *fine_to_coarse,
                                               HYPRE_Int     *fine_to_coarse_offd,
                                               HYPRE_Int     *A_diag_i,
-                                              HYPRE_Int     *A_diag_j,
                                               HYPRE_Complex *A_diag_data,
                                               HYPRE_Int     *A_offd_i,
-                                              HYPRE_Int     *A_offd_j,
                                               HYPRE_Complex *A_offd_data,
                                               HYPRE_Int     *Soc_diag_j,
                                               HYPRE_Int     *Soc_offd_j,

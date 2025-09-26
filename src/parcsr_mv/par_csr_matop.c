@@ -4161,7 +4161,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncComputeStream();
    }
 #endif
 
@@ -5290,31 +5289,15 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    #pragma omp parallel
 #endif
    {
-      HYPRE_Int   ii, num_threads;
-      HYPRE_Int   size, rest, ns, ne;
+      HYPRE_Int   ns, ne;
       HYPRE_Int  *marker_diag;
       HYPRE_Int  *marker_offd;
-
-      ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
 
       /*-----------------------------------------------------------------------
        *  Compute C_diag = alpha*A_diag + beta*B_diag
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_diag_C / num_threads;
-      rest = num_rownnz_diag_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_diag_C);
       marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag_A, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_diag,
                                   NULL, NULL, A_diag, B_diag,
@@ -5330,19 +5313,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
        *  Compute C_offd = alpha*A_offd + beta*B_offd
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_offd_C / num_threads;
-      rest = num_rownnz_offd_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_offd_C);
       marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_offd,
                                   A2C_offd, B2C_offd, A_offd, B_offd,

@@ -4,6 +4,11 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#include <HYPRE_config.h>
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_utilities_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -104,6 +109,23 @@ struct hypreFunctor_IndexCycle
    __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
    {
       return i % cycle_length;
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * Functor to check: |x| > tol
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_NonzeroAboveTol
+{
+   HYPRE_Real tol;
+
+   hypreFunctor_NonzeroAboveTol(HYPRE_Real tol_) : tol(tol_) {}
+
+   __host__ __device__
+   bool operator()(const HYPRE_Complex& x) const
+   {
+      return hypre_cabs(x) > tol;
    }
 };
 
@@ -311,6 +333,31 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_EXECUTION thrust::cuda::par
 #endif
 
+#if CUDART_VERSION >= 13000
+// Macro for device memory prefetching (CUDART 13.0+)
+#define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
+   do { \
+      cudaMemLocation loc = {cudaMemLocationTypeDevice, hypre_HandleDevice(hypre_handle())}; \
+      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+   } while (0)
+
+// Macro for host memory prefetching (CUDART 13.0+)
+#define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
+   do { \
+      cudaMemLocation loc = {cudaMemLocationTypeHost, cudaCpuDeviceId}; \
+      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+   } while (0)
+
+#else
+// Macro for device memory prefetching (< CUDART 13.0)
+#define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
+   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()), stream))
+
+// Macro for host memory prefetching (< CUDART 13.0)
+#define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
+   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId, stream))
+#endif
+
 #endif /* defined(HYPRE_USING_CUDA) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -383,6 +430,13 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
 #else
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
+#endif
+
+/* Resolve deprecated warnings about thrust::identity */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 200802)
+#define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
 #endif
 
 using namespace thrust::placeholders;
@@ -681,8 +735,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_sgetrf_batched
@@ -742,8 +801,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
-#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
 #define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
+#if (ROCSPARSE_VERSION >= 300400)
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute_ex
+#else
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
+#endif
+
 
 /* rocSOLVER */
 #define hypre_rocsolver_getrf_batched          rocsolver_dgetrf_batched
@@ -1156,6 +1220,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_threadIdx(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    if (dim == 0) { return threadIdx.x; }
    if (dim == 1) { return threadIdx.y; }
    if (dim == 2) { return threadIdx.z; }
@@ -1168,6 +1234,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_blockIdx(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    if (dim == 0) { return blockIdx.x; }
    if (dim == 1) { return blockIdx.y; }
    if (dim == 2) { return blockIdx.z; }
@@ -1180,6 +1248,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_blockDim(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    if (dim == 0) { return blockDim.x; }
    if (dim == 1) { return blockDim.y; }
    if (dim == 2) { return blockDim.z; }
@@ -1192,6 +1262,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    switch (dim)
    {
       case 1:
@@ -1210,6 +1282,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    switch (dim)
    {
       case 1:
@@ -1229,6 +1303,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_num_warps(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_num_threads<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
@@ -1237,6 +1313,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_warp_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_thread_id<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
@@ -1245,6 +1323,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_thread_id<dim>(item) & (HYPRE_WARP_SIZE - 1);
 }
 
@@ -1271,6 +1351,8 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_block_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    switch (dim)
    {
       case 1:
@@ -1290,6 +1372,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_num_threads(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>(item);
 }
 
@@ -1298,6 +1382,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item) +
           hypre_gpu_get_thread_id<bdim>(item);
 }
@@ -1307,6 +1393,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_num_warps(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>(item);
 }
 
@@ -1315,6 +1403,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
           hypre_gpu_get_warp_id<bdim>(item);
 }
@@ -1356,6 +1446,8 @@ template <typename T>
 static __device__ __forceinline__
 T __shfl_sync(hypre_mask mask, T val, hypre_int src_line, hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(mask);
+
    return __shfl(val, src_line, width);
 }
 
@@ -1363,6 +1455,8 @@ template <typename T>
 static __device__ __forceinline__
 T __shfl_up_sync(hypre_mask mask, T val, hypre_uint delta, hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(mask);
+
    return __shfl_up(val, delta, width);
 }
 
@@ -1370,6 +1464,8 @@ template <typename T>
 static __device__ __forceinline__
 T __shfl_down_sync(hypre_mask mask, T val, hypre_uint delta, hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(mask);
+
    return __shfl_down(val, delta, width);
 }
 
@@ -1377,6 +1473,8 @@ template <typename T>
 static __device__ __forceinline__
 T __shfl_xor_sync(hypre_mask mask, T val, hypre_int lanemask, hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(mask);
+
    return __shfl_xor(val, lanemask, width);
 }
 
@@ -1390,9 +1488,12 @@ void __syncwarp()
 static __device__ __forceinline__
 hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #if defined(HYPRE_USING_CUDA)
    return __ballot_sync(mask, predicate);
 #else
+   HYPRE_UNUSED_VAR(mask);
    return __ballot(predicate);
 #endif
 }
@@ -1421,6 +1522,8 @@ HYPRE_Int hypre_ffs(hypre_mask mask)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
+   HYPRE_UNUSED_VAR(mask);
+
    return __any(predicate);
 }
 #endif
@@ -1429,6 +1532,8 @@ hypre_int __any_sync(unsigned mask, hypre_int predicate)
 static __device__ __forceinline__
 void block_sync(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    __syncthreads();
 }
 
@@ -1436,6 +1541,8 @@ void block_sync(hypre_DeviceItem &item)
 static __device__ __forceinline__
 void warp_sync(hypre_DeviceItem &item)
 {
+   HYPRE_UNUSED_VAR(item);
+
    __syncwarp();
 }
 
@@ -1444,6 +1551,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
    {
@@ -1484,6 +1593,8 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 static __device__ __forceinline__
 hypre_int warp_any_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return __any_sync(mask, predicate);
 }
 
@@ -1492,6 +1603,8 @@ static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_int src_line,
                     hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return __shfl_sync(mask, val, src_line, width);
 }
 
@@ -1500,6 +1613,8 @@ static __device__ __forceinline__
 T warp_shuffle_up_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_uint delta,
                        hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return __shfl_up_sync(mask, val, delta, width);
 }
 
@@ -1508,6 +1623,8 @@ static __device__ __forceinline__
 T warp_shuffle_down_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_uint delta,
                          hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return __shfl_down_sync(mask, val, delta, width);
 }
 
@@ -1516,6 +1633,8 @@ static __device__ __forceinline__
 T warp_shuffle_xor_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_int lane_mask,
                         hypre_int width = HYPRE_WARP_SIZE)
 {
+   HYPRE_UNUSED_VAR(item);
+
    return __shfl_xor_sync(mask, val, lane_mask, width);
 }
 
@@ -1523,6 +1642,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -1535,6 +1656,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -1547,6 +1670,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -1559,6 +1684,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -1571,6 +1698,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -1583,6 +1712,8 @@ template <typename T>
 static __device__ __forceinline__
 T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
+   HYPRE_UNUSED_VAR(item);
+
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
@@ -2371,73 +2502,102 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
-struct HYPRE_double4
+struct HYPRE_Real2
 {
-   HYPRE_Real x, y, z, w;
+   HYPRE_Real x, y;
 
    __host__ __device__
-   HYPRE_double4() {}
+   HYPRE_Real2() {}
 
    __host__ __device__
-   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   HYPRE_Real2(HYPRE_Real x1, HYPRE_Real x2)
    {
       x = x1;
       y = x2;
-      z = x3;
-      w = x4;
    }
 
    __host__ __device__
    void operator=(HYPRE_Real val)
    {
-      x = y = z = w = val;
+      x = y = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_double4 rhs)
+   void operator+=(HYPRE_Real2 rhs)
    {
       x += rhs.x;
       y += rhs.y;
-      z += rhs.z;
-      w += rhs.w;
    }
 
 };
 
-struct HYPRE_double6
+struct HYPRE_Real4
 {
-   HYPRE_Real x, y, z, w, u, v;
+   HYPRE_Real u, v, w, x;
 
    __host__ __device__
-   HYPRE_double6() {}
+   HYPRE_Real4() {}
 
    __host__ __device__
-   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4,
-                 HYPRE_Real x5, HYPRE_Real x6)
+   HYPRE_Real4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
    {
-      x = x1;
-      y = x2;
-      z = x3;
-      w = x4;
-      u = x5;
-      v = x6;
+      u = x1;
+      v = x2;
+      w = x3;
+      x = x4;
    }
 
    __host__ __device__
    void operator=(HYPRE_Real val)
    {
-      x = y = z = w = u = v = val;
+      u = v = w = x = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_double6 rhs)
+   void operator+=(HYPRE_Real4 rhs)
    {
+      u += rhs.u;
+      v += rhs.v;
+      w += rhs.w;
+      x += rhs.x;
+   }
+
+};
+
+struct HYPRE_Real6
+{
+   HYPRE_Real u, v, w, x, y, z;
+
+   __host__ __device__
+   HYPRE_Real6() {}
+
+   __host__ __device__
+   HYPRE_Real6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3,
+               HYPRE_Real x4, HYPRE_Real x5, HYPRE_Real x6)
+   {
+      u = x1;
+      v = x2;
+      w = x3;
+      x = x4;
+      y = x5;
+      z = x6;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      u = v = w = x = y = z = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_Real6 rhs)
+   {
+      u += rhs.u;
+      v += rhs.v;
+      w += rhs.w;
       x += rhs.x;
       y += rhs.y;
       z += rhs.z;
-      w += rhs.w;
-      u += rhs.u;
-      v += rhs.v;
    }
 
 };
@@ -2456,32 +2616,45 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 }
 
 __inline__ __host__ __device__
-HYPRE_double4 warpReduceSum(HYPRE_double4 val)
+HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
       val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
       val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-      val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
    }
 #endif
    return val;
 }
 
 __inline__ __host__ __device__
-HYPRE_double6 warpReduceSum(HYPRE_double6 val)
+HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
+      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+      val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+   }
+#endif
+   return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_Real6 warpReduceSum(HYPRE_Real6 val)
+{
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
       val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
       val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
       val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
-      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
    }
 #endif
    return val;
@@ -2537,11 +2710,15 @@ OneBlockReduceKernel(hypre_DeviceItem &item,
                      T                *arr,
                      HYPRE_Int         N)
 {
+#if !defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(item);
+#endif
+
    T sum;
 
    sum = 0.0;
 
-   if (threadIdx.x < N)
+   if (threadIdx.x < (hypre_uint) N)
    {
       sum = arr[threadIdx.x];
    }
@@ -2603,9 +2780,9 @@ struct ReduceSum
    {
       if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
-         /* allocate for the max size for reducing double6 type */
+         /* allocate for the max size for reducing HYPRE_Real6 type */
          hypre_HandleReduceBuffer(hypre_handle()) =
-            hypre_TAlloc(HYPRE_double6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
+            hypre_TAlloc(HYPRE_Real6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
@@ -3510,6 +3687,17 @@ struct hypre_cub_CachingDeviceAllocator
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_utilities_mup_undef.h"
+#include "_hypre_utilities_mup.h"
+#endif
 #endif
 
 #endif

@@ -23,8 +23,6 @@ typedef struct
    hypre_StructVector     *b;
    hypre_StructVector     *x;
 
-   HYPRE_Int               diag_rank;
-
    hypre_ComputePkg       *compute_pkg;
 
    /* log info (always logged) */
@@ -404,7 +402,7 @@ typedef struct
          ii = (hypre__kk + jj + redblack) % 2;\
          bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
          xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
-         for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
+         for (; ii < ni; ii+=2, bi+=2, xi+=2)\
          {
 
 #define hypre_RedBlackConstantcoefLoopEnd()\

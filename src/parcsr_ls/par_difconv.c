@@ -341,4 +341,3 @@ GenerateDifConv( MPI_Comm comm,
 
    return (HYPRE_ParCSRMatrix) A;
 }
-

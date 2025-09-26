@@ -8,7 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "multivector.h"
+#include "_hypre_lobpcg_multivector.h"
 #include "_hypre_utilities.h"
 
 /* abstract multivector */

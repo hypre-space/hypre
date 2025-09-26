@@ -196,13 +196,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_DEVICE(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
    else if (location == hypre_MEMORY_HOST)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_HOST(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
 
 #elif defined(HYPRE_USING_HIP)
@@ -450,7 +448,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, hypre_MemoryLocation location
 }
 
 void *
-_hypre_MAlloc(size_t size, hypre_MemoryLocation location)
+hypre__MAlloc(size_t size, hypre_MemoryLocation location)
 {
    return hypre_MAlloc_core(size, 0, location);
 }
@@ -592,7 +590,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
 }
 
 void
-_hypre_Free(void *ptr, hypre_MemoryLocation location)
+hypre__Free(void *ptr, hypre_MemoryLocation location)
 {
    hypre_Free_core(ptr, location);
 }

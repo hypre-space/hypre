@@ -16,10 +16,6 @@
 //       hypre_dense_topo_sort(HYPRE_Real *L, HYPRE_Int *ordering, HYPRE_Int n)
 //    to get ordering for triangular solve. Can provide
 
-
-HYPRE_Int AIR_TOT_SOL_SIZE = 0;
-HYPRE_Int AIR_MAX_SOL_SIZE = 0;
-
 #define AIR_DEBUG 0
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16

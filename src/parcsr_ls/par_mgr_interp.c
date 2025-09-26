@@ -2587,7 +2587,6 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
     *-------------------------------------------------------*/
 
    hypre_DenseBlockMatrixMultiply(b_CF, b_FF, &r_CF);
-   hypre_DenseBlockMatrixPrint(hypre_ParCSRMatrixComm(A), r_CF, "r_CF");
    Wr = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_CF),
                                                      hypre_ParCSRMatrixGlobalNumRows(A_CF),
                                                      hypre_ParCSRMatrixGlobalNumCols(A_CF),

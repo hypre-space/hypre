@@ -218,7 +218,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                               graph_diag,
                                               graph_diag + graph_diag_size,
                                               diag_iwork,
-                                              thrust::identity<HYPRE_Int>() );
+                                              HYPRE_THRUST_IDENTITY(HYPRE_Int) );
 #endif
 
       graph_diag_size = new_end - graph_diag;
@@ -442,7 +442,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                                 thrust::make_counting_iterator(num_rows_diag),
                                 CF_marker_diag,
                                 graph_diag,
-                                thrust::identity<HYPRE_Int>());
+                                HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
 
    *graph_diag_size = new_end - graph_diag;

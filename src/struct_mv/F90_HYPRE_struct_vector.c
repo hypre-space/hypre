@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_structvectorsetvalues, HYPRE_STRUCTVECTORSETVALUES)
            ( HYPRE_StructVectorSetValues(
                 hypre_F90_PassObj (HYPRE_StructVector, vector),
                 hypre_F90_PassIntArray (grid_index),
-                hypre_F90_PassComplex (values)     ) );
+                hypre_F90_PassComplexRef (values)     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -117,7 +117,7 @@ hypre_F90_IFACE(hypre_structvectoraddtovalues, HYPRE_STRUCTVECTORADDTOVALUES)
            ( HYPRE_StructVectorAddToValues(
                 hypre_F90_PassObj (HYPRE_StructVector, vector),
                 hypre_F90_PassIntArray (grid_index),
-                hypre_F90_PassComplex (values)     ) );
+                hypre_F90_PassComplexRef (values)     ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -254,6 +254,22 @@ hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA
            ( HYPRE_StructVectorSetConstantValues(
                 hypre_F90_PassObj (HYPRE_StructVector, vector),
                 hypre_F90_PassComplex (values) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetRandomValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
+(hypre_F90_Obj *vector,
+ hypre_F90_Int *seed,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           ( hypre_StructVectorSetRandomValues(
+                (hypre_StructVector *) vector,
+                hypre_F90_PassInt (seed) ));
 }
 
 /*--------------------------------------------------------------------------

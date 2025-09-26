@@ -20,8 +20,12 @@ cat > $INTERNAL_HEADER <<@
 #include <HYPRE_config.h>
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "HYPRE_lobpcg.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_parcsr_ls_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +35,10 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 @
 
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
 cat par_amg.h             >> $INTERNAL_HEADER
 cat par_amgdd_comp_grid.h >> $INTERNAL_HEADER
 cat par_amgdd.h           >> $INTERNAL_HEADER
@@ -39,10 +47,6 @@ cat ams.h                 >> $INTERNAL_HEADER
 cat par_cheby.h           >> $INTERNAL_HEADER
 cat par_ilu.h             >> $INTERNAL_HEADER
 cat protos.h              >> $INTERNAL_HEADER
-
-#===========================================================================
-# Structures and prototypes
-#===========================================================================
 
 #../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
 
@@ -54,6 +58,17 @@ cat >> $INTERNAL_HEADER <<@
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_parcsr_ls_mup_undef.h"
+#include "_hypre_parcsr_ls_mup.h"
+#endif
 #endif
 
 #endif

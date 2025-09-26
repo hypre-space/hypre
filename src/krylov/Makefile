@@ -6,7 +6,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
- 
+
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
@@ -18,7 +18,8 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  HYPRE_krylov.h\
- krylov.h\
+ _hypre_krylov.h\
+ _hypre_lobpcg.h\
  bicgstab.h\
  cgnr.h\
  gmres.h\
@@ -26,9 +27,7 @@ HEADERS =\
  flexgmres.h\
  lgmres.h\
  pcg.h\
- HYPRE_lobpcg.h\
- HYPRE_MatvecFunctions.h\
- lobpcg.h
+ HYPRE_lobpcg.h
 
 FILES =\
  bicgstab.c\
@@ -37,6 +36,8 @@ FILES =\
  cogmres.c\
  flexgmres.c\
  lgmres.c\
+ pcg.c\
+ lobpcg.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
@@ -44,11 +45,30 @@ FILES =\
  HYPRE_lgmres.c\
  HYPRE_flexgmres.c\
  HYPRE_pcg.c\
- pcg.c\
- HYPRE_lobpcg.c\
- lobpcg.c
+ HYPRE_lobpcg.c
 
-OBJS = ${FILES:.c=.o}
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c\
+ mup_lobpcg_fixed.c\
+ mup_lobpcg_functions.c\
+ mup_lobpcg_pre.c
+
+COBJS = ${FILES:.c=.o}
+OBJS = ${COBJS}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single     = ${FILES:.c=.o_flt}
+COBJS_double     = ${FILES:.c=.o_dbl}
+COBJS_longdouble = ${FILES:.c=.o_ldbl}
+MP_COBJS         = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+
+endif
 
 SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -58,18 +78,17 @@ SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

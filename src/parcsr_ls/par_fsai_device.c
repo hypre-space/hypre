@@ -31,6 +31,8 @@ hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
                                         HYPRE_Complex     *rhs_data,
                                         HYPRE_Complex     *sol_data )
 {
+   HYPRE_UNUSED_VAR(item);
+
    extern __shared__ void* shmem[];
 
    HYPRE_Complex    *ls_data = (HYPRE_Complex*) shmem;

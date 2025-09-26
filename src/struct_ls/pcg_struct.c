@@ -7,6 +7,9 @@
 
 #include "_hypre_struct_ls.h"
 
+/* TODO (VPM): should this file be renamed?
+    These routines are also used by other Krylov methods */
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -42,7 +45,7 @@ hypre_StructKrylovCreateVector( void *vvector )
    new_vector = hypre_StructVectorCreate( hypre_StructVectorComm(vector),
                                           hypre_StructVectorGrid(vector) );
    hypre_StructVectorSetNumGhost(new_vector, num_ghost);
-   hypre_StructVectorInitialize(new_vector);
+   hypre_StructVectorInitialize(new_vector, 1);
    hypre_StructVectorAssemble(new_vector);
 
    return ( (void *) new_vector );
@@ -66,8 +69,8 @@ hypre_StructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                hypre_StructVectorGrid(vector),
                                (HYPRE_StructVector *) &new_vector[i] );
       hypre_StructVectorSetNumGhost(new_vector[i], num_ghost);
-      HYPRE_StructVectorInitialize((HYPRE_StructVector) new_vector[i]);
-      HYPRE_StructVectorAssemble((HYPRE_StructVector) new_vector[i]);
+      hypre_StructVectorInitialize(new_vector[i], 1);
+      hypre_StructVectorAssemble(new_vector[i]);
    }
 
    return ( (void *) new_vector );
@@ -115,6 +118,7 @@ hypre_StructKrylovMatvec( void   *matvec_data,
                                        (hypre_StructMatrix *) A,
                                        (hypre_StructVector *) x,
                                        beta,
+                                       (hypre_StructVector *) y,
                                        (hypre_StructVector *) y ) );
 }
 
@@ -187,6 +191,17 @@ hypre_StructKrylovClearVector( void *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructKrylovSetRandomValues( void *x,
+                                   HYPRE_Int seed )
+{
+   return ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) x,
+                                               seed ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructKrylovScaleVector( HYPRE_Complex  alpha,
                                void   *x     )
 {
@@ -201,8 +216,13 @@ hypre_StructKrylovAxpy( HYPRE_Complex alpha,
                         void   *x,
                         void   *y )
 {
-   return ( hypre_StructAxpy( alpha, (hypre_StructVector *) x,
-                              (hypre_StructVector *) y ) );
+   HYPRE_Complex beta = 1.0;
+
+   return ( hypre_StructVectorAxpy( alpha,
+                                    (hypre_StructVector *) x,
+                                    beta,
+                                    (hypre_StructVector *) y,
+                                    (hypre_StructVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -1441,6 +1441,10 @@ hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item,
                                  HYPRE_Int        *map,
                                  HYPRE_Real       *y)
 {
+#if !defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(item);
+#endif
+
    for (HYPRE_Int i = 0; i < n; i++)
    {
       x[map[i]] += y[i];
@@ -1900,7 +1904,7 @@ hypreGPUKernel_filln(hypre_DeviceItem &item, T *x, size_t n, T v)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
-   if (i < n)
+   if (i < (HYPRE_Int) n)
    {
       x[i] = v;
    }
@@ -2148,7 +2152,7 @@ hypreGPUKernel_scalen( hypre_DeviceItem &item,
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
-   if (i < n)
+   if (i < (HYPRE_Int) n)
    {
       y[i] = x[i] * v;
    }
@@ -2696,8 +2700,12 @@ __global__ void
 hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
                                        hypre_int        *cuda_arch_compile )
 {
+   HYPRE_UNUSED_VAR(item);
+
 #if defined(__CUDA_ARCH__)
    cuda_arch_compile[0] = __CUDA_ARCH__;
+#else
+   HYPRE_UNUSED_VAR(cuda_arch_compile);
 #endif
 }
 
@@ -2739,13 +2747,7 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   const hypre_int cuda_arch_actual_major  = cuda_arch_actual  / 100;
-   const hypre_int cuda_arch_compile_major = cuda_arch_compile / 100;
-   const hypre_int cuda_arch_actual_minor  = cuda_arch_actual  % 100;
-   const hypre_int cuda_arch_compile_minor = cuda_arch_compile % 100;
-
-   if (cuda_arch_actual_major != cuda_arch_compile_major ||
-       cuda_arch_actual_minor < cuda_arch_compile_minor)
+   if (cuda_arch_actual < cuda_arch_compile)
    {
       char msg[256];
 
@@ -2756,7 +2758,7 @@ hypre_CudaCompileFlagCheck()
       else
       {
          hypre_sprintf(msg,
-                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') is greater than device arch %d",
                        cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
       }
 
@@ -3061,10 +3063,10 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
 #else
    HYPRE_UNUSED_VAR(device_id_in);
    HYPRE_UNUSED_VAR(myid);
-   HYPRE_UNUSED_VAR(nproc);
    HYPRE_UNUSED_VAR(comm);
 
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_UNUSED_VAR(nproc);
 
    return hypre_error_flag;
 }

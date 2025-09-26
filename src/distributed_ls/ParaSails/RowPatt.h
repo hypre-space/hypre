@@ -13,6 +13,10 @@
 
 #include <stdio.h>
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_ParaSails_mup_def.h"
+#endif
+
 #ifndef _ROWPATT_H
 #define _ROWPATT_H
 

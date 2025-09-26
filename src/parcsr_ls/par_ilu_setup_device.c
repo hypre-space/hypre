@@ -455,6 +455,9 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    rocsparse_datatype        data_type;
    size_t                    buffer_size;
    HYPRE_Int                 history_size;
+#if (ROCSPARSE_VERSION >= 300400)
+   HYPRE_Int                 num_free_iter = 10;
+#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("CSRMatrixITILU0");
@@ -547,6 +550,9 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
                                                           (rocsparse_itilu0_alg) type,
                                                           (rocsparse_int) option,
                                                           (rocsparse_int*) num_iter_ptr,
+#if (ROCSPARSE_VERSION >= 300400)
+                                                          (rocsparse_int) num_free_iter,
+#endif
                                                           tolerance,
                                                           (rocsparse_int) num_rows,
                                                           (rocsparse_int) num_nonzeros,

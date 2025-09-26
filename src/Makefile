@@ -132,6 +132,10 @@ help:
 	@echo "     runs etags to create tags table"
 	@echo "     file is named TAGS and is saved in current directory"
 	@echo "     "
+	@echo "tagsnomup:"
+	@echo "     ignores auto-generated mup files and runs etags"
+	@echo "     file is named TAGS and is saved in current directory"
+	@echo "     "
 	@echo "test:"
 	@echo "     depends on the all target to be completed"
 	@echo "     removes existing temporary installation sub-directory"
@@ -245,5 +249,11 @@ distclean:
 	rm -rf ./HYPRE_config.h
 
 tags:
-	find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+	@find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
 	-name "*.c??" -o -name "*.h??" -o -name "*.f" | etags -
+
+tagsnomup:
+	@find . \( -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+		  -name "*.c??" -o -name "*.h??" -o -name "*.f" \) -type f \
+	| grep -vE 'mup_|mup.h' \
+	| etags -

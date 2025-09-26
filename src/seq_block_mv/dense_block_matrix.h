@@ -32,6 +32,10 @@ typedef struct hypre_DenseBlockMatrix_struct
    HYPRE_Complex        *data;               /* Matrix coefficients */
    HYPRE_Complex       **data_aop;           /* Array of pointers to data */
    HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
+
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_DenseBlockMatrix;
 
 /*--------------------------------------------------------------------------
@@ -61,5 +65,9 @@ typedef struct hypre_DenseBlockMatrix_struct
    ((matrix) -> data[(matrix) -> num_nonzeros_block * b + \
                      (matrix) -> row_stride * i + \
                      (matrix) -> col_stride * j])
+
+#ifdef HYPRE_MIXED_PRECISION
+#define hypre_DenseBlockMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
+#endif
 
 #endif

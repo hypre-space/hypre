@@ -21,32 +21,27 @@
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_SYCL)
 template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
 {
+
+#if defined(HYPRE_USING_SYCL)
    typedef std::tuple<T1, T2> Tuple;
+#else
+   typedef thrust::tuple<T1, T2> Tuple;
+#endif
 
    __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
    {
-      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
-                              std::get<1>(x) + std::get<1>(y) );
-   }
-};
+#if defined(HYPRE_USING_SYCL)
+      using namespace std;
 #else
-template<typename T1, typename T2>
-struct hypre_IJVectorAssembleFunctor : public
-   thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-{
-   typedef thrust::tuple<T1, T2> Tuple;
-
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
-   {
-      return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
-                                 thrust::get<1>(x) + thrust::get<1>(y) );
+      using namespace thrust;
+#endif
+      return make_tuple( hypre_max(get<0>(x), get<0>(y)),
+                                   get<1>(x) + get<1>(y) );
    }
 };
-#endif
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleSortAndReduce1
@@ -125,7 +120,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
-   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X, thrust::identity<char>(), 0.0);
+   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X, HYPRE_THRUST_IDENTITY(char), 0.0);
 
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
@@ -207,7 +202,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
-   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X0, thrust::identity<char>(), 0.0);
+   HYPRE_THRUST_CALL(replace_if, A0, A0 + N0, X0, HYPRE_THRUST_IDENTITY(char), 0.0);
 
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
@@ -237,7 +232,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                                       thrust::make_zip_iterator(thrust::make_tuple(I, A)) + Nt,
                                       A,
                                       thrust::make_zip_iterator(thrust::make_tuple(I0, A0)),
-                                      thrust::identity<HYPRE_Complex>() );
+                                      HYPRE_THRUST_IDENTITY(HYPRE_Complex) );
 
    *N1 = thrust::get<0>(new_end2.get_iterator_tuple()) - I0;
 #endif
@@ -493,7 +488,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                             is_on_proc,                                                         /* stencil */
                             thrust::make_zip_iterator(thrust::make_tuple(off_proc_i,      off_proc_data,
                                                                          off_proc_sora)),       /* result */
-                            HYPRE_THRUST_NOT(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)) );
 
          hypre_assert(thrust::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
 
@@ -505,7 +500,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                             thrust::make_zip_iterator(thrust::make_tuple(stack_i + nelms, stack_data + nelms,
                                                                          stack_sora + nelms)),  /* last */
                             is_on_proc,                                                         /* stencil */
-                            HYPRE_THRUST_NOT(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(char)) );
 
          hypre_assert(thrust::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
 #endif

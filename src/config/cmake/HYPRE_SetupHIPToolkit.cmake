@@ -106,6 +106,72 @@ else()
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
 
+# Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
+if(DEFINED HYPRE_WAVEFRONT_SIZE)
+  set(HYPRE_WARP_SIZE ${HYPRE_WAVEFRONT_SIZE} CACHE STRING "GPU warp size")
+  message(STATUS "Using user-specified wavefront size: ${HYPRE_WAVEFRONT_SIZE}")
+
+elseif(NOT DEFINED HYPRE_WARP_SIZE)
+  # Auto-detect warp size based on gpu arch if not specified
+  set(FOUND_OLD_GFX_CARD FALSE)
+  set(DETECTED_ARCHITECTURES "") # To collect and report all detected architectures
+
+  # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx1100")
+  if(DEFINED CMAKE_HIP_ARCHITECTURES AND NOT "${CMAKE_HIP_ARCHITECTURES}" STREQUAL "")
+    foreach(ARCH_ITEM IN LISTS CMAKE_HIP_ARCHITECTURES)
+      # Only process if we haven't already found an old GFX card
+      if(NOT FOUND_OLD_GFX_CARD)
+        # Extract the numeric part from the GFX architecture string (e.g., "gfx90a" -> "90a")
+        # Note: CMAKE_HIP_ARCHITECTURES usually contains only the ID, not "gfx" prefix,
+        # but regex is robust if it does.
+        string(REGEX MATCH "gfx?([0-9a-fA-F]+)" _dummy "${ARCH_ITEM}")
+        set(GFX_ID_STR "${CMAKE_MATCH_1}") # e.g., "90a", "1100"
+
+        # Extract only the leading numeric part for comparison
+        # (e.g., "90a" -> "90", "1100" -> "1100")
+        string(REGEX REPLACE "[^0-9]" "" GFX_BASE_ID_STR "${GFX_ID_STR}")
+
+        set(CURRENT_GFX_ID_INT 0)
+        if(GFX_BASE_ID_STR MATCHES "^[0-9]+$")
+          # Remove leading zeros to ensure correct integer comparison (e.g., "0900" -> "900")
+          string(REGEX REPLACE "^0+" "" GFX_ID_STR_NO_LEADING_ZERO "${GFX_BASE_ID_STR}")
+          if(NOT GFX_ID_STR_NO_LEADING_ZERO EQUAL "")
+            set(CURRENT_GFX_ID_INT "${GFX_ID_STR_NO_LEADING_ZERO}")
+          endif()
+       endif()
+
+        list(APPEND DETECTED_ARCHITECTURES "gfx${GFX_ID_STR}") # Add full GFX string to list for reporting
+        message(STATUS "Processing CMAKE_HIP_ARCHITECTURES entry: ${ARCH_ITEM} -> Numeric base: ${CURRENT_GFX_ID_INT}")
+
+        # If any detected GFX card has a numeric ID less than 1000
+        if(CURRENT_GFX_ID_INT LESS 1000)
+          set(FOUND_OLD_GFX_CARD TRUE)
+        endif()
+      endif()
+    endforeach()
+
+    # Set the final HYPRE_WARP_SIZE based on the flag
+    if(FOUND_OLD_GFX_CARD)
+      set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU wavefront size (detected at least one GFX < 1000)")
+      message(STATUS "HYPRE_WARP_SIZE set to 64 for architectures: ${DETECTED_ARCHITECTURES}")
+    else()
+      # Only reached here if all detected GFX cards are 1000 or greater
+      set(HYPRE_WARP_SIZE 32 CACHE STRING "GPU wavefront size (all detected GFX >= 1000)")
+      message(STATUS "HYPRE_WARP_SIZE set to 32 for architectures: ${DETECTED_ARCHITECTURES}")
+    endif()
+
+  else()
+    message(FATAL_ERROR "CMAKE_HIP_ARCHITECTURES not found or empty!")
+  endif()
+
+else()
+  message(STATUS "Using user-specified wavefront size: ${HYPRE_WARP_SIZE}")
+endif()
+
+# Set WAVEFRONT_SIZE to match WARP_SIZE for consistency
+set(HYPRE_WAVEFRONT_SIZE ${HYPRE_WARP_SIZE} CACHE STRING "GPU wavefront size (alias for WARP_SIZE)")
+mark_as_advanced(HYPRE_WAVEFRONT_SIZE)
+
 # Collection of ROCm optional libraries
 set(ROCM_LIBS "")
 
@@ -210,43 +276,6 @@ if (HYPRE_ENABLE_LTO AND NOT MSVC)
       -foffload-lto
   )
 endif ()
-
-# Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
-if(DEFINED HYPRE_WAVEFRONT_SIZE)
-  set(HYPRE_WARP_SIZE ${HYPRE_WAVEFRONT_SIZE} CACHE STRING "GPU warp size")
-  message(STATUS "Using user-specified wavefront size: ${HYPRE_WAVEFRONT_SIZE}")
-
-elseif(NOT DEFINED HYPRE_WARP_SIZE)
-  # Auto-detect if neither is specified
-  execute_process(
-    COMMAND rocm-smi --showproductname
-    OUTPUT_VARIABLE GPU_PRODUCT_NAME
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET
-    RESULT_VARIABLE ROCM_SMI_RESULT
-  )
-
-  if(ROCM_SMI_RESULT EQUAL 0)
-    string(TOUPPER "${GPU_PRODUCT_NAME}" GPU_PRODUCT_NAME)
-
-    if(GPU_PRODUCT_NAME MATCHES "MI[0-9]")
-      set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU wavefront size (CDNA architecture)")
-      message(STATUS "Detected CDNA architecture, setting wavefront size to 64")
-    else()
-      set(HYPRE_WARP_SIZE 32 CACHE STRING "GPU wavefront size (RDNA/default architecture)")
-      message(STATUS "Detected RDNA architecture, setting wavefront size to 32")
-    endif()
-  else()
-    set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU warp size (default)")
-    message(STATUS "Could not detect GPU architecture, defaulting to wavefront size 64")
-  endif()
-else()
-  message(STATUS "Using user-specified wavefront size: ${HYPRE_WARP_SIZE}")
-endif()
-
-# Set WAVEFRONT_SIZE to match WARP_SIZE for consistency
-set(HYPRE_WAVEFRONT_SIZE ${HYPRE_WARP_SIZE} CACHE STRING "GPU wavefront size (alias for WARP_SIZE)")
-mark_as_advanced(HYPRE_WAVEFRONT_SIZE)
 
 # Print HIP info
 if (DEFINED hip_VERSION)

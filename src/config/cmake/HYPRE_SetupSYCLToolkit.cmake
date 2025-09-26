@@ -14,6 +14,9 @@ endif()
 # Find Intel SYCL
 find_package(IntelSYCL REQUIRED)
 
+# Sycl requires hypre streams
+set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+
 # Set up SYCL flags
 if(IntelSYCL_FOUND)
   # Standard SYCL flags
@@ -40,6 +43,22 @@ if(IntelSYCL_FOUND)
     target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-Xsycl-target-backend=${INTEL_SYCL_BACKEND}>)
     target_link_options(${PROJECT_NAME} PUBLIC -Xsycl-target-backend=${INTEL_SYCL_BACKEND})
   endif()
+endif()
+
+# Find Intel oneDPL
+if(NOT DEFINED DPLROOT)
+  if(DEFINED ENV{DPLROOT})
+    set(DPLROOT $ENV{DPLROOT})
+  elseif(DEFINED ENV{ONEAPI_ROOT} AND EXISTS "$ENV{ONEAPI_ROOT}/dpl/latest")
+    set(DPLROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
+  endif()
+endif()
+find_package(oneDPL REQUIRED HINTS "$ENV{DPLROOT}/lib/cmake/oneDPL")
+target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
+
+# Check if DPL is found
+if(NOT oneDPL_FOUND)
+  message(FATAL_ERROR "Could not find oneDPL installation. Please set DPLROOT")
 endif()
 
 # Find Intel DPCT

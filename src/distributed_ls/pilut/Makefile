@@ -42,6 +42,16 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+
+endif
+
 SONAME = libHYPRE_DistributedMatrixPilutSolver-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
@@ -49,15 +59,14 @@ SONAME = libHYPRE_DistributedMatrixPilutSolver-${HYPRE_RELEASE_VERSION}${HYPRE_L
 ##################################################################
 
 all: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
-	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

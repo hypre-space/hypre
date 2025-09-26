@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_PCGCreate: Call class-specific function, e.g. HYPRE_ParCSRPCGCreate
@@ -320,6 +320,30 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 {
    return ( hypre_PCGGetPrecond( (void *)     solver,
                                  (HYPRE_Solver *) precond_data_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGSetPrecondMatrix( HYPRE_Solver  solver,
+                           HYPRE_Matrix precond_matrix)
+{
+   return ( hypre_PCGSetPrecondMatrix( (void *)     solver,
+                                       (void *) precond_matrix) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGGetPrecondMatrix( HYPRE_Solver  solver,
+                           HYPRE_Matrix *precond_matrix_ptr )
+{
+   return ( hypre_PCGGetPrecondMatrix( (void *)     solver,
+                                       (HYPRE_Matrix *) precond_matrix_ptr ) );
 }
 
 /*--------------------------------------------------------------------------

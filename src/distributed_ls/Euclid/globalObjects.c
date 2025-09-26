@@ -17,6 +17,8 @@
 /* #include "TimeLog_dh.h" */
 extern void sigRegister_dh(void); /* use sig_dh.h if not for euclid_signals_len */
 
+/* guard definition of global variables to avoid linker errors for multiprecision build */
+#if defined (hypre_DEFINE_GLOBAL)
 /*-------------------------------------------------------------------------
  * Globally scoped variables, flags, and objects
  *-------------------------------------------------------------------------*/
@@ -47,6 +49,7 @@ bool logFuncsToFile   = false;
 bool ignoreMe = true;
 HYPRE_Int  ref_counter = 0;
 
+#endif
 
 /*-------------------------------------------------------------------------
  * End of global definitions.

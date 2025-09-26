@@ -42,7 +42,7 @@ hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix
                                              HYPRE_Int *row_nums);
 HYPRE_Int hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
                                         HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal,
-                                        const char *set_or_add );
+                                        const char *set_or_add);
 HYPRE_Int hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A, HYPRE_Complex *col_sum,
                                         HYPRE_Int type, HYPRE_Complex scal );
 HYPRE_Int hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
@@ -59,6 +59,7 @@ hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                                                        hypre_CSRMatrix *C );
+hypre_CSRMatrix *hypre_CSRMatrixDeleteZerosDevice ( hypre_CSRMatrix *A, HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixMergeColMapOffd( HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                           HYPRE_Int B_ext_offd_nnz, HYPRE_BigInt *B_ext_offd_bigj, HYPRE_Int *num_cols_offd_C_ptr,
                                           HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int **map_B_to_C_ptr );
@@ -74,6 +75,7 @@ HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_
                                      HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                      HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr,
                                      hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
+HYPRE_Int hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix **AT,
                                            HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
@@ -154,10 +156,13 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
                                        HYPRE_BigInt *col_map_offd_A,
                                        HYPRE_BigInt *col_map_offd_B,
                                        HYPRE_BigInt **col_map_offd_C );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,
                                  HYPRE_Int new_num_cols, HYPRE_Int new_num_nonzeros );
+HYPRE_Int hypre_CSRMatrixEliminateRowsCols(hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows);
 
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
@@ -194,47 +199,6 @@ HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length, HYPRE_Int num_procs,
                                        HYPRE_BigInt **part_ptr );
 HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length, HYPRE_Int num_procs,
                                             HYPRE_Int myid, HYPRE_BigInt *part );
-
-/* HYPRE_csr_matrix.c */
-HYPRE_CSRMatrix HYPRE_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
-                                        HYPRE_Int *row_sizes );
-HYPRE_Int HYPRE_CSRMatrixDestroy ( HYPRE_CSRMatrix matrix );
-HYPRE_Int HYPRE_CSRMatrixInitialize ( HYPRE_CSRMatrix matrix );
-HYPRE_CSRMatrix HYPRE_CSRMatrixRead ( char *file_name );
-void HYPRE_CSRMatrixPrint ( HYPRE_CSRMatrix matrix, char *file_name );
-HYPRE_Int HYPRE_CSRMatrixGetNumRows ( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows );
-
-/* HYPRE_mapped_matrix.c */
-HYPRE_MappedMatrix HYPRE_MappedMatrixCreate ( void );
-HYPRE_Int HYPRE_MappedMatrixDestroy ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixLimitedDestroy ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixInitialize ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixAssemble ( HYPRE_MappedMatrix matrix );
-void HYPRE_MappedMatrixPrint ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixGetColIndex ( HYPRE_MappedMatrix matrix, HYPRE_Int j );
-void *HYPRE_MappedMatrixGetMatrix ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixSetMatrix ( HYPRE_MappedMatrix matrix, void *matrix_data );
-HYPRE_Int HYPRE_MappedMatrixSetColMap ( HYPRE_MappedMatrix matrix, HYPRE_Int (*ColMap )(HYPRE_Int,
-                                                                                        void *));
-HYPRE_Int HYPRE_MappedMatrixSetMapData ( HYPRE_MappedMatrix matrix, void *MapData );
-
-/* HYPRE_multiblock_matrix.c */
-HYPRE_MultiblockMatrix HYPRE_MultiblockMatrixCreate ( void );
-HYPRE_Int HYPRE_MultiblockMatrixDestroy ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixLimitedDestroy ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixInitialize ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixAssemble ( HYPRE_MultiblockMatrix matrix );
-void HYPRE_MultiblockMatrixPrint ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixSetNumSubmatrices ( HYPRE_MultiblockMatrix matrix, HYPRE_Int n );
-HYPRE_Int HYPRE_MultiblockMatrixSetSubmatrixType ( HYPRE_MultiblockMatrix matrix, HYPRE_Int j,
-                                                   HYPRE_Int type );
-
-/* HYPRE_vector.c */
-HYPRE_Vector HYPRE_VectorCreate ( HYPRE_Int size );
-HYPRE_Int HYPRE_VectorDestroy ( HYPRE_Vector vector );
-HYPRE_Int HYPRE_VectorInitialize ( HYPRE_Vector vector );
-HYPRE_Int HYPRE_VectorPrint ( HYPRE_Vector vector, char *file_name );
-HYPRE_Vector HYPRE_VectorRead ( char *file_name );
 
 /* mapped_matrix.c */
 hypre_MappedMatrix *hypre_MappedMatrixCreate ( void );

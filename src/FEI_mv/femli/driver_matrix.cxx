@@ -15,7 +15,7 @@
 #include "mli_matrix.h"
 #include "mli_matrix_misc.h"
 #include "IJ_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "parcsr_mv.h"
 #include "parcsr_ls.h"
 #include <mpi.h>
