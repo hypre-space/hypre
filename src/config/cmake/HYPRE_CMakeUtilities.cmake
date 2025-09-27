@@ -509,7 +509,7 @@ function(check_umpire_c_interface)
       "Umpire does not appear to provide the C interface headers.\n"
       "Failed to compile a test including 'umpire/interface/c_fortran/umpire.h'.\n"
       "Ensure Umpire is built with its C interface enabled (e.g., -DUMPIRE_ENABLE_C=ON) and that headers are visible in the include path.\n"
-      "For auto-build, try enabling the hypre buildoption -DHYPRE_BUILD_UMPIRE=ON.\n"
+      "For auto-build, try enabling the hypre build option -DHYPRE_BUILD_UMPIRE=ON.\n"
       "For manual Umpire builds, see https://hypre.readthedocs.io/en/latest/ch-misc.html#building-umpire\n")
   else()
     message(STATUS "Verified Umpire C interface headers are available.")
