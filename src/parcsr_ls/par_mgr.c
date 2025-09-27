@@ -912,6 +912,8 @@ hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
 
 /*--------------------------------------------------------------------------
  * Set CF marker array
+ *
+ * TODO: move to par_mgr_coarsen.c
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -923,11 +925,11 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
                  hypre_IntArray **CF_marker_ptr,
                  HYPRE_Int cflag)
 {
-   HYPRE_Int   *CF_marker = NULL;
-   HYPRE_Int *cindexes = fixed_coarse_indexes;
-   HYPRE_Int    i, row, nc;
-   HYPRE_Int nloc =  hypre_ParCSRMatrixNumRows(A);
-   HYPRE_MemoryLocation memory_location;
+   HYPRE_Int            *CF_marker = NULL;
+   HYPRE_Int            *cindexes = fixed_coarse_indexes;
+   HYPRE_Int             i, row, nc;
+   HYPRE_Int             nloc            = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* If this is the last level, coarsen onto fixed coarse set */
    if (cflag)
@@ -939,7 +941,6 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
       *CF_marker_ptr = hypre_IntArrayCreate(nloc);
       hypre_IntArrayInitialize(*CF_marker_ptr);
       hypre_IntArraySetConstantValues(*CF_marker_ptr, FMRK);
-      memory_location = hypre_IntArrayMemoryLocation(*CF_marker_ptr);
 
       if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
       {
@@ -969,8 +970,18 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
        * but not necessarily the best option, compared to initializing
        * CF_marker first and then coarsening on subgraph which excludes
        * the initialized coarse nodes.
-      */
-      hypre_BoomerAMGCoarsen(S, A, 0, debug_flag, CF_marker_ptr);
+       */
+#if defined(HYPRE_USING_GPU)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         hypre_BoomerAMGCoarsenPMIS(S, A, 2, debug_flag, CF_marker_ptr);
+      }
+      else
+#endif
+      {
+         hypre_BoomerAMGCoarsen(S, A, 0, debug_flag, CF_marker_ptr);
+      }
+      hypre_IntArrayMigrate(*CF_marker_ptr, HYPRE_MEMORY_HOST);
       CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
       /* Update CF_marker to correct Cpoints marked as Fpoints. */
@@ -979,6 +990,7 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
       {
          CF_marker[cindexes[i]] = CMRK;
       }
+
       /* set F-points to FMRK. This is necessary since the different coarsening schemes differentiate
        * between type of F-points (example Ruge coarsening). We do not need that distinction here.
       */
@@ -987,6 +999,8 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
          if (CF_marker[row] == CMRK) { continue; }
          CF_marker[row] = FMRK;
       }
+
+      hypre_IntArrayMigrate(*CF_marker_ptr, memory_location);
 #if 0
       /* IMPORTANT: Update coarse_indexes array to define the positions of the fixed coarse points
        * in the next level.

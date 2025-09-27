@@ -5737,6 +5737,7 @@ main( hypre_int argc,
             {
                HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
             }
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
             HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
             HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
@@ -5744,7 +5745,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
          HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
@@ -9320,9 +9320,10 @@ main( hypre_int argc,
       HYPRE_BoomerAMGCreate(&amg_solver);
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
          HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
       }
       else
       {
@@ -9344,6 +9345,7 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
          }
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
       }
@@ -9351,7 +9353,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-      HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       if (mgr_nlevels < 1 || mgr_bsize < 2)
       {

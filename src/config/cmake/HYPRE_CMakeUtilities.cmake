@@ -754,7 +754,21 @@ endfunction()
 
 # Function to process a list of executable source files
 function(add_hypre_executables EXE_SRCS)
-  foreach(SRC_FILE IN LISTS EXE_SRCS)
+  # Support both usage styles:
+  #  - add_hypre_executables(EXAMPLE_SRCS)     -> variable name
+  #  - add_hypre_executables("${TEST_SRCS}")   -> expanded list content
+  set(_HYPRE_EXE_SRC_LIST)
+  if(EXE_SRCS MATCHES "\\.(c|cc|cxx|cpp|cu|cuf|f|f90)(;|$)")
+    list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+  else()
+    if(DEFINED ${EXE_SRCS})
+      list(APPEND _HYPRE_EXE_SRC_LIST ${${EXE_SRCS}})
+    else()
+      list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+    endif()
+  endif()
+
+  foreach(SRC_FILE IN LISTS _HYPRE_EXE_SRC_LIST)
     add_hypre_executable(${SRC_FILE} "")
   endforeach()
 endfunction()
