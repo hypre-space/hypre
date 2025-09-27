@@ -661,10 +661,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
-      HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -792,10 +789,7 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
-      HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
