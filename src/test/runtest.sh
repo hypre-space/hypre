@@ -18,7 +18,7 @@ TestDirNames=""            # string of names of TEST_* directories used
 HOST=`hostname`
 NumThreads=0               # number of OpenMP threads to use if > 0
 Valgrind=""                # string to add to MpirunString when using valgrind
-cudamemcheck=""            # string to add to MpirunString when using cudamemcheck
+gpumemcheck=""             # string to add to MpirunString when using GPU memory checker
 mpibind=""                 # string to add to MpirunString when using mpibind
 script=""                  # string to add to MpirunString when using script
 SaveExt="saved"            # saved file extension
@@ -43,6 +43,7 @@ function usage
    printf "    -save <ext>    use '<test>.saved.<ext> for the saved-file extension\n"
    printf "    -valgrind      use valgrind memory checker\n"
    printf "    -cudamemcheck  use CUDA memory checker\n"
+   printf "    -cudasan       use CUDA compute sanitizer\n"
    printf "    -mpibind       use mpibind\n"
    printf "    -script <sh>   use a script before the command\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
@@ -149,7 +150,7 @@ function MpirunString
    NumArgs2=$(($#+1))
    if [ "$NumArgs1" -eq "$NumArgs2" ] ; then
       shift
-      RunString="$RunString $script $mpibind $cudamemcheck $Valgrind $*"
+      RunString="$RunString $script $mpibind $gpumemcheck $Valgrind $*"
       #echo $RunString
    fi
 }
@@ -529,7 +530,11 @@ do
          ;;
       -cudamemcheck)
          shift
-         cudamemcheck="cuda-memcheck --leak-check full"
+         gpumemcheck="cuda-memcheck --leak-check full"
+         ;;
+      -cudasan)
+         shift
+         gpumemcheck="compute-sanitizer"
          ;;
       -mpibind)
          shift
