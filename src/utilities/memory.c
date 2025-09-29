@@ -1567,7 +1567,7 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)")
+         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)");
 #endif
          hypre_printf("\n");
          hypre_printf("   ----+--------------+--------------+--------------+-------------");
