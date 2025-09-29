@@ -40,5 +40,5 @@ make
 
 # Test documentation build in examples/docs/
 cd ../examples/docs
-make distclean
+make distclean 1>&2 > /dev/null
 make

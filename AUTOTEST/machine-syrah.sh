@@ -56,7 +56,7 @@ do
    mv -f link.??? $output_subdir
 done
 rm -rf configure.??? make.???
-( cd $src_dir; make distclean )
+( cd $src_dir; make distclean 1>&2 > /dev/null )
 
 co="--enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo

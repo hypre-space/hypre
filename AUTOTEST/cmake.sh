@@ -37,7 +37,7 @@ root_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
-copts="-DHYPRE_BUILD_TESTS=ON"
+copts="-DHYPRE_BUILD_TESTS=ON -DHYPRE_BUILD_EXAMPLES=ON"
 mopts=""
 ropts=""
 eopts=""
@@ -81,12 +81,16 @@ rm -fr src/hypre
 
 # Configure
 cd $root_dir/build
-eval cmake $copts ../src
-make $mopts install
-
-cd $test_dir
+eval cmake $copts ../src 2> >(tee "CMakeLog.err") | tee "CMakeLog.out"
+for opt in $mopts
+do
+   make "$opt" 2> >(tee -a "CMakeLog.err") | tee -a "CMakeLog.out"
+done
+make install 2> >(tee -a "CMakeLog.err") | tee -a "CMakeLog.out"
+mv -f CMakeCache.txt CMakeLog.out CMakeLog.err $output_dir
 
 # Run
+cd $test_dir
 if [ -n "$rset" ]; then
    ./test.sh run.sh $root_dir/src $ropts
    mv -f run.??? $output_dir

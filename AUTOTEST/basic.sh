@@ -78,7 +78,7 @@ mv -f make.??? $output_dir
 
 # Run
 if [ -n "$rset" ]; then
-   ./test.sh run.sh $src_dir $ropts
+   ./test.sh run.sh $src_dir $ropts -J
    mv -f run.??? $output_dir
 fi
 
@@ -95,5 +95,4 @@ do
 done
 
 # Clean up
-( cd $src_dir; make distclean )
-
+( cd $src_dir; make distclean 1>&2 > /dev/null )

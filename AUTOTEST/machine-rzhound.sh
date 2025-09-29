@@ -56,7 +56,7 @@ do
    mv -f link.??? $output_subdir
 done
 rm -rf configure.??? make.???
-( cd $src_dir; make distclean )
+( cd $src_dir; make distclean 1>&2 > /dev/null )
 
 co="--with-openmp"
 RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"

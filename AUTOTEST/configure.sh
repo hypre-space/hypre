@@ -47,4 +47,3 @@ cp config.log HYPRE_config.h config/Makefile.config $output_dir
 
 # Save the environment variables
 set > $output_dir/sh.env
-

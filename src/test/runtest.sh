@@ -8,6 +8,7 @@
 BatchMode=0
 NoRun=0
 JobCheckInterval=10        # sleep time between jobs finished check
+MaxConcurrent=1            # maximum concurrent jobs (-j option)
 InputString=""
 RunPrefix=`type -p mpirun`
 RunPrefix="$RunPrefix -np"
@@ -25,6 +26,8 @@ SaveExt="saved"            # saved file extension
 RTOL=0
 ATOL=0
 RTOL_PERF=0.15
+JOB_COUNT=0                # count of jobs executed (when HYPRE_COUNT_JOBS=1)
+CountJobs=0                # enable job counting output when -countjobs is passed
 
 function usage
 {
@@ -46,6 +49,8 @@ function usage
    printf "    -cudasan       use CUDA compute sanitizer\n"
    printf "    -mpibind       use mpibind\n"
    printf "    -script <sh>   use a script before the command\n"
+   printf "    -j <n>         run up to <n> jobs concurrently (oversubscribe)\n"
+   printf "    -J|-countjobs  count and report total jobs executed by *.jobs files\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -290,11 +295,14 @@ function ExecuteJobs
    BatchCount=0              # different numbering for #Batch option
    PrevPid=0
    SavePWD=`pwd`
-##
-##     move to specified directory
+   ForceSequential=0         # Force sequential execution for certain job files (e.g., io.jobs)
+   if [ "$TestName" = "io" ] ; then
+      ForceSequential=1
+   fi
+   # Move to specified directory
    cd $WorkingDir
 
-##     open *.jobs files for reading
+   # Open *.jobs files for reading
    while read InputLine
    do
       case $InputLine in
@@ -343,7 +351,22 @@ EOF
                       ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
-               ${RunEcho} ${RunString} > $OutFile 2> $ErrFile </dev/null
+               JOB_COUNT=$((JOB_COUNT+1))
+               if [ "$MaxConcurrent" -gt 1 ] && [ "$ForceSequential" -eq 0 ] ; then
+                  # throttle concurrent background jobs without busy waiting
+                  while [ "$(jobs -pr | wc -l)" -ge "$MaxConcurrent" ] ; do
+                     if [ "${BASH_VERSINFO[0]:-0}" -ge 5 ] ; then
+                        wait -n
+                     else
+                        wait $(jobs -pr | head -n1)
+                     fi
+                  done
+                  (
+                     ${RunEcho} ${RunString} > $OutFile 2> $ErrFile </dev/null
+                  ) &
+               else
+                  ${RunEcho} ${RunString} > $OutFile 2> $ErrFile </dev/null
+               fi
             else
                if [ "$BatchFlag" -eq 0 ] ; then
                   BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
@@ -397,6 +420,10 @@ EOF
             ;;
       esac
    done < $TestName.jobs           # done with open *.jobs file for reading
+   # if running concurrent jobs, wait for all to finish before returning
+   if [ "$BatchMode" -eq 0 ] && [ "$MaxConcurrent" -gt 1 ] && [ "$ForceSequential" -eq 0 ] ; then
+      wait
+   fi
    cd $SavePWD
    return $ReturnFlag
 }
@@ -480,8 +507,6 @@ function CleanUp
 # process files
 function StartCrunch
 {
-   rm -f ~/insure.log*
-
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
@@ -545,6 +570,15 @@ do
          script=$1
          shift
          ;;
+      -J|-countjobs)
+         CountJobs=1
+         shift
+         ;;
+      -j)
+         shift
+         MaxConcurrent=$1
+         shift
+         ;;
       -n|-norun)
          NoRun=1
          RunEcho="echo"
@@ -568,7 +602,6 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-#                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
                      cd ../examples
                      for file in ex*
                      do
@@ -611,6 +644,11 @@ done
 #
 #     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames
+
+# Report total jobs if requested via -countjobs
+if [ "$CountJobs" -eq 1 ] ; then
+  echo "HYPRE_JOB_TOTAL: ${JOB_COUNT}"
+fi
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF

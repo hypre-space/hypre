@@ -14,10 +14,12 @@ case $1 in
 
    $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
-   where: {src_dir}  is the hypre source directory
-          -<test>    run <test>  (test = ams, ij, sstruct, struct)
-          -all       run all tests (default behavior)
-          -h|-help   prints this usage information and exits
+   where: {src_dir} is the hypre source directory
+          -<test>        run <test>  (test = ams, ij, sstruct, struct)
+          -all           run all tests (default behavior)
+          -j <n>         run up to <n> jobs concurrently (oversubscribe)
+          -J|-countjobs  count and report total jobs executed by *.jobs files
+          -h|-help       prints this usage information and exits
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 
@@ -41,6 +43,12 @@ do
       -rt)
          shift
          break
+         ;;
+      -j)
+         shift 2
+         ;;
+      -J|-countjobs)
+         shift
          ;;
       -*)
          tests="$tests $1"
