@@ -36,8 +36,8 @@ mv config/configure.in.tmp config/configure.in
 
 ln -s -f config/configure.in .
 rm -rf aclocal.m4 configure autom4te.cache
-autoconf --include=config
-autoheader configure.in
+~/projects/autoconf-2.71/install/bin/autoconf --include=config
+~/projects/autoconf-2.71/install/bin/autoheader configure.in
 rm configure.in
 
 cat >> configure <<EOF

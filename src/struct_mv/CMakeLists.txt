@@ -52,7 +52,9 @@ set(REGULAR_SRCS
   struct_innerprod.c
   struct_matrix.c
   struct_matvec.c
-  struct_matvec_core.c
+  struct_matvec_cc.c
+  struct_matvec_vc.c
+  struct_matvec_vcc.c
   struct_matmult.c
   struct_matmult_core.c
   struct_matmult_fuse.c
@@ -89,7 +91,9 @@ if (HYPRE_USING_GPU)
     struct_matop.c
     struct_matrix.c
     struct_matvec.c
-    struct_matvec_core.c
+    struct_matvec_cc.c
+    struct_matvec_vc.c
+    struct_matvec_vcc.c
     struct_scale.c
     struct_vector.c
   )

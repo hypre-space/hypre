@@ -705,7 +705,7 @@ HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
                                 HYPRE_Complex beta, hypre_StructVector *y );
 
-/* struct_matvec_core.c */
+/* struct_matvec_cc.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
                                    hypre_StructMatrix *A,
@@ -731,6 +731,8 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box,
                                    hypre_Box          *z_data_box);
+
+/* struct_matvec_vc.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
                                    hypre_StructMatrix *A,
@@ -759,6 +761,8 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box,
                                    hypre_Box          *z_data_box );
+
+/* struct_matvec_vcc.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_StructMatrix *A,
