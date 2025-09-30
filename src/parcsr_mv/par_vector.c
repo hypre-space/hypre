@@ -884,7 +884,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    global_size      = buffer[0];
    num_vectors      = (HYPRE_Int) buffer[1];
    global_vecstride = (HYPRE_Int) buffer[2];
-   memory_location  = (HYPRE_Int) buffer[3];
+   memory_location  = (HYPRE_MemoryLocation) buffer[3];
 
    if (num_vectors == 1)
    {
