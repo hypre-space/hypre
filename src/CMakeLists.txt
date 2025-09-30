@@ -139,6 +139,7 @@ set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Rea
 set_hypre_option(BASE HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MIXED_PRECISION      "Enable mixed precision support" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_FORTRAN              "Enable Fortran drivers (examples/tests)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_BLAS           "Use internal BLAS library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_LAPACK         "Use internal LAPACK library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
@@ -181,6 +182,7 @@ set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
+
 # TPL options
 set_hypre_option(TPL  HYPRE_ENABLE_UMPIRE               "Use Umpire Allocator for device and unified memory" OFF)
 set_hypre_option(TPL  HYPRE_ENABLE_UMPIRE_HOST          "Use Umpire Allocator for host memory" OFF)
@@ -223,6 +225,14 @@ endforeach()
 process_fmangling_scheme(FMANGLE "name")
 process_fmangling_scheme(FMANGLE_BLAS "BLAS")
 process_fmangling_scheme(FMANGLE_LAPACK "LAPACK")
+
+# Enable Fortran language when requested (for examples/tests only)
+if (HYPRE_ENABLE_FORTRAN)
+  enable_language(Fortran)
+  if (HYPRE_ENABLE_MPI)
+    find_package(MPI REQUIRED COMPONENTS Fortran)
+  endif()
+endif()
 
 # Set config name values
 set_internal_hypre_option("" BIGINT)
