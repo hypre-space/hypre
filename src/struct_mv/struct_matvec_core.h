@@ -79,7 +79,7 @@
    Ap##n[0] * xp[xi + xoff##n] +
 
 /* Sequence macros for declaring offset variables */
-#define HYPRE_DECLARE_OFFSETS_UP_TO_27 \
+#define HYPRE_DECLARE_OFFSETS_UP_TO_26 \
    HYPRE_DECLARE_OFFSETS(0);     \
    HYPRE_DECLARE_OFFSETS(1);     \
    HYPRE_DECLARE_OFFSETS(2);     \
@@ -105,8 +105,7 @@
    HYPRE_DECLARE_OFFSETS(22);    \
    HYPRE_DECLARE_OFFSETS(23);    \
    HYPRE_DECLARE_OFFSETS(24);    \
-   HYPRE_DECLARE_OFFSETS(25);    \
-   HYPRE_DECLARE_OFFSETS(26)
+   HYPRE_DECLARE_OFFSETS(25)
 
 /* Sequence macros for loading matrix entries */
 #define HYPRE_LOAD_AX_UP_TO_1(t) \

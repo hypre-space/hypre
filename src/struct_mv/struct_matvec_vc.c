@@ -53,7 +53,8 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
    hypre_Index           offset;
    HYPRE_Int             si = 0, depth;
    HYPRE_Complex        *xp, *yp, *zp;
-   HYPRE_DECLARE_OFFSETS_UP_TO_27;
+   HYPRE_DECLARE_OFFSETS_UP_TO_26;
+   HYPRE_DECLARE_OFFSETS(26);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VC");
@@ -84,59 +85,16 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
    hypre_CopyToIndex(start, ndim, zdstart);
    hypre_MapToCoarseIndex(zdstart, NULL, ran_stride, ndim);
 
-   /* Initialize output vector in the first pass */
-#ifdef HYPRE_CORE_CASE
-#undef HYPRE_CORE_CASE
-#endif
-#define HYPRE_CORE_CASE(n)                                                     \
-   case n:                                                                     \
-      HYPRE_LOAD_AX_UP_TO_##n(transpose);                                      \
-      hypre_BoxLoop4Begin(ndim, loop_size,                                     \
-                          A_data_box, Adstart, Adstride, Ai,                   \
-                          x_data_box, xdstart, xdstride, xi,                   \
-                          y_data_box, ydstart, ydstride, yi,                   \
-                          z_data_box, zdstart, zdstride, zi)                   \
-      {                                                                        \
-         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n);       \
-      }                                                                        \
-      hypre_BoxLoop4End(Ai, xi, yi, zi)                                        \
-      break;
-
    /* The flag "only_Ax" indicates that "beta * yp" has been computed previously (by the CC kernel) */
    depth = only_Ax ? 0 : hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
-   switch (depth)
-   {
-      HYPRE_CORE_CASE(27);
-      HYPRE_CORE_CASE(26);
-      HYPRE_CORE_CASE(25);
-      HYPRE_CORE_CASE(24);
-      HYPRE_CORE_CASE(23);
-      HYPRE_CORE_CASE(22);
-      HYPRE_CORE_CASE(21);
-      HYPRE_CORE_CASE(20);
-      HYPRE_CORE_CASE(19);
-      HYPRE_CORE_CASE(18);
-      HYPRE_CORE_CASE(17);
-      HYPRE_CORE_CASE(16);
-      HYPRE_CORE_CASE(15);
-      HYPRE_CORE_CASE(14);
-      HYPRE_CORE_CASE(13);
-      HYPRE_CORE_CASE(12);
-      HYPRE_CORE_CASE(11);
-      HYPRE_CORE_CASE(10);
-      HYPRE_CORE_CASE(9);
-      HYPRE_CORE_CASE(8);
-      HYPRE_CORE_CASE(7);
-      HYPRE_CORE_CASE(6);
-      HYPRE_CORE_CASE(5);
-      HYPRE_CORE_CASE(4);
-      HYPRE_CORE_CASE(3);
-      HYPRE_CORE_CASE(2);
-      HYPRE_CORE_CASE(1);
 
-      case 0:
-         break;
-   }
+   /* Initialize output vector (z = beta * y + alpha * A*x) with a first pass */
+   hypre_StructMatvecCompute_core_IVC(A, x, Ab, depth, alpha, beta, xp, yp, zp,
+                                      ndim, transpose, nentries, entries,
+                                      stencil_shape, loop_size, xfstride, start,
+                                      Adstart, xdstart, ydstart, zdstart,
+                                      Adstride, xdstride, ydstride, zdstride,
+                                      A_data_box, x_data_box, y_data_box, z_data_box);
 
    /* Update output vector with remaining A*x components if any */
 #ifdef HYPRE_CORE_CASE

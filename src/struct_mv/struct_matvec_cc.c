@@ -50,7 +50,8 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
    hypre_Index           offset;
    HYPRE_Int             si = 0, depth;
    HYPRE_Complex        *xp, *yp, *zp;
-   HYPRE_DECLARE_OFFSETS_UP_TO_27;
+   HYPRE_DECLARE_OFFSETS_UP_TO_26;
+   HYPRE_DECLARE_OFFSETS(26);
 
    /* Exit early if no stencil entries fall in this category */
    if (!nentries)
@@ -79,57 +80,14 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
    hypre_CopyToIndex(start, ndim, zdstart);
    hypre_MapToCoarseIndex(zdstart, NULL, ran_stride, ndim);
 
-   /* Initialize output vector in the first pass */
-#ifdef HYPRE_CORE_CASE
-#undef HYPRE_CORE_CASE
-#endif
-#define HYPRE_CORE_CASE(n)                                                     \
-   case n:                                                                     \
-      HYPRE_LOAD_CAX_UP_TO_##n(transpose);                                     \
-      hypre_BoxLoop3Begin(ndim, loop_size,                                     \
-                          x_data_box, xdstart, xdstride, xi,                   \
-                          y_data_box, ydstart, ydstride, yi,                   \
-                          z_data_box, zdstart, zdstride, zi);                  \
-      {                                                                        \
-         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_CAX_ADD_UP_TO_##n);      \
-      }                                                                        \
-      hypre_BoxLoop3End(xi, yi, zi);                                           \
-      break;
-
+   /* Initialize output vector (z = beta * y + alpha * A*x) with a first pass */
    depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
-   switch (depth)
-   {
-      HYPRE_CORE_CASE(27);
-      HYPRE_CORE_CASE(26);
-      HYPRE_CORE_CASE(25);
-      HYPRE_CORE_CASE(24);
-      HYPRE_CORE_CASE(23);
-      HYPRE_CORE_CASE(22);
-      HYPRE_CORE_CASE(21);
-      HYPRE_CORE_CASE(20);
-      HYPRE_CORE_CASE(19);
-      HYPRE_CORE_CASE(18);
-      HYPRE_CORE_CASE(17);
-      HYPRE_CORE_CASE(16);
-      HYPRE_CORE_CASE(15);
-      HYPRE_CORE_CASE(14);
-      HYPRE_CORE_CASE(13);
-      HYPRE_CORE_CASE(12);
-      HYPRE_CORE_CASE(11);
-      HYPRE_CORE_CASE(10);
-      HYPRE_CORE_CASE(9);
-      HYPRE_CORE_CASE(8);
-      HYPRE_CORE_CASE(7);
-      HYPRE_CORE_CASE(6);
-      HYPRE_CORE_CASE(5);
-      HYPRE_CORE_CASE(4);
-      HYPRE_CORE_CASE(3);
-      HYPRE_CORE_CASE(2);
-      HYPRE_CORE_CASE(1);
-
-      case 0:
-         break;
-   }
+   hypre_StructMatvecCompute_core_ICC(A, x, Ab, depth, alpha, beta, xp, yp, zp,
+                                      ndim, transpose, nentries, entries,
+                                      stencil_shape, loop_size, xfstride,
+                                      start, xdstart, ydstart, zdstart,
+                                      xdstride, ydstride, zdstride,
+                                      x_data_box, y_data_box, z_data_box);
 
    /* Update output vector with remaining A*x components if any */
 #ifdef HYPRE_CORE_CASE
