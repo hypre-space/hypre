@@ -72,6 +72,7 @@ CUFILES =\
  struct_matmult_fuse_fcc.c\
  struct_matmult_fuse_ff.c\
  struct_matmult_fuse_fc.c\
+ struct_matmult_fuse_cc.c\
  struct_matmult_fuse_c.c\
  struct_matmult_fuse_f.c\
  struct_axpy.c\

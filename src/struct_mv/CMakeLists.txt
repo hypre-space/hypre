@@ -37,6 +37,7 @@ set(REGULAR_SRCS
   struct_matmult_fuse_fcc.c
   struct_matmult_fuse_ff.c
   struct_matmult_fuse_fc.c
+  struct_matmult_fuse_cc.c
   struct_matmult_fuse_f.c
   struct_matmult_fuse_c.c
   assumed_part.c
@@ -105,6 +106,7 @@ if (HYPRE_USING_GPU)
     struct_matmult_fuse_fcc.c
     struct_matmult_fuse_ff.c
     struct_matmult_fuse_fc.c
+    struct_matmult_fuse_cc.c
     struct_matmult_fuse_f.c
     struct_matmult_fuse_c.c
     struct_axpy.c
