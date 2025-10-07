@@ -2456,36 +2456,37 @@ main( hypre_int argc,
          hypre_printf("reference solution xstar read from multiple binary files (IJ format)\n");
          hypre_printf("\n");
          hypre_printf("  -solver <ID>           : solver ID\n");
-         hypre_printf("       0=AMG               1=AMG-PCG        \n");
-         hypre_printf("       2=DS-PCG            3=AMG-GMRES      \n");
-         hypre_printf("       4=DS-GMRES          5=AMG-CGNR       \n");
-         hypre_printf("       6=DS-CGNR           7=PILUT-GMRES    \n");
-         hypre_printf("       8=ParaSails-PCG     9=AMG-BiCGSTAB   \n");
-         hypre_printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB \n");
-         hypre_printf("       12=Schwarz-PCG     13=GSMG           \n");
+         hypre_printf("       0=AMG               1=AMG-PCG\n");
+         hypre_printf("       2=DS-PCG            3=AMG-GMRES\n");
+         hypre_printf("       4=DS-GMRES          5=AMG-CGNR\n");
+         hypre_printf("       6=DS-CGNR           7=PILUT-GMRES\n");
+         hypre_printf("       8=ParaSails-PCG     9=AMG-BiCGSTAB\n");
+         hypre_printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB\n");
+         hypre_printf("       12=Schwarz-PCG     13=GSMG\n");
          hypre_printf("       14=GSMG-PCG        15=GSMG-GMRES\n");
          hypre_printf("       16=AMG-COGMRES     17=DIAG-COGMRES\n");
          hypre_printf("       18=ParaSails-GMRES\n");
-         hypre_printf("       20=Hybrid solver/ DiagScale, AMG \n");
-         hypre_printf("       31=FSAI-PCG \n");
-         hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
+         hypre_printf("       20=Hybrid solver/ DiagScale, AMG\n");
+         hypre_printf("       21=Cheby-PCG       22=Cheby-GMRES\n");
+         hypre_printf("       31=FSAI-PCG\n");
+         hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES\n");
          hypre_printf("       45=Euclid-BICGSTAB 46=Euclid-COGMRES\n");
          hypre_printf("       47=Euclid-FlexGMRES\n");
-         hypre_printf("       50=DS-LGMRES       51=AMG-LGMRES     \n");
-         hypre_printf("       60=DS-FlexGMRES    61=AMG-FlexGMRES  \n");
-         hypre_printf("       70=MGR             71=MGR-PCG  \n");
-         hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB  \n");
+         hypre_printf("       50=DS-LGMRES       51=AMG-LGMRES\n");
+         hypre_printf("       60=DS-FlexGMRES    61=AMG-FlexGMRES\n");
+         hypre_printf("       70=MGR             71=MGR-PCG\n");
+         hypre_printf("       72=MGR-FlexGMRES   73=MGR-BICGSTAB\n");
          hypre_printf("       74=MGR-COGMRES  \n");
-         hypre_printf("       80=ILU             81=ILU-GMRES  \n");
+         hypre_printf("       80=ILU             81=ILU-GMRES\n");
          hypre_printf("       82=ILU-FlexGMRES  \n");
-         hypre_printf("       90=AMG-DD          91=AMG-DD-GMRES  \n");
+         hypre_printf("       90=AMG-DD          91=AMG-DD-GMRES\n");
          hypre_printf("\n");
-         hypre_printf("  -cljp                 : CLJP coarsening \n");
-         hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
-         hypre_printf("  -cgc                  : CGC coarsening \n");
-         hypre_printf("  -cgce                 : CGC-E coarsening \n");
-         hypre_printf("  -pmis                 : PMIS coarsening \n");
-         hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
+         hypre_printf("  -cljp                 : CLJP coarsening\n");
+         hypre_printf("  -cljp1                : CLJP coarsening, fixed random\n");
+         hypre_printf("  -cgc                  : CGC coarsening\n");
+         hypre_printf("  -cgce                 : CGC-E coarsening\n");
+         hypre_printf("  -pmis                 : PMIS coarsening\n");
+         hypre_printf("  -pmis1                : PMIS coarsening, fixed random\n");
          hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
          hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
          hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
@@ -5228,11 +5229,10 @@ main( hypre_int argc,
     * Solve the system using PCG
     *-----------------------------------------------------------*/
 
-   /* begin lobpcg */
-   if (!lobpcgFlag && (solver_id == 1 || solver_id == 2 || solver_id == 8 ||
-                       solver_id == 12 || solver_id == 14 || solver_id == 31 ||
-                       solver_id == 43 || solver_id == 71))
-      /*end lobpcg */
+   if (!lobpcgFlag &&
+       (solver_id == 1  || solver_id == 2  || solver_id == 8  ||
+        solver_id == 12 || solver_id == 14 || solver_id == 21 ||
+        solver_id == 31 || solver_id == 43 || solver_id == 71))
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("PCG Setup");
@@ -5599,6 +5599,28 @@ main( hypre_int argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                              pcg_precond);
       }
+      else if (solver_id == 21)
+      {
+         /* Use Chebyshev preconditioning */
+         if (myid == 0) { hypre_printf("Solver: Chebyshev-PCG\n"); }
+
+         HYPRE_ParChebyCreate(&pcg_precond);
+
+         HYPRE_ParChebySetOrder(pcg_precond, cheby_order);
+         HYPRE_ParChebySetVariant(pcg_precond, cheby_variant);
+         HYPRE_ParChebySetScale(pcg_precond, cheby_scale);
+         HYPRE_ParChebySetEigRatio(pcg_precond, cheby_fraction);
+         HYPRE_ParChebySetEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_ParChebySetMaxIterations(pcg_precond, 1);
+         HYPRE_ParChebySetTolerance(pcg_precond, 0.0);
+         HYPRE_ParChebySetZeroGuess(pcg_precond, 1);
+         HYPRE_ParChebySetPrintLevel(pcg_precond, poutdat);
+
+         HYPRE_PCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParChebySolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParChebySetup,
+                             pcg_precond);
+      }
       else if (solver_id == 31)
       {
          /* use FSAI preconditioning */
@@ -5864,6 +5886,10 @@ main( hypre_int argc,
       else if (solver_id == 14)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+      else if (solver_id == 21)
+      {
+         HYPRE_ParChebyDestroy(pcg_precond);
       }
       else if (solver_id == 31)
       {
@@ -6939,8 +6965,8 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if (solver_id == 3  || solver_id == 4  || solver_id == 7  ||
-       solver_id == 15 || solver_id == 18 || solver_id == 44 ||
-       solver_id == 81 || solver_id == 91)
+       solver_id == 15 || solver_id == 18 || solver_id == 22 ||
+       solver_id == 44 || solver_id == 81 || solver_id == 91)
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("GMRES Setup");
@@ -7369,6 +7395,28 @@ main( hypre_int argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                                pcg_precond);
       }
+      else if (solver_id == 22)
+      {
+         /* Use Chebyshev preconditioning */
+         if (myid == 0) { hypre_printf("Solver: Chebyshev-GMRES\n"); }
+
+         HYPRE_ParChebyCreate(&pcg_precond);
+
+         HYPRE_ParChebySetOrder(pcg_precond, cheby_order);
+         HYPRE_ParChebySetVariant(pcg_precond, cheby_variant);
+         HYPRE_ParChebySetScale(pcg_precond, cheby_scale);
+         HYPRE_ParChebySetEigRatio(pcg_precond, cheby_fraction);
+         HYPRE_ParChebySetEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_ParChebySetMaxIterations(pcg_precond, 1);
+         HYPRE_ParChebySetTolerance(pcg_precond, 0.0);
+         HYPRE_ParChebySetZeroGuess(pcg_precond, 1);
+         HYPRE_ParChebySetPrintLevel(pcg_precond, poutdat);
+
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParChebySolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParChebySetup,
+                               pcg_precond);
+      }
       else if (solver_id == 44)
       {
          /* use Euclid preconditioning */
@@ -7546,6 +7594,10 @@ main( hypre_int argc,
       else if (solver_id == 18)
       {
          HYPRE_ParaSailsDestroy(pcg_precond);
+      }
+      else if (solver_id == 22)
+      {
+         HYPRE_ParChebyDestroy(pcg_precond);
       }
       else if (solver_id == 44)
       {
