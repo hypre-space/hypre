@@ -17,6 +17,9 @@ endif()
 if(POLICY CMP0104)
   cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
 endif()
+if(POLICY CMP0090)
+  cmake_policy(SET CMP0090 NEW) # Checks for <PackageName>_ROOT
+endif()
 
 # The version number.
 set(HYPRE_VERSION 3.0.0)
@@ -174,10 +177,11 @@ set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use CUB's device memory pool" OFF)
 # HIP options
-set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
-set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
@@ -520,6 +524,11 @@ if (MSVC)
     #Fix issue with visual studio 2013
     set_source_files_properties(struct_ls/pfmg3_setup_rap.c      PROPERTIES COMPILE_FLAGS /Od)
   endif()
+endif ()
+
+# Debug library
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  pretty_print_target_interface(HYPRE INTERFACE_LINK_LIBRARIES)
 endif ()
 
 # Build FEI, if requested (to be phased out)
