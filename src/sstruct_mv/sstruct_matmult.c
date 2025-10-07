@@ -780,8 +780,8 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* Unstructured component variables */
    hypre_IJMatrix             *ij_M;
    hypre_IJMatrix             *ijmatrix;
-   HYPRE_Int                   ilower, iupper;
-   HYPRE_Int                   jlower, jupper;
+   HYPRE_BigInt                ilower, iupper;
+   HYPRE_BigInt                jlower, jupper;
 
    /* Input matrices variables */
    hypre_SStructPMatrix       *pmatrix;
@@ -1058,8 +1058,13 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrix         **ij_sA;
 
    HYPRE_Int                m, t;
-   HYPRE_Int                num_nonzeros_uP;
+   HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation     memory_location;
+   HYPRE_ExecutionPolicy    exec;
+#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1067,6 +1072,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+#if defined(HYPRE_USING_GPU)
+   memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
+   exec  = hypre_GetExecPolicy1(memory_location);
+#endif
 
    /* The following ensures that NumNonzeros is initialized (a negative value
     * means uninitialized).  RDF: Not sure if this is needed for anything other
@@ -1288,10 +1297,13 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    /* Add to entries in S with entries from U where the sparsity pattern permits. */
-#if !defined(HYPRE_USING_GPU)
-   hypre_SStructMatrixCompressUToS(M, 1);
-   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+#if defined(HYPRE_USING_GPU)
+   if (exec == HYPRE_EXEC_HOST)
 #endif
+   {
+      hypre_SStructMatrixCompressUToS(M, 1);
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 

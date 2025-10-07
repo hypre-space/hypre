@@ -4,6 +4,8 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#include <HYPRE_config.h>
+
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_utilities_mup_def.h"
 #endif

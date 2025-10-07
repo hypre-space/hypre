@@ -125,19 +125,19 @@ hypre_SStructCopy_dbl( hypre_SStructVector *x, hypre_SStructVector *y );
 HYPRE_Int
 hypre_SStructCopy_long_dbl( hypre_SStructVector *x, hypre_SStructVector *y );
 
-HYPRE_Int
+HYPRE_BigInt
 hypre_SStructGraphFindBoxEndpt_flt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
-HYPRE_Int
+HYPRE_BigInt
 hypre_SStructGraphFindBoxEndpt_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
-HYPRE_Int
+HYPRE_BigInt
 hypre_SStructGraphFindBoxEndpt_long_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
 
 HYPRE_Int
-hypre_SStructGraphFindSGridEndpts_flt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts );
+hypre_SStructGraphFindSGridEndpts_flt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 HYPRE_Int
-hypre_SStructGraphFindSGridEndpts_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts );
+hypre_SStructGraphFindSGridEndpts_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 HYPRE_Int
-hypre_SStructGraphFindSGridEndpts_long_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int *endpts );
+hypre_SStructGraphFindSGridEndpts_long_dbl( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 HYPRE_Int
 hypre_SStructGraphGetUVEntryRank_flt( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var, hypre_Index index, HYPRE_BigInt *rank );

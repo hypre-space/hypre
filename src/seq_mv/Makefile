@@ -19,7 +19,7 @@ HEADERS =\
  HYPRE_seq_mv.h\
  mapped_matrix.h\
  multiblock_matrix.h\
- seq_mv.h\
+ _hypre_seq_mv.h\
  seq_mv.hpp\
  vector.h
 
@@ -88,7 +88,7 @@ COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}
@@ -116,13 +116,11 @@ all:
 lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/seq_mv.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/seq_mv.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: deleteautogen

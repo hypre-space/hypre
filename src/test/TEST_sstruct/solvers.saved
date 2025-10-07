@@ -186,10 +186,6 @@ Final Relative Residual Norm = 9.434675e-07
 Iterations = 9
 Final Relative Residual Norm = 5.708657e-07
 
-# Output file: solvers.out.51
-Iterations = 9
-Final Relative Residual Norm = 4.786920e-07
-
 # Output file: solvers.out.52
 Iterations = 10
 Final Relative Residual Norm = 5.546960e-07

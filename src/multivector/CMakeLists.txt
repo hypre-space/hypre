@@ -4,8 +4,14 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
-  multivector.h
-  temp_multivector.h
+  _hypre_lobpcg_interpreter.h
+  _hypre_lobpcg_multivector.h
+  _hypre_lobpcg_temp_multivector.h
+  _hypre_lobpcg_csr_matmultivec.h
+  _hypre_lobpcg_par_csr_matmultivec.h
+  _hypre_lobpcg_par_csr_pmvcomm.h
+  _hypre_lobpcg_par_multivector.h
+  _hypre_lobpcg_seq_multivector.h
 )
 
 # Add MUP headers

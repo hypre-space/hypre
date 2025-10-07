@@ -729,9 +729,17 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    HYPRE_Int              cdepth[HYPRE_MAXDIM];
    HYPRE_Int              vdepth[HYPRE_MAXDIM];
    HYPRE_Int             *entries[HYPRE_MAXDIM];
-   HYPRE_Int              csi[HYPRE_MAXDIM][stencil_size];
-   HYPRE_Int              vsi[HYPRE_MAXDIM][stencil_size];
+   HYPRE_Int              csi[HYPRE_MAXDIM][HYPRE_MAX_MMTERMS];
+   HYPRE_Int              vsi[HYPRE_MAXDIM][HYPRE_MAX_MMTERMS];
    HYPRE_Int              diag_is_constant;
+
+   /* Sanity check */
+   if (stencil_size >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached max. stencil size! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PFMGComputeCxyz");

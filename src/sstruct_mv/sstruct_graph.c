@@ -102,7 +102,7 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
  * 9/09 AB - modified to use the box manager
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+HYPRE_BigInt
 hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
                                HYPRE_Int              part,
                                HYPRE_Int              var,
@@ -132,7 +132,6 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
       hypre_SStructBoxManEntryGetGlobalRank(
          boxman_entry, hypre_BoxIMin(box), &rank, type);
    }
-
    else
    {
       hypre_SStructBoxManEntryGetGlobalRank(
@@ -164,7 +163,7 @@ hypre_SStructGraphFindSGridEndpts( hypre_SStructGraph  *graph,
                                    HYPRE_Int            var,
                                    HYPRE_Int            proc,
                                    HYPRE_Int            endpt,
-                                   HYPRE_Int           *endpts )
+                                   HYPRE_BigInt        *endpts )
 {
    hypre_SStructGrid     *grid = hypre_SStructGraphGrid(graph);
    hypre_StructGrid      *sgrid;

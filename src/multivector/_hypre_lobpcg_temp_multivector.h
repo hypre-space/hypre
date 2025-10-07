@@ -8,7 +8,7 @@
 #ifndef TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 #define TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 
-#include "interpreter.h"
+#include "_hypre_lobpcg_interpreter.h"
 
 typedef struct
 {
@@ -138,4 +138,3 @@ mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
 #endif
 
 #endif /* MULTIVECTOR_FUNCTION_PROTOTYPES */
-

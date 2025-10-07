@@ -14,7 +14,7 @@
 #define hypre_PAR_MULTIVECTOR_HEADER
 
 #include "_hypre_utilities.h"
-#include "seq_Multivector.h"
+#include "_hypre_lobpcg_seq_multivector.h"
 
 #ifdef __cplusplus
 extern "C" {

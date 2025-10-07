@@ -15,9 +15,8 @@ structured-grid applications, users should use the ``Struct`` interface
 described in this chapter.  This interface will also provide access (this is not
 yet supported) to solvers in hypre that were designed for unstructured-grid
 applications and sparse linear systems in general.  These additional solvers are
-usually provided via the unstructured-grid interface (``FEI``) or the
-linear-algebraic interface (``IJ``) described in Chapters :ref:`ch-FEI` and
-:ref:`ch-IJ`.
+usually provided via the linear-algebraic interface (``IJ``) described in
+Chapter :ref:`ch-IJ`.
 
 :numref:`fig-struct-example` gives an example of the type of grid currently
 supported by the ``Struct`` interface.  The interface uses a finite-difference

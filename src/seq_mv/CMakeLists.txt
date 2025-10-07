@@ -5,12 +5,7 @@
 
 set(HDRS
   HYPRE_seq_mv.h
-  seq_mv.h
-  seq_mv.hpp
-  csr_matrix.h
-  mapped_matrix.h
-  multiblock_matrix.h
-  vector.h
+  _hypre_seq_mv.h
 )
 
 # Add MUP headers when mixed precision is enabled

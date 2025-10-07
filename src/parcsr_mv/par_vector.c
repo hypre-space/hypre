@@ -53,6 +53,9 @@ hypre_ParVectorCreate( MPI_Comm      comm,
       partitioning[1] = partitioning_in[1];
    }
    local_size = (HYPRE_Int) (partitioning[1] - partitioning[0]);
+   hypre_assert(local_size >= 0);
+   hypre_assert(partitioning[0] >= 0);
+   hypre_assert(partitioning[1] >= 0);
 
    hypre_ParVectorAssumedPartition(vector) = NULL;
 
@@ -862,23 +865,26 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    hypre_MPI_Request   *requests;
    hypre_MPI_Status    *status, status0;
    HYPRE_Int            i, j, k, p;
+   HYPRE_BigInt         buffer[4];
 
+   hypre_assert(vec_starts[1] - vec_starts[0] >= 0);
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    if (my_id == 0)
    {
-      global_size = (HYPRE_BigInt)hypre_VectorSize(v);
       v_data = hypre_VectorData(v);
-      num_vectors = hypre_VectorNumVectors(v); /* for multivectors */
-      global_vecstride = hypre_VectorVectorStride(v);
-      memory_location = hypre_VectorMemoryLocation(v);
+      buffer[0] = (HYPRE_BigInt) hypre_VectorSize(v);
+      buffer[1] = (HYPRE_BigInt) hypre_VectorNumVectors(v);
+      buffer[2] = (HYPRE_BigInt) hypre_VectorVectorStride(v);
+      buffer[3] = (HYPRE_BigInt) hypre_VectorMemoryLocation(v);
    }
 
-   hypre_MPI_Bcast(&memory_location, 1, HYPRE_MPI_INT, 0, comm);
-   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, comm);
-   hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
-   hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&buffer[0], 4, HYPRE_MPI_BIG_INT, 0, comm);
+   global_size      = buffer[0];
+   num_vectors      = (HYPRE_Int) buffer[1];
+   global_vecstride = (HYPRE_Int) buffer[2];
+   memory_location  = (HYPRE_MemoryLocation) buffer[3];
 
    if (num_vectors == 1)
    {
@@ -889,7 +895,6 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       par_vector = hypre_ParMultiVectorCreate(comm, global_size, vec_starts, num_vectors);
    }
 
-   vec_starts  = hypre_ParVectorPartitioning(par_vector);
    first_index = hypre_ParVectorFirstIndex(par_vector);
    last_index  = hypre_ParVectorLastIndex(par_vector);
    local_size  = (HYPRE_Int)(last_index - first_index) + 1;

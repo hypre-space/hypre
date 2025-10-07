@@ -50,10 +50,6 @@
    approximate inverse preconditioners.  *SIAM J. Sci. Comput.*,
    21:1804--1822, 2000.
 
-.. [ClEA1999] R. L. Clay et al.  An annotated reference guide to the Finite
-   Element Interface (FEI) specification, Version 1.0.  Technical Report
-   SAND99-8229, Sandia National Laboratories, Livermore, CA, 1999.
-
 .. [CMakeWeb] CMake, a cross-platform open-source build system.
    `http://www.cmake.org/ <http://www.cmake.org/>`_.
 
@@ -150,9 +146,6 @@
    Preconditioning. *ACM T. Math. Software*, 41(2):1–-26, 2015.
    `https://doi.org/10.1145/2629475 <https://doi.org/10.1145/2629475>`_.
 
-.. [JoLe2006] J. Jones and B. Lee.  A multigrid method for variable coefficient
-   maxwell's equations.  *SIAM J. Sci. Comput.*, 27:1689--1708, 2006.
-
 .. [McCo1989] S. F. McCormick.  *Multilevel Adaptive Methods for Partial
    Differential Equations*, volume 6 of *Frontiers in Applied Mathematics*.
    SIAM Books, Philadelphia, 1989.
@@ -173,6 +166,9 @@
 .. [Scha1998] S. Schaffer.  A semi-coarsening multigrid method for elliptic
    partial differential equations with highly discontinuous and anisotropic
    coefficients.  *SIAM J. Sci. Comput.*, 20(1):228--242, 1998.
+
+.. [MaFaYa23] V. A. P. Magri, R. Falgout and U. M. Yang. A new semistructured
+   algebraic multigrid method. *SIAM J. Sci. Comput.*, 45(3):S439-S460, 2023.
 
 .. [Stue1999] K. Stüben.  Algebraic multigrid (AMG): an introduction with
    applications.  In U. Trottenberg, C. Oosterlee, and A. Schüller, editors,

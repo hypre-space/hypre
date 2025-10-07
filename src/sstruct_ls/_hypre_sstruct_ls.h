@@ -17,7 +17,7 @@
 #include "_hypre_struct_ls.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_parcsr_ls.h"
-#include "multivector.h"
+#include "_hypre_lobpcg_multivector.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_sstruct_ls_mup_def.h"

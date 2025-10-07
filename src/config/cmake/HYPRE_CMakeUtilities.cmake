@@ -5,6 +5,13 @@
 
 # Function to set hypre build options
 function(set_hypre_option category name description default_value)
+  # Detect if the user explicitly set this option via -D on the command line
+  if(DEFINED CACHE{${name}})
+    set(HYPRE_USER_SET_${name} ON CACHE INTERNAL "User explicitly set ${name}")
+  else()
+    set(HYPRE_USER_SET_${name} OFF CACHE INTERNAL "User explicitly set ${name}")
+  endif()
+
   option(${name} "${description}" ${default_value})
   if (${category} STREQUAL "CUDA" OR ${category} STREQUAL "HIP" OR ${category} STREQUAL "SYCL")
     if (HYPRE_ENABLE_${category} STREQUAL "ON")
@@ -30,13 +37,13 @@ endfunction()
 function(setup_git_version_info HYPRE_GIT_DIR)
   set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
   if (EXISTS "${HYPRE_GIT_DIR}")
-    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9
+    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9 --always
                     OUTPUT_VARIABLE develop_string
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     RESULT_VARIABLE git_result)
     if (git_result EQUAL 0)
       set(GIT_VERSION_FOUND TRUE PARENT_SCOPE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0 --always
                       OUTPUT_VARIABLE develop_lastag
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-list --count ${develop_lastag}..HEAD
@@ -252,6 +259,27 @@ macro(get_language_flags in_var out_var lang_type)
   endif()
 endmacro()
 
+# Function to print the INTERFACE properties of a target in a readable format.
+function(pretty_print_target_interface TARGET_NAME)
+    message(STATUS "--- INTERFACE properties for target: [${TARGET_NAME}] ---")
+
+    # Loop over all property names passed to the function (stored in ARGN)
+    foreach(PROP ${ARGN})
+        get_target_property(PROP_VALUE ${TARGET_NAME} ${PROP})
+        message(STATUS "  [${PROP}]") # Print the property name
+
+        if(PROP_VALUE)
+            # Loop over each item in the semicolon-separated list
+            foreach(ITEM ${PROP_VALUE})
+                message(STATUS "    - ${ITEM}") # Print each item indented
+            endforeach()
+        else()
+            message(STATUS "    <NOTFOUND>")
+        endif()
+    endforeach()
+    #message(STATUS "--- End of INTERFACE properties for [${TARGET_NAME}] ---")
+endfunction()
+
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl LIBNAME)
   string(TOUPPER ${LIBNAME} LIBNAME_UPPER)
@@ -271,6 +299,7 @@ function(setup_tpl LIBNAME)
         if(EXISTS ${lib})
           message(STATUS "${LIBNAME_UPPER} library found: ${lib}")
           get_filename_component(LIB_DIR "${lib}" DIRECTORY)
+          set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY BUILD_RPATH "${LIB_DIR}")
           set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY INSTALL_RPATH "${LIB_DIR}")
         else()
           message(WARNING "${LIBNAME_UPPER} library not found at specified path: ${lib}")
@@ -280,8 +309,8 @@ function(setup_tpl LIBNAME)
       target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_LIBRARIES})
       target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${LIBNAME_UPPER}_INCLUDE_DIRS})
     else()
-      # Use find_package
-      find_package(${LIBNAME} REQUIRED CONFIG)
+      # Use find_package (prefer CONFIG). Provide clearer error for libraries when missing.
+      find_package(${LIBNAME} CONFIG)
       if(${LIBNAME}_FOUND)
         list(APPEND HYPRE_DEPENDENCY_DIRS "${${LIBNAME}_ROOT}")
         set(HYPRE_DEPENDENCY_DIRS "${HYPRE_DEPENDENCY_DIRS}" CACHE INTERNAL "" FORCE)
@@ -300,7 +329,11 @@ function(setup_tpl LIBNAME)
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
-        message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+          message(FATAL_ERROR "\n===============================================================\nUmpire has been enabled for GPU builds to improve performance; However, it could not be found by CMake.\nEnsure Umpire provides a CMake package config so find_package(umpire) succeeds via ONE of the following:\n -Dumpire_ROOT=\"/path-to-umpire-install\" or\n -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire/\".\nOr provide both options below:\n -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\nTo opt out (strongly not recommended), set -DHYPRE_ENABLE_UMPIRE=OFF.\n===============================================================")
+        else()
+          message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
+        endif()
       endif()
 
       # Display library info
@@ -452,7 +485,7 @@ function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
   endif ()
 
   # Explicitly specify the linker
-  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_SYCL)
     set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif ()
 
@@ -482,7 +515,21 @@ endfunction()
 
 # Function to process a list of executable source files
 function(add_hypre_executables EXE_SRCS)
-  foreach(SRC_FILE IN LISTS EXE_SRCS)
+  # Support both usage styles:
+  #  - add_hypre_executables(EXAMPLE_SRCS)     -> variable name
+  #  - add_hypre_executables("${TEST_SRCS}")   -> expanded list content
+  set(_HYPRE_EXE_SRC_LIST)
+  if(EXE_SRCS MATCHES "\\.(c|cc|cxx|cpp|cu|cuf|f|f90)(;|$)")
+    list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+  else()
+    if(DEFINED ${EXE_SRCS})
+      list(APPEND _HYPRE_EXE_SRC_LIST ${${EXE_SRCS}})
+    else()
+      list(APPEND _HYPRE_EXE_SRC_LIST ${EXE_SRCS})
+    endif()
+  endif()
+
+  foreach(SRC_FILE IN LISTS _HYPRE_EXE_SRC_LIST)
     add_hypre_executable(${SRC_FILE} "")
   endforeach()
 endfunction()

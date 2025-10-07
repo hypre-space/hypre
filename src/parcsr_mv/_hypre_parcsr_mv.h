@@ -8,7 +8,7 @@
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
 #include "_hypre_seq_block_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_parcsr_mv_mup_def.h"
@@ -1326,6 +1326,14 @@ HYPRE_Int
 hypre_ParVectorAxpy_mp( hypre_double    alpha,
                         hypre_ParVector *x,
                         hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorConvert_mp ( hypre_ParVector *v,
+                            HYPRE_Precision new_precision );
+
+HYPRE_Int
+hypre_ParCSRMatrixConvert_mp ( hypre_ParCSRMatrix *A,
+                               HYPRE_Precision new_precision );
 
 #endif
 

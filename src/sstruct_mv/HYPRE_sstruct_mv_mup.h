@@ -419,6 +419,15 @@ HYPRE_Int
 HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix );
 
 HYPRE_Int
+HYPRE_SStructMatrixMatmat_flt( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C );
+HYPRE_Int
+HYPRE_SStructMatrixMatmat_dbl( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C );
+HYPRE_Int
+HYPRE_SStructMatrixMatmat_long_dbl( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C );
+HYPRE_Int
+HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C );
+
+HYPRE_Int
 HYPRE_SStructMatrixMatvec_flt( hypre_float alpha, HYPRE_SStructMatrix A, HYPRE_SStructVector x, hypre_float beta, HYPRE_SStructVector y );
 HYPRE_Int
 HYPRE_SStructMatrixMatvec_dbl( hypre_double alpha, HYPRE_SStructMatrix A, HYPRE_SStructVector x, hypre_double beta, HYPRE_SStructVector y );
@@ -644,6 +653,15 @@ HYPRE_Int
 HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector );
 
 HYPRE_Int
+HYPRE_SStructVectorAxpy_flt( hypre_float alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+HYPRE_Int
+HYPRE_SStructVectorAxpy_dbl( hypre_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+HYPRE_Int
+HYPRE_SStructVectorAxpy_long_dbl( hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+HYPRE_Int
+HYPRE_SStructVectorAxpy( hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+
+HYPRE_Int
 HYPRE_SStructVectorCopy_flt( HYPRE_SStructVector x, HYPRE_SStructVector y );
 HYPRE_Int
 HYPRE_SStructVectorCopy_dbl( HYPRE_SStructVector x, HYPRE_SStructVector y );
@@ -732,6 +750,15 @@ HYPRE_Int
 HYPRE_SStructVectorInitialize_long_dbl( HYPRE_SStructVector vector );
 HYPRE_Int
 HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector );
+
+HYPRE_Int
+HYPRE_SStructVectorInnerProd_flt( HYPRE_SStructVector x, HYPRE_SStructVector y, hypre_float *result );
+HYPRE_Int
+HYPRE_SStructVectorInnerProd_dbl( HYPRE_SStructVector x, HYPRE_SStructVector y, hypre_double *result );
+HYPRE_Int
+HYPRE_SStructVectorInnerProd_long_dbl( HYPRE_SStructVector x, HYPRE_SStructVector y, hypre_long_double *result );
+HYPRE_Int
+HYPRE_SStructVectorInnerProd( HYPRE_SStructVector x, HYPRE_SStructVector y, void *result );
 
 HYPRE_Int
 HYPRE_SStructVectorPrint_flt( const char *filename, HYPRE_SStructVector vector, HYPRE_Int all );
@@ -964,6 +991,9 @@ HYPRE_Int
 HYPRE_SStructMatrixInitialize_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix );
 
 HYPRE_Int
+HYPRE_SStructMatrixMatmat_pre( HYPRE_Precision precision, HYPRE_SStructMatrix A, HYPRE_SStructMatrix B, HYPRE_SStructMatrix *C );
+
+HYPRE_Int
 HYPRE_SStructMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_SStructMatrix A, HYPRE_SStructVector x, hypre_long_double beta, HYPRE_SStructVector y );
 
 HYPRE_Int
@@ -1039,6 +1069,9 @@ HYPRE_Int
 HYPRE_SStructVectorAssemble_pre( HYPRE_Precision precision, HYPRE_SStructVector vector );
 
 HYPRE_Int
+HYPRE_SStructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+
+HYPRE_Int
 HYPRE_SStructVectorCopy_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y );
 
 HYPRE_Int
@@ -1067,6 +1100,9 @@ HYPRE_SStructVectorGetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector
 
 HYPRE_Int
 HYPRE_SStructVectorInitialize_pre( HYPRE_Precision precision, HYPRE_SStructVector vector );
+
+HYPRE_Int
+HYPRE_SStructVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HYPRE_SStructVector y, void *result );
 
 HYPRE_Int
 HYPRE_SStructVectorPrint_pre( HYPRE_Precision precision, const char *filename, HYPRE_SStructVector vector, HYPRE_Int all );

@@ -1,3 +1,11 @@
 fatal: No names found, cannot describe anything.
 Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
 warning: 1501-264 The options qsmp and O0 are incompatible. Option O0 is ignored.
+CMake Warning at config/cmake/HYPRE_SetupGPUToolkit.cmake:97 (message):
+  ===============================================================
+
+   Umpire is explicitly disabled while building hypre for GPUs.
+   This is not recommended for performance reasons!
+   Enable it with -DHYPRE_ENABLE_UMPIRE=ON.
+Call Stack (most recent call first):
+  CMakeLists.txt:400 (include)

@@ -58,6 +58,7 @@
 #undef HYPRE_StructVectorAddToBoxValues2
 #undef HYPRE_StructVectorAddToValues
 #undef HYPRE_StructVectorAssemble
+#undef HYPRE_StructVectorAxpy
 #undef HYPRE_StructVectorClone
 #undef HYPRE_StructVectorCopy
 #undef HYPRE_StructVectorCreate
@@ -71,6 +72,7 @@
 #undef HYPRE_StructVectorMigrate
 #undef HYPRE_StructVectorPrint
 #undef HYPRE_StructVectorRead
+#undef HYPRE_StructVectorScale
 #undef HYPRE_StructVectorScaleValues
 #undef HYPRE_StructVectorSetBoxValues
 #undef HYPRE_StructVectorSetBoxValues2
@@ -342,7 +344,6 @@
 #undef hypre_StructMatmultCompute_fuse_f
 #undef hypre_StructMatmultCompute_fuse_fc
 #undef hypre_StructMatmultCompute_fuse_fcc
-#undef hypre_StructMatmultCompute_fuse_fcc_fc_f
 #undef hypre_StructMatmultCompute_fuse_ff
 #undef hypre_StructMatmultCompute_fuse_ffc
 #undef hypre_StructMatmultCompute_fuse_fff

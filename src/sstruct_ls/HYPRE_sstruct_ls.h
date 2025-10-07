@@ -237,8 +237,9 @@ HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
 /**
  * @name SStruct SSAMG Solver
  *
- * SSAMG is a semicoarsening multigrid solver similar to PFMG, but for systems
- * of PDEs. Continue description
+ * The semi-structured algebraic multigrid (SSAMG) method is an iterative solver
+ * that can handle problems with multiple parts such as block-structured and
+ * structured adaptive mesh refinement grids (SAMR).
  *
  * @{
  **/
@@ -429,8 +430,8 @@ HYPRE_Int
 HYPRE_SStructSSAMGSetCoarseSolverType(HYPRE_SStructSolver solver,
                                       HYPRE_Int           csolver_type);
 
-/*
- * RE-VISIT
+/**
+ * (Optional) Set the grid spacing metric used for coarsening purposes for each part.
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetDxyz(HYPRE_SStructSolver  solver,

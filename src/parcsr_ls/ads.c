@@ -1064,14 +1064,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          }
       }
 
-      if (HYPRE_AssumedPartitionCheck())
-      {
-         hypre_ParCSRMatrixDestroy(F2V);
-      }
-      else
-      {
-         hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
-      }
+      hypre_ParCSRMatrixDestroy(F2V);
    }
 
    hypre_ParVectorDestroy(RT100);

@@ -919,6 +919,11 @@ hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
                            HYPRE_Int        num_sends,
                            HYPRE_Int       *sends )
 {
+   HYPRE_UNUSED_VAR(comm);
+   HYPRE_UNUSED_VAR(num_recvs);
+   HYPRE_UNUSED_VAR(recvs);
+   HYPRE_UNUSED_VAR(num_sends);
+   HYPRE_UNUSED_VAR(sends);
    return (0);
 }
 

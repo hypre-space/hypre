@@ -124,7 +124,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    HYPRE_Int               **fem_sparse_j;
    HYPRE_Int               **fem_entries;
    HYPRE_Int                 nUventries;
-   HYPRE_Int                *iUventries;
+   HYPRE_BigInt             *iUventries;
    hypre_SStructUVEntry    **Uventries;
    hypre_SStructUVEntry     *Uventry;
    HYPRE_BigInt            **Uveoffsets;
@@ -366,7 +366,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_Box              ***Uvboxes     = hypre_SStructGraphUVBoxes(graph);
    hypre_BoxManager       ***managers    = hypre_SStructGridBoxManagers(grid);
    HYPRE_Int                 nUventries;
-   HYPRE_Int                *iUventries;
+   HYPRE_BigInt             *iUventries;
    hypre_SStructUVEntry    **Uventries;
    HYPRE_Int                 Uvesize;
    HYPRE_BigInt            **Uveoffsets;
@@ -402,6 +402,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxArray           *pbnd_boxa;
    hypre_BoxArrayArray      *pbnd_boxaa;
    HYPRE_Int               **idxcnt;
+   HYPRE_Int               **idxcap;
    HYPRE_Int             ****indices;
 
    /* may need to re-do box managers for the AP*/
@@ -414,6 +415,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    hypre_BoxManEntry         *all_entries, *entry;
    HYPRE_Int                  num_entries;
+   HYPRE_Int                  capacity;
    void                      *info;
    hypre_Box                 *bbox, *new_box, *grow_box;
    HYPRE_Int                 *num_ghost;
@@ -632,6 +634,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    /* now set up indices, nUventries, iUventries, and Uventries */
    indices = hypre_TAlloc(HYPRE_Int ***, nparts, HYPRE_MEMORY_HOST);
    idxcnt  = hypre_TAlloc(HYPRE_Int *, nparts, HYPRE_MEMORY_HOST);
+   idxcap  = hypre_TAlloc(HYPRE_Int *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -639,18 +642,19 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       indices[part] = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
       idxcnt[part]  = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
+      idxcap[part]  = hypre_TAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
-         indices[part][var] = hypre_CTAlloc(HYPRE_Int *, ndim, HYPRE_MEMORY_HOST);
+         indices[part][var] = hypre_TAlloc(HYPRE_Int *, ndim, HYPRE_MEMORY_HOST);
          for (d = 0; d < ndim; d++)
          {
-            /* TODO: n_add_entries is a too large upper bound */
             indices[part][var][d] = hypre_CTAlloc(HYPRE_Int, n_add_entries, HYPRE_MEMORY_HOST);
          }
+         idxcap[part][var] = n_add_entries;
       }
    }
-   iUventries = hypre_TAlloc(HYPRE_Int, n_add_entries, HYPRE_MEMORY_HOST);
-   Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, Uvesize, HYPRE_MEMORY_HOST);
+   iUventries = hypre_TAlloc(HYPRE_BigInt, n_add_entries, HYPRE_MEMORY_HOST);
+   Uventries  = hypre_CTAlloc(hypre_SStructUVEntry *, Uvesize, HYPRE_MEMORY_HOST);
    hypre_SStructGraphIUVEntries(graph) = iUventries;
    hypre_SStructGraphUVEntries(graph)  = Uventries;
    nUventries = 0;
@@ -670,6 +674,32 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       /* Safety checks */
       hypre_assert((part >= 0) && (part < nparts));
       hypre_assert((to_part >= 0) && (to_part < nparts));
+
+      /* Ensure capacity before writing new indices */
+      if (idxcnt[part][var] >= idxcap[part][var])
+      {
+         capacity = hypre_max(2 * idxcap[part][var], 1);
+         for (d = 0; d < ndim; d++)
+         {
+            indices[part][var][d] = hypre_TReAlloc(indices[part][var][d], HYPRE_Int,
+                                                   capacity, HYPRE_MEMORY_HOST);
+         }
+         idxcap[part][var] = capacity;
+      }
+      if (idxcnt[to_part][to_var] >= idxcap[to_part][to_var])
+      {
+         capacity = hypre_max(2 * idxcap[to_part][to_var], 1);
+         for (d = 0; d < ndim; d++)
+         {
+            indices[to_part][to_var][d] = hypre_TReAlloc(indices[to_part][to_var][d], HYPRE_Int,
+                                                         capacity, HYPRE_MEMORY_HOST);
+         }
+         idxcap[to_part][to_var] = capacity;
+      }
+
+      /* Safety checks */
+      hypre_assert(idxcap[part][var] > idxcnt[part][var]);
+      hypre_assert(idxcap[to_part][to_var] > idxcnt[to_part][to_var]);
 
       /* Build indices array */
       for (d = 0; d < ndim; d++)
@@ -801,9 +831,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_TFree(indices[part][var], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(idxcnt[part], HYPRE_MEMORY_HOST);
+      hypre_TFree(idxcap[part], HYPRE_MEMORY_HOST);
       hypre_TFree(indices[part], HYPRE_MEMORY_HOST);
    }
    hypre_TFree(idxcnt, HYPRE_MEMORY_HOST);
+   hypre_TFree(idxcap, HYPRE_MEMORY_HOST);
    hypre_TFree(indices, HYPRE_MEMORY_HOST);
    hypre_BoxDestroy(pbnd_box);
 
@@ -934,7 +966,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    if (nUventries > 1)
    {
-      hypre_qsort0(iUventries, 0, nUventries - 1);
+      hypre_BigQsort0(iUventries, 0, nUventries - 1);
 
       j = 1;
       for (i = 1; i < nUventries; i++)

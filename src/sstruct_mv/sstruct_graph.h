@@ -36,7 +36,7 @@ typedef struct
    HYPRE_Int     to_var;
    HYPRE_Int     to_boxnum;      /* local box number */
    HYPRE_Int     to_proc;
-   HYPRE_Int     to_rank;
+   HYPRE_BigInt  to_rank;
 
 } hypre_SStructUEntry;
 
@@ -45,7 +45,7 @@ typedef struct
    HYPRE_Int            part;
    hypre_Index          index;
    HYPRE_Int            var;
-   HYPRE_Int            rank;
+   HYPRE_BigInt         rank;
    HYPRE_Int            nUentries;
    hypre_SStructUEntry *Uentries;
 
@@ -69,7 +69,7 @@ typedef struct hypre_SStructGraph_struct
    /* U-graph info: Entries are referenced via a local rank that comes from an
     * ordering of the local grid boxes with ghost zones added. */
    HYPRE_Int               nUventries; /* number of Uventries */
-   HYPRE_Int              *iUventries; /* rank indexes into Uventries */
+   HYPRE_BigInt           *iUventries; /* rank indexes into Uventries */
    hypre_SStructUVEntry  **Uventries;
    HYPRE_Int               Uvesize;    /* size of Uventries array */
    HYPRE_Int               Uemaxsize;  /* max size of Uentries */

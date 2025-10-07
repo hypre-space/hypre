@@ -177,27 +177,30 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    HYPRE_Int           ****centries;
    hypre_Index            *dom_stride;
    hypre_Index            *ran_stride;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation    memory_location;
+#endif
 
    HYPRE_Int               nvars;
    HYPRE_Int               part, vi, vj;
-   HYPRE_MemoryLocation    memory_location;
 
    if (matrix)
    {
-      memory_location = hypre_SStructMatrixMemoryLocation(matrix);
-
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
       {
-         graph          = hypre_SStructMatrixGraph(matrix);
-         splits         = hypre_SStructMatrixSplits(matrix);
-         nparts         = hypre_SStructMatrixNParts(matrix);
-         pmatrices      = hypre_SStructMatrixPMatrices(matrix);
-         symmetric      = hypre_SStructMatrixSymmetric(matrix);
-         num_centries   = hypre_SStructMatrixNumCEntries(matrix);
-         centries       = hypre_SStructMatrixCEntries(matrix);
-         dom_stride     = hypre_SStructMatrixDomainStride(matrix);
-         ran_stride     = hypre_SStructMatrixRangeStride(matrix);
+         graph           = hypre_SStructMatrixGraph(matrix);
+         splits          = hypre_SStructMatrixSplits(matrix);
+         nparts          = hypre_SStructMatrixNParts(matrix);
+         pmatrices       = hypre_SStructMatrixPMatrices(matrix);
+         symmetric       = hypre_SStructMatrixSymmetric(matrix);
+         num_centries    = hypre_SStructMatrixNumCEntries(matrix);
+         centries        = hypre_SStructMatrixCEntries(matrix);
+         dom_stride      = hypre_SStructMatrixDomainStride(matrix);
+         ran_stride      = hypre_SStructMatrixRangeStride(matrix);
+#if defined(HYPRE_USING_GPU)
+         memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+#endif
 
          for (part = 0; part < nparts; part++)
          {
@@ -233,9 +236,17 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), memory_location);
-         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), memory_location);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix), memory_location);
+#if defined(HYPRE_USING_GPU)
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+         {
+            hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix),
+                        HYPRE_MEMORY_DEVICE);
+         }
+#endif
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
 
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
@@ -437,7 +448,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    iupper--; jupper--;
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
-   hypre_SStructUMatrixInitialize(matrix, HYPRE_MEMORY_DEVICE);
+   hypre_SStructUMatrixInitialize(matrix, hypre_HandleMemoryLocation(hypre_handle()));
 
    return hypre_error_flag;
 }
@@ -1709,6 +1720,17 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix  A,
+                                     HYPRE_SStructMatrix  B,
+                                     HYPRE_SStructMatrix *C )
+{
+   hypre_SStructMatmat(A, B, C);
 
    return hypre_error_flag;
 }

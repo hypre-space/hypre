@@ -301,7 +301,7 @@ hypre_ParCSRCommPkgCreateApart_core(
       if (count > 0)
       {
          /*add the range if the proc id != myid*/
-         tmp_id = response_buf[i * 2];
+         tmp_id = (HYPRE_Int) response_buf[i * 2];
          if (tmp_id != myid)
          {
             if (tmp_id != prev_id) /*increment the number of recvs */

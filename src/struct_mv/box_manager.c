@@ -541,7 +541,7 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
    entries = hypre_TReAlloc(entries, hypre_BoxManEntry, max_nentries, HYPRE_MEMORY_HOST);
    ids = hypre_TReAlloc(ids, HYPRE_Int, max_nentries, HYPRE_MEMORY_HOST);
    procs =  hypre_TReAlloc(procs, HYPRE_Int, max_nentries, HYPRE_MEMORY_HOST);
-   info = (void *)hypre_ReAlloc((char *)info, max_nentries * info_size, HYPRE_MEMORY_HOST);
+   info = hypre_TReAlloc(info, char, max_nentries * info_size, HYPRE_MEMORY_HOST);
 
    /* update manager */
    hypre_BoxManMaxNEntries(manager) = max_nentries;
@@ -1240,7 +1240,8 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          HYPRE_Int  count;
 
          HYPRE_Int  max_response_size;
-         HYPRE_Int  non_info_size, entry_size_bytes;
+         HYPRE_Int  non_info_size;
+         size_t     entry_size_bytes;
          HYPRE_Int *neighbor_proc_ids = NULL;
          HYPRE_Int *response_buf_starts;
          HYPRE_Int *response_buf;
@@ -1627,15 +1628,16 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   boxman, since this is just generated in addentry. */
 
                non_info_size = 2 * ndim + 2;
-               entry_size_bytes = non_info_size * sizeof(HYPRE_Int)
-                                  + hypre_BoxManEntryInfoSize(manager);
+               entry_size_bytes = ((size_t) non_info_size) * sizeof(HYPRE_Int) +
+                                  (size_t) hypre_BoxManEntryInfoSize(manager);
 
                /* modification -  use an true max_response_size
                   (should be faster and less communication */
                max_response_size = statbuf[2]; /* max of num_my_entries */
 
-               hypre_DataExchangeList(proc_count, contact_proc_ids, send_buf, send_buf_starts,
-                                      sizeof(HYPRE_Int), entry_size_bytes,
+               hypre_DataExchangeList(proc_count, contact_proc_ids,
+                                      send_buf, send_buf_starts,
+                                      sizeof(HYPRE_Int), (HYPRE_Int) entry_size_bytes,
                                       &response_obj2, max_response_size, 4, comm,
                                       &entry_response_buf, &response_buf_starts);
 
@@ -1718,10 +1720,10 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             entries id = myid (not all of the entries in the table). Then we
             will just re-create the entries array instead of looking for
             duplicates and sorting */
-         HYPRE_Int  entry_size_bytes;
-         HYPRE_Int  send_count, send_count_bytes;
+         size_t     entry_size_bytes, send_count_bytes, recv_buf_size_bytes;
+         HYPRE_Int  send_count;
          HYPRE_Int *displs, *recv_counts;
-         HYPRE_Int  recv_buf_size, recv_buf_size_bytes;
+         HYPRE_Int  recv_buf_size;
          HYPRE_Int  d;
          HYPRE_Int  size, non_info_size, position;
          HYPRE_Int  proc, id;
@@ -1750,11 +1752,12 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             boxman, since this is just generated in addentry. */
 
          non_info_size = 2 * ndim + 2;
-         entry_size_bytes = non_info_size * sizeof(HYPRE_Int) + hypre_BoxManEntryInfoSize(manager);
+         entry_size_bytes = ((size_t) non_info_size) * sizeof(HYPRE_Int) +
+                            (size_t) hypre_BoxManEntryInfoSize(manager);
 
          /* figure out how many entries each proc has - let the group know */
          send_count =  num_my_entries;
-         send_count_bytes = send_count * entry_size_bytes;
+         send_count_bytes = ((size_t) send_count) * entry_size_bytes;
          recv_counts = hypre_CTAlloc(HYPRE_Int, nprocs, HYPRE_MEMORY_HOST);
 
          hypre_MPI_Allgather(&send_count_bytes, 1, HYPRE_MPI_INT,
@@ -1768,7 +1771,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             displs[i] = displs[i - 1] + recv_counts[i - 1];
             recv_buf_size_bytes += recv_counts[i];
          }
-         recv_buf_size = recv_buf_size_bytes / entry_size_bytes;
+         recv_buf_size = (HYPRE_Int) (recv_buf_size_bytes / entry_size_bytes);
          /* mydispls = displs[myid]/entry_size_bytes; */
 
          global_num_boxes = recv_buf_size;
@@ -1830,7 +1833,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
          /* now send_buf is ready to go! */
 
-         hypre_MPI_Allgatherv(send_buf, send_count_bytes, hypre_MPI_BYTE,
+         hypre_MPI_Allgatherv(send_buf, (HYPRE_Int) send_count_bytes, hypre_MPI_BYTE,
                               recv_buf, recv_counts, displs, hypre_MPI_BYTE, comm);
 
          /* unpack recv_buf into entries - let's just unpack them all into the
@@ -2095,7 +2098,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
             }
             hypre_TFree(entries, HYPRE_MEMORY_HOST);
-            hypre_Free((char*)hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
+            hypre_TFree(hypre_BoxManInfoObjects(manager), HYPRE_MEMORY_HOST);
 
             hypre_BoxManEntries(manager) = new_entries;
             hypre_BoxManMaxNEntries(manager) = size;
@@ -2718,7 +2721,7 @@ hypre_FillResponseBoxManAssemble2( void       *p_recv_contact_buf,
    {
       response_obj->send_response_storage =  num_my_entries;
       size =  entry_size_bytes * (response_obj->send_response_storage + overhead);
-      send_response_buf = hypre_ReAlloc( (char*)send_response_buf, size, HYPRE_MEMORY_HOST);
+      send_response_buf = hypre_TReAlloc(send_response_buf, char, size, HYPRE_MEMORY_HOST);
       *p_send_response_buf = send_response_buf;
    }
 

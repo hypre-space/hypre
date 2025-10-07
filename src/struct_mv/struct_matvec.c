@@ -337,7 +337,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    HYPRE_Int                compute_i, i, j, si, se;
    HYPRE_Int                cnentries, vnentries;
-   HYPRE_Int                centries[nentries], ventries[nentries];
+   HYPRE_Int                centries[HYPRE_MAX_MMTERMS], ventries[HYPRE_MAX_MMTERMS];
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box, *z_data_box;
    HYPRE_Complex           *xp;

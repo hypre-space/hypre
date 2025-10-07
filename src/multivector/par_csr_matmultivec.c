@@ -11,14 +11,13 @@
  *
  *****************************************************************************/
 
-#include "par_csr_multimatvec.h"
-
 #include "_hypre_parcsr_mv.h"
 
-#include "seq_multivector.h"
-#include "par_multivector.h"
-#include "par_csr_pmvcomm.h"
-#include "csr_multimatvec.h"
+#include "_hypre_lobpcg_seq_multivector.h"
+#include "_hypre_lobpcg_par_multivector.h"
+#include "_hypre_lobpcg_par_csr_pmvcomm.h"
+#include "_hypre_lobpcg_csr_multimatvec.h"
+#include "_hypre_lobpcg_par_csr_multimatvec.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMultiMatvec
@@ -276,4 +275,3 @@ hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
 
    return ierr;
 }
-

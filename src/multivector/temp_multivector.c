@@ -8,8 +8,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "temp_multivector.h"
-#include "interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
 #include "_hypre_utilities.h"
 
 static void

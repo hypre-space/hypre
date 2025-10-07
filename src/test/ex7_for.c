@@ -62,7 +62,7 @@
 #define bcEval(F,i,j) (F( (bc_ilower[0]+(i))*h, (bc_ilower[1]+(j))*h ))
 
 #ifdef HYPRE_FORTRAN
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #include "hypre_struct_fortran_test.h"
 #include "hypre_sstruct_fortran_test.h"
 #endif
