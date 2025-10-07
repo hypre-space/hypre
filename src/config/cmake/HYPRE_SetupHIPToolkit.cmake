@@ -105,6 +105,8 @@ else()
   message(STATUS "CMAKE_HIP_ARCHITECTURES is already set to: ${CMAKE_HIP_ARCHITECTURES}")
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
+set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "GPU targets to compile for" FORCE)
+set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "AMD GPU targets to compile for" FORCE)
 
 # Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
 if(DEFINED HYPRE_WAVEFRONT_SIZE)
@@ -116,7 +118,7 @@ elseif(NOT DEFINED HYPRE_WARP_SIZE)
   set(FOUND_OLD_GFX_CARD FALSE)
   set(DETECTED_ARCHITECTURES "") # To collect and report all detected architectures
 
-  # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx1100")
+  # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx942")
   if(DEFINED CMAKE_HIP_ARCHITECTURES AND NOT "${CMAKE_HIP_ARCHITECTURES}" STREQUAL "")
     foreach(ARCH_ITEM IN LISTS CMAKE_HIP_ARCHITECTURES)
       # Only process if we haven't already found an old GFX card
@@ -125,10 +127,10 @@ elseif(NOT DEFINED HYPRE_WARP_SIZE)
         # Note: CMAKE_HIP_ARCHITECTURES usually contains only the ID, not "gfx" prefix,
         # but regex is robust if it does.
         string(REGEX MATCH "gfx?([0-9a-fA-F]+)" _dummy "${ARCH_ITEM}")
-        set(GFX_ID_STR "${CMAKE_MATCH_1}") # e.g., "90a", "1100"
+        set(GFX_ID_STR "${CMAKE_MATCH_1}") # e.g., "90a", "942"
 
         # Extract only the leading numeric part for comparison
-        # (e.g., "90a" -> "90", "1100" -> "1100")
+        # (e.g., "90a" -> "90", "942" -> "942")
         string(REGEX REPLACE "[^0-9]" "" GFX_BASE_ID_STR "${GFX_ID_STR}")
 
         set(CURRENT_GFX_ID_INT 0)
@@ -208,6 +210,7 @@ find_and_add_rocm_library(rocblas)
 find_and_add_rocm_library(rocsparse)
 find_and_add_rocm_library(rocrand)
 find_and_add_rocm_library(rocsolver)
+find_and_add_rocm_library(rocthrust)
 
 if(HYPRE_ENABLE_GPU_PROFILING)
   set(HYPRE_USING_ROCTX ON CACHE BOOL "" FORCE)
