@@ -16,10 +16,11 @@ elseif(EXISTS "/opt/rocm")
 else()
   message(FATAL_ERROR "ROCM_PATH or HIP_PATH not set. Please set one of them to point to your ROCm installation.")
 endif()
+set(CMAKE_HIP_COMPILER_ROCM_ROOT ${HIP_PATH})
 message(STATUS "Using ROCm installation: ${HIP_PATH}")
 
 # Add HIP_PATH to CMAKE_PREFIX_PATH
-list(APPEND CMAKE_PREFIX_PATH ${HIP_PATH})
+list(APPEND CMAKE_PREFIX_PATH "${HIP_PATH};${HIP_PATH}/lib/cmake;${HIP_PATH}/llvm/bin")
 
 # Set HIP standard to match C++ standard if not already set
 if(NOT DEFINED CMAKE_HIP_STANDARD)
@@ -28,6 +29,7 @@ endif()
 set(CMAKE_HIP_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard for HIP" FORCE)
 
 # Check if HIP is available and enable it if found
+set(CMAKE_HIP_COMPILER "${HIP_PATH}/llvm/bin/clang++" CACHE FILEPATH "Path to HIP compiler")
 include(CheckLanguage)
 check_language(HIP)
 if(CMAKE_HIP_COMPILER)
@@ -37,7 +39,8 @@ else()
 endif()
 
 # Find HIP package
-find_package(hip REQUIRED CONFIG)
+set(HIP_PLATFORM "amd")
+find_package(hip REQUIRED CONFIG PATHS ${ROCM_PATH} ${ROCM_PATH}/lib/cmake/hip)
 
 # Minimum supported HIP version for HYPRE
 set(REQUIRED_HIP_VERSION "5.2.0")
@@ -105,8 +108,8 @@ else()
   message(STATUS "CMAKE_HIP_ARCHITECTURES is already set to: ${CMAKE_HIP_ARCHITECTURES}")
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
-set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "GPU targets to compile for" FORCE)
-set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "AMD GPU targets to compile for" FORCE)
+set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "GPU targets to compile for")
+set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "AMD GPU targets to compile for")
 
 # Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
 if(DEFINED HYPRE_WAVEFRONT_SIZE)
