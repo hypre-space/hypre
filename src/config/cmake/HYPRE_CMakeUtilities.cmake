@@ -485,7 +485,7 @@ function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
   endif ()
 
   # Explicitly specify the linker
-  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_SYCL)
+  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
     set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif ()
 
