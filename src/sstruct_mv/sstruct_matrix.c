@@ -2422,11 +2422,11 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   if (ndim > 0) hypre_TMemcpy(indices[0], indices_0, HYPRE_Int, num_indices,
-                                              HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                                                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
                   if (ndim > 1) hypre_TMemcpy(indices[1], indices_1, HYPRE_Int, num_indices,
-                                              HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                                                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
                   if (ndim > 2) hypre_TMemcpy(indices[2], indices_2, HYPRE_Int, num_indices,
-                                              HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                                                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
                }
                else
 #endif

@@ -637,60 +637,6 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
    depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
    switch (depth)
    {
-      HYPRE_CORE_CASE(27);
-      HYPRE_CORE_CASE(26);
-      HYPRE_CORE_CASE(25);
-      HYPRE_CORE_CASE(24);
-      HYPRE_CORE_CASE(23);
-      HYPRE_CORE_CASE(22);
-      HYPRE_CORE_CASE(21);
-      HYPRE_CORE_CASE(20);
-      HYPRE_CORE_CASE(19);
-      HYPRE_CORE_CASE(18);
-      HYPRE_CORE_CASE(17);
-      HYPRE_CORE_CASE(16);
-      HYPRE_CORE_CASE(15);
-      HYPRE_CORE_CASE(14);
-      HYPRE_CORE_CASE(13);
-      HYPRE_CORE_CASE(12);
-      HYPRE_CORE_CASE(11);
-      HYPRE_CORE_CASE(10);
-      HYPRE_CORE_CASE(9);
-      HYPRE_CORE_CASE(8);
-      HYPRE_CORE_CASE(7);
-      HYPRE_CORE_CASE(6);
-      HYPRE_CORE_CASE(5);
-      HYPRE_CORE_CASE(4);
-      HYPRE_CORE_CASE(3);
-      HYPRE_CORE_CASE(2);
-      HYPRE_CORE_CASE(1);
-
-      case 0:
-         break;
-   }
-
-   /* Update output vector with remaining A*x components if any */
-#ifdef HYPRE_CORE_CASE
-#undef HYPRE_CORE_CASE
-#endif
-#define HYPRE_CORE_CASE(n)                                                     \
-   case n:                                                                     \
-      HYPRE_LOAD_CAX_UP_TO_##n(transpose);                                     \
-      hypre_BoxLoop2Begin(ndim, loop_size,                                     \
-                          x_data_box, xdstart, xdstride, xi,                   \
-                          z_data_box, zdstart, zdstride, zi);                  \
-      {                                                                        \
-         zp[zi] += alpha * (HYPRE_CALC_CAX_ADD_UP_TO_##n);                     \
-      }                                                                        \
-      hypre_BoxLoop2End(xi, zi);                                               \
-      break;
-
-   for (si = depth; si < nentries; si += HYPRE_UNROLL_MAXDEPTH)
-   {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries - si));
-
-      switch (depth)
-      {
          HYPRE_CORE_CASE(27);
          HYPRE_CORE_CASE(26);
          HYPRE_CORE_CASE(25);
@@ -718,6 +664,60 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
          HYPRE_CORE_CASE(3);
          HYPRE_CORE_CASE(2);
          HYPRE_CORE_CASE(1);
+
+      case 0:
+         break;
+   }
+
+   /* Update output vector with remaining A*x components if any */
+#ifdef HYPRE_CORE_CASE
+#undef HYPRE_CORE_CASE
+#endif
+#define HYPRE_CORE_CASE(n)                                                     \
+   case n:                                                                     \
+      HYPRE_LOAD_CAX_UP_TO_##n(transpose);                                     \
+      hypre_BoxLoop2Begin(ndim, loop_size,                                     \
+                          x_data_box, xdstart, xdstride, xi,                   \
+                          z_data_box, zdstart, zdstride, zi);                  \
+      {                                                                        \
+         zp[zi] += alpha * (HYPRE_CALC_CAX_ADD_UP_TO_##n);                     \
+      }                                                                        \
+      hypre_BoxLoop2End(xi, zi);                                               \
+      break;
+
+   for (si = depth; si < nentries; si += HYPRE_UNROLL_MAXDEPTH)
+   {
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nentries - si));
+
+      switch (depth)
+      {
+            HYPRE_CORE_CASE(27);
+            HYPRE_CORE_CASE(26);
+            HYPRE_CORE_CASE(25);
+            HYPRE_CORE_CASE(24);
+            HYPRE_CORE_CASE(23);
+            HYPRE_CORE_CASE(22);
+            HYPRE_CORE_CASE(21);
+            HYPRE_CORE_CASE(20);
+            HYPRE_CORE_CASE(19);
+            HYPRE_CORE_CASE(18);
+            HYPRE_CORE_CASE(17);
+            HYPRE_CORE_CASE(16);
+            HYPRE_CORE_CASE(15);
+            HYPRE_CORE_CASE(14);
+            HYPRE_CORE_CASE(13);
+            HYPRE_CORE_CASE(12);
+            HYPRE_CORE_CASE(11);
+            HYPRE_CORE_CASE(10);
+            HYPRE_CORE_CASE(9);
+            HYPRE_CORE_CASE(8);
+            HYPRE_CORE_CASE(7);
+            HYPRE_CORE_CASE(6);
+            HYPRE_CORE_CASE(5);
+            HYPRE_CORE_CASE(4);
+            HYPRE_CORE_CASE(3);
+            HYPRE_CORE_CASE(2);
+            HYPRE_CORE_CASE(1);
 
          case 0:
             break;
@@ -827,33 +827,33 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
    depth = only_Ax ? 0 : hypre_min(HYPRE_UNROLL_MAXDEPTH, nentries);
    switch (depth)
    {
-      HYPRE_CORE_CASE(27);
-      HYPRE_CORE_CASE(26);
-      HYPRE_CORE_CASE(25);
-      HYPRE_CORE_CASE(24);
-      HYPRE_CORE_CASE(23);
-      HYPRE_CORE_CASE(22);
-      HYPRE_CORE_CASE(21);
-      HYPRE_CORE_CASE(20);
-      HYPRE_CORE_CASE(19);
-      HYPRE_CORE_CASE(18);
-      HYPRE_CORE_CASE(17);
-      HYPRE_CORE_CASE(16);
-      HYPRE_CORE_CASE(15);
-      HYPRE_CORE_CASE(14);
-      HYPRE_CORE_CASE(13);
-      HYPRE_CORE_CASE(12);
-      HYPRE_CORE_CASE(11);
-      HYPRE_CORE_CASE(10);
-      HYPRE_CORE_CASE(9);
-      HYPRE_CORE_CASE(8);
-      HYPRE_CORE_CASE(7);
-      HYPRE_CORE_CASE(6);
-      HYPRE_CORE_CASE(5);
-      HYPRE_CORE_CASE(4);
-      HYPRE_CORE_CASE(3);
-      HYPRE_CORE_CASE(2);
-      HYPRE_CORE_CASE(1);
+         HYPRE_CORE_CASE(27);
+         HYPRE_CORE_CASE(26);
+         HYPRE_CORE_CASE(25);
+         HYPRE_CORE_CASE(24);
+         HYPRE_CORE_CASE(23);
+         HYPRE_CORE_CASE(22);
+         HYPRE_CORE_CASE(21);
+         HYPRE_CORE_CASE(20);
+         HYPRE_CORE_CASE(19);
+         HYPRE_CORE_CASE(18);
+         HYPRE_CORE_CASE(17);
+         HYPRE_CORE_CASE(16);
+         HYPRE_CORE_CASE(15);
+         HYPRE_CORE_CASE(14);
+         HYPRE_CORE_CASE(13);
+         HYPRE_CORE_CASE(12);
+         HYPRE_CORE_CASE(11);
+         HYPRE_CORE_CASE(10);
+         HYPRE_CORE_CASE(9);
+         HYPRE_CORE_CASE(8);
+         HYPRE_CORE_CASE(7);
+         HYPRE_CORE_CASE(6);
+         HYPRE_CORE_CASE(5);
+         HYPRE_CORE_CASE(4);
+         HYPRE_CORE_CASE(3);
+         HYPRE_CORE_CASE(2);
+         HYPRE_CORE_CASE(1);
 
       case 0:
          break;
@@ -882,33 +882,33 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
 
       switch (depth)
       {
-         HYPRE_CORE_CASE(27);
-         HYPRE_CORE_CASE(26);
-         HYPRE_CORE_CASE(25);
-         HYPRE_CORE_CASE(24);
-         HYPRE_CORE_CASE(23);
-         HYPRE_CORE_CASE(22);
-         HYPRE_CORE_CASE(21);
-         HYPRE_CORE_CASE(20);
-         HYPRE_CORE_CASE(19);
-         HYPRE_CORE_CASE(18);
-         HYPRE_CORE_CASE(17);
-         HYPRE_CORE_CASE(16);
-         HYPRE_CORE_CASE(15);
-         HYPRE_CORE_CASE(14);
-         HYPRE_CORE_CASE(13);
-         HYPRE_CORE_CASE(12);
-         HYPRE_CORE_CASE(11);
-         HYPRE_CORE_CASE(10);
-         HYPRE_CORE_CASE(9);
-         HYPRE_CORE_CASE(8);
-         HYPRE_CORE_CASE(7);
-         HYPRE_CORE_CASE(6);
-         HYPRE_CORE_CASE(5);
-         HYPRE_CORE_CASE(4);
-         HYPRE_CORE_CASE(3);
-         HYPRE_CORE_CASE(2);
-         HYPRE_CORE_CASE(1);
+            HYPRE_CORE_CASE(27);
+            HYPRE_CORE_CASE(26);
+            HYPRE_CORE_CASE(25);
+            HYPRE_CORE_CASE(24);
+            HYPRE_CORE_CASE(23);
+            HYPRE_CORE_CASE(22);
+            HYPRE_CORE_CASE(21);
+            HYPRE_CORE_CASE(20);
+            HYPRE_CORE_CASE(19);
+            HYPRE_CORE_CASE(18);
+            HYPRE_CORE_CASE(17);
+            HYPRE_CORE_CASE(16);
+            HYPRE_CORE_CASE(15);
+            HYPRE_CORE_CASE(14);
+            HYPRE_CORE_CASE(13);
+            HYPRE_CORE_CASE(12);
+            HYPRE_CORE_CASE(11);
+            HYPRE_CORE_CASE(10);
+            HYPRE_CORE_CASE(9);
+            HYPRE_CORE_CASE(8);
+            HYPRE_CORE_CASE(7);
+            HYPRE_CORE_CASE(6);
+            HYPRE_CORE_CASE(5);
+            HYPRE_CORE_CASE(4);
+            HYPRE_CORE_CASE(3);
+            HYPRE_CORE_CASE(2);
+            HYPRE_CORE_CASE(1);
 
          case 0:
             break;
@@ -1026,32 +1026,32 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    depth = hypre_min(HYPRE_UNROLL_MAXDEPTH - 1, nentries);
    switch (depth)
    {
-      HYPRE_CORE_CASE(26);
-      HYPRE_CORE_CASE(25);
-      HYPRE_CORE_CASE(24);
-      HYPRE_CORE_CASE(23);
-      HYPRE_CORE_CASE(22);
-      HYPRE_CORE_CASE(21);
-      HYPRE_CORE_CASE(20);
-      HYPRE_CORE_CASE(19);
-      HYPRE_CORE_CASE(18);
-      HYPRE_CORE_CASE(17);
-      HYPRE_CORE_CASE(16);
-      HYPRE_CORE_CASE(15);
-      HYPRE_CORE_CASE(14);
-      HYPRE_CORE_CASE(13);
-      HYPRE_CORE_CASE(12);
-      HYPRE_CORE_CASE(11);
-      HYPRE_CORE_CASE(10);
-      HYPRE_CORE_CASE(9);
-      HYPRE_CORE_CASE(8);
-      HYPRE_CORE_CASE(7);
-      HYPRE_CORE_CASE(6);
-      HYPRE_CORE_CASE(5);
-      HYPRE_CORE_CASE(4);
-      HYPRE_CORE_CASE(3);
-      HYPRE_CORE_CASE(2);
-      HYPRE_CORE_CASE(1);
+         HYPRE_CORE_CASE(26);
+         HYPRE_CORE_CASE(25);
+         HYPRE_CORE_CASE(24);
+         HYPRE_CORE_CASE(23);
+         HYPRE_CORE_CASE(22);
+         HYPRE_CORE_CASE(21);
+         HYPRE_CORE_CASE(20);
+         HYPRE_CORE_CASE(19);
+         HYPRE_CORE_CASE(18);
+         HYPRE_CORE_CASE(17);
+         HYPRE_CORE_CASE(16);
+         HYPRE_CORE_CASE(15);
+         HYPRE_CORE_CASE(14);
+         HYPRE_CORE_CASE(13);
+         HYPRE_CORE_CASE(12);
+         HYPRE_CORE_CASE(11);
+         HYPRE_CORE_CASE(10);
+         HYPRE_CORE_CASE(9);
+         HYPRE_CORE_CASE(8);
+         HYPRE_CORE_CASE(7);
+         HYPRE_CORE_CASE(6);
+         HYPRE_CORE_CASE(5);
+         HYPRE_CORE_CASE(4);
+         HYPRE_CORE_CASE(3);
+         HYPRE_CORE_CASE(2);
+         HYPRE_CORE_CASE(1);
 
       case 0:
          break;
@@ -1080,32 +1080,32 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
 
       switch (depth)
       {
-         HYPRE_CORE_CASE(26);
-         HYPRE_CORE_CASE(25);
-         HYPRE_CORE_CASE(24);
-         HYPRE_CORE_CASE(23);
-         HYPRE_CORE_CASE(22);
-         HYPRE_CORE_CASE(21);
-         HYPRE_CORE_CASE(20);
-         HYPRE_CORE_CASE(19);
-         HYPRE_CORE_CASE(18);
-         HYPRE_CORE_CASE(17);
-         HYPRE_CORE_CASE(16);
-         HYPRE_CORE_CASE(15);
-         HYPRE_CORE_CASE(14);
-         HYPRE_CORE_CASE(13);
-         HYPRE_CORE_CASE(12);
-         HYPRE_CORE_CASE(11);
-         HYPRE_CORE_CASE(10);
-         HYPRE_CORE_CASE(9);
-         HYPRE_CORE_CASE(8);
-         HYPRE_CORE_CASE(7);
-         HYPRE_CORE_CASE(6);
-         HYPRE_CORE_CASE(5);
-         HYPRE_CORE_CASE(4);
-         HYPRE_CORE_CASE(3);
-         HYPRE_CORE_CASE(2);
-         HYPRE_CORE_CASE(1);
+            HYPRE_CORE_CASE(26);
+            HYPRE_CORE_CASE(25);
+            HYPRE_CORE_CASE(24);
+            HYPRE_CORE_CASE(23);
+            HYPRE_CORE_CASE(22);
+            HYPRE_CORE_CASE(21);
+            HYPRE_CORE_CASE(20);
+            HYPRE_CORE_CASE(19);
+            HYPRE_CORE_CASE(18);
+            HYPRE_CORE_CASE(17);
+            HYPRE_CORE_CASE(16);
+            HYPRE_CORE_CASE(15);
+            HYPRE_CORE_CASE(14);
+            HYPRE_CORE_CASE(13);
+            HYPRE_CORE_CASE(12);
+            HYPRE_CORE_CASE(11);
+            HYPRE_CORE_CASE(10);
+            HYPRE_CORE_CASE(9);
+            HYPRE_CORE_CASE(8);
+            HYPRE_CORE_CASE(7);
+            HYPRE_CORE_CASE(6);
+            HYPRE_CORE_CASE(5);
+            HYPRE_CORE_CASE(4);
+            HYPRE_CORE_CASE(3);
+            HYPRE_CORE_CASE(2);
+            HYPRE_CORE_CASE(1);
 
          case 0:
             break;

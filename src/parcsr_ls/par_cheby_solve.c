@@ -211,8 +211,8 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A,
    HYPRE_Real      *f_data   = hypre_ParVectorLocalData(f);
    HYPRE_Real      *v_data   = hypre_ParVectorLocalData(v);
    HYPRE_Real      *r_data   = hypre_ParVectorLocalData(r);
-   HYPRE_Real      *tmp_data = hypre_ParVectorLocalData(tmp_vec);
    HYPRE_Int        num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Real      *tmp_data;
 
    HYPRE_Int        i, j;
    HYPRE_Int        cheby_order;
@@ -274,6 +274,8 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A,
    }
    else /* with scaling */
    {
+      tmp_data = hypre_ParVectorLocalData(tmp_vec);
+
       /* Compute scaled residual: r = D^(-1/2) f - D^(-1/2) A*u */
       /* tmp = -A*u */
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);

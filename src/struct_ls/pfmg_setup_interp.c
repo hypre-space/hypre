@@ -276,7 +276,8 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
 #if defined(DEBUG_PFMG)
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
-   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l ,r, m);
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD,
+                   "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l, r, m);
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
 #endif
 

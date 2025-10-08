@@ -180,8 +180,8 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,
 
    if (variant == 1)
    {
-     /* These are the corresponding cheby polynomials: u = u_o + s(A) r_0
-        So order is one less than  resid poly: r(t) = 1 - t*s(t) */
+      /* These are the corresponding cheby polynomials: u = u_o + s(A) r_0
+         So order is one less than  resid poly: r(t) = 1 - t*s(t) */
       switch (cheby_order)
       {
          case 0:
