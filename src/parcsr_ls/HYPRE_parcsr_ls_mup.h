@@ -5434,6 +5434,150 @@ HYPRE_Int
 HYPRE_ParCSRSetupMatvec( HYPRE_MatvecFunctions *mv );
 
 HYPRE_Int
+HYPRE_ParChebyCreate_flt( HYPRE_Solver *solver );
+HYPRE_Int
+HYPRE_ParChebyCreate_dbl( HYPRE_Solver *solver );
+HYPRE_Int
+HYPRE_ParChebyCreate_long_dbl( HYPRE_Solver *solver );
+HYPRE_Int
+HYPRE_ParChebyCreate( HYPRE_Solver *solver );
+
+HYPRE_Int
+HYPRE_ParChebyDestroy_flt( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_ParChebyDestroy_dbl( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_ParChebyDestroy_long_dbl( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_ParChebyDestroy( HYPRE_Solver solver );
+
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst_flt( HYPRE_Solver solver, hypre_float *min_eig_est, hypre_float *max_eig_est );
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst_dbl( HYPRE_Solver solver, hypre_double *min_eig_est, hypre_double *max_eig_est );
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst_long_dbl( HYPRE_Solver solver, hypre_long_double *min_eig_est, hypre_long_double *max_eig_est );
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst( HYPRE_Solver solver, void *min_eig_est, void *max_eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetEigEst_flt( HYPRE_Solver solver, HYPRE_Int eig_est );
+HYPRE_Int
+HYPRE_ParChebySetEigEst_dbl( HYPRE_Solver solver, HYPRE_Int eig_est );
+HYPRE_Int
+HYPRE_ParChebySetEigEst_long_dbl( HYPRE_Solver solver, HYPRE_Int eig_est );
+HYPRE_Int
+HYPRE_ParChebySetEigEst( HYPRE_Solver solver, HYPRE_Int eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetEigRatio_flt( HYPRE_Solver solver, hypre_float eig_ratio );
+HYPRE_Int
+HYPRE_ParChebySetEigRatio_dbl( HYPRE_Solver solver, hypre_double eig_ratio );
+HYPRE_Int
+HYPRE_ParChebySetEigRatio_long_dbl( HYPRE_Solver solver, hypre_long_double eig_ratio );
+HYPRE_Int
+HYPRE_ParChebySetEigRatio( HYPRE_Solver solver, hypre_long_double eig_ratio );
+
+HYPRE_Int
+HYPRE_ParChebySetLogging_flt( HYPRE_Solver solver, HYPRE_Int logging );
+HYPRE_Int
+HYPRE_ParChebySetLogging_dbl( HYPRE_Solver solver, HYPRE_Int logging );
+HYPRE_Int
+HYPRE_ParChebySetLogging_long_dbl( HYPRE_Solver solver, HYPRE_Int logging );
+HYPRE_Int
+HYPRE_ParChebySetLogging( HYPRE_Solver solver, HYPRE_Int logging );
+
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations_flt( HYPRE_Solver solver, HYPRE_Int max_iterations );
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations_dbl( HYPRE_Solver solver, HYPRE_Int max_iterations );
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations_long_dbl( HYPRE_Solver solver, HYPRE_Int max_iterations );
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations( HYPRE_Solver solver, HYPRE_Int max_iterations );
+
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst_flt( HYPRE_Solver solver, hypre_float min_eig_est, hypre_float max_eig_est );
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst_dbl( HYPRE_Solver solver, hypre_double min_eig_est, hypre_double max_eig_est );
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst_long_dbl( HYPRE_Solver solver, hypre_long_double min_eig_est, hypre_long_double max_eig_est );
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst( HYPRE_Solver solver, hypre_long_double min_eig_est, hypre_long_double max_eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetOrder_flt( HYPRE_Solver solver, HYPRE_Int order );
+HYPRE_Int
+HYPRE_ParChebySetOrder_dbl( HYPRE_Solver solver, HYPRE_Int order );
+HYPRE_Int
+HYPRE_ParChebySetOrder_long_dbl( HYPRE_Solver solver, HYPRE_Int order );
+HYPRE_Int
+HYPRE_ParChebySetOrder( HYPRE_Solver solver, HYPRE_Int order );
+
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int print_level );
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int print_level );
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int print_level );
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
+
+HYPRE_Int
+HYPRE_ParChebySetScale_flt( HYPRE_Solver solver, HYPRE_Int scale );
+HYPRE_Int
+HYPRE_ParChebySetScale_dbl( HYPRE_Solver solver, HYPRE_Int scale );
+HYPRE_Int
+HYPRE_ParChebySetScale_long_dbl( HYPRE_Solver solver, HYPRE_Int scale );
+HYPRE_Int
+HYPRE_ParChebySetScale( HYPRE_Solver solver, HYPRE_Int scale );
+
+HYPRE_Int
+HYPRE_ParChebySetTolerance_flt( HYPRE_Solver solver, hypre_float tolerance );
+HYPRE_Int
+HYPRE_ParChebySetTolerance_dbl( HYPRE_Solver solver, hypre_double tolerance );
+HYPRE_Int
+HYPRE_ParChebySetTolerance_long_dbl( HYPRE_Solver solver, hypre_long_double tolerance );
+HYPRE_Int
+HYPRE_ParChebySetTolerance( HYPRE_Solver solver, hypre_long_double tolerance );
+
+HYPRE_Int
+HYPRE_ParChebySetVariant_flt( HYPRE_Solver solver, HYPRE_Int variant );
+HYPRE_Int
+HYPRE_ParChebySetVariant_dbl( HYPRE_Solver solver, HYPRE_Int variant );
+HYPRE_Int
+HYPRE_ParChebySetVariant_long_dbl( HYPRE_Solver solver, HYPRE_Int variant );
+HYPRE_Int
+HYPRE_ParChebySetVariant( HYPRE_Solver solver, HYPRE_Int variant );
+
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess_flt( HYPRE_Solver solver, HYPRE_Int zero_guess );
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess_dbl( HYPRE_Solver solver, HYPRE_Int zero_guess );
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess_long_dbl( HYPRE_Solver solver, HYPRE_Int zero_guess );
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess( HYPRE_Solver solver, HYPRE_Int zero_guess );
+
+HYPRE_Int
+HYPRE_ParChebySetup_flt( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySetup_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySetup_long_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+
+HYPRE_Int
+HYPRE_ParChebySolve_flt( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySolve_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySolve_long_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+HYPRE_Int
+HYPRE_ParChebySolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+
+HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix_flt( HYPRE_Solver solver, HYPRE_IJMatrix *pij_A );
 HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix_dbl( HYPRE_Solver solver, HYPRE_IJMatrix *pij_A );
@@ -7522,6 +7666,54 @@ HYPRE_ParCSRSetupInterpreter_pre( HYPRE_Precision precision, mv_InterfaceInterpr
 
 HYPRE_Int
 HYPRE_ParCSRSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions *mv );
+
+HYPRE_Int
+HYPRE_ParChebyCreate_pre( HYPRE_Precision precision, HYPRE_Solver *solver );
+
+HYPRE_Int
+HYPRE_ParChebyDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver );
+
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *min_eig_est, void *max_eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetEigRatio_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double eig_ratio );
+
+HYPRE_Int
+HYPRE_ParChebySetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int logging );
+
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int max_iterations );
+
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double min_eig_est, hypre_long_double max_eig_est );
+
+HYPRE_Int
+HYPRE_ParChebySetOrder_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int order );
+
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int print_level );
+
+HYPRE_Int
+HYPRE_ParChebySetScale_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int scale );
+
+HYPRE_Int
+HYPRE_ParChebySetTolerance_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double tolerance );
+
+HYPRE_Int
+HYPRE_ParChebySetVariant_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int variant );
+
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int zero_guess );
+
+HYPRE_Int
+HYPRE_ParChebySetup_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
+
+HYPRE_Int
+HYPRE_ParChebySolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x );
 
 HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_IJMatrix *pij_A );
