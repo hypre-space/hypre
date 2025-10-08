@@ -21,7 +21,7 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
    HYPRE_Int        print_level   = hypre_ParChebyDataPrintLevel(cheby_data);
    HYPRE_Int        logging       = hypre_ParChebyDataLogging(cheby_data);
    HYPRE_Int        max_iter      = hypre_ParChebyDataMaxIterations(cheby_data);
-   HYPRE_Int        tol           = hypre_ParChebyDataTol(cheby_data);
+   HYPRE_Real       tol           = hypre_ParChebyDataTol(cheby_data);
    HYPRE_Int        scale         = hypre_ParChebyDataScale(cheby_data);
    HYPRE_Int        variant       = hypre_ParChebyDataVariant(cheby_data);
    HYPRE_Int        order         = hypre_ParChebyDataOrder(cheby_data);
