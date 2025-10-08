@@ -192,3 +192,37 @@ if(BUILD_TESTING)
     FAIL_REGULAR_EXPRESSION "Failed"
   )
 endif()
+
+# Optional Fortran-based drivers
+if(HYPRE_ENABLE_FORTRAN)
+  # Build Fortran wrapper object libraries to be linked into C drivers
+  add_library(hypre_fstruct_wrappers OBJECT fstruct_mv.f fstruct_ls.f)
+  add_library(hypre_fsstruct_wrappers OBJECT fsstruct_mv.f fsstruct_ls.f)
+  add_library(hypre_fparcsr_wrappers OBJECT fparcsr_mv.f fparcsr_ls.f)
+  add_library(hypre_fij_wrappers OBJECT fij_mv.f)
+
+  # Common include dirs for mixed-language linking
+  foreach(wlib IN ITEMS hypre_fstruct_wrappers hypre_fsstruct_wrappers hypre_fparcsr_wrappers hypre_fij_wrappers)
+    target_include_directories(${wlib} PRIVATE
+      ${CMAKE_SOURCE_DIR}
+      ${CMAKE_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    if(HYPRE_ENABLE_MPI)
+      target_link_libraries(${wlib} PRIVATE MPI::MPI_Fortran)
+    endif()
+  endforeach()
+
+  # Pure Fortran test drivers
+  add_executable(f77_ij f77_ij.f)
+  target_link_libraries(f77_ij PUBLIC HYPRE)
+  if(HYPRE_ENABLE_MPI)
+    target_link_libraries(f77_ij PUBLIC MPI::MPI_Fortran)
+  endif()
+
+  add_executable(f77_struct f77_struct.f)
+  target_link_libraries(f77_struct PUBLIC HYPRE)
+  if(HYPRE_ENABLE_MPI)
+    target_link_libraries(f77_struct PUBLIC MPI::MPI_Fortran)
+  endif()
+endif()

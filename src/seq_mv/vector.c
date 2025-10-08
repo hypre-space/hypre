@@ -314,6 +314,7 @@ hypre_SeqVectorInitialize_v2( hypre_Vector         *vector,
     * when being used, and freed */
    if (!hypre_VectorData(vector))
    {
+      hypre_assert((num_vectors * size) >= 0);
       hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
    }
 

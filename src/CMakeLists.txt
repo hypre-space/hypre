@@ -17,6 +17,9 @@ endif()
 if(POLICY CMP0104)
   cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
 endif()
+if(POLICY CMP0090)
+  cmake_policy(SET CMP0090 NEW) # Checks for <PackageName>_ROOT
+endif()
 
 # The version number.
 set(HYPRE_VERSION 3.0.0)
@@ -139,6 +142,7 @@ set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Rea
 set_hypre_option(BASE HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MIXED_PRECISION      "Enable mixed precision support" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_FORTRAN              "Enable Fortran drivers (examples/tests)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_BLAS           "Use internal BLAS library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_LAPACK         "Use internal LAPACK library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
@@ -173,14 +177,16 @@ set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use CUB's device memory pool" OFF)
 # HIP options
-set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
-set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
+
 # TPL options
 set_hypre_option(TPL  HYPRE_BUILD_UMPIRE                "Automatically download, build, and install Umpire before hypre" OFF)
 set_hypre_option(TPL  HYPRE_ENABLE_UMPIRE               "Use Umpire Allocator for device and unified memory" OFF)
@@ -225,6 +231,14 @@ endforeach()
 process_fmangling_scheme(FMANGLE "name")
 process_fmangling_scheme(FMANGLE_BLAS "BLAS")
 process_fmangling_scheme(FMANGLE_LAPACK "LAPACK")
+
+# Enable Fortran language when requested (for examples/tests only)
+if (HYPRE_ENABLE_FORTRAN)
+  enable_language(Fortran)
+  if (HYPRE_ENABLE_MPI)
+    find_package(MPI REQUIRED COMPONENTS Fortran)
+  endif()
+endif()
 
 # Set config name values
 set_internal_hypre_option("" BIGINT)
@@ -517,6 +531,11 @@ if (MSVC)
     #Fix issue with visual studio 2013
     set_source_files_properties(struct_ls/pfmg3_setup_rap.c      PROPERTIES COMPILE_FLAGS /Od)
   endif()
+endif ()
+
+# Debug library
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  pretty_print_target_interface(HYPRE INTERFACE_LINK_LIBRARIES)
 endif ()
 
 # Build FEI, if requested (to be phased out)
