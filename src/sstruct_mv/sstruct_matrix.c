@@ -2339,18 +2339,9 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                {
                   hypre_Index index;
                   hypre_BoxLoopGetIndex(index);
-                  if (ndim > 0)
-                  {
-                     all_indices_0[ii] = index[0] + start[0];
-                  }
-                  if (ndim > 1)
-                  {
-                     all_indices_1[ii] = index[1] + start[1];
-                  }
-                  if (ndim > 2)
-                  {
-                     all_indices_2[ii] = index[2] + start[2];
-                  }
+                  if (ndim > 0) { all_indices_0[ii] = index[0] + start[0]; }
+                  if (ndim > 1) { all_indices_1[ii] = index[1] + start[1]; }
+                  if (ndim > 2) { all_indices_2[ii] = index[2] + start[2]; }
                }
                hypre_BoxLoop1End(ii);
 
@@ -2400,6 +2391,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                       hypre_CSRMatrixI(A_uo)[offset + ii] > 0)
                   {
                      hypre_Index index;
+                     hypre_SetIndex(index, 0);
                      hypre_BoxLoopGetIndexHost(index);
                      if (ndim > 0) { indices_0[num_indices] = index[0] + start[0]; }
                      if (ndim > 1) { indices_1[num_indices] = index[1] + start[1]; }

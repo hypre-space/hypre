@@ -41,8 +41,8 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
    HYPRE_Complex    alpha = 1.0;
    HYPRE_Complex    beta  = -1.0;
    HYPRE_Real       conv_factor;
-   HYPRE_Complex    relative_resid, old_resid, resid_nrm, resid_nrm_init;
-   HYPRE_Complex    rhs_norm, ieee_check = 0.0;
+   HYPRE_Real       relative_resid, old_resid, resid_norm_init;
+   HYPRE_Real       rhs_norm = 0.0, resid_norm = 0.0, ieee_check = 0.0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_rank(comm, &myid);
@@ -69,13 +69,13 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
       hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, Ltemp);
 
       /* Compute residual L2-norm */
-      resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Ltemp, Ltemp));
+      resid_norm = hypre_sqrt(hypre_ParVectorInnerProd(Ltemp, Ltemp));
 
       /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
-      if (resid_nrm != 0.)
+      if (resid_norm != 0.)
       {
-         ieee_check = resid_nrm / resid_nrm; /* INF -> NaN conversion */
+         ieee_check = resid_norm / resid_norm; /* INF -> NaN conversion */
       }
 
       if (ieee_check != ieee_check)
@@ -99,12 +99,12 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
       }
 
       /* r0 */
-      resid_nrm_init = resid_nrm;
+      resid_norm_init = resid_norm;
 
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         relative_resid = (rhs_norm) ? resid_nrm_init / rhs_norm : resid_nrm_init;
+         relative_resid = (rhs_norm) ? resid_norm_init / rhs_norm : resid_norm_init;
       }
       else
       {
@@ -123,7 +123,7 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
       hypre_printf("    Initial    %e                 %e\n",
-                   resid_nrm_init, relative_resid);
+                   resid_norm_init, relative_resid);
    }
 
    /*-----------------------------------------------------------------------
@@ -144,7 +144,7 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
 
       if (print_level > 1 || logging > 1 || tol > 0.0)
       {
-         old_resid = resid_nrm;
+         old_resid = resid_norm;
 
          /* Set pointer to work vector for logging purposes */
          Ltemp = (logging > 1) ? residual : Vtemp;
@@ -152,14 +152,14 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
          /* Compute residual */
          hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, Ltemp);
 
-         conv_factor = (old_resid) ? resid_nrm / old_resid : resid_nrm;
+         conv_factor = (old_resid) ? resid_norm / old_resid : resid_norm;
          if (0 == converge_type)
          {
-            relative_resid = (rhs_norm) ? resid_nrm / rhs_norm : resid_nrm;
+            relative_resid = (rhs_norm) ? resid_norm / rhs_norm : resid_norm;
          }
          else
          {
-            relative_resid = resid_nrm / resid_nrm_init;
+            relative_resid = resid_norm / resid_norm_init;
          }
 
          hypre_ParChebyDataRelResidNorm(cheby_data) = relative_resid;
@@ -171,7 +171,7 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
       if (!myid && print_level > 1)
       {
          hypre_printf("     Iter %2d   %e    %f     %e \n",
-                      iter, resid_nrm, conv_factor, relative_resid);
+                      iter, resid_norm, conv_factor, relative_resid);
       }
    }
    hypre_ParChebyDataNumIterations(cheby_data) = iter;
