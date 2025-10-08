@@ -519,11 +519,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   /* CG */
                   if (j == 0) /* do num sweep iterations of CG */
                   {
-                     hypre_ParCSRRelax_CG( smoother[level],
-                                           A_array[level],
-                                           Aux_F,
-                                           Aux_U,
-                                           num_sweep);
+                     hypre_ParCSRRelax_CG(smoother[level],
+                                          A_array[level],
+                                          Aux_F, Aux_U,
+                                          num_sweep);
                   }
                }
                else if (relax_type == 16)
@@ -532,9 +531,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
-                                                hypre_VectorData(ds[level]), coefs[level],
+                                                hypre_VectorData(ds[level]),
+                                                coefs[level],
                                                 cheby_order, scale,
-                                                variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
+                                                variant, Aux_U,
+                                                Vtemp, Ztemp, Ptemp, Rtemp);
                }
                else if (relax_type == 17)
                {
@@ -543,12 +544,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                      /* if we are on the coarsest level, the cf_marker will be null
                         and we just do one sweep regular Jacobi */
                      hypre_assert(cycle_param == 3);
-                     hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker, 0, 0, relax_weight[level],
+                     hypre_BoomerAMGRelax(A_array[level], Aux_F,
+                                          CF_marker, 0, 0, relax_weight[level],
                                           0.0, NULL, Aux_U, Vtemp, NULL);
                   }
                   else
                   {
-                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker, relax_weight[level],
+                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F,
+                                                    CF_marker, relax_weight[level],
                                                     Aux_U, Vtemp);
                   }
                }
