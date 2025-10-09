@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
- #include "_hypre_struct_ls.h"
+#include "_hypre_struct_ls.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 
@@ -31,17 +31,17 @@ HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
    HYPRE_Precision precision = hypre_StructMatrixPrecision (A);
 
    /* call standard setup if precisions match */
-   if(precision == hypre_StructVectorPrecision (b))
+   if (precision == hypre_StructVectorPrecision (b))
    {
       return HYPRE_StructSMGSetup( solver, A, b, x );
    }
 
-   HYPRE_StructVectorCreate_pre(precision, 
+   HYPRE_StructVectorCreate_pre(precision,
                                 hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &btemp);
    HYPRE_StructVectorInitialize_pre( precision, btemp );
-   HYPRE_StructVectorCreate_pre(precision, 
+   HYPRE_StructVectorCreate_pre(precision,
                                 hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);

@@ -133,20 +133,18 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    HYPRE_UNUSED_VAR(variant);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real      *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real      *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
+   HYPRE_Real      *u_data = hypre_ParVectorLocalData(u);
+   HYPRE_Real      *f_data = hypre_ParVectorLocalData(f);
+   HYPRE_Real      *v_data = hypre_ParVectorLocalData(v);
+   HYPRE_Real      *r_data = hypre_ParVectorLocalData(r);
 
-   HYPRE_Real *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
+   HYPRE_Int        i;
+   HYPRE_Int        num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Real       mult;
+   HYPRE_Int        cheby_order;
+   HYPRE_Real      *tmp_data;
 
-   HYPRE_Int i;
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
-
-   HYPRE_Real  mult;
-
-   HYPRE_Int cheby_order;
-
-   HYPRE_Real *tmp_data;
+   hypre_GpuProfilingPushRange("ParCSRRelaxChebySolve");
 
    /* u = u + p(A)r */
 
@@ -170,14 +168,16 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       HYPRE_ONEDPL_CALL(
          std::for_each,
          oneapi::dpl::make_zip_iterator(orig_u, u_data, r_data),
-         oneapi::dpl::make_zip_iterator(orig_u + num_rows, u_data + num_rows,
+         oneapi::dpl::make_zip_iterator(orig_u + num_rows,
+                                        u_data + num_rows,
                                         r_data + num_rows),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
 #else
       HYPRE_THRUST_CALL(
          for_each,
          thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
-         thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows, u_data + num_rows,
+         thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows,
+                                                      u_data + num_rows,
                                                       r_data + num_rows)),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
 #endif
@@ -288,6 +288,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
 
    } /* end of scaling code */
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

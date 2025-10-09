@@ -330,13 +330,13 @@ int main (int argc, char *argv[])
 
       /* step 2: compute residual */
       /* This copy routine will copy from single precision, par_x, to double precision, par_xb */
-         float rprod0=0.;
-         HYPRE_ParVectorInnerProd_flt(par_x, par_x, &rprod0);
-         printf("rprod0 = %f\n",rprod0);
+      float rprod0 = 0.;
+      HYPRE_ParVectorInnerProd_flt(par_x, par_x, &rprod0);
+      printf("rprod0 = %f\n", rprod0);
       HYPRE_ParVectorCopy_mp(par_x, par_xb);
-         double rprod1=0.;
-         HYPRE_ParVectorInnerProd_dbl(par_xb, par_xb, &rprod1);
-         printf("rprod1 = %f\n",rprod1);
+      double rprod1 = 0.;
+      HYPRE_ParVectorInnerProd_dbl(par_xb, par_xb, &rprod1);
+      printf("rprod1 = %f\n", rprod1);
       //HYPRE_ParVectorPrint_flt( par_x, "par_x.flt");
       //HYPRE_ParVectorPrint_dbl( par_xb, "par_x.dbl");
       //exit(0);
@@ -362,7 +362,7 @@ int main (int argc, char *argv[])
          rprod = 0.;
          HYPRE_ParVectorInnerProd_dbl(hres, hres, &rprod);
          rnrm[i] = rprod;
-         printf("rprod = %f\n",rprod);
+         printf("rprod = %f\n", rprod);
          /*=====================*/
 
          /* step 4: solver for error in single precision */

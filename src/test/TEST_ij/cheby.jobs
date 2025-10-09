@@ -1,0 +1,33 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#
+# Chebyshev preconditioner tests - Sequential
+#
+mpirun -np 1  ./ij -solver 21 > cheby.out.1
+mpirun -np 1  ./ij -solver 21 -cheby_order 1 > cheby.out.2
+mpirun -np 1  ./ij -solver 21 -cheby_order 3 > cheby.out.3
+mpirun -np 1  ./ij -solver 21 -cheby_order 4 > cheby.out.4
+mpirun -np 1  ./ij -solver 21 -cheby_variant 1 > cheby.out.5
+mpirun -np 1  ./ij -solver 21 -cheby_scale 0 > cheby.out.6
+mpirun -np 1  ./ij -solver 21 -cheby_fraction 0.1 > cheby.out.7
+mpirun -np 1  ./ij -solver 21 -cheby_eig_est 4 > cheby.out.8
+mpirun -np 1  ./ij -solver 21 -cheby_eig_est -4 > cheby.out.9
+mpirun -np 1  ./ij -solver 22 > cheby.out.10
+
+#
+# Chebyshev preconditioner tests - Parallel
+#
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 > cheby.out.101
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_order 1 > cheby.out.102
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_order 3 > cheby.out.103
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_order 4 > cheby.out.104
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_variant 1 > cheby.out.105
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_scale 0 > cheby.out.106
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_fraction 0.1 > cheby.out.107
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_eig_est 4 > cheby.out.108
+mpirun -np 4  ./ij -P 2 2 1 -solver 21 -cheby_eig_est -4 > cheby.out.109
+mpirun -np 4  ./ij -P 2 2 1 -solver 22 > cheby.out.110

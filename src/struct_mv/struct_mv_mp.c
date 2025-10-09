@@ -62,7 +62,7 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
          {
             case HYPRE_REAL_DOUBLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {
@@ -71,7 +71,7 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
                break;
             case HYPRE_REAL_LONGDOUBLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {
@@ -87,7 +87,7 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
          {
             case HYPRE_REAL_SINGLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {
@@ -96,7 +96,7 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
                break;
             case HYPRE_REAL_LONGDOUBLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {
@@ -112,16 +112,16 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
          {
             case HYPRE_REAL_SINGLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {
                   ((hypre_float *)yp)[i] = (hypre_float)((hypre_long_double *)xp)[i];
                }
-               break;            
+               break;
             case HYPRE_REAL_DOUBLE:
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
                for (i = 0; i < size; i++)
                {

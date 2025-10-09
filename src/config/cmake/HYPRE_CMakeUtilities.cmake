@@ -259,6 +259,27 @@ macro(get_language_flags in_var out_var lang_type)
   endif()
 endmacro()
 
+# Function to print the INTERFACE properties of a target in a readable format.
+function(pretty_print_target_interface TARGET_NAME)
+    message(STATUS "--- INTERFACE properties for target: [${TARGET_NAME}] ---")
+
+    # Loop over all property names passed to the function (stored in ARGN)
+    foreach(PROP ${ARGN})
+        get_target_property(PROP_VALUE ${TARGET_NAME} ${PROP})
+        message(STATUS "  [${PROP}]") # Print the property name
+
+        if(PROP_VALUE)
+            # Loop over each item in the semicolon-separated list
+            foreach(ITEM ${PROP_VALUE})
+                message(STATUS "    - ${ITEM}") # Print each item indented
+            endforeach()
+        else()
+            message(STATUS "    <NOTFOUND>")
+        endif()
+    endforeach()
+    #message(STATUS "--- End of INTERFACE properties for [${TARGET_NAME}] ---")
+endfunction()
+
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl LIBNAME)
   string(TOUPPER ${LIBNAME} LIBNAME_UPPER)

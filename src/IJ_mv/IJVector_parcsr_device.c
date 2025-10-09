@@ -39,7 +39,7 @@ struct hypre_IJVectorAssembleFunctor
       using namespace thrust;
 #endif
       return make_tuple( hypre_max(get<0>(x), get<0>(y)),
-                                   get<1>(x) + get<1>(y) );
+                         get<1>(x) + get<1>(y) );
    }
 };
 

@@ -15,7 +15,8 @@
 /* returns 1 if the assumed partition is in use */
 HYPRE_Int HYPRE_AssumedPartitionCheck(void)
 {
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_AssumedPartitionCheck is obsolete and will eventually be removed.");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                     "HYPRE_AssumedPartitionCheck is obsolete and will eventually be removed.");
    return 1;
 }
 

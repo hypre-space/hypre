@@ -465,7 +465,6 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
@@ -591,7 +590,6 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {

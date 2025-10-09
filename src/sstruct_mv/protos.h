@@ -26,7 +26,8 @@ HYPRE_Int hypre_SStructCopy ( hypre_SStructVector *x, hypre_SStructVector *y );
 HYPRE_Int hypre_SStructGraphRef ( hypre_SStructGraph *graph, hypre_SStructGraph **graph_ref );
 HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph, HYPRE_Int part,
                                             HYPRE_Int var, hypre_Index index, HYPRE_BigInt *rank );
-HYPRE_BigInt hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph, HYPRE_Int part, HYPRE_Int var,
+HYPRE_BigInt hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph, HYPRE_Int part,
+                                              HYPRE_Int var,
                                               HYPRE_Int proc, HYPRE_Int endpt, HYPRE_Int boxi );
 HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_Int part,
                                               HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );

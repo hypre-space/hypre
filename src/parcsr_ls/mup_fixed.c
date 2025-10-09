@@ -7081,14 +7081,6 @@ hypre_ParCSRRelax_Cheby_Solve( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRRelax_Cheby_SolveHost( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant, hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRRelax_Cheby_SolveHost)( A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec, tmp_vec );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRRelax_L1_Jacobi)( A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp );
@@ -7100,6 +7092,222 @@ HYPRE_Int
 hypre_ParCSRSubspacePrec( hypre_ParCSRMatrix *A0, HYPRE_Int A0_relax_type, HYPRE_Int A0_relax_times, HYPRE_Real *A0_l1_norms, HYPRE_Real A0_relax_weight, HYPRE_Real A0_omega, HYPRE_Real A0_max_eig_est, HYPRE_Real A0_min_eig_est, HYPRE_Int A0_cheby_order, HYPRE_Real A0_cheby_fraction, hypre_ParCSRMatrix **A, HYPRE_Solver *B, HYPRE_PtrToSolverFcn *HB, hypre_ParCSRMatrix **P, hypre_ParVector **r, hypre_ParVector **g, hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector *r0, hypre_ParVector *g0, char *cycle, hypre_ParVector *z )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRSubspacePrec)( A0, A0_relax_type, A0_relax_times, A0_l1_norms, A0_relax_weight, A0_omega, A0_max_eig_est, A0_min_eig_est, A0_cheby_order, A0_cheby_fraction, A, B, HB, P, r, g, x, y, r0, g0, cycle, z );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParChebyData *
+hypre_ParChebyCreate( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyCreate)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyDestroy( hypre_ParChebyData *cheby_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyDestroy)( cheby_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetEigEst)( cheby_data, eig_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real *eig_ratio )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetEigRatio)( cheby_data, eig_ratio );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int *logging )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetLogging)( cheby_data, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetMaxIterations)( cheby_data, max_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetMinMaxEigEst( hypre_ParChebyData *cheby_data, HYPRE_Real *eig_min_est, HYPRE_Real *eig_max_est )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetMinMaxEigEst)( cheby_data, eig_min_est, eig_max_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int *order )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetOrder)( cheby_data, order );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetPrintLevel)( cheby_data, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetScale( hypre_ParChebyData *cheby_data, HYPRE_Int *scale )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetScale)( cheby_data, scale );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real *tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetTolerance)( cheby_data, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int *variant )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetVariant)( cheby_data, variant );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebyGetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebyGetZeroGuess)( cheby_data, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetEigEst)( cheby_data, eig_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real eig_ratio )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetEigRatio)( cheby_data, eig_ratio );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int logging )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetLogging)( cheby_data, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetMaxIterations)( cheby_data, max_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetMinMaxEigEst( hypre_ParChebyData *cheby_data, HYPRE_Real eig_min_est, HYPRE_Real eig_max_est )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetMinMaxEigEst)( cheby_data, eig_min_est, eig_max_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int order )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetOrder)( cheby_data, order );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int print_level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetPrintLevel)( cheby_data, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetScale( hypre_ParChebyData *cheby_data, HYPRE_Int scale )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetScale)( cheby_data, scale );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetTempVectors( hypre_ParChebyData *cheby_data, hypre_ParVector *Ptemp, hypre_ParVector *Rtemp, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetTempVectors)( cheby_data, Ptemp, Rtemp, Vtemp, Ztemp );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real tol )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetTolerance)( cheby_data, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int variant )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetVariant)( cheby_data, variant );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetZeroGuess)( cheby_data, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySetup( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySetup)( cheby_data, A, f, u );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParChebySolve( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParChebySolve)( cheby_data, A, f, u );
 }
 
 /*--------------------------------------------------------------------------*/

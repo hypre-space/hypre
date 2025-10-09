@@ -1002,40 +1002,31 @@ HYPRE_Int HYPRE_BoomerAMGSetLevelOuterWt(HYPRE_Solver  solver,
                                          HYPRE_Int     level);
 
 /**
- * (Optional) Defines the Order for Chebyshev smoother.
- *  The default is 2 (valid options are 1-4).
+ * (Optional) See \e HYPRE_ParChebySetOrder
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
                                        HYPRE_Int    order);
 
 /**
- * (Optional) Fraction of the spectrum to use for the Chebyshev smoother.
- *  The default is .3 (i.e., damp on upper 30% of the spectrum).
+ * (Optional) See \e HYPRE_ParChebySetEigRatio
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                            HYPRE_Real   ratio);
 
 /**
- * (Optional) Defines whether matrix should be scaled.
- *  The default is 1 (i.e., scaled).
+ * (Optional) See \e HYPRE_ParChebySetScale
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
                                         HYPRE_Int   scale);
 
 /**
- * (Optional) Defines which polynomial variant should be used.
- *  The default is 0 (i.e., scaled).
+ * (Optional) See \e HYPRE_ParChebySetVariant
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
                                           HYPRE_Int   variant);
 
 /**
- * (Optional) Defines how to estimate eigenvalues.
- *  The default is 10 (i.e., 10 CG iterations are used to find extreme
- *  eigenvalues.) If eig_est=0, the largest eigenvalue is estimated
- *  using Gershgorin, the smallest is set to 0.
- *  If eig_est is a positive number n, n iterations of CG are used to
- *  determine the smallest and largest eigenvalue.
+ * (Optional) See \e HYPRE_ParChebySetEigEst
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
                                          HYPRE_Int   eig_est);
@@ -1962,14 +1953,158 @@ HYPRE_Int HYPRE_FSAISetPrintLevel(HYPRE_Solver solver,
 /**
  * (Optional) Use a zero initial guess. This allows the solver to cut corners
  * in the case where a zero initial guess is needed (e.g., for preconditioning)
- * to reduce compuational cost.
+ * to reduce computational cost.
  **/
 HYPRE_Int HYPRE_FSAISetZeroGuess(HYPRE_Solver solver,
                                  HYPRE_Int    zero_guess);
 
-
 /**@}*/
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR Chebyshev Solver and Preconditioner
+ *
+ * Solver based on Chebyshev polynomials
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_ParChebyCreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_ParChebyDestroy( HYPRE_Solver solver );
+
+/**
+ * Set up the Chebyshev solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_ParChebySetup( HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x );
+
+/**
+ * Solve the system or apply Chebyshev as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_ParChebySolve( HYPRE_Solver       solver,
+                               HYPRE_ParCSRMatrix A,
+                               HYPRE_ParVector    b,
+                               HYPRE_ParVector    x );
+
+/**
+ * (Optional) Sets the maximum number of iterations (sweeps) for Chebyshev.
+ * Default is 100.
+ **/
+HYPRE_Int HYPRE_ParChebySetMaxIterations( HYPRE_Solver solver,
+                                          HYPRE_Int    max_iterations );
+
+/**
+ * (Optional) Set the convergence tolerance used by Chebyshev.
+ * When using Chebyshev as a preconditioner, set the tolerance to 0.0.
+ * The default is \f$10^{-6}\f$.
+ **/
+HYPRE_Int HYPRE_ParChebySetTolerance( HYPRE_Solver solver,
+                                      HYPRE_Real   tolerance );
+
+/**
+ * (Optional) Requests automatic printing of setup information.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup information
+ **/
+HYPRE_Int HYPRE_ParChebySetPrintLevel( HYPRE_Solver solver,
+                                       HYPRE_Int    print_level );
+
+/**
+ * (Optional) Requests additional computations for diagnostic and similar
+ * data to be logged by the user. Default to 0 to do nothing.  The latest
+ * residual will be available if logging > 1.
+ **/
+HYPRE_Int HYPRE_ParChebySetLogging( HYPRE_Solver solver,
+                                    HYPRE_Int    logging );
+
+/**
+ * (Optional) Defines the Order for Chebyshev smoother.
+ *  The default is 2 (valid options are 1-4).
+ **/
+HYPRE_Int HYPRE_ParChebySetOrder( HYPRE_Solver solver,
+                                  HYPRE_Int    order );
+
+/**
+ * (Optional) Defines which polynomial variant should be used.
+ *  The default is 0 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_ParChebySetVariant( HYPRE_Solver solver,
+                                    HYPRE_Int    variant );
+
+/**
+ * (Optional) Defines whether matrix should be scaled.
+ *  The default is 1 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_ParChebySetScale( HYPRE_Solver solver,
+                                  HYPRE_Int    scale );
+
+/**
+ * (Optional) Fraction of the spectrum to use for the Chebyshev smoother.
+ *  The default is .3 (i.e., damp on upper 30% of the spectrum).
+ **/
+HYPRE_Int HYPRE_ParChebySetEigRatio( HYPRE_Solver solver,
+                                     HYPRE_Real   eig_ratio );
+
+/**
+ * (Optional) Defines how to estimate eigenvalues.
+ *  The default is 10 CG iterations are used to find extreme eigenvalues.
+ *  If eig_est is 0, the largest eigenvalue is estimated using Gershgorin,
+ *  while the smallest eigenvalue is set to 0.
+ *  If eig_est is a positive number n, n iterations of CG are used to
+ *  estimate the smallest and largest eigenvalue.
+ **/
+HYPRE_Int HYPRE_ParChebySetEigEst( HYPRE_Solver solver,
+                                   HYPRE_Int    eig_est );
+
+/**
+ * (Optional) Set minimum and maximum eigenvalues
+ **/
+HYPRE_Int HYPRE_ParChebySetMinMaxEigEst( HYPRE_Solver solver,
+                                         HYPRE_Real   min_eig_est,
+                                         HYPRE_Real   max_eig_est );
+
+/**
+ * (Optional) Get minimum and maximum eigenvalues
+ **/
+HYPRE_Int HYPRE_ParChebyGetMinMaxEigEst( HYPRE_Solver solver,
+                                         HYPRE_Real  *min_eig_est,
+                                         HYPRE_Real  *max_eig_est );
+
+/**
+ * (Optional) Use a zero initial guess. This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce computational cost.
+ **/
+HYPRE_Int HYPRE_ParChebySetZeroGuess(HYPRE_Solver solver,
+                                     HYPRE_Int    zero_guess);
+
+/**@}*/
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

@@ -1075,7 +1075,7 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   hypre_IJMatrixSetMaxOffProcElmtsParCSR(ijmatrix,max_off_proc_elmts);
+   hypre_IJMatrixSetMaxOffProcElmtsParCSR(ijmatrix, max_off_proc_elmts);
 
    return hypre_error_flag;
 }

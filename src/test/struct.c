@@ -4287,24 +4287,32 @@ SetStencilBndry( HYPRE_StructMatrix  A,
    HYPRE_Int             stencil_indices[1] = {0};
    HYPRE_Int             stencil_sizes_27pt_neg[3] = {9, 9, 9};
    HYPRE_Int             stencil_indices_27pt_neg[3][9] =
-     {{1, 3, 6, 10, 12, 15, 19, 21, 24},
+   {
+      {1, 3, 6, 10, 12, 15, 19, 21, 24},
       {3, 4, 5, 12, 13, 14, 21, 22, 23},
-      {0, 1, 2, 3, 4, 5, 6, 7, 8}};
+      {0, 1, 2, 3, 4, 5, 6, 7, 8}
+   };
    HYPRE_Int             stencil_sizes_27pt_pos[3] = {9, 9, 9};
    HYPRE_Int             stencil_indices_27pt_pos[3][9] =
-     {{2, 5, 8, 11, 14, 17, 20, 23, 26},
+   {
+      {2, 5, 8, 11, 14, 17, 20, 23, 26},
       {6, 7, 8, 15, 16, 17, 24, 25, 26},
-      {18, 19, 20, 21, 22, 23, 24, 25, 26}};
+      {18, 19, 20, 21, 22, 23, 24, 25, 26}
+   };
    HYPRE_Int             stencil_sizes_27pt_sym_neg[3] = {5, 6, 9};
    HYPRE_Int             stencil_indices_27pt_sym_neg[3][9] =
-     {{1, 2, 6, 8, 11, -1, -1, -1, -1},
+   {
+      {1, 2, 6, 8, 11, -1, -1, -1, -1},
       {2, 3, 4, 8, 9, 10, -1, -1, -1},
-      {5, 6, 7, 8, 9, 10, 11, 12, 13}};
+      {5, 6, 7, 8, 9, 10, 11, 12, 13}
+   };
    HYPRE_Int             stencil_sizes_27pt_sym_pos[3] = {4, 3, 0};
    HYPRE_Int             stencil_indices_27pt_sym_pos[3][4] =
-     {{4, 7, 10, 13},
+   {
+      {4, 7, 10, 13},
       {11, 12, 13, -1},
-      {-1, -1, -1, -1}};
+      {-1, -1, -1, -1}
+   };
 
    boxes  = hypre_StructGridBoxes(grid);
    bbox   = hypre_StructGridBoundingBox(grid);
