@@ -555,8 +555,10 @@ HYPRE_Int hypre_Bisection ( HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd, HYP
 /* par_cheby.c */
 hypre_ParChebyData * hypre_ParChebyCreate( void );
 HYPRE_Int hypre_ParChebyDestroy( hypre_ParChebyData *cheby_data );
-HYPRE_Int hypre_ParChebySetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations );
-HYPRE_Int hypre_ParChebyGetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations );
+HYPRE_Int hypre_ParChebySetMaxIterations( hypre_ParChebyData *cheby_data,
+                                          HYPRE_Int max_iterations );
+HYPRE_Int hypre_ParChebyGetMaxIterations( hypre_ParChebyData *cheby_data,
+                                          HYPRE_Int *max_iterations );
 HYPRE_Int hypre_ParChebySetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
 HYPRE_Int hypre_ParChebyGetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
 HYPRE_Int hypre_ParChebySetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real tol );

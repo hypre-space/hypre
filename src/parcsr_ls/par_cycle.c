@@ -289,6 +289,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
          hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         if (Ztemp) { hypre_ParVectorSetLocalSize(Ztemp, local_size); }
+         if (Rtemp) { hypre_ParVectorSetLocalSize(Rtemp, local_size); }
+         if (Ptemp) { hypre_ParVectorSetLocalSize(Ptemp, local_size); }
 
          if (smooth_num_levels <= level)
          {
@@ -299,10 +302,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else if (smooth_type > 9)
          {
-            hypre_ParVectorSetLocalSize(Ztemp, local_size);
-            hypre_ParVectorSetLocalSize(Rtemp, local_size);
-            hypre_ParVectorSetLocalSize(Ptemp, local_size);
-
             Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
             Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
             hypre_ParVectorSetConstantValues(Ztemp, 0.0);
