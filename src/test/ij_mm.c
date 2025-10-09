@@ -25,6 +25,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
+#include "ij_helpers.h"
 
 #ifdef HYPRE_USING_CUDA
 #include "cuda_profiler_api.h"
@@ -2731,15 +2732,7 @@ BuildParCoordinates( HYPRE_Int                  argc,
    if (ny < 2) { coorddim--; }
    if (nz < 2) { coorddim--; }
 
-   if (coorddim > 0)
-   {
-      coordinates = hypre_GenerateCoordinates(hypre_MPI_COMM_WORLD,
-                                              nx, ny, nz, P, Q, R, p, q, r, coorddim);
-   }
-   else
-   {
-      coordinates = NULL;
-   }
+   coordinates = GenerateCoordinates(nx, ny, nz, P, Q, R, p, q, r, coorddim);
 
    *coorddim_ptr = coorddim;
    *coord_ptr = coordinates;

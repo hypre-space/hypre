@@ -20,34 +20,6 @@ extern "C" {
  ******************************************************************************/
 
 
-HYPRE_ParCSRMatrix
-GenerateSysLaplacian_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_float *mtrx, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateSysLaplacian_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_double *mtrx, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateSysLaplacian_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_long_double *mtrx, hypre_long_double *value );
-
-HYPRE_ParCSRMatrix
-GenerateSysLaplacianVCoef_flt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_float *mtrx, hypre_float *value );
-HYPRE_ParCSRMatrix
-GenerateSysLaplacianVCoef_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_double *mtrx, hypre_double *value );
-HYPRE_ParCSRMatrix
-GenerateSysLaplacianVCoef_long_dbl( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, hypre_long_double *mtrx, hypre_long_double *value );
-
-HYPRE_Real
-afun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-afun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-afun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-afun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-afun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-afun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
 void
 aux_indexFromMask_flt( HYPRE_Int n, HYPRE_Int *mask, HYPRE_Int *index );
 void
@@ -61,104 +33,6 @@ HYPRE_Int
 aux_maskCount_dbl( HYPRE_Int n, HYPRE_Int *mask );
 HYPRE_Int
 aux_maskCount_long_dbl( HYPRE_Int n, HYPRE_Int *mask );
-
-HYPRE_Real
-bfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-bfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-bfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-bfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-bfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-bfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-bndfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-bndfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-bndfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-bndfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-bndfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-bndfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-cfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-cfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-cfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-cfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-cfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-cfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-dfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-dfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-dfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-dfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-dfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-dfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-efun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-efun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-efun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-efun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-efun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-efun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-ffun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-ffun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-ffun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-ffun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-ffun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-ffun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-gfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-gfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-gfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-gfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-gfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-gfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
 
 HYPRE_Int
 hypre_ADSComputePi_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *G, hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector *z, hypre_ParCSRMatrix *PiNDx, hypre_ParCSRMatrix *PiNDy, hypre_ParCSRMatrix *PiNDz, hypre_ParCSRMatrix **Pi_ptr );
@@ -6803,20 +6677,6 @@ hypre_initialize_vecs_dbl( HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_f
 void
 hypre_initialize_vecs_long_dbl( HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_BigInt *offd_ftc, HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF );
 
-HYPRE_BigInt
-hypre_map_flt( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
-HYPRE_BigInt
-hypre_map_dbl( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
-HYPRE_BigInt
-hypre_map_long_dbl( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
-
-HYPRE_BigInt
-hypre_map2_flt( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q, HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
-HYPRE_BigInt
-hypre_map2_dbl( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q, HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
-HYPRE_BigInt
-hypre_map2_long_dbl( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q, HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
-
 HYPRE_Int
 hypre_matinv_flt( hypre_float *x, hypre_float *a, HYPRE_Int k );
 HYPRE_Int
@@ -6907,20 +6767,6 @@ HYPRE_Int
 matrix_matrix_product_dbl( HYPRE_Int **i_element_edge_pointer, HYPRE_Int **j_element_edge_pointer, HYPRE_Int *i_element_face, HYPRE_Int *j_element_face, HYPRE_Int *i_face_edge, HYPRE_Int *j_face_edge, HYPRE_Int num_elements, HYPRE_Int num_faces, HYPRE_Int num_edges );
 HYPRE_Int
 matrix_matrix_product_long_dbl( HYPRE_Int **i_element_edge_pointer, HYPRE_Int **j_element_edge_pointer, HYPRE_Int *i_element_face, HYPRE_Int *j_element_face, HYPRE_Int *i_face_edge, HYPRE_Int *j_face_edge, HYPRE_Int num_elements, HYPRE_Int num_faces, HYPRE_Int num_edges );
-
-HYPRE_Real
-rfun_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-rfun_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-rfun_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
-
-HYPRE_Real
-rfun_rs_flt( hypre_float xx, hypre_float yy, hypre_float zz );
-HYPRE_Real
-rfun_rs_dbl( hypre_double xx, hypre_double yy, hypre_double zz );
-HYPRE_Real
-rfun_rs_long_dbl( hypre_long_double xx, hypre_long_double yy, hypre_long_double zz );
 
 HYPRE_Int
 transpose_matrix_create_flt( HYPRE_Int **i_face_element_pointer, HYPRE_Int **j_face_element_pointer, HYPRE_Int *i_element_face, HYPRE_Int *j_element_face, HYPRE_Int num_elements, HYPRE_Int num_faces );

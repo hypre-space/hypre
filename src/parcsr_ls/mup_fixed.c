@@ -13,102 +13,6 @@
  ******************************************************************************/
 
 
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateDifConv( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateDifConv)( comm, nx, ny, nz, P, Q, R, p, q, r, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateLaplacian)( comm, nx, ny, nz, P, Q, R, p, q, r, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian27pt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateLaplacian27pt)( comm, nx, ny, nz, P, Q, R, p, q, r, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateLaplacian9pt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateLaplacian9pt)( comm, nx, ny, P, Q, p, q, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateRSVarDifConv( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Real eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateRSVarDifConv)( comm, nx, ny, nz, P, Q, R, p, q, r, eps, rhs_ptr, type );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateRotate7pt( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real alpha, HYPRE_Real eps )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateRotate7pt)( comm, nx, ny, P, Q, p, q, alpha, eps );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateVarDifConv( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Real eps, HYPRE_ParVector *rhs_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateVarDifConv)( comm, nx, ny, nz, P, Q, R, p, q, r, eps, rhs_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-float*
-hypre_GenerateCoordinates( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GenerateCoordinates)( comm, nx, ny, nz, P, Q, R, p, q, r, coorddim );
-}
-
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateSysLaplacian( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateSysLaplacian)( comm, nx, ny, nz, P, Q, R, p, q, r, num_fun, mtrx, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_ParCSRMatrix
-GenerateSysLaplacianVCoef( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(GenerateSysLaplacianVCoef)( comm, nx, ny, nz, P, Q, R, p, q, r, num_fun, mtrx, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-afun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(afun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-afun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(afun_rs)( xx, yy, zz );
-}
 
 /*--------------------------------------------------------------------------*/
 
@@ -124,118 +28,6 @@ HYPRE_Int
 aux_maskCount( HYPRE_Int n, HYPRE_Int *mask )
 {
    return HYPRE_CURRENTPRECISION_FUNC(aux_maskCount)( n, mask );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-bfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(bfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-bfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(bfun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-bndfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(bndfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-bndfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(bndfun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-cfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(cfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-cfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(cfun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-dfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(dfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-dfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(dfun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-efun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(efun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-efun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(efun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-ffun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(ffun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-ffun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(ffun_rs)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-gfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(gfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-gfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(gfun_rs)( xx, yy, zz );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -7832,22 +7624,6 @@ hypre_initialize_vecs( HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, 
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_BigInt
-hypre_map( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_map)( ix, iy, iz, p, q, r, nx, ny, nx_part, ny_part, nz_part );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_BigInt
-hypre_map2( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q, HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_map2)( ix, iy, p, q, nx, nx_part, ny_part );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_matinv( HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k )
 {
@@ -7948,22 +7724,6 @@ HYPRE_Int
 matrix_matrix_product( HYPRE_Int **i_element_edge_pointer, HYPRE_Int **j_element_edge_pointer, HYPRE_Int *i_element_face, HYPRE_Int *j_element_face, HYPRE_Int *i_face_edge, HYPRE_Int *j_face_edge, HYPRE_Int num_elements, HYPRE_Int num_faces, HYPRE_Int num_edges )
 {
    return HYPRE_CURRENTPRECISION_FUNC(matrix_matrix_product)( i_element_edge_pointer, j_element_edge_pointer, i_element_face, j_element_face, i_face_edge, j_face_edge, num_elements, num_faces, num_edges );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-rfun( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(rfun)( xx, yy, zz );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-rfun_rs( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(rfun_rs)( xx, yy, zz );
 }
 
 /*--------------------------------------------------------------------------*/

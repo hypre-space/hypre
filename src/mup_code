@@ -33,6 +33,7 @@ DIRS="\
  struct_ls\
  struct_mv\
  utilities\
+ test\
 "
 
 # Function to process a single directory
