@@ -692,7 +692,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
-                            [] (const auto & x) {return !x;}, 1.0 );
+         [] (const auto & x) {return !x;}, 1.0 );
 #else
          HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
                            HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), 1.0 );

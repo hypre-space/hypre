@@ -1753,9 +1753,9 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    hypre_ParAMGData    **FrelaxVcycleData = mgr_data -> FrelaxVcycleData;
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-/* #if defined(HYPRE_USING_GPU) */
-/*    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location); */
-/* #endif */
+   /* #if defined(HYPRE_USING_GPU) */
+   /*    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location); */
+   /* #endif */
 
    HYPRE_Int i, j, num_procs, my_id;
 
@@ -1997,7 +1997,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
                for (i = 0; i < local_size; i++)
                {
                   hypre_IntArrayData(CF_marker_array_local[lev_local])[i] =
-                    hypre_IntArrayData(CF_marker_array[lev])[i];
+                     hypre_IntArrayData(CF_marker_array[lev])[i];
                }
             }
          }
@@ -2040,7 +2040,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
             for (i = 0; i < local_size; i++)
             {
                hypre_IntArrayData(CF_marker_array_local[lev_local])[i] =
-                 hypre_IntArrayData(CF_marker_array[lev])[i];
+                  hypre_IntArrayData(CF_marker_array[lev])[i];
             }
          }
       }
