@@ -1,0 +1,68 @@
+# Output file: io.out.0
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.1
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.2
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.3
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.50
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.51
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.100
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.101
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.102
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.103
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.150
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.151
+Iterations = 11
+Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.200
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 8.017601e-09
+
+# Output file: io.out.201
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 8.017601e-09
+
+# Output file: io.out.202
+BoomerAMG Iterations = 24
+Final Relative Residual Norm = 8.504105e-09
+
+# Output file: io.out.203
+BoomerAMG Iterations = 28
+Final Relative Residual Norm = 6.523429e-09
+
+# Output file: io.out.204
+BoomerAMG Iterations = 24
+Final Relative Residual Norm = 6.815576e-09
+

@@ -1,0 +1,8 @@
+# Output file: state.out.1
+hypre library has been finalized
+hypre library has been re-initialized
+hypre library has been finalized
+# Output file: state.out.100
+hypre library has been re-initialized
+hypre library has been finalized
+Proc [global 1/4, local 1/4] can see 4 GPUs and is running on 1
