@@ -1596,7 +1596,7 @@ AS_HELP_STRING([--with-umpire-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for UMPIRE. OK to use -L and -l flags in the list]),
 [for umpire_lib in $withval; do
-       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+       HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB $umpire_lib"
  done;
  hypre_user_gave_umpire_lib=yes]
 )
@@ -1607,7 +1607,7 @@ AS_HELP_STRING([--with-umpire-libs=LIBS],
                 needed for UMPIRE (base name only). The options --with-umpire-libs and
                 --with-umpire-dirs must be used together.]),
 [for umpire_lib in $withval; do
-    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+    HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB -l$umpire_lib"
  done;
  hypre_user_gave_umpire_libs=yes]
 )
