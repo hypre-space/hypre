@@ -5362,6 +5362,150 @@ HYPRE_ParCSRSetupMatvec( HYPRE_MatvecFunctions *mv )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParChebyCreate( HYPRE_Solver *solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebyCreate_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebyDestroy( HYPRE_Solver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebyDestroy_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst( HYPRE_Solver solver, void *min_eig_est, void *max_eig_est )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebyGetMinMaxEigEst_pre( precision, solver, min_eig_est, max_eig_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetEigEst( HYPRE_Solver solver, HYPRE_Int eig_est )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetEigEst_pre( precision, solver, eig_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetEigRatio( HYPRE_Solver solver, hypre_long_double eig_ratio )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetEigRatio_pre( precision, solver, eig_ratio );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetLogging( HYPRE_Solver solver, HYPRE_Int logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations( HYPRE_Solver solver, HYPRE_Int max_iterations )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetMaxIterations_pre( precision, solver, max_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst( HYPRE_Solver solver, hypre_long_double min_eig_est, hypre_long_double max_eig_est )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetMinMaxEigEst_pre( precision, solver, min_eig_est, max_eig_est );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetOrder( HYPRE_Solver solver, HYPRE_Int order )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetOrder_pre( precision, solver, order );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetPrintLevel_pre( precision, solver, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetScale( HYPRE_Solver solver, HYPRE_Int scale )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetScale_pre( precision, solver, scale );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetTolerance( HYPRE_Solver solver, hypre_long_double tolerance )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetTolerance_pre( precision, solver, tolerance );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetVariant( HYPRE_Solver solver, HYPRE_Int variant )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetVariant_pre( precision, solver, variant );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess( HYPRE_Solver solver, HYPRE_Int zero_guess )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetZeroGuess_pre( precision, solver, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySetup_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParChebySolve_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix( HYPRE_Solver solver, HYPRE_IJMatrix *pij_A )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

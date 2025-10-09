@@ -16,10 +16,11 @@ elseif(EXISTS "/opt/rocm")
 else()
   message(FATAL_ERROR "ROCM_PATH or HIP_PATH not set. Please set one of them to point to your ROCm installation.")
 endif()
+set(CMAKE_HIP_COMPILER_ROCM_ROOT ${HIP_PATH})
 message(STATUS "Using ROCm installation: ${HIP_PATH}")
 
 # Add HIP_PATH to CMAKE_PREFIX_PATH
-list(APPEND CMAKE_PREFIX_PATH ${HIP_PATH})
+list(APPEND CMAKE_PREFIX_PATH "${HIP_PATH};${HIP_PATH}/lib/cmake;${HIP_PATH}/llvm/bin")
 
 # Set HIP standard to match C++ standard if not already set
 if(NOT DEFINED CMAKE_HIP_STANDARD)
@@ -28,6 +29,7 @@ endif()
 set(CMAKE_HIP_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard for HIP" FORCE)
 
 # Check if HIP is available and enable it if found
+set(CMAKE_HIP_COMPILER "${HIP_PATH}/llvm/bin/clang++" CACHE FILEPATH "Path to HIP compiler")
 include(CheckLanguage)
 check_language(HIP)
 if(CMAKE_HIP_COMPILER)
@@ -37,7 +39,8 @@ else()
 endif()
 
 # Find HIP package
-find_package(hip REQUIRED CONFIG)
+set(HIP_PLATFORM "amd")
+find_package(hip REQUIRED CONFIG PATHS ${ROCM_PATH} ${ROCM_PATH}/lib/cmake/hip)
 
 # Minimum supported HIP version for HYPRE
 set(REQUIRED_HIP_VERSION "5.2.0")
@@ -102,11 +105,45 @@ else()
   list(REMOVE_DUPLICATES HIP_ARCH_LIST)
   string(REPLACE ";" "," HIP_ARCH_STR "${HIP_ARCH_LIST}")
   set(CMAKE_HIP_ARCHITECTURES "${HIP_ARCH_STR}" CACHE STRING "Detected HIP architectures" FORCE)
-  message(STATUS "CMAKE_HIP_ARCHITECTURES is already set to: ${CMAKE_HIP_ARCHITECTURES}")
+  message(STATUS "CMAKE_HIP_ARCHITECTURES is explicitly set to: ${CMAKE_HIP_ARCHITECTURES}")
+endif()
+
+# Validate mixed-architecture sets: do not mix gfx9 (CDNA) with gfx10+/gfx11 (RDNA)
+# If multiple architectures are specified, fail fast on unsupported mixes
+string(REPLACE "," ";" _HYPRE_HIP_ARCH_LIST_CHECK "${CMAKE_HIP_ARCHITECTURES}")
+list(LENGTH _HYPRE_HIP_ARCH_LIST_CHECK _HYPRE_HIP_ARCH_COUNT)
+if(_HYPRE_HIP_ARCH_COUNT GREATER 1)
+  set(_HYPRE_HAS_GFX9 FALSE)
+  set(_HYPRE_HAS_GFX10PLUS FALSE)
+  foreach(_HYPRE_ARCH_ITEM IN LISTS _HYPRE_HIP_ARCH_LIST_CHECK)
+    # Extract numeric base from entries like "gfx90a", "gfx1100"
+    string(REGEX MATCH "gfx?([0-9a-fA-F]+)" _HYPRE_DUMMY "${_HYPRE_ARCH_ITEM}")
+    set(_HYPRE_GFX_ID_STR "${CMAKE_MATCH_1}")
+    string(REGEX REPLACE "[^0-9]" "" _HYPRE_GFX_BASE_ID_STR "${_HYPRE_GFX_ID_STR}")
+    if(_HYPRE_GFX_BASE_ID_STR MATCHES "^[0-9]+$")
+      string(REGEX REPLACE "^0+" "" _HYPRE_GFX_ID_NO_ZEROS "${_HYPRE_GFX_BASE_ID_STR}")
+      if(_HYPRE_GFX_ID_NO_ZEROS STREQUAL "")
+        set(_HYPRE_GFX_ID_NO_ZEROS "0")
+      endif()
+      math(EXPR _HYPRE_GFX_ID_INT "${_HYPRE_GFX_ID_NO_ZEROS}")
+      if(_HYPRE_GFX_ID_INT LESS 1000)
+        set(_HYPRE_HAS_GFX9 TRUE)
+      else()
+        set(_HYPRE_HAS_GFX10PLUS TRUE)
+      endif()
+    endif()
+  endforeach()
+  if(_HYPRE_HAS_GFX9 AND _HYPRE_HAS_GFX10PLUS)
+    message(FATAL_ERROR
+      "HYPRE does not support building a single binary for mixed HIP architectures: "
+      "found both gfx9 (CDNA) and gfx10+ (RDNA) in CMAKE_HIP_ARCHITECTURES='${CMAKE_HIP_ARCHITECTURES}'.\n"
+      "Please specify a single architecture via -DCMAKE_HIP_ARCHITECTURES=<gfx-id> (e.g., gfx90a or gfx1100) "
+      "and build separate binaries for each architecture family.")
+  endif()
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
-set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "GPU targets to compile for" FORCE)
-set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE STRING "AMD GPU targets to compile for" FORCE)
+set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "GPU targets to compile for")
+set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "AMD GPU targets to compile for")
 
 # Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
 if(DEFINED HYPRE_WAVEFRONT_SIZE)
@@ -115,14 +152,14 @@ if(DEFINED HYPRE_WAVEFRONT_SIZE)
 
 elseif(NOT DEFINED HYPRE_WARP_SIZE)
   # Auto-detect warp size based on gpu arch if not specified
-  set(FOUND_OLD_GFX_CARD FALSE)
+  set(FOUND_CDNA_CARD FALSE)
   set(DETECTED_ARCHITECTURES "") # To collect and report all detected architectures
 
   # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx942")
   if(DEFINED CMAKE_HIP_ARCHITECTURES AND NOT "${CMAKE_HIP_ARCHITECTURES}" STREQUAL "")
     foreach(ARCH_ITEM IN LISTS CMAKE_HIP_ARCHITECTURES)
       # Only process if we haven't already found an old GFX card
-      if(NOT FOUND_OLD_GFX_CARD)
+      if(NOT FOUND_CDNA_CARD)
         # Extract the numeric part from the GFX architecture string (e.g., "gfx90a" -> "90a")
         # Note: CMAKE_HIP_ARCHITECTURES usually contains only the ID, not "gfx" prefix,
         # but regex is robust if it does.
@@ -147,13 +184,13 @@ elseif(NOT DEFINED HYPRE_WARP_SIZE)
 
         # If any detected GFX card has a numeric ID less than 1000
         if(CURRENT_GFX_ID_INT LESS 1000)
-          set(FOUND_OLD_GFX_CARD TRUE)
+          set(FOUND_CDNA_CARD TRUE)
         endif()
       endif()
     endforeach()
 
     # Set the final HYPRE_WARP_SIZE based on the flag
-    if(FOUND_OLD_GFX_CARD)
+    if(FOUND_CDNA_CARD)
       set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU wavefront size (detected at least one GFX < 1000)")
       message(STATUS "HYPRE_WARP_SIZE set to 64 for architectures: ${DETECTED_ARCHITECTURES}")
     else()
