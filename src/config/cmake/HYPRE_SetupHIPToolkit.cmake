@@ -16,10 +16,11 @@ elseif(EXISTS "/opt/rocm")
 else()
   message(FATAL_ERROR "ROCM_PATH or HIP_PATH not set. Please set one of them to point to your ROCm installation.")
 endif()
+set(CMAKE_HIP_COMPILER_ROCM_ROOT ${HIP_PATH})
 message(STATUS "Using ROCm installation: ${HIP_PATH}")
 
 # Add HIP_PATH to CMAKE_PREFIX_PATH
-list(APPEND CMAKE_PREFIX_PATH ${HIP_PATH})
+list(APPEND CMAKE_PREFIX_PATH "${HIP_PATH};${HIP_PATH}/lib/cmake;${HIP_PATH}/llvm/bin")
 
 # Set HIP standard to match C++ standard if not already set
 if(NOT DEFINED CMAKE_HIP_STANDARD)
@@ -28,6 +29,7 @@ endif()
 set(CMAKE_HIP_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard for HIP" FORCE)
 
 # Check if HIP is available and enable it if found
+set(CMAKE_HIP_COMPILER "${HIP_PATH}/llvm/bin/clang++" CACHE FILEPATH "Path to HIP compiler")
 include(CheckLanguage)
 check_language(HIP)
 if(CMAKE_HIP_COMPILER)
@@ -37,7 +39,8 @@ else()
 endif()
 
 # Find HIP package
-find_package(hip REQUIRED CONFIG)
+set(HIP_PLATFORM "amd")
+find_package(hip REQUIRED CONFIG PATHS ${ROCM_PATH} ${ROCM_PATH}/lib/cmake/hip)
 
 # Minimum supported HIP version for HYPRE
 set(REQUIRED_HIP_VERSION "5.2.0")
@@ -139,6 +142,8 @@ if(_HYPRE_HIP_ARCH_COUNT GREATER 1)
   endif()
 endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
+set(GPU_BUILD_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "GPU targets to compile for")
+set(GPU_TARGETS "${CMAKE_HIP_ARCHITECTURES}" CACHE INTERNAL "AMD GPU targets to compile for")
 
 # Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
 if(DEFINED HYPRE_WAVEFRONT_SIZE)
@@ -150,7 +155,7 @@ elseif(NOT DEFINED HYPRE_WARP_SIZE)
   set(FOUND_CDNA_CARD FALSE)
   set(DETECTED_ARCHITECTURES "") # To collect and report all detected architectures
 
-  # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx1100")
+  # CMAKE_HIP_ARCHITECTURES typically contains a semicolon-separated list (e.g., "gfx90a;gfx942")
   if(DEFINED CMAKE_HIP_ARCHITECTURES AND NOT "${CMAKE_HIP_ARCHITECTURES}" STREQUAL "")
     foreach(ARCH_ITEM IN LISTS CMAKE_HIP_ARCHITECTURES)
       # Only process if we haven't already found an old GFX card
@@ -159,10 +164,10 @@ elseif(NOT DEFINED HYPRE_WARP_SIZE)
         # Note: CMAKE_HIP_ARCHITECTURES usually contains only the ID, not "gfx" prefix,
         # but regex is robust if it does.
         string(REGEX MATCH "gfx?([0-9a-fA-F]+)" _dummy "${ARCH_ITEM}")
-        set(GFX_ID_STR "${CMAKE_MATCH_1}") # e.g., "90a", "1100"
+        set(GFX_ID_STR "${CMAKE_MATCH_1}") # e.g., "90a", "942"
 
         # Extract only the leading numeric part for comparison
-        # (e.g., "90a" -> "90", "1100" -> "1100")
+        # (e.g., "90a" -> "90", "942" -> "942")
         string(REGEX REPLACE "[^0-9]" "" GFX_BASE_ID_STR "${GFX_ID_STR}")
 
         set(CURRENT_GFX_ID_INT 0)
@@ -242,6 +247,7 @@ find_and_add_rocm_library(rocblas)
 find_and_add_rocm_library(rocsparse)
 find_and_add_rocm_library(rocrand)
 find_and_add_rocm_library(rocsolver)
+find_and_add_rocm_library(rocthrust)
 
 if(HYPRE_ENABLE_GPU_PROFILING)
   set(HYPRE_USING_ROCTX ON CACHE BOOL "" FORCE)

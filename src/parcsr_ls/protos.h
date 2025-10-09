@@ -553,24 +553,61 @@ HYPRE_Int hypre_Bisection ( HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd, HYP
                             HYPRE_Real z, HYPRE_Real tol, HYPRE_Int k, HYPRE_Real *ev_ptr );
 
 /* par_cheby.c */
-HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A, HYPRE_Real max_eig,
-                                          HYPRE_Real min_eig, HYPRE_Real fraction, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                          HYPRE_Real **coefs_ptr, HYPRE_Real **ds_ptr );
-HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                          HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                          hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                          hypre_ParVector *tmp_vec);
+hypre_ParChebyData * hypre_ParChebyCreate( void );
+HYPRE_Int hypre_ParChebyDestroy( hypre_ParChebyData *cheby_data );
+HYPRE_Int hypre_ParChebySetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations );
+HYPRE_Int hypre_ParChebyGetMaxIterations( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations );
+HYPRE_Int hypre_ParChebySetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
+HYPRE_Int hypre_ParChebyGetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
+HYPRE_Int hypre_ParChebySetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real tol );
+HYPRE_Int hypre_ParChebyGetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real *tol );
+HYPRE_Int hypre_ParChebySetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int print_level );
+HYPRE_Int hypre_ParChebyGetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level );
+HYPRE_Int hypre_ParChebySetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int logging );
+HYPRE_Int hypre_ParChebyGetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int *logging );
+HYPRE_Int hypre_ParChebySetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int order );
+HYPRE_Int hypre_ParChebyGetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int *order );
+HYPRE_Int hypre_ParChebySetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int variant );
+HYPRE_Int hypre_ParChebyGetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int *variant );
+HYPRE_Int hypre_ParChebySetScale( hypre_ParChebyData *cheby_data, HYPRE_Int scale );
+HYPRE_Int hypre_ParChebyGetScale( hypre_ParChebyData *cheby_data, HYPRE_Int *scale );
+HYPRE_Int hypre_ParChebySetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real eig_ratio );
+HYPRE_Int hypre_ParChebyGetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real *eig_ratio );
+HYPRE_Int hypre_ParChebySetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est );
+HYPRE_Int hypre_ParChebyGetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est );
+HYPRE_Int hypre_ParChebySetMinMaxEigEst( hypre_ParChebyData *cheby_data,
+                                         HYPRE_Real eig_min_est, HYPRE_Real eig_max_est );
+HYPRE_Int hypre_ParChebyGetMinMaxEigEst( hypre_ParChebyData *cheby_data,
+                                         HYPRE_Real *eig_min_est, HYPRE_Real *eig_max_est );
+HYPRE_Int hypre_ParChebySetTempVectors( hypre_ParChebyData *cheby_data,
+                                        hypre_ParVector *Ptemp, hypre_ParVector *Rtemp,
+                                        hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                              HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                              hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                              hypre_ParVector *tmp_vec);
+/* par_cheby_setup.c */
+HYPRE_Int hypre_ParChebySetup( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A,
+                               hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Setup( hypre_ParCSRMatrix *A, HYPRE_Real max_eig,
+                                         HYPRE_Real min_eig, HYPRE_Real fraction,
+                                         HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                         HYPRE_Real **coefs_ptr, HYPRE_Real **ds_ptr );
+
+/* par_cheby_solve.c */
+HYPRE_Int hypre_ParChebySolve( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A,
+                               hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Solve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                         HYPRE_Real *ds_data, HYPRE_Real *coefs,
+                                         HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                         hypre_ParVector *u, hypre_ParVector *v,
+                                         hypre_ParVector *r, hypre_ParVector *orig_u_vec,
+                                         hypre_ParVector *tmp_vec );
 
 /* par_cheby_device.c */
-HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                                hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                                hypre_ParVector *tmp_vec);
+HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                               HYPRE_Real *ds_data, HYPRE_Real *coefs,
+                                               HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                               hypre_ParVector *u, hypre_ParVector *v,
+                                               hypre_ParVector *r, hypre_ParVector *orig_u_vec,
+                                               hypre_ParVector *tmp_vec );
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init,
