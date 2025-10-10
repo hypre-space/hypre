@@ -407,20 +407,20 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    switch (ndim)
    {
       case 3:
-        w_data_2 = w_data[2];
-        HYPRE_FALLTHROUGH;
+         w_data_2 = w_data[2];
+         HYPRE_FALLTHROUGH;
 
       case 2:
-        w_data_1 = w_data[1];
-        HYPRE_FALLTHROUGH;
+         w_data_1 = w_data[1];
+         HYPRE_FALLTHROUGH;
 
       case 1:
-        w_data_0 = w_data[0];
-        break;
+         w_data_0 = w_data[0];
+         break;
 
       default:
-        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
-        return hypre_error_flag;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+         return hypre_error_flag;
    }
 
 #ifdef HYPRE_CORE_CASE
@@ -494,24 +494,24 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
 
             switch (depth)
             {
-               HYPRE_CORE_CASE(18);
-               HYPRE_CORE_CASE(17);
-               HYPRE_CORE_CASE(16);
-               HYPRE_CORE_CASE(15);
-               HYPRE_CORE_CASE(14);
-               HYPRE_CORE_CASE(13);
-               HYPRE_CORE_CASE(12);
-               HYPRE_CORE_CASE(11);
-               HYPRE_CORE_CASE(10);
-               HYPRE_CORE_CASE(9);
-               HYPRE_CORE_CASE(8);
-               HYPRE_CORE_CASE(7);
-               HYPRE_CORE_CASE(6);
-               HYPRE_CORE_CASE(5);
-               HYPRE_CORE_CASE(4);
-               HYPRE_CORE_CASE(3);
-               HYPRE_CORE_CASE(2);
-               HYPRE_CORE_CASE(1);
+                  HYPRE_CORE_CASE(18);
+                  HYPRE_CORE_CASE(17);
+                  HYPRE_CORE_CASE(16);
+                  HYPRE_CORE_CASE(15);
+                  HYPRE_CORE_CASE(14);
+                  HYPRE_CORE_CASE(13);
+                  HYPRE_CORE_CASE(12);
+                  HYPRE_CORE_CASE(11);
+                  HYPRE_CORE_CASE(10);
+                  HYPRE_CORE_CASE(9);
+                  HYPRE_CORE_CASE(8);
+                  HYPRE_CORE_CASE(7);
+                  HYPRE_CORE_CASE(6);
+                  HYPRE_CORE_CASE(5);
+                  HYPRE_CORE_CASE(4);
+                  HYPRE_CORE_CASE(3);
+                  HYPRE_CORE_CASE(2);
+                  HYPRE_CORE_CASE(1);
 
                default:
                   break;
@@ -588,20 +588,20 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
    switch (ndim)
    {
       case 3:
-        w_data_2 = w_data[2];
-        HYPRE_FALLTHROUGH;
+         w_data_2 = w_data[2];
+         HYPRE_FALLTHROUGH;
 
       case 2:
-        w_data_1 = w_data[1];
-        HYPRE_FALLTHROUGH;
+         w_data_1 = w_data[1];
+         HYPRE_FALLTHROUGH;
 
       case 1:
-        w_data_0 = w_data[0];
-        break;
+         w_data_0 = w_data[0];
+         break;
 
       default:
-        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
-        return hypre_error_flag;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+         return hypre_error_flag;
    }
 
 #ifdef HYPRE_CORE_CASE
@@ -669,15 +669,15 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
 
             switch (depth)
             {
-               HYPRE_CORE_CASE(9);
-               HYPRE_CORE_CASE(8);
-               HYPRE_CORE_CASE(7);
-               HYPRE_CORE_CASE(6);
-               HYPRE_CORE_CASE(5);
-               HYPRE_CORE_CASE(4);
-               HYPRE_CORE_CASE(3);
-               HYPRE_CORE_CASE(2);
-               HYPRE_CORE_CASE(1);
+                  HYPRE_CORE_CASE(9);
+                  HYPRE_CORE_CASE(8);
+                  HYPRE_CORE_CASE(7);
+                  HYPRE_CORE_CASE(6);
+                  HYPRE_CORE_CASE(5);
+                  HYPRE_CORE_CASE(4);
+                  HYPRE_CORE_CASE(3);
+                  HYPRE_CORE_CASE(2);
+                  HYPRE_CORE_CASE(1);
 
                default:
                   break;

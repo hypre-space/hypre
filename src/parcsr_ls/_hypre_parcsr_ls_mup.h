@@ -6146,13 +6146,6 @@ HYPRE_Int
 hypre_ParCSRRelax_Cheby_Solve_long_dbl( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_long_double *ds_data, hypre_long_double *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant, hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec );
 
 HYPRE_Int
-hypre_ParCSRRelax_Cheby_SolveHost_flt( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_float *ds_data, hypre_float *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant, hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec );
-HYPRE_Int
-hypre_ParCSRRelax_Cheby_SolveHost_dbl( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_double *ds_data, hypre_double *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant, hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec );
-HYPRE_Int
-hypre_ParCSRRelax_Cheby_SolveHost_long_dbl( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_long_double *ds_data, hypre_long_double *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant, hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec, hypre_ParVector *tmp_vec );
-
-HYPRE_Int
 hypre_ParCSRRelax_L1_Jacobi_flt( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_float relax_weight, hypre_float *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp );
 HYPRE_Int
 hypre_ParCSRRelax_L1_Jacobi_dbl( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_double relax_weight, hypre_double *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp );
@@ -6165,6 +6158,195 @@ HYPRE_Int
 hypre_ParCSRSubspacePrec_dbl( hypre_ParCSRMatrix *A0, HYPRE_Int A0_relax_type, HYPRE_Int A0_relax_times, hypre_double *A0_l1_norms, hypre_double A0_relax_weight, hypre_double A0_omega, hypre_double A0_max_eig_est, hypre_double A0_min_eig_est, HYPRE_Int A0_cheby_order, hypre_double A0_cheby_fraction, hypre_ParCSRMatrix **A, HYPRE_Solver *B, HYPRE_PtrToSolverFcn *HB, hypre_ParCSRMatrix **P, hypre_ParVector **r, hypre_ParVector **g, hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector *r0, hypre_ParVector *g0, char *cycle, hypre_ParVector *z );
 HYPRE_Int
 hypre_ParCSRSubspacePrec_long_dbl( hypre_ParCSRMatrix *A0, HYPRE_Int A0_relax_type, HYPRE_Int A0_relax_times, hypre_long_double *A0_l1_norms, hypre_long_double A0_relax_weight, hypre_long_double A0_omega, hypre_long_double A0_max_eig_est, hypre_long_double A0_min_eig_est, HYPRE_Int A0_cheby_order, hypre_long_double A0_cheby_fraction, hypre_ParCSRMatrix **A, HYPRE_Solver *B, HYPRE_PtrToSolverFcn *HB, hypre_ParCSRMatrix **P, hypre_ParVector **r, hypre_ParVector **g, hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector *r0, hypre_ParVector *g0, char *cycle, hypre_ParVector *z );
+
+hypre_ParChebyData *
+hypre_ParChebyCreate_flt( void );
+hypre_ParChebyData *
+hypre_ParChebyCreate_dbl( void );
+hypre_ParChebyData *
+hypre_ParChebyCreate_long_dbl( void );
+
+HYPRE_Int
+hypre_ParChebyDestroy_flt( hypre_ParChebyData *cheby_data );
+HYPRE_Int
+hypre_ParChebyDestroy_dbl( hypre_ParChebyData *cheby_data );
+HYPRE_Int
+hypre_ParChebyDestroy_long_dbl( hypre_ParChebyData *cheby_data );
+
+HYPRE_Int
+hypre_ParChebyGetEigEst_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est );
+HYPRE_Int
+hypre_ParChebyGetEigEst_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est );
+HYPRE_Int
+hypre_ParChebyGetEigEst_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est );
+
+HYPRE_Int
+hypre_ParChebyGetEigRatio_flt( hypre_ParChebyData *cheby_data, hypre_float *eig_ratio );
+HYPRE_Int
+hypre_ParChebyGetEigRatio_dbl( hypre_ParChebyData *cheby_data, hypre_double *eig_ratio );
+HYPRE_Int
+hypre_ParChebyGetEigRatio_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double *eig_ratio );
+
+HYPRE_Int
+hypre_ParChebyGetLogging_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *logging );
+HYPRE_Int
+hypre_ParChebyGetLogging_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *logging );
+HYPRE_Int
+hypre_ParChebyGetLogging_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *logging );
+
+HYPRE_Int
+hypre_ParChebyGetMaxIterations_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations );
+HYPRE_Int
+hypre_ParChebyGetMaxIterations_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations );
+HYPRE_Int
+hypre_ParChebyGetMaxIterations_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *max_iterations );
+
+HYPRE_Int
+hypre_ParChebyGetMinMaxEigEst_flt( hypre_ParChebyData *cheby_data, hypre_float *eig_min_est, hypre_float *eig_max_est );
+HYPRE_Int
+hypre_ParChebyGetMinMaxEigEst_dbl( hypre_ParChebyData *cheby_data, hypre_double *eig_min_est, hypre_double *eig_max_est );
+HYPRE_Int
+hypre_ParChebyGetMinMaxEigEst_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double *eig_min_est, hypre_long_double *eig_max_est );
+
+HYPRE_Int
+hypre_ParChebyGetOrder_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *order );
+HYPRE_Int
+hypre_ParChebyGetOrder_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *order );
+HYPRE_Int
+hypre_ParChebyGetOrder_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *order );
+
+HYPRE_Int
+hypre_ParChebyGetPrintLevel_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level );
+HYPRE_Int
+hypre_ParChebyGetPrintLevel_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level );
+HYPRE_Int
+hypre_ParChebyGetPrintLevel_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level );
+
+HYPRE_Int
+hypre_ParChebyGetScale_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *scale );
+HYPRE_Int
+hypre_ParChebyGetScale_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *scale );
+HYPRE_Int
+hypre_ParChebyGetScale_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *scale );
+
+HYPRE_Int
+hypre_ParChebyGetTolerance_flt( hypre_ParChebyData *cheby_data, hypre_float *tol );
+HYPRE_Int
+hypre_ParChebyGetTolerance_dbl( hypre_ParChebyData *cheby_data, hypre_double *tol );
+HYPRE_Int
+hypre_ParChebyGetTolerance_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double *tol );
+
+HYPRE_Int
+hypre_ParChebyGetVariant_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *variant );
+HYPRE_Int
+hypre_ParChebyGetVariant_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *variant );
+HYPRE_Int
+hypre_ParChebyGetVariant_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *variant );
+
+HYPRE_Int
+hypre_ParChebyGetZeroGuess_flt( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
+HYPRE_Int
+hypre_ParChebyGetZeroGuess_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
+HYPRE_Int
+hypre_ParChebyGetZeroGuess_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
+
+HYPRE_Int
+hypre_ParChebySetEigEst_flt( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est );
+HYPRE_Int
+hypre_ParChebySetEigEst_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est );
+HYPRE_Int
+hypre_ParChebySetEigEst_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est );
+
+HYPRE_Int
+hypre_ParChebySetEigRatio_flt( hypre_ParChebyData *cheby_data, hypre_float eig_ratio );
+HYPRE_Int
+hypre_ParChebySetEigRatio_dbl( hypre_ParChebyData *cheby_data, hypre_double eig_ratio );
+HYPRE_Int
+hypre_ParChebySetEigRatio_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double eig_ratio );
+
+HYPRE_Int
+hypre_ParChebySetLogging_flt( hypre_ParChebyData *cheby_data, HYPRE_Int logging );
+HYPRE_Int
+hypre_ParChebySetLogging_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int logging );
+HYPRE_Int
+hypre_ParChebySetLogging_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int logging );
+
+HYPRE_Int
+hypre_ParChebySetMaxIterations_flt( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations );
+HYPRE_Int
+hypre_ParChebySetMaxIterations_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations );
+HYPRE_Int
+hypre_ParChebySetMaxIterations_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int max_iterations );
+
+HYPRE_Int
+hypre_ParChebySetMinMaxEigEst_flt( hypre_ParChebyData *cheby_data, hypre_float eig_min_est, hypre_float eig_max_est );
+HYPRE_Int
+hypre_ParChebySetMinMaxEigEst_dbl( hypre_ParChebyData *cheby_data, hypre_double eig_min_est, hypre_double eig_max_est );
+HYPRE_Int
+hypre_ParChebySetMinMaxEigEst_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double eig_min_est, hypre_long_double eig_max_est );
+
+HYPRE_Int
+hypre_ParChebySetOrder_flt( hypre_ParChebyData *cheby_data, HYPRE_Int order );
+HYPRE_Int
+hypre_ParChebySetOrder_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int order );
+HYPRE_Int
+hypre_ParChebySetOrder_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int order );
+
+HYPRE_Int
+hypre_ParChebySetPrintLevel_flt( hypre_ParChebyData *cheby_data, HYPRE_Int print_level );
+HYPRE_Int
+hypre_ParChebySetPrintLevel_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int print_level );
+HYPRE_Int
+hypre_ParChebySetPrintLevel_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int print_level );
+
+HYPRE_Int
+hypre_ParChebySetScale_flt( hypre_ParChebyData *cheby_data, HYPRE_Int scale );
+HYPRE_Int
+hypre_ParChebySetScale_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int scale );
+HYPRE_Int
+hypre_ParChebySetScale_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int scale );
+
+HYPRE_Int
+hypre_ParChebySetTempVectors_flt( hypre_ParChebyData *cheby_data, hypre_ParVector *Ptemp, hypre_ParVector *Rtemp, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+HYPRE_Int
+hypre_ParChebySetTempVectors_dbl( hypre_ParChebyData *cheby_data, hypre_ParVector *Ptemp, hypre_ParVector *Rtemp, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+HYPRE_Int
+hypre_ParChebySetTempVectors_long_dbl( hypre_ParChebyData *cheby_data, hypre_ParVector *Ptemp, hypre_ParVector *Rtemp, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+
+HYPRE_Int
+hypre_ParChebySetTolerance_flt( hypre_ParChebyData *cheby_data, hypre_float tol );
+HYPRE_Int
+hypre_ParChebySetTolerance_dbl( hypre_ParChebyData *cheby_data, hypre_double tol );
+HYPRE_Int
+hypre_ParChebySetTolerance_long_dbl( hypre_ParChebyData *cheby_data, hypre_long_double tol );
+
+HYPRE_Int
+hypre_ParChebySetVariant_flt( hypre_ParChebyData *cheby_data, HYPRE_Int variant );
+HYPRE_Int
+hypre_ParChebySetVariant_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int variant );
+HYPRE_Int
+hypre_ParChebySetVariant_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int variant );
+
+HYPRE_Int
+hypre_ParChebySetZeroGuess_flt( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
+HYPRE_Int
+hypre_ParChebySetZeroGuess_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
+HYPRE_Int
+hypre_ParChebySetZeroGuess_long_dbl( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
+
+HYPRE_Int
+hypre_ParChebySetup_flt( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_ParChebySetup_dbl( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_ParChebySetup_long_dbl( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+
+HYPRE_Int
+hypre_ParChebySolve_flt( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_ParChebySolve_dbl( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_ParChebySolve_long_dbl( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
 
 HYPRE_Int
 hypre_ParGenerateHybridScale_flt( hypre_ParCSRMatrix *A, hypre_CSRMatrix *domain_structure, hypre_CSRMatrix **A_boundary_pointer, hypre_float **scale_pointer );

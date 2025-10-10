@@ -64,7 +64,8 @@ typedef struct
    HYPRE_Int             num_nonzeros;
    hypre_int            *i_short;
    hypre_int            *j_short;
-   HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `j`, `big_j`, and `data'? */
+   HYPRE_Int
+   owns_data;       /* Does the CSRMatrix create/destroy `j`, `big_j`, and `data'? */
    HYPRE_Int             pattern_only;    /* 1: data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
