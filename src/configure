@@ -5157,7 +5157,7 @@ fi
 if test ${with_umpire_lib+y}
 then :
   withval=$with_umpire_lib; for umpire_lib in $withval; do
-       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+       HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB $umpire_lib"
  done;
  hypre_user_gave_umpire_lib=yes
 
@@ -5169,7 +5169,7 @@ fi
 if test ${with_umpire_libs+y}
 then :
   withval=$with_umpire_libs; for umpire_lib in $withval; do
-    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+    HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB -l$umpire_lib"
  done;
  hypre_user_gave_umpire_libs=yes
 
