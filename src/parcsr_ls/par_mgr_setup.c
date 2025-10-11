@@ -310,7 +310,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             if (isCpoint)
             {
                level_coarse_indexes[i][final_coarse_size++] = row;
-               //printf("%d\n",row);
             }
          }
       }
@@ -539,7 +538,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if ((mgr_data -> l1_norms)[j])
          {
-            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
+            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[j]);
             (mgr_data -> l1_norms)[j] = NULL;
          }
       }
