@@ -4207,7 +4207,7 @@ fi
 if test ${with_MPI_libs+y}
 then :
   withval=$with_MPI_libs; for mpi_lib in $withval; do
-    MPILIBS="$MPILIBS -l$mpi_lib"
+    MPILIBS+=" -l$mpi_lib"
  done;
  hypre_user_chose_mpi=yes
 
@@ -4219,7 +4219,7 @@ fi
 if test ${with_MPI_lib_dirs+y}
 then :
   withval=$with_MPI_lib_dirs; for mpi_lib_dir in $withval; do
-    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+    MPILIBDIRS+=" -L$mpi_lib_dir"
  done;
  hypre_user_chose_mpi=yes
 
@@ -4304,7 +4304,7 @@ fi
 if test ${with_blas_lib+y}
 then :
   withval=$with_blas_lib; for blas_lib in $withval; do
-       BLASLIBS="$BLASLIBS $blas_lib"
+       BLASLIBS+=" $blas_lib"
  done;
  hypre_user_chose_blas=yes
 
@@ -4316,7 +4316,7 @@ fi
 if test ${with_blas_libs+y}
 then :
   withval=$with_blas_libs; for blas_lib in $withval; do
-    BLASLIBS="$BLASLIBS -l$blas_lib"
+    BLASLIBS+=" -l$blas_lib"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_old_style=yes
@@ -4329,7 +4329,7 @@ fi
 if test ${with_blas_lib_dirs+y}
 then :
   withval=$with_blas_lib_dirs; for blas_lib_dir in $withval; do
-    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+    BLASLIBDIRS+=" -L$blas_lib_dir"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_dir_old_style=yes
@@ -4343,7 +4343,7 @@ fi
 if test ${with_lapack_lib+y}
 then :
   withval=$with_lapack_lib; for lapack_lib in $withval; do
-       LAPACKLIBS="$LAPACKLIBS $lapack_lib"
+       LAPACKLIBS+=" $lapack_lib"
  done;
  hypre_user_chose_lapack=yes
 
@@ -4355,7 +4355,7 @@ fi
 if test ${with_lapack_libs+y}
 then :
   withval=$with_lapack_libs; for lapack_lib in $withval; do
-    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+    LAPACKLIBS+=" -l$lapack_lib"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_old_style=yes
@@ -4368,7 +4368,7 @@ fi
 if test ${with_lapack_lib_dirs+y}
 then :
   withval=$with_lapack_lib_dirs; for lapack_lib_dir in $withval; do
-    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+    LAPACKLIBDIRS+=" -L$lapack_lib_dir"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_dir_old_style=yes
@@ -4540,7 +4540,7 @@ fi
 if test ${with_superlu_lib+y}
 then :
   withval=$with_superlu_lib; for superlu_lib in $withval; do
-    SUPERLU_LIBS="$SUPERLU_LIBS $superlu_lib"
+    SUPERLU_LIBS+=" $superlu_lib"
  done
 
 fi
@@ -4582,7 +4582,7 @@ fi
 if test ${with_dsuperlu_lib+y}
 then :
   withval=$with_dsuperlu_lib; for dsuperlu_lib in $withval; do
-    DSUPERLU_LIBS="$DSUPERLU_LIBS $dsuperlu_lib"
+    DSUPERLU_LIBS+=" $dsuperlu_lib"
  done
 
 fi
@@ -4970,7 +4970,7 @@ fi
 if test ${with_raja_lib+y}
 then :
   withval=$with_raja_lib; for raja_lib in $withval; do
-       HYPRE_RAJA_LIB="$raja_lib $HYPRE_RAJA_LIB"
+       HYPRE_RAJA_LIB+=" $raja_lib"
  done;
 hypre_user_chose_raja=yes
 
@@ -4982,7 +4982,7 @@ fi
 if test ${with_raja_libs+y}
 then :
   withval=$with_raja_libs; for raja_lib in $withval; do
-    HYPRE_RAJA_LIB="-l$raja_lib $HYPRE_RAJA_LIB"
+    HYPRE_RAJA_LIB+=" -l$raja_lib"
  done;
 hypre_user_chose_raja=yes
 
@@ -4994,7 +4994,7 @@ fi
 if test ${with_raja_lib_dirs+y}
 then :
   withval=$with_raja_lib_dirs; for raja_lib_dir in $withval; do
-    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
+    HYPRE_RAJA_LIB_DIR+=" -L$raja_lib_dir"
  done;
  hypre_user_chose_raja=yes
 
@@ -5034,7 +5034,7 @@ fi
 if test ${with_kokkos_lib+y}
 then :
   withval=$with_kokkos_lib; for kokkos_lib in $withval; do
-       HYPRE_KOKKOS_LIB="$kokkos_lib $HYPRE_KOKKOS_LIB"
+       HYPRE_KOKKOS_LIB+=" $kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -5046,7 +5046,7 @@ fi
 if test ${with_kokkos_libs+y}
 then :
   withval=$with_kokkos_libs; for kokkos_lib in $withval; do
-    HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
+    HYPRE_KOKKOS_LIB+=" -l$kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -5058,7 +5058,7 @@ fi
 if test ${with_kokkos_lib_dirs+y}
 then :
   withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+    HYPRE_KOKKOS_LIB_DIR+=" -L$kokkos_lib_dir"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -5157,7 +5157,7 @@ fi
 if test ${with_umpire_lib+y}
 then :
   withval=$with_umpire_lib; for umpire_lib in $withval; do
-       HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB $umpire_lib"
+       HYPRE_UMPIRE_LIB+=" $umpire_lib"
  done;
  hypre_user_gave_umpire_lib=yes
 
@@ -5169,7 +5169,7 @@ fi
 if test ${with_umpire_libs+y}
 then :
   withval=$with_umpire_libs; for umpire_lib in $withval; do
-    HYPRE_UMPIRE_LIB="$HYPRE_UMPIRE_LIB -l$umpire_lib"
+    HYPRE_UMPIRE_LIB+=" -l$umpire_lib"
  done;
  hypre_user_gave_umpire_libs=yes
 
@@ -5181,8 +5181,8 @@ fi
 if test ${with_umpire_lib_dirs+y}
 then :
   withval=$with_umpire_lib_dirs; for umpire_lib_dir in $withval; do
-    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
-    HYPRE_UMPIRE_RPATH="${HYPRE_UMPIRE_RPATH} -Wl,-rpath,${umpire_lib_dir}"
+    HYPRE_UMPIRE_LIB_DIR+=" -L$umpire_lib_dir"
+    HYPRE_UMPIRE_RPATH+=" -Wl,-rpath,${umpire_lib_dir}"
  done;
  hypre_user_gave_umpire_lib_dirs=yes
 
@@ -5229,7 +5229,7 @@ fi
 if test ${with_magma_lib+y}
 then :
   withval=$with_magma_lib; for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" $magma_lib"
  done;
 hypre_user_gave_magma_lib=yes
 
@@ -5241,7 +5241,7 @@ fi
 if test ${with_magma_libs+y}
 then :
   withval=$with_magma_libs; for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="-l$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" -l$magma_lib"
  done;
 hypre_user_gave_magma_libs=yes
 
@@ -5253,7 +5253,7 @@ fi
 if test ${with_magma_lib_dirs+y}
 then :
   withval=$with_magma_lib_dirs; for magma_lib_dir in $withval; do
-    HYPRE_MAGMA_LIB_DIR="-L$magma_lib_dir $HYPRE_MAGMA_LIB_DIR"
+    HYPRE_MAGMA_LIB_DIR+=" -L$magma_lib_dir"
  done;
 hypre_user_gave_magma_lib_dirs=yes
 
@@ -5298,7 +5298,7 @@ fi
 if test ${with_caliper_lib+y}
 then :
   withval=$with_caliper_lib; for caliper_lib in $withval; do
-    CALIPER_LIBS="$CALIPER_LIBS $caliper_lib"
+    CALIPER_LIBS+=" $caliper_lib"
  done;
  hypre_user_gave_caliper_lib=yes
 
@@ -8940,7 +8940,7 @@ else
 
 printf "%s\n" "#define HYPRE_HAVE_MPI 1" >>confdefs.h
 
-  LIBS="$LIBS $MPILIBS"
+  LIBS+=" $MPILIBS"
   :
 fi
 
@@ -9753,7 +9753,7 @@ fi
 printf "%s\n" "$ac_cv_lib_stdcpp___gxx_personality_v0" >&6; }
 if test "x$ac_cv_lib_stdcpp___gxx_personality_v0" = xyes
 then :
-  LIBS="$LIBS -lstdc++"
+  LIBS+=" -lstdc++"
 fi
 
 else
@@ -10084,7 +10084,7 @@ fi
 printf "%s\n" "$ac_cv_lib_m_cabs" >&6; }
 if test "x$ac_cv_lib_m_cabs" = xyes
 then :
-  LIBS="$LIBS -lm"
+  LIBS+=" -lm"
 fi
 
 
@@ -11121,8 +11121,8 @@ else $as_nop
   as_fn_error $? "unable to find oneMKL ... Ensure that MKLROOT is set" "$LINENO" 5
 fi
 
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
+               HYPRE_SYCL_LIBS+=" -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL+=" -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
 
 fi
 
