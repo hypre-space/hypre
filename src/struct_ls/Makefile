@@ -67,6 +67,8 @@ CUFILES =\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
  pfmg_coarsen.c\
+ pfmg_cxyz_cc.c\
+ pfmg_cxyz_vc.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap5.c\

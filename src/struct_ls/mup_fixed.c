@@ -513,6 +513,22 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcx
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_PFMGComputeCxyz_core_CC( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, HYPRE_Real **w_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeCxyz_core_CC)( A, Ab, diag_is_constant, diag_entry, nentries, entries, start, loop_size, A_dbox, w_dbox, w_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_VC( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, HYPRE_Real **w_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeCxyz_core_VC)( A, Ab, diag_is_constant, diag_entry, nentries, entries, start, loop_size, A_dbox, w_dbox, w_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_PFMGComputeDxyz( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Int *dxyz_flag )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PFMGComputeDxyz)( A, dxyz, dxyz_flag );

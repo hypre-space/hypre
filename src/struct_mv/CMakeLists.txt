@@ -22,6 +22,24 @@ endif()
 
 # Regular sources
 set(REGULAR_SRCS
+  struct_matvec.c
+  struct_matvec_icc.c
+  struct_matvec_ivc.c
+  struct_matvec_ivcc.c
+  struct_matvec_cc.c
+  struct_matvec_vc.c
+  struct_matvec_vcc.c
+  struct_matmult.c
+  struct_matmult_core.c
+  struct_matmult_fuse.c
+  struct_matmult_fuse_fff.c
+  struct_matmult_fuse_ffc.c
+  struct_matmult_fuse_fcc.c
+  struct_matmult_fuse_ff.c
+  struct_matmult_fuse_fc.c
+  struct_matmult_fuse_cc.c
+  struct_matmult_fuse_f.c
+  struct_matmult_fuse_c.c
   assumed_part.c
   box_algebra.c
   box_boundary.c
@@ -51,11 +69,6 @@ set(REGULAR_SRCS
   struct_grid.c
   struct_innerprod.c
   struct_matrix.c
-  struct_matvec.c
-  struct_matvec_core.c
-  struct_matmult.c
-  struct_matmult_core.c
-  struct_matmult_fuse.c
   struct_matop.c
   struct_stmatrix.c
   struct_scale.c
@@ -78,18 +91,31 @@ endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    struct_matvec.c
+    struct_matvec_cc.c
+    struct_matvec_icc.c
+    struct_matvec_ivc.c
+    struct_matvec_ivcc.c
+    struct_matvec_vc.c
+    struct_matvec_vcc.c
+    struct_matmult.c
+    struct_matmult_core.c
+    struct_matmult_fuse.c
+    struct_matmult_fuse_fff.c
+    struct_matmult_fuse_ffc.c
+    struct_matmult_fuse_fcc.c
+    struct_matmult_fuse_ff.c
+    struct_matmult_fuse_fc.c
+    struct_matmult_fuse_cc.c
+    struct_matmult_fuse_f.c
+    struct_matmult_fuse_c.c
     struct_axpy.c
     struct_communication.c
     struct_copy.c
     struct_data.c
     struct_innerprod.c
-    struct_matmult.c
-    struct_matmult_core.c
-    struct_matmult_fuse.c
     struct_matop.c
     struct_matrix.c
-    struct_matvec.c
-    struct_matvec_core.c
     struct_scale.c
     struct_vector.c
   )

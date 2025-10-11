@@ -48,6 +48,8 @@ set(REGULAR_SRCS
   jacobi.c
   pcg_struct.c
   pfmg.c
+  pfmg_cxyz_cc.c
+  pfmg_cxyz_vc.c
   pfmg_coarsen.c
   pfmg_relax.c
   pfmg_setup_rap.c
@@ -109,6 +111,8 @@ if (HYPRE_USING_GPU)
     HYPRE_struct_pcg.c
     pfmg2_setup_rap.c
     pfmg3_setup_rap.c
+    pfmg_cxyz_cc.c
+    pfmg_cxyz_vc.c
     pfmg_coarsen.c
     pfmg_setup.c
     pfmg_setup_interp.c

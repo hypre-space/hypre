@@ -42,7 +42,16 @@ There are two ways to obtain hypre:
 Building the Library
 ==============================================================================
 
-After obtaining the source code (see :ref:`getting-source`), there are three main ways to build hypre:
+After obtaining the source code (see :ref:`getting-source`), there are three main ways to
+build hypre:
+
+.. tip::
+   For the fastest build, use CMake with the Ninja generator (if Ninja is installed):
+
+       cmake -G Ninja
+
+   Ninja handles parallel builds efficiently, often completing faster than
+   a traditional Makefile build, especially on multi-core systems.
 
 1. Using autotools (Configure & Make)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
