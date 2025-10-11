@@ -6778,7 +6778,6 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                HYPRE_Int                num_cols_block,
                                hypre_DenseBlockMatrix **B_ptr )
 {
-   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_BigInt             num_rows_A      = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt             num_cols_A      = hypre_ParCSRMatrixGlobalNumCols(A);
 
@@ -6828,10 +6827,11 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                     num_rows_block, num_cols_block);
 
    /* Initialize the output matrix */
-   hypre_DenseBlockMatrixInitializeOn(B, memory_location);
+   /* TODO: Change back to memory_location after implementing hypre_ParCSRMatrixBlockColSumDevice */
+   hypre_DenseBlockMatrixInitializeOn(B, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
