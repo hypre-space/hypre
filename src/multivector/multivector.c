@@ -46,7 +46,6 @@ mv_MultiVectorWrap( mv_InterfaceInterpreter* ii, void * data, HYPRE_Int ownsData
 mv_MultiVectorPtr
 mv_MultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample )
 {
-
    mv_MultiVectorPtr x;
    mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
@@ -63,7 +62,6 @@ mv_MultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample )
 mv_MultiVectorPtr
 mv_MultiVectorCreateCopy( mv_MultiVectorPtr x, HYPRE_Int copyValues )
 {
-
    mv_MultiVectorPtr y;
    void* data;
    mv_InterfaceInterpreter* ii;
@@ -86,7 +84,6 @@ mv_MultiVectorCreateCopy( mv_MultiVectorPtr x, HYPRE_Int copyValues )
 void
 mv_MultiVectorDestroy( mv_MultiVectorPtr v)
 {
-
    if ( v == NULL )
    {
       return;
@@ -102,7 +99,6 @@ mv_MultiVectorDestroy( mv_MultiVectorPtr v)
 void
 mv_MultiVectorSetMask( mv_MultiVectorPtr v, HYPRE_Int* mask )
 {
-
    hypre_assert( v != NULL );
    (v->interpreter->SetMask)( v->data, mask );
 }
@@ -110,7 +106,6 @@ mv_MultiVectorSetMask( mv_MultiVectorPtr v, HYPRE_Int* mask )
 HYPRE_Int
 mv_MultiVectorWidth( mv_MultiVectorPtr v )
 {
-
    if ( v == NULL )
    {
       return 0;
@@ -122,7 +117,6 @@ mv_MultiVectorWidth( mv_MultiVectorPtr v )
 HYPRE_Int
 mv_MultiVectorHeight( mv_MultiVectorPtr v )
 {
-
    if ( v == NULL )
    {
       return 0;
@@ -134,7 +128,6 @@ mv_MultiVectorHeight( mv_MultiVectorPtr v )
 void
 mv_MultiVectorClear( mv_MultiVectorPtr v )
 {
-
    hypre_assert( v != NULL );
    (v->interpreter->ClearMultiVector)( v->data );
 }
@@ -142,7 +135,6 @@ mv_MultiVectorClear( mv_MultiVectorPtr v )
 void
 mv_MultiVectorSetRandom( mv_MultiVectorPtr v, HYPRE_Int seed )
 {
-
    hypre_assert( v != NULL );
    (v->interpreter->SetRandomVectors)( v->data, seed );
 }
@@ -150,7 +142,6 @@ mv_MultiVectorSetRandom( mv_MultiVectorPtr v, HYPRE_Int seed )
 void
 mv_MultiVectorCopy( mv_MultiVectorPtr src, mv_MultiVectorPtr dest )
 {
-
    hypre_assert( src != NULL && dest != NULL );
    (src->interpreter->CopyMultiVector)( src->data, dest->data );
 }
@@ -158,21 +149,18 @@ mv_MultiVectorCopy( mv_MultiVectorPtr src, mv_MultiVectorPtr dest )
 void
 mv_MultiVectorAxpy( HYPRE_Complex a, mv_MultiVectorPtr x, mv_MultiVectorPtr y )
 {
-
    hypre_assert( x != NULL && y != NULL );
    (x->interpreter->MultiAxpy)( a, x->data, y->data );
 }
 
 void
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-                             HYPRE_BigInt xyGHeight, HYPRE_Int xyHeight,
-                             HYPRE_Int xyWidth, HYPRE_Real* xy )
+                             HYPRE_BigInt xyGHeight, HYPRE_BigInt xyHeight,
+                             HYPRE_BigInt xyWidth, HYPRE_Real* xy )
 {
    /* xy = x'*y */
-
    hypre_assert( x != NULL && y != NULL );
-   (x->interpreter->MultiInnerProd)
-   ( x->data, y->data, xyGHeight, xyHeight, xyWidth, xy );
+   (x->interpreter->MultiInnerProd)( x->data, y->data, xyGHeight, xyHeight, xyWidth, xy );
 }
 
 void
@@ -180,23 +168,19 @@ mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
                                  HYPRE_Int* mask, HYPRE_Int n, HYPRE_Real* d )
 {
    /* d = diag(x'*y) */
-
    hypre_assert( x != NULL && y != NULL );
    (x->interpreter->MultiInnerProdDiag)( x->data, y->data, mask, n, d );
 }
 
 void
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x,
-                        HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
-                        HYPRE_Int rWidth, HYPRE_Complex* rVal,
+                        HYPRE_BigInt rGHeight, HYPRE_BigInt rHeight,
+                        HYPRE_BigInt rWidth, HYPRE_Complex* rVal,
                         mv_MultiVectorPtr y )
 {
-
    /* y = x*r */
-
    hypre_assert( x != NULL && y != NULL );
-   (x->interpreter->MultiVecMat)
-   ( x->data, rGHeight, rHeight, rWidth, rVal, y->data );
+   (x->interpreter->MultiVecMat)( x->data, rGHeight, rHeight, rWidth, rVal, y->data );
 }
 
 void
@@ -205,12 +189,9 @@ mv_MultiVectorXapy( mv_MultiVectorPtr x,
                     HYPRE_Int rWidth, HYPRE_Complex* rVal,
                     mv_MultiVectorPtr y )
 {
-
    /* y = y + x*a */
-
    hypre_assert( x != NULL && y != NULL );
-   (x->interpreter->MultiXapy)
-   ( x->data, rGHeight, rHeight, rWidth, rVal, y->data );
+   (x->interpreter->MultiXapy)( x->data, rGHeight, rHeight, rWidth, rVal, y->data );
 }
 
 void
@@ -218,9 +199,7 @@ mv_MultiVectorByDiagonal( mv_MultiVectorPtr x,
                           HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* d,
                           mv_MultiVectorPtr y )
 {
-
    /* y = x*d */
-
    hypre_assert( x != NULL && y != NULL );
    (x->interpreter->MultiVecMatDiag)( x->data, mask, n, d, y->data );
 }
@@ -229,9 +208,7 @@ void
 mv_MultiVectorEval( void (*f)( void*, void*, void* ), void* par,
                     mv_MultiVectorPtr x, mv_MultiVectorPtr y )
 {
-
    /* y = f(x) computed vector-wise */
-
    hypre_assert( x != NULL && y != NULL );
    (x->interpreter->Eval)( f, par, x->data, y->data );
 }

@@ -660,7 +660,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 
    hypre_GpuProfilingPushRange("SeqVectorCopy");
 
-   size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
+   HYPRE_Int size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) *
+                    hypre_VectorNumVectors(x);
 
    hypre_TMemcpy( hypre_VectorData(y),
                   hypre_VectorData(x),

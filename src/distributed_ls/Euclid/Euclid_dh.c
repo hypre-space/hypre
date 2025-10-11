@@ -223,7 +223,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
    * (ctx->isScaled is set in get_runtime_params_private(); )
    *---------------------------------------------------------*/
   if (ctx->scale == NULL) {
-    ctx->scale = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
+    ctx->scale = (REAL_DH*)MALLOC_DH((size_t) m * sizeof(REAL_DH)); CHECK_V_ERROR;
   }
   { HYPRE_Int i; for (i=0; i<m; ++i) ctx->scale[i] = 1.0; }
 
@@ -231,10 +231,10 @@ void Euclid_dhSetup(Euclid_dh ctx)
    * allocate work vectors; used in factorization and triangular solves;
    *------------------------------------------------------------------*/
   if ( ctx->work == NULL) {
-    ctx->work = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
+    ctx->work = (REAL_DH*)MALLOC_DH((size_t) m * sizeof(REAL_DH)); CHECK_V_ERROR;
   }
   if ( ctx->work2 == NULL) {
-    ctx->work2 = (REAL_DH*)MALLOC_DH(m*sizeof(REAL_DH)); CHECK_V_ERROR;
+    ctx->work2 = (REAL_DH*)MALLOC_DH((size_t) m * sizeof(REAL_DH)); CHECK_V_ERROR;
   }
 
   /*-----------------------------------------------------------------

@@ -135,8 +135,8 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
    if (my_id == (num_procs - 1)) { total_old_global_cpts = num_old_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
-   n_old_Cpts = num_old_cpts_global[1] - num_old_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
+   n_old_Cpts = (HYPRE_Int) (num_old_cpts_global[1] - num_old_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFC3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -780,8 +780,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    if (my_id == (num_procs - 1)) { total_old_global_cpts = num_old_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
-   n_old_Cpts = num_old_cpts_global[1] - num_old_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
+   n_old_Cpts = (HYPRE_Int) (num_old_cpts_global[1] - num_old_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFCD3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF, &D_lambda);
 

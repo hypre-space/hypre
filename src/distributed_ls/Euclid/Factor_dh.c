@@ -241,7 +241,7 @@ void Factor_dhPrintGraph(Factor_dh mat, char *filename)
 
   if (np_dh > 1) SET_V_ERROR("only implemented for single mpi task");
 
-  work = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  work = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
 
@@ -418,10 +418,10 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
 
   mat->sendlenLo = sendlenLo;
   mat->sendlenHi = sendlenHi;
-  mat->sendbufLo = (HYPRE_Real *)MALLOC_DH(sendlenLo * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendbufHi = (HYPRE_Real *)MALLOC_DH(sendlenHi * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendindLo = (HYPRE_Int *)MALLOC_DH(sendlenLo * sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  mat->sendindHi = (HYPRE_Int *)MALLOC_DH(sendlenHi * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  mat->sendbufLo = (HYPRE_Real*) MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendbufHi = (HYPRE_Real*) MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendindLo = (HYPRE_Int*)  MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  mat->sendindHi = (HYPRE_Int*)  MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   count = 0;  /* number of calls to hypre_MPI_Irecv() */
   jLo = jHi = 0;
@@ -509,9 +509,9 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
 
   if (mat->debug && logFile != NULL) debug = true;
 
-  end_rows = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  outlist = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  inlist  = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  end_rows = (HYPRE_Int *)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  outlist  = (HYPRE_Int *)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  inlist   = (HYPRE_Int *)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<np_dh; ++i) {
     inlist[i] = 0;
     outlist[i] = 0;
@@ -531,8 +531,8 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
 
   /* Allocate recvbuf; recvbuf has numlocal entries saved for local part of x */
   i = m+numb->num_ext;
-  mat->work_y_lo = (HYPRE_Real*)MALLOC_DH(i*sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->work_x_hi = (HYPRE_Real*)MALLOC_DH(i*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->work_y_lo = (HYPRE_Real*)MALLOC_DH((size_t) i * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->work_x_hi = (HYPRE_Real*)MALLOC_DH((size_t) i * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   if (debug) {
     hypre_fprintf(logFile, "FACT num_extLo= %i  num_extHi= %i\n", numb->num_extLo, numb->num_extHi);
   }
@@ -916,15 +916,15 @@ void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
   F->id = id;
   F->alloc = alloc;
 
-  F->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  F->rp = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   F->rp[0] = 0;
-  F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  F->diag = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  F->cval = (HYPRE_Int*)MALLOC_DH((size_t) alloc * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  F->diag = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   if (fillFlag) {
-    F->fill = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    F->fill = (HYPRE_Int*)MALLOC_DH((size_t) alloc * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
   if (avalFlag) {
-    F->aval = (REAL_DH*)MALLOC_DH(alloc*sizeof(REAL_DH)); CHECK_V_ERROR;
+    F->aval = (REAL_DH*)MALLOC_DH((size_t) alloc * sizeof(REAL_DH)); CHECK_V_ERROR;
   }
   END_FUNC_DH
 }
@@ -941,18 +941,18 @@ void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional)
     while (alloc < used+additional) alloc *= 2;
     F->alloc = alloc;
     tmpI = F->cval;
-    F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    F->cval = (HYPRE_Int*)MALLOC_DH((size_t) alloc * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     hypre_TMemcpy(F->cval,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     FREE_DH(tmpI); CHECK_V_ERROR;
     if (F->fill != NULL) {
       tmpI = F->fill;
-      F->fill = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      F->fill = (HYPRE_Int*)MALLOC_DH((size_t) alloc * sizeof(HYPRE_Int)); CHECK_V_ERROR;
       hypre_TMemcpy(F->fill,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpI); CHECK_V_ERROR;
     }
     if (F->aval != NULL) {
       REAL_DH *tmpF = F->aval;
-      F->aval = (REAL_DH*)MALLOC_DH(alloc*sizeof(REAL_DH)); CHECK_V_ERROR;
+      F->aval = (REAL_DH*)MALLOC_DH((size_t) alloc * sizeof(REAL_DH)); CHECK_V_ERROR;
       hypre_TMemcpy(F->aval,  tmpF, REAL_DH, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpF); CHECK_V_ERROR;
     }

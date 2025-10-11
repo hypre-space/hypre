@@ -443,13 +443,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       if (block_mode)
       {
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[level]);
-         global_nonzeros = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[level]);
+         global_nonzeros = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[level]);
          ndigits[2] = hypre_max(hypre_ndigits((HYPRE_BigInt) global_nonzeros / fine_size ), ndigits[2]);
       }
       else
       {
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
          ndigits[2] = hypre_max(hypre_ndigits((HYPRE_BigInt) global_nonzeros / fine_size ), ndigits[2]);
       }
 
@@ -829,8 +829,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
 
          }
-         avg_entries = ((HYPRE_Real) (global_nonzeros - coarse_size)) / ((HYPRE_Real) (
-                                                                            fine_size - coarse_size));
+         avg_entries = (global_nonzeros - (HYPRE_Real) coarse_size) /
+                       ((HYPRE_Real) (fine_size - coarse_size));
       }
       else
       {
@@ -932,8 +932,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
 
          }
-         avg_entries = ((HYPRE_Real) (global_nonzeros - coarse_size)) / ((HYPRE_Real) (
-                                                                            fine_size - coarse_size));
+         avg_entries = (global_nonzeros - (HYPRE_Real) coarse_size) /
+                       ((HYPRE_Real) (fine_size - coarse_size));
 
          if (P_diag_clone != P_diag)
          {
@@ -946,7 +946,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 
-      numrows = row_starts[1] - row_starts[0];
+      numrows = (HYPRE_Int) (row_starts[1] - row_starts[0]);
       if (!numrows) /* if we don't have any rows, then don't have this count toward
                        min row sum or min num entries */
       {

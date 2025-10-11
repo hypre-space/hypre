@@ -79,9 +79,9 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    /* row_starts[0] is start of local rows.
       row_starts[1] is start of next processor's rows */
    first_row_index = row_starts[0];
-   local_num_rows  = row_starts[1] - first_row_index;
+   local_num_rows  = (HYPRE_Int) (row_starts[1] - first_row_index);
    first_col_diag  = col_starts[0];
-   local_num_cols  = col_starts[1] - first_col_diag;
+   local_num_cols  = (HYPRE_Int) (col_starts[1] - first_col_diag);
 
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixDiag(matrix) =
@@ -279,7 +279,7 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(S) = hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(S) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
 
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
@@ -1176,7 +1176,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    header[3]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumRows(h_matrix);;
    header[4]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumCols(h_matrix);;
    header[5]  = (hypre_uint64) hypre_ParCSRMatrixDNumNonzeros(h_matrix);
-   header[6]  = (hypre_uint64) diag_nnz + offd_nnz; /* local number of nonzeros*/
+   header[6]  = (hypre_uint64) (diag_nnz + offd_nnz); /* local number of nonzeros*/
    header[7]  = (hypre_uint64) ilower;
    header[8]  = (hypre_uint64) iupper;
    header[9]  = (hypre_uint64) jlower;
@@ -1635,14 +1635,12 @@ hypre_ParCSRMatrixGetRowHost( hypre_ParCSRMatrix  *mat,
       allocate buffer */
    if (!hypre_ParCSRMatrixRowvalues(mat) && ( col_ind || values ))
    {
-      /*
-        allocate enough space to hold information from the longest row.
-      */
+      /* allocate enough space to hold information from the longest row. */
       HYPRE_Int max = 1, tmp;
       HYPRE_Int i;
-      HYPRE_Int m = row_end - row_start;
+      HYPRE_Int m = (HYPRE_Int) (row_end - row_start);
 
-      for ( i = 0; i < m; i++ )
+      for (i = 0; i < m; i++)
       {
          tmp = hypre_CSRMatrixI(Aa)[i + 1] - hypre_CSRMatrixI(Aa)[i] +
                hypre_CSRMatrixI(Ba)[i + 1] - hypre_CSRMatrixI(Ba)[i];
@@ -1652,10 +1650,10 @@ hypre_ParCSRMatrixGetRowHost( hypre_ParCSRMatrix  *mat,
          }
       }
 
-      hypre_ParCSRMatrixRowvalues(mat)  =
-         (HYPRE_Complex *) hypre_CTAlloc(HYPRE_Complex, max, hypre_ParCSRMatrixMemoryLocation(mat));
-      hypre_ParCSRMatrixRowindices(mat) =
-         (HYPRE_BigInt *)  hypre_CTAlloc(HYPRE_BigInt,  max, hypre_ParCSRMatrixMemoryLocation(mat));
+      hypre_ParCSRMatrixRowvalues(mat)  = hypre_CTAlloc(HYPRE_Complex, max,
+                                                        hypre_ParCSRMatrixMemoryLocation(mat));
+      hypre_ParCSRMatrixRowindices(mat) = hypre_CTAlloc(HYPRE_BigInt, max,
+                                                        hypre_ParCSRMatrixMemoryLocation(mat));
    }
 
    /* Copy from dual sequential matrices into buffer */
@@ -2395,8 +2393,6 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
    MPI_Comm                   comm = hypre_ParCSRMatrixComm(par_matrix);
    HYPRE_Int                  num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_matrix);
    HYPRE_Int                  num_cols = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumCols(par_matrix);
-   HYPRE_BigInt               first_row_index = hypre_ParCSRMatrixFirstRowIndex(par_matrix);
-   HYPRE_BigInt               last_row_index  = hypre_ParCSRMatrixLastRowIndex(par_matrix);
 
    hypre_ParCSRMatrix        *par_temp;
    hypre_CSRMatrix           *matrix;
@@ -2442,6 +2438,13 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   /* Sanity check */
+   if (hypre_ParCSRMatrixGlobalNumRows(par_matrix) > HYPRE_INT_MAX)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_rows > INT_MAX!");
+      return NULL;
+   }
+
    /* Clone input matrix to host memory */
    par_temp = hypre_ParCSRMatrixClone_v2(par_matrix, 1, HYPRE_MEMORY_HOST);
 
@@ -2455,7 +2458,8 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
    local_matrix_data = hypre_CSRMatrixData(local_matrix);
-   local_num_rows = (HYPRE_Int) (last_row_index - first_row_index + 1);
+   local_num_rows = (HYPRE_Int) (hypre_ParCSRMatrixLastRowIndex(par_matrix) -
+                                 hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1);
 
    /* determine procs that have vector data and store their ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
@@ -2515,7 +2519,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
 
          /* now unpack */
          num_types = send_info[0];
-         used_procs =  hypre_CTAlloc(HYPRE_Int, num_types, HYPRE_MEMORY_HOST);
+         used_procs = hypre_CTAlloc(HYPRE_Int, num_types, HYPRE_MEMORY_HOST);
          new_vec_starts = hypre_CTAlloc(HYPRE_Int, num_types + 1, HYPRE_MEMORY_HOST);
 
          for (i = 1; i <= num_types; i++)
@@ -2524,7 +2528,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
          }
          for (i = num_types + 1; i < count; i++)
          {
-            new_vec_starts[i - num_types - 1] = send_info[i] ;
+            new_vec_starts[i - num_types - 1] = send_info[i];
          }
       }
       else /* clean up and exit */
@@ -2549,7 +2553,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       for (i = 0; i < num_types; i++)
       {
          used_procs[i] = send_proc_obj.id[i];
-         new_vec_starts[i + 1] = send_proc_obj.elements[i] + 1;
+         new_vec_starts[i + 1] = (HYPRE_Int) send_proc_obj.elements[i] + 1;
       }
       hypre_qsort0(used_procs, 0, num_types - 1);
       hypre_qsort0(new_vec_starts, 0, num_types);

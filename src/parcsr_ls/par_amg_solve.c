@@ -360,7 +360,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
-      num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
+      num_variables[0] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A);
 
       if (block_mode)
       {
@@ -369,8 +369,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
             num_variables[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
          }
-         num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
-         num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+         num_coeffs[0]    = (HYPRE_Real) hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+         num_variables[0] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
 
       }
       else

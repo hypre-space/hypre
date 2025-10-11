@@ -177,7 +177,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    {
       for (j = 1; j < num_levels; j++)
       {
-         num_coeffs[j] = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+         num_coeffs[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
       }
    }
    else

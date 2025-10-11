@@ -106,9 +106,9 @@ void iluk_seq(Euclid_dh ctx)
   beg_rowP  = ctx->sg->beg_rowP[myid_dh];
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list    = (HYPRE_Int*) MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker  = (HYPRE_Int*) MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*) MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -277,7 +277,7 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   else {
-    dummy = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    dummy = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) dummy[i] = i;
     n2o_row   = dummy;
     o2n_col   = dummy;
@@ -289,9 +289,9 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -680,8 +680,8 @@ void ilut_seq(Euclid_dh ctx)
 
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
   rp[0] = 0;
 

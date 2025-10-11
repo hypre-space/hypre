@@ -535,7 +535,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       if (cf_tol > 0.0)
       {
          cf_ave_0 = cf_ave_1;
-         cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+         cf_ave_1 = hypre_pow(r_norm / r_norm_0, 1.0 / (2.0 * (HYPRE_Real) iter));
 
          weight   = hypre_abs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);

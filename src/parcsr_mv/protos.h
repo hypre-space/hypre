@@ -232,14 +232,14 @@ void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location, HYPRE_Int 
 hypre_ParCSRMatrix *hypre_ParMatmul ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i, HYPRE_BigInt **pB_ext_j,
                                             HYPRE_Complex **pB_ext_data, HYPRE_BigInt **pB_ext_row_map, HYPRE_Int *num_nonzeros, HYPRE_Int data,
-                                            HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_cols_B,
+                                            HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg,
                                             HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts,
                                             HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                             HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j,
                                             HYPRE_BigInt *col_map_offd, HYPRE_Real *diag_data, HYPRE_Real *offd_data );
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap ( HYPRE_Int **pB_ext_i, HYPRE_BigInt **pB_ext_j,
                                                     HYPRE_Complex **pB_ext_data, HYPRE_BigInt **pB_ext_row_map, HYPRE_Int *num_nonzeros, HYPRE_Int data,
-                                                    HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_cols_B,
+                                                    HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg,
                                                     HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts,
                                                     HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                                     HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j,

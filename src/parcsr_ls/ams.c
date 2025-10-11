@@ -272,7 +272,7 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
    hypre_ParVector *b_[3] = {NULL, NULL, NULL};
    hypre_ParVector *x_[3] = {NULL, NULL, NULL};
 
-   dim = hypre_ParVectorGlobalSize(x) / hypre_ParCSRMatrixGlobalNumRows(A);
+   dim = (HYPRE_Int) (hypre_ParVectorGlobalSize(x) / hypre_ParCSRMatrixGlobalNumRows(A));
 
    if (dim == 1)
    {

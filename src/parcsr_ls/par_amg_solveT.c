@@ -34,7 +34,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    HYPRE_Int      amg_print_level;
    HYPRE_Int      amg_logging;
    HYPRE_Real  *num_coeffs;
-   HYPRE_Int     *num_variables;
+   HYPRE_BigInt     *num_variables;
    HYPRE_Real   cycle_op_count;
    HYPRE_Int      num_levels;
    /* HYPRE_Int      num_unknowns; */
@@ -52,8 +52,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_count;
-   HYPRE_Real   total_coeffs;
-   HYPRE_Int      total_variables;
+   HYPRE_Real     total_coeffs;
+   HYPRE_Real     total_variables;
    HYPRE_Int      num_procs, my_id;
 
    HYPRE_Real   alpha = 1.0;
@@ -90,8 +90,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    min_iter      = hypre_ParAMGDataMinIter(amg_data);
    max_iter      = hypre_ParAMGDataMaxIter(amg_data);
 
-   num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
-   num_variables = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
+   num_variables    = hypre_CTAlloc(HYPRE_BigInt, num_levels, HYPRE_MEMORY_HOST);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
 
@@ -132,8 +132,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    Solve_err_flag = 0;
 
-   total_coeffs = 0;
-   total_variables = 0;
+   total_coeffs = 0.0;
+   total_variables = 0.0;
    cycle_count = 0;
    operat_cmplxty = 0;
    grid_cmplxty = 0;
@@ -249,15 +249,15 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
    {
-      total_coeffs += num_coeffs[j];
-      total_variables += num_variables[j];
+      total_coeffs    += num_coeffs[j];
+      total_variables += (HYPRE_Real) num_variables[j];
    }
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    if (num_variables[0])
    {
-      grid_cmplxty = ((HYPRE_Real) total_variables) / ((HYPRE_Real) num_variables[0]);
+      grid_cmplxty = total_variables / ((HYPRE_Real) num_variables[0]);
    }
    if (num_coeffs[0])
    {

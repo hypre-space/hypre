@@ -956,7 +956,7 @@ hypre_PCGSolve( void *pcg_vdata,
                break;
             }
          }
-         cf_ave_1 = hypre_pow( i_prod / i_prod_0, 1.0 / (2.0 * i) );
+         cf_ave_1 = hypre_pow(i_prod / i_prod_0, 1.0 / (2.0 * (HYPRE_Real) i) );
 
          weight   = hypre_abs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);

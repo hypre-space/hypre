@@ -534,24 +534,22 @@ function(add_hypre_executables EXE_SRCS)
   endforeach()
 endfunction()
 
-# Function to add a tags target if etags is found
+# Function to add a tags target if Universal Ctags is found
 function(add_hypre_target_tags)
-  find_program(ETAGS_EXECUTABLE etags)
-  if(ETAGS_EXECUTABLE)
+  find_program(CTAGS_EXECUTABLE ctags)
+  if(CTAGS_EXECUTABLE)
     add_custom_target(tags
-      COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}
-              -type f
-              "(" -name "*.h" -o -name "*.c" -o -name "*.cpp"
-              -o -name "*.hpp" -o -name "*.cxx"
-              -o -name "*.f" -o -name "*.f90" ")"
-              -not -path "*/build/*"
-              -print | ${ETAGS_EXECUTABLE}
-              --declarations
-              --ignore-indentation
-              --no-members
-              -
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Generating TAGS file with etags"
+      COMMAND ${CTAGS_EXECUTABLE} -e -R
+              --languages=C,C++,CUDA
+              --langmap=C++:+.hip
+              --c-kinds=+p
+              --c++-kinds=+p
+              --extras=+q
+              --exclude=.git
+              --exclude=build
+              -o TAGS .
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMENT "Generating TAGS file with Universal Ctags"
       VERBATIM
     )
   endif()

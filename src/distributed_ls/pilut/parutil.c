@@ -65,11 +65,11 @@ HYPRE_Int *hypre_idx_malloc(HYPRE_Int n,const char *msg)
 
   ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes",
+                  msg, (size_t) n * sizeof(HYPRE_Int));
   }
 
   return ptr;
-
 }
 
 
@@ -86,7 +86,8 @@ HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival,const char *msg)
 
   ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes",
+                  msg, (size_t) n * sizeof(HYPRE_Int));
   }
 
   for (i=0; i<n; i++)
@@ -108,7 +109,8 @@ HYPRE_Real *hypre_fp_malloc(HYPRE_Int n,const char *msg)
 
   ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes",
+                  msg, (size_t) n * sizeof(HYPRE_Real));
   }
 
   return ptr;
@@ -129,7 +131,8 @@ HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival,const char *msg)
 
   ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes",
+                   msg, (size_t) n * sizeof(HYPRE_Real));
   }
 
   for (i=0; i<n; i++)
@@ -152,7 +155,8 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
 
   ptr = hypre_TAlloc(char, nbytes, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes",
+                  msg, nbytes);
   }
 
   return ptr;
@@ -208,4 +212,3 @@ void hypre_memcpy_fp( HYPRE_Real *dest, const HYPRE_Real *src, size_t n )
   /*hypre_dcopy(&n, src, &inc, dest, &inc);*/
   for (i=0; i<ni; i++) dest[i] = src[i];
 }
-

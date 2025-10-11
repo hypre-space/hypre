@@ -201,7 +201,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     }
 
     /* Reply buffer - will be freed by caller */
-    indbuf = (HYPRE_Int *) MemAlloc(mem, sendbacksize * sizeof(HYPRE_Int));
+    indbuf = (HYPRE_Int *) MemAlloc(mem, (size_t) sendbacksize * sizeof(HYPRE_Int));
 
     /* Pointer used to construct reply message */
     indbufp = indbuf;
@@ -225,8 +225,8 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
         indbufp += len;
     }
 
-    hypre_MPI_Isend(indbuf, indbufp-indbuf, HYPRE_MPI_INT, dest, ROW_REPI_TAG,
-        comm, request);
+    hypre_MPI_Isend(indbuf, (HYPRE_Int) (indbufp - indbuf), HYPRE_MPI_INT,
+                    dest, ROW_REPI_TAG, comm, request);
 }
 
 /*--------------------------------------------------------------------------
@@ -315,8 +315,8 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
     }
 
     /* Reply buffers - will be freed by caller */
-    indbuf = (HYPRE_Int *)    MemAlloc(mem, sendbacksize * sizeof(HYPRE_Int));
-    valbuf = (HYPRE_Real *) MemAlloc(mem, sendbacksize * sizeof(HYPRE_Real));
+    indbuf = (HYPRE_Int *)  MemAlloc(mem, (size_t) sendbacksize * sizeof(HYPRE_Int));
+    valbuf = (HYPRE_Real *) MemAlloc(mem, (size_t) sendbacksize * sizeof(HYPRE_Real));
 
     /* Pointers used to construct reply messages */
     indbufp = indbuf;
@@ -344,13 +344,13 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
         valbufp += len;
     }
 
-    hypre_MPI_Isend(indbuf, indbufp-indbuf, HYPRE_MPI_INT, dest, ROW_REPI_TAG,
-        comm, request);
+    hypre_MPI_Isend(indbuf, (HYPRE_Int) (indbufp - indbuf), HYPRE_MPI_INT,
+                    dest, ROW_REPI_TAG, comm, request);
 
     hypre_MPI_Request_free(request);
 
-    hypre_MPI_Isend(valbuf, valbufp-valbuf, hypre_MPI_REAL, dest, ROW_REPV_TAG,
-        comm, request);
+    hypre_MPI_Isend(valbuf, (HYPRE_Int) (valbufp - valbuf), hypre_MPI_REAL,
+                    dest, ROW_REPV_TAG, comm, request);
 }
 
 /*--------------------------------------------------------------------------
@@ -1059,7 +1059,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         memset(ahat, 0, len*(len+1)/2 * sizeof(HYPRE_Real));
 #else
 /*        bzero((char *) ahat, len*len * sizeof(HYPRE_Real));*/
-        memset(ahat, 0, len*len * sizeof(HYPRE_Real));
+        memset(ahat, 0, ((size_t) (len * len)) * sizeof(HYPRE_Real));
 #endif
 
 #ifdef PARASAILS_DEBUG
@@ -1126,7 +1126,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 
         /* Set the right-hand side */
 /*        bzero((char *) val, len*sizeof(HYPRE_Real));*/
-        memset(val, 0, len*sizeof(HYPRE_Real));
+        memset(val, 0, (size_t) len * sizeof(HYPRE_Real));
         NumberingGlobalToLocal(numb, 1, &row, &loc);
         loc = marker[loc];
         hypre_assert(loc != -1);
@@ -1297,7 +1297,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
         /* Initialize ahat to zero */
 /*        bzero((char *) ahat, len*npat * sizeof(HYPRE_Real));*/
-        memset(ahat, 0, len*npat * sizeof(HYPRE_Real));
+        memset(ahat, 0, ((size_t) (len * npat)) * sizeof(HYPRE_Real));
 
         /* Form ahat matrix, entries correspond to indices in "ind" only */
         ahatp = ahat;
@@ -1328,7 +1328,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
         /* Set the right-hand side, bhat */
 /*        bzero((char *) bhat, npat*sizeof(HYPRE_Real));*/
-        memset(bhat, 0, npat*sizeof(HYPRE_Real));
+        memset(bhat, 0, (size_t) npat * sizeof(HYPRE_Real));
         NumberingGlobalToLocal(numb, 1, &row, &loc);
         loc = marker[loc];
         hypre_assert(loc != -1);

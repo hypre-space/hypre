@@ -19,7 +19,7 @@ void SortedSet_dhCreate(SortedSet_dh *ss, HYPRE_Int size)
   *ss= tmp;
 
   tmp->n = size;
-  tmp->list = (HYPRE_Int*)MALLOC_DH(size*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmp->list = (HYPRE_Int*)MALLOC_DH((size_t) size * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   tmp->count = 0;
   END_FUNC_DH
 }
@@ -59,7 +59,7 @@ void SortedSet_dhInsert(SortedSet_dh ss, HYPRE_Int idx)
   */
   if (! isInserted) {
     if (ct == n) {
-      HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(n*2*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH((size_t) (n * 2) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
       hypre_TMemcpy(tmp,  list, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(list); CHECK_V_ERROR;
       list = ss->list = tmp;
@@ -83,4 +83,3 @@ void SortedSet_dhGetList(SortedSet_dh ss, HYPRE_Int **list, HYPRE_Int *count)
   *count = ss->count;
   END_FUNC_DH
 }
-
