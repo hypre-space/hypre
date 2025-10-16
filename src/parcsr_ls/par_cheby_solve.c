@@ -104,7 +104,7 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         relative_resid = (rhs_norm) ? resid_norm_init / rhs_norm : resid_norm_init;
+         relative_resid = (rhs_norm != 0.0) ? resid_norm_init / rhs_norm : resid_norm_init;
       }
       else
       {
@@ -152,10 +152,10 @@ hypre_ParChebySolve( hypre_ParChebyData *cheby_data,
          /* Compute residual */
          hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, Ltemp);
 
-         conv_factor = (old_resid) ? resid_norm / old_resid : resid_norm;
+         conv_factor = (old_resid != 0.0) ? resid_norm / old_resid : resid_norm;
          if (0 == converge_type)
          {
-            relative_resid = (rhs_norm) ? resid_norm / rhs_norm : resid_norm;
+            relative_resid = (rhs_norm != 0.0) ? resid_norm / rhs_norm : resid_norm;
          }
          else
          {

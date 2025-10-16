@@ -350,7 +350,7 @@ void get_runtime_params_private(Euclid_dh ctx)
                                         /* how to adjust pivots */
 
   /* set row scaling for mandatory cases */
-  if (ctx->sparseTolA || ! strcmp(ctx->algo_ilu, "ilut")) {
+  if (ctx->sparseTolA != 0.0 || ! strcmp(ctx->algo_ilu, "ilut")) {
     ctx->isScaled = true;
   }
 
@@ -413,14 +413,14 @@ void compute_rho_private(Euclid_dh ctx)
     if (myid_dh == 0) {
 
       /* compute rho */
-      if (bufGlobal[0] && bufGlobal[1]) {
+      if (bufGlobal[0] != 0.0 && bufGlobal[1] != 0.0) {
         ctx->rho_final = bufGlobal[1]/bufGlobal[0];
       } else {
         ctx->rho_final = -1;
       }
 
       /* compute ratio of nonzeros in A that were used */
-      if (bufGlobal[0] && bufGlobal[2]) {
+      if (bufGlobal[0] != 0.0 && bufGlobal[2] != 0.0) {
         ctx->stats[NZA_RATIO_STATS] = 100.0*bufGlobal[2]/bufGlobal[0];
       } else {
         ctx->stats[NZA_RATIO_STATS] = 100.0;

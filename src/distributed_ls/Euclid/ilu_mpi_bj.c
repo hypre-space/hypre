@@ -144,7 +144,7 @@ if (ctx->F->rp == NULL) {
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }

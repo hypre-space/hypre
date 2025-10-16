@@ -595,7 +595,7 @@ void Mat_dhZeroTiming(Mat_dh mat)
 void Mat_dhReduceTiming(Mat_dh mat)
 {
   START_FUNC_DH
-  if (mat->time[MATVEC_MPI_TIME]) {
+  if (mat->time[MATVEC_MPI_TIME] != 0.0) {
     mat->time[MATVEC_RATIO] = mat->time[MATVEC_TIME] / mat->time[MATVEC_MPI_TIME];
   }
   hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MIN, comm_dh);

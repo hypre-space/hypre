@@ -38,7 +38,7 @@ void compute_scaling_private(HYPRE_Int row, HYPRE_Int len, HYPRE_Real *AVAL, Euc
   HYPRE_Int j;
 
   for (j=0; j<len; ++j) tmp = MAX( tmp, hypre_abs(AVAL[j]) );
-  if (tmp) {
+  if (tmp != 0.0) {
     ctx->scale[row] = 1.0/tmp;
   }
   END_FUNC_DH
@@ -203,7 +203,7 @@ void iluk_seq(Euclid_dh ctx)
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
@@ -423,7 +423,7 @@ void iluk_seq_block(Euclid_dh ctx)
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
@@ -735,7 +735,7 @@ void ilut_seq(Euclid_dh ctx)
     diag[i] = temp;
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }

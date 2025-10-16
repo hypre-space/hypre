@@ -67,7 +67,7 @@ HYPRE_Int *hypre_idx_malloc( HYPRE_Int n ,const char *msg );
 HYPRE_Int *hypre_idx_malloc_init( HYPRE_Int n , HYPRE_Int ival ,const char *msg );
 HYPRE_Real *hypre_fp_malloc( HYPRE_Int n ,const char *msg );
 HYPRE_Real *hypre_fp_malloc_init( HYPRE_Int n , HYPRE_Real ival ,const char *msg );
-void *hypre_mymalloc( HYPRE_Int nbytes ,const char *msg );
+void *hypre_mymalloc( size_t nbytes ,const char *msg );
 void hypre_free_multi( void *ptr1 , ...);
 void hypre_memcpy_int( HYPRE_Int *dest , const HYPRE_Int *src , size_t n );
 void hypre_memcpy_idx( HYPRE_Int *dest , const HYPRE_Int *src , size_t n );

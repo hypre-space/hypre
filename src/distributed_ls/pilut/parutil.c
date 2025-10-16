@@ -146,7 +146,7 @@ HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival,const char *msg)
 /*************************************************************************
 * This function is my wrapper around malloc.
 **************************************************************************/
-void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
+void *hypre_mymalloc(size_t nbytes,const char *msg)
 {
   void *ptr;
 

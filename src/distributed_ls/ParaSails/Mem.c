@@ -77,9 +77,9 @@ void MemDestroy(Mem *m)
  * 3) memory exhausted.
  *--------------------------------------------------------------------------*/
 
-char *MemAlloc(Mem *m, HYPRE_Int size)
+char *MemAlloc(Mem *m, size_t size)
 {
-   HYPRE_Int req;
+   size_t req;
    char *p;
 
    /* Align on 16-byte boundary */
@@ -108,7 +108,7 @@ char *MemAlloc(Mem *m, HYPRE_Int size)
 
       m->blocks[m->num_blocks] = m->avail;
       m->num_blocks++;
-      m->bytes_left = req;
+      m->bytes_left = (hypre_longint) req;
       m->total_bytes += size;
       m->bytes_alloc += req;
       if (req > MEM_BLOCKSIZE)

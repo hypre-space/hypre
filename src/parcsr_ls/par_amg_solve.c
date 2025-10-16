@@ -222,7 +222,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         if (rhs_norm)
+         if (rhs_norm != 0.0)
          {
             relative_resid = resid_nrm_init / rhs_norm;
          }
@@ -294,7 +294,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
-         if (old_resid)
+         if (old_resid != 0.0)
          {
             conv_factor = resid_nrm / old_resid;
          }
@@ -305,7 +305,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
          if (0 == converge_type)
          {
-            if (rhs_norm)
+            if (rhs_norm != 0.0)
             {
                relative_resid = resid_nrm / rhs_norm;
             }
@@ -346,7 +346,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && resid_nrm_init)
+   if (cycle_count > 0 && resid_nrm_init != 0.0)
    {
       conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
    }
@@ -391,11 +391,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-      if (num_variables[0])
+      if (num_variables[0] != 0.0)
       {
          grid_cmplxty = total_variables / num_variables[0];
       }
-      if (num_coeffs[0])
+      if (num_coeffs[0] != 0.0)
       {
          operat_cmplxty = total_coeffs / num_coeffs[0];
          cycle_cmplxty = cycle_op_count / num_coeffs[0];
