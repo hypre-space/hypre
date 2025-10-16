@@ -269,7 +269,7 @@ hypre_PCGSetup( void *pcg_vdata,
       (pcg_data -> r_old) = (*(pcg_functions->CreateVector))(b);
    }
 
-   if (rtol && recompute_residual_p && (!two_norm))
+   if (rtol > 0.0 && recompute_residual_p && (!two_norm))
    {
       if ( pcg_data -> v != NULL )
       {
@@ -674,7 +674,7 @@ hypre_PCGSolve( void *pcg_vdata,
          }
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         if (rtol)
+         if (rtol > 0.0)
          {
             /* compute s = r_old-r_new */
             (*(pcg_functions->Axpy))(-1.0, s, r);
@@ -712,7 +712,7 @@ hypre_PCGSolve( void *pcg_vdata,
          }
       }
 
-      if (rtol && two_norm)
+      if (rtol > 0.0 && two_norm)
       {
          if (!recompute_true_residual)
          {
@@ -741,7 +741,7 @@ hypre_PCGSolve( void *pcg_vdata,
       }
 
       /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
-      if (rtol && !two_norm)
+      if (rtol > 0.0 && !two_norm)
       {
          if (!recompute_true_residual)
          {
@@ -785,7 +785,7 @@ hypre_PCGSolve( void *pcg_vdata,
       if ( logging > 0 || print_level > 0 )
       {
          norms[i]     = hypre_sqrt(i_prod);
-         rel_norms[i] = bi_prod ? hypre_sqrt(i_prod / bi_prod) : 0;
+         rel_norms[i] = bi_prod > 0.0 ? hypre_sqrt(i_prod / bi_prod) : 0;
       }
       if ( print_level > 1 && my_id == 0 )
       {

@@ -171,7 +171,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    resid_nrm_init = resid_nrm;
    rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
    relative_resid = 9999;
-   if (rhs_norm)
+   if (rhs_norm != 0.0)
    {
       relative_resid = resid_nrm_init / rhs_norm;
    }
@@ -219,7 +219,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
       conv_factor = resid_nrm / old_resid;
       relative_resid = 9999;
-      if (rhs_norm)
+      if (rhs_norm != 0.0)
       {
          relative_resid = resid_nrm / rhs_norm;
       }
@@ -259,7 +259,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    {
       grid_cmplxty = total_variables / ((HYPRE_Real) num_variables[0]);
    }
-   if (num_coeffs[0])
+   if (num_coeffs[0] != 0.0)
    {
       operat_cmplxty = total_coeffs / num_coeffs[0];
       cycle_cmplxty = cycle_op_count / num_coeffs[0];

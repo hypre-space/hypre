@@ -1709,7 +1709,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
       hypre_MPI_Irecv(recv_buffers_mpi[i],
-                      (size_t) recv_bufsizes[i] * sizeof(HYPRE_Complex),
+                      (HYPRE_Int) sizeof(HYPRE_Complex) * recv_bufsizes[i],
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
                       tag, comm, &requests[j++]);
    }
@@ -1719,7 +1719,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
       hypre_MPI_Isend(send_buffers_mpi[i],
-                      (size_t) send_bufsizes[i] * sizeof(HYPRE_Complex),
+                      (HYPRE_Int) sizeof(HYPRE_Complex) * send_bufsizes[i],
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
                       tag, comm, &requests[j++]);
 

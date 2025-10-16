@@ -219,7 +219,7 @@ void Factor_dhPrintDiags(Factor_dh mat, FILE *fp)
       hypre_fprintf(fp, "----- subdomain: %i  processor: %i\n", pe, myid_dh);
       for (i=0; i<m; ++i) {
         REAL_DH val = aval[diag[i]];
-        if (val) {
+        if (val != 0.0) {
           hypre_fprintf(fp, "%i %g\n", i+1+beg_row, aval[diag[i]]);
         } else {
           hypre_fprintf(fp, "%i %g ZERO\n", i+1+beg_row, aval[diag[i]]);

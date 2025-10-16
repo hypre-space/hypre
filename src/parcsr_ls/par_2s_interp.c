@@ -380,11 +380,11 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
                }
                for (j = As_FF_diag_i[row] + 1; j < As_FF_diag_i[row + 1]; j++)
                {
-                  if (D_q[As_FF_diag_j[j]]) { D_w[row] -= As_FF_diag_data[j]; }
+                  if (D_q[As_FF_diag_j[j]] != 0.0) { D_w[row] -= As_FF_diag_data[j]; }
                }
                for (j = As_FF_offd_i[row]; j < As_FF_offd_i[row + 1]; j++)
                {
-                  if (D_q_offd[As_FF_offd_j[j]]) { D_w[row] -= As_FF_offd_data[j]; }
+                  if (D_q_offd[As_FF_offd_j[j]] != 0.0) { D_w[row] -= As_FF_offd_data[j]; }
                }
                D_w[row] -= D_q[new_fine_to_fine[row]];
                row++;
@@ -402,7 +402,7 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
       for (i = startnewf; i < stopnewf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i])
+         if (D_w[i] != 0.0)
          {
             beta = 1.0 / D_w[i];
             As_FF_diag_data[j] = beta * D_q[new_fine_to_fine[i]];
@@ -418,7 +418,7 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
       }
       for (i = startf; i < stopf; i++)
       {
-         if (D_q[i]) { gamma = -1.0 / D_q[i]; }
+         if (D_q[i] != 0.0) { gamma = -1.0 / D_q[i]; }
          else { gamma = 0.0; }
          for (j = As_FC_diag_i[i]; j < As_FC_diag_i[i + 1]; j++)
          {
@@ -908,7 +908,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
          {
             D_q[i] += As_FC_offd_data[j];
          }
-         if (D_q[i] + D_lambda[i]) { D_inv[i] = 1.0 / (D_q[i] + D_lambda[i]); }
+         if (D_q[i] + D_lambda[i] != 0.0) { D_inv[i] = 1.0 / (D_q[i] + D_lambda[i]); }
       }
 
       row = 0;
@@ -1073,11 +1073,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
                }
                for (j = As_FF_diag_i[row] + 1; j < As_FF_diag_i[row + 1]; j++)
                {
-                  if (D_inv[As_FF_diag_j[j]]) { D_w[row] -= As_FF_diag_data[j]; }
+                  if (D_inv[As_FF_diag_j[j]] != 0.0) { D_w[row] -= As_FF_diag_data[j]; }
                }
                for (j = As_FF_offd_i[row]; j < As_FF_offd_i[row + 1]; j++)
                {
-                  if (D_inv_offd[As_FF_offd_j[j]]) { D_w[row] -= As_FF_offd_data[j]; }
+                  if (D_inv_offd[As_FF_offd_j[j]] != 0.0) { D_w[row] -= As_FF_offd_data[j]; }
                }
                D_w[row] += D_tau[row] - D_q[new_fine_to_fine[row]];
                row++;
@@ -1095,7 +1095,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
       for (i = startnewf; i < stopnewf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i])
+         if (D_w[i] != 0.0)
          {
             beta = -1.0 / D_w[i];
             As_FF_diag_data[j] = beta * (D_q[new_fine_to_fine[i]] + D_lambda[new_fine_to_fine[i]]);
