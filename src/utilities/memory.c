@@ -1889,11 +1889,17 @@ HYPRE_Int
 hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
-   const hypre_int device_id = hypre_HandleDevice(handle);
    char resource_name[16];
    const char *pool_name = hypre_HandleUmpireDevicePoolName(handle);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int device_id;
+   hypre_GetDevice(&device_id);
    hypre_sprintf(resource_name, "%s::%d", "DEVICE", device_id);
+#else
+   const hypre_int device_id = hypre_HandleDevice(handle);
+   hypre_sprintf(resource_name, "%s::%d", "DEVICE", device_id);
+#endif
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
    umpire_allocator pooled_allocator;
