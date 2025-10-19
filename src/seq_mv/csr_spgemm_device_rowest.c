@@ -9,7 +9,7 @@
                 Row size estimations
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_GPU)
@@ -72,7 +72,6 @@ void hypre_spgemm_rownnz_naive( hypre_DeviceItem &item,
                                 HYPRE_Int *ia,
                                 HYPRE_Int *ja,
                                 HYPRE_Int *ib,
-                                HYPRE_Int *jb,
                                 HYPRE_Int *rcL,
                                 HYPRE_Int *rcU )
 {
@@ -468,13 +467,13 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    {
       /* naive overestimate */
       HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
-                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, NULL, d_rc );
    }
    else if (row_est_mtd == 2)
    {
       /* naive underestimate */
       HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
-                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_rc, NULL );
    }
    else if (row_est_mtd == 3)
    {
@@ -493,7 +492,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
       HYPRE_Int *d_upp = d_low_upp + m;
 
       HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
-                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */
       hypre_spgemm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>

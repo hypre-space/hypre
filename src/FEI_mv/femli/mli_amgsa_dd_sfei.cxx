@@ -24,7 +24,7 @@
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
 #include "HYPRE_IJ_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_parcsr_mv.h"
 
 #define mabs(x) ((x) > 0 ? x : -(x))

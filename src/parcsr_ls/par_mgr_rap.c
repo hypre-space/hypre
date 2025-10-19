@@ -616,7 +616,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       }
       else if (RT)
       {
-         RAP = hypre_ParCSRMatrixRAPKT(RT, A, P, 1);
+         RAP = hypre_ParCSRMatrixRAPKT(RT, A, P, 1, 0);
       }
       else if (R)
       {

@@ -33,10 +33,6 @@ typedef unsigned long long int hypre_ulonglongint;
 typedef uint32_t               hypre_uint32;
 typedef uint64_t               hypre_uint64;
 
-/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
-typedef float                  hypre_float;
-typedef double                 hypre_double;
-
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/
@@ -53,9 +49,9 @@ typedef double                 hypre_double;
 /* Macro for marking fallthrough in switch statements */
 #if (defined(__GNUC__) && __GNUC__ >= 7) ||\
     (defined(__clang__) && __clang_major__ >= 10)
- #define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
+#define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
 #else
- #define HYPRE_FALLTHROUGH ((void)0)
+#define HYPRE_FALLTHROUGH ((void)0)
 #endif
 
 /* Macro for silencing unused variable warning */

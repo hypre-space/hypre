@@ -21,18 +21,6 @@ tail -17 ${TNAME}.out.110 | head -6 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
-# IJ: MGR case nlevels < 1 and bsize < 2 should be the same
-#                    compare results
-#=============================================================================
-
-tail -17 ${TNAME}.out.200 | head -6 > ${TNAME}.mgr_testdata
-
-#=============================================================================
-
-tail -17 ${TNAME}.out.202 | head -6 > ${TNAME}.mgr_testdata.temp
-diff ${TNAME}.mgr_testdata ${TNAME}.mgr_testdata.temp >&2
-
-#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -157,20 +145,6 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
 fi
 
 FILES="\
- ${TNAME}.out.200\
- ${TNAME}.out.201\
- ${TNAME}.out.202\
- ${TNAME}.out.203\
- ${TNAME}.out.204\
- ${TNAME}.out.205\
- ${TNAME}.out.206\
- ${TNAME}.out.207\
- ${TNAME}.out.208\
- ${TNAME}.out.209\
- ${TNAME}.out.210\
- ${TNAME}.out.211\
- ${TNAME}.out.212\
- ${TNAME}.out.213\
  ${TNAME}.out.404\
  ${TNAME}.out.405\
 "
@@ -188,6 +162,58 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
+FILES="\
+ ${TNAME}.out.501\
+ ${TNAME}.out.502\
+ ${TNAME}.out.503\
+ ${TNAME}.out.504\
+ ${TNAME}.out.505\
+ ${TNAME}.out.506\
+ ${TNAME}.out.507\
+ ${TNAME}.out.508\
+ ${TNAME}.out.509\
+ ${TNAME}.out.511\
+ ${TNAME}.out.512\
+ ${TNAME}.out.513\
+ ${TNAME}.out.514\
+ ${TNAME}.out.515\
+ ${TNAME}.out.516\
+ ${TNAME}.out.517\
+ ${TNAME}.out.518\
+ ${TNAME}.out.519\
+"
+
+# Process each output file to extract the solver convergence history
+# We capture all lines between the first and last occurrence of "L2 norm of"
+# This includes initial norms, iteration history, and final convergence results
+for i in $FILES
+do
+  echo "# Output file: $i"
+  awk '
+    BEGIN { found=0; last=0 }
+    /L2 norm of/ {
+      if (!found) { found=1; start=NR }
+      last=NR
+    }
+    END {
+      if (found) {
+        for (i=start; i<=last; i++) {
+          print lines[i]
+        }
+      }
+    }
+    { lines[NR]=$0 }
+  ' $i
+  echo ""  # Add a newline after each file
+done > ${TNAME}.out.f
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "L2 norm of b:" ${TNAME}.out.f | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
+
 # put all of the output files together
 cat ${TNAME}.out.[a-z] > ${TNAME}.out
 
@@ -196,4 +222,3 @@ cat ${TNAME}.out.[a-z] > ${TNAME}.out
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
-rm -r ${TNAME}.mgr_testdata*

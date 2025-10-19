@@ -34,6 +34,7 @@ typedef void (*GPUMfreeFunc)(void *);
 typedef struct
 {
    HYPRE_Int              log_level;
+   HYPRE_Int              log_level_saved;
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
@@ -82,6 +83,7 @@ typedef struct
 
 /* accessor macros to hypre_Handle */
 #define hypre_HandleLogLevel(hypre_handle)                       ((hypre_handle) -> log_level)
+#define hypre_HandleLogLevelSaved(hypre_handle)                  ((hypre_handle) -> log_level_saved)
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
 
@@ -145,4 +147,5 @@ typedef struct
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
+extern hypre_Handle *_hypre_handle;
 #endif

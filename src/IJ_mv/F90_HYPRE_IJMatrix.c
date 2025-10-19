@@ -11,8 +11,8 @@
  *
  *****************************************************************************/
 
-#include "./_hypre_IJ_mv.h"
-#include "fortran.h"
+#include "_hypre_IJ_mv.h"
+#include "_hypre_fortran.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -294,8 +294,8 @@ hypre_F90_IFACE(hypre_ijmatrixgetglobalinfo, HYPRE_IJMATRIXGETGLOBALINFO)
   hypre_F90_BigInt *global_num_nonzeros,
   hypre_F90_Int *ierr    )
 {
-  *ierr = (hypre_F90_Int)
-          ( HYPRE_IJMatrixGetGlobalInfo(
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJMatrixGetGlobalInfo(
                 hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
                 hypre_F90_PassBigIntRef (global_num_rows),
                 hypre_F90_PassBigIntRef (global_num_cols),

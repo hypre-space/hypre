@@ -196,13 +196,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_DEVICE(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
    else if (location == hypre_MEMORY_HOST)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_HOST(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
 
 #elif defined(HYPRE_USING_HIP)
@@ -450,7 +448,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, hypre_MemoryLocation location
 }
 
 void *
-_hypre_MAlloc(size_t size, hypre_MemoryLocation location)
+hypre__MAlloc(size_t size, hypre_MemoryLocation location)
 {
    return hypre_MAlloc_core(size, 0, location);
 }
@@ -592,7 +590,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
 }
 
 void
-_hypre_Free(void *ptr, hypre_MemoryLocation location)
+hypre__Free(void *ptr, hypre_MemoryLocation location)
 {
    hypre_Free_core(ptr, location);
 }
@@ -663,10 +661,12 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
+      /* Asynchronous (wrt host) D2D copies are default starting from rocm 5.6.1 */
+#if HIP_VERSION < 50631062
       HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+#else
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+#endif
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -794,10 +794,12 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
+      /* Asynchronous (wrt host) D2D copies are default starting from rocm 5.6.1 */
+#if HIP_VERSION < 50631062
       HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+#else
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+#endif
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -1569,7 +1571,7 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)")
+         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)");
 #endif
          hypre_printf("\n");
          hypre_printf("   ----+--------------+--------------+--------------+-------------");

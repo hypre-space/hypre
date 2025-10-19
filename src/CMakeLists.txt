@@ -17,11 +17,14 @@ endif()
 if(POLICY CMP0104)
   cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
 endif()
+if(POLICY CMP0090)
+  cmake_policy(SET CMP0090 NEW) # Checks for <PackageName>_ROOT
+endif()
 
 # The version number.
-set(HYPRE_VERSION 2.33.0)
-set(HYPRE_NUMBER  23300)
-set(HYPRE_DATE    2025/04/03)
+set(HYPRE_VERSION 3.0.0)
+set(HYPRE_NUMBER  30000)
+set(HYPRE_DATE    2025/09/26)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -82,6 +85,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeR
 
 # Set debug flags based on compiler
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(HYPRE_DEBUG ON CACHE INTERNAL "")
   if(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wremarks>
@@ -137,6 +141,8 @@ set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for H
 set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_MIXED_PRECISION      "Enable mixed precision support" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_FORTRAN              "Enable Fortran drivers (examples/tests)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_BLAS           "Use internal BLAS library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_HYPRE_LAPACK         "Use internal LAPACK library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
@@ -148,6 +154,7 @@ set_hypre_option(BASE HYPRE_ENABLE_LTO                  "Use Link-Time Optimizat
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Use strict error checking (Sequential only)" OFF)
+set_hypre_option(SKIP HYPRE_ENABLE_MEMORY_TRACKER       "Use internal memory tracker (Debug only)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_ENABLE_MEMORY_TRACKER       "Use memory tracker for debugging purposes" OFF)
@@ -161,7 +168,7 @@ set_hypre_option(GPU  HYPRE_ENABLE_SYCL                 "Use SYCL" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_AWARE_MPI        "Use device aware MPI support" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
-set_hypre_option(GPU  HYPRE_ENABLE_THRUST_ASYNC         "Use Thrust par_nosync policy" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_THRUST_NOSYNC        "Use Thrust par_nosync policy" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA or rocTX on HIP" OFF)
 # CUDA options
 set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
@@ -171,14 +178,16 @@ set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use CUB's device memory pool" OFF)
 # HIP options
-set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
-set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
+
 # TPL options
 set_hypre_option(TPL  HYPRE_ENABLE_UMPIRE               "Use Umpire Allocator for device and unified memory" OFF)
 set_hypre_option(TPL  HYPRE_ENABLE_UMPIRE_HOST          "Use Umpire Allocator for host memory" OFF)
@@ -222,20 +231,31 @@ process_fmangling_scheme(FMANGLE "name")
 process_fmangling_scheme(FMANGLE_BLAS "BLAS")
 process_fmangling_scheme(FMANGLE_LAPACK "LAPACK")
 
+# Enable Fortran language when requested (for examples/tests only)
+if (HYPRE_ENABLE_FORTRAN)
+  enable_language(Fortran)
+  if (HYPRE_ENABLE_MPI)
+    find_package(MPI REQUIRED COMPONENTS Fortran)
+  endif()
+endif()
+
 # Set config name values
 set_internal_hypre_option("" BIGINT)
 set_internal_hypre_option("" MIXEDINT)
 set_internal_hypre_option("" SINGLE)
 set_internal_hypre_option("" LONG_DOUBLE)
 set_internal_hypre_option("" COMPLEX)
+set_internal_hypre_option("" MIXED_PRECISION)
 set_internal_hypre_option("" TEST_USING_HOST)
 set_internal_hypre_option("" PRINT_ERRORS)
 set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HYPRE_BLAS)
 set_internal_hypre_option(USING HYPRE_LAPACK)
+set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HOPSCOTCH)
 set_internal_hypre_option(USING GPU_AWARE_MPI)
-set_internal_hypre_option(USING GPU_STREAMS)
+set_internal_hypre_option(USING CUDA_STREAMS)
+set_internal_hypre_option(USING THRUST_NOSYNC)
 set_internal_hypre_option(USING DEVICE_POOL)
 set_internal_hypre_option(USING OPENMP)
 set_internal_hypre_option(USING CUDA)
@@ -282,8 +302,8 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic>)
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror -Werror=vla>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
@@ -406,10 +426,11 @@ if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
     $<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>)
 endif ()
 
-# Set output directory for the library
+# Set versions and output directories for the library
+math(EXPR HYPRE_SOVERSION "${HYPRE_VERSION_MAJOR} * 100 + ${HYPRE_VERSION_MINOR}")
 set_target_properties(${PROJECT_NAME} PROPERTIES
   VERSION "${HYPRE_VERSION}"
-  SOVERSION "${HYPRE_VERSION_MAJOR}${HYPRE_VERSION_MINOR}"
+  SOVERSION "${HYPRE_SOVERSION}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -429,13 +450,13 @@ set(HYPRE_NEEDS_CXX OFF CACHE INTERNAL "Flag to indicate if C++ is needed for TP
 
 # Setup third-party libraries (TPLs)
 setup_fei()
-setup_tpl_or_internal(blas)
-setup_tpl_or_internal(lapack)
+setup_tpl(umpire)
 setup_tpl(superlu)
 setup_tpl(dsuperlu)
 setup_tpl(magma)
 setup_tpl(caliper)
-setup_tpl(umpire)
+setup_tpl_or_internal(blas)
+setup_tpl_or_internal(lapack)
 
 # Some TPLs need C++ to be enabled (GPU already enables C++ by default)
 if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
@@ -505,6 +526,11 @@ if (MSVC)
     #Fix issue with visual studio 2013
     set_source_files_properties(struct_ls/pfmg3_setup_rap.c      PROPERTIES COMPILE_FLAGS /Od)
   endif()
+endif ()
+
+# Debug library
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  pretty_print_target_interface(HYPRE INTERFACE_LINK_LIBRARIES)
 endif ()
 
 # Build FEI, if requested (to be phased out)

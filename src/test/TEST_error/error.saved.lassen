@@ -61,11 +61,11 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
                 operator = 2.492344
                    cycle = 4.982188
 
-0: hypre error in file "par_amg.c", line 2024, error code = 20
-0: hypre error in file "par_amg_solve.c", line 341, error code = 256
-0: hypre error in file "par_amg_solve.c", line 341, error code = 256
-0: hypre error in file "pcg.c", line 851, error code = 256 - Negative or zero gamma value in PCG
-0: hypre error in file "pcg.c", line 992, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 992, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 992, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 992, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "par_amg.c", line 2025, error code = 20
+0: hypre error in file "par_amg_solve.c", line 342, error code = 256
+0: hypre error in file "par_amg_solve.c", line 342, error code = 256
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 869, error code = 256 - Negative or zero gamma value in PCG

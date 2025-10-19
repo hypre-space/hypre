@@ -1,0 +1,108 @@
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+
+#
+# Grid sketch:
+#
+# ------------------------- -------------------------
+# |           |           | |           |           |
+# |           |           | |           |           |
+# |     *     |   (2,1)   | |     *     |   (1,1)   |
+# |           |           | |           |           |
+# |           |           | |           |           |
+# ------------------------- -------------------------
+# |           |           | |           |           |
+# |           |           | |           |           |
+# |   (1,0)   |     *     | |   (0,0)   |     *     |
+# |           |           | |           |           |
+# |           |           | |           |           |
+# ------------------------- -------------------------
+#
+#         (Part 0)                   (Part 1)
+############################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 0-) (2+ 1+)
+GridSetExtents: 1 (0- 0-) (1+ 1+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+GridSetVariables: 0 1 [0]
+GridSetVariables: 1 1 [0]
+
+# GridSetNeighborPart: part      ilower(ndim)      iupper(ndim)
+#                      nbor_part nbor_ilower(ndim) nbor_iupper(ndim)
+#                      index_map[ndim] index_dir[ndim]
+# East neighbors
+GridSetNeighborPart: 0 (2+ 0- :  1 0) (2+ 1+ :  1 0) 1 (0- 0-) (0- 1+) [0 1] [1 1]
+
+# West neighbors
+GridSetNeighborPart: 1 (0- 0- : -1 0) (0- 1+ : -1 0) 0 (2+ 0-) (2+ 1+) [0 1] [1 1]
+
+############################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [5]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  4.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+
+############################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 1 0 0
+
+############################################################
+
+# MatrixSetDomainStride: part stride[ndim]
+MatrixSetDomainStride: 0 [1 1]
+MatrixSetDomainStride: 1 [1 1]
+
+# MatrixSetRangeStride: part stride[ndim]
+MatrixSetRangeStride: 0 [1 1]
+MatrixSetRangeStride: 1 [1 1]
+
+# MatrixSetConstantEntries: part num_centries centries(num_centries)
+
+# MatrixSetValues: boundary conditions
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+# North BCs
+MatrixSetValues: 0 (1- 1+) (2+ 1+) [1 1] 0 4 0.0
+MatrixSetValues: 1 (0- 1+) (1+ 1+) [1 1] 0 4 0.0
+
+# South BCs
+MatrixSetValues: 0 (1- 0-) (2+ 0-) [1 1] 0 3 0.0
+MatrixSetValues: 1 (0- 0-) (1+ 0-) [1 1] 0 3 0.0
+
+# East BCs
+MatrixSetValues: 1 (1+ 0-) (1+ 1+) [1 1] 0 2 0.0
+
+# West BCs
+MatrixSetValues: 0 (1- 0-) (1- 1+) [1 1] 0 1 0.0
+
+############################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1
+############################################################

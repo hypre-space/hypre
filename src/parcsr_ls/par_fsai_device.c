@@ -31,6 +31,8 @@ hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
                                         HYPRE_Complex     *rhs_data,
                                         HYPRE_Complex     *sol_data )
 {
+   HYPRE_UNUSED_VAR(item);
+
    extern __shared__ void* shmem[];
 
    HYPRE_Complex    *ls_data = (HYPRE_Complex*) shmem;
@@ -463,7 +465,6 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
@@ -589,7 +590,6 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {

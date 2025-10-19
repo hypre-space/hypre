@@ -60,13 +60,13 @@ endif()
 include(CheckLanguage)
 check_language(CUDA)
 if(DEFINED CMAKE_CUDA_COMPILER)
-   enable_language(CUDA)
+  enable_language(CUDA)
 else()
   message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
 endif()
 
 # Find the CUDA Toolkit
-find_package(CUDAToolkit REQUIRED)
+find_package(CUDAToolkit REQUIRED ${CUDA_DIR})
 
 # Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
 if(NOT TARGET cuda)
@@ -74,7 +74,9 @@ if(NOT TARGET cuda)
 endif()
 
 # Detection CUDA architecture if not given by the user
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52")
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
+   CMAKE_CUDA_ARCHITECTURES MATCHES "^[ \t\r\n]*$" OR
+   CMAKE_CUDA_ARCHITECTURES STREQUAL "52")  # CMake's default
   message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
 
   # Platform-specific NVIDIA smi command
@@ -121,7 +123,7 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52
       string(REPLACE "." "" CUDA_ARCHS "${CUDA_ARCHS}")   # Replace '.' with nothing to format '7.0' as '70'
       string(REPLACE "\n" ";" CUDA_ARCHS "${CUDA_ARCHS}") # Replace newline with semicolon for list format
 
-      # Remove any duplicates CUDA archictectures
+      # Remove any duplicates CUDA architectures
       list(REMOVE_DUPLICATES CUDA_ARCHS)
 
       if(CUDA_ARCHS)
@@ -138,8 +140,7 @@ else()
   # Remove duplicates from the pre-set CMAKE_CUDA_ARCHITECTURES
   string(REPLACE "," ";" CUDA_ARCH_LIST "${CMAKE_CUDA_ARCHITECTURES}")
   list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
-  string(REPLACE ";" "," CUDA_ARCH_STR "${CUDA_ARCH_LIST}")
-  set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
+  set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_LIST}" CACHE STRING "Detected CUDA architectures" FORCE)
   message(STATUS "CMAKE_CUDA_ARCHITECTURES is already set to: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 
@@ -160,7 +161,7 @@ endif()
 
 # Check for Thrust headers
 find_path(THRUST_INCLUDE_DIR thrust/version.h
-  HINTS ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_INCLUDE_DIRS}/cuda-thrust
+  HINTS ${CUDAToolkit_INCLUDE_DIRS} ${CUDAToolkit_INCLUDE_DIRS}/cccl ${CUDAToolkit_INCLUDE_DIRS}/cuda-thrust
   PATH_SUFFIXES thrust
   NO_DEFAULT_PATH
 )
@@ -208,21 +209,14 @@ endfunction()
 # Handle CUDA libraries
 list(APPEND CUDA_LIBS CUDA::cudart) # Add cudart first since other CUDA libraries may depend on it
 find_and_add_cuda_library(cusparse HYPRE_ENABLE_CUSPARSE)
-find_and_add_cuda_library(curand HYPRE_ENABLE_CURAND)
-find_and_add_cuda_library(cublas HYPRE_ENABLE_CUBLAS)
+find_and_add_cuda_library(curand   HYPRE_ENABLE_CURAND)
+find_and_add_cuda_library(cublas   HYPRE_ENABLE_CUBLAS)
 find_and_add_cuda_library(cublasLt HYPRE_ENABLE_CUBLAS)
 find_and_add_cuda_library(cusolver HYPRE_ENABLE_CUSOLVER)
 
-# Handle GPU Profiling with nvToolsExt
+# Handle GPU Profiling with nvtx3
 if(HYPRE_ENABLE_GPU_PROFILING)
-  find_library(NVTX_LIBRARY nvToolsExt HINTS ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib64 lib)
-  if(NVTX_LIBRARY)
-    message(STATUS "Found NVTX library")
-    set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
-    list(APPEND CUDA_LIBS ${NVTX_LIBRARY})
-  else()
-    message(FATAL_ERROR "NVTX library not found! Make sure CUDA is installed correctly.")
-  endif()
+  set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
 endif()
 
 # Add CUDA Toolkit include directories to the target

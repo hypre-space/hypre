@@ -495,11 +495,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_SYCL)
 struct l1_norm_op1
-#else
-struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
-#endif
 {
    __host__ __device__
    HYPRE_Complex operator()(const HYPRE_Complex &x, const HYPRE_Complex &y) const
@@ -507,14 +503,8 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
       return x <= 4.0 / 3.0 * y ? y : x;
    }
 };
-#endif
 
-#if defined(HYPRE_USING_GPU)
-#if defined(HYPRE_USING_SYCL)
 struct l1_norm_op6
-#else
-struct l1_norm_op6 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
-#endif
 {
    __host__ __device__
    HYPRE_Complex operator()(const HYPRE_Complex &d, const HYPRE_Complex &l) const
@@ -698,14 +688,14 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
 
 #if defined(HYPRE_USING_GPU)
-      if ( exec == HYPRE_EXEC_DEVICE)
+      if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, [] (const auto & x) {return !x;},
-         1.0 );
+         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
+         [] (const auto & x) {return !x;}, 1.0 );
 #else
-         thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, HYPRE_THRUST_NOT(identity), 1.0 );
+         HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
+                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), 1.0 );
 #endif
       }
       else
@@ -1260,8 +1250,9 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_Pi = A_Pi;
 
-   /* Penalize the eliminated degrees of freedom */
-   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX);
+   /* Penalize the eliminated degrees of freedom.
+      We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX / 1000);
 
    /* Make sure that the first entry in each row is the diagonal one. */
    /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_Pi)); */
@@ -1291,8 +1282,9 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
    }
    else
    {
-      /* Penalize the eliminated degrees of freedom */
-      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX);
+      /* Penalize the eliminated degrees of freedom.
+         We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX / 1000);
 
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */
@@ -1916,7 +1908,7 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j;
 
-      HYPRE_Real *Gx_data, *Gy_data, *Gz_data;
+      HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
@@ -2273,19 +2265,22 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePixyz_copy, gDim, bDim,
-                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data,
+                              Gx_data, Gy_data, Gz_data,
                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
          }
          else
 #endif
          {
             if (G_offd_ncols)
+            {
                for (i = 0; i < G_offd_nrows + 1; i++)
                {
                   Pix_offd_I[i] = G_offd_I[i];
                   Piy_offd_I[i] = G_offd_I[i];
                   Piz_offd_I[i] = G_offd_I[i];
                }
+            }
 
             for (i = 0; i < G_offd_nnz; i++)
             {
@@ -2295,12 +2290,14 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < G_offd_nrows; i++)
+            {
                for (j = G_offd_I[i]; j < G_offd_I[i + 1]; j++)
                {
                   *Pix_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gx_data[i];
                   *Piy_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gy_data[i];
                   *Piz_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gz_data[i];
                }
+            }
          }
 
          for (i = 0; i < G_offd_ncols; i++)
@@ -3343,7 +3340,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_G = hypre_ParCSRMatrixRAPKT(ams_data -> G,
                                                       ams_data -> A,
-                                                      ams_data -> G, 1);
+                                                      ams_data -> G, 1, 1);
          }
          else
 #endif
@@ -3428,7 +3425,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ams_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ams_data -> Pix, ams_data -> A, ams_data -> Pix, 1);
+         ams_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ams_data -> Pix, ams_data -> A, ams_data -> Pix, 1, 1);
       }
       else
 #endif
@@ -3459,7 +3456,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ams_data -> Piy,
                                                         ams_data -> A,
-                                                        ams_data -> Piy, 1);
+                                                        ams_data -> Piy, 1, 1);
          }
          else
 #endif
@@ -3491,7 +3488,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ams_data -> Piz,
                                                         ams_data -> A,
-                                                        ams_data -> Piz, 1);
+                                                        ams_data -> Piz, 1, 1);
          }
          else
 #endif
@@ -3692,7 +3689,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
-                  ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ApGGt, ams_data -> Pi, 1);
+                  ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ApGGt, ams_data -> Pi, 1, 1);
                }
                else
 #endif
@@ -3709,7 +3706,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
-               ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ams_data -> A, ams_data -> Pi, 1);
+               ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ams_data -> A, ams_data -> Pi, 1, 1);
             }
             else
 #endif

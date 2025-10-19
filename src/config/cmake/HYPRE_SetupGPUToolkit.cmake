@@ -6,21 +6,10 @@
 # Enable CXX language
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(HYPRE_ENABLE_SYCL)
-  # We enforce the use of Intel's oneAPI DPC++/C++ Compiler
-  if(NOT CMAKE_CXX_COMPILER MATCHES "dpcpp|icpx")
-    message(FATAL_ERROR "SYCL requires DPC++ or Intel C++ compiler")
-  endif()
 
-  # Enforce C++17 at least for SYCL
-  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
-    set(CMAKE_CXX_STANDARD 17)
-  endif()
-else()
-  # Enforce C++14 at least for CUDA and HIP
-  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-    set(CMAKE_CXX_STANDARD 14)
-  endif()
+# Use C++17 by default if not given by users
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 # Set C++ standard for HYPRE
@@ -88,4 +77,27 @@ elseif(HYPRE_ENABLE_SYCL)
 
 else()
   message(FATAL_ERROR "Neither CUDA nor HIP nor SYCL is enabled. Please enable one of them.")
+endif()
+
+# Checks involving Umpire for CUDA/HIP
+if (NOT HYPRE_ENABLE_SYCL AND
+    NOT HYPRE_ENABLE_UMPIRE AND
+    NOT HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
+  # Auto-enable Umpire if the user didn't do it explicitly
+  set(HYPRE_ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+  message(STATUS "Enabling Umpire automatically for GPU-enabled build due to performance and allocator features. Set -DHYPRE_ENABLE_UMPIRE=OFF to opt out.")
+
+elseif(NOT HYPRE_ENABLE_SYCL AND
+       NOT HYPRE_ENABLE_UMPIRE AND
+       HYPRE_USER_SET_HYPRE_ENABLE_UMPIRE)
+  # If user explicitly disables Umpire while enabling GPU, warn strongly but respect it
+  message(WARNING
+"===============================================================
+ Umpire is explicitly disabled while building hypre for GPUs.
+ This is not recommended for performance reasons!
+ Enable it with -DHYPRE_ENABLE_UMPIRE=ON.
+===============================================================")
 endif()

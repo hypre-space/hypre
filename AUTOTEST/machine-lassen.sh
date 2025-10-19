@@ -55,56 +55,56 @@ module -q load cuda
 module -q load xl
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
-# CUDA with UM in debug mode [ij, ams, struct, sstruct]
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-print-errors --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+# CUDA with UM in debug mode with print errors [error]
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-persistent --enable-debug --with-print-errors --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-error -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-with-errors
 
 # CUDA with UM and mixed-int
-co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # CUDA with UM with shared library
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 # CUDA with UM and single precision
-co="--with-cuda --enable-unified-memory --enable-single --enable-cusolver --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-single --enable-cusolver --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
 ./renametest.sh basic $output_dir/basic-cuda-um-single
 
 # CUDA with UM without MPI [no run]
-#co="--with-cuda --enable-unified-memory --without-MPI --with-gpu-arch=70 --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+#co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --without-MPI --with-gpu-arch=70 --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
 #./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
 
 # CUDA without UM with device memory pool [struct]
-co="--with-cuda --enable-device-memory-pool --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-device-memory-pool --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-nonum
 
 # CUDA without UM with umpire [benchmark]
-UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/2022.03.1-nvcc11.2-sm_70-xl2023.06.28-cuda-11.2.0-gcc-8.3.1
-co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=umpire --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/install_umpire-2025.03.0_nvcc11.2-sm_70-xl2023.06.28-cuda-11.2.0-gcc-8.3.1
+co="--with-cuda --with-cxxstandard=11 --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=\\'camp umpire\\' --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-bench
 
 # run on CPU
-co="--with-cuda --with-test-using-host --with-memory-tracker --enable-debug --with-gpu-arch=70"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-gpu-arch=70"
 ro="-ij-noilu -ams -struct -sstruct -rt -mpibind -save lassen_cpu"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-cpu
@@ -133,17 +133,17 @@ module list cmake/3.22 |& grep "None found"
 mo="-j"
 
 # CUDA with UM + CMake
-co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_DEVICE_POOL=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029"\'" -DCMAKE_CUDA_ARCHITECTURES=70"
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_STANDARD=11 -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_DEVICE_POOL=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029"\'" -DCMAKE_CUDA_ARCHITECTURES=70"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-um-ij
 
 # CUDA with UM [shared library] + CMake
-co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_OPENMP=ON -DHYPRE_ENABLE_HOPSCOTCH=ON -DBUILD_SHARED_LIBS=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029 "\'" -DCMAKE_CUDA_ARCHITECTURES=70"
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_STANDARD=11 -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_OPENMP=ON -DHYPRE_ENABLE_HOPSCOTCH=ON -DBUILD_SHARED_LIBS=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029 "\'" -DCMAKE_CUDA_ARCHITECTURES=70"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-um-shared
 
 # CUDA w.o UM + CMake
-co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_ENABLE_CUDA=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029"\'" -DCMAKE_CUDA_ARCHITECTURES=70"
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_STANDARD=11 -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UMPIRE=OFF -DCMAKE_BUILD_TYPE=Debug -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029"\'" -DCMAKE_CUDA_ARCHITECTURES=70"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
@@ -160,7 +160,7 @@ mo="-j test"
 module -q load gcc/8.3.1
 module -q load cuda/12.0
 module list cuda/12.0 |& grep "None found"
-co="--with-cuda --enable-unified-memory --enable-thrust-nosync --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
+co="--with-cuda --with-cxxstandard=11 --without-umpire --enable-unified-memory --enable-thrust-nosync --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda12_0

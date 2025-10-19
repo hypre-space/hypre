@@ -355,6 +355,7 @@ when building for GPUs are:
 1. Only one GPU backend can be enabled at a time (CUDA, HIP, or SYCL)
 2. Some features like full support for 64-bit integers (`BigInt`) are not available
 3. Memory management options (device vs unified memory) affect solver availability
+4. Umpire is implicitly enabled by default when building with CUDA or HIP support
 
 The table below lists the available GPU-specific build options for both autotools and CMake
 build systems.
@@ -458,26 +459,29 @@ build systems.
      - ``--enable-onemklrand``
      - ``-DHYPRE_ENABLE_ONEMKLRAND=ON``
    * - | Umpire Support
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire``
      - ``-DHYPRE_ENABLE_UMPIRE=ON``
    * - | Umpire Unified Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-um``
      - ``-DHYPRE_ENABLE_UMPIRE_UM=ON``
    * - | Umpire Device Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-device``
      - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
 
-.. warning::
+.. note::
 
-   Allocations and deallocations of GPU memory can be slow. Memory pooling is a
-   common approach to reduce such overhead and improve performance. We recommend using
-   [Umpire]_ for memory management, which provides robust pooling capabilities for both
-   device and unified memory. For Umpire support, the Umpire library must be installed
-   and properly configured. See the note in the previous section for more details on
-   how to specify the installation path for dependency libraries.
+    Allocations and deallocations of GPU memory can be slow. Memory pooling is a common
+    approach to reduce such overhead and improve performance. For better performance,
+    [Umpire]_ is enabled by default for CUDA and HIP builds and provides robust pooling
+    capabilities for both device and unified memory.
+
+    For SYCL builds, Umpire remains optional and must be enabled explicitly.
+
+    For Umpire support, the Umpire library must be installed and properly configured. See
+    :ref:`umpire_build` for instructions on building Umpire from source.
 
 .. note::
 
@@ -487,6 +491,57 @@ build systems.
    memory, whereas only selected unstructured solvers can run with device memory.
    See :ref:`ch-boomeramg-gpu` for details. Some solver options for BoomerAMG
    require unified (managed) memory.
+
+.. _umpire_build:
+
+Building Umpire
+^^^^^^^^^^^^^^^
+
+If Umpire is not already available on your system, you can build it using
+`Spack <https://spack.io/>`_ or manually from source. To build from source,
+follow these steps:
+
+.. code-block:: bash
+
+   git clone --recursive https://github.com/LLNL/Umpire.git
+
+   cd Umpire
+   cmake -S . -B build \
+     -DUMPIRE_ENABLE_C=ON \
+     -DUMPIRE_ENABLE_TOOLS=OFF \
+     -DENABLE_CUDA=${ENABLE_CUDA} \
+     -DENABLE_HIP=${ENABLE_HIP} \
+     -DENABLE_SYCL=${ENABLE_SYCL} \
+     -DENABLE_BENCHMARKS=OFF \
+     -DENABLE_EXAMPLES=OFF \
+     -DENABLE_DOCS=OFF \
+     -DENABLE_TESTS=OFF \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DCMAKE_INSTALL_LIBDIR=/path-to-umpire-install/lib \
+     -DCMAKE_INSTALL_PREFIX=/path-to-umpire-install
+
+   cmake --build build -j
+   cmake --install build
+
+Enable either CUDA, HIP, or SYCL by setting the corresponding flag to ``ON`` and
+the others to ``OFF``.
+
+After completion, make sure to add the installation path to your environment
+or provide it to hypre at configure time. For example:
+
+.. code-block:: bash
+
+   ./configure --with-umpire-include=/path-to-umpire-install/include \
+               --with-umpire-lib-dirs=/path-to-umpire-install/lib \
+               --with-umpire-libs="umpire camp" \
+
+or with CMake:
+
+.. code-block:: bash
+
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -Dumpire_DIR=/path-to-umpire-install/lib/cmake/umpire \
+         ../src
 
 Make Targets
 =====================
@@ -802,55 +857,6 @@ effectively, please include:
 - Comparison with previous versions (if applicable)
 - Problem size and scaling information
 - Hardware configuration details
-
-.. _LSI_install:
-
-Using HYPRE in External FEI Implementations
-==============================================================================
-
-.. warning::
-   FEI is not actively supported by the hypre development team. For similar
-   functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
-   allows the representation of block-structured grid problems via hypre's
-   SStruct interface.
-
-To set up hypre for use in external, e.g. Sandia's, FEI implementations one
-needs to follow the following steps:
-
-#. obtain the hypre and Sandia's FEI source codes,
-#. compile Sandia's FEI (fei-2.5.0) to create the ``fei_base`` library.
-#. compile hypre
-
-   * unpack the archive and go into the ``src`` directory
-   * do a ``configure`` with the ``--with-fei-inc-dir`` option set to the FEI
-     include directory plus other compile options
-   * compile with ``make install`` to create the ``HYPRE_LSI`` library in
-     ``hypre/lib``.
-
-#. call the FEI functions in your application code (as shown in Chapters
-   :ref:`ch-FEI` and :ref:`ch-Solvers`)
-
-   * include ``cfei-hypre.h`` in your file
-   * include ``FEI_Implementation.h`` in your file
-
-#. Modify your ``Makefile``
-
-   * include hypre's ``include`` and ``lib`` directories in the search paths.
-   * Link with ``-lfei_base -lHYPRE_LSI``.  Note that the order in which the
-     libraries are listed may be important.
-
-Building an application executable often requires linking with many different
-software packages, and many software packages use some LAPACK and/or BLAS
-functions.  In order to alleviate the problem of multiply defined functions at
-link time, it is recommended that all software libraries are stripped of all
-LAPACK and BLAS function definitions.  These LAPACK and BLAS functions should
-then be resolved at link time by linking with the system LAPACK and BLAS
-libraries (e.g. dxml on DEC cluster).  Both hypre and SuperLU were built with
-this in mind.  However, some other software library files needed may have the
-BLAS functions defined in them.  To avoid the problem of multiply defined
-functions, it is recommended that the offending library files be stripped of the
-BLAS functions.
-
 
 Calling HYPRE from Other Languages
 ==============================================================================

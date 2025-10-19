@@ -104,7 +104,6 @@ main( hypre_int argc,
    HYPRE_Int           sym;
    HYPRE_Int           rap;
    HYPRE_Int           relax;
-   HYPRE_Int           jump;
    HYPRE_Int           rep, reps;
 
    HYPRE_Int         **iupper;
@@ -178,7 +177,6 @@ main( hypre_int argc,
    sym  = 1;
    rap = 0;
    relax = 1;
-   jump  = 0;
    reps = 1;
 
    nx = 10;
@@ -331,11 +329,6 @@ main( hypre_int argc,
          arg_index++;
          skip = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-jump") == 0 )
-      {
-         arg_index++;
-         jump = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -402,7 +395,6 @@ main( hypre_int argc,
       hypre_printf("                        4  - spMV with constant coeffs var diag\n");
       hypre_printf("                        8  - Jacobi\n");
       hypre_printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
-      hypre_printf("  -jump <num>         : num levels to jump in SparseMSG\n");
       hypre_printf("\n");
    }
 
@@ -474,7 +466,6 @@ main( hypre_int argc,
       hypre_printf("  sym             = %d\n", sym);
       hypre_printf("  rap             = %d\n", rap);
       hypre_printf("  relax           = %d\n", relax);
-      hypre_printf("  jump            = %d\n", jump);
       hypre_printf("  solver ID       = %d\n", solver_id);
    }
 
@@ -489,7 +480,6 @@ main( hypre_int argc,
       hypre_printf("  sym             = %d\n", sym);
       hypre_printf("  rap             = %d\n", rap);
       hypre_printf("  relax           = %d\n", relax);
-      hypre_printf("  jump            = %d\n", jump);
       hypre_printf("  solver ID       = %d\n", solver_id);
       hypre_printf("  the grid is read from  file \n");
 
@@ -849,7 +839,7 @@ main( hypre_int argc,
 
       for ( rep = 0; rep < reps; ++rep )
       {
-         hypre_StructAxpy(2.0, b, x);
+         hypre_StructVectorAxpy(2.0, b, 1.0, x, x);
       }
       //gettimeofday(&tstop,NULL);
       hypre_EndTiming(time_index);
@@ -883,7 +873,7 @@ main( hypre_int argc,
 
       for ( rep = 0; rep < reps; ++rep )
       {
-         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
       }
       //gettimeofday(&tstop,NULL);
       hypre_EndTiming(time_index);
@@ -996,7 +986,7 @@ main( hypre_int argc,
 
       for (i = 0; i < imax; i++)
       {
-         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b, b);
       }
       /* this counts mult-adds */
       hypre_IncFLOPCount(7 * N * imax);

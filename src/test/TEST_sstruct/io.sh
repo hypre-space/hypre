@@ -19,8 +19,6 @@ FILES="\
  ${TNAME}.out.1R\
  ${TNAME}.out.2P\
  ${TNAME}.out.2R\
- ${TNAME}.out.3P\
- ${TNAME}.out.3R\
  ${TNAME}.out.4P\
  ${TNAME}.out.4R\
  ${TNAME}.out.5P\
@@ -35,8 +33,6 @@ FILES="\
  ${TNAME}.out.101R\
  ${TNAME}.out.102P\
  ${TNAME}.out.102R\
- ${TNAME}.out.103P\
- ${TNAME}.out.103R\
  ${TNAME}.out.104P\
  ${TNAME}.out.104R\
  ${TNAME}.out.105P\

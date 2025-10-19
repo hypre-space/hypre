@@ -4161,7 +4161,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncComputeStream();
    }
 #endif
 
@@ -5290,31 +5289,15 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    #pragma omp parallel
 #endif
    {
-      HYPRE_Int   ii, num_threads;
-      HYPRE_Int   size, rest, ns, ne;
+      HYPRE_Int   ns, ne;
       HYPRE_Int  *marker_diag;
       HYPRE_Int  *marker_offd;
-
-      ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
 
       /*-----------------------------------------------------------------------
        *  Compute C_diag = alpha*A_diag + beta*B_diag
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_diag_C / num_threads;
-      rest = num_rownnz_diag_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_diag_C);
       marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag_A, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_diag,
                                   NULL, NULL, A_diag, B_diag,
@@ -5330,19 +5313,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
        *  Compute C_offd = alpha*A_offd + beta*B_offd
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_offd_C / num_threads;
-      rest = num_rownnz_offd_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_offd_C);
       marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_offd,
                                   A2C_offd, B2C_offd, A_offd, B_offd,
@@ -6807,7 +6778,6 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                HYPRE_Int                num_cols_block,
                                hypre_DenseBlockMatrix **B_ptr )
 {
-   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_BigInt             num_rows_A      = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt             num_cols_A      = hypre_ParCSRMatrixGlobalNumCols(A);
 
@@ -6857,10 +6827,11 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                     num_rows_block, num_cols_block);
 
    /* Initialize the output matrix */
-   hypre_DenseBlockMatrixInitializeOn(B, memory_location);
+   /* TODO: Change back to memory_location after implementing hypre_ParCSRMatrixBlockColSumDevice */
+   hypre_DenseBlockMatrixInitializeOn(B, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -7033,12 +7004,7 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): hypre_ParCSRMatrixColSumDevice */
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-      hypre_ParVectorMigrate(b, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixColSumHost(A, b);
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-      hypre_ParVectorMigrate(b, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixColSumDevice(A, b);
    }
    else
 #endif
@@ -7048,6 +7014,178 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 
    /* Set output pointer */
    *b_ptr = b;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute a scaling vector based on matrix coefficients and tags.
+ *
+ * This function computes a scaling vector for a ParCSR matrix, where each
+ * entry in the scaling vector corresponds to a row of the matrix. The
+ * scaling is determined by the `type` parameter and, for type 1, by a
+ * user-provided tags array.
+ *
+ * Parameters:
+ *   - A:           The ParCSR matrix to analyze.
+ *   - type:        The scaling type:
+ *                    0: No scaling (returns NULL scaling vector)
+ *                    1: For each tag, compute the Frobenius norm of the diagonal block
+ *                       (rows and columns with the same tag) and take the inverse
+ *                       square root of its magnitude.
+ *   - num_tags:    Number of unique tags (blocks/components).
+ *   - memloc_tags: Memory location of the tags array.
+ *   - tags:        Array of length num_rows, assigning a tag to each row.
+ *   - scaling_ptr: Output pointer to the resulting scaling vector (host or device).
+ *
+ * Notes:
+ *   - For multiphysics problems, call this function with type=1
+ *     and a tags array indicating the block/component of each row.
+ *   - The resulting scaling vector can be used to scale the matrix and/or
+ *     right-hand side to improve conditioning or solver performance.
+ *   - This function stores a copy of the input tags array in the output scaling vector
+ *     (scaling_ptr) for use in subsequent scaling operations. The internal copy of the tags
+ *     array is updated only if the number of unique tags differs from the previous call.
+ *
+ * Example usage:
+ *   hypre_ParCSRMatrixComputeScalingTagged(A, 1, HYPRE_MEMORY_HOST, num_tags, tags, &scaling);
+ *   hypre_ParCSRMatrixDiagScale(A, scaling, scaling);
+ *
+ * Notes:
+ *   - If type=0 or tags=NULL, the function returns without scaling.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixComputeScalingTagged(hypre_ParCSRMatrix  *A,
+                                       HYPRE_Int            type,
+                                       HYPRE_MemoryLocation memloc_tags,
+                                       HYPRE_Int            num_tags,
+                                       HYPRE_Int           *tags,
+                                       hypre_ParVector    **scaling_ptr)
+{
+   MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_BigInt             global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int                num_rows        = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+
+   hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real              *tnorms          = NULL;
+   HYPRE_Real              *local_weights   = NULL;
+   HYPRE_Real              *g_weights       = NULL;
+   HYPRE_Real              *weights         = NULL;
+   HYPRE_Real               tnorm;
+   HYPRE_Int                i;
+
+   /* Sanity check - Return an empty scaling if tags is a null pointer or type = 0 */
+   if ((!tags && num_rows > 0) || (type == 0))
+   {
+      hypre_ParVectorDestroy(*scaling_ptr);
+      *scaling_ptr = NULL;
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Create and initialize scaling vector if it does not exist yet */
+   if (!*scaling_ptr)
+   {
+      *scaling_ptr = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
+      hypre_ParVectorInitialize_v2(*scaling_ptr, memory_location);
+   }
+   else
+   {
+      /* No-op if scaling has the same size as the number of local rows in A */
+      hypre_ParVectorResize(*scaling_ptr, num_rows, 1);
+   }
+
+   /* Set tags array if not present in the output array or
+      if the number of unique tags has changed since the last call of this function */
+   if (!hypre_ParVectorTags(*scaling_ptr) ||
+       num_tags != hypre_ParVectorNumTags(*scaling_ptr))
+   {
+      hypre_ParVectorSetOwnsTags(*scaling_ptr, 1);
+      hypre_ParVectorSetNumTags(*scaling_ptr, num_tags);
+      hypre_ParVectorSetTags(*scaling_ptr, memloc_tags, tags);
+   }
+
+   if (type == 1)
+   {
+      /* Compute Frobenius norms */
+      hypre_CSRMatrixTaggedFnorm(A_diag, num_tags, hypre_ParVectorTags(*scaling_ptr), &tnorms);
+
+      /* Compute local scaling weights */
+      local_weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_tags; i++)
+      {
+         tnorm = tnorms[i * num_tags + i];
+         local_weights[i] = (tnorm > 0.0) ? hypre_squared(tnorm) : 1.0;
+      }
+
+      /* Compute global scaling weights */
+      g_weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_DEVICE);
+      }
+      else
+#endif
+      {
+         weights = g_weights;
+      }
+
+      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+      for (i = 0; i < num_tags; i++)
+      {
+         g_weights[i] = hypre_sqrt(pow(10.0,
+                                       2 * round( log10(hypre_sqrt(1.0 / g_weights[i])) / 2.0 )));
+      }
+
+      if (weights != g_weights)
+      {
+         hypre_TMemcpy(weights, g_weights, HYPRE_Real, num_tags,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      }
+
+#if 0
+      /* Debug weights */
+      hypre_ParPrintf(comm, "%s - Scaling weights: [ ", __func__);
+      for (i = 0; i < num_tags; i++)
+      {
+         hypre_ParPrintf(comm, "%.0e ", g_weights[i]);
+      }
+      hypre_ParPrintf(comm, "]\n");
+      hypre_MPI_Barrier(comm);
+#endif
+
+      /* Setup scaling vector */
+      hypre_ParVectorSetValuesTagged(*scaling_ptr, weights);
+
+      /* Free memory */
+      hypre_TFree(tnorms, HYPRE_MEMORY_HOST);
+      hypre_TFree(local_weights, HYPRE_MEMORY_HOST);
+      if (weights != g_weights)
+      {
+         hypre_TFree(weights, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(g_weights, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         hypre_TFree(weights, HYPRE_MEMORY_HOST);
+      }
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid scaling type");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 
