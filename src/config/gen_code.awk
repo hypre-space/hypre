@@ -95,11 +95,11 @@ function AddCast(pargs, cargs,          n, i, pa, ca, cast, cvar)
       # Update the call string with additional cast (if any)
       if(i < n)
       {
-         cargs_cst = cargs_cst " " cast cvar ","
+         cargs_cst = cargs_cst cast cvar ","
       }
       else
       {
-         cargs_cst = cargs_cst " " cast cvar " "
+         cargs_cst = cargs_cst cast cvar
       }
    }
 
