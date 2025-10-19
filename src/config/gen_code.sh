@@ -150,8 +150,8 @@ cat ${OUTP}.functions.int.proto > ${OUTP}.pre.int.proto
 # Create C implementation files and header files
 for i in fixed functions pre
 do
-    $scriptdir/gen_code_${i}.sh ${OUTP}.${i}.ext.proto ${OUTP}_${i}_ext
-    $scriptdir/gen_code_${i}.sh ${OUTP}.${i}.int.proto ${OUTP}_${i}_int
+    $scriptdir/gen_code_awk.sh ${OUTP}.${i}.ext.proto ${OUTP}_${i}_ext ${i}
+    $scriptdir/gen_code_awk.sh ${OUTP}.${i}.int.proto ${OUTP}_${i}_int ${i}
 done
 
 ############################################################################
