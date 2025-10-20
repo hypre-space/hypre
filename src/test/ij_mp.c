@@ -25,9 +25,10 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "_hypre_parcsr_ls.h"  // Needed for GenerateSysLaplacian call below
+//#include "_hypre_parcsr_ls.h"  // Needed for GenerateSysLaplacian call below
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
+#include "ij_helpers.h"
 
 #include <time.h>
 
@@ -3221,5 +3222,3 @@ BuildParVarDifConv_mp( HYPRE_Int            argc,
 
    return (0);
 }
-
-

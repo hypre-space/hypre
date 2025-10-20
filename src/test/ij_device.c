@@ -25,14 +25,13 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
+#include "ij_helpers.h"
 
 #include "cuda_profiler_api.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
 
 HYPRE_Int BuildParFromFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                             HYPRE_ParCSRMatrix *A_ptr );
@@ -57,13 +56,6 @@ HYPRE_Int BuildParRotate7pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                              HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParVarDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                               HYPRE_ParCSRMatrix *A_ptr, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
-                                         HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                         HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny,
-                                              HYPRE_Int nz,
-                                              HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                              HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
 HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
                             HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 
@@ -464,7 +456,38 @@ BuildParRhsFromFile( HYPRE_Int            argc,
 }
 
 
+/**************************************************************************/
 
+
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+                            HYPRE_Real vcx,
+                            HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
+{
+
+
+   HYPRE_Int sz = num_fun * num_fun;
+
+   values[1 * sz + mtx_entry] = -vcx;
+   values[2 * sz + mtx_entry] = -vcy;
+   values[3 * sz + mtx_entry] = -vcz;
+   values[0 * sz + mtx_entry] = 0.0;
+
+   if (nx > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcx;
+   }
+   if (ny > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcy;
+   }
+   if (nz > 1)
+   {
+      values[0 * sz + mtx_entry] += 2.0 * vcz;
+   }
+
+   return 0;
+
+}
 
 /*----------------------------------------------------------------------
  * Build standard 7-point laplacian in 3D with grid and anisotropy.
@@ -1746,39 +1769,6 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    return (0);
 }
 
-/**************************************************************************/
-
-
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
-                            HYPRE_Real vcx,
-                            HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
-{
-
-
-   HYPRE_Int sz = num_fun * num_fun;
-
-   values[1 * sz + mtx_entry] = -vcx;
-   values[2 * sz + mtx_entry] = -vcy;
-   values[3 * sz + mtx_entry] = -vcz;
-   values[0 * sz + mtx_entry] = 0.0;
-
-   if (nx > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcx;
-   }
-   if (ny > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcy;
-   }
-   if (nz > 1)
-   {
-      values[0 * sz + mtx_entry] += 2.0 * vcz;
-   }
-
-   return 0;
-
-}
-
 /*----------------------------------------------------------------------
  * Build coordinates for 1D/2D/3D
  *----------------------------------------------------------------------*/
@@ -1858,15 +1848,7 @@ BuildParCoordinates( HYPRE_Int                  argc,
    if (ny < 2) { coorddim--; }
    if (nz < 2) { coorddim--; }
 
-   if (coorddim > 0)
-   {
-      coordinates = hypre_GenerateCoordinates(hypre_MPI_COMM_WORLD,
-                                              nx, ny, nz, P, Q, R, p, q, r, coorddim);
-   }
-   else
-   {
-      coordinates = NULL;
-   }
+   coordinates = GenerateCoordinates(nx, ny, nz, P, Q, R, p, q, r, coorddim);
 
    *coorddim_ptr = coorddim;
    *coord_ptr = coordinates;
