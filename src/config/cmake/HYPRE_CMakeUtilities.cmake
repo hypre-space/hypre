@@ -81,17 +81,17 @@ endfunction()
 
 # Function to check if two options have different values
 function(ensure_options_differ option1 option2)
-  if(DEFINED ${option1} AND DEFINED ${option2})
-    if(${option1} AND ${${option2}})
+  if(DEFINED HYPRE_ENABLE_${option1} AND DEFINED HYPRE_ENABLE_${option2})
+    if(HYPRE_ENABLE_${option1} AND ${HYPRE_ENABLE_${option2}})
       # Save the value of the conflicting options
-      set(saved_value1 "${${option1}}")
-      set(saved_value2 "${${option2}}")
+      set(saved_value1 "${HYPRE_ENABLE_${option1}}")
+      set(saved_value2 "${HYPRE_ENABLE_${option2}}")
 
       # Unset conflicting options
-      unset(${option1} CACHE)
-      unset(${option2} CACHE)
+      unset(HYPRE_ENABLE_${option1} CACHE)
+      unset(HYPRE_ENABLE_${option2} CACHE)
 
-      message(FATAL_ERROR "Error: ${option1} (${saved_value1}) and ${option2} (${saved_value2}) are mutually exclusive. Only one can be set to ON. Unsetting both options.")
+      message(FATAL_ERROR "Error: HYPRE_ENABLE_${option1} (${saved_value1}) and HYPRE_ENABLE_${option2} (${saved_value2}) are mutually exclusive. Only one can be set to ON. Unsetting both options.")
     endif()
   endif()
 endfunction()
@@ -258,6 +258,27 @@ macro(get_language_flags in_var out_var lang_type)
     set(${out_var} "")
   endif()
 endmacro()
+
+# Function to print the INTERFACE properties of a target in a readable format.
+function(pretty_print_target_interface TARGET_NAME)
+    message(STATUS "--- INTERFACE properties for target: [${TARGET_NAME}] ---")
+
+    # Loop over all property names passed to the function (stored in ARGN)
+    foreach(PROP ${ARGN})
+        get_target_property(PROP_VALUE ${TARGET_NAME} ${PROP})
+        message(STATUS "  [${PROP}]") # Print the property name
+
+        if(PROP_VALUE)
+            # Loop over each item in the semicolon-separated list
+            foreach(ITEM ${PROP_VALUE})
+                message(STATUS "    - ${ITEM}") # Print each item indented
+            endforeach()
+        else()
+            message(STATUS "    <NOTFOUND>")
+        endif()
+    endforeach()
+    #message(STATUS "--- End of INTERFACE properties for [${TARGET_NAME}] ---")
+endfunction()
 
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl LIBNAME)
