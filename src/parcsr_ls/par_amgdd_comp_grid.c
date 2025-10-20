@@ -705,7 +705,7 @@ hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data,
          hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixOwnedOffd(R))    = hypre_CSRMatrixI(R_offd_original);
          hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixOwnedOffd(R)) = hypre_CSRMatrixData(R_offd_original);
          hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R))    =
-            hypre_CTAlloc(HYPRE_BigInt,
+            hypre_CTAlloc(HYPRE_Int,
                           hypre_CSRMatrixNumNonzeros(R_offd_original),
                           memory_location);
 
