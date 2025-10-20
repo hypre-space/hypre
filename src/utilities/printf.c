@@ -129,14 +129,7 @@ free_format( char *newformat )
 HYPRE_Int
 hypre_ndigits( HYPRE_BigInt number )
 {
-   HYPRE_Int ndigits;
-
-   for (ndigits = 0; number > 0; ndigits++)
-   {
-      number /= 10;
-   }
-
-   return ndigits;
+   return hypre_ndigits_ull( (HYPRE_BigInt) number );
 }
 
 HYPRE_Int
