@@ -269,7 +269,7 @@ hypre_PCGSetup( void *pcg_vdata,
       (pcg_data -> r_old) = (*(pcg_functions->CreateVector))(b);
    }
 
-   if (rtol > 0.0 && recompute_residual_p && (!two_norm))
+   if (rtol != 0.0 && recompute_residual_p && (!two_norm))
    {
       if ( pcg_data -> v != NULL )
       {
