@@ -306,7 +306,7 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
       -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla>
       -Wconversion)
 
-  elif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
       -Wimplicit-float-conversion -Werror -Werror=vla -Wconversion>
