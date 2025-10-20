@@ -310,7 +310,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             if (isCpoint)
             {
                level_coarse_indexes[i][final_coarse_size++] = row;
-               //printf("%d\n",row);
             }
          }
       }
@@ -539,7 +538,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if ((mgr_data -> l1_norms)[j])
          {
-            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
+            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[j]);
             (mgr_data -> l1_norms)[j] = NULL;
          }
       }
@@ -1753,9 +1752,9 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    hypre_ParAMGData    **FrelaxVcycleData = mgr_data -> FrelaxVcycleData;
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-/* #if defined(HYPRE_USING_GPU) */
-/*    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location); */
-/* #endif */
+   /* #if defined(HYPRE_USING_GPU) */
+   /*    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location); */
+   /* #endif */
 
    HYPRE_Int i, j, num_procs, my_id;
 
@@ -1997,7 +1996,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
                for (i = 0; i < local_size; i++)
                {
                   hypre_IntArrayData(CF_marker_array_local[lev_local])[i] =
-                    hypre_IntArrayData(CF_marker_array[lev])[i];
+                     hypre_IntArrayData(CF_marker_array[lev])[i];
                }
             }
          }
@@ -2040,7 +2039,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
             for (i = 0; i < local_size; i++)
             {
                hypre_IntArrayData(CF_marker_array_local[lev_local])[i] =
-                 hypre_IntArrayData(CF_marker_array[lev])[i];
+                  hypre_IntArrayData(CF_marker_array[lev])[i];
             }
          }
       }
