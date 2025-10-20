@@ -389,7 +389,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    num_levels_total = num_levels_mgr + num_sublevels_amg[coarsest_mgr_level];
 
    /* Compute global number of nonzeros if not done before */
-   if (!hypre_ParCSRMatrixDNumNonzeros(A_finest))
+   if (hypre_ParCSRMatrixDNumNonzeros(A_finest) <= 0.0)
    {
       hypre_ParCSRMatrixSetDNumNonzeros(A_finest);
    }
@@ -420,7 +420,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
       if (block_num_Cpts)
       {
          coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[0], block_CF_marker[0]);
-         max_length = hypre_min(strlen(coarse_dofs_str) + 2, 50);
+         max_length = hypre_min((HYPRE_Int) strlen(coarse_dofs_str) + 2, 50);
          hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
       }
       else
@@ -660,15 +660,15 @@ hypre_MGRSetupStats(void *mgr_vdata)
                           hypre_ParAMGDataRArray(amg_solver)[k] : NULL;
 
             /* Compute global number of nonzeros if not done before */
-            if (!hypre_ParCSRMatrixDNumNonzeros(A_array[k]))
+            if (hypre_ParCSRMatrixDNumNonzeros(A_array[k]) <= 0.0)
             {
                hypre_ParCSRMatrixSetDNumNonzeros(A_array[k]);
             }
-            if (k < (num_sublevels_amg[i] - 1) && !hypre_ParCSRMatrixDNumNonzeros(P_array[k]))
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(P_array[k]) <= 0.0)
             {
                hypre_ParCSRMatrixSetDNumNonzeros(P_array[k]);
             }
-            if (k < (num_sublevels_amg[i] - 1) && !hypre_ParCSRMatrixDNumNonzeros(RT_array[k]))
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(RT_array[k]) <= 0.0)
             {
                hypre_ParCSRMatrixSetDNumNonzeros(RT_array[k]);
             }
@@ -700,7 +700,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
          memcomp[i]  = 1.0;
 
          A_array[i] = hypre_ParMGRDataA(mgr_data, i);
-         gridcomp[num_levels_mgr + 1] += hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
+         gridcomp[num_levels_mgr + 1] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
          opcomp[num_levels_mgr + 1]   += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
                                          hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /

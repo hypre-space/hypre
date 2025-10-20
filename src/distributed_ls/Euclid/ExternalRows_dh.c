@@ -207,8 +207,8 @@ void rcv_ext_storage_private(ExternalRows_dh er)
   for (i=0; i<loCount; ++i) {
     HYPRE_Int nz = rcv_nz_counts[i];
     HYPRE_Int nabor = loNabors[i];
-    lengths[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    numbers[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    lengths[i] = (HYPRE_Int*) MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    numbers[i] = (HYPRE_Int*) MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     hypre_MPI_Irecv(lengths[i], nz, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req1+i);
     hypre_MPI_Irecv(numbers[i], nz, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req2+i);
   }
@@ -242,9 +242,9 @@ void allocate_ext_row_storage_private(ExternalRows_dh er)
   for (i=0; i<loCount; ++i) nz += rcv_nz_counts[i];
 
   /* allocate buffers */
-  er->cvalExt = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  er->fillExt = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  er->avalExt = (REAL_DH*)MALLOC_DH(nz*sizeof(REAL_DH)); CHECK_V_ERROR;
+  er->cvalExt = (HYPRE_Int*) MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  er->fillExt = (HYPRE_Int*) MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  er->avalExt = (REAL_DH*)   MALLOC_DH((size_t) nz * sizeof(REAL_DH)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
@@ -426,8 +426,8 @@ void send_ext_storage_private(ExternalRows_dh er)
   if (logFile != NULL && er->debug) debug = true;
 
   /* allocate storage to hold nz counts for each row */
-  nzCounts =  er->my_row_counts = (HYPRE_Int*)MALLOC_DH(rowCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  nzNumbers =  er->my_row_numbers = (HYPRE_Int*)MALLOC_DH(rowCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  nzCounts =  er->my_row_counts = (HYPRE_Int*)MALLOC_DH((size_t) rowCount * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  nzNumbers =  er->my_row_numbers = (HYPRE_Int*)MALLOC_DH((size_t) rowCount * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* count nonzeros in upper triangular portion of each boundary row */
   nz = 0;
@@ -489,9 +489,9 @@ void send_external_rows_private(ExternalRows_dh er)
   if (logFile != NULL && er->debug) debug = true;
 
   /* allocate buffers to hold upper triangular portion of boundary rows */
-  cvalSend = er->cvalSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  fillSend = er->fillSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  avalSend = er->avalSend = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  cvalSend = er->cvalSend = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  fillSend = er->fillSend = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  avalSend = er->avalSend = (HYPRE_Real*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* copy upper triangular portion of boundary rows HYPRE_Int send buffers */
   offset = 0;

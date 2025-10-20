@@ -2910,7 +2910,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             } /* if (ns == 1) */
             HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
-            if (add_P_max_elmts || add_trunc_factor)
+            if (add_P_max_elmts || add_trunc_factor != 0.0)
             {
                hypre_BoomerAMGTruncandBuild(P_array[level], add_trunc_factor, add_P_max_elmts);
             }
@@ -3629,7 +3629,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             HYPRE_EuclidSetBJ(smoother[j], eu_bj);
          }
-         if (eu_sparse_A)
+         if (eu_sparse_A != 0.0)
          {
             HYPRE_EuclidSetSparseA(smoother[j], eu_sparse_A);
          }

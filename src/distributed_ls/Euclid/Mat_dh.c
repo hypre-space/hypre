@@ -154,11 +154,11 @@ void Mat_dhMatVecSetup(Mat_dh mat)
     HYPRE_Int lastLocal = firstLocal+m;
     HYPRE_Int *beg_rows, *end_rows;
 
-    mat->recv_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-    mat->send_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-    mat->status = (hypre_MPI_Status *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
-    beg_rows = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    end_rows = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    mat->recv_req = (hypre_MPI_Request *)MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+    mat->send_req = (hypre_MPI_Request *)MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+    mat->status = (hypre_MPI_Status *)MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
+    beg_rows = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    end_rows = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
     if (np_dh == 1) { /* this is for debugging purposes in some of the drivers */
       beg_rows[0] = 0;
@@ -171,8 +171,8 @@ void Mat_dhMatVecSetup(Mat_dh mat)
       ierr = hypre_MPI_Allgather(&lastLocal, 1, HYPRE_MPI_INT, end_rows, 1, HYPRE_MPI_INT, comm_dh); CHECK_MPI_V_ERROR(ierr);
     }
 
-    outlist = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    inlist  = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    outlist = (HYPRE_Int *)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    inlist  = (HYPRE_Int *)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<np_dh; ++i) {
       outlist[i] = 0;
       inlist[i] = 0;
@@ -227,7 +227,7 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
 
   /* Allocate recvbuf */
   /* recvbuf has numlocal entries saved for local part of x, used in matvec */
-  mat->recvbuf = (HYPRE_Real*)MALLOC_DH((reqlen+m) * sizeof(HYPRE_Real));
+  mat->recvbuf = (HYPRE_Real*)MALLOC_DH(((size_t) (reqlen + m)) * sizeof(HYPRE_Real));
 
   for (i=0; i<reqlen; i=j) { /* j is set below */
     /* The processor that owns the row with index reqind[i] */
@@ -268,15 +268,15 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   hypre_MPI_Request *requests;
   hypre_MPI_Status  *statuses;
 
-  requests = (hypre_MPI_Request *) MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-  statuses = (hypre_MPI_Status *)  MALLOC_DH(np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
+  requests = (hypre_MPI_Request *) MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  statuses = (hypre_MPI_Status *)  MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
   /* Determine size of and allocate sendbuf and sendind */
   sendlen = 0;
   for (i=0; i<np_dh; i++) sendlen += inlist[i];
   mat->sendlen = sendlen;
-  mat->sendbuf = (HYPRE_Real *)MALLOC_DH(sendlen * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendind = (HYPRE_Int *)MALLOC_DH(sendlen * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  mat->sendbuf = (HYPRE_Real *)MALLOC_DH((size_t) sendlen * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendind = (HYPRE_Int *)MALLOC_DH((size_t) sendlen * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   j = 0;
   mat->num_send = 0;
@@ -567,8 +567,8 @@ void Mat_dhAllocate_getRow_private(Mat_dh A)
   }
 
   /* allocate private storage */
-  A->cval_private = (HYPRE_Int*)MALLOC_DH(len*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  A->aval_private = (HYPRE_Real*)MALLOC_DH(len*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  A->cval_private = (HYPRE_Int*)MALLOC_DH((size_t) len * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  A->aval_private = (HYPRE_Real*)MALLOC_DH((size_t) len * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   A->len_private = len;
   END_FUNC_DH
 }
@@ -595,7 +595,7 @@ void Mat_dhZeroTiming(Mat_dh mat)
 void Mat_dhReduceTiming(Mat_dh mat)
 {
   START_FUNC_DH
-  if (mat->time[MATVEC_MPI_TIME]) {
+  if (mat->time[MATVEC_MPI_TIME] != 0.0) {
     mat->time[MATVEC_RATIO] = mat->time[MATVEC_TIME] / mat->time[MATVEC_MPI_TIME];
   }
   hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MIN, comm_dh);
@@ -618,13 +618,13 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
   *Bout = B;
 
   /* form inverse permutation */
-  o2n = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  o2n = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) o2n[n2o[i]] = i;
 
   /* allocate storage for permuted matrix */
-  rp = B->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = B->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = B->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  rp = B->rp = (HYPRE_Int*)MALLOC_DH(((size_t)(m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = B->cval = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  aval = B->aval = (HYPRE_Real*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* form new rp array */
   rp[0] = 0;
@@ -1176,9 +1176,9 @@ void insert_diags_private(Mat_dh A, HYPRE_Int ct)
   HYPRE_Int nz = RP[m] + ct;
   HYPRE_Int i, j, idx = 0;
 
-  rp = A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = A->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = A->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  rp = A->rp = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = A->cval = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  aval = A->aval = (HYPRE_Real*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   rp[0] = 0;
 
   for (i=0; i<m; ++i) {
@@ -1308,10 +1308,10 @@ void Mat_dhRowPermute(Mat_dh mat)
   hypre_sprintf(msgBuf_dh, "calling row permutation with algo= %i", algo);
   SET_INFO(msgBuf_dh);
 
-  r1 = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  c1 = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  r1 = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  c1 = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   if (mat->row_perm == NULL) {
-    mat->row_perm = o2n = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    mat->row_perm = o2n = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   } else {
     o2n = mat->row_perm;
   }
@@ -1391,8 +1391,8 @@ void build_adj_lists_private(Mat_dh mat, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT)
   HYPRE_Int nz = RP[m];
   HYPRE_Int i, j, *rp, *cval, idx = 0;
 
-  rp = *rpOUT = (HYPRE_Int *)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  cval = *cvalOUT = (HYPRE_Int *)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  rp = *rpOUT = (HYPRE_Int *)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  cval = *cvalOUT = (HYPRE_Int *)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   rp[0] = 0;
 
   /* assume symmetry for now! */
@@ -1436,10 +1436,10 @@ void Mat_dhPartition(Mat_dh mat, HYPRE_Int blocks,
   HYPRE_Int *rp, *cval;
 
   /* allocate storage for returned arrays */
-  beg_row = *beg_rowOUT = (HYPRE_Int *)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  row_count = *row_countOUT = (HYPRE_Int *)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  *n2oOUT = n2o = (HYPRE_Int *)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  *o2nOUT = o2n = (HYPRE_Int *)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  beg_row = *beg_rowOUT = (HYPRE_Int *)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  row_count = *row_countOUT = (HYPRE_Int *)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  *n2oOUT = n2o = (HYPRE_Int *)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  *o2nOUT = o2n = (HYPRE_Int *)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
 #if 0
 =============================================================
@@ -1461,7 +1461,7 @@ part[]
 
   /* form the graph representation that metis wants */
   build_adj_lists_private(mat, &rp, &cval); CHECK_V_ERROR;
-  part = (HYPRE_Int *)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  part = (HYPRE_Int *)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* get parition vector from metis */
   METIS_PartGraphKway(&m, rp, cval, NULL, NULL,
@@ -1495,17 +1495,17 @@ part[]
 
   /* compute permutation vector */
   {
-	 HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-	 hypre_TMemcpy(tmp,  beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-	 for (i=0; i<m; ++i)
-	 {
-		bk = part[i];  /* block to which row i belongs */
-		new = tmp[bk];
-		tmp[bk] += 1;
-		o2n[i] = new;
-		n2o[new] = i;
-	 }
-	 FREE_DH(tmp);
+     HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+     hypre_TMemcpy(tmp,  beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+     for (i=0; i<m; ++i)
+     {
+        bk = part[i];  /* block to which row i belongs */
+        new = tmp[bk];
+        tmp[bk] += 1;
+        o2n[i] = new;
+        n2o[new] = i;
+     }
+     FREE_DH(tmp);
   }
 
   FREE_DH(part); CHECK_V_ERROR;

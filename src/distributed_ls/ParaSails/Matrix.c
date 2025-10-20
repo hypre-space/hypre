@@ -45,9 +45,9 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
 
    num_rows = mat->end_row - mat->beg_row + 1;
 
-   mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
-   mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
-   mat->vals = (HYPRE_Real **) MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Real *));
+   mat->lens = (HYPRE_Int *)   MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Int));
+   mat->inds = (HYPRE_Int **)  MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Int*));
+   mat->vals = (HYPRE_Real **) MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Real*));
 
    /* Send beg_row and end_row to all processors */
    /* This is needed in order to map row numbers to processors */
@@ -55,8 +55,8 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
    hypre_MPI_Comm_rank(comm, &mype);
    hypre_MPI_Comm_size(comm, &npes);
 
-   mat->beg_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
-   mat->end_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
+   mat->beg_rows = (HYPRE_Int *) MemAlloc(mat->mem, (size_t) npes * sizeof(HYPRE_Int));
+   mat->end_rows = (HYPRE_Int *) MemAlloc(mat->mem, (size_t) npes * sizeof(HYPRE_Int));
 
    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, mat->beg_rows, 1, HYPRE_MPI_INT, comm);
    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, mat->end_rows, 1, HYPRE_MPI_INT, comm);
@@ -99,9 +99,9 @@ Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row)
 
    num_rows = mat->end_row - mat->beg_row + 1;
 
-   mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
-   mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
-   mat->vals = (HYPRE_Real **) MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Real *));
+   mat->lens = (HYPRE_Int*)   MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Int));
+   mat->inds = (HYPRE_Int**)  MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Int*));
+   mat->vals = (HYPRE_Real**) MemAlloc(mat->mem, (size_t) num_rows * sizeof(HYPRE_Real*));
 
    /* Send beg_row and end_row to all processors */
    /* This is needed in order to map row numbers to processors */
@@ -177,19 +177,19 @@ void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYP
    row -= mat->beg_row;
 
    mat->lens[row] = len;
-   mat->inds[row] = (HYPRE_Int *) MemAlloc(mat->mem, len*sizeof(HYPRE_Int));
-   mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, len*sizeof(HYPRE_Real));
+   mat->inds[row] = (HYPRE_Int *) MemAlloc(mat->mem, (size_t) len * sizeof(HYPRE_Int));
+   mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, (size_t) len * sizeof(HYPRE_Real));
 
    if (ind != NULL)
    {
       //hypre_TMemcpy(mat->inds[row], ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      memcpy(mat->inds[row], ind, sizeof(HYPRE_Int) * len);
+      memcpy(mat->inds[row], ind, (size_t) len * sizeof(HYPRE_Int) );
    }
 
    if (val != NULL)
    {
       //hypre_TMemcpy(mat->vals[row], val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      memcpy(mat->vals[row], val, sizeof(HYPRE_Real) * len);
+      memcpy(mat->vals[row], val, (size_t) len * sizeof(HYPRE_Real));
    }
 }
 

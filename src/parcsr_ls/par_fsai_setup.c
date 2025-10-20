@@ -496,7 +496,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
       hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
-      hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      hypre_Memset(marker, -1, (size_t) num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
       G_temp_data   = hypre_VectorData(G_temp);
@@ -769,7 +769,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
-      hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      hypre_Memset(marker, -1, (size_t) num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
       G_temp_data   = hypre_VectorData(G_temp);
@@ -1265,7 +1265,7 @@ hypre_FSAIDumpLocalLSDense( void               *fsai_vdata,
    indices = hypre_CTAlloc(HYPRE_Int, data_size, HYPRE_MEMORY_HOST);
    data    = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_HOST);
    marker  = hypre_TAlloc(HYPRE_Int, num_rows_diag_G, HYPRE_MEMORY_HOST);
-   hypre_Memset(marker, -1, num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   hypre_Memset(marker, -1, (size_t) num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
    /* Write header info */
    hypre_fprintf(fp, "num_linear_sys = %d\n", num_rows_diag_G);
