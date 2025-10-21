@@ -255,9 +255,9 @@ hypre_ParCSRBooleanMatrix *hypre_ParCSRBooleanMatrixCreate( MPI_Comm comm,
    }
 
    first_row_index = row_starts[my_id];
-   local_num_rows = row_starts[my_id + 1] - first_row_index;
+   local_num_rows = (HYPRE_Int) (row_starts[my_id + 1] - first_row_index);
    first_col_diag = col_starts[my_id];
-   local_num_cols = col_starts[my_id + 1] - first_col_diag;
+   local_num_cols = (HYPRE_Int) (col_starts[my_id + 1] - first_col_diag);
    hypre_ParCSRBooleanMatrix_Get_Comm(matrix) = comm;
    hypre_ParCSRBooleanMatrix_Get_Diag(matrix) =
       hypre_CSRBooleanMatrixCreate(local_num_rows, local_num_cols,

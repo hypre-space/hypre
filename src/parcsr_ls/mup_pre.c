@@ -57,11 +57,11 @@ HYPRE_ADSGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSGetFinalRelativeResidualNorm_flt( solver, rel_resid_norm );
+         return HYPRE_ADSGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)rel_resid_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSGetFinalRelativeResidualNorm_dbl( solver, rel_resid_norm );
+         return HYPRE_ADSGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)rel_resid_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSGetFinalRelativeResidualNorm_long_dbl( solver, rel_resid_norm );
+         return HYPRE_ADSGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)rel_resid_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -93,11 +93,11 @@ HYPRE_ADSSetAMGOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSSetAMGOptions_flt( solver, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMGOptions_flt( solver, coarsen_type, agg_levels, relax_type, (hypre_float)strength_threshold, interp_type, Pmax );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSSetAMGOptions_dbl( solver, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMGOptions_dbl( solver, coarsen_type, agg_levels, relax_type, (hypre_double)strength_threshold, interp_type, Pmax );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSSetAMGOptions_long_dbl( solver, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMGOptions_long_dbl( solver, coarsen_type, agg_levels, relax_type, (hypre_long_double)strength_threshold, interp_type, Pmax );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -111,11 +111,11 @@ HYPRE_ADSSetAMSOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPR
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSSetAMSOptions_flt( solver, cycle_type, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMSOptions_flt( solver, cycle_type, coarsen_type, agg_levels, relax_type, (hypre_float)strength_threshold, interp_type, Pmax );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSSetAMSOptions_dbl( solver, cycle_type, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMSOptions_dbl( solver, cycle_type, coarsen_type, agg_levels, relax_type, (hypre_double)strength_threshold, interp_type, Pmax );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSSetAMSOptions_long_dbl( solver, cycle_type, coarsen_type, agg_levels, relax_type, strength_threshold, interp_type, Pmax );
+         return HYPRE_ADSSetAMSOptions_long_dbl( solver, cycle_type, coarsen_type, agg_levels, relax_type, (hypre_long_double)strength_threshold, interp_type, Pmax );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -129,11 +129,11 @@ HYPRE_ADSSetChebySmoothingOptions_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSSetChebySmoothingOptions_flt( solver, cheby_order, cheby_fraction );
+         return HYPRE_ADSSetChebySmoothingOptions_flt( solver, cheby_order, (hypre_float)cheby_fraction );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSSetChebySmoothingOptions_dbl( solver, cheby_order, cheby_fraction );
+         return HYPRE_ADSSetChebySmoothingOptions_dbl( solver, cheby_order, (hypre_double)cheby_fraction );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSSetChebySmoothingOptions_long_dbl( solver, cheby_order, cheby_fraction );
+         return HYPRE_ADSSetChebySmoothingOptions_long_dbl( solver, cheby_order, (hypre_long_double)cheby_fraction );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -273,11 +273,11 @@ HYPRE_ADSSetSmoothingOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSSetSmoothingOptions_flt( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_ADSSetSmoothingOptions_flt( solver, relax_type, relax_times, (hypre_float)relax_weight, (hypre_float)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSSetSmoothingOptions_dbl( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_ADSSetSmoothingOptions_dbl( solver, relax_type, relax_times, (hypre_double)relax_weight, (hypre_double)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSSetSmoothingOptions_long_dbl( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_ADSSetSmoothingOptions_long_dbl( solver, relax_type, relax_times, (hypre_long_double)relax_weight, (hypre_long_double)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -291,11 +291,11 @@ HYPRE_ADSSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ADSSetTol_flt( solver, tol );
+         return HYPRE_ADSSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ADSSetTol_dbl( solver, tol );
+         return HYPRE_ADSSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ADSSetTol_long_dbl( solver, tol );
+         return HYPRE_ADSSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -381,11 +381,11 @@ HYPRE_AMEGetEigenvalues_pre( HYPRE_Precision precision, HYPRE_Solver esolver, vo
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMEGetEigenvalues_flt( esolver, eigenvalues );
+         return HYPRE_AMEGetEigenvalues_flt( esolver, (hypre_float **)eigenvalues );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMEGetEigenvalues_dbl( esolver, eigenvalues );
+         return HYPRE_AMEGetEigenvalues_dbl( esolver, (hypre_double **)eigenvalues );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMEGetEigenvalues_long_dbl( esolver, eigenvalues );
+         return HYPRE_AMEGetEigenvalues_long_dbl( esolver, (hypre_long_double **)eigenvalues );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -525,11 +525,11 @@ HYPRE_AMESetRTol_pre( HYPRE_Precision precision, HYPRE_Solver esolver, hypre_lon
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMESetRTol_flt( esolver, tol );
+         return HYPRE_AMESetRTol_flt( esolver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMESetRTol_dbl( esolver, tol );
+         return HYPRE_AMESetRTol_dbl( esolver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMESetRTol_long_dbl( esolver, tol );
+         return HYPRE_AMESetRTol_long_dbl( esolver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -543,11 +543,11 @@ HYPRE_AMESetTol_pre( HYPRE_Precision precision, HYPRE_Solver esolver, hypre_long
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMESetTol_flt( esolver, tol );
+         return HYPRE_AMESetTol_flt( esolver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMESetTol_dbl( esolver, tol );
+         return HYPRE_AMESetTol_dbl( esolver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMESetTol_long_dbl( esolver, tol );
+         return HYPRE_AMESetTol_long_dbl( esolver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -651,11 +651,11 @@ HYPRE_AMSGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMSGetFinalRelativeResidualNorm_flt( solver, rel_resid_norm );
+         return HYPRE_AMSGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)rel_resid_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMSGetFinalRelativeResidualNorm_dbl( solver, rel_resid_norm );
+         return HYPRE_AMSGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)rel_resid_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMSGetFinalRelativeResidualNorm_long_dbl( solver, rel_resid_norm );
+         return HYPRE_AMSGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)rel_resid_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -723,11 +723,11 @@ HYPRE_AMSSetAlphaAMGOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMSSetAlphaAMGOptions_flt( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
+         return HYPRE_AMSSetAlphaAMGOptions_flt( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, (hypre_float)alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMSSetAlphaAMGOptions_dbl( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
+         return HYPRE_AMSSetAlphaAMGOptions_dbl( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, (hypre_double)alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMSSetAlphaAMGOptions_long_dbl( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
+         return HYPRE_AMSSetAlphaAMGOptions_long_dbl( solver, alpha_coarsen_type, alpha_agg_levels, alpha_relax_type, (hypre_long_double)alpha_strength_threshold, alpha_interp_type, alpha_Pmax );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -777,11 +777,11 @@ HYPRE_AMSSetBetaAMGOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMSSetBetaAMGOptions_flt( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, beta_strength_threshold, beta_interp_type, beta_Pmax );
+         return HYPRE_AMSSetBetaAMGOptions_flt( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, (hypre_float)beta_strength_threshold, beta_interp_type, beta_Pmax );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMSSetBetaAMGOptions_dbl( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, beta_strength_threshold, beta_interp_type, beta_Pmax );
+         return HYPRE_AMSSetBetaAMGOptions_dbl( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, (hypre_double)beta_strength_threshold, beta_interp_type, beta_Pmax );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMSSetBetaAMGOptions_long_dbl( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, beta_strength_threshold, beta_interp_type, beta_Pmax );
+         return HYPRE_AMSSetBetaAMGOptions_long_dbl( solver, beta_coarsen_type, beta_agg_levels, beta_relax_type, (hypre_long_double)beta_strength_threshold, beta_interp_type, beta_Pmax );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -993,11 +993,11 @@ HYPRE_AMSSetSmoothingOptions_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMSSetSmoothingOptions_flt( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_AMSSetSmoothingOptions_flt( solver, relax_type, relax_times, (hypre_float)relax_weight, (hypre_float)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMSSetSmoothingOptions_dbl( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_AMSSetSmoothingOptions_dbl( solver, relax_type, relax_times, (hypre_double)relax_weight, (hypre_double)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMSSetSmoothingOptions_long_dbl( solver, relax_type, relax_times, relax_weight, omega );
+         return HYPRE_AMSSetSmoothingOptions_long_dbl( solver, relax_type, relax_times, (hypre_long_double)relax_weight, (hypre_long_double)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1011,11 +1011,11 @@ HYPRE_AMSSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_AMSSetTol_flt( solver, tol );
+         return HYPRE_AMSSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_AMSSetTol_dbl( solver, tol );
+         return HYPRE_AMSSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_AMSSetTol_long_dbl( solver, tol );
+         return HYPRE_AMSSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1137,11 +1137,11 @@ HYPRE_BlockTridiagSetAMGStrengthThreshold_pre( HYPRE_Precision precision, HYPRE_
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BlockTridiagSetAMGStrengthThreshold_flt( solver, thresh );
+         return HYPRE_BlockTridiagSetAMGStrengthThreshold_flt( solver, (hypre_float)thresh );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BlockTridiagSetAMGStrengthThreshold_dbl( solver, thresh );
+         return HYPRE_BlockTridiagSetAMGStrengthThreshold_dbl( solver, (hypre_double)thresh );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BlockTridiagSetAMGStrengthThreshold_long_dbl( solver, thresh );
+         return HYPRE_BlockTridiagSetAMGStrengthThreshold_long_dbl( solver, (hypre_long_double)thresh );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1299,11 +1299,11 @@ HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HY
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_flt( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)rel_resid_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_dbl( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)rel_resid_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_long_dbl( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)rel_resid_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1407,11 +1407,11 @@ HYPRE_BoomerAMGDDSetFACRelaxWeight_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGDDSetFACRelaxWeight_flt( solver, amgdd_fac_relax_weight );
+         return HYPRE_BoomerAMGDDSetFACRelaxWeight_flt( solver, (hypre_float)amgdd_fac_relax_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGDDSetFACRelaxWeight_dbl( solver, amgdd_fac_relax_weight );
+         return HYPRE_BoomerAMGDDSetFACRelaxWeight_dbl( solver, (hypre_double)amgdd_fac_relax_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGDDSetFACRelaxWeight_long_dbl( solver, amgdd_fac_relax_weight );
+         return HYPRE_BoomerAMGDDSetFACRelaxWeight_long_dbl( solver, (hypre_long_double)amgdd_fac_relax_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1605,11 +1605,11 @@ HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_flt( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_flt( solver, (hypre_float *)cum_nnz_AP );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_dbl( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_dbl( solver, (hypre_double *)cum_nnz_AP );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_long_dbl( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_long_dbl( solver, (hypre_long_double *)cum_nnz_AP );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1767,11 +1767,11 @@ HYPRE_BoomerAMGGetFilterThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetFilterThresholdR_flt( solver, filter_threshold );
+         return HYPRE_BoomerAMGGetFilterThresholdR_flt( solver, (hypre_float *)filter_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetFilterThresholdR_dbl( solver, filter_threshold );
+         return HYPRE_BoomerAMGGetFilterThresholdR_dbl( solver, (hypre_double *)filter_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetFilterThresholdR_long_dbl( solver, filter_threshold );
+         return HYPRE_BoomerAMGGetFilterThresholdR_long_dbl( solver, (hypre_long_double *)filter_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1785,11 +1785,11 @@ HYPRE_BoomerAMGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPR
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_flt( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)rel_resid_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_dbl( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)rel_resid_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_long_dbl( solver, rel_resid_norm );
+         return HYPRE_BoomerAMGGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)rel_resid_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1821,11 +1821,11 @@ HYPRE_BoomerAMGGetJacobiTruncThreshold_pre( HYPRE_Precision precision, HYPRE_Sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetJacobiTruncThreshold_flt( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGGetJacobiTruncThreshold_flt( solver, (hypre_float *)jacobi_trunc_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetJacobiTruncThreshold_dbl( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGGetJacobiTruncThreshold_dbl( solver, (hypre_double *)jacobi_trunc_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetJacobiTruncThreshold_long_dbl( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGGetJacobiTruncThreshold_long_dbl( solver, (hypre_long_double *)jacobi_trunc_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1911,11 +1911,11 @@ HYPRE_BoomerAMGGetMaxRowSum_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetMaxRowSum_flt( solver, max_row_sum );
+         return HYPRE_BoomerAMGGetMaxRowSum_flt( solver, (hypre_float *)max_row_sum );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetMaxRowSum_dbl( solver, max_row_sum );
+         return HYPRE_BoomerAMGGetMaxRowSum_dbl( solver, (hypre_double *)max_row_sum );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetMaxRowSum_long_dbl( solver, max_row_sum );
+         return HYPRE_BoomerAMGGetMaxRowSum_long_dbl( solver, (hypre_long_double *)max_row_sum );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2127,11 +2127,11 @@ HYPRE_BoomerAMGGetSchwarzRlxWeight_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetSchwarzRlxWeight_flt( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGGetSchwarzRlxWeight_flt( solver, (hypre_float *)schwarz_rlx_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetSchwarzRlxWeight_dbl( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGGetSchwarzRlxWeight_dbl( solver, (hypre_double *)schwarz_rlx_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetSchwarzRlxWeight_long_dbl( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGGetSchwarzRlxWeight_long_dbl( solver, (hypre_long_double *)schwarz_rlx_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2235,11 +2235,11 @@ HYPRE_BoomerAMGGetStrongThreshold_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetStrongThreshold_flt( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThreshold_flt( solver, (hypre_float *)strong_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetStrongThreshold_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThreshold_dbl( solver, (hypre_double *)strong_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetStrongThreshold_long_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThreshold_long_dbl( solver, (hypre_long_double *)strong_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2253,11 +2253,11 @@ HYPRE_BoomerAMGGetStrongThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetStrongThresholdR_flt( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThresholdR_flt( solver, (hypre_float *)strong_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetStrongThresholdR_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThresholdR_dbl( solver, (hypre_double *)strong_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetStrongThresholdR_long_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGGetStrongThresholdR_long_dbl( solver, (hypre_long_double *)strong_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2271,11 +2271,11 @@ HYPRE_BoomerAMGGetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, void 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetTol_flt( solver, tol );
+         return HYPRE_BoomerAMGGetTol_flt( solver, (hypre_float *)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetTol_dbl( solver, tol );
+         return HYPRE_BoomerAMGGetTol_dbl( solver, (hypre_double *)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetTol_long_dbl( solver, tol );
+         return HYPRE_BoomerAMGGetTol_long_dbl( solver, (hypre_long_double *)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2289,11 +2289,11 @@ HYPRE_BoomerAMGGetTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetTruncFactor_flt( solver, trunc_factor );
+         return HYPRE_BoomerAMGGetTruncFactor_flt( solver, (hypre_float *)trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetTruncFactor_dbl( solver, trunc_factor );
+         return HYPRE_BoomerAMGGetTruncFactor_dbl( solver, (hypre_double *)trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetTruncFactor_long_dbl( solver, trunc_factor );
+         return HYPRE_BoomerAMGGetTruncFactor_long_dbl( solver, (hypre_long_double *)trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2325,11 +2325,11 @@ HYPRE_BoomerAMGInitGridRelaxation_pre( HYPRE_Precision precision, HYPRE_Int **nu
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGInitGridRelaxation_flt( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, relax_weights_ptr, max_levels );
+         return HYPRE_BoomerAMGInitGridRelaxation_flt( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, (hypre_float **)relax_weights_ptr, max_levels );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGInitGridRelaxation_dbl( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, relax_weights_ptr, max_levels );
+         return HYPRE_BoomerAMGInitGridRelaxation_dbl( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, (hypre_double **)relax_weights_ptr, max_levels );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGInitGridRelaxation_long_dbl( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, relax_weights_ptr, max_levels );
+         return HYPRE_BoomerAMGInitGridRelaxation_long_dbl( num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr, coarsen_type, (hypre_long_double **)relax_weights_ptr, max_levels );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2343,11 +2343,11 @@ HYPRE_BoomerAMGSetADropTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetADropTol_flt( solver, A_drop_tol );
+         return HYPRE_BoomerAMGSetADropTol_flt( solver, (hypre_float)A_drop_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetADropTol_dbl( solver, A_drop_tol );
+         return HYPRE_BoomerAMGSetADropTol_dbl( solver, (hypre_double)A_drop_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetADropTol_long_dbl( solver, A_drop_tol );
+         return HYPRE_BoomerAMGSetADropTol_long_dbl( solver, (hypre_long_double)A_drop_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2433,11 +2433,11 @@ HYPRE_BoomerAMGSetAddRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetAddRelaxWt_flt( solver, add_rlx_wt );
+         return HYPRE_BoomerAMGSetAddRelaxWt_flt( solver, (hypre_float)add_rlx_wt );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetAddRelaxWt_dbl( solver, add_rlx_wt );
+         return HYPRE_BoomerAMGSetAddRelaxWt_dbl( solver, (hypre_double)add_rlx_wt );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetAddRelaxWt_long_dbl( solver, add_rlx_wt );
+         return HYPRE_BoomerAMGSetAddRelaxWt_long_dbl( solver, (hypre_long_double)add_rlx_wt );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2451,11 +2451,11 @@ HYPRE_BoomerAMGSetAddTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetAddTruncFactor_flt( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetAddTruncFactor_flt( solver, (hypre_float)add_trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetAddTruncFactor_dbl( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetAddTruncFactor_dbl( solver, (hypre_double)add_trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetAddTruncFactor_long_dbl( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetAddTruncFactor_long_dbl( solver, (hypre_long_double)add_trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2541,11 +2541,11 @@ HYPRE_BoomerAMGSetAggP12TruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetAggP12TruncFactor_flt( solver, agg_P12_trunc_factor );
+         return HYPRE_BoomerAMGSetAggP12TruncFactor_flt( solver, (hypre_float)agg_P12_trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetAggP12TruncFactor_dbl( solver, agg_P12_trunc_factor );
+         return HYPRE_BoomerAMGSetAggP12TruncFactor_dbl( solver, (hypre_double)agg_P12_trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetAggP12TruncFactor_long_dbl( solver, agg_P12_trunc_factor );
+         return HYPRE_BoomerAMGSetAggP12TruncFactor_long_dbl( solver, (hypre_long_double)agg_P12_trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2577,11 +2577,11 @@ HYPRE_BoomerAMGSetAggTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetAggTruncFactor_flt( solver, agg_trunc_factor );
+         return HYPRE_BoomerAMGSetAggTruncFactor_flt( solver, (hypre_float)agg_trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetAggTruncFactor_dbl( solver, agg_trunc_factor );
+         return HYPRE_BoomerAMGSetAggTruncFactor_dbl( solver, (hypre_double)agg_trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetAggTruncFactor_long_dbl( solver, agg_trunc_factor );
+         return HYPRE_BoomerAMGSetAggTruncFactor_long_dbl( solver, (hypre_long_double)agg_trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2631,11 +2631,11 @@ HYPRE_BoomerAMGSetCRRate_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetCRRate_flt( solver, CR_rate );
+         return HYPRE_BoomerAMGSetCRRate_flt( solver, (hypre_float)CR_rate );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetCRRate_dbl( solver, CR_rate );
+         return HYPRE_BoomerAMGSetCRRate_dbl( solver, (hypre_double)CR_rate );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetCRRate_long_dbl( solver, CR_rate );
+         return HYPRE_BoomerAMGSetCRRate_long_dbl( solver, (hypre_long_double)CR_rate );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2649,11 +2649,11 @@ HYPRE_BoomerAMGSetCRStrongTh_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetCRStrongTh_flt( solver, CR_strong_th );
+         return HYPRE_BoomerAMGSetCRStrongTh_flt( solver, (hypre_float)CR_strong_th );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetCRStrongTh_dbl( solver, CR_strong_th );
+         return HYPRE_BoomerAMGSetCRStrongTh_dbl( solver, (hypre_double)CR_strong_th );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetCRStrongTh_long_dbl( solver, CR_strong_th );
+         return HYPRE_BoomerAMGSetCRStrongTh_long_dbl( solver, (hypre_long_double)CR_strong_th );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2703,11 +2703,11 @@ HYPRE_BoomerAMGSetChebyFraction_pre( HYPRE_Precision precision, HYPRE_Solver sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetChebyFraction_flt( solver, ratio );
+         return HYPRE_BoomerAMGSetChebyFraction_flt( solver, (hypre_float)ratio );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetChebyFraction_dbl( solver, ratio );
+         return HYPRE_BoomerAMGSetChebyFraction_dbl( solver, (hypre_double)ratio );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetChebyFraction_long_dbl( solver, ratio );
+         return HYPRE_BoomerAMGSetChebyFraction_long_dbl( solver, (hypre_long_double)ratio );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2883,11 +2883,11 @@ HYPRE_BoomerAMGSetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_flt( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_flt( solver, (hypre_float)cum_nnz_AP );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_dbl( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_dbl( solver, (hypre_double)cum_nnz_AP );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_long_dbl( solver, cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_long_dbl( solver, (hypre_long_double)cum_nnz_AP );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3009,11 +3009,11 @@ HYPRE_BoomerAMGSetDropTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetDropTol_flt( solver, drop_tol );
+         return HYPRE_BoomerAMGSetDropTol_flt( solver, (hypre_float)drop_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetDropTol_dbl( solver, drop_tol );
+         return HYPRE_BoomerAMGSetDropTol_dbl( solver, (hypre_double)drop_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetDropTol_long_dbl( solver, drop_tol );
+         return HYPRE_BoomerAMGSetDropTol_long_dbl( solver, (hypre_long_double)drop_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3063,11 +3063,11 @@ HYPRE_BoomerAMGSetEuSparseA_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetEuSparseA_flt( solver, eu_sparse_A );
+         return HYPRE_BoomerAMGSetEuSparseA_flt( solver, (hypre_float)eu_sparse_A );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetEuSparseA_dbl( solver, eu_sparse_A );
+         return HYPRE_BoomerAMGSetEuSparseA_dbl( solver, (hypre_double)eu_sparse_A );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetEuSparseA_long_dbl( solver, eu_sparse_A );
+         return HYPRE_BoomerAMGSetEuSparseA_long_dbl( solver, (hypre_long_double)eu_sparse_A );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3171,11 +3171,11 @@ HYPRE_BoomerAMGSetFSAIKapTolerance_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetFSAIKapTolerance_flt( solver, kap_tolerance );
+         return HYPRE_BoomerAMGSetFSAIKapTolerance_flt( solver, (hypre_float)kap_tolerance );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetFSAIKapTolerance_dbl( solver, kap_tolerance );
+         return HYPRE_BoomerAMGSetFSAIKapTolerance_dbl( solver, (hypre_double)kap_tolerance );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetFSAIKapTolerance_long_dbl( solver, kap_tolerance );
+         return HYPRE_BoomerAMGSetFSAIKapTolerance_long_dbl( solver, (hypre_long_double)kap_tolerance );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3279,11 +3279,11 @@ HYPRE_BoomerAMGSetFSAIThreshold_pre( HYPRE_Precision precision, HYPRE_Solver sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetFSAIThreshold_flt( solver, threshold );
+         return HYPRE_BoomerAMGSetFSAIThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetFSAIThreshold_dbl( solver, threshold );
+         return HYPRE_BoomerAMGSetFSAIThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetFSAIThreshold_long_dbl( solver, threshold );
+         return HYPRE_BoomerAMGSetFSAIThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3297,11 +3297,11 @@ HYPRE_BoomerAMGSetFilter_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetFilter_flt( solver, filter );
+         return HYPRE_BoomerAMGSetFilter_flt( solver, (hypre_float)filter );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetFilter_dbl( solver, filter );
+         return HYPRE_BoomerAMGSetFilter_dbl( solver, (hypre_double)filter );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetFilter_long_dbl( solver, filter );
+         return HYPRE_BoomerAMGSetFilter_long_dbl( solver, (hypre_long_double)filter );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3333,11 +3333,11 @@ HYPRE_BoomerAMGSetFilterThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetFilterThresholdR_flt( solver, filter_threshold );
+         return HYPRE_BoomerAMGSetFilterThresholdR_flt( solver, (hypre_float)filter_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetFilterThresholdR_dbl( solver, filter_threshold );
+         return HYPRE_BoomerAMGSetFilterThresholdR_dbl( solver, (hypre_double)filter_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetFilterThresholdR_long_dbl( solver, filter_threshold );
+         return HYPRE_BoomerAMGSetFilterThresholdR_long_dbl( solver, (hypre_long_double)filter_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3423,11 +3423,11 @@ HYPRE_BoomerAMGSetILUDroptol_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetILUDroptol_flt( solver, ilu_droptol );
+         return HYPRE_BoomerAMGSetILUDroptol_flt( solver, (hypre_float)ilu_droptol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetILUDroptol_dbl( solver, ilu_droptol );
+         return HYPRE_BoomerAMGSetILUDroptol_dbl( solver, (hypre_double)ilu_droptol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetILUDroptol_long_dbl( solver, ilu_droptol );
+         return HYPRE_BoomerAMGSetILUDroptol_long_dbl( solver, (hypre_long_double)ilu_droptol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3477,11 +3477,11 @@ HYPRE_BoomerAMGSetILUIterSetupTolerance_pre( HYPRE_Precision precision, HYPRE_So
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetILUIterSetupTolerance_flt( solver, ilu_iter_setup_tolerance );
+         return HYPRE_BoomerAMGSetILUIterSetupTolerance_flt( solver, (hypre_float)ilu_iter_setup_tolerance );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetILUIterSetupTolerance_dbl( solver, ilu_iter_setup_tolerance );
+         return HYPRE_BoomerAMGSetILUIterSetupTolerance_dbl( solver, (hypre_double)ilu_iter_setup_tolerance );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetILUIterSetupTolerance_long_dbl( solver, ilu_iter_setup_tolerance );
+         return HYPRE_BoomerAMGSetILUIterSetupTolerance_long_dbl( solver, (hypre_long_double)ilu_iter_setup_tolerance );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3711,11 +3711,11 @@ HYPRE_BoomerAMGSetInterpVecAbsQTrunc_pre( HYPRE_Precision precision, HYPRE_Solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_flt( solver, q_trunc );
+         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_flt( solver, (hypre_float)q_trunc );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_dbl( solver, q_trunc );
+         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_dbl( solver, (hypre_double)q_trunc );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_long_dbl( solver, q_trunc );
+         return HYPRE_BoomerAMGSetInterpVecAbsQTrunc_long_dbl( solver, (hypre_long_double)q_trunc );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3819,11 +3819,11 @@ HYPRE_BoomerAMGSetJacobiTruncThreshold_pre( HYPRE_Precision precision, HYPRE_Sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetJacobiTruncThreshold_flt( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGSetJacobiTruncThreshold_flt( solver, (hypre_float)jacobi_trunc_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetJacobiTruncThreshold_dbl( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGSetJacobiTruncThreshold_dbl( solver, (hypre_double)jacobi_trunc_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetJacobiTruncThreshold_long_dbl( solver, jacobi_trunc_threshold );
+         return HYPRE_BoomerAMGSetJacobiTruncThreshold_long_dbl( solver, (hypre_long_double)jacobi_trunc_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3891,11 +3891,11 @@ HYPRE_BoomerAMGSetLevelNonGalerkinTol_pre( HYPRE_Precision precision, HYPRE_Solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_flt( solver, nongalerkin_tol, level );
+         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_flt( solver, (hypre_float)nongalerkin_tol, level );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_dbl( solver, nongalerkin_tol, level );
+         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_dbl( solver, (hypre_double)nongalerkin_tol, level );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_long_dbl( solver, nongalerkin_tol, level );
+         return HYPRE_BoomerAMGSetLevelNonGalerkinTol_long_dbl( solver, (hypre_long_double)nongalerkin_tol, level );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3909,11 +3909,11 @@ HYPRE_BoomerAMGSetLevelOuterWt_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetLevelOuterWt_flt( solver, omega, level );
+         return HYPRE_BoomerAMGSetLevelOuterWt_flt( solver, (hypre_float)omega, level );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetLevelOuterWt_dbl( solver, omega, level );
+         return HYPRE_BoomerAMGSetLevelOuterWt_dbl( solver, (hypre_double)omega, level );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetLevelOuterWt_long_dbl( solver, omega, level );
+         return HYPRE_BoomerAMGSetLevelOuterWt_long_dbl( solver, (hypre_long_double)omega, level );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -3927,11 +3927,11 @@ HYPRE_BoomerAMGSetLevelRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetLevelRelaxWt_flt( solver, relax_weight, level );
+         return HYPRE_BoomerAMGSetLevelRelaxWt_flt( solver, (hypre_float)relax_weight, level );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetLevelRelaxWt_dbl( solver, relax_weight, level );
+         return HYPRE_BoomerAMGSetLevelRelaxWt_dbl( solver, (hypre_double)relax_weight, level );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetLevelRelaxWt_long_dbl( solver, relax_weight, level );
+         return HYPRE_BoomerAMGSetLevelRelaxWt_long_dbl( solver, (hypre_long_double)relax_weight, level );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4035,11 +4035,11 @@ HYPRE_BoomerAMGSetMaxRowSum_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetMaxRowSum_flt( solver, max_row_sum );
+         return HYPRE_BoomerAMGSetMaxRowSum_flt( solver, (hypre_float)max_row_sum );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetMaxRowSum_dbl( solver, max_row_sum );
+         return HYPRE_BoomerAMGSetMaxRowSum_dbl( solver, (hypre_double)max_row_sum );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetMaxRowSum_long_dbl( solver, max_row_sum );
+         return HYPRE_BoomerAMGSetMaxRowSum_long_dbl( solver, (hypre_long_double)max_row_sum );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4143,11 +4143,11 @@ HYPRE_BoomerAMGSetMultAddTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetMultAddTruncFactor_flt( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetMultAddTruncFactor_flt( solver, (hypre_float)add_trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetMultAddTruncFactor_dbl( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetMultAddTruncFactor_dbl( solver, (hypre_double)add_trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetMultAddTruncFactor_long_dbl( solver, add_trunc_factor );
+         return HYPRE_BoomerAMGSetMultAddTruncFactor_long_dbl( solver, (hypre_long_double)add_trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4233,11 +4233,11 @@ HYPRE_BoomerAMGSetNonGalerkTol_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetNonGalerkTol_flt( solver, nongalerk_num_tol, nongalerk_tol );
+         return HYPRE_BoomerAMGSetNonGalerkTol_flt( solver, nongalerk_num_tol, (hypre_float *)nongalerk_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetNonGalerkTol_dbl( solver, nongalerk_num_tol, nongalerk_tol );
+         return HYPRE_BoomerAMGSetNonGalerkTol_dbl( solver, nongalerk_num_tol, (hypre_double *)nongalerk_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetNonGalerkTol_long_dbl( solver, nongalerk_num_tol, nongalerk_tol );
+         return HYPRE_BoomerAMGSetNonGalerkTol_long_dbl( solver, nongalerk_num_tol, (hypre_long_double *)nongalerk_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4251,11 +4251,11 @@ HYPRE_BoomerAMGSetNonGalerkinTol_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetNonGalerkinTol_flt( solver, nongalerkin_tol );
+         return HYPRE_BoomerAMGSetNonGalerkinTol_flt( solver, (hypre_float)nongalerkin_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetNonGalerkinTol_dbl( solver, nongalerkin_tol );
+         return HYPRE_BoomerAMGSetNonGalerkinTol_dbl( solver, (hypre_double)nongalerkin_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetNonGalerkinTol_long_dbl( solver, nongalerkin_tol );
+         return HYPRE_BoomerAMGSetNonGalerkinTol_long_dbl( solver, (hypre_long_double)nongalerkin_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4395,11 +4395,11 @@ HYPRE_BoomerAMGSetOmega_pre( HYPRE_Precision precision, HYPRE_Solver solver, voi
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetOmega_flt( solver, omega );
+         return HYPRE_BoomerAMGSetOmega_flt( solver, (hypre_float *)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetOmega_dbl( solver, omega );
+         return HYPRE_BoomerAMGSetOmega_dbl( solver, (hypre_double *)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetOmega_long_dbl( solver, omega );
+         return HYPRE_BoomerAMGSetOmega_long_dbl( solver, (hypre_long_double *)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4413,11 +4413,11 @@ HYPRE_BoomerAMGSetOuterWt_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetOuterWt_flt( solver, omega );
+         return HYPRE_BoomerAMGSetOuterWt_flt( solver, (hypre_float)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetOuterWt_dbl( solver, omega );
+         return HYPRE_BoomerAMGSetOuterWt_dbl( solver, (hypre_double)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetOuterWt_long_dbl( solver, omega );
+         return HYPRE_BoomerAMGSetOuterWt_long_dbl( solver, (hypre_long_double)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4629,11 +4629,11 @@ HYPRE_BoomerAMGSetRelaxWeight_pre( HYPRE_Precision precision, HYPRE_Solver solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetRelaxWeight_flt( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWeight_flt( solver, (hypre_float *)relax_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetRelaxWeight_dbl( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWeight_dbl( solver, (hypre_double *)relax_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetRelaxWeight_long_dbl( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWeight_long_dbl( solver, (hypre_long_double *)relax_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4647,11 +4647,11 @@ HYPRE_BoomerAMGSetRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetRelaxWt_flt( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWt_flt( solver, (hypre_float)relax_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetRelaxWt_dbl( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWt_dbl( solver, (hypre_double)relax_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetRelaxWt_long_dbl( solver, relax_weight );
+         return HYPRE_BoomerAMGSetRelaxWt_long_dbl( solver, (hypre_long_double)relax_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4683,11 +4683,11 @@ HYPRE_BoomerAMGSetSCommPkgSwitch_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetSCommPkgSwitch_flt( solver, S_commpkg_switch );
+         return HYPRE_BoomerAMGSetSCommPkgSwitch_flt( solver, (hypre_float)S_commpkg_switch );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetSCommPkgSwitch_dbl( solver, S_commpkg_switch );
+         return HYPRE_BoomerAMGSetSCommPkgSwitch_dbl( solver, (hypre_double)S_commpkg_switch );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetSCommPkgSwitch_long_dbl( solver, S_commpkg_switch );
+         return HYPRE_BoomerAMGSetSCommPkgSwitch_long_dbl( solver, (hypre_long_double)S_commpkg_switch );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4719,11 +4719,11 @@ HYPRE_BoomerAMGSetSchwarzRlxWeight_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetSchwarzRlxWeight_flt( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGSetSchwarzRlxWeight_flt( solver, (hypre_float)schwarz_rlx_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetSchwarzRlxWeight_dbl( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGSetSchwarzRlxWeight_dbl( solver, (hypre_double)schwarz_rlx_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetSchwarzRlxWeight_long_dbl( solver, schwarz_rlx_weight );
+         return HYPRE_BoomerAMGSetSchwarzRlxWeight_long_dbl( solver, (hypre_long_double)schwarz_rlx_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4899,11 +4899,11 @@ HYPRE_BoomerAMGSetStrongThreshold_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetStrongThreshold_flt( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThreshold_flt( solver, (hypre_float)strong_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetStrongThreshold_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThreshold_dbl( solver, (hypre_double)strong_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetStrongThreshold_long_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThreshold_long_dbl( solver, (hypre_long_double)strong_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4917,11 +4917,11 @@ HYPRE_BoomerAMGSetStrongThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetStrongThresholdR_flt( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThresholdR_flt( solver, (hypre_float)strong_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetStrongThresholdR_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThresholdR_dbl( solver, (hypre_double)strong_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetStrongThresholdR_long_dbl( solver, strong_threshold );
+         return HYPRE_BoomerAMGSetStrongThresholdR_long_dbl( solver, (hypre_long_double)strong_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4953,11 +4953,11 @@ HYPRE_BoomerAMGSetThreshold_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetThreshold_flt( solver, threshold );
+         return HYPRE_BoomerAMGSetThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetThreshold_dbl( solver, threshold );
+         return HYPRE_BoomerAMGSetThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetThreshold_long_dbl( solver, threshold );
+         return HYPRE_BoomerAMGSetThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4971,11 +4971,11 @@ HYPRE_BoomerAMGSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetTol_flt( solver, tol );
+         return HYPRE_BoomerAMGSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetTol_dbl( solver, tol );
+         return HYPRE_BoomerAMGSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetTol_long_dbl( solver, tol );
+         return HYPRE_BoomerAMGSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -4989,11 +4989,11 @@ HYPRE_BoomerAMGSetTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetTruncFactor_flt( solver, trunc_factor );
+         return HYPRE_BoomerAMGSetTruncFactor_flt( solver, (hypre_float)trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetTruncFactor_dbl( solver, trunc_factor );
+         return HYPRE_BoomerAMGSetTruncFactor_dbl( solver, (hypre_double)trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetTruncFactor_long_dbl( solver, trunc_factor );
+         return HYPRE_BoomerAMGSetTruncFactor_long_dbl( solver, (hypre_long_double)trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5133,11 +5133,11 @@ HYPRE_EuclidSetILUT_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_l
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_EuclidSetILUT_flt( solver, drop_tol );
+         return HYPRE_EuclidSetILUT_flt( solver, (hypre_float)drop_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_EuclidSetILUT_dbl( solver, drop_tol );
+         return HYPRE_EuclidSetILUT_dbl( solver, (hypre_double)drop_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_EuclidSetILUT_long_dbl( solver, drop_tol );
+         return HYPRE_EuclidSetILUT_long_dbl( solver, (hypre_long_double)drop_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5241,11 +5241,11 @@ HYPRE_EuclidSetSparseA_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_EuclidSetSparseA_flt( solver, sparse_A );
+         return HYPRE_EuclidSetSparseA_flt( solver, (hypre_float)sparse_A );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_EuclidSetSparseA_dbl( solver, sparse_A );
+         return HYPRE_EuclidSetSparseA_dbl( solver, (hypre_double)sparse_A );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_EuclidSetSparseA_long_dbl( solver, sparse_A );
+         return HYPRE_EuclidSetSparseA_long_dbl( solver, (hypre_long_double)sparse_A );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5385,11 +5385,11 @@ HYPRE_FSAISetKapTolerance_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_FSAISetKapTolerance_flt( solver, kap_tolerance );
+         return HYPRE_FSAISetKapTolerance_flt( solver, (hypre_float)kap_tolerance );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_FSAISetKapTolerance_dbl( solver, kap_tolerance );
+         return HYPRE_FSAISetKapTolerance_dbl( solver, (hypre_double)kap_tolerance );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_FSAISetKapTolerance_long_dbl( solver, kap_tolerance );
+         return HYPRE_FSAISetKapTolerance_long_dbl( solver, (hypre_long_double)kap_tolerance );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5511,11 +5511,11 @@ HYPRE_FSAISetOmega_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_lo
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_FSAISetOmega_flt( solver, omega );
+         return HYPRE_FSAISetOmega_flt( solver, (hypre_float)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_FSAISetOmega_dbl( solver, omega );
+         return HYPRE_FSAISetOmega_dbl( solver, (hypre_double)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_FSAISetOmega_long_dbl( solver, omega );
+         return HYPRE_FSAISetOmega_long_dbl( solver, (hypre_long_double)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5547,11 +5547,11 @@ HYPRE_FSAISetThreshold_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_FSAISetThreshold_flt( solver, threshold );
+         return HYPRE_FSAISetThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_FSAISetThreshold_dbl( solver, threshold );
+         return HYPRE_FSAISetThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_FSAISetThreshold_long_dbl( solver, threshold );
+         return HYPRE_FSAISetThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5565,11 +5565,11 @@ HYPRE_FSAISetTolerance_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_FSAISetTolerance_flt( solver, tolerance );
+         return HYPRE_FSAISetTolerance_flt( solver, (hypre_float)tolerance );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_FSAISetTolerance_dbl( solver, tolerance );
+         return HYPRE_FSAISetTolerance_dbl( solver, (hypre_double)tolerance );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_FSAISetTolerance_long_dbl( solver, tolerance );
+         return HYPRE_FSAISetTolerance_long_dbl( solver, (hypre_long_double)tolerance );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5673,11 +5673,11 @@ HYPRE_ILUGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUGetFinalRelativeResidualNorm_flt( solver, res_norm );
+         return HYPRE_ILUGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)res_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUGetFinalRelativeResidualNorm_dbl( solver, res_norm );
+         return HYPRE_ILUGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)res_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUGetFinalRelativeResidualNorm_long_dbl( solver, res_norm );
+         return HYPRE_ILUGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)res_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5709,11 +5709,11 @@ HYPRE_ILUSetDropThreshold_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetDropThreshold_flt( solver, threshold );
+         return HYPRE_ILUSetDropThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetDropThreshold_dbl( solver, threshold );
+         return HYPRE_ILUSetDropThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetDropThreshold_long_dbl( solver, threshold );
+         return HYPRE_ILUSetDropThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5727,11 +5727,11 @@ HYPRE_ILUSetDropThresholdArray_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetDropThresholdArray_flt( solver, threshold );
+         return HYPRE_ILUSetDropThresholdArray_flt( solver, (hypre_float *)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetDropThresholdArray_dbl( solver, threshold );
+         return HYPRE_ILUSetDropThresholdArray_dbl( solver, (hypre_double *)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetDropThresholdArray_long_dbl( solver, threshold );
+         return HYPRE_ILUSetDropThresholdArray_long_dbl( solver, (hypre_long_double *)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5781,11 +5781,11 @@ HYPRE_ILUSetIterativeSetupTolerance_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetIterativeSetupTolerance_flt( solver, iter_setup_tolerance );
+         return HYPRE_ILUSetIterativeSetupTolerance_flt( solver, (hypre_float)iter_setup_tolerance );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetIterativeSetupTolerance_dbl( solver, iter_setup_tolerance );
+         return HYPRE_ILUSetIterativeSetupTolerance_dbl( solver, (hypre_double)iter_setup_tolerance );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetIterativeSetupTolerance_long_dbl( solver, iter_setup_tolerance );
+         return HYPRE_ILUSetIterativeSetupTolerance_long_dbl( solver, (hypre_long_double)iter_setup_tolerance );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5925,11 +5925,11 @@ HYPRE_ILUSetNSHDropThreshold_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetNSHDropThreshold_flt( solver, threshold );
+         return HYPRE_ILUSetNSHDropThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetNSHDropThreshold_dbl( solver, threshold );
+         return HYPRE_ILUSetNSHDropThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetNSHDropThreshold_long_dbl( solver, threshold );
+         return HYPRE_ILUSetNSHDropThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5943,11 +5943,11 @@ HYPRE_ILUSetNSHDropThresholdArray_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetNSHDropThresholdArray_flt( solver, threshold );
+         return HYPRE_ILUSetNSHDropThresholdArray_flt( solver, (hypre_float *)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetNSHDropThresholdArray_dbl( solver, threshold );
+         return HYPRE_ILUSetNSHDropThresholdArray_dbl( solver, (hypre_double *)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetNSHDropThresholdArray_long_dbl( solver, threshold );
+         return HYPRE_ILUSetNSHDropThresholdArray_long_dbl( solver, (hypre_long_double *)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -5997,11 +5997,11 @@ HYPRE_ILUSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ILUSetTol_flt( solver, tol );
+         return HYPRE_ILUSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ILUSetTol_dbl( solver, tol );
+         return HYPRE_ILUSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ILUSetTol_long_dbl( solver, tol );
+         return HYPRE_ILUSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -6159,11 +6159,11 @@ HYPRE_MGRGetCoarseGridConvergenceFactor_pre( HYPRE_Precision precision, HYPRE_So
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_MGRGetCoarseGridConvergenceFactor_flt( solver, conv_factor );
+         return HYPRE_MGRGetCoarseGridConvergenceFactor_flt( solver, (hypre_float *)conv_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_MGRGetCoarseGridConvergenceFactor_dbl( solver, conv_factor );
+         return HYPRE_MGRGetCoarseGridConvergenceFactor_dbl( solver, (hypre_double *)conv_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_MGRGetCoarseGridConvergenceFactor_long_dbl( solver, conv_factor );
+         return HYPRE_MGRGetCoarseGridConvergenceFactor_long_dbl( solver, (hypre_long_double *)conv_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -6177,11 +6177,11 @@ HYPRE_MGRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_MGRGetFinalRelativeResidualNorm_flt( solver, res_norm );
+         return HYPRE_MGRGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)res_norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_MGRGetFinalRelativeResidualNorm_dbl( solver, res_norm );
+         return HYPRE_MGRGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)res_norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_MGRGetFinalRelativeResidualNorm_long_dbl( solver, res_norm );
+         return HYPRE_MGRGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)res_norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -6951,11 +6951,11 @@ HYPRE_MGRSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_MGRSetTol_flt( solver, tol );
+         return HYPRE_MGRSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_MGRSetTol_dbl( solver, tol );
+         return HYPRE_MGRSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_MGRSetTol_long_dbl( solver, tol );
+         return HYPRE_MGRSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -6969,11 +6969,11 @@ HYPRE_MGRSetTruncateCoarseGridThreshold_pre( HYPRE_Precision precision, HYPRE_So
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_MGRSetTruncateCoarseGridThreshold_flt( solver, threshold );
+         return HYPRE_MGRSetTruncateCoarseGridThreshold_flt( solver, (hypre_float)threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_MGRSetTruncateCoarseGridThreshold_dbl( solver, threshold );
+         return HYPRE_MGRSetTruncateCoarseGridThreshold_dbl( solver, (hypre_double)threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_MGRSetTruncateCoarseGridThreshold_long_dbl( solver, threshold );
+         return HYPRE_MGRSetTruncateCoarseGridThreshold_long_dbl( solver, (hypre_long_double)threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7059,11 +7059,11 @@ HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7131,11 +7131,11 @@ HYPRE_ParCSRBiCGSTABSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_flt( solver, a_tol );
+         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_flt( solver, (hypre_float)a_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_dbl( solver, a_tol );
+         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_dbl( solver, (hypre_double)a_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_long_dbl( solver, a_tol );
+         return HYPRE_ParCSRBiCGSTABSetAbsoluteTol_long_dbl( solver, (hypre_long_double)a_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7257,11 +7257,11 @@ HYPRE_ParCSRBiCGSTABSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRBiCGSTABSetTol_flt( solver, tol );
+         return HYPRE_ParCSRBiCGSTABSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRBiCGSTABSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRBiCGSTABSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRBiCGSTABSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRBiCGSTABSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7347,11 +7347,11 @@ HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYP
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7491,11 +7491,11 @@ HYPRE_ParCSRCGNRSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRCGNRSetTol_flt( solver, tol );
+         return HYPRE_ParCSRCGNRSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRCGNRSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRCGNRSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRCGNRSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRCGNRSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7581,11 +7581,11 @@ HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7653,11 +7653,11 @@ HYPRE_ParCSRCOGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_flt( solver, a_tol );
+         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_flt( solver, (hypre_float)a_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_dbl( solver, a_tol );
+         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_dbl( solver, (hypre_double)a_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_long_dbl( solver, a_tol );
+         return HYPRE_ParCSRCOGMRESSetAbsoluteTol_long_dbl( solver, (hypre_long_double)a_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7797,11 +7797,11 @@ HYPRE_ParCSRCOGMRESSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRCOGMRESSetTol_flt( solver, tol );
+         return HYPRE_ParCSRCOGMRESSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRCOGMRESSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRCOGMRESSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRCOGMRESSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRCOGMRESSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -7941,11 +7941,11 @@ HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8013,11 +8013,11 @@ HYPRE_ParCSRFlexGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_flt( solver, a_tol );
+         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_flt( solver, (hypre_float)a_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_dbl( solver, a_tol );
+         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_dbl( solver, (hypre_double)a_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_long_dbl( solver, a_tol );
+         return HYPRE_ParCSRFlexGMRESSetAbsoluteTol_long_dbl( solver, (hypre_long_double)a_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8157,11 +8157,11 @@ HYPRE_ParCSRFlexGMRESSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRFlexGMRESSetTol_flt( solver, tol );
+         return HYPRE_ParCSRFlexGMRESSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRFlexGMRESSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRFlexGMRESSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRFlexGMRESSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRFlexGMRESSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8247,11 +8247,11 @@ HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HY
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8337,11 +8337,11 @@ HYPRE_ParCSRGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRGMRESSetAbsoluteTol_flt( solver, a_tol );
+         return HYPRE_ParCSRGMRESSetAbsoluteTol_flt( solver, (hypre_float)a_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRGMRESSetAbsoluteTol_dbl( solver, a_tol );
+         return HYPRE_ParCSRGMRESSetAbsoluteTol_dbl( solver, (hypre_double)a_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRGMRESSetAbsoluteTol_long_dbl( solver, a_tol );
+         return HYPRE_ParCSRGMRESSetAbsoluteTol_long_dbl( solver, (hypre_long_double)a_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8499,11 +8499,11 @@ HYPRE_ParCSRGMRESSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hyp
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRGMRESSetTol_flt( solver, tol );
+         return HYPRE_ParCSRGMRESSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRGMRESSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRGMRESSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRGMRESSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRGMRESSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8607,11 +8607,11 @@ HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8697,11 +8697,11 @@ HYPRE_ParCSRHybridGetSetupSolveTime_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridGetSetupSolveTime_flt( solver, time );
+         return HYPRE_ParCSRHybridGetSetupSolveTime_flt( solver, (hypre_float *)time );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridGetSetupSolveTime_dbl( solver, time );
+         return HYPRE_ParCSRHybridGetSetupSolveTime_dbl( solver, (hypre_double *)time );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridGetSetupSolveTime_long_dbl( solver, time );
+         return HYPRE_ParCSRHybridGetSetupSolveTime_long_dbl( solver, (hypre_long_double *)time );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8715,11 +8715,11 @@ HYPRE_ParCSRHybridSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetAbsoluteTol_flt( solver, tol );
+         return HYPRE_ParCSRHybridSetAbsoluteTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetAbsoluteTol_dbl( solver, tol );
+         return HYPRE_ParCSRHybridSetAbsoluteTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetAbsoluteTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRHybridSetAbsoluteTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8787,11 +8787,11 @@ HYPRE_ParCSRHybridSetConvergenceTol_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetConvergenceTol_flt( solver, cf_tol );
+         return HYPRE_ParCSRHybridSetConvergenceTol_flt( solver, (hypre_float)cf_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetConvergenceTol_dbl( solver, cf_tol );
+         return HYPRE_ParCSRHybridSetConvergenceTol_dbl( solver, (hypre_double)cf_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetConvergenceTol_long_dbl( solver, cf_tol );
+         return HYPRE_ParCSRHybridSetConvergenceTol_long_dbl( solver, (hypre_long_double)cf_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -8985,11 +8985,11 @@ HYPRE_ParCSRHybridSetLevelOuterWt_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetLevelOuterWt_flt( solver, outer_wt, level );
+         return HYPRE_ParCSRHybridSetLevelOuterWt_flt( solver, (hypre_float)outer_wt, level );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetLevelOuterWt_dbl( solver, outer_wt, level );
+         return HYPRE_ParCSRHybridSetLevelOuterWt_dbl( solver, (hypre_double)outer_wt, level );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetLevelOuterWt_long_dbl( solver, outer_wt, level );
+         return HYPRE_ParCSRHybridSetLevelOuterWt_long_dbl( solver, (hypre_long_double)outer_wt, level );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9003,11 +9003,11 @@ HYPRE_ParCSRHybridSetLevelRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetLevelRelaxWt_flt( solver, relax_wt, level );
+         return HYPRE_ParCSRHybridSetLevelRelaxWt_flt( solver, (hypre_float)relax_wt, level );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetLevelRelaxWt_dbl( solver, relax_wt, level );
+         return HYPRE_ParCSRHybridSetLevelRelaxWt_dbl( solver, (hypre_double)relax_wt, level );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetLevelRelaxWt_long_dbl( solver, relax_wt, level );
+         return HYPRE_ParCSRHybridSetLevelRelaxWt_long_dbl( solver, (hypre_long_double)relax_wt, level );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9075,11 +9075,11 @@ HYPRE_ParCSRHybridSetMaxRowSum_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetMaxRowSum_flt( solver, max_row_sum );
+         return HYPRE_ParCSRHybridSetMaxRowSum_flt( solver, (hypre_float)max_row_sum );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetMaxRowSum_dbl( solver, max_row_sum );
+         return HYPRE_ParCSRHybridSetMaxRowSum_dbl( solver, (hypre_double)max_row_sum );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetMaxRowSum_long_dbl( solver, max_row_sum );
+         return HYPRE_ParCSRHybridSetMaxRowSum_long_dbl( solver, (hypre_long_double)max_row_sum );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9147,11 +9147,11 @@ HYPRE_ParCSRHybridSetNonGalerkinTol_pre( HYPRE_Precision precision, HYPRE_Solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetNonGalerkinTol_flt( solver, num_levels, nongalerkin_tol );
+         return HYPRE_ParCSRHybridSetNonGalerkinTol_flt( solver, num_levels, (hypre_float *)nongalerkin_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetNonGalerkinTol_dbl( solver, num_levels, nongalerkin_tol );
+         return HYPRE_ParCSRHybridSetNonGalerkinTol_dbl( solver, num_levels, (hypre_double *)nongalerkin_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetNonGalerkinTol_long_dbl( solver, num_levels, nongalerkin_tol );
+         return HYPRE_ParCSRHybridSetNonGalerkinTol_long_dbl( solver, num_levels, (hypre_long_double *)nongalerkin_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9237,11 +9237,11 @@ HYPRE_ParCSRHybridSetOmega_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetOmega_flt( solver, omega );
+         return HYPRE_ParCSRHybridSetOmega_flt( solver, (hypre_float *)omega );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetOmega_dbl( solver, omega );
+         return HYPRE_ParCSRHybridSetOmega_dbl( solver, (hypre_double *)omega );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetOmega_long_dbl( solver, omega );
+         return HYPRE_ParCSRHybridSetOmega_long_dbl( solver, (hypre_long_double *)omega );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9255,11 +9255,11 @@ HYPRE_ParCSRHybridSetOuterWt_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetOuterWt_flt( solver, outer_wt );
+         return HYPRE_ParCSRHybridSetOuterWt_flt( solver, (hypre_float)outer_wt );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetOuterWt_dbl( solver, outer_wt );
+         return HYPRE_ParCSRHybridSetOuterWt_dbl( solver, (hypre_double)outer_wt );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetOuterWt_long_dbl( solver, outer_wt );
+         return HYPRE_ParCSRHybridSetOuterWt_long_dbl( solver, (hypre_long_double)outer_wt );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9435,11 +9435,11 @@ HYPRE_ParCSRHybridSetRelaxWeight_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetRelaxWeight_flt( solver, relax_weight );
+         return HYPRE_ParCSRHybridSetRelaxWeight_flt( solver, (hypre_float *)relax_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetRelaxWeight_dbl( solver, relax_weight );
+         return HYPRE_ParCSRHybridSetRelaxWeight_dbl( solver, (hypre_double *)relax_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetRelaxWeight_long_dbl( solver, relax_weight );
+         return HYPRE_ParCSRHybridSetRelaxWeight_long_dbl( solver, (hypre_long_double *)relax_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9453,11 +9453,11 @@ HYPRE_ParCSRHybridSetRelaxWt_pre( HYPRE_Precision precision, HYPRE_Solver solver
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetRelaxWt_flt( solver, relax_wt );
+         return HYPRE_ParCSRHybridSetRelaxWt_flt( solver, (hypre_float)relax_wt );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetRelaxWt_dbl( solver, relax_wt );
+         return HYPRE_ParCSRHybridSetRelaxWt_dbl( solver, (hypre_double)relax_wt );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetRelaxWt_long_dbl( solver, relax_wt );
+         return HYPRE_ParCSRHybridSetRelaxWt_long_dbl( solver, (hypre_long_double)relax_wt );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9543,11 +9543,11 @@ HYPRE_ParCSRHybridSetStrongThreshold_pre( HYPRE_Precision precision, HYPRE_Solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetStrongThreshold_flt( solver, strong_threshold );
+         return HYPRE_ParCSRHybridSetStrongThreshold_flt( solver, (hypre_float)strong_threshold );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetStrongThreshold_dbl( solver, strong_threshold );
+         return HYPRE_ParCSRHybridSetStrongThreshold_dbl( solver, (hypre_double)strong_threshold );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetStrongThreshold_long_dbl( solver, strong_threshold );
+         return HYPRE_ParCSRHybridSetStrongThreshold_long_dbl( solver, (hypre_long_double)strong_threshold );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9561,11 +9561,11 @@ HYPRE_ParCSRHybridSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetTol_flt( solver, tol );
+         return HYPRE_ParCSRHybridSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRHybridSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRHybridSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9579,11 +9579,11 @@ HYPRE_ParCSRHybridSetTruncFactor_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRHybridSetTruncFactor_flt( solver, trunc_factor );
+         return HYPRE_ParCSRHybridSetTruncFactor_flt( solver, (hypre_float)trunc_factor );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRHybridSetTruncFactor_dbl( solver, trunc_factor );
+         return HYPRE_ParCSRHybridSetTruncFactor_dbl( solver, (hypre_double)trunc_factor );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRHybridSetTruncFactor_long_dbl( solver, trunc_factor );
+         return HYPRE_ParCSRHybridSetTruncFactor_long_dbl( solver, (hypre_long_double)trunc_factor );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9687,11 +9687,11 @@ HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9759,11 +9759,11 @@ HYPRE_ParCSRLGMRESSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver so
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRLGMRESSetAbsoluteTol_flt( solver, a_tol );
+         return HYPRE_ParCSRLGMRESSetAbsoluteTol_flt( solver, (hypre_float)a_tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRLGMRESSetAbsoluteTol_dbl( solver, a_tol );
+         return HYPRE_ParCSRLGMRESSetAbsoluteTol_dbl( solver, (hypre_double)a_tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRLGMRESSetAbsoluteTol_long_dbl( solver, a_tol );
+         return HYPRE_ParCSRLGMRESSetAbsoluteTol_long_dbl( solver, (hypre_long_double)a_tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -9903,11 +9903,11 @@ HYPRE_ParCSRLGMRESSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRLGMRESSetTol_flt( solver, tol );
+         return HYPRE_ParCSRLGMRESSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRLGMRESSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRLGMRESSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRLGMRESSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRLGMRESSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10065,11 +10065,11 @@ HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPR
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_flt( solver, norm );
+         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_dbl( solver, norm );
+         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_long_dbl( solver, norm );
+         return HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10137,11 +10137,11 @@ HYPRE_ParCSRPCGSetAbsoluteTol_pre( HYPRE_Precision precision, HYPRE_Solver solve
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRPCGSetAbsoluteTol_flt( solver, tol );
+         return HYPRE_ParCSRPCGSetAbsoluteTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRPCGSetAbsoluteTol_dbl( solver, tol );
+         return HYPRE_ParCSRPCGSetAbsoluteTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRPCGSetAbsoluteTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRPCGSetAbsoluteTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10281,11 +10281,11 @@ HYPRE_ParCSRPCGSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRPCGSetTol_flt( solver, tol );
+         return HYPRE_ParCSRPCGSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRPCGSetTol_dbl( solver, tol );
+         return HYPRE_ParCSRPCGSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRPCGSetTol_long_dbl( solver, tol );
+         return HYPRE_ParCSRPCGSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10389,11 +10389,11 @@ HYPRE_ParCSRParaSailsSetFilter_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRParaSailsSetFilter_flt( solver, filter );
+         return HYPRE_ParCSRParaSailsSetFilter_flt( solver, (hypre_float)filter );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRParaSailsSetFilter_dbl( solver, filter );
+         return HYPRE_ParCSRParaSailsSetFilter_dbl( solver, (hypre_double)filter );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRParaSailsSetFilter_long_dbl( solver, filter );
+         return HYPRE_ParCSRParaSailsSetFilter_long_dbl( solver, (hypre_long_double)filter );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10407,11 +10407,11 @@ HYPRE_ParCSRParaSailsSetLoadbal_pre( HYPRE_Precision precision, HYPRE_Solver sol
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRParaSailsSetLoadbal_flt( solver, loadbal );
+         return HYPRE_ParCSRParaSailsSetLoadbal_flt( solver, (hypre_float)loadbal );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRParaSailsSetLoadbal_dbl( solver, loadbal );
+         return HYPRE_ParCSRParaSailsSetLoadbal_dbl( solver, (hypre_double)loadbal );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRParaSailsSetLoadbal_long_dbl( solver, loadbal );
+         return HYPRE_ParCSRParaSailsSetLoadbal_long_dbl( solver, (hypre_long_double)loadbal );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10443,11 +10443,11 @@ HYPRE_ParCSRParaSailsSetParams_pre( HYPRE_Precision precision, HYPRE_Solver solv
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRParaSailsSetParams_flt( solver, thresh, nlevels );
+         return HYPRE_ParCSRParaSailsSetParams_flt( solver, (hypre_float)thresh, nlevels );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRParaSailsSetParams_dbl( solver, thresh, nlevels );
+         return HYPRE_ParCSRParaSailsSetParams_dbl( solver, (hypre_double)thresh, nlevels );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRParaSailsSetParams_long_dbl( solver, thresh, nlevels );
+         return HYPRE_ParCSRParaSailsSetParams_long_dbl( solver, (hypre_long_double)thresh, nlevels );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10569,11 +10569,11 @@ HYPRE_ParCSRPilutSetDropTolerance_pre( HYPRE_Precision precision, HYPRE_Solver s
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParCSRPilutSetDropTolerance_flt( solver, tol );
+         return HYPRE_ParCSRPilutSetDropTolerance_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParCSRPilutSetDropTolerance_dbl( solver, tol );
+         return HYPRE_ParCSRPilutSetDropTolerance_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParCSRPilutSetDropTolerance_long_dbl( solver, tol );
+         return HYPRE_ParCSRPilutSetDropTolerance_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10708,6 +10708,294 @@ HYPRE_ParCSRSetupMatvec_pre( HYPRE_Precision precision, HYPRE_MatvecFunctions *m
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParChebyCreate_pre( HYPRE_Precision precision, HYPRE_Solver *solver )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebyCreate_flt( solver );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebyCreate_dbl( solver );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebyCreate_long_dbl( solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebyDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebyDestroy_flt( solver );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebyDestroy_dbl( solver );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebyDestroy_long_dbl( solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebyGetMinMaxEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *min_eig_est, void *max_eig_est )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebyGetMinMaxEigEst_flt( solver, (hypre_float *)min_eig_est, (hypre_float *)max_eig_est );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebyGetMinMaxEigEst_dbl( solver, (hypre_double *)min_eig_est, (hypre_double *)max_eig_est );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebyGetMinMaxEigEst_long_dbl( solver, (hypre_long_double *)min_eig_est, (hypre_long_double *)max_eig_est );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int eig_est )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetEigEst_flt( solver, eig_est );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetEigEst_dbl( solver, eig_est );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetEigEst_long_dbl( solver, eig_est );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetEigRatio_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double eig_ratio )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetEigRatio_flt( solver, (hypre_float)eig_ratio );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetEigRatio_dbl( solver, (hypre_double)eig_ratio );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetEigRatio_long_dbl( solver, (hypre_long_double)eig_ratio );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetLogging_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int logging )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetLogging_flt( solver, logging );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetLogging_dbl( solver, logging );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetLogging_long_dbl( solver, logging );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetMaxIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int max_iterations )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetMaxIterations_flt( solver, max_iterations );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetMaxIterations_dbl( solver, max_iterations );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetMaxIterations_long_dbl( solver, max_iterations );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetMinMaxEigEst_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double min_eig_est, hypre_long_double max_eig_est )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetMinMaxEigEst_flt( solver, (hypre_float)min_eig_est, (hypre_float)max_eig_est );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetMinMaxEigEst_dbl( solver, (hypre_double)min_eig_est, (hypre_double)max_eig_est );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetMinMaxEigEst_long_dbl( solver, (hypre_long_double)min_eig_est, (hypre_long_double)max_eig_est );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetOrder_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int order )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetOrder_flt( solver, order );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetOrder_dbl( solver, order );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetOrder_long_dbl( solver, order );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetPrintLevel_flt( solver, print_level );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetPrintLevel_dbl( solver, print_level );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetPrintLevel_long_dbl( solver, print_level );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetScale_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int scale )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetScale_flt( solver, scale );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetScale_dbl( solver, scale );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetScale_long_dbl( solver, scale );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetTolerance_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double tolerance )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetTolerance_flt( solver, (hypre_float)tolerance );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetTolerance_dbl( solver, (hypre_double)tolerance );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetTolerance_long_dbl( solver, (hypre_long_double)tolerance );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetVariant_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int variant )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetVariant_flt( solver, variant );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetVariant_dbl( solver, variant );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetVariant_long_dbl( solver, variant );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetZeroGuess_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int zero_guess )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetZeroGuess_flt( solver, zero_guess );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetZeroGuess_dbl( solver, zero_guess );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetZeroGuess_long_dbl( solver, zero_guess );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySetup_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySetup_flt( solver, A, b, x );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySetup_dbl( solver, A, b, x );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySetup_long_dbl( solver, A, b, x );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParChebySolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_ParChebySolve_flt( solver, A, b, x );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_ParChebySolve_dbl( solver, A, b, x );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_ParChebySolve_long_dbl( solver, A, b, x );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_IJMatrix *pij_A )
 {
    switch (precision)
@@ -10767,11 +11055,11 @@ HYPRE_ParaSailsGetFilter_pre( HYPRE_Precision precision, HYPRE_Solver solver, vo
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsGetFilter_flt( solver, filter );
+         return HYPRE_ParaSailsGetFilter_flt( solver, (hypre_float *)filter );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsGetFilter_dbl( solver, filter );
+         return HYPRE_ParaSailsGetFilter_dbl( solver, (hypre_double *)filter );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsGetFilter_long_dbl( solver, filter );
+         return HYPRE_ParaSailsGetFilter_long_dbl( solver, (hypre_long_double *)filter );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10785,11 +11073,11 @@ HYPRE_ParaSailsGetLoadbal_pre( HYPRE_Precision precision, HYPRE_Solver solver, v
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsGetLoadbal_flt( solver, loadbal );
+         return HYPRE_ParaSailsGetLoadbal_flt( solver, (hypre_float *)loadbal );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsGetLoadbal_dbl( solver, loadbal );
+         return HYPRE_ParaSailsGetLoadbal_dbl( solver, (hypre_double *)loadbal );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsGetLoadbal_long_dbl( solver, loadbal );
+         return HYPRE_ParaSailsGetLoadbal_long_dbl( solver, (hypre_long_double *)loadbal );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10875,11 +11163,11 @@ HYPRE_ParaSailsGetThresh_pre( HYPRE_Precision precision, HYPRE_Solver solver, vo
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsGetThresh_flt( solver, thresh );
+         return HYPRE_ParaSailsGetThresh_flt( solver, (hypre_float *)thresh );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsGetThresh_dbl( solver, thresh );
+         return HYPRE_ParaSailsGetThresh_dbl( solver, (hypre_double *)thresh );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsGetThresh_long_dbl( solver, thresh );
+         return HYPRE_ParaSailsGetThresh_long_dbl( solver, (hypre_long_double *)thresh );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10893,11 +11181,11 @@ HYPRE_ParaSailsSetFilter_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsSetFilter_flt( solver, filter );
+         return HYPRE_ParaSailsSetFilter_flt( solver, (hypre_float)filter );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsSetFilter_dbl( solver, filter );
+         return HYPRE_ParaSailsSetFilter_dbl( solver, (hypre_double)filter );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsSetFilter_long_dbl( solver, filter );
+         return HYPRE_ParaSailsSetFilter_long_dbl( solver, (hypre_long_double)filter );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10911,11 +11199,11 @@ HYPRE_ParaSailsSetLoadbal_pre( HYPRE_Precision precision, HYPRE_Solver solver, h
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsSetLoadbal_flt( solver, loadbal );
+         return HYPRE_ParaSailsSetLoadbal_flt( solver, (hypre_float)loadbal );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsSetLoadbal_dbl( solver, loadbal );
+         return HYPRE_ParaSailsSetLoadbal_dbl( solver, (hypre_double)loadbal );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsSetLoadbal_long_dbl( solver, loadbal );
+         return HYPRE_ParaSailsSetLoadbal_long_dbl( solver, (hypre_long_double)loadbal );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -10965,11 +11253,11 @@ HYPRE_ParaSailsSetParams_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsSetParams_flt( solver, thresh, nlevels );
+         return HYPRE_ParaSailsSetParams_flt( solver, (hypre_float)thresh, nlevels );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsSetParams_dbl( solver, thresh, nlevels );
+         return HYPRE_ParaSailsSetParams_dbl( solver, (hypre_double)thresh, nlevels );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsSetParams_long_dbl( solver, thresh, nlevels );
+         return HYPRE_ParaSailsSetParams_long_dbl( solver, (hypre_long_double)thresh, nlevels );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -11019,11 +11307,11 @@ HYPRE_ParaSailsSetThresh_pre( HYPRE_Precision precision, HYPRE_Solver solver, hy
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_ParaSailsSetThresh_flt( solver, thresh );
+         return HYPRE_ParaSailsSetThresh_flt( solver, (hypre_float)thresh );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_ParaSailsSetThresh_dbl( solver, thresh );
+         return HYPRE_ParaSailsSetThresh_dbl( solver, (hypre_double)thresh );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_ParaSailsSetThresh_long_dbl( solver, thresh );
+         return HYPRE_ParaSailsSetThresh_long_dbl( solver, (hypre_long_double)thresh );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -11217,11 +11505,11 @@ HYPRE_SchwarzSetRelaxWeight_pre( HYPRE_Precision precision, HYPRE_Solver solver,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SchwarzSetRelaxWeight_flt( solver, relax_weight );
+         return HYPRE_SchwarzSetRelaxWeight_flt( solver, (hypre_float)relax_weight );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SchwarzSetRelaxWeight_dbl( solver, relax_weight );
+         return HYPRE_SchwarzSetRelaxWeight_dbl( solver, (hypre_double)relax_weight );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SchwarzSetRelaxWeight_long_dbl( solver, relax_weight );
+         return HYPRE_SchwarzSetRelaxWeight_long_dbl( solver, (hypre_long_double)relax_weight );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

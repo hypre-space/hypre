@@ -71,16 +71,16 @@ void Hash_dhInit_private(Hash_dh h, HYPRE_Int s)
   /* want table size to be a power of 2: */
   while (size < s) size *= 2;
   /* rule-of-thumb: ensure there's some padding */
-  if ( (size-s) < (.1 * size) ) { size *= 2; }
+  if ( (size-s) < (.1 * (HYPRE_Real) size) ) { size *= 2; }
   h->size = size;
 
 /*
-  hypre_sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size); 
+  hypre_sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size);
   SET_INFO(msgBuf_dh);
 */
 
   /* allocate and zero the hash table */
-  data = h->data = (HashRecord*)MALLOC_DH(size*sizeof(HashRecord)); CHECK_V_ERROR;
+  data = h->data = (HashRecord*)MALLOC_DH((size_t) size * sizeof(HashRecord)); CHECK_V_ERROR;
   for (i=0; i<size; ++i) {
     data[i].key = -1;
     data[i].mark = -1;
@@ -113,13 +113,13 @@ HashData * Hash_dhLookup(Hash_dh h, HYPRE_Int key)
         retval = &(data[idx].data);
         break;
       }
-    } 
+    }
   }
   END_FUNC_VAL(retval)
 }
 
 
-/* 
+/*
   TODO: (1) check for already-inserted  (done?)
         (2) rehash, if table grows too large
 */

@@ -388,6 +388,12 @@ hypre_MGRSetupStats(void *mgr_vdata)
    }
    num_levels_total = num_levels_mgr + num_sublevels_amg[coarsest_mgr_level];
 
+   /* Compute global number of nonzeros if not done before */
+   if (hypre_ParCSRMatrixDNumNonzeros(A_finest) <= 0.0)
+   {
+      hypre_ParCSRMatrixSetDNumNonzeros(A_finest);
+   }
+
    /* Compute number of AMG sublevels at each MGR level */
    max_levels = num_levels_total;
    for (i = 0; i < num_levels_mgr; i++)
@@ -414,7 +420,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
       if (block_num_Cpts)
       {
          coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[0], block_CF_marker[0]);
-         max_length = hypre_min(strlen(coarse_dofs_str) + 2, 50);
+         max_length = hypre_min((HYPRE_Int) strlen(coarse_dofs_str) + 2, 50);
          hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
       }
       else
@@ -653,20 +659,34 @@ hypre_MGRSetupStats(void *mgr_vdata)
             RT_array[k] = (k < (num_sublevels_amg[i] - 1)) ?
                           hypre_ParAMGDataRArray(amg_solver)[k] : NULL;
 
+            /* Compute global number of nonzeros if not done before */
+            if (hypre_ParCSRMatrixDNumNonzeros(A_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(A_array[k]);
+            }
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(P_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(P_array[k]);
+            }
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(RT_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(RT_array[k]);
+            }
+
             gridcomp[i] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[k]);
-            opcomp[i]   += (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[k]);
+            opcomp[i]   += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
+            memcomp[i]  += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
             if (k < (num_sublevels_amg[i] - 1))
             {
-               memcomp[i] += (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[k]) +
-                             (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P_array[k]) +
-                             (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(RT_array[k]);
+               memcomp[i] += hypre_ParCSRMatrixDNumNonzeros(P_array[k]) +
+                             hypre_ParCSRMatrixDNumNonzeros(RT_array[k]);
             }
          }
          gridcomp[num_levels_mgr + 1] += gridcomp[i];
          opcomp[num_levels_mgr + 1]   += opcomp[i] /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += memcomp[i] /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
 
          gridcomp[i] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
          opcomp[i]   /= hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
@@ -680,11 +700,11 @@ hypre_MGRSetupStats(void *mgr_vdata)
          memcomp[i]  = 1.0;
 
          A_array[i] = hypre_ParMGRDataA(mgr_data, i);
-         gridcomp[num_levels_mgr + 1] += hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
+         gridcomp[num_levels_mgr + 1] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
          opcomp[num_levels_mgr + 1]   += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
       }
    }
    gridcomp[num_levels_mgr + 1] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_finest);

@@ -637,6 +637,7 @@ typedef struct hypre_MatrixStatsArray_struct
 
 /* printf.c */
 HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
+HYPRE_Int hypre_ndigits_ull( hypre_ulonglongint number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
@@ -1230,25 +1231,28 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 #if !defined(HYPRE_USING_MEMORY_TRACKER)
 
 #define hypre_TAlloc(type, count, location) \
-( (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+( (type *) hypre_MAlloc((size_t) (count) * sizeof(type), (location)) )
 
 #define hypre__TAlloc(type, count, location) \
 ( (type *) hypre__MAlloc((size_t)(sizeof(type) * (count)), location) )
 
 #define hypre_CTAlloc(type, count, location) \
-( (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
+( (type *) hypre_CAlloc((size_t) (count), (size_t) sizeof(type), (location)) )
 
 #define hypre_TReAlloc(ptr, type, count, location) \
-( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
+( (type *) hypre_ReAlloc((char *) (ptr), (size_t) (count) * sizeof(type), (location)) )
 
 #define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location) \
-( (new_type *) hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location) )
+( (new_type *) hypre_ReAlloc_v2((char *) ptr, \
+                                (size_t) (old_count) * sizeof(old_type), \
+                                (size_t) (new_count) * sizeof(new_type), \
+                                (location)) )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
+(hypre_Memcpy((void *) (dst), (void *) (src), (size_t) (count) * sizeof(type), (locdst), (locsrc)))
 
 #define hypre_TFree(ptr, location) \
-( hypre_Free((void *)ptr, location), ptr = NULL )
+( hypre_Free((void *) (ptr), (location)), ptr = NULL )
 
 #define hypre__TFree(ptr, location) \
 ( hypre__Free((void *)ptr, location), ptr = NULL )
@@ -2667,7 +2671,7 @@ static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
-#if defined(_MSC_VER) || defined(__MINGW64__)
+#if defined(_MSC_VER)
    if (x == 0)
    {
       pos = 0;
@@ -2680,7 +2684,7 @@ first_lsb_bit_indx( hypre_uint x )
       }
    }
 #else
-   pos = ffs(x);
+   pos = ffs((hypre_int) x);
 #endif
    return (pos - 1);
 }
@@ -2744,8 +2748,8 @@ static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_BigInt
 hypre_BigHash( HYPRE_BigInt input )
 {
    hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint k1  = (hypre_ulonglongint) input;
 
-   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
@@ -2766,7 +2770,7 @@ hypre_BigHash( HYPRE_BigInt input )
    }
 #endif
 
-   return h64;
+   return (HYPRE_BigInt) h64;
 }
 
 #else
@@ -2778,7 +2782,7 @@ hypre_BigHash(HYPRE_Int input)
    // 1665863975 is added to input so that
    // only -1073741824 gives HYPRE_HOPSCOTCH_HASH_EMPTY.
    // Hence, we're fine as long as key is non-negative.
-   h32 += (input + 1665863975) * HYPRE_XXH_PRIME32_3;
+   h32 += ((hypre_uint) input + 1665863975U) * HYPRE_XXH_PRIME32_3;
    h32 = HYPRE_XXH_rotl32(h32, 17) * HYPRE_XXH_PRIME32_4;
 
    h32 ^= h32 >> 15;
@@ -2789,7 +2793,7 @@ hypre_BigHash(HYPRE_Int input)
 
    //hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
 
-   return h32;
+   return (HYPRE_Int) h32;
 }
 #endif
 
@@ -2832,7 +2836,7 @@ hypre_Hash(HYPRE_Int input)
    // 1665863975 is added to input so that
    // only -1073741824 gives HYPRE_HOPSCOTCH_HASH_EMPTY.
    // Hence, we're fine as long as key is non-negative.
-   h32 += (input + 1665863975) * HYPRE_XXH_PRIME32_3;
+   h32 += ((hypre_uint) input + 1665863975U) * HYPRE_XXH_PRIME32_3;
    h32 = HYPRE_XXH_rotl32(h32, 17) * HYPRE_XXH_PRIME32_4;
 
    h32 ^= h32 >> 15;
@@ -2843,7 +2847,7 @@ hypre_Hash(HYPRE_Int input)
 
    //hypre_assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
 
-   return h32;
+   return (HYPRE_Int) h32;
 }
 #endif
 
@@ -3965,11 +3969,11 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 
 typedef struct
 {
-   HYPRE_BigInt globalHeight;
-   HYPRE_BigInt height;
-   HYPRE_BigInt width;
-   HYPRE_Real* value;
-   HYPRE_Int    ownsValues;
+   HYPRE_BigInt  globalHeight;
+   HYPRE_BigInt  height;
+   HYPRE_BigInt  width;
+   HYPRE_Real   *value;
+   HYPRE_Int     ownsValues;
 } utilities_FortranMatrix;
 
 #ifdef __cplusplus
@@ -4065,7 +4069,6 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
 #endif
 
 #endif /* FORTRAN_STYLE_MATRIX */
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

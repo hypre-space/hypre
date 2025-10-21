@@ -38,7 +38,7 @@ void compute_scaling_private(HYPRE_Int row, HYPRE_Int len, HYPRE_Real *AVAL, Euc
   HYPRE_Int j;
 
   for (j=0; j<len; ++j) tmp = MAX( tmp, hypre_abs(AVAL[j]) );
-  if (tmp) {
+  if (tmp != 0.0) {
     ctx->scale[row] = 1.0/tmp;
   }
   END_FUNC_DH
@@ -106,9 +106,9 @@ void iluk_seq(Euclid_dh ctx)
   beg_rowP  = ctx->sg->beg_rowP[myid_dh];
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list    = (HYPRE_Int*) MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker  = (HYPRE_Int*) MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*) MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -203,7 +203,7 @@ void iluk_seq(Euclid_dh ctx)
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
@@ -277,7 +277,7 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   else {
-    dummy = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    dummy = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) dummy[i] = i;
     n2o_row   = dummy;
     o2n_col   = dummy;
@@ -289,9 +289,9 @@ void iluk_seq_block(Euclid_dh ctx)
   }
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
 
   /* working space for values */
@@ -423,7 +423,7 @@ void iluk_seq_block(Euclid_dh ctx)
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
@@ -680,8 +680,8 @@ void ilut_seq(Euclid_dh ctx)
 
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = -1;
   rp[0] = 0;
 
@@ -735,7 +735,7 @@ void ilut_seq(Euclid_dh ctx)
     diag[i] = temp;
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }

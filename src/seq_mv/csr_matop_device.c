@@ -349,7 +349,7 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_data + num_nonzeros, A_j + num_nonzeros)),
                                         A_data,
                                         thrust::make_zip_iterator(thrust::make_tuple(B_data, B_j)),
-					hypreFunctor_NonzeroAboveTol(tol));
+                                        hypreFunctor_NonzeroAboveTol(tol));
       hypre_assert(thrust::get<0>(new_end.get_iterator_tuple()) - B_data == num_nonzeros_B);
 #elif defined(HYPRE_USING_SYCL)
       auto new_end = HYPRE_ONEDPL_CALL( copy_if,
@@ -394,7 +394,7 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
                          row_indices + num_nonzeros,
                          A_data,
                          B_row_indices,
-			 hypreFunctor_NonzeroAboveTol(tol));
+                         hypreFunctor_NonzeroAboveTol(tol));
 #elif defined(HYPRE_USING_SYCL)
       hypreSycl_copy_if( row_indices,
                          row_indices + num_nonzeros,

@@ -824,7 +824,7 @@ test_all(MPI_Comm             comm,
    HYPRE_Int       i, j, chunk, chunk_size, chunk_nnz;
    HYPRE_Int       time_index;
    HYPRE_Int      *h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int       cmd_len = strlen(cmd_sequence);
+   HYPRE_Int       cmd_len = (HYPRE_Int) strlen(cmd_sequence);
    HYPRE_Int       myid;
 
    hypre_MPI_Comm_rank(comm, &myid);

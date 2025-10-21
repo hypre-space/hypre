@@ -45,8 +45,8 @@ lobpcg_chol( utilities_FortranMatrix* a,
    char uplo;
    HYPRE_Int ierr;
 
-   lda = utilities_FortranMatrixGlobalHeight( a );
-   n = utilities_FortranMatrixHeight( a );
+   lda  = (HYPRE_Int) utilities_FortranMatrixGlobalHeight( a );
+   n    = (HYPRE_Int) utilities_FortranMatrixHeight( a );
    aval = utilities_FortranMatrixValues( a );
    uplo = 'U';
 
@@ -81,9 +81,9 @@ lobpcg_solveGEVP(
    b = utilities_FortranMatrixValues( mtxB );
    lmd = utilities_FortranMatrixValues( eigVal );
 
-   n = utilities_FortranMatrixHeight( mtxA );
-   lda = utilities_FortranMatrixGlobalHeight( mtxA );
-   ldb = utilities_FortranMatrixGlobalHeight( mtxB );
+   n   = (HYPRE_Int) utilities_FortranMatrixHeight( mtxA );
+   lda = (HYPRE_Int) utilities_FortranMatrixGlobalHeight( mtxA );
+   ldb = (HYPRE_Int) utilities_FortranMatrixGlobalHeight( mtxB );
    lwork = 10 * n;
 
    work = hypre_CTAlloc(HYPRE_Real,  lwork, HYPRE_MEMORY_HOST);
@@ -170,7 +170,7 @@ lobpcg_checkResiduals(
    HYPRE_Real atol;
    HYPRE_Real rtol;
 
-   n = utilities_FortranMatrixHeight( resNorms );
+   n = (HYPRE_Int) utilities_FortranMatrixHeight( resNorms );
 
    atol = tol.absolute;
    rtol = tol.relative;

@@ -276,7 +276,8 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
 #if defined(DEBUG_PFMG)
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
-   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l ,r, m);
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD,
+                   "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l, r, m);
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
 #endif
 
@@ -324,7 +325,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                              P_dbox, Pstart, Pstride, Pi);
          {
             HYPRE_Complex center = Pconst0 + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] + Ap_m4[Ai];
-            if (center)
+            if (center != 0.0)
             {
                Pp1[Pi] = (Pconst1 - Ap_l0[Ai]) / center;
                Pp2[Pi] = (Pconst2 - Ap_r0[Ai]) / center;
@@ -362,7 +363,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
             HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
                                    Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
 
-            if (center)
+            if (center != 0.0)
             {
                Pp1[Pi] = (Pconst1 - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai]) / center;
                Pp2[Pi] = (Pconst2 - Ap_r0[Ai] - Ap_r1[Ai] - Ap_r2[Ai]) / center;
@@ -412,7 +413,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
             HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
                                    Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
 
-            if (center)
+            if (center != 0.0)
             {
                Pp1[Pi] = (Pconst1   - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai] - Ap_l3[Ai] -
                           Ap_l4[Ai] - Ap_l5[Ai] - Ap_l6[Ai] - Ap_l7[Ai] - Ap_l8[Ai]) / center;
@@ -640,7 +641,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
          /* Phase 3: set final coefficients */
          hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
          {
-            if (mid[Pi])
+            if (mid[Pi] != 0.0)
             {
                /* Average out prolongation coefficients */
                Pp1[Pi] /= mid[Pi];

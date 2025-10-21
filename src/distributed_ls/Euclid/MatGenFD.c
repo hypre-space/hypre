@@ -162,7 +162,7 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
   }
 
   mg->first = id*m;
-  mg->hh = 1.0/(mg->px*mg->cc - 1);
+  mg->hh = 1.0/(HYPRE_Real) (mg->px*mg->cc - 1);
 
   if (debug) {
     hypre_sprintf(msgBuf_dh, "cc (local grid dimension) = %i", mg->cc);
@@ -180,10 +180,10 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
 
   /* 2. allocate storage */
   if (mg->allocateMem) {
-    A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    A->rp = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     A->rp[0] = 0;
-    A->cval = (HYPRE_Int*)MALLOC_DH(nnz*sizeof(HYPRE_Int)); CHECK_V_ERROR
-    A->aval = (HYPRE_Real*)MALLOC_DH(nnz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+    A->cval = (HYPRE_Int*)MALLOC_DH((size_t) nnz * sizeof(HYPRE_Int)); CHECK_V_ERROR
+    A->aval = (HYPRE_Real*)MALLOC_DH((size_t) nnz * sizeof(HYPRE_Real)); CHECK_V_ERROR;
     /* rhs->vals = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR; */
   }
 
@@ -253,7 +253,7 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *av
   if (mg->id == mg->np-1) end_row = mGlobal;
   nx = ny = m;
 
-  mg->hh = 1.0/(m-1);
+  mg->hh = 1.0/ (HYPRE_Real) (m - 1);
   hhalf = 0.5 * mg->hh;
 
   A->n = m*m;
