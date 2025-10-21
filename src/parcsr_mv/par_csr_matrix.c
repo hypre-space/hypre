@@ -636,8 +636,8 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    HYPRE_MemoryLocation  memory_location = hypre_ParVectorMemoryLocation(b);
 
    /* Auxiliary variables */
-   HYPRE_Int             num_rows        = (HYPRE_Int) row_starts[1] - row_starts[0];
-   HYPRE_Int             num_cols        = (HYPRE_Int) col_starts[1] - col_starts[0];
+   HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
+   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
    HYPRE_Int             num_nonzeros    = hypre_min(num_rows, num_cols);
 
    /* Output matrix variables */
@@ -2297,7 +2297,7 @@ hypre_MergeDiagAndOffdHost(hypre_ParCSRMatrix *par_matrix)
 
    num_nonzeros = diag_i[num_rows] + offd_i[num_rows];
 
-   matrix = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+   matrix = hypre_CSRMatrixCreate(num_rows, (HYPRE_Int) num_cols, num_nonzeros);
    hypre_CSRMatrixMemoryLocation(matrix) = memory_location;
    hypre_CSRMatrixBigInitialize(matrix);
 
@@ -2564,7 +2564,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       send_info[0] = num_types;
       for (i = 1; i <= num_types; i++)
       {
-         send_info[i] = (HYPRE_BigInt) used_procs[i - 1];
+         send_info[i] = used_procs[i - 1];
       }
       for (i = num_types + 1; i < count; i++)
       {

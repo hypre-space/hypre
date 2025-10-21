@@ -2044,8 +2044,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
             {
                P_diag_data_new[j_diag_pos] = P_diag_data[orig_diag_start + j];
 
-               new_col = col_map[ P_diag_j[orig_diag_start + j]];
-               P_diag_j_new[j_diag_pos] = new_col;
+               new_col = col_map[P_diag_j[orig_diag_start + j]];
+               P_diag_j_new[j_diag_pos] = (HYPRE_Int) new_col;
 
                j_diag_pos++;
                p_count_diag++;
@@ -2402,7 +2402,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                         if (is_diag[j])
                         {
                            P_diag_data_new[new_diag_pos] = value;
-                           P_diag_j_new[new_diag_pos] = aux_j[j_counter];
+                           P_diag_j_new[new_diag_pos] = (HYPRE_Int) aux_j[j_counter];
                            new_diag_pos++;
 
                            is_q[new_j_counter] = is_q[j_counter];

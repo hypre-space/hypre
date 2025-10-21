@@ -2568,7 +2568,7 @@ hypre_BoomerAMGDD_PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGD
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int*
+HYPRE_BigInt*
 hypre_BoomerAMGDD_PackSendBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGDD_PackSendBuffer)( amgdd_data, proc, current_level, padding, send_flag_buffer_size );
@@ -2601,7 +2601,7 @@ hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_A
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGDD_UnpackRecvBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number )
+hypre_BoomerAMGDD_UnpackRecvBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGDD_UnpackRecvBuffer)( amgdd_data, recv_buffer, A_tmp_info, recv_map_send_buffer_size, nodes_added_on_level, current_level, buffer_number );
 }

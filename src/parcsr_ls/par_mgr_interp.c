@@ -2228,7 +2228,7 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
    /* Local variables */
    HYPRE_Int            i, j, jj;
    HYPRE_Int            jj_counter;
-   HYPRE_Int            blk_size = num_cols / num_rows;
+   HYPRE_Int            blk_size = (HYPRE_Int) (num_cols / num_rows);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 

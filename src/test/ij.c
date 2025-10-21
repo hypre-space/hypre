@@ -3550,7 +3550,7 @@ main( hypre_int argc,
       b = (HYPRE_ParVector) object;
 
       /* Initial guess */
-      hypre_Memset(values_d, 0, (size_t) local_num_rows * sizeof(HYPRE_Complex), memory_location);
+      hypre_Memset(values_d, 0, (size_t)local_num_rows * sizeof(HYPRE_Complex), memory_location);
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorSetNumComponents(ij_x, num_components);
@@ -10850,13 +10850,13 @@ BuildFuncTagsFromOneFile( MPI_Comm             comm,
    char                 *filename;
 
    HYPRE_Int             myid, num_procs;
-   HYPRE_Int             first_row_index;
-   HYPRE_Int             last_row_index;
+   HYPRE_BigInt          first_row_index;
+   HYPRE_BigInt          last_row_index;
    HYPRE_BigInt         *partitioning;
    HYPRE_Int            *dof_func = NULL;
    HYPRE_Int            *dof_func_local;
    HYPRE_Int             i, j;
-   HYPRE_Int             local_size;
+   HYPRE_BigInt          local_size;
    HYPRE_Int             global_size;
    hypre_MPI_Request    *requests;
    hypre_MPI_Status     *status, status0;
@@ -10919,10 +10919,10 @@ BuildFuncTagsFromOneFile( MPI_Comm             comm,
       for (i = 1; i < num_procs; i++)
       {
          hypre_MPI_Isend(&dof_func[partitioning[i]],
-                         (partitioning[i + 1] - partitioning[i]),
+                         (HYPRE_Int)(partitioning[i + 1] - partitioning[i]),
                          HYPRE_MPI_INT, i, 0, comm, &requests[i - 1]);
       }
-      for (i = 0; i < local_size; i++)
+      for (i = 0; i < (HYPRE_Int)local_size; i++)
       {
          dof_func_local[i] = dof_func[i];
       }
@@ -10932,7 +10932,7 @@ BuildFuncTagsFromOneFile( MPI_Comm             comm,
    }
    else
    {
-      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
+      hypre_MPI_Recv(dof_func_local, (HYPRE_Int)local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
    }
 
    *dof_func_ptr = dof_func_local;
