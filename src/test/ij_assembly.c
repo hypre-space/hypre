@@ -640,7 +640,7 @@ buildMatrixEntries(MPI_Comm            comm,
          HYPRE_BigInt col = jlower + (HYPRE_BigInt) A_diag_j[j];
          if (row < col)
          {
-            hypre_CSRMatrixData(A_diag)[j] += (float)myid + .89;
+            hypre_CSRMatrixData(A_diag)[j] += (HYPRE_Real) myid + .89;
          }
       }
       for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
@@ -649,7 +649,7 @@ buildMatrixEntries(MPI_Comm            comm,
          HYPRE_BigInt col = col_map_offd_A[A_offd_j[j]];
          if (row < col)
          {
-            hypre_CSRMatrixData(A_offd)[j] += (float)myid + .64;
+            hypre_CSRMatrixData(A_offd)[j] += (HYPRE_Real) myid + .64;
          }
       }
    }

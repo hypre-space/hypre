@@ -511,7 +511,7 @@ SetCosineVector( HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * cos((float)(i + j + k) / 10.0);
+            values[count] = scale * cos((HYPRE_Real)(i + j + k) / 10.0);
             count++;
          }
       }

@@ -2163,7 +2163,7 @@ SetCosineVector(HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * hypre_cos((float)(i + j + k) / 10.0);
+            values[count] = scale * hypre_cos((HYPRE_Real)(i + j + k) / 10.0);
             count++;
          }
       }
@@ -4276,7 +4276,7 @@ main( hypre_int argc,
                      pdata = data.pdata[part];
                      for (var = 0; var < pdata.nvars; var++)
                      {
-                        scale = (float)((float)part + 1.0) * (float)((float)var + 1.0);
+                        scale = ((HYPRE_Real) part + 1.0) * ((HYPRE_Real) var + 1.0);
                         for (box = 0; box < pdata.nboxes; box++)
                         {
                            /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
