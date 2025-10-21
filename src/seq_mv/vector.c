@@ -660,7 +660,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 
    hypre_GpuProfilingPushRange("SeqVectorCopy");
 
-   size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
+   HYPRE_Int size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) *
+                    hypre_VectorNumVectors(x);
 
    hypre_TMemcpy( hypre_VectorData(y),
                   hypre_VectorData(x),
@@ -1632,9 +1633,9 @@ hypre_SeqVectorPointwiseProduct( hypre_Vector  *x,
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Complex  x_size = hypre_VectorSize(x);
-   HYPRE_Complex  y_size = hypre_VectorSize(y);
-   HYPRE_Complex  z_size = hypre_VectorSize(*z_ptr);
+   HYPRE_Int      x_size = hypre_VectorSize(x);
+   HYPRE_Int      y_size = hypre_VectorSize(y);
+   HYPRE_Int      z_size = hypre_VectorSize(*z_ptr);
 
    /* Check if vectors are initialized */
    if ((!x_data && !x_size) || (!y_data && !y_size))

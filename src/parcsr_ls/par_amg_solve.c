@@ -222,7 +222,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         if (rhs_norm)
+         if (rhs_norm != 0.0)
          {
             relative_resid = resid_nrm_init / rhs_norm;
          }
@@ -294,7 +294,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
-         if (old_resid)
+         if (old_resid != 0.0)
          {
             conv_factor = resid_nrm / old_resid;
          }
@@ -305,7 +305,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
          if (0 == converge_type)
          {
-            if (rhs_norm)
+            if (rhs_norm != 0.0)
             {
                relative_resid = resid_nrm / rhs_norm;
             }
@@ -346,7 +346,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && resid_nrm_init)
+   if (cycle_count > 0 && resid_nrm_init != 0.0)
    {
       conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
    }
@@ -360,7 +360,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
-      num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
+      num_variables[0] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A);
 
       if (block_mode)
       {
@@ -369,8 +369,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
             num_variables[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
          }
-         num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
-         num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+         num_coeffs[0]    = (HYPRE_Real) hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+         num_variables[0] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
 
       }
       else
@@ -391,11 +391,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-      if (num_variables[0])
+      if (num_variables[0] != 0.0)
       {
          grid_cmplxty = total_variables / num_variables[0];
       }
-      if (num_coeffs[0])
+      if (num_coeffs[0] != 0.0)
       {
          operat_cmplxty = total_coeffs / num_coeffs[0];
          cycle_cmplxty = cycle_op_count / num_coeffs[0];

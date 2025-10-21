@@ -1166,10 +1166,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        * we need from these rows and put them in Ai and bi*/
 
       /* clear DAi and bi */
-      memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Complex));
-      memset(Dxi, 0, local_size * sizeof(HYPRE_Complex));
-      memset(Dbi, 0, local_size * sizeof(HYPRE_Complex));
-
+      hypre_Memset(DAi, 0, (size_t) (local_size * local_size) * sizeof(HYPRE_Complex),
+                   HYPRE_MEMORY_HOST);
+      hypre_Memset(Dxi, 0, (size_t) local_size * sizeof(HYPRE_Complex), HYPRE_MEMORY_HOST);
+      hypre_Memset(Dbi, 0, (size_t) local_size * sizeof(HYPRE_Complex), HYPRE_MEMORY_HOST);
 
       /* we will populate Ai row-by-row */
       for (rr = 0; rr < local_size; rr++)

@@ -2432,8 +2432,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
                }
             }
-            if (sum_P_neg) { alfa = sum_N_neg / sum_P_neg / diagonal; }
-            if (sum_P_pos) { beta = sum_N_pos / sum_P_pos / diagonal; }
+            if (sum_P_neg != 0.0) { alfa = sum_N_neg / sum_P_neg / diagonal; }
+            if (sum_P_pos != 0.0) { beta = sum_N_pos / sum_P_pos / diagonal; }
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.

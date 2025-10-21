@@ -52,7 +52,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
       return HYPRE_VectorCopy_pre(precision_y, (HYPRE_Vector)x, (HYPRE_Vector)y);
    }
 
-   size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
+   HYPRE_Int size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
 
    /* Implicit conversion to generic data type (void pointer) */
    xp = hypre_VectorData(x);
@@ -134,6 +134,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
             default:
                break;
          }
+         break;
       default:
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
          break;

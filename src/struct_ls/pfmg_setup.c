@@ -455,6 +455,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_ANNOTATE_REGION_END("%s", region_name);
    HYPRE_ANNOTATE_FUNC_END;
 
+
 #ifdef DEBUG_SETUP
    {
       hypre_StructVector   *ones  = NULL;

@@ -645,6 +645,7 @@ hypre_CSRMatrixPrintIJ( hypre_CSRMatrix  *matrix,
    HYPRE_Complex       *matrix_a;
 
    HYPRE_Int            i, j, ii, jj;
+   HYPRE_BigInt         bj;
    HYPRE_Int            ilower, iupper, jlower, jupper;
    FILE                *file;
 
@@ -687,7 +688,14 @@ hypre_CSRMatrixPrintIJ( hypre_CSRMatrix  *matrix,
       /* print diag columns */
       for (j = matrix_i[i]; j < matrix_i[i + 1]; j++)
       {
-         jj = (matrix_bj) ? (matrix_bj[j] + base_j) : (matrix_j[j] + base_j);
+         if (matrix_bj)
+         {
+            bj = matrix_bj[j] + (HYPRE_BigInt) base_j;
+         }
+         else
+         {
+            jj = matrix_j[j] + base_j;
+         }
 
          if (!patt_only)
          {
@@ -695,12 +703,12 @@ hypre_CSRMatrixPrintIJ( hypre_CSRMatrix  *matrix,
             hypre_fprintf(file, "%b %b %.14e , %.14e\n", ii, jj,
                           hypre_creal(matrix_a[j]), hypre_cimag(matrix_a[j]));
 #else
-            hypre_fprintf(file, "%b %b %.14e\n", ii, jj, matrix_a[j]);
+            hypre_fprintf(file, "%b %b %.14e\n", ii, (matrix_bj) ? bj : jj, matrix_a[j]);
 #endif
          }
          else
          {
-            hypre_fprintf(file, "%b %b\n", ii, jj);
+            hypre_fprintf(file, "%b %b\n", ii, (matrix_bj) ? bj : jj);
          }
       }
    }
