@@ -93,8 +93,8 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   newperm  = hypre_idx_malloc(lnrows, "hypre_ParILUT: newperm");
   newiperm = hypre_idx_malloc(lnrows, "hypre_ParILUT: newiperm");
 
-  hypre_memcpy_idx(newperm,   perm, lnrows);
-  hypre_memcpy_idx(newiperm, iperm, lnrows);
+  hypre_memcpy_idx(newperm,   perm, (size_t) lnrows);
+  hypre_memcpy_idx(newiperm, iperm, (size_t) lnrows);
 
   ldu->nnodes[0] = ndone;
   nlevel = 0;
@@ -120,8 +120,8 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
 
     /* copy the new portion of the permutation, and the entire inverse
      * (since updates to the inverse are scattered throughout.) */
-    hypre_memcpy_idx(perm+ndone, newperm+ndone,  ntogo );
-    hypre_memcpy_idx(iperm,      newiperm,       lnrows);
+    hypre_memcpy_idx(perm+ndone, newperm+ndone,  (size_t) ntogo );
+    hypre_memcpy_idx(iperm,      newiperm,       (size_t) lnrows);
 
     /* setup next rmat */
     nlevel++;
@@ -1342,14 +1342,16 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
 
   /* save a global copy of the row distribution */
   vrowdist = hypre_idx_malloc(npes+1, "hypre_ParINIT: vrowdist");
-  hypre_memcpy_idx(vrowdist, rowdist, npes+1);
+  hypre_memcpy_idx(vrowdist, rowdist, (size_t) (npes + 1));
 
   /* ---- hypre_ParILUT ---- */
   /* Allocate the new rmat */
   nrmat->rmat_rnz     = hypre_idx_malloc(ntogo, "hypre_ParILUT: nrmat->rmat_rnz"    );
   nrmat->rmat_rrowlen = hypre_idx_malloc(ntogo, "hypre_ParILUT: nrmat->rmat_rrowlen");
-  nrmat->rmat_rcolind = (HYPRE_Int **) hypre_mymalloc( sizeof(HYPRE_Int*)*ntogo, "hypre_ParILUT: nrmat->rmat_rcolind");
-  nrmat->rmat_rvalues = (HYPRE_Real **)  hypre_mymalloc( sizeof(HYPRE_Real*) *ntogo, "hypre_ParILUT: nrmat->rmat_rvalues");
+  nrmat->rmat_rcolind = (HYPRE_Int **) hypre_mymalloc( sizeof(HYPRE_Int*) * ((size_t) ntogo),
+                                                       "hypre_ParILUT: nrmat->rmat_rcolind" );
+  nrmat->rmat_rvalues = (HYPRE_Real **)  hypre_mymalloc( sizeof(HYPRE_Real*) * ((size_t) ntogo),
+                                                         "hypre_ParILUT: nrmat->rmat_rvalues" );
   for ( i=0; i < ntogo; i++ )
   {
      nrmat->rmat_rcolind[ i ] = NULL;

@@ -50,10 +50,10 @@ HYPRE_Int hypre_mm_read_banner(FILE *f, MM_typecode *matcode)
       return MM_PREMATURE_EOF;
    }
 
-   for (p = mtx; *p != '\0'; *p = tolower(*p), p++); /* convert to lower case */
-   for (p = crd; *p != '\0'; *p = tolower(*p), p++);
-   for (p = data_type; *p != '\0'; *p = tolower(*p), p++);
-   for (p = storage_scheme; *p != '\0'; *p = tolower(*p), p++);
+   for (p = mtx; *p != '\0'; *p = (char) tolower((hypre_int) * p), p++); /* convert to lower case */
+   for (p = crd; *p != '\0'; *p = (char) tolower((hypre_int) * p), p++);
+   for (p = data_type; *p != '\0'; *p = (char) tolower((hypre_int) * p), p++);
+   for (p = storage_scheme; *p != '\0'; *p = (char) tolower((hypre_int) * p), p++);
 
    /* check for banner */
    if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
@@ -172,4 +172,3 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 
    return 0;
 }
-

@@ -247,9 +247,9 @@ set_internal_hypre_option("" COMPLEX)
 set_internal_hypre_option("" MIXED_PRECISION)
 set_internal_hypre_option("" TEST_USING_HOST)
 set_internal_hypre_option("" PRINT_ERRORS)
+set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HYPRE_BLAS)
 set_internal_hypre_option(USING HYPRE_LAPACK)
-set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HOPSCOTCH)
 set_internal_hypre_option(USING GPU_AWARE_MPI)
 set_internal_hypre_option(USING CUDA_STREAMS)
@@ -263,17 +263,17 @@ set_internal_hypre_option(USING MAGMA)
 set_internal_hypre_option(USING CALIPER)
 
 # Check for conflicting options
-ensure_options_differ(HYPRE_ENABLE_SINGLE HYPRE_ENABLE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_HIP)
-ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_SYCL)
-ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_HIP )
-ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_LTO    HYPRE_ENABLE_SYCL) # TODO: allow LTO with SYCL
+ensure_options_differ(SINGLE LONG_DOUBLE)
+ensure_options_differ(CUDA   HIP)
+ensure_options_differ(CUDA   SYCL)
+ensure_options_differ(CUDA   BIGINT)
+ensure_options_differ(CUDA   LONG_DOUBLE)
+ensure_options_differ(SYCL   HIP )
+ensure_options_differ(SYCL   BIGINT)
+ensure_options_differ(SYCL   LONG_DOUBLE)
+ensure_options_differ(HIP    BIGINT)
+ensure_options_differ(HIP    LONG_DOUBLE)
+ensure_options_differ(LTO    SYCL) # TODO: allow LTO with SYCL
 
 # Enable CTest support if tests are being built
 if (HYPRE_BUILD_TESTS)
@@ -298,10 +298,20 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(HYPRE_HAVE_MPI OFF CACHE INTERNAL "")
   set(HYPRE_SEQUENTIAL ON CACHE INTERNAL "")
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
-  if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  if(CMAKE_C_COMPILER_ID MATCHES "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror -Werror=vla>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla>)
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      -Wimplicit-float-conversion -fsingle-precision-constant -Werror -Werror=vla -Wconversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -Wimplicit-float-conversion
+      -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla>
+      -Wconversion)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      -Wimplicit-float-conversion -Werror -Werror=vla -Wconversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -Wimplicit-float-conversion
+      -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE

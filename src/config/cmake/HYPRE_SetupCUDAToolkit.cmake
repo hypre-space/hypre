@@ -123,7 +123,7 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
       string(REPLACE "." "" CUDA_ARCHS "${CUDA_ARCHS}")   # Replace '.' with nothing to format '7.0' as '70'
       string(REPLACE "\n" ";" CUDA_ARCHS "${CUDA_ARCHS}") # Replace newline with semicolon for list format
 
-      # Remove any duplicates CUDA archictectures
+      # Remove any duplicates CUDA architectures
       list(REMOVE_DUPLICATES CUDA_ARCHS)
 
       if(CUDA_ARCHS)

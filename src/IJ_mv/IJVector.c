@@ -183,7 +183,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
     *---------------------------------------------*/
 
    /* Allocate memory for buffers */
-   count  = total_size;
+   count  = (size_t) total_size;
    buffer = hypre_TAlloc(HYPRE_Complex, total_size, HYPRE_MEMORY_HOST);
 
    /* Read data */

@@ -1369,12 +1369,12 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
 #endif
 
    /* Convert data from bytes to GiB (HYPRE_Real) */
-   mem[0] = vm_size  / b_to_gib;
-   mem[1] = vm_peak  / b_to_gib;
-   mem[2] = vm_rss   / b_to_gib;
-   mem[3] = vm_hwm   / b_to_gib;
-   mem[4] = (tot_mem - free_mem) / b_to_gib;
-   mem[5] = tot_mem  / b_to_gib;
+   mem[0] = (HYPRE_Real) vm_size  / b_to_gib;
+   mem[1] = (HYPRE_Real) vm_peak  / b_to_gib;
+   mem[2] = (HYPRE_Real) vm_rss   / b_to_gib;
+   mem[3] = (HYPRE_Real) vm_hwm   / b_to_gib;
+   mem[4] = (HYPRE_Real) (tot_mem - free_mem) / b_to_gib;
+   mem[5] = (HYPRE_Real) tot_mem  / b_to_gib;
 
    return hypre_error_flag;
 }
@@ -1694,7 +1694,8 @@ HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth,
                            HYPRE_Int max_bin,
                            size_t    max_cached_bytes)
 {
-   return hypre_SetCubMemPoolSize(bin_growth, min_bin, max_bin, max_cached_bytes);
+   return hypre_SetCubMemPoolSize((hypre_uint) bin_growth, (hypre_uint) min_bin,
+                                  (hypre_uint) max_bin, max_cached_bytes);
 }
 
 #if defined(HYPRE_USING_DEVICE_POOL) && defined(HYPRE_USING_CUDA)

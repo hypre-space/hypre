@@ -401,7 +401,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
          }
 
-         if (old_resnorm)
+         if (old_resnorm != 0.0)
          {
             conv_factor = resnorm / old_resnorm;
          }
@@ -445,7 +445,7 @@ hypre_ILUSolve( void               *ilu_vdata,
     *    Add operator and grid complexity stats
     *-----------------------------------------------------------------------*/
 
-   if (iter > 0 && init_resnorm)
+   if (iter > 0 && init_resnorm != 0.0)
    {
       conv_factor = hypre_pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }
@@ -1757,7 +1757,7 @@ hypre_NSHSolve( void               *nsh_vdata,
             resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
          }
 
-         if (old_resnorm) { conv_factor = resnorm / old_resnorm; }
+         if (old_resnorm != 0.0) { conv_factor = resnorm / old_resnorm; }
          else { conv_factor = resnorm; }
          if (rhs_norm > HYPRE_REAL_EPSILON)
          {
@@ -1794,7 +1794,7 @@ hypre_NSHSolve( void               *nsh_vdata,
     *    Add operator and grid complexity stats
     *-----------------------------------------------------------------------*/
 
-   if (iter > 0 && init_resnorm)
+   if (iter > 0 && init_resnorm != 0.0)
    {
       conv_factor = hypre_pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }

@@ -199,9 +199,9 @@ hypre_ParCSRCommPkgCreateApart_core(
    /* it is ok to contact yourself - because then there doesn't
       need to be separate code */
 
-   ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
-   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int,  size + 1, HYPRE_MEMORY_HOST);
-   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt,  size * 2, HYPRE_MEMORY_HOST);
+   ex_contact_procs = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int, size + 1, HYPRE_MEMORY_HOST);
+   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt, size * 2, HYPRE_MEMORY_HOST);
 
    range_end = -1;
    for (i = 0; i < num_cols_off_d; i++)
@@ -214,7 +214,8 @@ hypre_ParCSRCommPkgCreateApart_core(
          if (ex_num_contacts == size) /*need more space? */
          {
             size += 20;
-            ex_contact_procs = hypre_TReAlloc(ex_contact_procs, HYPRE_Int, size, HYPRE_MEMORY_HOST);
+            ex_contact_procs = hypre_TReAlloc(ex_contact_procs, HYPRE_Int, size,
+                                              HYPRE_MEMORY_HOST);
             ex_contact_vec_starts = hypre_TReAlloc(ex_contact_vec_starts,  HYPRE_Int,  size + 1,
                                                    HYPRE_MEMORY_HOST);
             ex_contact_buf = hypre_TReAlloc(ex_contact_buf,  HYPRE_BigInt,  size * 2,
@@ -300,13 +301,13 @@ hypre_ParCSRCommPkgCreateApart_core(
       }
       if (count > 0)
       {
-         /*add the range if the proc id != myid*/
+         /* Add the range if the proc id != myid*/
          tmp_id = (HYPRE_Int) response_buf[i * 2];
          if (tmp_id != myid)
          {
             if (tmp_id != prev_id) /*increment the number of recvs */
             {
-               /*check size of recv buffers*/
+               /* Check size of recv buffers */
                if (num_recvs == size)
                {
                   size += 20;

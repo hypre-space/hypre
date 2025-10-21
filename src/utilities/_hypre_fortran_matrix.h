@@ -12,11 +12,11 @@
 
 typedef struct
 {
-   HYPRE_BigInt globalHeight;
-   HYPRE_BigInt height;
-   HYPRE_BigInt width;
-   HYPRE_Real* value;
-   HYPRE_Int    ownsValues;
+   HYPRE_BigInt  globalHeight;
+   HYPRE_BigInt  height;
+   HYPRE_BigInt  width;
+   HYPRE_Real   *value;
+   HYPRE_Int     ownsValues;
 } utilities_FortranMatrix;
 
 #ifdef __cplusplus
@@ -112,4 +112,3 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
 #endif
 
 #endif /* FORTRAN_STYLE_MATRIX */
-

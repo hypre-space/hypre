@@ -54,7 +54,7 @@ GenerateLaplacian( MPI_Comm       comm,
    HYPRE_BigInt *nz_part;
 
    HYPRE_Int num_procs;
-   HYPRE_Int P_busy, Q_busy, R_busy;
+   HYPRE_BigInt P_busy, Q_busy, R_busy;
 
    hypre_MPI_Comm_size(comm, &num_procs);
 
@@ -76,9 +76,9 @@ GenerateLaplacian( MPI_Comm       comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = hypre_min(nx, (HYPRE_BigInt) P);
+   Q_busy = hypre_min(ny, (HYPRE_BigInt) Q);
+   R_busy = hypre_min(nz, (HYPRE_BigInt) R);
 
    num_cols_offd = 0;
    if (ip) { num_cols_offd += ny_local * nz_local; }
@@ -406,7 +406,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    HYPRE_Real *offd_data = NULL;
 
    HYPRE_BigInt global_part[2];
-   HYPRE_Int ix, iy, iz;
+   HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows;
    HYPRE_BigInt *col_map_offd;
@@ -427,7 +427,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    HYPRE_BigInt *nz_part;
 
    HYPRE_Int num_procs;
-   HYPRE_Int P_busy, Q_busy, R_busy;
+   HYPRE_BigInt P_busy, Q_busy, R_busy;
    HYPRE_Real val;
    HYPRE_Int gp_size;
 
@@ -453,9 +453,9 @@ GenerateSysLaplacian( MPI_Comm comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = hypre_min(nx, (HYPRE_BigInt) P);
+   Q_busy = hypre_min(ny, (HYPRE_BigInt) Q);
+   R_busy = hypre_min(nz, (HYPRE_BigInt) R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }
@@ -921,7 +921,8 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    HYPRE_BigInt *ny_part;
    HYPRE_BigInt *nz_part;
 
-   HYPRE_Int num_procs, P_busy, Q_busy, R_busy;
+   HYPRE_Int num_procs;
+   HYPRE_BigInt P_busy, Q_busy, R_busy;
    HYPRE_Real val;
 
    /* for indexing in values */
@@ -948,9 +949,9 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = hypre_min(nx, (HYPRE_BigInt) P);
+   Q_busy = hypre_min(ny, (HYPRE_BigInt) Q);
+   R_busy = hypre_min(nz, (HYPRE_BigInt) R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }
