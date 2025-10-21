@@ -98,7 +98,7 @@ HYPRE_Int
 hypre_IntArrayCopy( hypre_IntArray *x,
                     hypre_IntArray *y )
 {
-   size_t size = hypre_min( hypre_IntArraySize(x), hypre_IntArraySize(y) );
+   HYPRE_Int size = hypre_min( hypre_IntArraySize(x), hypre_IntArraySize(y) );
 
    hypre_TMemcpy( hypre_IntArrayData(y),
                   hypre_IntArrayData(x),

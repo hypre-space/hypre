@@ -301,7 +301,7 @@ SScanIntArray( char  *sdata_ptr,
    sdata_ptr += strspn(sdata_ptr, " \t\n[");
    for (i = 0; i < size; i++)
    {
-      array[i] = strtol(sdata_ptr, &sdata_ptr, 10);
+      array[i] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
    }
    sdata_ptr += strcspn(sdata_ptr, "]") + 1;
 
@@ -502,8 +502,8 @@ ReadData( MPI_Comm      comm,
 
          if ( strcmp(key, "GridCreate:") == 0 )
          {
-            data.ndim = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.nparts = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.ndim = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            data.nparts = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.pdata = hypre_CTAlloc(ProblemPartData,  data.nparts, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "GridSetNumGhost:") == 0 )
@@ -515,7 +515,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "GridSetExtents:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.nboxes % 10) == 0)
             {
@@ -558,9 +558,9 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "GridSetVariables:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
-            pdata.nvars = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.nvars = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.vartypes = hypre_CTAlloc(HYPRE_SStructVariable,  pdata.nvars, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, pdata.nvars, pdata.vartypes);
             data.pdata[part] = pdata;
@@ -574,7 +574,7 @@ ReadData( MPI_Comm      comm,
          else if ( strcmp(key, "GridSetNeighborPart:") == 0 ||
                    strcmp(key, "GridSetSharedPart:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.glue_nboxes % 10) == 0)
             {
@@ -617,7 +617,7 @@ ReadData( MPI_Comm      comm,
                              pdata.glue_offsets[pdata.glue_nboxes]);
             }
             pdata.glue_nbor_parts[pdata.glue_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.glue_nbor_ilowers[pdata.glue_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
@@ -645,7 +645,7 @@ ReadData( MPI_Comm      comm,
                /* read in optional primary indicator */
                sdata_ptr += 1;
                pdata.glue_primaries[pdata.glue_nboxes] =
-                  strtol(sdata_ptr, &sdata_ptr, 10);
+                  (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             }
             else
             {
@@ -657,7 +657,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "GridSetPeriodic:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim, pdata.periodic);
             for (i = data.ndim; i < 3; i++)
@@ -673,7 +673,7 @@ ReadData( MPI_Comm      comm,
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
                hypre_MPI_Abort(comm, -1);
             }
-            data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.nstencils = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int,  data.nstencils, HYPRE_MEMORY_HOST);
             data.stencil_offsets = hypre_CTAlloc(Index *,  data.nstencils, HYPRE_MEMORY_HOST);
             data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *,  data.nstencils, HYPRE_MEMORY_HOST);
@@ -692,15 +692,15 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
          {
-            s = strtol(sdata_ptr, &sdata_ptr, 10);
-            entry = strtol(sdata_ptr, &sdata_ptr, 10);
+            s = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            entry = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.ndim, data.stencil_offsets[s][entry]);
             for (i = data.ndim; i < 3; i++)
             {
                data.stencil_offsets[s][entry][i] = 0;
             }
-            data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.stencil_vars[s][entry] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "RhsSet:") == 0 )
@@ -718,7 +718,7 @@ ReadData( MPI_Comm      comm,
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
                hypre_MPI_Abort(comm, -1);
             }
-            data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.fem_nvars = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.fem_offsets = hypre_CTAlloc(Index,  data.fem_nvars, HYPRE_MEMORY_HOST);
             data.fem_vars = hypre_CTAlloc(HYPRE_Int,  data.fem_nvars, HYPRE_MEMORY_HOST);
             data.fem_values_full = hypre_CTAlloc(HYPRE_Real *,  data.fem_nvars, HYPRE_MEMORY_HOST);
@@ -729,14 +729,14 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "FEMStencilSetRow:") == 0 )
          {
-            i = strtol(sdata_ptr, &sdata_ptr, 10);
+            i = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.ndim, data.fem_offsets[i]);
             for (k = data.ndim; k < 3; k++)
             {
                data.fem_offsets[i][k] = 0;
             }
-            data.fem_vars[i] = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.fem_vars[i] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_values_full[i]);
          }
@@ -753,9 +753,9 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "GraphSetStencil:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
-            var = strtol(sdata_ptr, &sdata_ptr, 10);
-            s = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            var = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            s = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if (pdata.stencil_num == NULL)
             {
@@ -766,7 +766,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "GraphAddEntries:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.graph_nboxes % 10) == 0)
             {
@@ -815,9 +815,9 @@ ReadData( MPI_Comm      comm,
                pdata.graph_strides[pdata.graph_nboxes][i] = 1;
             }
             pdata.graph_vars[pdata.graph_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_to_parts[pdata.graph_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_to_ilowers[pdata.graph_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
@@ -829,7 +829,7 @@ ReadData( MPI_Comm      comm,
                pdata.graph_to_strides[pdata.graph_nboxes][i] = 1;
             }
             pdata.graph_to_vars[pdata.graph_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
                           pdata.graph_index_maps[pdata.graph_nboxes]);
             for (i = data.ndim; i < 3; i++)
@@ -846,7 +846,7 @@ ReadData( MPI_Comm      comm,
                }
             }
             pdata.graph_entries[pdata.graph_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nboxes] =
                (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nboxes] = 1;
@@ -874,22 +874,22 @@ ReadData( MPI_Comm      comm,
                   hypre_TReAlloc(data.symmetric_booleans,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
             data.symmetric_parts[data.symmetric_num] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.symmetric_vars[data.symmetric_num] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.symmetric_to_vars[data.symmetric_num] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.symmetric_booleans[data.symmetric_num] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.symmetric_num++;
          }
          else if ( strcmp(key, "MatrixSetNSSymmetric:") == 0 )
          {
-            data.ns_symmetric = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.ns_symmetric = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
          }
          else if ( strcmp(key, "MatrixSetValues:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.matset_nboxes % 10) == 0)
             {
@@ -918,9 +918,9 @@ ReadData( MPI_Comm      comm,
                pdata.matset_strides[pdata.matset_nboxes][i] = 1;
             }
             pdata.matset_vars[pdata.matset_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matset_entries[pdata.matset_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matset_values[pdata.matset_nboxes] =
                (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matset_nboxes++;
@@ -928,7 +928,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "MatrixAddToValues:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.matadd_nboxes % 10) == 0)
             {
@@ -951,8 +951,8 @@ ReadData( MPI_Comm      comm,
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matadd_iuppers[pdata.matadd_nboxes]);
             pdata.matadd_vars[pdata.matadd_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
-            i = strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            i = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matadd_nentries[pdata.matadd_nboxes] = i;
             pdata.matadd_entries[pdata.matadd_nboxes] =
                hypre_TAlloc(HYPRE_Int,  i, HYPRE_MEMORY_HOST);
@@ -967,7 +967,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "FEMMatrixAddToValues:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.fem_matadd_nboxes % 10) == 0)
             {
@@ -991,12 +991,12 @@ ReadData( MPI_Comm      comm,
                               pdata.fem_matadd_ilowers[pdata.fem_matadd_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_matadd_iuppers[pdata.fem_matadd_nboxes]);
-            i = strtol(sdata_ptr, &sdata_ptr, 10);
+            i = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.fem_matadd_nrows[pdata.fem_matadd_nboxes] = i;
             pdata.fem_matadd_rows[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int,  i, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, i,
                           (HYPRE_Int*) pdata.fem_matadd_rows[pdata.fem_matadd_nboxes]);
-            j = strtol(sdata_ptr, &sdata_ptr, 10);
+            j = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.fem_matadd_ncols[pdata.fem_matadd_nboxes] = j;
             pdata.fem_matadd_cols[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, j,
@@ -1010,7 +1010,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "RhsAddToValues:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.rhsadd_nboxes % 10) == 0)
             {
@@ -1029,7 +1029,7 @@ ReadData( MPI_Comm      comm,
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.rhsadd_iuppers[pdata.rhsadd_nboxes]);
             pdata.rhsadd_vars[pdata.rhsadd_nboxes] =
-               strtol(sdata_ptr, &sdata_ptr, 10);
+               (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.rhsadd_values[pdata.rhsadd_nboxes] =
                (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.rhsadd_nboxes++;
@@ -1037,7 +1037,7 @@ ReadData( MPI_Comm      comm,
          }
          else if ( strcmp(key, "FEMRhsAddToValues:") == 0 )
          {
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             if ((pdata.fem_rhsadd_nboxes % 10) == 0)
             {
@@ -1065,17 +1065,17 @@ ReadData( MPI_Comm      comm,
             data.ndists++;
             data.dist_npools = hypre_TReAlloc(data.dist_npools,  HYPRE_Int,  data.ndists, HYPRE_MEMORY_HOST);
             data.dist_pools = hypre_TReAlloc(data.dist_pools,  HYPRE_Int *,  data.ndists, HYPRE_MEMORY_HOST);
-            data.dist_npools[data.ndists - 1] = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.dist_npools[data.ndists - 1] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.dist_pools[data.ndists - 1] = hypre_CTAlloc(HYPRE_Int,  data.nparts, HYPRE_MEMORY_HOST);
 #if 0
-            data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.npools = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.pools = hypre_CTAlloc(HYPRE_Int,  data.nparts, HYPRE_MEMORY_HOST);
 #endif
          }
          else if ( strcmp(key, "ProcessPoolSetPart:") == 0 )
          {
-            i = strtol(sdata_ptr, &sdata_ptr, 10);
-            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            i = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            part = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.dist_pools[data.ndists - 1][part] = i;
          }
          else if ( strcmp(key, "GridSetNeighborBox:") == 0 )
@@ -2432,7 +2432,7 @@ hypre_MuPDataAlloc(HYPRE_Int count, HYPRE_MemoryLocation location)
 
 void
 hypre_MuPDataMemcpy(void *dst, void *src, HYPRE_Int count,
-                   HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src)
+                    HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src)
 {
    HYPRE_Precision precision;
    HYPRE_GetGlobalPrecision(&precision);
@@ -2831,7 +2831,7 @@ main( hypre_int argc,
    vis = 0;
    seed = 1;
    old_default = 0;
-   
+
    /* runtime precision */
    precision_id = -1;
 
@@ -3846,7 +3846,7 @@ main( hypre_int argc,
 
                      hypre_MuPDataCopyToMP(h_values, values, values_size);
                      hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                        memory_location, HYPRE_MEMORY_HOST);
+                                         memory_location, HYPRE_MEMORY_HOST);
 
                      for (box = 0; box < pdata.nboxes; box++)
                      {
@@ -3866,7 +3866,7 @@ main( hypre_int argc,
 #if 0    // Use AddFEMValues
             hypre_MuPDataCopyToMP(h_values, data.fem_values, data.fem_nsparse);
             hypre_MuPDataMemcpy(d_values, h_values, data.fem_nsparse,
-                               memory_location, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
 
             for (part = 0; part < data.nparts; part++)
             {
@@ -3898,7 +3898,7 @@ main( hypre_int argc,
             }
             hypre_MuPDataCopyToMP(h_values, values, data.fem_nsparse * data.max_boxsize);
             hypre_MuPDataMemcpy(d_values, h_values, data.fem_nsparse * data.max_boxsize,
-                               memory_location, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
             for (part = 0; part < data.nparts; part++)
             {
                pdata = data.pdata[part];
@@ -3980,7 +3980,7 @@ main( hypre_int argc,
 
                hypre_MuPDataCopyToMP(h_values, values, values_size);
                hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                  memory_location, HYPRE_MEMORY_HOST);
+                                   memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructMatrixSetBoxValues(A, part,
                                                pdata.matset_ilowers[box], pdata.matset_iuppers[box],
@@ -4006,7 +4006,7 @@ main( hypre_int argc,
 
                   hypre_MuPDataCopyToMP(h_values, values, values_size);
                   hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                     memory_location, HYPRE_MEMORY_HOST);
+                                      memory_location, HYPRE_MEMORY_HOST);
 
                   HYPRE_SStructMatrixAddToBoxValues(A, part,
                                                     pdata.matadd_ilowers[box],
@@ -4043,7 +4043,7 @@ main( hypre_int argc,
 
                hypre_MuPDataCopyToMP(h_values, values, values_size);
                hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                  memory_location, HYPRE_MEMORY_HOST);
+                                   memory_location, HYPRE_MEMORY_HOST);
 
                for (index[2] = pdata.fem_matadd_ilowers[box][2];
                     index[2] <= pdata.fem_matadd_iuppers[box][2]; index[2]++)
@@ -4135,7 +4135,7 @@ main( hypre_int argc,
 
          hypre_MuPDataCopyToMP(h_values, values, values_size);
          hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                            memory_location, HYPRE_MEMORY_HOST);
+                             memory_location, HYPRE_MEMORY_HOST);
 
          for (part = 0; part < data.nparts; part++)
          {
@@ -4157,7 +4157,7 @@ main( hypre_int argc,
 #if 0    // Use AddFEMValues
             hypre_MuPDataCopyToMP(h_values, data.fem_rhs_values, data.fem_nvars);
             hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
-                               memory_location, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
 
             for (part = 0; part < data.nparts; part++)
             {
@@ -4189,7 +4189,7 @@ main( hypre_int argc,
             }
             hypre_MuPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
             hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
-                               memory_location, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
             for (part = 0; part < data.nparts; part++)
             {
                pdata = data.pdata[part];
@@ -4217,7 +4217,7 @@ main( hypre_int argc,
 
                hypre_MuPDataCopyToMP(h_values, values, values_size);
                hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                  memory_location, HYPRE_MEMORY_HOST);
+                                   memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructVectorAddToBoxValues(b, part,
                                                  pdata.rhsadd_ilowers[box],
@@ -4234,7 +4234,7 @@ main( hypre_int argc,
             {
                hypre_MuPDataCopyToMP(h_values, pdata.fem_rhsadd_values[box], data.fem_nvars);
                hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
-                                  memory_location, HYPRE_MEMORY_HOST);
+                                   memory_location, HYPRE_MEMORY_HOST);
                for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
                     index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
                {
@@ -4288,7 +4288,7 @@ main( hypre_int argc,
 
                            hypre_MuPDataCopyToMP(h_values, values, size);
                            hypre_MuPDataMemcpy(d_values, h_values, size,
-                                              memory_location, HYPRE_MEMORY_HOST);
+                                               memory_location, HYPRE_MEMORY_HOST);
 
                            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, d_values);
                         }
@@ -4519,7 +4519,7 @@ main( hypre_int argc,
 
                   hypre_MuPDataCopyToMP(h_values, values, values_size);
                   hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                     memory_location, HYPRE_MEMORY_HOST);
+                                      memory_location, HYPRE_MEMORY_HOST);
 
                   for (box = 0; box < pdata.nboxes; box++)
                   {

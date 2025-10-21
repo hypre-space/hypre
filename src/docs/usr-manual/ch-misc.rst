@@ -210,6 +210,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-debug``
      - ``-DCMAKE_BUILD_TYPE=Debug``
+   * - | Memory tracker
+       | (default is off)
+     - ``--with-memory-tracker``
+     - ``-DHYPRE_ENABLE_MEMORY_TRACKER=ON``
    * - | Print Errors
        | (default is off)
      - ``--with-print-errors``
@@ -499,10 +503,9 @@ follow these steps:
 
 .. code-block:: bash
 
-   git clone https://github.com/LLNL/Umpire.git
-   cd Umpire
-   git submodule update --init
+   git clone --recursive https://github.com/LLNL/Umpire.git
 
+   cd Umpire
    cmake -S . -B build \
      -DUMPIRE_ENABLE_C=ON \
      -DUMPIRE_ENABLE_TOOLS=OFF \
@@ -530,7 +533,7 @@ or provide it to hypre at configure time. For example:
 
    ./configure --with-umpire-include=/path-to-umpire-install/include \
                --with-umpire-lib-dirs=/path-to-umpire-install/lib \
-               --with-umpire-libs="camp umpire" \
+               --with-umpire-libs="umpire camp" \
 
 or with CMake:
 

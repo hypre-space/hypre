@@ -6,6 +6,11 @@
 # This handles the non-compiler aspect of the SYCL toolkit.
 message(STATUS "Enabling SYCL toolkit")
 
+# We enforce the use of Intel's oneAPI DPC++/C++ Compiler
+if(NOT CMAKE_CXX_COMPILER MATCHES "dpcpp|icpx")
+  message(FATAL_ERROR "SYCL requires DPC++ or Intel C++ compiler")
+endif()
+
 # limit C++ errors to one
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel|Clang")
   target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-ferror-limit=1>)

@@ -290,7 +290,7 @@ void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
 
   /* form inverse column permutation */
   if (n2o_col != NULL) {
-    o2n_col = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    o2n_col = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) o2n_col[n2o_col[i]] = i;
   }
 

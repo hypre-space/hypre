@@ -2493,7 +2493,8 @@ HYPRE_Int hypre_StructMatrixResize ( hypre_StructMatrix *matrix, hypre_BoxArray 
 HYPRE_Int hypre_StructMatrixRestore ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix, HYPRE_Int zero_init, HYPRE_Complex *data );
+HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix, HYPRE_Int zero_init,
+                                             HYPRE_Complex *data );
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix, hypre_Index grid_index,
                                         HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int action,

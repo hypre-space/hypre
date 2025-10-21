@@ -713,7 +713,7 @@ HYPRE_StructVectorClone(HYPRE_StructVector x,
  * Copy vector x into y (\f$y \leftarrow x\f$).
  **/
 HYPRE_Int
-HYPRE_StructVectorCopy(HYPRE_StructVector x, 
+HYPRE_StructVectorCopy(HYPRE_StructVector x,
                        HYPRE_StructVector y);
 
 /**

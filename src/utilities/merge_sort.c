@@ -449,13 +449,14 @@ static void big_kth_element( HYPRE_Int *out1, HYPRE_Int *out2,
  *                      participate in this merge
  *--------------------------------------------------------------------------*/
 
-static void hypre_parallel_merge( HYPRE_Int *first1, HYPRE_Int *last1,
-                                  HYPRE_Int *first2, HYPRE_Int *last2,
-                                  HYPRE_Int *out, HYPRE_Int num_threads,
-                                  HYPRE_Int my_thread_num )
+static void
+hypre_parallel_merge( HYPRE_Int *first1, HYPRE_Int *last1,
+                      HYPRE_Int *first2, HYPRE_Int *last2,
+                      HYPRE_Int *out, HYPRE_Int num_threads,
+                      HYPRE_Int my_thread_num )
 {
-   HYPRE_Int n1 = last1 - first1;
-   HYPRE_Int n2 = last2 - first2;
+   HYPRE_Int n1 = (HYPRE_Int) (last1 - first1);
+   HYPRE_Int n2 = (HYPRE_Int) (last2 - first2);
    HYPRE_Int n = n1 + n2;
    HYPRE_Int n_per_thread = (n + num_threads - 1) / num_threads;
    HYPRE_Int begin_rank = hypre_min(n_per_thread * my_thread_num, n);

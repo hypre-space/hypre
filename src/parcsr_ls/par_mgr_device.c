@@ -460,7 +460,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
    HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
-   HYPRE_Int   i, ii, j, pj, qj, k;
+   HYPRE_Int   i, ii, j, pj, qj;
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
@@ -486,17 +486,16 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
             /* Loop over columns */
             for (j = pj + lane; j < qj; j += HYPRE_WARP_SIZE)
             {
-               k = read_only_load(A_j + j);
-               col = A_j[k];
+               col = read_only_load(A_j + j);
 
                if (marker[col] == marker_val)
                {
                   if ((col >= ii) &&
                       (col <  ii + blk_size) &&
-                      (fabs(A_a[k]) > HYPRE_REAL_MIN))
+                      (fabs(A_a[j]) > HYPRE_REAL_MIN))
                   {
                      /* batch offset + column offset + row offset */
-                     B_a[marker_indices[ii] * blk_size + (col - ii) * blk_size + lidx] = A_a[k];
+                     B_a[marker_indices[ii] * blk_size + (col - ii) * blk_size + lidx] = A_a[j];
                   }
                }
             }
@@ -662,6 +661,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    if (num_points % blk_size)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO! num_points % blk_size != 0");
+      hypre_TFree(blk_row_indices, HYPRE_MEMORY_DEVICE);
       hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
@@ -702,9 +702,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       tmpdiag     = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
       diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_ONEMKLBLAS)
-      pivots      = hypre_CTAlloc(std::int64_t, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      pivots      = hypre_CTAlloc(std::int64_t, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
 #else
-      pivots      = hypre_CTAlloc(HYPRE_Int, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      pivots      = hypre_CTAlloc(HYPRE_Int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
       tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
       info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
@@ -732,10 +732,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
+      /* Use diag_aop to store factors in B_diag_data. This is necessary for subsequent in-place call to getri. */
       HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                          blk_size,
                                                          blk_size,
-                                                         tmpdiag_aop,
+                                                         diag_aop,
                                                          blk_size,
                                                          pivots,
                                                          blk_size,
@@ -765,10 +766,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       work_size  = hypre_max(work_sizes[0], work_sizes[1]);
       scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
 
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t m,
                                                            (std::int64_t) blk_size, // std::int64_t n,
-                                                           *diag_aop, // T *a,
+                                                           B_diag_data, // T *a,
                                                            (std::int64_t) blk_size, // std::int64_t lda,
                                                            (std::int64_t) bs2, // std::int64_t stride_a,
                                                            pivots, // std::int64_t *ipiv,
@@ -814,18 +816,20 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
+      /* Note: This is an in-place operation and overwrites factorization with batched inverses. -DOK */
       HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                          blk_size,
-                                                         tmpdiag_aop,
+                                                         diag_aop,
                                                          blk_size,
                                                          pivots,
                                                          blk_size,
                                                          info,
                                                          num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t n,
-                                                           *diag_aop, // T *a,
+                                                           B_diag_data, // T *a,
                                                            (std::int64_t) blk_size, // std::int64_t lda,
                                                            (std::int64_t) bs2, // std::int64_t stride_a,
                                                            pivots, // std::int64_t *ipiv,
