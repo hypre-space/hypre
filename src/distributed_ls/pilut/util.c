@@ -78,11 +78,11 @@ static HYPRE_Int decshort(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_sincsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  hypre_tex_qsort((char *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), (HYPRE_Int (*) (char*,char*))incshort);
+  hypre_tex_qsort((char *)a, n, (size_t)sizeof(HYPRE_Int), (HYPRE_Int (*) (char*,char*))incshort);
 }
 
 
 void hypre_sdecsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  hypre_tex_qsort((char *)a, (size_t)n, (size_t)sizeof(HYPRE_Int),(HYPRE_Int (*) (char*,char*)) decshort);
+  hypre_tex_qsort((char *)a, n, (size_t)sizeof(HYPRE_Int),(HYPRE_Int (*) (char*,char*)) decshort);
 }

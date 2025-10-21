@@ -1765,11 +1765,11 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
          displs = hypre_CTAlloc(HYPRE_Int, nprocs, HYPRE_MEMORY_HOST);
          displs[0] = 0;
-         recv_buf_size_bytes = recv_counts[0];
+         recv_buf_size_bytes = (size_t) recv_counts[0];
          for (i = 1; i < nprocs; i++)
          {
             displs[i] = displs[i - 1] + recv_counts[i - 1];
-            recv_buf_size_bytes += recv_counts[i];
+            recv_buf_size_bytes += (size_t) recv_counts[i];
          }
          recv_buf_size = (HYPRE_Int) (recv_buf_size_bytes / entry_size_bytes);
          /* mydispls = displs[myid]/entry_size_bytes; */
@@ -2712,7 +2712,7 @@ hypre_FillResponseBoxManAssemble2( void       *p_recv_contact_buf,
    /*initialize stuff */
    hypre_MPI_Comm_rank(comm, &myid );
 
-   entry_size_bytes = 8 * sizeof(HYPRE_Int) + hypre_BoxManEntryInfoSize(manager);
+   entry_size_bytes = 8 * ((HYPRE_Int) sizeof(HYPRE_Int)) + hypre_BoxManEntryInfoSize(manager);
 
    /* num_my_entries is the amount of information to send */
 

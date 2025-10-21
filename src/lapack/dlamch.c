@@ -918,8 +918,8 @@ it
        First compute 1.0 - BETA**(-P), being careful that the
        result is less than 1.0 . */
 
-    recbas = 1. / *beta;
-    z = *beta - 1.;
+    recbas = 1. / (doublereal) *beta;
+    z =  (doublereal) *beta - 1.;
     y = 0.;
 /***i__1 = *p;***/
     for (i = 1; i <= *p; ++i) {

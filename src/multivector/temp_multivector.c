@@ -241,7 +241,7 @@ mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed )
 
    hypre_assert( x != NULL );
 
-   mysrand(seed);
+   mysrand((hypre_uint) seed);
 
    for ( i = 0; i < x->numVectors; i++ )
    {

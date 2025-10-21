@@ -766,7 +766,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       work_size  = hypre_max(work_sizes[0], work_sizes[1]);
       scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
 
-      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/ 
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t m,
                                                            (std::int64_t) blk_size, // std::int64_t n,
@@ -826,7 +826,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                          info,
                                                          num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
-      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/ 
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t n,
                                                            B_diag_data, // T *a,

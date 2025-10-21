@@ -1358,12 +1358,12 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
 #endif
 
    /* Convert data from bytes to GiB (HYPRE_Real) */
-   mem[0] = vm_size  / b_to_gib;
-   mem[1] = vm_peak  / b_to_gib;
-   mem[2] = vm_rss   / b_to_gib;
-   mem[3] = vm_hwm   / b_to_gib;
-   mem[4] = (tot_mem - free_mem) / b_to_gib;
-   mem[5] = tot_mem  / b_to_gib;
+   mem[0] = (HYPRE_Real) vm_size  / b_to_gib;
+   mem[1] = (HYPRE_Real) vm_peak  / b_to_gib;
+   mem[2] = (HYPRE_Real) vm_rss   / b_to_gib;
+   mem[3] = (HYPRE_Real) vm_hwm   / b_to_gib;
+   mem[4] = (HYPRE_Real) (tot_mem - free_mem) / b_to_gib;
+   mem[5] = (HYPRE_Real) tot_mem  / b_to_gib;
 
    return hypre_error_flag;
 }

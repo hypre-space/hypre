@@ -372,7 +372,7 @@ hypre_PrintTiming_fcn( const char     *heading,
 
             /* print wall clock info */
             hypre_printf("  wall clock time = %f seconds\n", wall_time);
-            if (wall_time)
+            if (wall_time != 0.0)
             {
                wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
             }
@@ -384,7 +384,7 @@ hypre_PrintTiming_fcn( const char     *heading,
 
             /* print CPU clock info */
             hypre_printf("  cpu clock time  = %f seconds\n", cpu_time);
-            if (cpu_time)
+            if (cpu_time != 0.0)
             {
                cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
             }

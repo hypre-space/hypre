@@ -24,13 +24,13 @@
  * StoredRowsCreate - Return (a pointer to) a stored rows object.
  *
  * mat  - matrix used for returning on-processor rows (input)
- * size - the maximum number of (off-processor) rows that can be stored 
+ * size - the maximum number of (off-processor) rows that can be stored
  *        (input).  See below for more a precise description.
  *
  * A slot is available for "size" off-processor rows.  The slot for the
  * row with local index i is (i - num_loc).  Therefore, if max_i is the
- * largest local index expected, then size should be set to 
- * (max_i - num_loc + 1).  StoredRows will automatically increase its 
+ * largest local index expected, then size should be set to
+ * (max_i - num_loc + 1).  StoredRows will automatically increase its
  * size if a row with a larger local index needs to be put in StoredRows.
  *--------------------------------------------------------------------------*/
 
@@ -73,7 +73,7 @@ void StoredRowsDestroy(StoredRows *p)
 
 HYPRE_Int *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
 {
-    return (HYPRE_Int *) MemAlloc(p->mem, len*sizeof(HYPRE_Int));
+    return (HYPRE_Int *) MemAlloc(p->mem, (size_t) len * sizeof(HYPRE_Int));
 }
 
 /*--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ HYPRE_Int *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
 
 HYPRE_Real *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
 {
-    return (HYPRE_Real *) MemAlloc(p->mem, len*sizeof(HYPRE_Real));
+    return (HYPRE_Real *) MemAlloc(p->mem, (size_t) len * sizeof(HYPRE_Real));
 }
 
 /*--------------------------------------------------------------------------
@@ -128,11 +128,11 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 }
 
 /*--------------------------------------------------------------------------
- * StoredRowsGet - Return the row with index "index" through the pointers 
+ * StoredRowsGet - Return the row with index "index" through the pointers
  * "lenp", "indp" and "valp" in the stored rows object "p".
  *--------------------------------------------------------------------------*/
 
-void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
+void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp,
   HYPRE_Real **valp)
 {
     if (index < p->num_loc)
