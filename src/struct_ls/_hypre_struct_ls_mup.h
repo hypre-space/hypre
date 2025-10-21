@@ -455,6 +455,20 @@ HYPRE_Int
 hypre_PFMGComputeCxyz_long_dbl( hypre_StructMatrix *A, hypre_long_double *cxyz, hypre_long_double *sqcxyz );
 
 HYPRE_Int
+hypre_PFMGComputeCxyz_core_CC_flt( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_float **w_data );
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_CC_dbl( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_double **w_data );
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_CC_long_dbl( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_long_double **w_data );
+
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_VC_flt( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_float **w_data );
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_VC_dbl( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_double **w_data );
+HYPRE_Int
+hypre_PFMGComputeCxyz_core_VC_long_dbl( hypre_StructMatrix *A, HYPRE_Int Ab, HYPRE_Int diag_is_constant, HYPRE_Int diag_entry, HYPRE_Int *nentries, HYPRE_Int **entries, hypre_IndexRef start, hypre_Index loop_size, hypre_Box *A_dbox, hypre_Box *w_dbox, hypre_long_double **w_data );
+
+HYPRE_Int
 hypre_PFMGComputeDxyz_flt( hypre_StructMatrix *A, hypre_float *dxyz, HYPRE_Int *dxyz_flag );
 HYPRE_Int
 hypre_PFMGComputeDxyz_dbl( hypre_StructMatrix *A, hypre_double *dxyz, HYPRE_Int *dxyz_flag );
