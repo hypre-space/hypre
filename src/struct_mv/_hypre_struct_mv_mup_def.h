@@ -343,7 +343,6 @@
 #define hypre_StructMatmultCompute_core_generic HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_core_generic )
 #define hypre_StructMatmultCompute_fuse HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse )
 #define hypre_StructMatmultCompute_fuse_c HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse_c )
-#define hypre_StructMatmultCompute_fuse_cc HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse_cc )
 #define hypre_StructMatmultCompute_fuse_f HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse_f )
 #define hypre_StructMatmultCompute_fuse_fc HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse_fc )
 #define hypre_StructMatmultCompute_fuse_fcc HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatmultCompute_fuse_fcc )

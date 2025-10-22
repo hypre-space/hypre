@@ -57,18 +57,32 @@ FILES =\
  struct_stmatrix.c
 
 CUFILES =\
+ struct_matvec.c\
+ struct_matvec_cc.c\
+ struct_matvec_icc.c\
+ struct_matvec_ivc.c\
+ struct_matvec_ivcc.c\
+ struct_matvec_vc.c\
+ struct_matvec_vcc.c\
+ struct_matmult.c\
+ struct_matmult_core.c\
+ struct_matmult_fuse.c\
+ struct_matmult_fuse_fff.c\
+ struct_matmult_fuse_ffc.c\
+ struct_matmult_fuse_fcc.c\
+ struct_matmult_fuse_ff.c\
+ struct_matmult_fuse_fc.c\
+ struct_matmult_fuse_cc.c\
+ struct_matmult_fuse_c.c\
+ struct_matmult_fuse_f.c\
  struct_axpy.c\
  struct_communication.c\
  struct_copy.c\
  struct_data.c\
  struct_innerprod.c\
- struct_matmult.c\
- struct_matmult_core.c\
- struct_matmult_fuse.c\
  struct_matop.c\
  struct_matrix.c\
  struct_matvec.c\
- struct_matvec_core.c\
  struct_scale.c\
  struct_vector.c
 
@@ -84,7 +98,7 @@ COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

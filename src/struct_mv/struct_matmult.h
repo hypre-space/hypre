@@ -19,6 +19,9 @@
 #define HYPRE_MAX_MMTERMS 512
 #endif
 
+typedef HYPRE_Complex *hypre_3Cptrs[3];
+typedef HYPRE_Complex *hypre_1Cptr;
+
 /*--------------------------------------------------------------------------
  * StructMatmultDataMH data structure
  *
