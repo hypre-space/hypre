@@ -71,16 +71,6 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataUseGpuRand(data) = 0;
 #endif
 
-   /* device pool */
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubBinGrowth(data)      = 8u;
-   hypre_DeviceDataCubMinBin(data)         = 1u;
-   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
-   hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
-   hypre_DeviceDataCubDevAllocator(data)   = NULL;
-   hypre_DeviceDataCubUvmAllocator(data)   = NULL;
-#endif
-
    return data;
 }
 
@@ -156,10 +146,6 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 #endif
       }
    }
-#endif
-
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubCachingAllocatorDestroy(data);
 #endif
 
 #if defined(HYPRE_USING_SYCL)
