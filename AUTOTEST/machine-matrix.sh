@@ -38,6 +38,7 @@ root_dir=`cd $src_dir/..; pwd`
 shift
 
 # Basic build and run tests
+aco="LIBS=-ldl"
 cco="-DMPIEXEC_EXECUTABLE=\"srun\" -DMPIEXEC_NUMPROC_FLAG=\"n\""
 cmo="-j check"
 mo="-j test"
@@ -101,44 +102,44 @@ ro="-ij-noilu -ams -struct -sstruct"
 
 # 1A) GCC 13.3.1 + CUDA 12.9.1 with UM and memory tracker in debug mode
 module -q load cuda/12.9.1 gcc/13.3.1
-co="--with-cuda --without-umpire --enable-unified-memory --enable-debug --with-gpu-arch=90 --with-memory-tracker --enable-persistent --with-print-errors"
+co="${aco} --with-cuda --without-umpire --enable-unified-memory --enable-debug --with-gpu-arch=90 --with-memory-tracker --enable-persistent --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-dbg
 
 # 2A) GCC 13.3.1 + CUDA 12.9.1 with mixed integers and UM in debug mode
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="--with-cuda --without-umpire --enable-unified-memory --enable-debug --with-gpu-arch=90 --enable-mixedint --with-print-errors"
+co="${aco} --with-cuda --without-umpire --enable-unified-memory --enable-debug --with-gpu-arch=90 --enable-mixedint --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # 3A) GCC 13.3.1 + CUDA 12.9.1 with OMP and shared library in release mode
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="--with-cuda --without-umpire --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=90 --with-print-errors"
+co="${aco} --with-cuda --without-umpire --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=90 --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 # 4A) GCC 13.3.1 + CUDA 12.9.1 with UM and single precision in debug mode
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="--enable-single --without-umpire --enable-unified-memory --with-cuda --enable-cusolver --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch-90 --with-print-errors"
+co="${aco} --enable-single --without-umpire --enable-unified-memory --with-cuda --enable-cusolver --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch-90 --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-single
 
 # 5A) GCC 13.3.1 + CUDA 12.9.1 without MPI
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="--without-MPI --without-umpire --enable-unified-memory --with-cuda --with-gpu-arch-90 --with-print-errors"
+co="${aco} --without-MPI --without-umpire --enable-unified-memory --with-cuda --with-gpu-arch-90 --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
 
 # 6A) GCC 13.3.1 + CUDA 12.9.1 with Umpire
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
 UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/install-umpire_2025.09.0-cuda_12.9_sm90-gcc_13.3
-co="--with-cuda --with-gpu-arch=90 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=\"umpire camp\" --with-print-errors"
+co="${aco} --with-cuda --with-gpu-arch=90 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=\"umpire camp\" --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-bench
 
 # 7A) GCC 13.3.1 + CUDA 12.9.1 with host execution
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="--with-cuda --with-gpu-arch=90 --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-print-errors"
+co="${aco} --with-cuda --with-gpu-arch=90 --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-print-errors"
 ./test.sh basic.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-cpu
 
