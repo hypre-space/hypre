@@ -73,7 +73,7 @@ HYPRE_Int HashLookup(Hash *h, HYPRE_Int key)
     HYPRE_Int loc;
 
     /* loc = key % h->size; */
-    HYPRE_Real keyd = key * 0.6180339887;
+    HYPRE_Real keyd = (HYPRE_Real) key * 0.6180339887;
     loc = (HYPRE_Int) (h->size * (keyd - (HYPRE_Int) keyd));
 
     while (h->table[loc] != key)
@@ -167,4 +167,3 @@ void HashPrint(Hash *h)
 	hypre_printf("\n");
     }
 }
-

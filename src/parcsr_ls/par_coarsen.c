@@ -935,7 +935,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    HYPRE_BigInt     num_nonzeros    = hypre_ParCSRMatrixNumNonzeros(A);
    HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int        avg_nnzrow;
+   HYPRE_Real       avg_nnzrow;
 
    hypre_CSRMatrix *S_ext = NULL;
    HYPRE_Int       *S_ext_i = NULL;
@@ -1126,21 +1126,21 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       if (use_commpkg_A)
       {
-         S_ext      = hypre_ParCSRMatrixExtractBExt(S, A, 0);
+         S_ext = hypre_ParCSRMatrixExtractBExt(S, A, 0);
       }
       else
       {
-         S_ext      = hypre_ParCSRMatrixExtractBExt(S, S, 0);
+         S_ext = hypre_ParCSRMatrixExtractBExt(S, S, 0);
       }
-      S_ext_i    = hypre_CSRMatrixI(S_ext);
-      S_ext_j    = hypre_CSRMatrixBigJ(S_ext);
-      HYPRE_Int num_nonzeros = S_ext_i[num_cols_offd];
+      S_ext_i = hypre_CSRMatrixI(S_ext);
+      S_ext_j = hypre_CSRMatrixBigJ(S_ext);
+
       /*first_col = hypre_ParCSRMatrixFirstColDiag(S);
         col_0 = first_col-1;
         col_n = col_0+num_variables; */
       if (meas_type)
       {
-         for (i = 0; i < num_nonzeros; i++)
+         for (i = 0; i < S_ext_i[num_cols_offd]; i++)
          {
             index = (HYPRE_Int)(S_ext_j[i] - first_col);
             if (index > -1 && index < num_variables)
@@ -1203,8 +1203,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    /* Set dense rows as SF_PT */
    if ((cut_factor > 0) && (global_num_rows > 0))
    {
-      avg_nnzrow = num_nonzeros / global_num_rows;
-      cut = cut_factor * avg_nnzrow;
+      avg_nnzrow = (HYPRE_Real) num_nonzeros / (HYPRE_Real) global_num_rows;
+      cut = (HYPRE_Int) (((HYPRE_Real) cut_factor) * avg_nnzrow);
       for (j = 0; j < num_variables; j++)
       {
          nnzrow = (A_i[j + 1] - A_i[j]) + (A_offd_i[j + 1] - A_offd_i[j]);

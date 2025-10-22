@@ -35,134 +35,10 @@ HYPRE_Int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 
   /* Remove it */
   lastlr-- ;
-  if (j < lastlr) 
+  if (j < lastlr)
     hypre_lr[j] = hypre_lr[lastlr];
 
   return i;
-}
-
-
-/*************************************************************************
-* This function sort an (idx,val) array in increasing idx values
-**************************************************************************/
-void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
-{
-  HYPRE_Int i, j, min;
-  HYPRE_Real tmpval;
-  HYPRE_Int tmpidx;
-
-  for (i=0; i<n; i++) {
-    min = i;
-    for (j=i+1; j<n; j++) {
-      if (idx[j] < idx[min])
-        min = j;
-    }
-
-    if (min != i) {
-      SWAP(idx[i], idx[min], tmpidx);
-      SWAP(val[i], val[min], tmpval);
-    }
-  }
-}
-
-
-
-/*************************************************************************
-* This function sort an (idx,val) array in decreasing abs val 
-**************************************************************************/
-void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
-{
-  HYPRE_Int i, j, max;
-  HYPRE_Int tmpidx;
-  HYPRE_Real tmpval;
-
-  for (i=0; i<n; i++) {
-    max = i;
-    for (j=i+1; j<n; j++) {
-      if (hypre_abs(val[j]) > hypre_abs(val[max]))
-        max = j;
-    }
-
-    if (max != i) {
-      SWAP(idx[i], idx[max], tmpidx);
-      SWAP(val[i], val[max], tmpval);
-    }
-  }
-}
-
-
-
-
-
-/*************************************************************************
-* This function takes an (idx, val) array and compacts it so that every 
-* entry with idx[] = -1, gets removed. It returns the new count
-**************************************************************************/
-HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
-{
-  HYPRE_Int i, j;
-
-  j = n-1;
-  for (i=0; i<n; i++) {
-    if (idx[i] == -1) {
-      while (j > i && idx[j] == -1)
-        j--;
-      if (j > i) {
-        idx[i] = idx[j];
-        val[i] = val[j];
-        j--;
-      }
-      else {
-        n = i;
-        break;
-      }
-    }
-    if (i == j) {
-      n = i+1;
-      break;
-    }
-  }
-
-  return n;
-}
-
-/*************************************************************************
-* This function prints an (idx, val) pair
-**************************************************************************/
-void hypre_PrintIdxVal(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
-{
-  HYPRE_Int i;
-
-  hypre_printf("%3d ", n);
-  for (i=0; i<n; i++) 
-    hypre_printf("(%3d, %3.1e) ", idx[i], val[i]);
-  hypre_printf("\n");
-
-}
-
-
-
-/*************************************************************************
-* This function compares 2 KeyValueType variables for sorting in inc order
-**************************************************************************/
-HYPRE_Int hypre_DecKeyValueCmp(const void *v1, const void *v2)
-{
-  KeyValueType *n1, *n2;
-
-  n1 = (KeyValueType *)v1;
-  n2 = (KeyValueType *)v2;
-
-  return n2->key - n1->key;
-
-}
-
-
-/*************************************************************************
-* This function sorts an array of type KeyValueType in increasing order
-**************************************************************************/
-void hypre_SortKeyValueNodesDec(KeyValueType *nodes, HYPRE_Int n)
-{
-	hypre_tex_qsort((char *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), (HYPRE_Int (*) (char*,char*))hypre_DecKeyValueCmp);
 }
 
 
@@ -202,15 +78,11 @@ static HYPRE_Int decshort(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_sincsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  hypre_tex_qsort((char *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), (HYPRE_Int (*) (char*,char*))incshort);
+  hypre_tex_qsort((char *)a, n, (size_t)sizeof(HYPRE_Int), (HYPRE_Int (*) (char*,char*))incshort);
 }
 
 
 void hypre_sdecsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  hypre_tex_qsort((char *)a, (size_t)n, (size_t)sizeof(HYPRE_Int),(HYPRE_Int (*) (char*,char*)) decshort);
+  hypre_tex_qsort((char *)a, n, (size_t)sizeof(HYPRE_Int),(HYPRE_Int (*) (char*,char*)) decshort);
 }
-
-
-
-

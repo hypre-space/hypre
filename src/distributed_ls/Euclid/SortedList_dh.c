@@ -17,8 +17,8 @@ struct _sortedList_dh {
   HYPRE_Int row;        /* local number of row being factored */
   HYPRE_Int beg_row;    /* global number of first locally owned row, wrt A */
   HYPRE_Int beg_rowP;   /* global number of first locally owned row, wrt F */
-  HYPRE_Int count;      /* number of items entered in the list, 
-                     plus 1 (for header node) 
+  HYPRE_Int count;      /* number of items entered in the list,
+                     plus 1 (for header node)
                    */
   HYPRE_Int countMax;    /* same as count, but includes number of items that my have
                       been deleted from calling SortedList_dhEnforceConstraint()
@@ -30,7 +30,7 @@ struct _sortedList_dh {
   HYPRE_Int alloc;      /* allocated length of list */
   HYPRE_Int getLower;   /* index used for returning lower tri elts */
   HYPRE_Int get;        /* index of returning all elts; */
-  
+
   bool debug;
 };
 
@@ -88,7 +88,7 @@ void SortedList_dhInit(SortedList_dh sList, SubdomainGraph_dh sg)
 
   /* heuristic: "m" should be a good number of nodes */
   sList->alloc = sList->m + 5;
-  sList->list = (SRecord*)MALLOC_DH(sList->alloc*sizeof(SRecord)); 
+  sList->list = (SRecord*)MALLOC_DH((size_t) sList->alloc * sizeof(SRecord));
   sList->list[0].col = INT_MAX;
   sList->list[0].next = 0;
   END_FUNC_DH
@@ -193,7 +193,7 @@ hypre_fprintf(logFile, "local row: %i  DROPPED: col= %i  val= %g (thresh= %g)\n"
                            sList->row+1, sr->col+1, testVal, thresh);
 */
     }
-  } 
+  }
 
 
   /* insertion of external indices */
@@ -211,7 +211,7 @@ hypre_fprintf(logFile, "local row: %i  DROPPED: col= %i  val= %g (thresh= %g)\n"
       } else {
         col = tmp;
       }
-    } 
+    }
   }
 
   if (col != -1) {
@@ -312,8 +312,8 @@ void lengthen_list_private(SortedList_dh sList)
 
   SET_INFO("lengthening list");
 
-  sList->list = (SRecord*)MALLOC_DH(size * sizeof(SRecord));
-  hypre_TMemcpy(sList->list,  tmp, SRecord, sList->countMax, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST); 
+  sList->list = (SRecord*)MALLOC_DH((size_t) size * sizeof(SRecord));
+  hypre_TMemcpy(sList->list,  tmp, SRecord, sList->countMax, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   SET_INFO("doubling size of sList->list");
   FREE_DH(tmp); CHECK_V_ERROR;
   END_FUNC_DH
@@ -321,11 +321,11 @@ void lengthen_list_private(SortedList_dh sList)
 
 
 /*=====================================================================
- * functions for enforcing subdomain constraint 
+ * functions for enforcing subdomain constraint
  *=====================================================================*/
 
 
-static bool check_constraint_private(SubdomainGraph_dh sg, 
+static bool check_constraint_private(SubdomainGraph_dh sg,
                                      HYPRE_Int thisSubdomain, HYPRE_Int col);
 void delete_private(SortedList_dh sList, HYPRE_Int col);
 

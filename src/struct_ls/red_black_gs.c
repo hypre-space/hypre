@@ -74,32 +74,24 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
                        hypre_StructVector *b,
                        hypre_StructVector *x )
 {
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
    hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData *)relax_vdata;
+   hypre_StructGrid      *grid       = hypre_StructMatrixGrid(A);
+   hypre_StructStencil   *stencil    = hypre_StructMatrixStencil(A);
 
-   HYPRE_Int              diag_rank;
    hypre_ComputePkg      *compute_pkg;
-
-   hypre_StructGrid      *grid;
-   hypre_StructStencil   *stencil;
-   hypre_Index            diag_index;
    hypre_ComputeInfo     *compute_info;
+   hypre_Index            ustride;
 
-   /*----------------------------------------------------------
-    * Find the matrix diagonal
-    *----------------------------------------------------------*/
-
-   grid    = hypre_StructMatrixGrid(A);
-   stencil = hypre_StructMatrixStencil(A);
-
-   hypre_SetIndex3(diag_index, 0, 0, 0);
-   diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute packages
     *----------------------------------------------------------*/
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------
@@ -109,7 +101,6 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    (relax_data -> A) = hypre_StructMatrixRef(A);
    (relax_data -> x) = hypre_StructVectorRef(x);
    (relax_data -> b) = hypre_StructVectorRef(b);
-   (relax_data -> diag_rank) = diag_rank;
    (relax_data -> compute_pkg) = compute_pkg;
 
    return hypre_error_flag;
@@ -129,9 +120,8 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
-   HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
-   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
+   HYPRE_Int              ndim        = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
 
@@ -146,12 +136,13 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              Astart, Ani, Anj;
    HYPRE_Int              bstart, bni, bnj;
    HYPRE_Int              xstart, xni, xnj;
-   HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
+   HYPRE_Int              xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int              xoff3 = 0, xoff4 = 0, xoff5 = 0;
 
-   HYPRE_Real            *Ap;
-   HYPRE_Real            *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5;
-   HYPRE_Real            *bp;
-   HYPRE_Real            *xp;
+   HYPRE_Real            *Ap  = NULL;
+   HYPRE_Real            *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Real            *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Real            *bp, *xp;
 
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -159,6 +150,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
+   HYPRE_Int              stencil_diag_entry;
    HYPRE_Int              offd[6];
 
    HYPRE_Int              iter, rb, redblack, d;
@@ -197,12 +189,13 @@ hypre_RedBlackGS( void               *relax_vdata,
       stencil       = hypre_StructMatrixStencil(A);
       stencil_shape = hypre_StructStencilShape(stencil);
       stencil_size  = hypre_StructStencilSize(stencil);
+      stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
 
       /* get off-diag entry ranks ready */
       i = 0;
       for (j = 0; j < stencil_size; j++)
       {
-         if (j != diag_rank)
+         if (j != stencil_diag_entry)
          {
             offd[i] = j;
             i++;
@@ -244,7 +237,7 @@ hypre_RedBlackGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -337,7 +330,7 @@ hypre_RedBlackGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -384,14 +377,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                      Ap4 = hypre_StructMatrixBoxData(A, i, offd[4]);
                      xoff5 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[4]]);
-                  // fall through
+                     HYPRE_FALLTHROUGH;
 
                   case 5:
                      Ap3 = hypre_StructMatrixBoxData(A, i, offd[3]);
                      Ap2 = hypre_StructMatrixBoxData(A, i, offd[2]);
                      xoff3 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[2]]);
-                  // fall through
+                     HYPRE_FALLTHROUGH;
 
                   case 3:
                      Ap1 = hypre_StructMatrixBoxData(A, i, offd[1]);

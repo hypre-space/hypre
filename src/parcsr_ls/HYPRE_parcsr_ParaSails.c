@@ -23,7 +23,7 @@
 
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
-#include "../distributed_ls/ParaSails/hypre_ParaSails.h"
+#include "../distributed_ls/ParaSails/_hypre_ParaSails.h"
 
 /* these includes required for HYPRE_ParaSailsBuildIJMatrix */
 #include "../IJ_mv/HYPRE_IJ_mv.h"

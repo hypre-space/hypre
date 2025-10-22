@@ -67,18 +67,16 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
  * initializes ParVector of IJVectorPar
  *
  *****************************************************************************/
-HYPRE_Int
-hypre_IJVectorInitializePar(hypre_IJVector *vector)
-{
-   return hypre_IJVectorInitializePar_v2(vector, hypre_IJVectorMemoryLocation(vector));
-}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializeParShell
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memory_location)
+hypre_IJVectorInitializeParShell(hypre_IJVector *vector)
 {
    MPI_Comm            comm         = hypre_IJVectorComm(vector);
    hypre_ParVector    *par_vector   = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector   = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    HYPRE_Int           print_level  = hypre_IJVectorPrintLevel(vector);
    HYPRE_Int           num_vectors  = hypre_IJVectorNumComponents(vector);
 
@@ -86,9 +84,6 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memo
    hypre_Vector       *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    HYPRE_Int           my_id;
-
-   HYPRE_MemoryLocation memory_location_aux =
-      hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -106,14 +101,79 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memo
    hypre_VectorNumVectors(local_vector) = num_vectors;
    hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[1] - partitioning[0]);
 
-   hypre_ParVectorInitialize_v2(par_vector, memory_location);
+   return hypre_error_flag;
+}
 
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorSetParData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorSetParData(hypre_IJVector *vector,
+                         HYPRE_Complex  *data)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   hypre_ParVectorSetData(par_vector, data);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorSetTagsPar
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorSetTagsPar(hypre_IJVector *vector,
+                         HYPRE_Int       owns_tags,
+                         HYPRE_Int       num_tags,
+                         HYPRE_Int      *tags)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   hypre_ParVectorSetOwnsTags(par_vector, owns_tags);
+   hypre_ParVectorSetNumTags(par_vector, num_tags);
+   hypre_ParVectorSetTags(par_vector, hypre_IJVectorMemoryLocation(vector), tags);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializePar
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorInitializePar(hypre_IJVector *vector)
+{
+   return hypre_IJVectorInitializePar_v2(vector, hypre_IJVectorMemoryLocation(vector));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializePar_v2
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorInitializePar_v2(hypre_IJVector       *vector,
+                               HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParVector      *par_vector;
+   hypre_AuxParVector   *aux_vector;
+
+   /* Set up the basic structure and metadata for the vector */
+   hypre_IJVectorInitializeParShell(vector);
+   par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+
+   /* Check if auxiliary vectors needs to be created */
    if (!aux_vector)
    {
       hypre_AuxParVectorCreate(&aux_vector);
       hypre_IJVectorTranslator(vector) = aux_vector;
    }
-   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location_aux);
+
+   /* Memory allocations */
+   hypre_ParVectorInitialize_v2(par_vector, memory_location);
+   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location);
 
    return hypre_error_flag;
 }
@@ -207,63 +267,7 @@ hypre_IJVectorDistributePar(hypre_IJVector  *vector,
 HYPRE_Int
 hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 {
-   HYPRE_Int my_id;
-   HYPRE_BigInt vec_start, vec_stop;
-
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_BigInt *partitioning;
-   hypre_Vector *local_vector;
-   HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
-
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* If par_vector == NULL or partitioning == NULL or local_vector == NULL
-      let user know of catastrophe and exit */
-
-   if (!par_vector)
-   {
-      if (print_level)
-      {
-         hypre_printf("par_vector == NULL -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
-         hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   partitioning = hypre_ParVectorPartitioning(par_vector);
-   local_vector = hypre_ParVectorLocalVector(par_vector);
-   if (!local_vector)
-   {
-      if (print_level)
-      {
-         hypre_printf("local_vector == NULL -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
-         hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   vec_start = partitioning[0];
-   vec_stop  = partitioning[1];
-
-   if (vec_start > vec_stop)
-   {
-      if (print_level)
-      {
-         hypre_printf("vec_start > vec_stop -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
-         hypre_printf("**** This vector partitioning should not occur ****\n");
-      }
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_assert(hypre_VectorSize(local_vector) == (HYPRE_Int)(vec_stop - vec_start));
-
-   hypre_SeqVectorSetConstantValues(local_vector, 0.0);
+   hypre_IJVectorSetConstantValuesPar(vector, 0.0);
 
    return hypre_error_flag;
 }
@@ -420,6 +424,40 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
          data[vecoffset + j * idxstride] = values[j];
       }
    }
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJVectorSetConstantValuesPar
+ *
+ * sets all vector coefficients to a given value
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJVectorSetConstantValuesPar(hypre_IJVector *vector,
+                                   HYPRE_Complex   value)
+{
+   HYPRE_Int        print_level = hypre_IJVectorPrintLevel(vector);
+   hypre_ParVector *par_vector  = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   /* Sanity check for par_vector */
+   if (!par_vector)
+   {
+      if (print_level)
+      {
+         hypre_printf("par_vector == NULL -- ");
+         hypre_printf("hypre_IJVectorSetValuesPar\n");
+         hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   /* Set vector coefficients to "value" */
+   hypre_ParVectorSetConstantValues(par_vector, value);
 
    return hypre_error_flag;
 }
@@ -771,7 +809,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
    HYPRE_Int  obj_size_bytes, big_int_size, complex_size;
-   HYPRE_Int  first_index;
+   HYPRE_BigInt  first_index;
 
    void *void_contact_buf = NULL;
    void *index_ptr;
@@ -1213,6 +1251,22 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
 
    hypre_TFree(off_proc_i_recv_d,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(off_proc_data_recv_d, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorMigrateParCSR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorMigrateParCSR(hypre_IJVector       *vector,
+                            HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector *) hypre_IJVectorObject(vector);
+
+   /* Migrate the ParVector */
+   hypre_ParVectorMigrate(par_vector, memory_location);
 
    return hypre_error_flag;
 }

@@ -25,7 +25,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            ndim;         /* Number of grid dimensions */
 
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-   HYPRE_Int           *ids;          /* Unique IDs for boxes */
+   HYPRE_Int           *ids;          /* Unique IDs for boxes - RDF TODO: Use boxes IDs instead */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -38,14 +38,13 @@ typedef struct hypre_StructGrid_struct
 
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
-
    HYPRE_Int            ref_count;
-
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
    HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -56,6 +55,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridNDim(grid)          ((grid) -> ndim)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridIDs(grid)           ((grid) -> ids)
+#define hypre_StructGridID(grid, i)         ((grid) -> ids[i])
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -76,6 +76,7 @@ typedef struct hypre_StructGrid_struct
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_StructGridDataLocation(grid)  ((grid) -> data_location)
 #endif
+
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/

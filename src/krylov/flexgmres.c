@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
@@ -385,7 +385,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
@@ -412,7 +412,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
@@ -613,7 +613,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
-            cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+            cf_ave_1 = hypre_pow(r_norm / r_norm_0, 1.0 / (2.0 * (HYPRE_Real) iter));
 
             weight   = hypre_abs(cf_ave_1 - cf_ave_0);
             weight   = weight / hypre_max(cf_ave_1, cf_ave_0);

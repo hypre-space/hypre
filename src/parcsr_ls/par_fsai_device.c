@@ -31,6 +31,8 @@ hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
                                         HYPRE_Complex     *rhs_data,
                                         HYPRE_Complex     *sol_data )
 {
+   HYPRE_UNUSED_VAR(item);
+
    extern __shared__ void* shmem[];
 
    HYPRE_Complex    *ls_data = (HYPRE_Complex*) shmem;
@@ -463,7 +465,6 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
@@ -589,7 +590,6 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 
             for (kk = 0; kk < cnt; kk++)
             {
-               /* warp_sync(item); */
                max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
@@ -1104,22 +1104,22 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       if (local_solve_type == 1)
       {
 #if defined (HYPRE_USING_CUSOLVER)
-         HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(vs_handle,
-                                                     CUBLAS_FILL_MODE_LOWER,
-                                                     max_nnz_row,
-                                                     mat_aop,
-                                                     max_nnz_row,
-                                                     info,
-                                                     num_rows));
+         HYPRE_CUSOLVER_CALL(hypre_cusolver_dnpotrf_batched(vs_handle,
+                                                            CUBLAS_FILL_MODE_LOWER,
+                                                            max_nnz_row,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 
 #elif defined (HYPRE_USING_ROCSOLVER)
-         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrf_batched(vs_handle,
-                                                       rocblas_fill_lower,
-                                                       max_nnz_row,
-                                                       mat_aop,
-                                                       max_nnz_row,
-                                                       info,
-                                                       num_rows));
+         HYPRE_ROCSOLVER_CALL(hypre_rocsolver_potrf_batched(vs_handle,
+                                                            rocblas_fill_lower,
+                                                            max_nnz_row,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 #endif
       }
       else if (local_solve_type == 2)
@@ -1158,26 +1158,26 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       else if (local_solve_type == 1)
       {
 #if defined (HYPRE_USING_CUSOLVER)
-         HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,
-                                                     CUBLAS_FILL_MODE_LOWER,
-                                                     max_nnz_row,
-                                                     1,
-                                                     mat_aop,
-                                                     max_nnz_row,
-                                                     sol_aop,
-                                                     max_nnz_row,
-                                                     info,
-                                                     num_rows));
+         HYPRE_CUSOLVER_CALL(hypre_cusolver_dnpotrs_batched(vs_handle,
+                                                            CUBLAS_FILL_MODE_LOWER,
+                                                            max_nnz_row,
+                                                            1,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            sol_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 #elif defined (HYPRE_USING_ROCSOLVER)
-         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrs_batched(vs_handle,
-                                                       rocblas_fill_lower,
-                                                       max_nnz_row,
-                                                       1,
-                                                       mat_aop,
-                                                       max_nnz_row,
-                                                       sol_aop,
-                                                       max_nnz_row,
-                                                       num_rows));
+         HYPRE_ROCSOLVER_CALL(hypre_rocsolver_potrs_batched(vs_handle,
+                                                            rocblas_fill_lower,
+                                                            max_nnz_row,
+                                                            1,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            sol_aop,
+                                                            max_nnz_row,
+                                                            num_rows));
 #endif
       }
       else if (local_solve_type == 2)

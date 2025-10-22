@@ -17,6 +17,7 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
+ ${TNAME}.out.4\
 "
 
 for i in $FILES

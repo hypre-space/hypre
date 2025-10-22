@@ -19,6 +19,9 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.10\
+ ${TNAME}.out.11\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
 "
 
 for i in $FILES

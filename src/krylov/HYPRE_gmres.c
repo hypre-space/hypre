@@ -10,7 +10,8 @@
  * HYPRE_GMRES interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_GMRESDestroy
@@ -48,6 +49,24 @@ HYPRE_GMRESSolve( HYPRE_Solver solver,
                   HYPRE_Vector x      )
 {
    return ( hypre_GMRESSolve( solver, A, b, x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetRefSolution, HYPRE_GMRESSetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetRefSolution( HYPRE_Solver solver,
+                           HYPRE_Vector xref )
+{
+   return ( hypre_GMRESSetRefSolution( (void *) solver, (void *) xref ) );
+}
+
+HYPRE_Int
+HYPRE_GMRESGetRefSolution( HYPRE_Solver  solver,
+                           HYPRE_Vector *xref )
+{
+   return ( hypre_GMRESGetRefSolution( (void *) solver, (void **) xref ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -240,6 +259,30 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver  solver,
+                             HYPRE_Matrix precond_matrix)
+{
+   return ( hypre_GMRESSetPrecondMatrix( (void *)     solver,
+                                         (void *) precond_matrix) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver  solver,
+                             HYPRE_Matrix *precond_matrix_ptr )
+{
+   return ( hypre_GMRESGetPrecondMatrix( (void *)     solver,
+                                         (HYPRE_Matrix *) precond_matrix_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetPrintLevel, HYPRE_GMRESGetPrintLevel
  *--------------------------------------------------------------------------*/
 
@@ -317,4 +360,3 @@ HYPRE_Int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void *residual )
    /* returns a pointer to the residual vector */
    return hypre_GMRESGetResidual( (void *) solver, (void **) residual );
 }
-

@@ -1,0 +1,11 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+touch mup_fake_ext.h
+
+../../config/gen_code.sh mup_fake_ext.h _hypre_Euclid.h onlydef
+
+rm -f mup_fake_ext.h

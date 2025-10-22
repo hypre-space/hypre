@@ -99,7 +99,7 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
 
    (relax_data -> num_pre_relax)  = 1;
    (relax_data -> num_post_relax) = 1;
-   (relax_data -> max_level)      = -1;
+
    return (void *) relax_data;
 }
 
@@ -424,7 +424,7 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
       temp_vec = hypre_StructVectorCreate(hypre_StructVectorComm(b),
                                           hypre_StructVectorGrid(b));
       hypre_StructVectorSetNumGhost(temp_vec, hypre_StructVectorNumGhost(b));
-      hypre_StructVectorInitialize(temp_vec);
+      hypre_StructVectorInitialize(temp_vec, 1);
       hypre_StructVectorAssemble(temp_vec);
       (relax_data -> temp_vec) = temp_vec;
    }
@@ -595,14 +595,13 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          hypre_SMGSetTol(solve_data[i], 0.0);
          hypre_SMGSetMaxIter(solve_data[i], 1);
-         hypre_StructSMGSetMaxLevel(solve_data[i], (relax_data -> max_level));
+         hypre_SMGSetMaxLevel(solve_data[i], (relax_data -> max_level));
          hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
       {
          solve_data[i] = hypre_CyclicReductionCreate(relax_data -> comm);
          hypre_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
-         //hypre_CyclicReductionSetMaxLevel(solve_data[i], -1);//(relax_data -> max_level)+10);
          hypre_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
    }
@@ -938,7 +937,7 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
    grid  = hypre_StructVectorGrid(x);
    boxes = hypre_StructGridBoxes(grid);
 
-   base_box_array = hypre_BoxArrayDuplicate(boxes);
+   base_box_array = hypre_BoxArrayClone(boxes);
    hypre_ProjectBoxArray(base_box_array,
                          (relax_data -> base_index),
                          (relax_data -> base_stride));
@@ -952,8 +951,8 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SMGRelaxSetMaxLevel( void *relax_vdata,
-                           HYPRE_Int   num_max_level )
+hypre_SMGRelaxSetMaxLevel( void      *relax_vdata,
+                           HYPRE_Int  num_max_level )
 {
    hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
 

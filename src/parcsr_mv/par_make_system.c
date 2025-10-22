@@ -133,8 +133,8 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
 
       /* assume m11 and m22 are nonzero */
       A_nnz_diag = L1_nnz_diag + L2_nnz_diag;
-      if (m12) { A_nnz_diag +=  L2_nnz_diag; }
-      if (m21) { A_nnz_diag +=  L1_nnz_diag; }
+      if (m12 != 0.0) { A_nnz_diag += L2_nnz_diag; }
+      if (m21 != 0.0) { A_nnz_diag += L1_nnz_diag; }
 
       A_diag_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows + 1, HYPRE_MEMORY_HOST);
       A_diag_j    = hypre_CTAlloc(HYPRE_Int,  A_nnz_diag, HYPRE_MEMORY_HOST);
@@ -240,8 +240,8 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       A_num_rows = L_num_rows * dim;
 
       A_nnz_offd = L1_nnz_offd + L2_nnz_offd;
-      if (m12) { A_nnz_offd +=  L2_nnz_offd; }
-      if (m21) { A_nnz_offd +=  L1_nnz_offd; }
+      if (m12 != 0.0) { A_nnz_offd +=  L2_nnz_offd; }
+      if (m21 != 0.0) { A_nnz_offd +=  L1_nnz_offd; }
 
       A_num_cols_offd = L1_num_cols_offd + L2_num_cols_offd;
 
