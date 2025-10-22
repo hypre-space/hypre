@@ -772,8 +772,9 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    bnnz = block_size * block_size;
    num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
-   B_int_i = hypre_CTAlloc(HYPRE_Int,  send_map_starts[num_sends] + 1, HYPRE_MEMORY_HOST);
-   B_ext_i = hypre_CTAlloc(HYPRE_Int,  num_rows_B_ext + 1, HYPRE_MEMORY_HOST);
+   B_int_i = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends] + 1, HYPRE_MEMORY_HOST);
+   B_ext_i = hypre_CTAlloc(HYPRE_Int, num_rows_B_ext + 1, HYPRE_MEMORY_HOST);
+
    /*--------------------------------------------------------------------------
     * generate B_int_i through adding number of row-elements of offd and diag
     * for corresponding rows. B_int_i[j+1] contains the number of elements of
@@ -925,43 +926,32 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector *
-hypre_ParVectorCreateFromBlock(  MPI_Comm comm,
-                                 HYPRE_BigInt p_global_size,
-                                 HYPRE_BigInt *p_partitioning, HYPRE_Int block_size)
+hypre_ParVectorCreateFromBlock(MPI_Comm      comm,
+                               HYPRE_BigInt  p_global_size,
+                               HYPRE_BigInt *p_partitioning,
+                               HYPRE_Int     block_size)
 {
    hypre_ParVector  *vector;
-   HYPRE_Int num_procs, my_id;
-   HYPRE_BigInt global_size;
-   HYPRE_BigInt new_partitioning[2]; /* need to create a new partitioning - son't want to write over
-                                     what is passed in */
+   HYPRE_Int         my_id, num_procs;
+   HYPRE_BigInt      global_size;
+   HYPRE_BigInt      new_partitioning[2];
 
-   global_size = p_global_size * (HYPRE_BigInt)block_size;
-
-   vector = hypre_CTAlloc(hypre_ParVector, 1, HYPRE_MEMORY_HOST);
-   hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm_size(comm, &num_procs);
+   global_size = p_global_size * (HYPRE_BigInt) block_size;
 
    if (!p_partitioning)
    {
+      hypre_MPI_Comm_rank(comm, &my_id);
+      hypre_MPI_Comm_size(comm, &num_procs);
+
       hypre_GenerateLocalPartitioning(global_size, num_procs, my_id, new_partitioning);
    }
    else /* adjust for block_size */
    {
-      new_partitioning[0] = p_partitioning[0] * (HYPRE_BigInt)block_size;
-      new_partitioning[1] = p_partitioning[1] * (HYPRE_BigInt)block_size;
+      new_partitioning[0] = p_partitioning[0] * (HYPRE_BigInt) block_size;
+      new_partitioning[1] = p_partitioning[1] * (HYPRE_BigInt) block_size;
    }
 
-   hypre_ParVectorComm(vector) = comm;
-   hypre_ParVectorGlobalSize(vector) = global_size;
-   hypre_ParVectorFirstIndex(vector) = new_partitioning[0];
-   hypre_ParVectorLastIndex(vector)  = new_partitioning[1] - 1;
-   hypre_ParVectorPartitioning(vector)[0] = new_partitioning[0];
-   hypre_ParVectorPartitioning(vector)[1] = new_partitioning[1];
-   hypre_ParVectorLocalVector(vector) =
-      hypre_SeqVectorCreate(new_partitioning[1] - new_partitioning[0]);
-
-   /* set defaults */
-   hypre_ParVectorOwnsData(vector) = 1;
+   vector = hypre_ParVectorCreate(comm, global_size, new_partitioning);
 
    return vector;
 }

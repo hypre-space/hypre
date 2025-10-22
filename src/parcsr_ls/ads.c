@@ -1609,7 +1609,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          r0_norm = r_norm;
          b_norm = hypre_sqrt(hypre_ParVectorInnerProd(b, b));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }
@@ -1652,7 +1652,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }

@@ -774,7 +774,8 @@ hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
    for (i = 0; i < max_num_levels; i++)
    {
       block_cf_marker[i] = hypre_CTAlloc(HYPRE_Int, block_size, HYPRE_MEMORY_HOST);
-      memset(block_cf_marker[i], FMRK, block_size * sizeof(HYPRE_Int));
+      hypre_Memset(block_cf_marker[i], FMRK, (size_t) block_size * sizeof(HYPRE_Int),
+                   HYPRE_MEMORY_HOST);
    }
    for (i = 0; i < max_num_levels; i++)
    {
@@ -844,7 +845,8 @@ hypre_MGRSetCpointsByPointMarkerArray( void      *mgr_vdata,
    for (i = 0; i < max_num_levels; i++)
    {
       block_cf_marker[i] = hypre_CTAlloc(HYPRE_Int, block_size, HYPRE_MEMORY_HOST);
-      memset(block_cf_marker[i], FMRK, block_size * sizeof(HYPRE_Int));
+      hypre_Memset(block_cf_marker[i], FMRK, (size_t) block_size * sizeof(HYPRE_Int),
+                   HYPRE_MEMORY_HOST);
    }
    for (i = 0; i < max_num_levels; i++)
    {
@@ -3845,7 +3847,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
          }
 
          hypre_CreateNextDirOfSequence(topdir, "ls_", &data_path);
-         data_path_length = strlen(data_path) + 1;
+         data_path_length = (HYPRE_Int) strlen(data_path) + 1;
       }
       hypre_MPI_Bcast(&data_path_length, 1, HYPRE_MPI_INT, 0, comm);
 
@@ -3870,7 +3872,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
    {
       if (data_path)
       {
-         data_path_length = strlen(data_path);
+         data_path_length = (HYPRE_Int) strlen(data_path);
       }
    }
 

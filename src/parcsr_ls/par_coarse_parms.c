@@ -71,7 +71,7 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm         comm,
 
    if (num_functions > 1)
    {
-      *coarse_dof_func_ptr = hypre_IntArrayCreate(local_coarse_size);
+      *coarse_dof_func_ptr = hypre_IntArrayCreate((HYPRE_Int) local_coarse_size);
       hypre_IntArrayInitialize(*coarse_dof_func_ptr);
       coarse_dof_func = hypre_IntArrayData(*coarse_dof_func_ptr);
 

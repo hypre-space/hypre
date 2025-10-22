@@ -312,7 +312,7 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
                            {
                               HYPRE_Real center = Pp1[Pi] + Pp2[Pi];
 
-                              if (center)
+                              if (center != 0.0)
                               {
                                  Pp1[Pi] /= center;
                                  Pp2[Pi] /= center;

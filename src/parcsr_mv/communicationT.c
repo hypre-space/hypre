@@ -314,7 +314,7 @@ hypre_MatTCommPkgCreate_core (
       for ( ir = 0; ir < num_rows_diag; ++ir ) { row_marker[ir] = 0; }
       while ( j < displs[i + 1])
       {
-         num_elmts = recv_buf[j++];  /* no. of columns proc. i wants */
+         num_elmts = (HYPRE_Int) recv_buf[j++];  /* no. of columns proc. i wants */
          for ( k = 0; k < num_elmts; k++ )
          {
             col = recv_buf[j++]; /* a global column no. at proc. i */

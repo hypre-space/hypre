@@ -41,6 +41,8 @@ hypre_ParChebySetup( hypre_ParChebyData *cheby_data,
    hypre_ParVector      *Ztemp            = hypre_ParChebyDataZtemp(cheby_data);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
 
    /* Allocate work vectors when either of the conditions hold:
       - Chebyshev solver owns them.
@@ -82,7 +84,7 @@ hypre_ParChebySetup( hypre_ParChebyData *cheby_data,
    }
 
    /* Estimate eigenvalues if not provided by user */
-   if (!eig_provided)
+   if (eig_provided == 0.0)
    {
       if (eig_est > 0)
       {

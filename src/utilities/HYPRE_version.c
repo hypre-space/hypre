@@ -19,7 +19,7 @@
 HYPRE_Int
 HYPRE_Version( char **version_ptr )
 {
-   HYPRE_Int  len = 30;
+   size_t     len = 30;
    char      *version;
 
    /* compute string length */
@@ -74,4 +74,3 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
 
    return hypre_error_flag;
 }
-

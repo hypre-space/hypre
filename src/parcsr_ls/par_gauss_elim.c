@@ -208,14 +208,14 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
             {
                /* using row major */
-               col = A_diag_j[jj] + first_row_index;
+               col = (HYPRE_Int) (A_diag_j[jj] + first_row_index);
                A_mat_local[i * global_num_rows + col] = A_diag_data[jj];
             }
 
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                /* using row major */
-               col = col_map_offd[A_offd_j[jj]];
+               col = (HYPRE_Int) col_map_offd[A_offd_j[jj]];
                A_mat_local[i * global_num_rows + col] = A_offd_data[jj];
             }
          }

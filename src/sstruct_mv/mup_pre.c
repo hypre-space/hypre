@@ -21,11 +21,11 @@ HYPRE_SStructAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructAxpy_flt( alpha, x, y );
+         return HYPRE_SStructAxpy_flt( (hypre_float)alpha, x, y );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructAxpy_dbl( alpha, x, y );
+         return HYPRE_SStructAxpy_dbl( (hypre_double)alpha, x, y );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructAxpy_long_dbl( alpha, x, y );
+         return HYPRE_SStructAxpy_long_dbl( (hypre_long_double)alpha, x, y );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -345,11 +345,11 @@ HYPRE_SStructGridPrintGLVis_pre( HYPRE_Precision precision, HYPRE_SStructGrid gr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructGridPrintGLVis_flt( grid, meshprefix, trans, origin );
+         return HYPRE_SStructGridPrintGLVis_flt( grid, meshprefix, (hypre_float *)trans, (hypre_float *)origin );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructGridPrintGLVis_dbl( grid, meshprefix, trans, origin );
+         return HYPRE_SStructGridPrintGLVis_dbl( grid, meshprefix, (hypre_double *)trans, (hypre_double *)origin );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructGridPrintGLVis_long_dbl( grid, meshprefix, trans, origin );
+         return HYPRE_SStructGridPrintGLVis_long_dbl( grid, meshprefix, (hypre_long_double *)trans, (hypre_long_double *)origin );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -507,11 +507,11 @@ HYPRE_SStructInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector x, HY
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructInnerProd_flt( x, y, result );
+         return HYPRE_SStructInnerProd_flt( x, y, (hypre_float *)result );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructInnerProd_dbl( x, y, result );
+         return HYPRE_SStructInnerProd_dbl( x, y, (hypre_double *)result );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructInnerProd_long_dbl( x, y, result );
+         return HYPRE_SStructInnerProd_long_dbl( x, y, (hypre_long_double *)result );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -525,11 +525,11 @@ HYPRE_SStructMatrixAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStruct
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixAddFEMBoxValues_flt( matrix, part, ilower, iupper, values );
+         return HYPRE_SStructMatrixAddFEMBoxValues_flt( matrix, part, ilower, iupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixAddFEMBoxValues_dbl( matrix, part, ilower, iupper, values );
+         return HYPRE_SStructMatrixAddFEMBoxValues_dbl( matrix, part, ilower, iupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixAddFEMBoxValues_long_dbl( matrix, part, ilower, iupper, values );
+         return HYPRE_SStructMatrixAddFEMBoxValues_long_dbl( matrix, part, ilower, iupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -543,11 +543,11 @@ HYPRE_SStructMatrixAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixAddFEMValues_flt( matrix, part, index, values );
+         return HYPRE_SStructMatrixAddFEMValues_flt( matrix, part, index, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixAddFEMValues_dbl( matrix, part, index, values );
+         return HYPRE_SStructMatrixAddFEMValues_dbl( matrix, part, index, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixAddFEMValues_long_dbl( matrix, part, index, values );
+         return HYPRE_SStructMatrixAddFEMValues_long_dbl( matrix, part, index, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -561,11 +561,11 @@ HYPRE_SStructMatrixAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructM
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixAddToBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixAddToBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixAddToBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -579,11 +579,11 @@ HYPRE_SStructMatrixAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStruct
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixAddToBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixAddToBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixAddToBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixAddToBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixAddToBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixAddToBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -597,11 +597,11 @@ HYPRE_SStructMatrixAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructMatr
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixAddToValues_flt( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToValues_flt( matrix, part, index, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixAddToValues_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToValues_dbl( matrix, part, index, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixAddToValues_long_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixAddToValues_long_dbl( matrix, part, index, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -669,11 +669,11 @@ HYPRE_SStructMatrixGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixGetBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixGetBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixGetBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -687,11 +687,11 @@ HYPRE_SStructMatrixGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMa
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixGetBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixGetBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixGetBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixGetBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixGetBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixGetBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -705,11 +705,11 @@ HYPRE_SStructMatrixGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixGetFEMValues_flt( matrix, part, index, values );
+         return HYPRE_SStructMatrixGetFEMValues_flt( matrix, part, index, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixGetFEMValues_dbl( matrix, part, index, values );
+         return HYPRE_SStructMatrixGetFEMValues_dbl( matrix, part, index, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixGetFEMValues_long_dbl( matrix, part, index, values );
+         return HYPRE_SStructMatrixGetFEMValues_long_dbl( matrix, part, index, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -759,11 +759,11 @@ HYPRE_SStructMatrixGetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixGetValues_flt( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetValues_flt( matrix, part, index, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixGetValues_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetValues_dbl( matrix, part, index, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixGetValues_long_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixGetValues_long_dbl( matrix, part, index, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -813,11 +813,11 @@ HYPRE_SStructMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alph
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixMatvec_flt( alpha, A, x, beta, y );
+         return HYPRE_SStructMatrixMatvec_flt( (hypre_float)alpha, A, x, (hypre_float)beta, y );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixMatvec_dbl( alpha, A, x, beta, y );
+         return HYPRE_SStructMatrixMatvec_dbl( (hypre_double)alpha, A, x, (hypre_double)beta, y );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixMatvec_long_dbl( alpha, A, x, beta, y );
+         return HYPRE_SStructMatrixMatvec_long_dbl( (hypre_long_double)alpha, A, x, (hypre_long_double)beta, y );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -867,11 +867,11 @@ HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMat
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixSetBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetBoxValues_flt( matrix, part, ilower, iupper, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixSetBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetBoxValues_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixSetBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetBoxValues_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -885,11 +885,11 @@ HYPRE_SStructMatrixSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructMa
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixSetBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixSetBoxValues2_flt( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixSetBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixSetBoxValues2_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixSetBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, values );
+         return HYPRE_SStructMatrixSetBoxValues2_long_dbl( matrix, part, ilower, iupper, var, nentries, entries, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1029,11 +1029,11 @@ HYPRE_SStructMatrixSetValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructMatrixSetValues_flt( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetValues_flt( matrix, part, index, var, nentries, entries, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructMatrixSetValues_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetValues_dbl( matrix, part, index, var, nentries, entries, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructMatrixSetValues_long_dbl( matrix, part, index, var, nentries, entries, values );
+         return HYPRE_SStructMatrixSetValues_long_dbl( matrix, part, index, var, nentries, entries, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1155,11 +1155,11 @@ HYPRE_SStructVectorAddFEMBoxValues_pre( HYPRE_Precision precision, HYPRE_SStruct
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAddFEMBoxValues_flt( vector, part, ilower, iupper, values );
+         return HYPRE_SStructVectorAddFEMBoxValues_flt( vector, part, ilower, iupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAddFEMBoxValues_dbl( vector, part, ilower, iupper, values );
+         return HYPRE_SStructVectorAddFEMBoxValues_dbl( vector, part, ilower, iupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAddFEMBoxValues_long_dbl( vector, part, ilower, iupper, values );
+         return HYPRE_SStructVectorAddFEMBoxValues_long_dbl( vector, part, ilower, iupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1173,11 +1173,11 @@ HYPRE_SStructVectorAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAddFEMValues_flt( vector, part, index, values );
+         return HYPRE_SStructVectorAddFEMValues_flt( vector, part, index, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAddFEMValues_dbl( vector, part, index, values );
+         return HYPRE_SStructVectorAddFEMValues_dbl( vector, part, index, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAddFEMValues_long_dbl( vector, part, index, values );
+         return HYPRE_SStructVectorAddFEMValues_long_dbl( vector, part, index, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1191,11 +1191,11 @@ HYPRE_SStructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructV
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAddToBoxValues_flt( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorAddToBoxValues_flt( vector, part, ilower, iupper, var, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAddToBoxValues_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorAddToBoxValues_dbl( vector, part, ilower, iupper, var, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAddToBoxValues_long_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorAddToBoxValues_long_dbl( vector, part, ilower, iupper, var, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1209,11 +1209,11 @@ HYPRE_SStructVectorAddToBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStruct
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAddToBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorAddToBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAddToBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorAddToBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAddToBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorAddToBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1227,11 +1227,11 @@ HYPRE_SStructVectorAddToValues_pre( HYPRE_Precision precision, HYPRE_SStructVect
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAddToValues_flt( vector, part, index, var, value );
+         return HYPRE_SStructVectorAddToValues_flt( vector, part, index, var, (hypre_float *)value );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAddToValues_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorAddToValues_dbl( vector, part, index, var, (hypre_double *)value );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAddToValues_long_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorAddToValues_long_dbl( vector, part, index, var, (hypre_long_double *)value );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1263,11 +1263,11 @@ HYPRE_SStructVectorAxpy_pre( HYPRE_Precision precision, hypre_long_double alpha,
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorAxpy_flt( alpha, x, y );
+         return HYPRE_SStructVectorAxpy_flt( (hypre_float)alpha, x, y );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorAxpy_dbl( alpha, x, y );
+         return HYPRE_SStructVectorAxpy_dbl( (hypre_double)alpha, x, y );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorAxpy_long_dbl( alpha, x, y );
+         return HYPRE_SStructVectorAxpy_long_dbl( (hypre_long_double)alpha, x, y );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1353,11 +1353,11 @@ HYPRE_SStructVectorGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorGetBoxValues_flt( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorGetBoxValues_flt( vector, part, ilower, iupper, var, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorGetBoxValues_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorGetBoxValues_dbl( vector, part, ilower, iupper, var, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorGetBoxValues_long_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorGetBoxValues_long_dbl( vector, part, ilower, iupper, var, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1371,11 +1371,11 @@ HYPRE_SStructVectorGetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVe
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorGetBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorGetBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorGetBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorGetBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorGetBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorGetBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1389,11 +1389,11 @@ HYPRE_SStructVectorGetFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorGetFEMValues_flt( vector, part, index, values );
+         return HYPRE_SStructVectorGetFEMValues_flt( vector, part, index, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorGetFEMValues_dbl( vector, part, index, values );
+         return HYPRE_SStructVectorGetFEMValues_dbl( vector, part, index, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorGetFEMValues_long_dbl( vector, part, index, values );
+         return HYPRE_SStructVectorGetFEMValues_long_dbl( vector, part, index, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1425,11 +1425,11 @@ HYPRE_SStructVectorGetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorGetValues_flt( vector, part, index, var, value );
+         return HYPRE_SStructVectorGetValues_flt( vector, part, index, var, (hypre_float *)value );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorGetValues_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorGetValues_dbl( vector, part, index, var, (hypre_double *)value );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorGetValues_long_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorGetValues_long_dbl( vector, part, index, var, (hypre_long_double *)value );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1461,11 +1461,11 @@ HYPRE_SStructVectorInnerProd_pre( HYPRE_Precision precision, HYPRE_SStructVector
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorInnerProd_flt( x, y, result );
+         return HYPRE_SStructVectorInnerProd_flt( x, y, (hypre_float *)result );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorInnerProd_dbl( x, y, result );
+         return HYPRE_SStructVectorInnerProd_dbl( x, y, (hypre_double *)result );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorInnerProd_long_dbl( x, y, result );
+         return HYPRE_SStructVectorInnerProd_long_dbl( x, y, (hypre_long_double *)result );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1533,11 +1533,11 @@ HYPRE_SStructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorScale_flt( alpha, y );
+         return HYPRE_SStructVectorScale_flt( (hypre_float)alpha, y );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorScale_dbl( alpha, y );
+         return HYPRE_SStructVectorScale_dbl( (hypre_double)alpha, y );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorScale_long_dbl( alpha, y );
+         return HYPRE_SStructVectorScale_long_dbl( (hypre_long_double)alpha, y );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1551,11 +1551,11 @@ HYPRE_SStructVectorSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVec
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorSetBoxValues_flt( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorSetBoxValues_flt( vector, part, ilower, iupper, var, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorSetBoxValues_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorSetBoxValues_dbl( vector, part, ilower, iupper, var, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorSetBoxValues_long_dbl( vector, part, ilower, iupper, var, values );
+         return HYPRE_SStructVectorSetBoxValues_long_dbl( vector, part, ilower, iupper, var, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1569,11 +1569,11 @@ HYPRE_SStructVectorSetBoxValues2_pre( HYPRE_Precision precision, HYPRE_SStructVe
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorSetBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorSetBoxValues2_flt( vector, part, ilower, iupper, var, vilower, viupper, (hypre_float *)values );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorSetBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorSetBoxValues2_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_double *)values );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorSetBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, values );
+         return HYPRE_SStructVectorSetBoxValues2_long_dbl( vector, part, ilower, iupper, var, vilower, viupper, (hypre_long_double *)values );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1587,11 +1587,11 @@ HYPRE_SStructVectorSetConstantValues_pre( HYPRE_Precision precision, HYPRE_SStru
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorSetConstantValues_flt( vector, value );
+         return HYPRE_SStructVectorSetConstantValues_flt( vector, (hypre_float)value );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorSetConstantValues_dbl( vector, value );
+         return HYPRE_SStructVectorSetConstantValues_dbl( vector, (hypre_double)value );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorSetConstantValues_long_dbl( vector, value );
+         return HYPRE_SStructVectorSetConstantValues_long_dbl( vector, (hypre_long_double)value );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -1641,11 +1641,11 @@ HYPRE_SStructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_SStructVector
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_SStructVectorSetValues_flt( vector, part, index, var, value );
+         return HYPRE_SStructVectorSetValues_flt( vector, part, index, var, (hypre_float *)value );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_SStructVectorSetValues_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorSetValues_dbl( vector, part, index, var, (hypre_double *)value );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SStructVectorSetValues_long_dbl( vector, part, index, var, value );
+         return HYPRE_SStructVectorSetValues_long_dbl( vector, part, index, var, (hypre_long_double *)value );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

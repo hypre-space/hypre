@@ -1016,7 +1016,7 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
 
    HYPRE_Int                    num_contacts;
    HYPRE_Int                    contact_proc_list[1];
-   HYPRE_Int                    contact_send_buf[1];
+   HYPRE_BigInt                 contact_send_buf[1];
    HYPRE_Int                    contact_send_buf_starts[2];
    HYPRE_Int                    max_response_size;
    HYPRE_Int                   *response_recv_buf = NULL;
@@ -1115,7 +1115,7 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
          }
          for (i = num_types + 1; i < count; i++)
          {
-            new_vec_starts[i - num_types - 1] = send_info[i] ;
+            new_vec_starts[i - num_types - 1] = send_info[i];
          }
       }
       else /* clean up and exit */
@@ -1139,7 +1139,7 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
       for (i = 0; i < num_types; i++)
       {
          used_procs[i] = send_proc_obj.id[i];
-         new_vec_starts[i + 1] = send_proc_obj.elements[i] + 1;
+         new_vec_starts[i + 1] = (HYPRE_Int) send_proc_obj.elements[i] + 1;
       }
       hypre_qsort0(used_procs, 0, num_types - 1);
       hypre_qsort0(new_vec_starts, 0, num_types);
@@ -1387,7 +1387,7 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
    storage_method = hypre_VectorMultiVecStorageMethod(h_vector);
    data = hypre_VectorData(h_vector);
    size = hypre_VectorSize(h_vector);
-   total_size = size * num_components;
+   total_size = (size_t) (num_components * size);
 
    /* Open binary file */
    hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);

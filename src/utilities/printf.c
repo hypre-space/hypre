@@ -32,7 +32,7 @@ new_format( const char *format,
    HYPRE_Int   copychar;
    HYPRE_Int   foundpercent = 0;
 
-   newformatlen = 2 * strlen(format) + 1; /* worst case is all %d's to %lld's */
+   newformatlen = (HYPRE_Int) strlen(format) * 2 + 1; /* worst case is all %d's to %lld's */
 
    if (newformatlen > hypre_printf_buffer_len)
    {
@@ -129,12 +129,17 @@ free_format( char *newformat )
 HYPRE_Int
 hypre_ndigits( HYPRE_BigInt number )
 {
-   HYPRE_Int     ndigits = 0;
+   return hypre_ndigits_ull( (hypre_ulonglongint) number );
+}
 
-   while (number)
+HYPRE_Int
+hypre_ndigits_ull( hypre_ulonglongint number )
+{
+   HYPRE_Int ndigits;
+
+   for (ndigits = 0; number > 0; ndigits++)
    {
       number /= 10;
-      ndigits++;
    }
 
    return ndigits;
