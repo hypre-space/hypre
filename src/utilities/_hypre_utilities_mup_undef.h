@@ -34,7 +34,6 @@
 #undef HYPRE_PrintDeviceInfo
 #undef HYPRE_PrintErrorMessages
 #undef HYPRE_SetExecutionPolicy
-#undef HYPRE_SetGPUMemoryPoolSize
 #undef HYPRE_SetGpuAwareMPI
 #undef HYPRE_SetLogLevel
 #undef HYPRE_SetMemoryLocation
@@ -202,7 +201,6 @@
 #undef hypre_ReAlloc_v2
 #undef hypre_RestoreLogLevel
 #undef hypre_SeedRand
-#undef hypre_SetCubMemPoolSize
 #undef hypre_SetDevice
 #undef hypre_SetFinalized
 #undef hypre_SetGaussSeidelMethod
