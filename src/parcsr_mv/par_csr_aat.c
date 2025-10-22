@@ -933,7 +933,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
      diag_data, offd_data
    );
 
-   A_ext = hypre_CSRMatrixCreate(num_rows_A_ext, num_cols_A, num_nonzeros);
+   A_ext = hypre_CSRMatrixCreate(num_rows_A_ext, (HYPRE_Int) num_cols_A, num_nonzeros);
    hypre_CSRMatrixI(A_ext) = A_ext_i;
    hypre_CSRMatrixBigJ(A_ext) = A_ext_j;
    if (data) { hypre_CSRMatrixData(A_ext) = A_ext_data; }

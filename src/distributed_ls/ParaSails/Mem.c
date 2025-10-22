@@ -85,7 +85,7 @@ char *MemAlloc(Mem *m, size_t size)
    /* Align on 16-byte boundary */
    size = ((size + 15) / 16) * 16;
 
-   if (m->bytes_left < size)
+   if ((size_t) m->bytes_left < size)
    {
       /* Allocate a new block */
       if (m->num_blocks+1 > MEM_MAXBLOCKS)
@@ -109,16 +109,16 @@ char *MemAlloc(Mem *m, size_t size)
       m->blocks[m->num_blocks] = m->avail;
       m->num_blocks++;
       m->bytes_left = (hypre_longint) req;
-      m->total_bytes += size;
-      m->bytes_alloc += req;
+      m->total_bytes += (hypre_longint) size;
+      m->bytes_alloc += (hypre_longint) req;
       if (req > MEM_BLOCKSIZE)
          m->num_over++;
    }
 
    p = m->avail;
    m->avail += size;
-   m->bytes_left -= size;
-   m->total_bytes += size;
+   m->bytes_left -= (hypre_longint) size;
+   m->total_bytes += (hypre_longint) size;
 
    return p;
 }

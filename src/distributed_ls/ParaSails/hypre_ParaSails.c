@@ -147,9 +147,9 @@ static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix distmat)
    HYPRE_DistributedMatrixGetLocalRange(distmat, &beg_row, &end_row,
                                         &dummy, &dummy);
 
-   mat = MatrixCreate(comm, beg_row, end_row);
+   mat = MatrixCreate(comm, (HYPRE_Int) beg_row, (HYPRE_Int) end_row);
 
-   for (row=beg_row; row<=end_row; row++)
+   for (row= (HYPRE_Int) beg_row; row<= (HYPRE_Int) end_row; row++)
    {
       HYPRE_DistributedMatrixGetRow(distmat, row, &len, &ind, &val);
       MatrixSetRow(mat, row, len, (HYPRE_Int*) ind, val);

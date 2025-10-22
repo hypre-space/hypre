@@ -12,7 +12,7 @@
 
 /* "row" refers to global row number */
 
-extern void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal);
+extern void EuclidGetDimensions(void *A, HYPRE_BigInt *beg_row, HYPRE_Int *rowsLocal, HYPRE_BigInt *rowsGlobal);
 extern void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 extern void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
@@ -23,4 +23,3 @@ extern void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
 
 
 #endif
-

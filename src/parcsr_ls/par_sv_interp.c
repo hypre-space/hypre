@@ -719,7 +719,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                   /* add an entry */
 
                   /* create a single new entry for Q*/
-                  new_col = cur_col + (HYPRE_BigInt)((orig_nf - fcn_num) + k);
+                  new_col = (HYPRE_Int)(cur_col + (orig_nf - fcn_num) + k);
 
                   /* Determine the Q entry value*/
                   if (variant == 2)
