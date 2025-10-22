@@ -131,11 +131,11 @@ Iterations = 10
 Final Relative Residual Norm = 2.384986e-09
 
 # Output file: solvers.out.26
-  cpu clock time  = 0.003826 seconds
-  cpu MFLOPS      = 0.000000
 
-Solver: AMG-PCG
-HYPRE_ParCSRPCGGetPrecond got good precond
+
+Iterations = 15
+Final Relative Residual Norm = 7.167937e-09
+
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.205554
 
