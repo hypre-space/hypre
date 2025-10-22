@@ -137,7 +137,7 @@ function MpirunString
          ;;
       matrix*)
          shift
-         RunString="srun -n$1 --exclusive"
+         RunString="srun -n$1 -G4 --overlap"
          ;;
       node*)
          shift
@@ -349,6 +349,24 @@ EOF
                       ;;
                *dawn*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
                       ;;
+               *matrix*)
+                   OriginalExecutable=""
+                   for arg in ${RunString}; do
+                       if [ -f "${arg}" ] && [ -x "${arg}" ]; then
+                           OriginalExecutable="${arg}"
+                           break
+                       fi
+                   done
+                   TmpExecutable="/tmp/$(basename ${OriginalExecutable}).${SLURM_JOB_ID}"
+                   RunString="${RunString/${OriginalExecutable}/${TmpExecutable}}"
+                   if [ ! -f "${TmpExecutable}" ]; then
+                       sbcast "${OriginalExecutable}" "${TmpExecutable}"
+                       if [ $? -ne 0 ]; then
+                           echo "Error: sbcast failed to distribute the executable. Aborting." >&2
+                           exit 1
+                       fi
+                   fi
+                   ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
                JOB_COUNT=$((JOB_COUNT+1))
@@ -423,6 +441,9 @@ EOF
    # if running concurrent jobs, wait for all to finish before returning
    if [ "$BatchMode" -eq 0 ] && [ "$MaxConcurrent" -gt 1 ] && [ "$ForceSequential" -eq 0 ] ; then
       wait
+   fi
+   if [ -f "${TmpExecutable}" ]; then
+       srun rm -rf "${TmpExecutable}"
    fi
    cd $SavePWD
    return $ReturnFlag
