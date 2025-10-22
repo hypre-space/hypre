@@ -132,7 +132,7 @@ function MpirunString
          ;;
       matrix*)
          shift
-         RunString="srun -n$1 --exclusive"
+         RunString="srun -n$1 --cpus-per-task=1"
          ;;
       node*)
          shift
