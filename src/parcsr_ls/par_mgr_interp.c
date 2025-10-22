@@ -365,8 +365,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
-   HYPRE_ANNOTATE_FUNC_END;
-
    return hypre_error_flag;
 }
 
