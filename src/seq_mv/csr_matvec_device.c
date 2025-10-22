@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
@@ -163,7 +163,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    //hypre_GpuProfilingPopRange();
@@ -315,7 +315,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /* Free memory */

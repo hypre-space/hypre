@@ -723,7 +723,7 @@ hypre_LINPACKcgpthy(HYPRE_Real *a, HYPRE_Real *b)
    /* Computing MAX */
    d__1 = hypre_abs(*a), d__2 = hypre_abs(*b);
    p = hypre_max(d__1, d__2);
-   if (!p)
+   if (p == 0.0)
    {
       goto L20;
    }

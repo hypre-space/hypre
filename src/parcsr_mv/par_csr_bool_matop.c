@@ -43,7 +43,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int   num_cols_offd_B = hypre_CSRBooleanMatrix_Get_NCols(B_offd);
 
    hypre_ParCSRBooleanMatrix *C;
-   HYPRE_BigInt            *col_map_offd_C;
+   HYPRE_BigInt            *col_map_offd_C = NULL;
    HYPRE_Int            *map_B_to_C = NULL;
 
    hypre_CSRBooleanMatrix *C_diag;
@@ -505,7 +505,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
    ( &B_ext_i, &B_ext_j, &B_ext_data, &B_ext_row_map,
      &num_nonzeros,
      0, 0, comm, comm_pkg,
-     num_cols_B, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, B->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
@@ -579,7 +579,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
    ( &A_ext_i, &A_ext_j, &A_ext_data, pA_ext_row_map,
      &num_nonzeros,
      data, 1, comm, comm_pkg,
-     num_cols_A, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, A->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
@@ -732,13 +732,9 @@ hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
     *  Allocate C_offd_j arrays.
     *-----------------------------------------------------------------------*/
 
-   last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
-   if (C_offd_size)
-   {
-      C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
-   }
-
+   last_col_diag_C = first_row_index_A + (HYPRE_BigInt) (num_rows_diag_A - 1);
+   C_diag_j = hypre_CTAlloc(HYPRE_Int, C_diag_size, HYPRE_MEMORY_HOST);
+   C_offd_j = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Fill in C_diag_j.

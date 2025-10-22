@@ -49,20 +49,30 @@ typedef struct
    HYPRE_SStructVariable  *vartypes;         /* types of variables */
    hypre_StructGrid       *sgrids[8];        /* struct grids for each vartype */
    hypre_BoxArray         *iboxarrays[8];    /* interface boxes */
-
+   hypre_BoxArrayArray    *pbnd_boxaa[8];    /* arrays of box arrays for part boundaries
+                                                each BoxArrayArray entry has size equal to
+                                                the number of boxes in a sgrid */
+   HYPRE_Int               active[8];        /* flag indicating if grid is active for mat/vec
+                                                operations purposes */
    hypre_BoxArray         *pneighbors;
    hypre_Index            *pnbor_offsets;
 
    HYPRE_Int               local_size;       /* Number of variables locally */
    HYPRE_BigInt            global_size;      /* Total number of variables */
 
+   HYPRE_Int               ref_count;
+
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
    /* GEC0902 additions for ghost expansion of boxes */
-
+   // TODO: deprecate ghlocal_size
    HYPRE_Int               ghlocal_size;     /* Number of vars including ghosts */
-
    HYPRE_Int               cell_sgrid_done;  /* =1 implies cell grid already assembled */
+
+   /* Geometrical data */
+   HYPRE_Real              coords_origin[HYPRE_MAXDIM]; /* Origin coordinates */
+   hypre_Index             coords_stride;
+
 } hypre_SStructPGrid;
 
 typedef struct
@@ -83,9 +93,9 @@ enum hypre_SStructBoxManInfoType
 
 typedef struct
 {
-   HYPRE_Int  type;
-   HYPRE_BigInt offset;
-   HYPRE_BigInt ghoffset;
+   HYPRE_Int     type;
+   HYPRE_BigInt  offset;
+   HYPRE_BigInt  ghoffset;
 
 } hypre_SStructBoxManInfo;
 
@@ -156,10 +166,9 @@ typedef struct hypre_SStructGrid_struct
    HYPRE_Int                  ref_count;
 
    /* GEC0902 additions for ghost expansion of boxes */
-
+   // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_BigInt            ghstart_rank;  /* GEC0902 start rank including ghosts  */
-   HYPRE_Int               num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
 } hypre_SStructGrid;
 
@@ -202,7 +211,6 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridRefCount(grid)       ((grid) -> ref_count)
 #define hypre_SStructGridGhlocalSize(grid)    ((grid) -> ghlocal_size)
 #define hypre_SStructGridGhstartRank(grid)    ((grid) -> ghstart_rank)
-#define hypre_SStructGridNumGhost(grid)       ((grid) -> num_ghost)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPGrid
@@ -214,6 +222,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridVarTypes(pgrid)         ((pgrid) -> vartypes)
 #define hypre_SStructPGridVarType(pgrid, var)     ((pgrid) -> vartypes[var])
 #define hypre_SStructPGridCellSGridDone(pgrid)    ((pgrid) -> cell_sgrid_done)
+#define hypre_SStructPGridCoordsOrigin(pgrid)     ((pgrid) -> coords_origin)
+#define hypre_SStructPGridCoordsStride(pgrid)     ((pgrid) -> coords_stride)
 
 #define hypre_SStructPGridSGrids(pgrid)           ((pgrid) -> sgrids)
 #define hypre_SStructPGridSGrid(pgrid, var) \
@@ -229,11 +239,20 @@ typedef struct hypre_SStructGrid_struct
 ((pgrid) -> iboxarrays[HYPRE_SSTRUCT_VARIABLE_CELL])
 #define hypre_SStructPGridVTIBoxArray(pgrid, vartype) \
 ((pgrid) -> iboxarrays[vartype])
+#define hypre_SStructPGridPBndBoxArrayArrays(pgrid)    ((pgrid) -> pbnd_boxaa)
+#define hypre_SStructPGridPBndBoxArrayArray(pgrid, var) \
+((pgrid) -> pbnd_boxaa[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTPBndBoxArrayArray(pgrid, vartype) \
+((pgrid) -> pbnd_boxaa[vartype])
 
+#define hypre_SStructPGridActive(pgrid, var) \
+((pgrid) -> active[hypre_SStructPGridVarType(pgrid, var)])
+#define hypre_SStructPGridVTActive(pgrid, vart)   ((pgrid) -> active[vart])
 #define hypre_SStructPGridPNeighbors(pgrid)       ((pgrid) -> pneighbors)
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+#define hypre_SStructPGridRefCount(pgrid)         ((pgrid) -> ref_count)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 #define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
 
@@ -292,4 +311,3 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif
-

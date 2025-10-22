@@ -7,6 +7,10 @@
 #ifndef SEQ_MV_HPP
 #define SEQ_MV_HPP
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_seq_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

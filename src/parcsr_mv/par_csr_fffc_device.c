@@ -21,10 +21,10 @@ typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 /* transform from local F/C index to global F/C index,
  * where F index "x" are saved as "-x-1"
  */
-#if defined(HYPRE_USING_SYCL)
-struct FFFC_functor
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
+#else
+struct FFFC_functor
 #endif
 {
    HYPRE_BigInt CF_first[2];
@@ -48,10 +48,10 @@ struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
 
 /* this predicate selects A^s_{FF} */
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct FF_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FF_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct FF_pred
 #endif
 {
    HYPRE_Int  option;
@@ -86,10 +86,10 @@ struct FF_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{FC} */
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct FC_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FC_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct FC_pred
 #endif
 {
    HYPRE_Int *row_CF_marker;
@@ -113,10 +113,10 @@ struct FC_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{CF} */
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct CF_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CF_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct CF_pred
 #endif
 {
    HYPRE_Int *row_CF_marker;
@@ -140,10 +140,10 @@ struct CF_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{CC} */
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct CC_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CC_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct CC_pred
 #endif
 {
    HYPRE_Int *row_CF_marker;
@@ -166,10 +166,10 @@ struct CC_pred : public thrust::unary_function<Tuple, bool>
 };
 
 /* this predicate selects A^s_{C,:} */
-#if defined(HYPRE_USING_SYCL)
-struct CX_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CX_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct CX_pred
 #endif
 {
    HYPRE_Int *row_CF_marker;
@@ -191,10 +191,10 @@ struct CX_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{:,C} */
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct XC_pred
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct XC_pred : public thrust::unary_function<Tuple, bool>
+#else
+struct XC_pred
 #endif
 {
    T         *col_CF_marker;
@@ -332,14 +332,18 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    /* map from all points (i.e, F+C) to F/C indices */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map2FC, /* F */
                       HYPRE_Int(0) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       itmp, /* C */
                       HYPRE_Int(0) );
 
@@ -377,8 +381,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       map2F2 = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                         oneapi::dpl::make_transform_iterator(CF_marker,           equal<HYPRE_Int>(-2)),
-                         oneapi::dpl::make_transform_iterator(CF_marker + n_local, equal<HYPRE_Int>(-2)),
+                         oneapi::dpl::make_transform_iterator(CF_marker,
+                                                              make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
+                         oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                              make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
                          map2F2, /* F2 */
                          HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else
@@ -415,7 +421,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -625,7 +631,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      thrust::make_transform_iterator(recv_buf, -_1 - 1) + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFF,
-                                                     thrust::identity<HYPRE_Int>() );
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int) );
       hypre_assert(tmp_end_big - col_map_offd_AFF == num_cols_AFF_offd);
 #endif
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -847,7 +853,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFC,
-                                                     thrust::identity<HYPRE_Int>());
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
       hypre_assert(tmp_end_big - col_map_offd_AFC == num_cols_AFC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -1075,7 +1081,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      thrust::make_transform_iterator(recv_buf, -_1 - 1) + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACF,
-                                                     thrust::identity<HYPRE_Int>());
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
       hypre_assert(tmp_end_big - col_map_offd_ACF == num_cols_ACF_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -1299,7 +1305,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACC,
-                                                     thrust::identity<HYPRE_Int>());
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
       hypre_assert(tmp_end_big - col_map_offd_ACC == num_cols_ACC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -1534,14 +1540,18 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
    /* map from all points (i.e, F+C) to F/C indices */
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map2FC, /* F */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       itmp, /* C */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
@@ -1600,7 +1610,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -1785,7 +1795,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                                      col_map_offd_A + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACX,
-                                                     thrust::identity<HYPRE_Int>());
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
       hypre_assert(tmp_end_big - col_map_offd_ACX == num_cols_ACX_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -1984,7 +1994,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AXC,
-                                                     thrust::identity<HYPRE_Int>());
+                                                     HYPRE_THRUST_IDENTITY(HYPRE_Int));
 #endif
       hypre_assert(tmp_end_big - col_map_offd_AXC == num_cols_AXC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);

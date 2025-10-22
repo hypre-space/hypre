@@ -54,6 +54,10 @@ hypre_DenseBlockMatrixCreate( HYPRE_Int  row_major,
    hypre_DenseBlockMatrixDataAOP(A)          = NULL;
    hypre_DenseBlockMatrixMemoryLocation(A)   = hypre_HandleMemoryLocation(hypre_handle());
 
+#if defined(HYPRE_MIXED_PRECISION)
+   hypre_DenseBlockMatrixPrecision(A) = HYPRE_OBJECT_PRECISION;
+#endif
+
    if (row_major)
    {
       hypre_DenseBlockMatrixRowStride(A)     = 1;
@@ -314,15 +318,15 @@ hypre_DenseBlockMatrixPrint( MPI_Comm                comm,
 
    for (ib = 0; ib < hypre_DenseBlockMatrixNumBlocks(A); ib++)
    {
+      hypre_fprintf(file, "%d\n", ib);
       for (i = 0; i < hypre_DenseBlockMatrixNumRowsBlock(A); i++)
       {
-         hypre_fprintf(file, "%d", ib);
-
          for (j = 0; j < hypre_DenseBlockMatrixNumColsBlock(A); j++)
          {
-            hypre_fprintf(file, " %.15e", hypre_DenseBlockMatrixDataBIJ(A, ib, i, j));
+            hypre_fprintf(file, " %22.15e",
+                          hypre_DenseBlockMatrixDataBIJ(A, ib, i, j));
          }
-         hypre_fprintf(file, "\n");
+         hypre_fprintf(file, ";\n");
       }
    }
 

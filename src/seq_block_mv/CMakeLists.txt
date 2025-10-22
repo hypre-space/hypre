@@ -7,17 +7,29 @@ set(HDRS
   _hypre_seq_block_mv.h
 )
 
-set(SRCS
+# Add MUP headers when mixed precision is enabled
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  list(APPEND HDRS
+    _hypre_seq_block_mv_mup.h
+    _hypre_seq_block_mv_mup_def.h
+    _hypre_seq_block_mv_mup_undef.h
+  )
+endif()
+
+# Regular sources
+set(REGULAR_SRCS
   dense_block_matrix.c
   dense_block_matmult.c
 )
 
-target_sources(${PROJECT_NAME}
-  PRIVATE ${SRCS}
-          ${HDRS}
-)
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("seq_block_mv" SRCS "${REGULAR_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+endif()
 
-# if (HYPRE_USING_CUDA OR HYPRE_USING_HIP)
+# if (HYPRE_USING_GPU)
 #   set(GPU_SRCS
 #      # File name here
 #   )

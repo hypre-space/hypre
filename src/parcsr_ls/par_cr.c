@@ -88,7 +88,7 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
 
    for (i = 0; i < n; i++)
    {
-      e1[i] = 1.0e0 + .1 * hypre_RandI();
+      e1[i] = 1.0e0 + .1 * (HYPRE_Real) hypre_RandI();
    }
 
    /* stages */
@@ -147,8 +147,8 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
             }
             else if (cf[i] ==  fpt)
             {
-               e0[i] = 1.0e0 + .1 * hypre_RandI();
-               e1[i] = 1.0e0 + .1 * hypre_RandI();
+               e0[i] = 1.0e0 + .1 * (HYPRE_Real) hypre_RandI();
+               e1[i] = 1.0e0 + .1 * (HYPRE_Real) hypre_RandI();
             }
          }
          nstages += 1;
@@ -3301,8 +3301,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                }
                else if (CF_marker[i] ==  fpt)
                {
-                  e0[i] = 1.0e0 + .1 * hypre_RandI();
-                  e1[i] = 1.0e0 + .1 * hypre_RandI();
+                  e0[i] = 1.0e0 + .1 * (HYPRE_Real) hypre_RandI();
+                  e1[i] = 1.0e0 + .1 * (HYPRE_Real) hypre_RandI();
                }
             }
          }

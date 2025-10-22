@@ -51,6 +51,8 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                                HYPRE_Int            max_elmts,
                                                hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -109,7 +111,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -163,8 +165,10 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map_to_F,
                       HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
 #else
@@ -335,6 +339,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  HYPRE_Int            max_elmts,
                                                  hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -430,7 +436,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -455,7 +461,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -509,8 +515,10 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map_to_F,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else

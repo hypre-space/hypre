@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_GPU)
@@ -36,9 +36,9 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
                                             HYPRE_Int *d_rc,
                                             char      *d_rf )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
+   static constexpr HYPRE_Int BIN = 5;
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
@@ -61,6 +61,8 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
                                              HYPRE_Int *d_rc,
                                              char      *d_rf )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
    const bool CAN_FAIL = true;
 
    /* Binning (bins 3-10) with d_rc */
@@ -103,6 +105,8 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_rc,
                                        HYPRE_Int *rownnz_exact_ptr)
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
@@ -140,13 +144,13 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    *rownnz_exact_ptr = !HYPRE_THRUST_CALL( any_of,
                                            d_rf,
                                            d_rf + m,
-                                           thrust::identity<char>() );
+                                           HYPRE_THRUST_IDENTITY(char) );
 #endif
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzBound time %f\n", t2);
 #endif
@@ -177,9 +181,9 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
+   static constexpr HYPRE_Int BIN = 5;
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
@@ -227,7 +231,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
@@ -260,6 +264,8 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                    HYPRE_Int  in_rc,
                                    HYPRE_Int *d_rc )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
    const char s = 32, t = 1, u = 5;
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
 #if 0
@@ -282,7 +288,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
    hypre_CSRMatrixIntSpMVDevice(m, nnzA, 1, d_ia, d_ja, NULL, d_rind + 1, 0, d_rc);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzEst time %f\n", t2);
 #endif
@@ -334,7 +340,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
@@ -373,6 +379,8 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
@@ -399,7 +407,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("Rownnz time %f\n", t2);
 #endif

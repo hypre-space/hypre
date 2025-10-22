@@ -32,11 +32,15 @@ shift
 cd $src_dir
 
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/examples' |
   egrep -v '/FEI_mv' |
-  egrep -v '/hypre/include' > check-double.files
+  egrep -v '/hypre/include' |
+  egrep -v '/test/ij_mp.c' |
+  egrep -v '/test/struct_mp.c' |
+  egrep -v '/test/test_mp.c' |
+  egrep -v '/test/test_mp_pcg.c' |
+  egrep -v '/test/test_mp_pcg_3d.c' > check-double.files
 
 egrep '(^|[^[:alnum:]_-]+)double([^[:alnum:]_-]+|$)' `cat check-double.files` >&2
 

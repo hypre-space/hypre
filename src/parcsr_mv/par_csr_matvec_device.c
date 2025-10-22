@@ -31,6 +31,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 {
    hypre_GpuProfilingPushRange("Matvec");
 
+   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int               *d_send_map_elmts;
@@ -61,9 +62,11 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    HYPRE_Complex           *x_buf_data;
 
    HYPRE_Int                sync_stream;
+   HYPRE_Int                num_procs;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
 
@@ -211,7 +214,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -223,26 +226,29 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 #endif
 
    /* Non-blocking communication starts */
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
-                                                 HYPRE_MEMORY_DEVICE, x_buf_data,
-                                                 HYPRE_MEMORY_DEVICE, x_tmp_data);
-
-   /* Non-blocking communication ends */
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
-#endif
-
-   /* computation offd part */
-   if (num_cols_offd)
+   if (num_procs > 1)
    {
-      hypre_CSRMatrixMatvec(alpha, offd, x_tmp, 1.0, y_local);
-   }
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
+                                                    HYPRE_MEMORY_DEVICE, x_buf_data,
+                                                    HYPRE_MEMORY_DEVICE, x_tmp_data);
+
+      /* Non-blocking communication ends */
+      hypre_ParCSRCommHandleDestroy(comm_handle);
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+      hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
+
+      /* computation offd part */
+      if (num_cols_offd)
+      {
+         hypre_CSRMatrixMatvec(alpha, offd, x_tmp, 1.0, y_local);
+      }
+
+#ifdef HYPRE_PROFILE
+      hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
+   }
 
    /*---------------------------------------------------------------------
     * Free memory
@@ -253,7 +259,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    /*---------------------------------------------------------------------
     * Performance profiling
@@ -436,7 +442,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -506,7 +512,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /*---------------------------------------------------------------------
@@ -584,19 +590,8 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
    hypre_VectorNumVectors(&vec_y)            = num_components;
    hypre_VectorMultiVecStorageMethod(&vec_y) = 0;
 
-   /* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *data = hypre_TAlloc(HYPRE_Complex,
-                                      hypre_CSRMatrixNumNonzeros(matrix_E),
-                                      HYPRE_MEMORY_DEVICE);
-   hypreDevice_ComplexFilln(data, hypre_CSRMatrixNumNonzeros(matrix_E), 1.0);
-   hypre_CSRMatrixData(matrix_E) = data;
-
-   hypre_CSRMatrixMatvecDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, &vec_y, 0);
-#else
    /* Compute y += E*x */
    hypre_CSRMatrixSpMVDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, fill);
-#endif
 
    return hypre_error_flag;
 }

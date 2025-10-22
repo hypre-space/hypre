@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_GPU)
@@ -25,7 +25,6 @@
 HYPRE_Int
 hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
                       HYPRE_Int       mb, /* num of rows of B */
-                      HYPRE_Int       n,  /* not used actually */
                       HYPRE_Int       nnzA,
                       HYPRE_Int       nnzB,
                       HYPRE_Int      *d_ia,

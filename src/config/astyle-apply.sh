@@ -49,12 +49,13 @@ fi
 
 # Generate list of source files to indent
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/FEI_mv' |
   egrep -v '/blas' |
   egrep -v '/lapack' |
   egrep -v '/distributed' |
+  egrep -v '/mup' |
+  egrep -v '_mup[.]h' |
   egrep -v '/hypre/include' |
   egrep -v '/HYPREf[.]h' |
   egrep -v '/utilities/HYPRE_error_f[.]h' |

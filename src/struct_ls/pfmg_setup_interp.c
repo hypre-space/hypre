@@ -9,72 +9,70 @@
 #include "_hypre_struct_mv.hpp"
 #include "pfmg.h"
 
-#ifdef MAX_DEPTH
-#undef MAX_DEPTH
-#endif
-#define MAX_DEPTH 7
-
-/* 2: the most explicit implementation, a function for each stencil size */
-#define CC0_IMPLEMENTATION 2
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
 hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
-                          hypre_StructGrid   *cgrid,
                           HYPRE_Int           cdir,
+                          hypre_Index         stride,
                           HYPRE_Int           rap_type )
 {
+   MPI_Comm              comm            = hypre_StructMatrixComm(A);
+   HYPRE_Int             ndim            = hypre_StructMatrixNDim(A);
+   hypre_StructGrid     *grid            = hypre_StructMatrixGrid(A);
+   hypre_StructStencil  *stencil         = hypre_StructMatrixStencil(A);
+   hypre_Index          *stencil_shape   = hypre_StructStencilShape(stencil);
+   HYPRE_Int             stencil_size    = hypre_StructStencilSize(stencil);
+   HYPRE_Int             diag_entry      = hypre_StructStencilDiagEntry(stencil);
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+
    hypre_StructMatrix   *P;
+   HYPRE_Int             centries[3] = {0, 1, 2};
+   HYPRE_Int             ncentries, i;
 
-   hypre_StructStencil  *stencil;
-   hypre_Index          *stencil_shape;
-   HYPRE_Int             stencil_size;
-   HYPRE_Int             stencil_dim;
-
-   HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-
-   HYPRE_Int             i;
-   HYPRE_Int             constant_coefficient;
-
-   /* set up stencil */
-   stencil_size = 2;
-   stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
-   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
+   /* Figure out which entries to make constant (ncentries) */
+   ncentries = 3; /* Make all entries in P constant by default */
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
-   }
-   hypre_IndexD(stencil_shape[0], cdir) = -1;
-   hypre_IndexD(stencil_shape[1], cdir) =  1;
-   stencil =
-      hypre_StructStencilCreate(stencil_dim, stencil_size, stencil_shape);
-
-   /* set up matrix */
-   P = hypre_StructMatrixCreate(hypre_StructMatrixComm(A), cgrid, stencil);
-   hypre_StructMatrixSetNumGhost(P, num_ghost);
-
-   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient == 2 )
-   {
-      if ( rap_type == 0 )
-         /* A has variable diagonal, which will force all P coefficients to be variable */
+      /* Check for entries in A in direction cdir that are variable */
+      if (hypre_IndexD(stencil_shape[i], cdir) != 0)
       {
-         hypre_StructMatrixSetConstantCoefficient(P, 0 );
-      }
-      else
-      {
-         /* We will force P to be 0.5's everywhere, ignoring A. */
-         hypre_StructMatrixSetConstantCoefficient(P, 1);
+         if (!hypre_StructMatrixConstEntry(A, i))
+         {
+            ncentries = 1; /* Make only the diagonal of P constant */
+            break;
+         }
       }
    }
-   else
+
+   /* If diagonal of A is not constant and using RAP, do variable interpolation.
+    *
+    * NOTE: This is important right now because of an issue with Matmult, where
+    * it computes constant stencil entries that may not truly be constant along
+    * grid boundaries.  RDF: Remove this?  I don't think it's needed anymore,
+    * because Matmult uses a mask. */
+   if (!hypre_StructMatrixConstEntry(A, diag_entry) && (rap_type == 0))
    {
-      /* constant_coefficient = 0 or 1: A is entirely constant or entirely
-         variable coefficient */
-      hypre_StructMatrixSetConstantCoefficient( P, constant_coefficient );
+      ncentries = 1; /* Make only the diagonal of P constant */
    }
+
+   /* Set up the stencil for P */
+   stencil_size = 3;
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
+   for (i = 0; i < stencil_size; i++)
+   {
+      hypre_SetIndex(stencil_shape[i], 0);
+   }
+   hypre_IndexD(stencil_shape[1], cdir) = -1;
+   hypre_IndexD(stencil_shape[2], cdir) =  1;
+   stencil = hypre_StructStencilCreate(ndim, stencil_size, stencil_shape);
+
+   /* Set up the P matrix */
+   P = hypre_StructMatrixCreate(comm, grid, stencil);
+   hypre_StructMatrixSetDomainStride(P, stride);
+   hypre_StructMatrixSetConstantEntries(P, ncentries, centries);
+   hypre_StructMatrixSetMemoryLocation(P, memory_location);
 
    hypre_StructStencilDestroy(stencil);
 
@@ -82,1892 +80,655 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGSetupInterpOp_core_CC
+ *
+ * Core function to compute the constant part of the stencil collapse of the
+ * prolongation matrix.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
-                         HYPRE_Int           cdir,
-                         hypre_Index         findex,
-                         hypre_Index         stride,
-                         hypre_StructMatrix *P,
-                         HYPRE_Int           rap_type )
+hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix   *P,
+                                 hypre_StructMatrix   *A,
+                                 HYPRE_Int             cdir,
+                                 HYPRE_Complex        *Pconst0_ptr,
+                                 HYPRE_Complex        *Pconst1_ptr,
+                                 HYPRE_Complex        *Pconst2_ptr)
 {
-   hypre_BoxArray        *compute_boxes;
-   hypre_Box             *compute_box;
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(P);
+   HYPRE_ExecutionPolicy  exec            = hypre_GetExecPolicy1(memory_location);
+   HYPRE_Complex         *A_data          = hypre_StructMatrixData(A);
+   HYPRE_Int             *A_const_indices = hypre_StructMatrixConstIndices(A);
+   hypre_StructStencil   *A_stencil       = hypre_StructMatrixStencil(A);
+   HYPRE_Int              A_stencil_size  = hypre_StructStencilSize(A_stencil);
+   hypre_Index           *A_stencil_shape = hypre_StructStencilShape(A_stencil);
+   hypre_StructStencil   *P_stencil       = hypre_StructMatrixStencil(P);
+   hypre_Index           *P_stencil_shape = hypre_StructStencilShape(P_stencil);
+   HYPRE_Int              Pstenc1         = hypre_IndexD(P_stencil_shape[1], cdir);
+   HYPRE_Int              Pstenc2         = hypre_IndexD(P_stencil_shape[2], cdir);
 
-   hypre_Box             *A_dbox;
-   hypre_Box             *P_dbox;
+   HYPRE_Complex         *A_const_data_h;
+   HYPRE_Complex          Pconst0;
+   HYPRE_Complex          Pconst1;
+   HYPRE_Complex          Pconst2;
+   HYPRE_Int              Astenc, si;
 
-   HYPRE_Real            *Pp0, *Pp1;
-   HYPRE_Int              constant_coefficient;
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CC");
 
-   hypre_StructStencil   *stencil;
-   hypre_Index           *stencil_shape;
-   HYPRE_Int              stencil_size;
-   hypre_StructStencil   *P_stencil;
-   hypre_Index           *P_stencil_shape;
-
-   HYPRE_Int              Pstenc0, Pstenc1;
-
-   hypre_Index            loop_size;
-   hypre_Index            start;
-   hypre_IndexRef         startc;
-   hypre_Index            stridec;
-
-   HYPRE_Int              i, si;
-
-   HYPRE_Int              si0, si1;
-   HYPRE_Int              mrk0, mrk1;
-   HYPRE_Int              d;
-
-   /*----------------------------------------------------------
-    * Initialize some things
-    *----------------------------------------------------------*/
-
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
-
-   P_stencil       = hypre_StructMatrixStencil(P);
-   P_stencil_shape = hypre_StructStencilShape(P_stencil);
-
-   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-
-   /*----------------------------------------------------------
-    * Find stencil enties in A corresponding to P
-    *----------------------------------------------------------*/
-
-   si0 = -1;
-   si1 = -1;
-   for (si = 0; si < stencil_size; si++)
+   /* Set host pointer to constant data entries in A */
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      mrk0 = 0;
-      mrk1 = 0;
-      for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
+      A_const_data_h = hypre_TAlloc(HYPRE_Complex, A_stencil_size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(A_const_data_h, A_data, HYPRE_Complex,
+                    A_stencil_size, HYPRE_MEMORY_HOST, memory_location);
+   }
+   else
+   {
+      A_const_data_h = A_data;
+   }
+
+   /* Compute the constant part of the stencil collapse (independent of boxes) */
+   Pconst0 = 0.0;
+   Pconst1 = 0.0;
+   Pconst2 = 0.0;
+   for (si = 0; si < A_stencil_size; si++)
+   {
+      if (hypre_StructMatrixConstEntry(A, si))
       {
-         if (hypre_IndexD(stencil_shape[si], d) ==
-             hypre_IndexD(P_stencil_shape[0], d))
+         Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
+
+         if (Astenc == 0)
          {
-            mrk0++;
+            Pconst0 += A_const_data_h[A_const_indices[si]];
          }
-         if (hypre_IndexD(stencil_shape[si], d) ==
-             hypre_IndexD(P_stencil_shape[1], d))
+         else if (Astenc == Pstenc1)
          {
-            mrk1++;
+            Pconst1 -= A_const_data_h[A_const_indices[si]];
          }
-      }
-      if (mrk0 == hypre_StructStencilNDim(stencil))
-      {
-         si0 = si;
-      }
-      if (mrk1 == hypre_StructStencilNDim(stencil))
-      {
-         si1 = si;
+         else if (Astenc == Pstenc2)
+         {
+            Pconst2 -= A_const_data_h[A_const_indices[si]];
+         }
       }
    }
 
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   /* Free memory */
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TFree(A_const_data_h, HYPRE_MEMORY_HOST);
+   }
 
-   /*----------------------------------------------------------
-    * Compute P
-    *----------------------------------------------------------*/
+   /* Set output pointers */
+   *Pconst0_ptr = Pconst0;
+   *Pconst1_ptr = Pconst1;
+   *Pconst2_ptr = Pconst2;
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGSetupInterpOp_core_VC
+ *
+ * Core function to compute the variable part of the stencil collapse of the
+ * prolongation matrix.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
+                                 hypre_StructMatrix *A,
+                                 HYPRE_Int           cdir,
+                                 HYPRE_Complex       Pconst0,
+                                 HYPRE_Complex       Pconst1,
+                                 HYPRE_Complex       Pconst2 )
+{
+#if defined(HYPRE_UNROLL_MAXDEPTH)
+#undef HYPRE_UNROLL_MAXDEPTH
+#endif
+#define HYPRE_UNROLL_MAXDEPTH 9
+#define HYPRE_DECLARE_2VARS(n)                             \
+    HYPRE_Complex *Ap##n = NULL;                           \
+    HYPRE_Int      As##n = 0
+#define HYPRE_UPDATE_VALUES(n)                             \
+    do {                                                   \
+        if      ((As##n) == 0)       mid[Pi] += Ap##n[Ai]; \
+        else if ((As##n) == Pstenc1) Pp1[Pi] -= Ap##n[Ai]; \
+        else if ((As##n) == Pstenc2) Pp2[Pi] -= Ap##n[Ai]; \
+    } while (0)
+
+   HYPRE_Int              ndim            = hypre_StructMatrixNDim(A);
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(P);
+   hypre_StructStencil   *A_stencil       = hypre_StructMatrixStencil(A);
+   HYPRE_Int              A_stencil_size  = hypre_StructStencilSize(A_stencil);
+   hypre_Index           *A_stencil_shape = hypre_StructStencilShape(A_stencil);
+   hypre_StructStencil   *P_stencil       = hypre_StructMatrixStencil(P);
+   hypre_Index           *P_stencil_shape = hypre_StructStencilShape(P_stencil);
+   HYPRE_Int              Pstenc1         = hypre_IndexD(P_stencil_shape[1], cdir);
+   HYPRE_Int              Pstenc2         = hypre_IndexD(P_stencil_shape[2], cdir);
+
+   hypre_BoxArray        *compute_boxes;
+   hypre_Box             *compute_box;
+   hypre_Box             *A_dbox;
+   hypre_Box             *P_dbox;
+
+   HYPRE_Int              P_dbox_volume;
+   HYPRE_Complex         *Pp1, *Pp2, *mid;
+
+   HYPRE_Complex         *Ap_l0 = NULL, *Ap_r0 = NULL, *Ap_m0 = NULL;
+   HYPRE_Complex         *Ap_l1 = NULL, *Ap_r1 = NULL, *Ap_m1 = NULL;
+   HYPRE_Complex         *Ap_l2 = NULL, *Ap_r2 = NULL, *Ap_m2 = NULL;
+   HYPRE_Complex         *Ap_l3 = NULL, *Ap_r3 = NULL, *Ap_m3 = NULL;
+   HYPRE_Complex         *Ap_l4 = NULL, *Ap_r4 = NULL, *Ap_m4 = NULL;
+   HYPRE_Complex         *Ap_l5 = NULL, *Ap_r5 = NULL, *Ap_m5 = NULL;
+   HYPRE_Complex         *Ap_l6 = NULL, *Ap_r6 = NULL, *Ap_m6 = NULL;
+   HYPRE_Complex         *Ap_l7 = NULL, *Ap_r7 = NULL, *Ap_m7 = NULL;
+   HYPRE_Complex         *Ap_l8 = NULL, *Ap_r8 = NULL, *Ap_m8 = NULL;
+
+   HYPRE_Int              i, l, r, m, k, si;
+   HYPRE_Int              depth, vdepth, vsi[HYPRE_UNROLL_MAXDEPTH];
+   HYPRE_Int              msi[HYPRE_MAX_MMTERMS];
+   HYPRE_Int              lsi[HYPRE_MAX_MMTERMS];
+   HYPRE_Int              rsi[HYPRE_MAX_MMTERMS];
+   hypre_Index            Astart, Astride, Pstart, Pstride;
+   hypre_Index            origin, stride, loop_size;
+   HYPRE_DECLARE_2VARS(0);
+   HYPRE_DECLARE_2VARS(1);
+   HYPRE_DECLARE_2VARS(2);
+   HYPRE_DECLARE_2VARS(3);
+   HYPRE_DECLARE_2VARS(4);
+   HYPRE_DECLARE_2VARS(5);
+   HYPRE_DECLARE_2VARS(6);
+   HYPRE_DECLARE_2VARS(7);
+   HYPRE_DECLARE_2VARS(8);
+
+   /* Sanity check */
+   if (A_stencil_size >= HYPRE_MAX_MMTERMS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Reached max. stencil size! Increase HYPRE_MAX_MMTERMS!");
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("VC");
+
+   /* Gather stencil indices */
+   for (i = 0, l = 0, r = 0, m = 0; i < A_stencil_size; i++)
+   {
+      if (!hypre_StructMatrixConstEntry(A, i))
+      {
+         if (hypre_IndexD(A_stencil_shape[i], cdir) == 0)
+         {
+            msi[m++] = i;
+         }
+         else if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc1)
+         {
+            lsi[l++] = i;
+         }
+         else if (hypre_IndexD(A_stencil_shape[i], cdir) == Pstenc2)
+         {
+            rsi[r++] = i;
+         }
+      }
+   }
+
+#if defined(DEBUG_PFMG)
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD,
+                   "Number of (left, right, middle) stencil. entries: (%d, %d, %d)\n", l, r, m);
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=== PFMG Interp Stencil ===\n");
+#endif
+
+   /* Off-diagonal entries are variable */
+   compute_box = hypre_BoxCreate(ndim);
+
+   /* Get the stencil space on the base grid for entry 1 of P (valid also for entry 2) */
+   hypre_StructMatrixGetStencilSpace(P, 1, 0, origin, stride);
+
+   hypre_CopyToIndex(stride, ndim, Astride);
+   hypre_StructMatrixMapDataStride(A, Astride);
+   hypre_CopyToIndex(stride, ndim, Pstride);
+   hypre_StructMatrixMapDataStride(P, Pstride);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(P));
    hypre_ForBoxI(i, compute_boxes)
    {
-      compute_box = hypre_BoxArrayBox(compute_boxes, i);
+      hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
+      hypre_ProjectBox(compute_box, origin, stride);
+      hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Astart);
+      hypre_StructMatrixMapDataIndex(A, Astart);
+      hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
+      hypre_StructMatrixMapDataIndex(P, Pstart);
 
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
       P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
 
-      Pp0 = hypre_StructMatrixBoxData(P, i, 0);
       Pp1 = hypre_StructMatrixBoxData(P, i, 1);
+      Pp2 = hypre_StructMatrixBoxData(P, i, 2);
 
-      Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
-      Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
+      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-      startc  = hypre_BoxIMin(compute_box);
-      hypre_StructMapCoarseToFine(startc, findex, stride, start);
-
-      hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
-
-      if ( constant_coefficient == 1 )
-         /* all coefficients are constant */
+      if (1 && l == 1 && r == 1 && m == 5)
       {
-         hypre_PFMGSetupInterpOp_CC1
-         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-      }
-
-      else if ( constant_coefficient == 2 )
-         /* all coefficients are constant except the diagonal is variable */
-      {
-         hypre_PFMGSetupInterpOp_CC2
-         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-      }
-
-      else
-         /* constant_coefficient == 0 , all coefficients in A vary */
-      {
-#if CC0_IMPLEMENTATION <= 1
-         hypre_PFMGSetupInterpOp_CC0
-         ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-           P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-#else
-         switch (stencil_size)
+         /* Load data pointers - Left: 1 | Right: 1 | Middle: 5 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
          {
-            case 5:
-               hypre_PFMGSetupInterpOp_CC0_SS5
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            case 9:
-               hypre_PFMGSetupInterpOp_CC0_SS9
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            case 7:
-               hypre_PFMGSetupInterpOp_CC0_SS7
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            case 15:
-               hypre_PFMGSetupInterpOp_CC0_SS15
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            case 19:
-               hypre_PFMGSetupInterpOp_CC0_SS19
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            case 27:
-               hypre_PFMGSetupInterpOp_CC0_SS27
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-               break;
-            default:
-               /*
-               hypre_PFMGSetupInterpOp_CC0
-                  ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                    P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-                */
-
-               hypre_printf("hypre error: unsupported stencil size %d\n", stencil_size);
-               hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
+            HYPRE_Complex center = Pconst0 + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] + Ap_m4[Ai];
+            if (center != 0.0)
+            {
+               Pp1[Pi] = (Pconst1 - Ap_l0[Ai]) / center;
+               Pp2[Pi] = (Pconst2 - Ap_r0[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
          }
-#endif
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else if (1 && l == 3 && r == 3 && m == 9)
+      {
+         /* Load data pointers - Left: 3 | Right: 3 | Middle: 9 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_l1 = hypre_StructMatrixBoxData(A, i, lsi[1]);
+         Ap_l2 = hypre_StructMatrixBoxData(A, i, lsi[2]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_r1 = hypre_StructMatrixBoxData(A, i, rsi[1]);
+         Ap_r2 = hypre_StructMatrixBoxData(A, i, rsi[2]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         Ap_m5 = hypre_StructMatrixBoxData(A, i, msi[5]);
+         Ap_m6 = hypre_StructMatrixBoxData(A, i, msi[6]);
+         Ap_m7 = hypre_StructMatrixBoxData(A, i, msi[7]);
+         Ap_m8 = hypre_StructMatrixBoxData(A, i, msi[8]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
+         {
+            HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
+                                   Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
+
+            if (center != 0.0)
+            {
+               Pp1[Pi] = (Pconst1 - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai]) / center;
+               Pp2[Pi] = (Pconst2 - Ap_r0[Ai] - Ap_r1[Ai] - Ap_r2[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else if (1 && l == 9 && r == 9 && m == 9)
+      {
+         /* Load data pointers - Left: 9 | Right: 9 | Middle: 9 */
+         Ap_l0 = hypre_StructMatrixBoxData(A, i, lsi[0]);
+         Ap_l1 = hypre_StructMatrixBoxData(A, i, lsi[1]);
+         Ap_l2 = hypre_StructMatrixBoxData(A, i, lsi[2]);
+         Ap_l3 = hypre_StructMatrixBoxData(A, i, lsi[3]);
+         Ap_l4 = hypre_StructMatrixBoxData(A, i, lsi[4]);
+         Ap_l5 = hypre_StructMatrixBoxData(A, i, lsi[5]);
+         Ap_l6 = hypre_StructMatrixBoxData(A, i, lsi[6]);
+         Ap_l7 = hypre_StructMatrixBoxData(A, i, lsi[7]);
+         Ap_l8 = hypre_StructMatrixBoxData(A, i, lsi[8]);
+         Ap_r0 = hypre_StructMatrixBoxData(A, i, rsi[0]);
+         Ap_r1 = hypre_StructMatrixBoxData(A, i, rsi[1]);
+         Ap_r2 = hypre_StructMatrixBoxData(A, i, rsi[2]);
+         Ap_r3 = hypre_StructMatrixBoxData(A, i, rsi[3]);
+         Ap_r4 = hypre_StructMatrixBoxData(A, i, rsi[4]);
+         Ap_r5 = hypre_StructMatrixBoxData(A, i, rsi[5]);
+         Ap_r6 = hypre_StructMatrixBoxData(A, i, rsi[6]);
+         Ap_r7 = hypre_StructMatrixBoxData(A, i, rsi[7]);
+         Ap_r8 = hypre_StructMatrixBoxData(A, i, rsi[8]);
+         Ap_m0 = hypre_StructMatrixBoxData(A, i, msi[0]);
+         Ap_m1 = hypre_StructMatrixBoxData(A, i, msi[1]);
+         Ap_m2 = hypre_StructMatrixBoxData(A, i, msi[2]);
+         Ap_m3 = hypre_StructMatrixBoxData(A, i, msi[3]);
+         Ap_m4 = hypre_StructMatrixBoxData(A, i, msi[4]);
+         Ap_m5 = hypre_StructMatrixBoxData(A, i, msi[5]);
+         Ap_m6 = hypre_StructMatrixBoxData(A, i, msi[6]);
+         Ap_m7 = hypre_StructMatrixBoxData(A, i, msi[7]);
+         Ap_m8 = hypre_StructMatrixBoxData(A, i, msi[8]);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             A_dbox, Astart, Astride, Ai,
+                             P_dbox, Pstart, Pstride, Pi);
+         {
+            HYPRE_Complex center = Pconst0   + Ap_m0[Ai] + Ap_m1[Ai] + Ap_m2[Ai] + Ap_m3[Ai] +
+                                   Ap_m4[Ai] + Ap_m5[Ai] + Ap_m6[Ai] + Ap_m7[Ai] + Ap_m8[Ai];
+
+            if (center != 0.0)
+            {
+               Pp1[Pi] = (Pconst1   - Ap_l0[Ai] - Ap_l1[Ai] - Ap_l2[Ai] - Ap_l3[Ai] -
+                          Ap_l4[Ai] - Ap_l5[Ai] - Ap_l6[Ai] - Ap_l7[Ai] - Ap_l8[Ai]) / center;
+               Pp2[Pi] = (Pconst2   - Ap_r0[Ai] - Ap_r1[Ai] - Ap_r2[Ai] - Ap_r3[Ai] -
+                          Ap_r4[Ai] - Ap_r5[Ai] - Ap_r6[Ai] - Ap_r7[Ai] - Ap_r8[Ai]) / center;
+            }
+            else
+            {
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop2End(Ai, Pi);
+      }
+      else
+      {
+         /* Allocate array for storing center coefficient */
+         P_dbox_volume = hypre_BoxVolume(P_dbox);
+         mid = hypre_TAlloc(HYPRE_Complex, P_dbox_volume, memory_location);
+
+         /* Phase 1: Set initial coefficient values in P */
+         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+         {
+            mid[Pi] = Pconst0;
+            Pp1[Pi] = Pconst1;
+            Pp2[Pi] = Pconst2;
+         }
+         hypre_BoxLoop1End(Pi);
+
+         /* Phase 2: Update coefficients in P with variable coefficients from A */
+         for (si = 0; si < A_stencil_size; si += HYPRE_UNROLL_MAXDEPTH)
+         {
+            depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (A_stencil_size - si));
+            for (k = 0, vdepth = 0; k < depth; k++)
+            {
+               if (!hypre_StructMatrixConstEntry(A, si + k))
+               {
+                  vsi[vdepth++] = si + k;
+               }
+            }
+
+            /* Exit loop if there are no variable stencil coefficients left */
+            if (!vdepth)
+            {
+               continue;
+            }
+
+            switch (vdepth)
+            {
+               case 9:
+                  Ap8 = hypre_StructMatrixBoxData(A, i, vsi[8]);
+                  As8 = hypre_IndexD(A_stencil_shape[vsi[8]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 8:
+                  Ap7 = hypre_StructMatrixBoxData(A, i, vsi[7]);
+                  As7 = hypre_IndexD(A_stencil_shape[vsi[7]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 7:
+                  Ap6 = hypre_StructMatrixBoxData(A, i, vsi[6]);
+                  As6 = hypre_IndexD(A_stencil_shape[vsi[6]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 6:
+                  Ap5 = hypre_StructMatrixBoxData(A, i, vsi[5]);
+                  As5 = hypre_IndexD(A_stencil_shape[vsi[5]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 5:
+                  Ap4 = hypre_StructMatrixBoxData(A, i, vsi[4]);
+                  As4 = hypre_IndexD(A_stencil_shape[vsi[4]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 4:
+                  Ap3 = hypre_StructMatrixBoxData(A, i, vsi[3]);
+                  As3 = hypre_IndexD(A_stencil_shape[vsi[3]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 3:
+                  Ap2 = hypre_StructMatrixBoxData(A, i, vsi[2]);
+                  As2 = hypre_IndexD(A_stencil_shape[vsi[2]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 2:
+                  Ap1 = hypre_StructMatrixBoxData(A, i, vsi[1]);
+                  As1 = hypre_IndexD(A_stencil_shape[vsi[1]], cdir);
+                  HYPRE_FALLTHROUGH;
+
+               case 1:
+                  Ap0 = hypre_StructMatrixBoxData(A, i, vsi[0]);
+                  As0 = hypre_IndexD(A_stencil_shape[vsi[0]], cdir);
+            }
+
+            switch (vdepth)
+            {
+               case 9:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(8);
+                     HYPRE_UPDATE_VALUES(7);
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 8:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(7);
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 7:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(6);
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 6:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(5);
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 5:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(4);
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 4:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(3);
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 3:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(2);
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 2:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(1);
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+
+               case 1:
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      A_dbox, Astart, Astride, Ai,
+                                      P_dbox, Pstart, Pstride, Pi);
+                  {
+                     HYPRE_UPDATE_VALUES(0);
+                  }
+                  hypre_BoxLoop2End(Ai, Pi);
+                  break;
+            }
+         }
+
+         /* Phase 3: set final coefficients */
+         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+         {
+            if (mid[Pi] != 0.0)
+            {
+               /* Average out prolongation coefficients */
+               Pp1[Pi] /= mid[Pi];
+               Pp2[Pi] /= mid[Pi];
+            }
+            else
+            {
+               /* For some reason the interpolation coefficients sum to zero */
+               Pp1[Pi] = 0.0;
+               Pp2[Pi] = 0.0;
+            }
+         }
+         hypre_BoxLoop1End(Pi);
+
+         /* Free memory */
+         hypre_TFree(mid, memory_location);
       }
    }
 
-#if 0
+   /* Free memory */
+   hypre_BoxDestroy(compute_box);
+
+#undef HYPRE_UPDATE_VALUES
+#undef HYPRE_UNROLL_MAXDEPTH
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGSetupInterpOp( hypre_StructMatrix *P,
+                         hypre_StructMatrix *A,
+                         HYPRE_Int           cdir )
+{
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(P);
+   HYPRE_Int              constant;
+
+   HYPRE_Complex          Pconst0, Pconst1, Pconst2;
+   HYPRE_Complex          one  = 1.0;
+   HYPRE_Complex          half = 0.5;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PFMGSetupInterp");
+
+   /* 0: Only the diagonal is constant
+      1: All entries are constant */
+   constant = (hypre_StructMatrixConstEntry(P, 1)) ? 1 : 0;
+
+   /*----------------------------------------------------------
+    * Compute Prolongation Matrix
+    *----------------------------------------------------------*/
+
+   /* Set center (diagonal) coefficient to 1, since it is constant */
+   hypre_TMemcpy(hypre_StructMatrixConstData(P, 0), &one, HYPRE_Complex, 1,
+                 memory_location, HYPRE_MEMORY_HOST);
+
+   if (constant)
+   {
+      /* Off-diagonal entries are constant */
+      hypre_TMemcpy(hypre_StructMatrixConstData(P, 1), &half, HYPRE_Complex, 1,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_StructMatrixConstData(P, 2), &half, HYPRE_Complex, 1,
+                    memory_location, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      /* Set prolongation entries derived from constant coefficients in A */
+      hypre_PFMGSetupInterpOp_core_CC(P, A, cdir, &Pconst0, &Pconst1, &Pconst2);
+
+      /* Set prolongation entries derived from variable coefficients in A */
+      hypre_PFMGSetupInterpOp_core_VC(P, A, cdir, Pconst0, Pconst1, Pconst2);
+   }
+
+   /* Assemble prolongation matrix */
    hypre_StructMatrixAssemble(P);
-#else
-   hypre_StructInterpAssemble(A, P, 0, cdir, findex, stride);
-#endif
+
+   /* The following call is needed to prevent cases where interpolation reaches
+    * outside the boundary with nonzero coefficient */
+   hypre_StructMatrixClearBoundary(P);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
-
-#if CC0_IMPLEMENTATION == 0
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  HYPRE_Int           si0,
-  HYPRE_Int           si1 )
-{
-   hypre_StructStencil *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index         *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int            stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int            warning_cnt = 0;
-   HYPRE_Int            data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-   HYPRE_Int          **data_indices = hypre_StructMatrixDataIndices(A);
-   HYPRE_Complex       *matrixA_data = hypre_StructMatrixData(A);
-   HYPRE_Int           *data_indices_boxi_d;
-   hypre_Index         *stencil_shape_d;
-   HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(A);
-
-   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
-   {
-      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int, stencil_size, memory_location);
-      stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size, memory_location);
-      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, memory_location,
-                    HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, memory_location,
-                    HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      data_indices_boxi_d = data_indices[i];
-      stencil_shape_d = stencil_shape;
-   }
-
-#define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start,  stride,  Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Int si, mrk0, mrk1, Astenc;
-      HYPRE_Real center;
-      HYPRE_Real *Ap;
-
-      center  = 0.0;
-      Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;
-      mrk0 = 0;
-      mrk1 = 0;
-
-      for (si = 0; si < stencil_size; si++)
-      {
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         if (data_location != HYPRE_MEMORY_HOST)
-         {
-            Ap     = matrixA_data + data_indices_boxi_d[si];
-            Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
-         }
-         else
-         {
-            Ap     = hypre_StructMatrixBoxData(A, i, si);
-            Astenc = hypre_IndexD(stencil_shape[si], cdir);
-         }
-#else
-         Ap     = matrixA_data + data_indices_boxi_d[si];
-         Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
-#endif
-
-         if (Astenc == 0)
-         {
-            center += Ap[Ai];
-         }
-         else if (Astenc == Pstenc0)
-         {
-            Pp0[Pi] -= Ap[Ai];
-         }
-         else if (Astenc == Pstenc1)
-         {
-            Pp1[Pi] -= Ap[Ai];
-         }
-
-         if (si == si0 && Ap[Ai] == 0.0)
-         {
-            mrk0++;
-         }
-         if (si == si1 && Ap[Ai] == 0.0)
-         {
-            mrk1++;
-         }
-      }
-
-      if (!center)
-      {
-         //warning_cnt++;
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         Pp0[Pi] /= center;
-         Pp1[Pi] /= center;
-      }
-
-      /*----------------------------------------------
-       * Set interpolation weight to zero, if stencil
-       * entry in same direction is zero. Prevents
-       * interpolation and operator stencils reaching
-       * outside domain.
-       *----------------------------------------------*/
-      if (mrk0 != 0)
-      {
-         Pp0[Pi] = 0.0;
-      }
-      if (mrk1 != 0)
-      {
-         Pp1[Pi] = 0.0;
-      }
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   if (warning_cnt)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Warning 0 center in interpolation. Setting interp = 0.");
-   }
-
-   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
-   {
-      hypre_TFree(data_indices_boxi_d, memory_location);
-      hypre_TFree(stencil_shape_d, memory_location);
-   }
-
-   return hypre_error_flag;
-}
-
-#endif
-
-#if CC0_IMPLEMENTATION == 1
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  HYPRE_Int           si0,
-  HYPRE_Int           si1 )
-{
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int              warning_cnt = 0;
-   HYPRE_Int              dim, si, loop_length = 1, Astenc;
-   HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
-   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
-
-   for (dim = 0; dim < hypre_StructMatrixNDim(A); dim++)
-   {
-      loop_length *= loop_size[dim];
-   }
-   center = hypre_CTAlloc(HYPRE_Real, loop_length, memory_location);
-
-   for (si = 0; si < stencil_size; si++)
-   {
-      Ap     = hypre_StructMatrixBoxData(A, i, si);
-      Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-      if (Astenc == 0)
-      {
-#define DEVICE_VAR is_device_ptr(center, Ap)
-         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start,  stride,  Ai,
-                             P_dbox, startc, stridec, Pi)
-         center[idx] += Ap[Ai];
-         hypre_BoxLoop2End(Ai, Pi)
-#undef DEVICE_VAR
-      }
-      else if (Astenc == Pstenc0)
-      {
-#define DEVICE_VAR is_device_ptr(Pp0, Ap)
-         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start,  stride,  Ai,
-                             P_dbox, startc, stridec, Pi)
-         Pp0[Pi] -= Ap[Ai];
-         hypre_BoxLoop2End(Ai, Pi)
-#undef DEVICE_VAR
-      }
-      else if (Astenc == Pstenc1)
-      {
-#define DEVICE_VAR is_device_ptr(Pp1, Ap)
-         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start,  stride,  Ai,
-                             P_dbox, startc, stridec, Pi)
-         Pp1[Pi] -= Ap[Ai];
-         hypre_BoxLoop2End(Ai, Pi)
-#undef DEVICE_VAR
-      }
-   }
-
-   Ap0 = hypre_StructMatrixBoxData(A, i, si0);
-   Ap1 = hypre_StructMatrixBoxData(A, i, si1);
-#define DEVICE_VAR is_device_ptr(center, Pp0, Pp1, Ap0, Ap1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start,  stride,  Ai,
-                       P_dbox, startc, stridec, Pi)
-   HYPRE_Real cval = center[idx];
-   if (Ap0[Ai] == 0.0 || cval == 0.0)
-   {
-      Pp0[Pi] = 0.0;
-   }
-   else
-   {
-      Pp0[Pi] /= cval;
-   }
-
-   if (Ap1[Ai] == 0.0 || cval == 0.0)
-   {
-      Pp1[Pi] = 0.0;
-   }
-   else
-   {
-      Pp1[Pi] /= cval;
-   }
-   hypre_BoxLoop2End(Ai, Pi)
-#undef DEVICE_VAR
-
-   if (warning_cnt)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Warning 0 center in interpolation. Setting interp = 0.");
-   }
-
-   hypre_TFree(center, memory_location);
-
-   return hypre_error_flag;
-}
-
-#endif
-
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC1
-( HYPRE_Int           i, /* box index, doesn't matter */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  HYPRE_Int           si0,
-  HYPRE_Int           si1 )
-{
-   HYPRE_UNUSED_VAR(A_dbox);
-   HYPRE_UNUSED_VAR(stride);
-   HYPRE_UNUSED_VAR(stridec);
-   HYPRE_UNUSED_VAR(start);
-   HYPRE_UNUSED_VAR(startc);
-   HYPRE_UNUSED_VAR(loop_size);
-   HYPRE_UNUSED_VAR(P_dbox);
-   HYPRE_UNUSED_VAR(rap_type);
-
-   HYPRE_Int              si;
-   HYPRE_Int              Ai, Pi;
-   HYPRE_Real            *Ap;
-   HYPRE_Real             center;
-   HYPRE_Int              Astenc;
-   HYPRE_Int              mrk0, mrk1;
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int              warning_cnt = 0;
-
-   Ai = hypre_CCBoxIndexRank(A_dbox, start );
-   Pi = hypre_CCBoxIndexRank(P_dbox, startc);
-
-   center  = 0.0;
-   Pp0[Pi] = 0.0;
-   Pp1[Pi] = 0.0;
-   mrk0 = 0;
-   mrk1 = 0;
-
-   for (si = 0; si < stencil_size; si++)
-   {
-      Ap     = hypre_StructMatrixBoxData(A, i, si);
-      Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-      if (Astenc == 0)
-      {
-         center += Ap[Ai];
-      }
-      else if (Astenc == Pstenc0)
-      {
-         Pp0[Pi] -= Ap[Ai];
-      }
-      else if (Astenc == Pstenc1)
-      {
-         Pp1[Pi] -= Ap[Ai];
-      }
-
-      if (si == si0 && Ap[Ai] == 0.0)
-      {
-         mrk0++;
-      }
-      if (si == si1 && Ap[Ai] == 0.0)
-      {
-         mrk1++;
-      }
-   }
-   if (!center)
-   {
-      warning_cnt++;
-      Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;
-   }
-   else
-   {
-      Pp0[Pi] /= center;
-      Pp1[Pi] /= center;
-   }
-
-   /*----------------------------------------------
-    * Set interpolation weight to zero, if stencil
-    * entry in same direction is zero.
-    * For variable coefficients, this was meant to prevent
-    * interpolation and operator stencils from reaching
-    * outside the domain.
-    * For constant coefficients it will hardly ever happen
-    * (means the stencil point shouldn't have been defined there)
-    * but it's possible and then it would still make sense to
-    * do this.
-    *----------------------------------------------*/
-   if (mrk0 != 0)
-   {
-      Pp0[Pi] = 0.0;
-   }
-   if (mrk1 != 0)
-   {
-      Pp1[Pi] = 0.0;
-   }
-
-   if (warning_cnt)
-   {
-      hypre_error_w_msg(
-         HYPRE_ERROR_GENERIC,
-         "Warning 0 center in interpolation. Setting interp = 0.");
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC2
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  HYPRE_Int           si0,
-  HYPRE_Int           si1 )
-{
-   HYPRE_Int              si;
-   HYPRE_Int              Ai;
-   HYPRE_Int              Pi;
-   HYPRE_Real            *Ap;
-   HYPRE_Real             P0, P1;
-   HYPRE_Real             center_offd;
-   HYPRE_Int              Astenc;
-   HYPRE_Int              mrk0_offd, mrk1_offd;
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   hypre_Index            diag_index;
-   HYPRE_Int              diag_rank;
-   HYPRE_Int              warning_cnt = 0;
-
-   hypre_SetIndex3(diag_index, 0, 0, 0);
-   diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
-
-   if ( rap_type != 0 )
-   {
-      /* simply force P to be constant coefficient, all 0.5's */
-      Pi = hypre_CCBoxIndexRank(P_dbox, startc);
-      Pp0[Pi] = 0.5;
-      Pp1[Pi] = 0.5;
-   }
-   else
-   {
-      /* Most coeffients of A go into P like for constant_coefficient=1.
-         But P is entirely variable coefficient, because the diagonal of A is
-         variable, and hence "center" below is variable. So we use the constant
-         coefficient calculation to initialize the diagonal's variable
-         coefficient calculation (which is like constant_coefficient=0). */
-      Ai = hypre_CCBoxIndexRank(A_dbox, start );
-
-      center_offd  = 0.0;
-      P0 = 0.0;
-      P1 = 0.0;
-      mrk0_offd = 0;
-      mrk1_offd = 0;
-
-      for (si = 0; si < stencil_size; si++)
-      {
-         if ( si != diag_rank )
-         {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-            Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-            if (Astenc == 0)
-            {
-               center_offd += Ap[Ai];
-            }
-            else if (Astenc == Pstenc0)
-            {
-               P0 -= Ap[Ai];
-            }
-            else if (Astenc == Pstenc1)
-            {
-               P1 -= Ap[Ai];
-            }
-
-            if (si == si0 && Ap[Ai] == 0.0)
-            {
-               mrk0_offd++;
-            }
-            if (si == si1 && Ap[Ai] == 0.0)
-            {
-               mrk1_offd++;
-            }
-         }
-      }
-
-      si = diag_rank;
-
-      HYPRE_Real *Ap = hypre_StructMatrixBoxData(A, i, si);
-
-#define DEVICE_VAR is_device_ptr(Pp0,Pp1,Ap)
-      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                          A_dbox, start, stride, Ai,
-                          P_dbox, startc, stridec, Pi);
-      {
-         HYPRE_Int   mrk0, mrk1;
-         HYPRE_Real  center;
-         HYPRE_Real  p0val, p1val;
-
-         p0val = P0;
-         p1val = P1;
-         center = center_offd;
-         mrk0 = mrk0_offd;
-         mrk1 = mrk1_offd;
-
-         /* RL: Astenc is only needed for assertion, comment out
-            Astenc = hypre_IndexD(stencil_shape[si], cdir);
-            hypre_assert( Astenc==0 );
-         */
-
-         center += Ap[Ai];
-
-         //if (si == si0 && Ap[Ai] == 0.0)
-         //   mrk0++;
-         //if (si == si1 && Ap[Ai] == 0.0)
-         //   mrk1++;
-
-         if (!center)
-         {
-            //warning_cnt++;
-            p0val = 0.0;
-            p1val = 0.0;
-         }
-         else
-         {
-            p0val /= center;
-            p1val /= center;
-         }
-
-         /*----------------------------------------------
-          * Set interpolation weight to zero, if stencil
-          * entry in same direction is zero. Prevents
-          * interpolation and operator stencils reaching
-          * outside domain.
-          *----------------------------------------------*/
-         if (mrk0 != 0)
-         {
-            p0val = 0.0;
-         }
-         if (mrk1 != 0)
-         {
-            p1val = 0.0;
-         }
-         Pp0[Pi] = p0val;
-         Pp1[Pi] = p1val;
-
-      }
-      hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-   }
-
-   if (warning_cnt)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning 0 center in interpolation. Setting interp = 0.");
-   }
-
-   return hypre_error_flag;
-}
-
-#if CC0_IMPLEMENTATION > 1
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS5
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(rap_type);
-   HYPRE_UNUSED_VAR(Pstenc1);
-
-   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   //HYPRE_Int              warning_cnt= 0;
-
-   hypre_Index            index;
-   HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real            *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-
-   /*-----------------------------------------------------------------
-    * Extract pointers for 5-point fine grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient
-    * a_ce is pointer for east coefficient
-    * a_cs is pointer for south coefficient
-    * a_cn is pointer for north coefficient
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_ce,Pp0,Pp1,p0,p1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Real center, left, right;
-
-      switch (cdir)
-      {
-         case 0:
-            center = a_cc[Ai] + a_cs[Ai] + a_cn[Ai];
-            left   = -a_cw[Ai];
-            right  = -a_ce[Ai];
-            break;
-      case 1: default:
-            center = a_cc[Ai] + a_cw[Ai] + a_ce[Ai];
-            left   = -a_cs[Ai];
-            right  = -a_cn[Ai];
-            break;
-      }
-
-      if (!center)
-      {
-         //warning_cnt++;
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         switch (Pstenc0)
-         {
-            case -1:
-               Pp0[Pi] = left / center;
-               break;
-            case  1:
-               Pp0[Pi] = right / center;
-               break;
-         }
-
-         switch (Pstenc1)
-         {
-            case -1:
-               Pp1[Pi] = left / center;
-               break;
-            case  1:
-               Pp1[Pi] = right / center;
-               break;
-         }
-      }
-
-      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
-      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
-      /*----------------------------------------------
-       * Set interpolation weight to zero, if stencil
-       * entry in same direction is zero. Prevents
-       * interpolation and operator stencils reaching
-       * outside domain.
-       *----------------------------------------------*/
-      //if (mrk0 != 0)
-      //   Pp0[Pi] = 0.0;
-      //if (mrk1 != 0)
-      //   Pp1[Pi] = 0.0;
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS9
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(rap_type);
-   HYPRE_UNUSED_VAR(Pstenc1);
-
-   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   //HYPRE_Int              warning_cnt= 0;
-
-   hypre_Index            index;
-   HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
-   HYPRE_Real            *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-   /*-----------------------------------------------------------------
-    * Extract pointers for 5-point grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient
-    * a_ce is pointer for east coefficient
-    * a_cs is pointer for south coefficient
-    * a_cn is pointer for north coefficient
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   /*-----------------------------------------------------------------
-    * Extract additional pointers for 9-point grid operator:
-    *
-    * a_csw is pointer for southwest coefficient
-    * a_cse is pointer for southeast coefficient
-    * a_cnw is pointer for northwest coefficient
-    * a_cne is pointer for northeast coefficient
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, -1, -1, 0);
-   a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, 0);
-   a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, 0);
-   a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, 0);
-   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_cw,a_csw,a_cnw,a_ce,a_cse,a_cne,Pp0,Pp1,p0,p1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Real center, left, right;
-
-      switch (cdir)
-      {
-         case 0:
-            center = a_cc[Ai] +  a_cs[Ai] +  a_cn[Ai];
-            left   = -a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
-            right  = -a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
-            break;
-      case 1: default:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
-            left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
-            right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
-            break;
-      };
-
-      if (!center)
-      {
-         //warning_cnt++;
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         switch (Pstenc0)
-         {
-            case -1:
-               Pp0[Pi] = left / center;
-               Pp1[Pi] = right / center;
-               break;
-            case 1:
-               Pp0[Pi] = right / center;
-               Pp1[Pi] = left / center;
-               break;
-         };
-         /*
-            switch (Pstenc1)
-            {
-            case -1:
-            Pp1[Pi] = left/center;break;
-            case 1:
-            Pp1[Pi] = right/center;break;
-            };
-            */
-      }
-
-      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
-      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS7
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(rap_type);
-   HYPRE_UNUSED_VAR(Pstenc1);
-
-   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   //HYPRE_Int              warning_cnt= 0;
-
-   hypre_Index            index;
-   HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-   HYPRE_Real            *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-
-   /*-----------------------------------------------------------------
-    * Extract pointers for 7-point grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient in same plane
-    * a_ce is pointer for east coefficient in same plane
-    * a_cs is pointer for south coefficient in same plane
-    * a_cn is pointer for north coefficient in same plane
-    * a_ac is pointer for center coefficient in plane above
-    * a_bc is pointer for center coefficient in plane below
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, 1);
-   a_ac = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, -1);
-   a_bc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_cw,a_ce,Pp0,Pp1,p0,p1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Real center, left, right;
-
-      switch (cdir)
-      {
-         case 0:
-            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai];
-            left   = -a_cw[Ai];
-            right  = -a_ce[Ai];
-            break;
-         case 1:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] ;
-            left   = -a_cs[Ai];
-            right  = -a_cn[Ai];
-            break;
-      case 2: default:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
-            left   = -a_bc[Ai];
-            right  = -a_ac[Ai];
-            break;
-      };
-
-      if (!center)
-      {
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         switch (Pstenc0)
-         {
-            case -1:
-               Pp0[Pi] = left / center;
-               Pp1[Pi] = right / center;
-               break;
-            case 1:
-               Pp0[Pi] = right / center;
-               Pp1[Pi] = left / center;
-               break;
-         };
-         /*
-            switch (Pstenc1)
-            {
-            case -1:
-            Pp1[Pi] = left/center;break;
-            case 1:
-            Pp1[Pi] = right/center;break;
-            };
-            */
-      }
-
-      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
-      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
-
-      //printf("%d: %d, Pp0[%d] = %e, Pp1 = %e, %e, %e, %e, cc=%e, cw=%e, ce=%e, cs=%e, cn=%e, bc=%e, ac=%e \n",Ai,cdir, Pi,Pp0[Pi],Pp1[Pi],center, left, right,
-      //     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS15
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(rap_type);
-   HYPRE_UNUSED_VAR(Pstenc1);
-
-   hypre_Index           index;
-   HYPRE_Int             stencil_type15;
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-   HYPRE_Real           *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-   HYPRE_Real           *a_csw, *a_cse, *a_cnw, *a_cne;
-   HYPRE_Real           *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-
-   /*-----------------------------------------------------------------
-    * Extract pointers for 7-point grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient in same plane
-    * a_ce is pointer for east coefficient in same plane
-    * a_cs is pointer for south coefficient in same plane
-    * a_cn is pointer for north coefficient in same plane
-    * a_ac is pointer for center coefficient in plane above
-    * a_bc is pointer for center coefficient in plane below
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, 1);
-   a_ac = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, -1);
-   a_bc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   /*-----------------------------------------------------------------
-    * Extract additional pointers for 15-point fine grid operator:
-    *
-    * a_aw is pointer for west coefficient in plane above
-    * a_ae is pointer for east coefficient in plane above
-    * a_as is pointer for south coefficient in plane above
-    * a_an is pointer for north coefficient in plane above
-    * a_bw is pointer for west coefficient in plane below
-    * a_be is pointer for east coefficient in plane below
-    * a_bs is pointer for south coefficient in plane below
-    * a_bn is pointer for north coefficient in plane below
-    * a_csw is pointer for southwest coefficient in same plane
-    * a_cse is pointer for southeast coefficient in same plane
-    * a_cnw is pointer for northwest coefficient in same plane
-    * a_cne is pointer for northeast coefficient in same plane
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, -1, 0, 1);
-   a_aw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 1);
-   a_ae = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 1);
-   a_as = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 1);
-   a_an = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, -1);
-   a_bw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, -1);
-   a_be = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, -1);
-   a_bs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, -1);
-   a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, -1, 0);
-   a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, 0);
-   a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, 0);
-   a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, 0);
-   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   if (a_csw)
-   {
-      if (a_as)
-      {
-         stencil_type15 = 1;
-      }
-      else
-      {
-         stencil_type15 = 0;
-      }
-   }
-   else
-   {
-      stencil_type15 = 2;
-   }
-
-   //printf("loop_size %d %d %d, cdir %d, %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p\n", loop_size[0], loop_size[1], loop_size[2], cdir, a_cc, a_cw, a_ce, a_ac, a_bc, a_cs, a_as, a_bs, a_csw, a_cse, a_cn, a_an, a_bn, a_cnw, a_cne);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_ce,a_ae,a_be,a_cnw,a_cne,a_csw,a_cse,Pp0,Pp1,p0,p1)
-   if (stencil_type15 == 0)
-   {
-      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                          A_dbox, start, stride, Ai,
-                          P_dbox, startc, stridec, Pi);
-      {
-         HYPRE_Real center, left, right;
-
-         switch (cdir)
-         {
-            case 0:
-               center =  a_cc[Ai] + a_cs[Ai] + a_cn[Ai] +  a_ac[Ai] +  a_bc[Ai];
-               left   = -a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
-               right  = -a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
-               break;
-            case 1:
-               center =  a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_ac[Ai] +  a_aw[Ai] + a_ae[Ai] +
-                         a_bc[Ai] +  a_bw[Ai] +  a_be[Ai];
-               left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
-               right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
-               break;
-         case 2: default:
-               center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] +
-                          a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
-               left   =  -a_bc[Ai] -  a_bw[Ai] -   a_be[Ai]; /* below */
-               right  =  -a_ac[Ai] -  a_aw[Ai] -   a_ae[Ai]; /* above */
-               break;
-         }
-
-         if (!center)
-         {
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;
-         }
-         else
-         {
-            switch (Pstenc0)
-            {
-               case -1:
-                  Pp0[Pi] = left  / center;
-                  Pp1[Pi] = right / center;
-                  break;
-               case 1:
-                  Pp0[Pi] = right / center;
-                  Pp1[Pi] = left  / center;
-                  break;
-            }
-         }
-
-         if (p0[Ai] == 0.0)
-         {
-            Pp0[Pi] = 0.0;
-         }
-         if (p1[Ai] == 0.0)
-         {
-            Pp1[Pi] = 0.0;
-         }
-      }
-      hypre_BoxLoop2End(Ai, Pi);
-   }
-   else if (stencil_type15 == 1)
-   {
-      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                          A_dbox, start, stride, Ai,
-                          P_dbox, startc, stridec, Pi);
-      {
-         HYPRE_Real center, left, right;
-
-         switch (cdir)
-         {
-            case 0:
-               center =  a_cc[Ai] + a_cs[Ai] + a_cn[Ai] +  a_ac[Ai] +  a_as[Ai] + a_an[Ai] +
-                         a_bc[Ai] + a_bs[Ai] + a_bn[Ai];
-               left   = -a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
-               right  = -a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
-               break;
-            case 1:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] +  a_ac[Ai] +  a_bc[Ai];
-               left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
-               right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
-               break;
-         case 2: default:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai] +
-                         a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-               left   = -a_bc[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
-               right  = -a_ac[Ai] - a_as[Ai] - a_an[Ai]; /* above */
-               break;
-         }
-
-         if (!center)
-         {
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;
-         }
-         else
-         {
-            switch (Pstenc0)
-            {
-               case -1:
-                  Pp0[Pi] = left  / center;
-                  Pp1[Pi] = right / center;
-                  break;
-               case 1:
-                  Pp0[Pi] = right / center;
-                  Pp1[Pi] = left  / center;
-                  break;
-            }
-         }
-
-         if (p0[Ai] == 0.0)
-         {
-            Pp0[Pi] = 0.0;
-         }
-         if (p1[Ai] == 0.0)
-         {
-            Pp1[Pi] = 0.0;
-         }
-      }
-      hypre_BoxLoop2End(Ai, Pi);
-   }
-   else
-   {
-      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                          A_dbox, start, stride, Ai,
-                          P_dbox, startc, stridec, Pi);
-      {
-         HYPRE_Real center, left, right;
-
-         switch (cdir)
-         {
-            case 0:
-               center =  a_cc[Ai] + a_cs[Ai] + a_cn[Ai] +  a_ac[Ai] + a_as[Ai] + a_an[Ai] +
-                         a_bc[Ai] + a_bs[Ai] + a_bn[Ai];
-               left   = -a_cw[Ai] - a_aw[Ai] - a_bw[Ai];
-               right  = -a_ce[Ai] - a_ae[Ai] - a_be[Ai];
-               break;
-            case 1:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] +  a_ac[Ai] +  a_aw[Ai] + a_ae[Ai] +
-                         a_bc[Ai] + a_bw[Ai] + a_be[Ai];
-               left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai]; /* front */
-               right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai]; /* back */
-               break;
-         case 2: default:
-               center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai];
-               left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
-               right  = -a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai]; /* above */
-               break;
-         }
-
-         if (!center)
-         {
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;
-         }
-         else
-         {
-            switch (Pstenc0)
-            {
-               case -1:
-                  Pp0[Pi] = left  / center;
-                  Pp1[Pi] = right / center;
-                  break;
-               case 1:
-                  Pp0[Pi] = right / center;
-                  Pp1[Pi] = left  / center;
-                  break;
-            }
-         }
-
-         if (p0[Ai] == 0.0)
-         {
-            Pp0[Pi] = 0.0;
-         }
-         if (p1[Ai] == 0.0)
-         {
-            Pp1[Pi] = 0.0;
-         }
-      }
-      hypre_BoxLoop2End(Ai, Pi);
-   }
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS19
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(Pstenc1);
-   HYPRE_UNUSED_VAR(rap_type);
-
-   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   // hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   //HYPRE_Int              warning_cnt= 0;
-
-   hypre_Index            index;
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-   HYPRE_Real           *a_csw, *a_cse, *a_cne, *a_cnw;
-   HYPRE_Real           *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-   HYPRE_Real            *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-
-   /*-----------------------------------------------------------------
-    * Extract pointers for 7-point grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient in same plane
-    * a_ce is pointer for east coefficient in same plane
-    * a_cs is pointer for south coefficient in same plane
-    * a_cn is pointer for north coefficient in same plane
-    * a_ac is pointer for center coefficient in plane above
-    * a_bc is pointer for center coefficient in plane below
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, 1);
-   a_ac = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, -1);
-   a_bc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   /*-----------------------------------------------------------------
-    * Extract additional pointers for 19-point fine grid operator:
-    *
-    * a_aw is pointer for west coefficient in plane above
-    * a_ae is pointer for east coefficient in plane above
-    * a_as is pointer for south coefficient in plane above
-    * a_an is pointer for north coefficient in plane above
-    * a_bw is pointer for west coefficient in plane below
-    * a_be is pointer for east coefficient in plane below
-    * a_bs is pointer for south coefficient in plane below
-    * a_bn is pointer for north coefficient in plane below
-    * a_csw is pointer for southwest coefficient in same plane
-    * a_cse is pointer for southeast coefficient in same plane
-    * a_cnw is pointer for northwest coefficient in same plane
-    * a_cne is pointer for northeast coefficient in same plane
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, -1, 0, 1);
-   a_aw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 1);
-   a_ae = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 1);
-   a_as = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 1);
-   a_an = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, -1);
-   a_bw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, -1);
-   a_be = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, -1);
-   a_bs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, -1);
-   a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, -1, 0);
-   a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, 0);
-   a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, 0);
-   a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, 0);
-   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_csw,a_cnw,a_ce,a_ae,a_be,a_cse,a_cne,Pp0,Pp1,p0,p1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Real center, left, right;
-
-      switch (cdir)
-      {
-         case 0:
-            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] +
-                     a_bn[Ai];
-            left   = -a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
-            right  = -a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
-            break;
-         case 1:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] +
-                     a_be[Ai];
-            left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
-            right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
-            break;
-      case 2: default:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
-                     + a_cne[Ai];
-            left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
-            right  = -a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
-            break;
-      };
-
-      if (!center)
-      {
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         switch (Pstenc0)
-         {
-            case -1:
-               Pp0[Pi] = left / center;
-               Pp1[Pi] = right / center;
-               break;
-            case 1:
-               Pp0[Pi] = right / center;
-               Pp1[Pi] = left / center;
-               break;
-         };
-         /*
-            switch (Pstenc1)
-            {
-            case -1:
-            Pp1[Pi] = left/center;break;
-            case 1:
-            Pp1[Pi] = right/center;break;
-            };
-            */
-      }
-
-      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
-      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
-      //printf("Pp0[%d] = %e, Pp1 = %e\n",Pi,Pp0[Pi],Pp1[Pi]);
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0_SS27
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  hypre_Index        *P_stencil_shape )
-{
-   HYPRE_UNUSED_VAR(rap_type);
-   HYPRE_UNUSED_VAR(Pstenc1);
-
-   //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   //HYPRE_Int              warning_cnt= 0;
-
-   hypre_Index            index;
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-   HYPRE_Real           *a_csw, *a_cse, *a_cne, *a_cnw;
-   HYPRE_Real           *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-   HYPRE_Real           *a_asw, *a_ase, *a_ane, *a_anw, *a_bsw, *a_bse, *a_bne, *a_bnw;
-   HYPRE_Real            *p0, *p1;
-
-   p0 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[0]);
-   p1 = hypre_StructMatrixExtractPointerByIndex(A, i, P_stencil_shape[1]);
-
-   /*-----------------------------------------------------------------
-    * Extract pointers for 7-point grid operator:
-    *
-    * a_cc is pointer for center coefficient
-    * a_cw is pointer for west coefficient in same plane
-    * a_ce is pointer for east coefficient in same plane
-    * a_cs is pointer for south coefficient in same plane
-    * a_cn is pointer for north coefficient in same plane
-    * a_ac is pointer for center coefficient in plane above
-    * a_bc is pointer for center coefficient in plane below
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, 0, 0, 0);
-   a_cc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, 0);
-   a_cw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 0);
-   a_ce = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 0);
-   a_cs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 0);
-   a_cn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, 1);
-   a_ac = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 0, -1);
-   a_bc = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   /*-----------------------------------------------------------------
-    * Extract additional pointers for 19-point fine grid operator:
-    *
-    * a_aw is pointer for west coefficient in plane above
-    * a_ae is pointer for east coefficient in plane above
-    * a_as is pointer for south coefficient in plane above
-    * a_an is pointer for north coefficient in plane above
-    * a_bw is pointer for west coefficient in plane below
-    * a_be is pointer for east coefficient in plane below
-    * a_bs is pointer for south coefficient in plane below
-    * a_bn is pointer for north coefficient in plane below
-    * a_csw is pointer for southwest coefficient in same plane
-    * a_cse is pointer for southeast coefficient in same plane
-    * a_cnw is pointer for northwest coefficient in same plane
-    * a_cne is pointer for northeast coefficient in same plane
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, -1, 0, 1);
-   a_aw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, 1);
-   a_ae = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, 1);
-   a_as = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, 1);
-   a_an = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 0, -1);
-   a_bw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 0, -1);
-   a_be = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, -1, -1);
-   a_bs = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 0, 1, -1);
-   a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, -1, 0);
-   a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, 0);
-   a_cse = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, 0);
-   a_cnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, 0);
-   a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   /*-----------------------------------------------------------------
-    * Extract additional pointers for 27-point fine grid operator:
-    *
-    * a_asw is pointer for southwest coefficient in plane above
-    * a_ase is pointer for southeast coefficient in plane above
-    * a_anw is pointer for northwest coefficient in plane above
-    * a_ane is pointer for northeast coefficient in plane above
-    * a_bsw is pointer for southwest coefficient in plane below
-    * a_bse is pointer for southeast coefficient in plane below
-    * a_bnw is pointer for northwest coefficient in plane below
-    * a_bne is pointer for northeast coefficient in plane below
-    *-----------------------------------------------------------------*/
-
-   hypre_SetIndex3(index, -1, -1, 1);
-   a_asw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, 1);
-   a_ase = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, 1);
-   a_anw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, 1);
-   a_ane = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, -1, -1);
-   a_bsw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, -1, -1);
-   a_bse = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, -1, 1, -1);
-   a_bnw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-   hypre_SetIndex3(index, 1, 1, -1);
-   a_bne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-
-#define DEVICE_VAR is_device_ptr(a_cc,a_cs,a_cn,a_ac,a_bc,a_as,a_an,a_bs,a_bn,a_cw,a_aw,a_bw,a_csw,a_cnw,a_asw,a_anw,a_bsw,a_bnw,a_ce,a_ae,a_be,a_cse,a_cne,a_ase,a_ane,a_bse,a_bne,Pp0,Pp1,p0,p1)
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-                       A_dbox, start, stride, Ai,
-                       P_dbox, startc, stridec, Pi);
-   {
-      HYPRE_Real center, left, right;
-
-      switch (cdir)
-      {
-         case 0:
-            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] +
-                     a_bn[Ai];
-            left   = -a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai]
-                     - a_bnw[Ai];
-            right  = -a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai]
-                     - a_bne[Ai];
-            break;
-         case 1:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] +
-                     a_be[Ai];
-            left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai]
-                     - a_bse[Ai];
-            right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai]
-                     - a_bne[Ai];
-            break;
-      case 2: default:
-            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
-                     + a_cne[Ai];
-            left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] -
-                     a_bne[Ai];
-            right  = -a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] -
-                     a_ane[Ai];
-            break;
-      };
-
-      if (!center)
-      {
-         //warning_cnt++;
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-      }
-      else
-      {
-         switch (Pstenc0)
-         {
-            case -1:
-               Pp0[Pi] = left / center;
-               Pp1[Pi] = right / center;
-               break;
-            case 1:
-               Pp0[Pi] = right / center;
-               Pp1[Pi] = left / center;
-               break;
-         };
-         /*
-            switch (Pstenc1)
-            {
-            case -1:
-            Pp1[Pi] = left/center;break;
-            case 1:
-            Pp1[Pi] = right/center;break;
-            };
-            */
-      }
-
-      if (p0[Ai] == 0.0) { Pp0[Pi] = 0.0; }
-      if (p1[Ai] == 0.0) { Pp1[Pi] = 0.0; }
-      //printf("Pp0[%d] = %e, Pp1 = %e\n",Pi,Pp0[Pi],Pp1[Pi]);
-   }
-   hypre_BoxLoop2End(Ai, Pi);
-#undef DEVICE_VAR
-
-   return hypre_error_flag;
-}
-
-#endif

@@ -1019,6 +1019,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    HYPRE_Int           i, j, Cpt, row_start, row_end;
    HYPRE_BigInt        global_row, global_col;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Other Setup */
    if (num_cols_RAP_offd)
    {
@@ -1036,8 +1038,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    rownz = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_variables; i++)
    {
-      rownz[i] = (HYPRE_Int)(1.2 * (RAP_diag_i[i + 1] - RAP_diag_i[i]) +
-                             1.2 * (RAP_offd_i[i + 1] - RAP_offd_i[i]));
+      rownz[i] = (HYPRE_Int)(1.2 * (HYPRE_Real) (RAP_diag_i[i + 1] - RAP_diag_i[i]) +
+                             1.2 * (HYPRE_Real) (RAP_offd_i[i + 1] - RAP_offd_i[i]));
    }
    HYPRE_IJMatrixSetRowSizes(Pattern, rownz);
    HYPRE_IJMatrixInitialize(Pattern);
@@ -1233,6 +1235,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
       hypre_TFree(ijbuf_sym_numcols, memory_location_RAP);
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return Pattern_CSR;
 }
 
@@ -1367,6 +1371,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    HYPRE_Real          *ijbuf_sym_data;
    HYPRE_BigInt        *ijbuf_sym_cols, *ijbuf_sym_rownums;
    HYPRE_Int           *ijbuf_sym_numcols;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Further Initializations */
    if (num_cols_RAP_offd)
@@ -1692,8 +1698,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    rownz = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_variables; i++)
    {
-      rownz[i] = (HYPRE_Int)(1.2 * (Pattern_diag_i[i + 1] - Pattern_diag_i[i]) +
-                             1.2 * (Pattern_offd_i[i + 1] - Pattern_offd_i[i]));
+      rownz[i] = (HYPRE_Int)(1.2 * (HYPRE_Real) (Pattern_diag_i[i + 1] - Pattern_diag_i[i]) +
+                             1.2 * (HYPRE_Real) (Pattern_offd_i[i + 1] - Pattern_offd_i[i]));
    }
    HYPRE_IJMatrixSetRowSizes(ijmatrix, rownz);
    HYPRE_IJMatrixInitialize(ijmatrix);
@@ -2351,6 +2357,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    hypre_ParCSRMatrixDestroy(S);
    HYPRE_IJMatrixSetObjectType(ijmatrix, -1);
    HYPRE_IJMatrixDestroy(ijmatrix);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

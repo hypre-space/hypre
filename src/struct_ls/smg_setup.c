@@ -9,6 +9,9 @@
 #include "smg.h"
 
 #define DEBUG 0
+#if DEBUG
+static HYPRE_Int  static_print_debug = 0;
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -45,10 +48,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructGrid    **PT_grid_l;
 
    HYPRE_Real           *data;
-   HYPRE_Real           *data_const;
    HYPRE_Int             data_size = 0;
-   HYPRE_Int             data_size_const = 0;
-
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -79,6 +79,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
 #if DEBUG
    char                  filename[255];
+   HYPRE_Int             print_debug = static_print_debug++;
 #endif
 
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
@@ -99,7 +100,7 @@ hypre_SMGSetup( void               *smg_vdata,
    grid = hypre_StructMatrixGrid(A);
 
    /* Compute a new max_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    max_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
    if ((smg_data -> max_levels) > 0)
    {
@@ -152,8 +153,15 @@ hypre_SMGSetup( void               *smg_vdata,
       /* build the interpolation grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 0, &PT_grid_l[l + 1]);
 
+      /* assemble the interpolation grid */
+      hypre_StructGridAssemble(PT_grid_l[l + 1]);
+
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
+
+      /* assemble the interpolation grid */
+      hypre_StructGridAssemble(grid_l[l + 1]);
+
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(PT_grid_l[l + 1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
@@ -212,20 +220,18 @@ hypre_SMGSetup( void               *smg_vdata,
    tb_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tb_l[0], hypre_StructVectorNumGhost(b));
    hypre_StructVectorInitializeShell(tb_l[0]);
-   hypre_StructVectorSetDataSize(tb_l[0], &data_size, &data_size_const);
+   data_size += hypre_StructVectorDataSize(tb_l[0]);
 
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tx_l[0], hypre_StructVectorNumGhost(x));
    hypre_StructVectorInitializeShell(tx_l[0]);
-   hypre_StructVectorSetDataSize(tx_l[0], &data_size, &data_size_const);
+   data_size += hypre_StructVectorDataSize(tx_l[0]);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], PT_grid_l[l + 1], cdir);
-
+      PT_l[l] = hypre_SMGCreateInterpOp(A_l[l], PT_grid_l[l + 1], cdir);
       hypre_StructMatrixInitializeShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
-      data_size_const += hypre_StructMatrixDataConstSize(PT_l[l]);
 
       if (hypre_StructMatrixSymmetric(A))
       {
@@ -240,24 +246,22 @@ hypre_SMGSetup( void               *smg_vdata,
          R_l[l]   = hypre_SMGCreateRestrictOp(A_l[l], grid_l[l + 1], cdir);
          hypre_StructMatrixInitializeShell(R_l[l]);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
-         data_size_const += hypre_StructMatrixDataConstSize(R_l[l]);
 #endif
       }
 
       A_l[l + 1] = hypre_SMGCreateRAPOp(R_l[l], A_l[l], PT_l[l], grid_l[l + 1]);
       hypre_StructMatrixInitializeShell(A_l[l + 1]);
       data_size += hypre_StructMatrixDataSize(A_l[l + 1]);
-      data_size_const += hypre_StructMatrixDataConstSize(A_l[l + 1]);
 
       b_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(b_l[l + 1], b_num_ghost);
       hypre_StructVectorInitializeShell(b_l[l + 1]);
-      hypre_StructVectorSetDataSize(b_l[l + 1], &data_size, &data_size_const);
+      data_size += hypre_StructVectorDataSize(b_l[l + 1]);
 
       x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l + 1]);
-      hypre_StructVectorSetDataSize(x_l[l + 1], &data_size, &data_size_const);
+      data_size += hypre_StructVectorDataSize(x_l[l + 1]);
 
       tb_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(tb_l[l + 1], hypre_StructVectorNumGhost(b));
@@ -276,11 +280,9 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
    data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
-   data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
 
    (smg_data -> memory_location) = memory_location;
    (smg_data -> data) = data;
-   (smg_data -> data_const) = data_const;
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //if (hypre_StructGridNDim(grid) == hypre_StructStencilNDim(hypre_StructMatrixStencil(A)))
@@ -315,83 +317,23 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVectorAssemble(tx_l[0]);
    data += hypre_StructVectorDataSize(tx_l[0]);
 #endif
+
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(PT_l[l], data, data_const);
+      hypre_StructMatrixInitializeData(PT_l[l], 1, data);
       data += hypre_StructMatrixDataSize(PT_l[l]);
-      data_const += hypre_StructMatrixDataConstSize(PT_l[l]);
 
 #if 0
       /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
-         hypre_StructMatrixInitializeData(R_l[l], data, data_const);
+         hypre_StructMatrixInitializeData(R_l[l], 1, data);
          data += hypre_StructMatrixDataSize(R_l[l]);
-         data_const += hypre_StructMatrixDataConstSize(R_l[l]);
       }
 #endif
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      if (l + 1 == num_level_GPU)
-      {
-         data_location = HYPRE_MEMORY_HOST;
-      }
-#endif
-
-      hypre_StructMatrixInitializeData(A_l[l + 1], data, data_const);
+      hypre_StructMatrixInitializeData(A_l[l + 1], 1, data);
       data += hypre_StructMatrixDataSize(A_l[l + 1]);
-      data_const += hypre_StructMatrixDataConstSize(A_l[l + 1]);
-
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      if (data_location != HYPRE_MEMORY_HOST)
-      {
-         hypre_StructVectorInitializeData(b_l[l + 1], data);
-         hypre_StructVectorAssemble(b_l[l + 1]);
-         data += hypre_StructVectorDataSize(b_l[l + 1]);
-
-         hypre_StructVectorInitializeData(x_l[l + 1], data);
-         hypre_StructVectorAssemble(x_l[l + 1]);
-         data += hypre_StructVectorDataSize(x_l[l + 1]);
-         hypre_StructVectorInitializeData(tb_l[l + 1],
-                                          hypre_StructVectorData(tb_l[0]));
-         hypre_StructVectorAssemble(tb_l[l + 1]);
-
-         hypre_StructVectorInitializeData(tx_l[l + 1],
-                                          hypre_StructVectorData(tx_l[0]));
-         hypre_StructVectorAssemble(tx_l[l + 1]);
-         //printf("\n Alloc x_l,b_l[%d] on GPU\n",l+1);
-      }
-      else
-      {
-         hypre_StructVectorInitializeData(b_l[l + 1], data_const);
-         hypre_StructVectorAssemble(b_l[l + 1]);
-         data_const += hypre_StructVectorDataSize(b_l[l + 1]);
-
-         hypre_StructVectorInitializeData(x_l[l + 1], data_const);
-         hypre_StructVectorAssemble(x_l[l + 1]);
-         data_const += hypre_StructVectorDataSize(x_l[l + 1]);
-         if (l + 1 == num_level_GPU)
-         {
-            hypre_StructVectorInitializeData(tb_l[l + 1], data_const);
-            hypre_StructVectorAssemble(tb_l[l + 1]);
-            data_const += hypre_StructVectorDataSize(tb_l[l + 1]);
-            hypre_StructVectorInitializeData(tx_l[l + 1], data_const);
-            hypre_StructVectorAssemble(tx_l[l + 1]);
-            data_const += hypre_StructVectorDataSize(tx_l[l + 1]);
-         }
-         else
-         {
-            hypre_StructVectorInitializeData(tb_l[l + 1],
-                                             hypre_StructVectorData(tb_l[num_level_GPU]));
-            hypre_StructVectorAssemble(tb_l[l + 1]);
-
-            hypre_StructVectorInitializeData(tx_l[l + 1],
-                                             hypre_StructVectorData(tx_l[num_level_GPU]));
-            hypre_StructVectorAssemble(tx_l[l + 1]);
-         }
-         //printf("\n Alloc x_l,b_l[%d] on CPU\n",l+1);
-      }
-#else
 
       hypre_StructVectorInitializeData(b_l[l + 1], data);
       hypre_StructVectorAssemble(b_l[l + 1]);
@@ -408,7 +350,6 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorInitializeData(tx_l[l + 1],
                                        hypre_StructVectorData(tx_l[0]));
       hypre_StructVectorAssemble(tx_l[l + 1]);
-#endif
    }
 
    (smg_data -> A_l)  = A_l;
@@ -476,7 +417,6 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
       hypre_SMGRelaxSetNumPreRelax( relax_data_l[l], n_pre);
       hypre_SMGRelaxSetNumPostRelax( relax_data_l[l], n_post);
-      //hypre_SMGRelaxSetMaxLevel( relax_data_l[l], l+6);
       hypre_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
       hypre_SMGSetupInterpOp(relax_data_l[l], A_l[l], b_l[l], x_l[l],
@@ -505,6 +445,7 @@ hypre_SMGSetup( void               *smg_vdata,
          hypre_SMGSetupRestrictOp(A_l[l], R_l[l], tx_l[l], cdir,
                                   cindex, stride);
 #endif
+
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_SemiRestrictCreate();
       hypre_SemiRestrictSetup(restrict_data_l[l], R_l[l], 0, r_l[l], b_l[l + 1],
@@ -567,17 +508,19 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
 #if DEBUG
-   if (hypre_StructGridNDim(grid_l[0]) == 3)
+   if (print_debug == 0)
    {
       for (l = 0; l < (num_levels - 1); l++)
       {
-         hypre_sprintf(filename, "zout_A.%02d", l);
+         hypre_sprintf(filename, "smg_A.%02d", l);
          hypre_StructMatrixPrint(filename, A_l[l], 0);
-         hypre_sprintf(filename, "zout_PT.%02d", l);
+         hypre_sprintf(filename, "smg_PT.%02d", l);
          hypre_StructMatrixPrint(filename, PT_l[l], 0);
       }
-      hypre_sprintf(filename, "zout_A.%02d", l);
+      hypre_sprintf(filename, "smg_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
+
+      print_debug = 0;
    }
 #endif
 

@@ -17,6 +17,7 @@
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -32,13 +33,26 @@ typedef unsigned long long int hypre_ulonglongint;
 typedef uint32_t               hypre_uint32;
 typedef uint64_t               hypre_uint64;
 
-/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
-typedef float                  hypre_float;
-typedef double                 hypre_double;
-
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused function warning */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
+#elif defined(_MSC_VER)
+#define HYPRE_MAYBE_UNUSED_FUNC
+#else
+#define HYPRE_MAYBE_UNUSED_FUNC
+#endif
+
+/* Macro for marking fallthrough in switch statements */
+#if (defined(__GNUC__) && __GNUC__ >= 7) ||\
+    (defined(__clang__) && __clang_major__ >= 10)
+#define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
+#else
+#define HYPRE_FALLTHROUGH ((void)0)
+#endif
 
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)

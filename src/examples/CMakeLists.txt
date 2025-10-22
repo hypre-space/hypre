@@ -38,3 +38,20 @@ endif()
 
 add_hypre_executables(EXAMPLE_SRCS)
 
+if(HYPRE_ENABLE_FORTRAN)
+  # Pure Fortran-enabled examples: ex5f and ex12f
+  # Note: CUDA/Fortran (cudaf.f, ex5f_cptr.f, ex12f_cptr.f)
+  #       paths are handled by GPU toolchains (skipped here)
+  add_executable(ex5f ex5f.f)
+  target_link_libraries(ex5f PUBLIC HYPRE)
+  if(HYPRE_ENABLE_MPI)
+    find_package(MPI REQUIRED COMPONENTS Fortran)
+    target_link_libraries(ex5f PUBLIC MPI::MPI_Fortran)
+  endif()
+
+  add_executable(ex12f ex12f.f)
+  target_link_libraries(ex12f PUBLIC HYPRE)
+  if(HYPRE_ENABLE_MPI)
+    target_link_libraries(ex12f PUBLIC MPI::MPI_Fortran)
+  endif()
+endif()
