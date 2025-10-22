@@ -37,8 +37,24 @@ endif()
 # Build each executable
 add_hypre_executables("${TEST_SRCS}")
 
+# Ensure test executables land in the top-level build bin directory
+set_target_properties(ij sstruct struct structmat ams_driver struct_migrate ij_assembly
+  PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
 add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
+
+# Link CUDA runtime transitively for tests when CUDA is enabled
+if(HYPRE_ENABLE_CUDA)
+  find_package(CUDAToolkit REQUIRED)
+  foreach(t ij sstruct struct structmat ams_driver struct_migrate ij_assembly)
+    if(TARGET ${t})
+      target_link_libraries(${t} PRIVATE CUDA::cudart)
+    endif()
+  endforeach()
+endif()
 
 # Copy test input files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default
@@ -69,7 +85,12 @@ endif()
 find_program(BASH_PROGRAM bash)
 
 # Run check target
-add_custom_target(check
+# Avoid name collision if a parent/subproject already defined a 'check' target (e.g., Umpire)
+set(HYPRE_CHECK_TARGET_NAME check)
+if(TARGET check)
+  set(HYPRE_CHECK_TARGET_NAME hypre_check)
+endif()
+add_custom_target(${HYPRE_CHECK_TARGET_NAME}
   COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
   COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:ij> 2> ij.err
   COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:struct> 2> struct.err
