@@ -39,10 +39,9 @@ Iterations = 10
 Final Relative Residual Norm = 5.540991e-07
 
 # Output file: vcpfmgRedBlackGS.out.10
-  cpu clock time  = 0.002607 seconds
-  cpu MFLOPS      = 0.000000
+Iterations = 10
+Final Relative Residual Norm = 5.540991e-07
 
 # Output file: vcpfmgRedBlackGS.out.11
 Iterations = 10
 Final Relative Residual Norm = 5.540991e-07
-
