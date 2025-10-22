@@ -636,9 +636,10 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    HYPRE_MemoryLocation  memory_location = hypre_ParVectorMemoryLocation(b);
 
    /* Auxiliary variables */
-   HYPRE_Int             num_rows        = (HYPRE_Int) row_starts[1] - row_starts[0];
-   HYPRE_Int             num_cols        = (HYPRE_Int) col_starts[1] - col_starts[0];
-   HYPRE_Int             num_nonzeros    = hypre_min(num_rows, num_cols);
+   HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
+   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
+   HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
+   /* HYPRE_Int             blk_dim         = num_rows / num_cols; */
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -650,10 +651,17 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    /* Local variables */
    HYPRE_Int             i;
 
-   /* Sanity check */
+   /* Sanity checks */
    if (hypre_ParVectorNumVectors(b) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for multi-component vectors");
+      return NULL;
+   }
+
+   if (num_rows % num_cols)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Number of rows is not evenly divisible by number of columns");
       return NULL;
    }
 
