@@ -60,9 +60,7 @@ using hypre_DeviceItem = void*;
 
 #if CUDA_VERSION >= 11000
 #define THRUST_IGNORE_DEPRECATED_CPP11
-#define CUB_IGNORE_DEPRECATED_CPP11
 #define THRUST_IGNORE_DEPRECATED_CPP_DIALECT
-#define CUB_IGNORE_DEPRECATED_CPP_DIALECT
 #endif
 
 #ifndef CUSPARSE_VERSION
@@ -719,9 +717,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device info data structures
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-struct hypre_cub_CachingDeviceAllocator;
-typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
-
 #if defined(HYPRE_USING_CUSOLVER)
 typedef cusolverDnHandle_t vendorSolverHandle_t;
 #elif defined(HYPRE_USING_ROCSOLVER)
@@ -765,15 +760,6 @@ struct hypre_DeviceData
 #endif
 #endif
 
-#if defined(HYPRE_USING_DEVICE_POOL)
-   hypre_uint                        cub_bin_growth;
-   hypre_uint                        cub_min_bin;
-   hypre_uint                        cub_max_bin;
-   size_t                            cub_max_cached_bytes;
-   hypre_cub_CachingDeviceAllocator *cub_dev_allocator;
-   hypre_cub_CachingDeviceAllocator *cub_uvm_allocator;
-#endif
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_device_allocator            device_allocator;
 #endif
@@ -810,12 +796,6 @@ struct hypre_DeviceData
    HYPRE_Int                         use_gpu_rand;
 };
 
-#define hypre_DeviceDataCubBinGrowth(data)                   ((data) -> cub_bin_growth)
-#define hypre_DeviceDataCubMinBin(data)                      ((data) -> cub_min_bin)
-#define hypre_DeviceDataCubMaxBin(data)                      ((data) -> cub_max_bin)
-#define hypre_DeviceDataCubMaxCachedBytes(data)              ((data) -> cub_max_cached_bytes)
-#define hypre_DeviceDataCubDevAllocator(data)                ((data) -> cub_dev_allocator)
-#define hypre_DeviceDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
 #define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
@@ -2258,26 +2238,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 #endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-#if defined(HYPRE_USING_CUDA)
-cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
-
-cudaError_t hypre_CachingMallocManaged(void **ptr, size_t nbytes);
-
-cudaError_t hypre_CachingFreeDevice(void *ptr);
-
-cudaError_t hypre_CachingFreeManaged(void *ptr);
-#endif
-
-hypre_cub_CachingDeviceAllocator * hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
-                                                                             hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug,
-                                                                             bool use_managed_memory);
-
-void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUSPARSE)
 
