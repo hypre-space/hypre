@@ -118,14 +118,6 @@ function MpirunString
          shift
          RunString="srun -n$1"
          ;;
-      rzansel*)
-         shift
-         RunString="lrun -T$1"
-         ;;
-      lassen*)
-         shift
-         RunString="lrun -n$1"
-         ;;
       tioga*)
          shift
          RunString="srun -n$1"
@@ -616,7 +608,6 @@ CleanUp $TestDirNames $ExecFileNames
 cat > runtest.filters <<EOF
 PMIX ERROR: PMIX_ERR_NOT_FOUND in file dstore_base.c at line 1567
 PMIX ERROR: PMIX_ERROR in file dstore_base.c at line 2334
-lrun warning: default mapping forced to idle
 srun: Warning: can't run 1 processes on 2 nodes, setting nnodes to 1
 hypre_MPI_Init
 job [0-9]* queued and waiting for resources
