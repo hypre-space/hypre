@@ -5,45 +5,60 @@
 
 message(STATUS "Enabling CUDA toolkit")
 
-# Check for CUDA_PATH, CUDA_HOME or CUDA_DIR
-if(DEFINED CUDAToolkit_ROOT)
-  set(CUDA_DIR ${CUDAToolkit_ROOT})
-elseif(DEFINED ENV{CUDAToolkit_ROOT})
-  set(CUDA_DIR $ENV{CUDAToolkit_ROOT})
-elseif(DEFINED CUDA_DIR)
-  set(CUDA_DIR ${CUDA_DIR})
-elseif(DEFINED ENV{CUDA_DIR})
-  set(CUDA_DIR $ENV{CUDA_DIR})
-elseif(DEFINED CUDA_PATH)
-  set(CUDA_DIR ${CUDA_PATH})
-elseif(DEFINED ENV{CUDA_PATH})
-  set(CUDA_DIR $ENV{CUDA_PATH})
-elseif(DEFINED CUDA_HOME)
-  set(CUDA_DIR ${CUDA_HOME})
-elseif(DEFINED ENV{CUDA_HOME})
-  set(CUDA_DIR $ENV{CUDA_HOME})
-elseif(EXISTS "/opt/cuda")
-  set(CUDA_DIR "/opt/cuda")
-elseif(EXISTS "/usr/bin/nvcc")
-  set(CUDA_DIR "/usr")
+# First, try to find CUDA using CMake's find_package mechanism
+# This respects CUDAToolkit_ROOT and other standard CMake variables
+find_package(CUDAToolkit QUIET)
+
+# If find_package didn't find CUDA, try manual detection as fallback
+if(NOT CUDAToolkit_FOUND)
+  message(STATUS "CUDAToolkit not found via find_package, trying manual detection...")
+
+  # Check for CUDA_PATH, CUDA_HOME or CUDA_DIR
+  if(DEFINED CUDAToolkit_ROOT)
+    set(CUDA_DIR ${CUDAToolkit_ROOT})
+  elseif(DEFINED ENV{CUDAToolkit_ROOT})
+    set(CUDA_DIR $ENV{CUDAToolkit_ROOT})
+  elseif(DEFINED CUDA_DIR)
+    set(CUDA_DIR ${CUDA_DIR})
+  elseif(DEFINED ENV{CUDA_DIR})
+    set(CUDA_DIR $ENV{CUDA_DIR})
+  elseif(DEFINED CUDA_PATH)
+    set(CUDA_DIR ${CUDA_PATH})
+  elseif(DEFINED ENV{CUDA_PATH})
+    set(CUDA_DIR $ENV{CUDA_PATH})
+  elseif(DEFINED CUDA_HOME)
+    set(CUDA_DIR ${CUDA_HOME})
+  elseif(DEFINED ENV{CUDA_HOME})
+    set(CUDA_DIR $ENV{CUDA_HOME})
+  elseif(EXISTS "/opt/cuda")
+    set(CUDA_DIR "/opt/cuda")
+  elseif(EXISTS "/usr/bin/nvcc")
+    set(CUDA_DIR "/usr")
+  else()
+    message(FATAL_ERROR "CUDA not found. Please set CUDAToolkit_ROOT, CUDA_PATH, or CUDA_HOME to point to your CUDA installation.")
+  endif()
+  message(STATUS "Using CUDA installation: ${CUDA_DIR}")
+
+  # Specify the path to the custom nvcc compiler
+  if(WIN32)
+    set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler")
+  else()
+    set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc" CACHE FILEPATH "CUDA compiler")
+  endif()
+
+  # Specify the CUDA Toolkit root directory
+  set(CUDAToolkit_ROOT "${CUDA_DIR}" CACHE PATH "Path to the CUDA toolkit")
+
+  # Optionally, prioritize the custom CUDA path in CMAKE_PREFIX_PATH
+  list(APPEND CMAKE_PREFIX_PATH "${CUDA_DIR}")
+
+  # Find the CUDA Toolkit with the manually detected path
+  find_package(CUDAToolkit REQUIRED)
 else()
-  message(FATAL_ERROR "CUDA_PATH or CUDA_HOME not set. Please set one of them to point to your CUDA installation.")
-endif()
-message(STATUS "Using CUDA installation: ${CUDA_DIR}")
-
-# Specify the path to the custom nvcc compiler
-if(WIN32)
-  set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler")
-else()
-  set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc" CACHE FILEPATH "CUDA compiler")
+  message(STATUS "Found CUDA toolkit")
 endif()
 
-# Specify the CUDA Toolkit root directory
-set(CUDAToolkit_ROOT "${CUDA_DIR}" CACHE PATH "Path to the CUDA toolkit")
-
-# Optionally, prioritize the custom CUDA path in CMAKE_PREFIX_PATH
-list(APPEND CMAKE_PREFIX_PATH "${CUDA_DIR}")
-
+# Common CUDA language and compiler configuration (applies to both branches above)
 # Set CUDA standard to match C++ standard if not already set
 if(NOT DEFINED CMAKE_CUDA_STANDARD)
   set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
@@ -56,7 +71,7 @@ if (NOT MSVC)
   set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "CXX compiler used by CUDA" FORCE)
 endif()
 
-# Check if CUDA is available and enable it if found
+# Ensure CUDA language is enabled when available
 include(CheckLanguage)
 check_language(CUDA)
 if(DEFINED CMAKE_CUDA_COMPILER)
@@ -64,9 +79,6 @@ if(DEFINED CMAKE_CUDA_COMPILER)
 else()
   message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
 endif()
-
-# Find the CUDA Toolkit
-find_package(CUDAToolkit REQUIRED ${CUDA_DIR})
 
 # Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
 if(NOT TARGET cuda)
