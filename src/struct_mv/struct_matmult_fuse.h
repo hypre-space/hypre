@@ -43,6 +43,9 @@
  *    b. Use a BoxLoop to iterate over the grid and apply the FMA sequence macro.
  *--------------------------------------------------------------------------*/
 
+typedef HYPRE_Complex *hypre_3Cptrs[3];
+typedef HYPRE_Complex *hypre_1Cptr;
+
 /* Variable declaration macros */
 #define HYPRE_SMMFUSE_DECLARE_MPTR(k) \
    HYPRE_Complex *mptr_##k
