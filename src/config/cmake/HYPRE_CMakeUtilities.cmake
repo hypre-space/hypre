@@ -772,17 +772,11 @@ function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
     get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
   endif ()
 
-  # If CUDA is enabled, only tag sources with .cu extension to be compiled with nvcc.
+  # If CUDA is enabled, tag source files to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
-    get_filename_component(SRC_EXT ${SRC_FILENAME} EXT)
-    if (SRC_EXT STREQUAL ".cu")
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
-    endif ()
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
     if (DEP_SRC_FILE)
-      get_filename_component(DEP_SRC_EXT ${DEP_SRC_FILENAME} EXT)
-      if (DEP_SRC_EXT STREQUAL ".cu")
-        set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
-      endif ()
+      set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
     endif ()
   endif ()
 
