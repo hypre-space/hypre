@@ -471,6 +471,14 @@ build systems.
        | (default is on for **CUDA/HIP**)
      - ``--with-umpire``
      - ``-DHYPRE_ENABLE_UMPIRE=ON``
+   * - | Umpire Auto-Build
+       | (default is off)
+     - N/A
+     - ``-DHYPRE_BUILD_UMPIRE=ON``
+   * - | Umpire Version
+       | (default is latest)
+     - N/A
+     - ``-DHYPRE_UMPIRE_VERSION=v2024.07.1``
    * - | Umpire Unified Memory
        | (default is on for **CUDA/HIP**)
      - ``--with-umpire-um``
@@ -479,6 +487,14 @@ build systems.
        | (default is on for **CUDA/HIP**)
      - ``--with-umpire-device``
      - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
+   * - | Umpire Host Memory
+       | (default is off)
+     - ``--with-umpire-host``
+     - ``-DHYPRE_ENABLE_UMPIRE_HOST=ON``
+   * - | Umpire Pinned Memory
+       | (default is off)
+     - ``--with-umpire-pinned``
+     - ``-DHYPRE_ENABLE_UMPIRE_PINNED=ON``
 
 .. note::
 
@@ -489,8 +505,7 @@ build systems.
 
     For SYCL builds, Umpire remains optional and must be enabled explicitly.
 
-    For Umpire support, the Umpire library must be installed and properly configured. See
-    :ref:`umpire_build` for instructions on building Umpire from source.
+    See :ref:`umpire_build` for detailed instructions on how to build and use Umpire with HYPRE.
 
 .. note::
 
@@ -506,9 +521,41 @@ build systems.
 Building Umpire
 ^^^^^^^^^^^^^^^
 
-If Umpire is not already available on your system, you can build it using
-`Spack <https://spack.io/>`_ or manually from source. To build from source,
-follow these steps:
+HYPRE provides three primary methods for integrating Umpire for GPU memory management:
+the recommended Automatic Build, where HYPRE handles the download and configuration process
+automatically; a Manual Build from Source, which offers maximum control for advanced users;
+and installation via Package Managers like Spack, which is convenient for managing Umpire
+within an existing software environment.
+
+
+Automatic Umpire Build
+~~~~~~~~~~~~~~~~~~~~~~
+
+The easiest way to use Umpire with HYPRE is to enable the automatic build feature.
+This is recommended if you don't have Umpire pre-installed or want to ensure maximum
+compatibility. When enabled, HYPRE handles the entire process: it automatically
+downloads a compatible Umpire version, detects your GPU backend (CUDA, HIP, or SYCL),
+and configures Umpire with settings optimized for HYPRE's specific memory management
+needs. This approach simplifies setup by eliminating the need to manually manage
+Umpire's installation, dependencies, or build configuration.
+
+To enable this feature, set ``HYPRE_BUILD_UMPIRE=ON`` during CMake configuration:
+
+.. code-block:: bash
+
+    # Enable automatic Umpire build and CUDA
+    cmake -DHYPRE_BUILD_UMPIRE=ON \
+          -DHYPRE_ENABLE_CUDA=ON \
+          ../src
+
+    # Build HYPRE (Umpire will be built automatically)
+    make -j
+
+Manual Umpire Build
+~~~~~~~~~~~~~~~~~~~
+
+If you prefer to build Umpire separately or need specific Umpire configurations,
+you can build it manually from source:
 
 .. code-block:: bash
 
@@ -535,8 +582,20 @@ follow these steps:
 Enable either CUDA, HIP, or SYCL by setting the corresponding flag to ``ON`` and
 the others to ``OFF``.
 
-After completion, make sure to add the installation path to your environment
-or provide it to hypre at configure time. For example:
+Using Spack Package Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Install Umpire with Spack
+   spack install umpire+cuda  # or +hip, +sycl
+
+Linking with Pre-built Umpire
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After building or installing Umpire manually, configure HYPRE to use it:
+
+**Autotools:**
 
 .. code-block:: bash
 
@@ -544,12 +603,24 @@ or provide it to hypre at configure time. For example:
                --with-umpire-lib-dirs=/path-to-umpire-install/lib \
                --with-umpire-libs="umpire camp" \
 
-or with CMake:
+**CMake:**
 
 .. code-block:: bash
 
+   # Method 1: Using Umpire's CMake config
    cmake -DHYPRE_ENABLE_UMPIRE=ON \
          -Dumpire_DIR=/path-to-umpire-install/lib/cmake/umpire \
+         ../src
+
+   # Method 2: Using umpire_ROOT pattern
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -Dumpire_ROOT=/path-to-umpire-install \
+         ../src
+
+   # Method 3: Manual specification
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -DTPL_UMPIRE_INCLUDE_DIRS=/path-to-umpire-install/include \
+         -DTPL_UMPIRE_LIBRARIES=/path-to-umpire-install/lib/libumpire.so \
          ../src
 
 Make Targets

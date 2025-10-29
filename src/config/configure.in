@@ -176,7 +176,6 @@ hypre_using_cusparse=no
 hypre_using_cublas=no
 hypre_using_curand=no
 hypre_using_cusolver=no
-hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_thrust_nosync=no
 hypre_using_umpire=no
@@ -448,17 +447,6 @@ AS_HELP_STRING([--enable-unified-memory],
     *)   hypre_using_um=no ;;
  esac],
 [hypre_using_um=no]
-)
-
-AC_ARG_ENABLE(device-memory-pool,
-AS_HELP_STRING([--enable-device-memory-pool],
-               [Use device pooling allocator (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_device_pool=yes ;;
-    no)  hypre_using_device_pool=no ;;
-    *)   hypre_using_device_pool=no ;;
- esac],
-[hypre_using_device_pool=no]
 )
 
 AC_ARG_ENABLE(device-malloc-async,
@@ -2698,11 +2686,6 @@ then
    then
       AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSOLVER])
       HYPRE_CUDA_LIBS+=" -lcusolver"
-   fi
-
-   if test "$hypre_using_device_pool" = "yes"
-   then
-      AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
    fi
 
    if test "$hypre_using_device_malloc_async" = "yes"
