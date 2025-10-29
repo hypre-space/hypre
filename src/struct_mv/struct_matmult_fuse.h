@@ -1629,3 +1629,140 @@
 #define HYPRE_SMMFUSE_C_UP_TO_20 \
    HYPRE_SMMFUSE_C_UP_TO_19; \
    HYPRE_SMMFUSE_C(19)
+
+/* struct_matmult_fuse_fff.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_fff( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     hypre_3Cptrs        *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int           *mentries,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_ffc.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_ffc( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     hypre_3Cptrs        *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int           *mentries,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_fcc.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_fcc( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     hypre_3Cptrs        *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int           *mentries,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_ff.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_ff( HYPRE_Int            nprod,
+                                    HYPRE_Complex       *cprod,
+                                    hypre_3Cptrs        *tptrs,
+                                    hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
+                                    HYPRE_Int            ndim,
+                                    hypre_Index          loop_size,
+                                    hypre_Box           *fdbox,
+                                    hypre_Index          fdstart,
+                                    hypre_Index          fdstride,
+                                    hypre_Box           *Mdbox,
+                                    hypre_Index          Mdstart,
+                                    hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_fc.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_fc( HYPRE_Int            nprod,
+                                    HYPRE_Complex       *cprod,
+                                    hypre_3Cptrs        *tptrs,
+                                    hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
+                                    HYPRE_Int            ndim,
+                                    hypre_Index          loop_size,
+                                    hypre_Box           *fdbox,
+                                    hypre_Index          fdstart,
+                                    hypre_Index          fdstride,
+                                    hypre_Box           *cdbox,
+                                    hypre_Index          cdstart,
+                                    hypre_Index          cdstride,
+                                    hypre_Box           *Mdbox,
+                                    hypre_Index          Mdstart,
+                                    hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_cc.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_cc( HYPRE_Int            nprod,
+                                    HYPRE_Complex       *cprod,
+                                    hypre_3Cptrs        *tptrs,
+                                    hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
+                                    HYPRE_Int            ndim,
+                                    hypre_Index          loop_size,
+                                    hypre_Box           *cdbox,
+                                    hypre_Index          cdstart,
+                                    hypre_Index          cdstride,
+                                    hypre_Box           *Mdbox,
+                                    hypre_Index          Mdstart,
+                                    hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_f.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_f( HYPRE_Int            nprod,
+                                   HYPRE_Complex       *cprod,
+                                   hypre_3Cptrs        *tptrs,
+                                   hypre_1Cptr         *mptrs,
+                                   HYPRE_Int           *mentries,
+                                   HYPRE_Int            ndim,
+                                   hypre_Index          loop_size,
+                                   hypre_Box           *fdbox,
+                                   hypre_Index          fdstart,
+                                   hypre_Index          fdstride,
+                                   hypre_Box           *Mdbox,
+                                   hypre_Index          Mdstart,
+                                   hypre_Index          Mdstride );
+
+/* struct_matmult_fuse_c.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_c( HYPRE_Int            nprod,
+                                   HYPRE_Complex       *cprod,
+                                   hypre_3Cptrs        *tptrs,
+                                   hypre_1Cptr         *mptrs,
+                                   HYPRE_Int           *mentries,
+                                   HYPRE_Int            ndim,
+                                   hypre_Index          loop_size,
+                                   hypre_Box           *cdbox,
+                                   hypre_Index          cdstart,
+                                   hypre_Index          cdstride,
+                                   hypre_Box           *Mdbox,
+                                   hypre_Index          Mdstart,
+                                   hypre_Index          Mdstride );
