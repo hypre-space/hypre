@@ -272,7 +272,7 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
    hypre_ParVector *b_[3] = {NULL, NULL, NULL};
    hypre_ParVector *x_[3] = {NULL, NULL, NULL};
 
-   dim = hypre_ParVectorGlobalSize(x) / hypre_ParCSRMatrixGlobalNumRows(A);
+   dim = (HYPRE_Int) (hypre_ParVectorGlobalSize(x) / hypre_ParCSRMatrixGlobalNumRows(A));
 
    if (dim == 1)
    {
@@ -3959,7 +3959,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0));
          r0_norm = r_norm;
          b_norm = hypre_sqrt(hypre_ParVectorInnerProd(b, b));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }
@@ -4002,7 +4002,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }

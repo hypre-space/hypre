@@ -1252,7 +1252,7 @@ hypre_StructAssumedPartitionCreate(
 
    /* Probably there will mostly be one proc per box */
    /* Don't want to allocate too much memory here */
-   size = (HYPRE_Int)(1.2 * hypre_BoxArraySize(local_boxes));
+   size = (HYPRE_Int)(1.2 * (HYPRE_Real) hypre_BoxArraySize(local_boxes));
 
    /* Each local box may live on multiple procs in the assumed partition */
    tmp_proc_ids = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST); /* local box proc ids */
@@ -1272,7 +1272,8 @@ hypre_StructAssumedPartitionCreate(
       /* Do we need more storage? */
       if ((count + proc_count) > size)
       {
-         size = (HYPRE_Int)(size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i));
+         size = (HYPRE_Int)(size + proc_count + (HYPRE_Int) 1.2 * (HYPRE_Real) (hypre_BoxArraySize(
+                                                                                   local_boxes) - i));
          /* hypre_printf("myid = %d, *adjust* alloc size = %d\n", myid, size);*/
          tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          tmp_box_nums = hypre_TReAlloc(tmp_box_nums,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -1372,7 +1373,7 @@ hypre_StructAssumedPartitionCreate(
    max_response_size = 0; /* No response data - just confirmation */
 
    hypre_DataExchangeList(proc_count, proc_array, contact_boxinfo, proc_array_starts,
-                          (2 * ndim)*sizeof(HYPRE_Int), sizeof(HYPRE_Int),
+                          (HYPRE_Int) sizeof(HYPRE_Int) * 2 * ndim, sizeof(HYPRE_Int),
                           &response_obj, max_response_size, 1, comm,
                           (void**) &response_buf, &response_buf_starts);
 

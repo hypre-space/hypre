@@ -219,11 +219,11 @@ HYPRE_LOBPCGSetRTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_l
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_LOBPCGSetRTol_flt( solver, tol );
+         return HYPRE_LOBPCGSetRTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_LOBPCGSetRTol_dbl( solver, tol );
+         return HYPRE_LOBPCGSetRTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_LOBPCGSetRTol_long_dbl( solver, tol );
+         return HYPRE_LOBPCGSetRTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -237,11 +237,11 @@ HYPRE_LOBPCGSetTol_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_lo
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_LOBPCGSetTol_flt( solver, tol );
+         return HYPRE_LOBPCGSetTol_flt( solver, (hypre_float)tol );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_LOBPCGSetTol_dbl( solver, tol );
+         return HYPRE_LOBPCGSetTol_dbl( solver, (hypre_double)tol );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_LOBPCGSetTol_long_dbl( solver, tol );
+         return HYPRE_LOBPCGSetTol_long_dbl( solver, (hypre_long_double)tol );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -309,11 +309,11 @@ HYPRE_LOBPCGSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, mv_MultiV
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_LOBPCGSolve_flt( solver, y, x, lambda );
+         return HYPRE_LOBPCGSolve_flt( solver, y, x, (hypre_float *)lambda );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_LOBPCGSolve_dbl( solver, y, x, lambda );
+         return HYPRE_LOBPCGSolve_dbl( solver, y, x, (hypre_double *)lambda );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_LOBPCGSolve_long_dbl( solver, y, x, lambda );
+         return HYPRE_LOBPCGSolve_long_dbl( solver, y, x, (hypre_long_double *)lambda );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

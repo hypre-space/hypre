@@ -670,14 +670,7 @@ main( hypre_int argc,
       mod_rap2      = 1;
    }
 
-#if defined (HYPRE_USING_DEVICE_POOL)
-   /* device pool allocator */
-   hypre_uint mempool_bin_growth   = 8,
-              mempool_min_bin      = 3,
-              mempool_max_bin      = 9;
-   size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
-
-#elif defined (HYPRE_USING_UMPIRE)
+#if defined (HYPRE_USING_UMPIRE)
    size_t umpire_dev_pool_size    = 4294967296; // 4 GiB
    size_t umpire_uvm_pool_size    = 4294967296; // 4 GiB
    size_t umpire_pinned_pool_size = 4294967296; // 4 GiB
@@ -1631,29 +1624,7 @@ main( hypre_int argc,
          use_curand = atoi(argv[arg_index++]);
       }
 #endif
-#if defined (HYPRE_USING_DEVICE_POOL)
-      else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
-      {
-         arg_index++;
-         mempool_bin_growth = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-mempool_minbin") == 0 )
-      {
-         arg_index++;
-         mempool_min_bin = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-mempool_maxbin") == 0 )
-      {
-         arg_index++;
-         mempool_max_bin = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-mempool_maxcached") == 0 )
-      {
-         // Give maximum cached in Mbytes.
-         arg_index++;
-         mempool_max_cached_bytes = atoi(argv[arg_index++]) * 1024LL * 1024LL;
-      }
-#elif defined (HYPRE_USING_UMPIRE)
+#if defined (HYPRE_USING_UMPIRE)
       else if ( strcmp(argv[arg_index], "-umpire_dev_pool_size") == 0 )
       {
          arg_index++;
@@ -2830,12 +2801,7 @@ main( hypre_int argc,
       HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_GENERIC, 1);  /* turn generic errors on */
    }
 
-#if defined(HYPRE_USING_DEVICE_POOL)
-   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
-   HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
-                               mempool_max_bin, mempool_max_cached_bytes );
-
-#elif defined(HYPRE_USING_UMPIRE)
+#if defined(HYPRE_USING_UMPIRE)
    /* Setup Umpire pools */
    HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
    HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
@@ -3550,7 +3516,7 @@ main( hypre_int argc,
       b = (HYPRE_ParVector) object;
 
       /* Initial guess */
-      hypre_Memset(values_d, 0, local_num_rows * sizeof(HYPRE_Complex), memory_location);
+      hypre_Memset(values_d, 0, (size_t) local_num_rows * sizeof(HYPRE_Complex), memory_location);
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorSetNumComponents(ij_x, num_components);
@@ -5659,8 +5625,8 @@ main( hypre_int argc,
             parse the command line.
          */
          if (eu_level > -1) { HYPRE_EuclidSetLevel(pcg_precond, eu_level); }
-         if (eu_ilut) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
-         if (eu_sparse_A) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
+         if (eu_ilut != 0.0) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
+         if (eu_sparse_A != 0.0) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
          if (eu_row_scale) { HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale); }
          if (eu_bj) { HYPRE_EuclidSetBJ(pcg_precond, eu_bj); }
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);
@@ -7425,8 +7391,8 @@ main( hypre_int argc,
          HYPRE_EuclidCreate(comm, &pcg_precond);
 
          if (eu_level > -1) { HYPRE_EuclidSetLevel(pcg_precond, eu_level); }
-         if (eu_ilut) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
-         if (eu_sparse_A) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
+         if (eu_ilut != 0.0) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
+         if (eu_sparse_A != 0.0) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
          if (eu_row_scale) { HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale); }
          if (eu_bj) { HYPRE_EuclidSetBJ(pcg_precond, eu_bj); }
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);
@@ -8128,8 +8094,8 @@ main( hypre_int argc,
          HYPRE_EuclidCreate(comm, &pcg_precond);
 
          if (eu_level > -1) { HYPRE_EuclidSetLevel(pcg_precond, eu_level); }
-         if (eu_ilut) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
-         if (eu_sparse_A) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
+         if (eu_ilut != 0.0) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
+         if (eu_sparse_A != 0.0) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
          if (eu_row_scale) { HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale); }
          if (eu_bj) { HYPRE_EuclidSetBJ(pcg_precond, eu_bj); }
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);
@@ -8502,8 +8468,8 @@ main( hypre_int argc,
             parse the command line.
          */
          if (eu_level > -1) { HYPRE_EuclidSetLevel(pcg_precond, eu_level); }
-         if (eu_ilut) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
-         if (eu_sparse_A) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
+         if (eu_ilut != 0.0) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
+         if (eu_sparse_A != 0.0) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
          if (eu_row_scale) { HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale); }
          if (eu_bj) { HYPRE_EuclidSetBJ(pcg_precond, eu_bj); }
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);
@@ -8904,8 +8870,8 @@ main( hypre_int argc,
             parse the command line.
          */
          if (eu_level > -1) { HYPRE_EuclidSetLevel(pcg_precond, eu_level); }
-         if (eu_ilut) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
-         if (eu_sparse_A) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
+         if (eu_ilut != 0.0) { HYPRE_EuclidSetILUT(pcg_precond, eu_ilut); }
+         if (eu_sparse_A != 0.0) { HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A); }
          if (eu_row_scale) { HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale); }
          if (eu_bj) { HYPRE_EuclidSetBJ(pcg_precond, eu_bj); }
          HYPRE_EuclidSetStats(pcg_precond, eu_stats);

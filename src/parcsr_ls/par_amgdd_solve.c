@@ -167,7 +167,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         if (rhs_norm)
+         if (rhs_norm != 0.0)
          {
             relative_resid = resid_nrm_init / rhs_norm;
          }
@@ -295,7 +295,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
             resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
-         if (old_resid)
+         if (old_resid != 0.0)
          {
             conv_factor = resid_nrm / old_resid;
          }
@@ -306,7 +306,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
 
          if (0 == converge_type)
          {
-            if (rhs_norm)
+            if (rhs_norm != 0.0)
             {
                relative_resid = resid_nrm / rhs_norm;
             }

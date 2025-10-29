@@ -36,14 +36,14 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
   monitor = Parser_dhHasSwitch(parser_dh, "-monitor");
 
   /* allocate working space */
-  t = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  s = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  s_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  v = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  p = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  p_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  r = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  r_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  t = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  v = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  p = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  p_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, s); /* s = Ax */
@@ -179,9 +179,9 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
   bi_prod = InnerProd(m, b, b); CHECK_V_ERROR;
   eps = (rtol*rtol)*bi_prod;
 
-  p = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
-  s = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
-  r = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
+  p = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, r);       /* r = Ax */ CHECK_V_ERROR;

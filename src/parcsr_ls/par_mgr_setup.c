@@ -21,7 +21,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int       i, j, final_coarse_size = 0, block_size, idx, **block_cf_marker;
    HYPRE_Int       *block_num_coarse_indexes, *point_marker_array;
-   HYPRE_BigInt    row, end_idx;
+   HYPRE_Int       row;
+   HYPRE_BigInt    big_row, end_idx;
    HYPRE_Int    lev, num_coarsening_levs, last_level;
    HYPRE_Int    num_c_levels = 0, nc, index_i, cflag;
    HYPRE_Int      set_c_points_method;
@@ -261,12 +262,12 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (set_c_points_method == 0) // interleaved ordering, i.e. s1,p1,s2,p2,...
       {
          // loop over rows
-         for (row = ilower; row <= iupper; row++)
+         for (big_row = ilower; big_row <= iupper; big_row++)
          {
-            idx = row % block_size;
+            idx = (HYPRE_Int) (big_row % (HYPRE_BigInt) block_size);
             if (block_cf_marker[i - reserved_cpoints_eliminated][idx] == CMRK)
             {
-               level_coarse_indexes[i][final_coarse_size++] = (HYPRE_Int)(row - ilower);
+               level_coarse_indexes[i][final_coarse_size++] = (HYPRE_Int)(big_row - ilower);
             }
          }
       }
@@ -284,9 +285,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                {
                   end_idx = idx_array[j + 1];
                }
-               for (row = idx_array[j]; row < end_idx; row++)
+               for (big_row = idx_array[j]; big_row < end_idx; big_row++)
                {
-                  level_coarse_indexes[i][final_coarse_size++] = (HYPRE_Int)(row - ilower);
+                  level_coarse_indexes[i][final_coarse_size++] = (HYPRE_Int)(big_row - ilower);
                }
             }
          }
@@ -310,7 +311,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             if (isCpoint)
             {
                level_coarse_indexes[i][final_coarse_size++] = row;
-               //printf("%d\n",row);
             }
          }
       }
@@ -336,18 +336,18 @@ hypre_MGRSetup( void               *mgr_vdata,
       reserved_Cpoint_local_indexes = (mgr_data -> reserved_Cpoint_local_indexes);
       for (i = 0; i < reserved_coarse_size; i++)
       {
-         row = reserved_coarse_indexes[i];
-         HYPRE_Int local_row = (HYPRE_Int)(row - ilower);
-         reserved_Cpoint_local_indexes[i] = local_row;
+         big_row = reserved_coarse_indexes[i];
+         row = (HYPRE_Int)(big_row - ilower);
+         reserved_Cpoint_local_indexes[i] = row;
          HYPRE_Int lvl = lvl_to_keep_cpoints == 0 ? max_num_coarse_levels : lvl_to_keep_cpoints;
          if (set_c_points_method < 2)
          {
-            idx = row % block_size;
+            idx = (HYPRE_Int) (big_row % (HYPRE_BigInt) block_size);
             for (j = 0; j < lvl; j++)
             {
                if (block_cf_marker[j][idx] != CMRK)
                {
-                  level_coarse_indexes[j][level_coarse_size[j]++] = local_row;
+                  level_coarse_indexes[j][level_coarse_size[j]++] = row;
                }
             }
          }
@@ -359,7 +359,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                HYPRE_Int k;
                for (k = 0; k < block_num_coarse_indexes[j]; k++)
                {
-                  if (point_marker_array[local_row] == block_cf_marker[j][k])
+                  if (point_marker_array[row] == block_cf_marker[j][k])
                   {
                      isCpoint = 1;
                      break;
@@ -367,7 +367,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                }
                if (!isCpoint)
                {
-                  level_coarse_indexes[j][level_coarse_size[j]++] = local_row;
+                  level_coarse_indexes[j][level_coarse_size[j]++] = row;
                }
             }
          }
@@ -539,7 +539,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if ((mgr_data -> l1_norms)[j])
          {
-            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
+            hypre_SeqVectorDestroy((mgr_data -> l1_norms)[j]);
             (mgr_data -> l1_norms)[j] = NULL;
          }
       }

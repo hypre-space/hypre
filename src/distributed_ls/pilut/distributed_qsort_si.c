@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #ifdef __cplusplus
-#define REGISTER 
+#define REGISTER
 #else
 #define REGISTER register
 #endif
@@ -58,7 +58,7 @@ void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
     siqst(base, max);
     hi = base + THRESH;
   }
-  else 
+  else
     hi = max;
 
 
@@ -122,7 +122,7 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
   HYPRE_Int lo;
   HYPRE_Int hi;
 
-  lo = max - base;		/* number of elements as shorts */
+  lo = (HYPRE_Int) (max - base);		/* number of elements as shorts */
   do {
     /* At the top here, lo is the number of characters of elements in the
        current partition.  (Which should be max - base). Find the median
@@ -141,7 +141,7 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
           j = tmp;
       }
 
-      if (j != mid) {  /* SWAP */ 
+      if (j != mid) {  /* SWAP */
         c = *mid;
         *mid = *j;
         *j = c;
@@ -165,7 +165,7 @@ static void siqst(HYPRE_Int *base, HYPRE_Int *max)
         goto swap;
       }
 
-      if (i == mid) 
+      if (i == mid)
 	break;
       else {		/* i <-> mid, new mid is i */
         jj = mid;
@@ -185,7 +185,7 @@ swap:
        repeat (recursively or by branching) if the partition is of at
        least size THRESH. */
     i = (j = mid) + 1;
-    if ((lo = j - base) <= (hi = max - i)) {
+    if ((lo = (HYPRE_Int) (j - base)) <= (hi = (HYPRE_Int) (max - i))) {
       if (lo >= THRESH)
         siqst(base, j);
       base = i;
@@ -201,7 +201,7 @@ swap:
 
 
 /*************************************************************************
-* A decreasing sort of HYPRE_Int ints 
+* A decreasing sort of HYPRE_Int ints
 **************************************************************************/
 void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
@@ -222,7 +222,7 @@ void hypre_sdecsort_fast(HYPRE_Int n, HYPRE_Int *base)
     sdqst(base, max);
     hi = base + THRESH;
   }
-  else 
+  else
     hi = max;
 
 
@@ -271,7 +271,7 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
   HYPRE_Int lo;
   HYPRE_Int hi;
 
-  lo = max - base;		/* number of elements as shorts */
+  lo = (HYPRE_Int) (max - base);		/* number of elements as shorts */
   do {
     /* At the top here, lo is the number of characters of elements in the
        current partition.  (Which should be max - base). Find the median
@@ -290,7 +290,7 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
           j = tmp;
       }
 
-      if (j != mid) {  /* SWAP */ 
+      if (j != mid) {  /* SWAP */
         c = *mid;
         *mid = *j;
         *j = c;
@@ -314,7 +314,7 @@ static void sdqst(HYPRE_Int *base, HYPRE_Int *max)
         goto swap;
       }
 
-      if (i == mid) 
+      if (i == mid)
 	break;
       else {		/* i <-> mid, new mid is i */
         jj = mid;
@@ -334,7 +334,7 @@ swap:
        repeat (recursively or by branching) if the partition is of at
        least size THRESH. */
     i = (j = mid) + 1;
-    if ((lo = j - base) <= (hi = max - i)) {
+    if ((lo = (HYPRE_Int) (j - base)) <= (hi = (HYPRE_Int) (max - i))) {
       if (lo >= THRESH)
         sdqst(base, j);
       base = i;
