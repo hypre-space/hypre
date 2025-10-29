@@ -340,6 +340,7 @@
 #undef hypre_StructMatmultCompute_core_generic
 #undef hypre_StructMatmultCompute_fuse
 #undef hypre_StructMatmultCompute_fuse_c
+#undef hypre_StructMatmultCompute_fuse_cc
 #undef hypre_StructMatmultCompute_fuse_f
 #undef hypre_StructMatmultCompute_fuse_fc
 #undef hypre_StructMatmultCompute_fuse_fcc
@@ -419,6 +420,9 @@
 #undef hypre_StructMatvec
 #undef hypre_StructMatvecCompute
 #undef hypre_StructMatvecCompute_core_CC
+#undef hypre_StructMatvecCompute_core_ICC
+#undef hypre_StructMatvecCompute_core_IVC
+#undef hypre_StructMatvecCompute_core_IVCC
 #undef hypre_StructMatvecCompute_core_VC
 #undef hypre_StructMatvecCompute_core_VCC
 #undef hypre_StructMatvecCreate

@@ -1736,55 +1736,6 @@ HYPRE_Int
 hypre_StructMatmultCompute_fuse_long_dbl( HYPRE_Int nterms, hypre_StructMatmultDataMH *a, HYPRE_Int na, HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride, hypre_StructMatrix *M );
 
 HYPRE_Int
-hypre_StructMatmultCompute_fuse_c_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_c_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_c_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_f_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_f_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_f_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fc_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fc_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fc_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fcc_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fcc_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fcc_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ff_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ff_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ff_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ffc_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ffc_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_ffc_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fff_flt( HYPRE_Int nprod, hypre_float *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fff_dbl( HYPRE_Int nprod, hypre_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_fuse_fff_long_dbl( HYPRE_Int nprod, hypre_long_double *cprod, hypre_3Cptrs *tptrs, hypre_1Cptr *mptrs, HYPRE_Int *mentries, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart, hypre_Index fdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-
-HYPRE_Int
 hypre_StructMatmultCreate_flt( HYPRE_Int max_matmults, HYPRE_Int max_matrices, hypre_StructMatmultData **mmdata_ptr );
 HYPRE_Int
 hypre_StructMatmultCreate_dbl( HYPRE_Int max_matmults, HYPRE_Int max_matrices, hypre_StructMatmultData **mmdata_ptr );
@@ -2280,6 +2231,27 @@ HYPRE_Int
 hypre_StructMatvecCompute_core_CC_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_double beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
 HYPRE_Int
 hypre_StructMatvecCompute_core_CC_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_long_double beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_ICC_flt( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_float alpha, hypre_float beta, hypre_float *xp, hypre_float *yp, hypre_float *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_ICC_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_double alpha, hypre_double beta, hypre_double *xp, hypre_double *yp, hypre_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_ICC_long_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_long_double alpha, hypre_long_double beta, hypre_long_double *xp, hypre_long_double *yp, hypre_long_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVC_flt( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_float alpha, hypre_float beta, hypre_float *xp, hypre_float *yp, hypre_float *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVC_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_double alpha, hypre_double beta, hypre_double *xp, hypre_double *yp, hypre_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVC_long_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_long_double alpha, hypre_long_double beta, hypre_long_double *xp, hypre_long_double *yp, hypre_long_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVCC_flt( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_float alpha, hypre_float beta, hypre_float *xp, hypre_float *yp, hypre_float *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int centry, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVCC_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_double alpha, hypre_double beta, hypre_double *xp, hypre_double *yp, hypre_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int centry, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
+HYPRE_Int
+hypre_StructMatvecCompute_core_IVCC_long_dbl( hypre_StructMatrix *A, hypre_StructVector *x, HYPRE_Int Ab, HYPRE_Int depth, hypre_long_double alpha, hypre_long_double beta, hypre_long_double *xp, hypre_long_double *yp, hypre_long_double *zp, HYPRE_Int ndim, HYPRE_Int transpose, HYPRE_Int centry, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Index *stencil_shape, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef start, hypre_IndexRef Adstart, hypre_IndexRef xdstart, hypre_IndexRef ydstart, hypre_IndexRef zdstart, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
 
 HYPRE_Int
 hypre_StructMatvecCompute_core_VC_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_StructVector *x, hypre_float beta, hypre_StructVector *y, hypre_StructVector *z, HYPRE_Int Ab, HYPRE_Int xb, HYPRE_Int yb, HYPRE_Int zb, HYPRE_Int transpose, HYPRE_Int only_Ax, HYPRE_Int nentries, HYPRE_Int *entries, hypre_IndexRef start, hypre_IndexRef stride, hypre_IndexRef loop_size, hypre_IndexRef xfstride, hypre_IndexRef ran_stride, hypre_IndexRef Adstride, hypre_IndexRef xdstride, hypre_IndexRef ydstride, hypre_IndexRef zdstride, hypre_Box *A_data_box, hypre_Box *x_data_box, hypre_Box *y_data_box, hypre_Box *z_data_box );
