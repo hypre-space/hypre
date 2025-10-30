@@ -2554,35 +2554,6 @@ HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
                                 HYPRE_Complex beta, hypre_StructVector *y );
 
-/* struct_matvec_icc.c */
-HYPRE_Int
-hypre_StructMatvecCompute_core_ICC( hypre_StructMatrix *A,
-                                    hypre_StructVector *x,
-                                    HYPRE_Int           Ab,
-                                    HYPRE_Int           depth,
-                                    HYPRE_Complex       alpha,
-                                    HYPRE_Complex       beta,
-                                    HYPRE_Complex      *xp,
-                                    HYPRE_Complex      *yp,
-                                    HYPRE_Complex      *zp,
-                                    HYPRE_Int           ndim,
-                                    HYPRE_Int           transpose,
-                                    HYPRE_Int           nentries,
-                                    HYPRE_Int          *entries,
-                                    hypre_Index        *stencil_shape,
-                                    hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
-                                    hypre_IndexRef      start,
-                                    hypre_IndexRef      xdstart,
-                                    hypre_IndexRef      ydstart,
-                                    hypre_IndexRef      zdstart,
-                                    hypre_IndexRef      xdstride,
-                                    hypre_IndexRef      ydstride,
-                                    hypre_IndexRef      zdstride,
-                                    hypre_Box          *x_data_box,
-                                    hypre_Box          *y_data_box,
-                                    hypre_Box          *z_data_box);
-
 /* struct_matvec_cc.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
@@ -2609,38 +2580,6 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box,
                                    hypre_Box          *z_data_box);
-
-/* struct_matvec_ivc.c */
-HYPRE_Int
-hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
-                                    hypre_StructVector *x,
-                                    HYPRE_Int           Ab,
-                                    HYPRE_Int           depth,
-                                    HYPRE_Complex       alpha,
-                                    HYPRE_Complex       beta,
-                                    HYPRE_Complex      *xp,
-                                    HYPRE_Complex      *yp,
-                                    HYPRE_Complex      *zp,
-                                    HYPRE_Int           ndim,
-                                    HYPRE_Int           transpose,
-                                    HYPRE_Int           nentries,
-                                    HYPRE_Int          *entries,
-                                    hypre_Index        *stencil_shape,
-                                    hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
-                                    hypre_IndexRef      start,
-                                    hypre_IndexRef      Adstart,
-                                    hypre_IndexRef      xdstart,
-                                    hypre_IndexRef      ydstart,
-                                    hypre_IndexRef      zdstart,
-                                    hypre_IndexRef      Adstride,
-                                    hypre_IndexRef      xdstride,
-                                    hypre_IndexRef      ydstride,
-                                    hypre_IndexRef      zdstride,
-                                    hypre_Box          *A_data_box,
-                                    hypre_Box          *x_data_box,
-                                    hypre_Box          *y_data_box,
-                                    hypre_Box          *z_data_box);
 
 /* struct_matvec_vc.c */
 HYPRE_Int
@@ -2701,39 +2640,6 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_Box          *x_data_box,
                                     hypre_Box          *y_data_box,
                                     hypre_Box          *z_data_box );
-
-/* struct_matvec_ivcc.c */
-HYPRE_Int
-hypre_StructMatvecCompute_core_IVCC( hypre_StructMatrix *A,
-                                     hypre_StructVector *x,
-                                     HYPRE_Int           Ab,
-                                     HYPRE_Int           depth,
-                                     HYPRE_Complex       alpha,
-                                     HYPRE_Complex       beta,
-                                     HYPRE_Complex      *xp,
-                                     HYPRE_Complex      *yp,
-                                     HYPRE_Complex      *zp,
-                                     HYPRE_Int           ndim,
-                                     HYPRE_Int           transpose,
-                                     HYPRE_Int           centry,
-                                     HYPRE_Int           nentries,
-                                     HYPRE_Int          *entries,
-                                     hypre_Index        *stencil_shape,
-                                     hypre_IndexRef      loop_size,
-                                     hypre_IndexRef      xfstride,
-                                     hypre_IndexRef      start,
-                                     hypre_IndexRef      Adstart,
-                                     hypre_IndexRef      xdstart,
-                                     hypre_IndexRef      ydstart,
-                                     hypre_IndexRef      zdstart,
-                                     hypre_IndexRef      Adstride,
-                                     hypre_IndexRef      xdstride,
-                                     hypre_IndexRef      ydstride,
-                                     hypre_IndexRef      zdstride,
-                                     hypre_Box          *A_data_box,
-                                     hypre_Box          *x_data_box,
-                                     hypre_Box          *y_data_box,
-                                     hypre_Box          *z_data_box);
 
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha, hypre_StructVector *y );
