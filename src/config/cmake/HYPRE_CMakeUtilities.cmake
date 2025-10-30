@@ -649,9 +649,9 @@ function(maybe_build_umpire)
   set(ENABLE_EXAMPLES              OFF CACHE BOOL "Disable Umpire examples" FORCE)
   set(ENABLE_DOCS                  OFF CACHE BOOL "Disable Umpire docs" FORCE)
   set(ENABLE_TESTS                 OFF CACHE BOOL "Disable Umpire tests" FORCE)
-  set(ENABLE_CUDA ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
-  set(ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
-  set(ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
+  set(UMPIRE_ENABLE_CUDA ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
+  set(UMPIRE_ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
+  set(UMPIRE_ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
 
   # Ensure Umpire installs to the same prefix as hypre
   set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Install prefix" FORCE)
