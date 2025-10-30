@@ -117,8 +117,8 @@ mv_TempMultiVectorByMultiVectorDiag( void* x, void* y,
 
 void
 mv_TempMultiVectorByMatrix( void*,
-                            HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
-                            void* );
+                            HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w,
+                            HYPRE_Complex* v, void* );
 
 void
 mv_TempMultiVectorXapy( void* x,

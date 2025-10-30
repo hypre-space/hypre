@@ -3142,16 +3142,16 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
       {
-         big_buf_data[index++] = my_first_cpt
-                                 + fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+         big_buf_data[index++] = my_first_cpt +
+                                 fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
    }
 
    /* again, we do not need to use the block version of comm handle since
       the fine to coarse mapping is size of the nodes */
 
-   comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data,
-                                               fine_to_coarse_offd);
+   comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, big_buf_data,
+                                              fine_to_coarse_offd);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -3165,7 +3165,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   for (i = 0; i < n_fine; i++) { fine_to_coarse[i] -= my_first_cpt; }
+   for (i = 0; i < n_fine; i++) { fine_to_coarse[i] -= (HYPRE_Int) my_first_cpt; }
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.

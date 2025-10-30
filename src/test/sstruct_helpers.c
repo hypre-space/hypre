@@ -243,7 +243,7 @@ ReadData( MPI_Comm      comm,
       s = 0;
       while (sdata_line != NULL)
       {
-         sdata_size += strlen(sdata_line) + 1;
+         sdata_size += (HYPRE_Int) (strlen(sdata_line) + 1);
 
          /* allocate more space, if necessary */
          if ((sdata_size + maxline) > s)
@@ -2708,7 +2708,7 @@ SetCosineVector( HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * cos((i + j + k) / 10.0);
+            values[count] = scale * cos((HYPRE_Real)(i + j + k) / 10.0);
             count++;
          }
       }

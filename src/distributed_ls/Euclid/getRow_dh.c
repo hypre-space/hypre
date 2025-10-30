@@ -48,7 +48,7 @@ void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, H
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetDimensions (HYPRE)"
-void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal)
+void EuclidGetDimensions(void *A, HYPRE_BigInt *beg_row, HYPRE_Int *rowsLocal, HYPRE_BigInt *rowsGlobal)
 {
   START_FUNC_DH
   HYPRE_Int ierr;
@@ -73,7 +73,7 @@ void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPR
 */
 
   *beg_row = row_start;
-  *rowsLocal = (row_end - row_start + 1);
+  *rowsLocal = (HYPRE_Int) (row_end - row_start) + 1;
   *rowsGlobal = n;
   END_FUNC_DH
 }
@@ -357,7 +357,7 @@ void Euclid_dhInputHypreMat(Euclid_dh ctx, HYPRE_ParCSRMatrix A)
   }
   HYPRE_ParCSRMatrixGetLocalRange(A, &beg_row, &end_row, &junk, &junk);
 
-  ctx->m = end_row - beg_row + 1;
+  ctx->m = (HYPRE_Int) (end_row - beg_row) + 1;
   ctx->n = M;
   ctx->A = (void*)A;
 

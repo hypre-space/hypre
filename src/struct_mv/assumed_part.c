@@ -1373,9 +1373,9 @@ hypre_StructAssumedPartitionCreate(
    max_response_size = 0; /* No response data - just confirmation */
 
    hypre_DataExchangeList(proc_count, proc_array, contact_boxinfo, proc_array_starts,
-                          (HYPRE_Int) sizeof(HYPRE_Int) * 2 * ndim, sizeof(HYPRE_Int),
-                          &response_obj, max_response_size, 1, comm,
-                          (void**) &response_buf, &response_buf_starts);
+                          (HYPRE_Int) sizeof(HYPRE_Int) * (2 * ndim),
+                          sizeof(HYPRE_Int), &response_obj, max_response_size,
+                          1, comm, (void**) &response_buf, &response_buf_starts);
 
    hypre_TFree(proc_array, HYPRE_MEMORY_HOST);
    hypre_TFree(proc_array_starts, HYPRE_MEMORY_HOST);
