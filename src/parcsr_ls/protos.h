@@ -1626,6 +1626,7 @@ HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
 HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );
+const char* hypre_ILUGetName( void *ilu_vdata );
 HYPRE_Int hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil );
 HYPRE_Int hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax );
 HYPRE_Int hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold );

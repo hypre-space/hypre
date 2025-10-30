@@ -350,7 +350,11 @@ hypre_MGRDestroy( void *data )
    {
       for (i = 1; i < (num_coarse_levels); i++)
       {
-         if ((mgr_data -> aff_solver)[i])
+         if ((mgr_data -> Frelax_type)[i] == 29)
+         {
+            hypre_MGRDirectSolverDestroy((mgr_data -> aff_solver)[i]);
+         }
+         else if ((mgr_data -> aff_solver)[i])
          {
             aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
             hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));

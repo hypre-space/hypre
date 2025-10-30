@@ -987,6 +987,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
          else if (Frelax_type[level] == 2  ||
+                  Frelax_type[level] == 29 ||
                   Frelax_type[level] == 32 ||
                   Frelax_type[level] == 9  ||
                   Frelax_type[level] == 99 ||
@@ -1023,6 +1024,18 @@ hypre_MGRCycle( void              *mgr_vdata,
                                            (HYPRE_Matrix) A_ff_array[level],
                                            (HYPRE_Vector) F_fine_array[coarse_grid],
                                            (HYPRE_Vector) U_fine_array[coarse_grid]);
+            }
+            else if (Frelax_type[level] == 29)
+            {
+#if defined(HYPRE_USING_DSUPERLU)
+               hypre_MGRDirectSolverSolve((mgr_data -> aff_solver)[level],
+                                          A_ff_array[level],
+                                          F_fine_array[coarse_grid],
+                                          U_fine_array[coarse_grid]);
+#else
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+               return hypre_error_flag;
+#endif
             }
             else
             {

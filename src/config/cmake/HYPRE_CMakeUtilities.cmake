@@ -398,116 +398,25 @@ function(setup_tpl LIBNAME)
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
-        # If a CMake package is not found, try pkg-config as a fallback
-        set(_found_pkg FALSE)
-        find_package(PkgConfig QUIET)
-        if(PKG_CONFIG_FOUND)
-          # If the user provided an install prefix (e.g., -DDSUPERLU_DIR=/prefix),
-          # augment PKG_CONFIG_PATH with common subdirs so pkg-config can find the .pc
-          set(_old_pkg_config_path "$ENV{PKG_CONFIG_PATH}")
-          set(_pc_hint_dirs)
-          foreach(_var IN ITEMS ${LIBNAME_UPPER}_DIR ${LIBNAME_UPPER}_ROOT TPL_${LIBNAME_UPPER}_DIR TPL_${LIBNAME_UPPER}_ROOT)
-            if(DEFINED ${_var})
-              set(_root "${${_var}}")
-              if(EXISTS "${_root}")
-                list(APPEND _pc_hint_dirs
-                  "${_root}"
-                  "${_root}/lib/pkgconfig"
-                  "${_root}/lib64/pkgconfig"
-                  "${_root}/share/pkgconfig")
-              endif()
-            endif()
-          endforeach()
-          if(_pc_hint_dirs)
-            # Prepend hints to PKG_CONFIG_PATH for this configure step
-            list(REMOVE_DUPLICATES _pc_hint_dirs)
-            string(JOIN ":" _pc_hint_path ${_pc_hint_dirs})
-            if(_old_pkg_config_path)
-              set(ENV{PKG_CONFIG_PATH} "${_pc_hint_path}:$ENV{PKG_CONFIG_PATH}")
-            else()
-              set(ENV{PKG_CONFIG_PATH} "${_pc_hint_path}")
-            endif()
-            message(STATUS "Augmented PKG_CONFIG_PATH with hints for ${LIBNAME}: ${_pc_hint_path}")
-          endif()
-          # Allow user to override the pkg-config name
-          set(_pc_names)
-          if(TPL_${LIBNAME_UPPER}_PKGCONFIG_NAME)
-            list(APPEND _pc_names "${TPL_${LIBNAME_UPPER}_PKGCONFIG_NAME}")
-          endif()
-          # Common sensible defaults
-          string(TOLOWER ${LIBNAME} _lib_lower)
-          list(APPEND _pc_names "${_lib_lower}")
-          if(${LIBNAME_UPPER} STREQUAL "DSUPERLU")
-            list(INSERT _pc_names 0 "superlu_dist")
-          elseif(${LIBNAME_UPPER} STREQUAL "SUPERLU")
-            list(INSERT _pc_names 0 "superlu")
-          elseif(${LIBNAME_UPPER} STREQUAL "PARMETIS")
-            list(INSERT _pc_names 0 "parmetis")
-          elseif(${LIBNAME_UPPER} STREQUAL "METIS")
-            list(INSERT _pc_names 0 "metis")
-          endif()
-
-          foreach(_pc IN LISTS _pc_names)
-            if(NOT _pc)
-              continue()
-            endif()
-            # Use a distinct prefix to avoid clobbering variables
-            pkg_check_modules(PC_${LIBNAME_UPPER} QUIET IMPORTED_TARGET ${_pc})
-            if(PC_${LIBNAME_UPPER}_FOUND)
-              # Prefer linking the generated IMPORTED target when available
-              if(TARGET PkgConfig::PC_${LIBNAME_UPPER})
-                target_link_libraries(${PROJECT_NAME} PUBLIC PkgConfig::PC_${LIBNAME_UPPER})
-              else()
-                target_link_libraries(${PROJECT_NAME} PUBLIC ${PC_${LIBNAME_UPPER}_LINK_LIBRARIES})
-              endif()
-              if(PC_${LIBNAME_UPPER}_INCLUDE_DIRS)
-                target_include_directories(${PROJECT_NAME} PUBLIC ${PC_${LIBNAME_UPPER}_INCLUDE_DIRS})
-              endif()
-              if(PC_${LIBNAME_UPPER}_LIBDIR)
-                foreach(_dir IN LISTS PC_${LIBNAME_UPPER}_LIBDIR)
-                  set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY BUILD_RPATH "${_dir}")
-                  set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY INSTALL_RPATH "${_dir}")
-                endforeach()
-              endif()
-              if(PC_${LIBNAME_UPPER}_VERSION)
-                message(STATUS "Found ${LIBNAME} via pkg-config (${_pc}), version: ${PC_${LIBNAME_UPPER}_VERSION}")
-              else()
-                message(STATUS "Found ${LIBNAME} via pkg-config (${_pc})")
-              endif()
-              set(${LIBNAME_UPPER}_FOUND TRUE PARENT_SCOPE)
-              set(_found_pkg TRUE)
-              break()
-            endif()
-          endforeach()
-          # Restore PKG_CONFIG_PATH if we modified it
-          if(DEFINED _old_pkg_config_path)
-            set(ENV{PKG_CONFIG_PATH} "${_old_pkg_config_path}")
-          endif()
-        endif()
-
-        if(NOT _found_pkg)
-          if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
-            message(FATAL_ERROR
-              "===============================================================\n"
-              "Umpire was requested but could not be found by CMake or pkg-config.\n"
-              "Try one of the following options (in this order):\n"
-              "  1) Auto-build Umpire (recommended):\n"
-              "     -DHYPRE_BUILD_UMPIRE=ON\n\n"
-              "  2) Provide a CMake package config for Umpire:\n"
-              "     -Dumpire_ROOT=\"/path-to-umpire-install\"   (or)\n"
-              "     -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire\"\n\n"
-              "  3) Provide explicit include and library paths:\n"
-              "     -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n"
-              "     -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\n\n"
-              "  4) Provide a pkg-config name:\n"
-              "     -DTPL_UMPIRE_PKGCONFIG_NAME=umpire\n\n"
-              "To opt out (not recommended for GPU builds), set:\n"
-              "  -DHYPRE_ENABLE_UMPIRE=OFF\n"
-              "==============================================================="
-            )
-          else()
-            message(FATAL_ERROR "${LIBNAME_UPPER} not found via CMake package or pkg-config. Provide TPL_${LIBNAME_UPPER}_LIBRARIES/TPL_${LIBNAME_UPPER}_INCLUDE_DIRS or TPL_${LIBNAME_UPPER}_PKGCONFIG_NAME.")
-          endif()
+        if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
+          message(FATAL_ERROR
+            "===============================================================\n"
+            "Umpire was requested but could not be found by CMake.\n"
+            "Try one of the following options (in this order):\n"
+            "  1) Auto-build Umpire (recommended):\n"
+            "     -DHYPRE_BUILD_UMPIRE=ON\n\n"
+            "  2) Provide a CMake package config for Umpire:\n"
+            "     -Dumpire_ROOT=\"/path-to-umpire-install\"   (or)\n"
+            "     -Dumpire_DIR=\"/path-to-umpire-install/lib/cmake/umpire\"\n\n"
+            "  3) Provide explicit include and library paths:\n"
+            "     -DTPL_UMPIRE_INCLUDE_DIRS=\"/path-to-umpire-install/include\"\n"
+            "     -DTPL_UMPIRE_LIBRARIES=\"/path-to-umpire-install/lib/libumpire.so;...\"\n\n"
+            "To opt out (not recommended for GPU builds), set:\n"
+            "  -DHYPRE_ENABLE_UMPIRE=OFF\n"
+            "==============================================================="
+          )
+        else()
+          message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
         endif()
       endif()
 
