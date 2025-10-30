@@ -592,10 +592,6 @@ HYPRE_Int HYPRE_SetUmpireHostPoolName(const char *pool_name);
  **/
 HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
 
-/** Set GPU memory pool size **/
-HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin,
-                                     size_t max_cached_bytes);
-
 /**@}*/
 
 /*--------------------------------------------------------------------------

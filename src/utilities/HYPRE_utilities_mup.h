@@ -230,15 +230,6 @@ HYPRE_Int
 HYPRE_SetExecutionPolicy( HYPRE_ExecutionPolicy exec_policy );
 
 HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize_flt( HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes );
-HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize_dbl( HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes );
-HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize_long_dbl( HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes );
-HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize( HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes );
-
-HYPRE_Int
 HYPRE_SetGpuAwareMPI_flt( HYPRE_Int use_gpu_aware_mpi );
 HYPRE_Int
 HYPRE_SetGpuAwareMPI_dbl( HYPRE_Int use_gpu_aware_mpi );
@@ -413,9 +404,6 @@ HYPRE_PrintErrorMessages_pre( HYPRE_Precision precision, MPI_Comm comm );
 
 HYPRE_Int
 HYPRE_SetExecutionPolicy_pre( HYPRE_Precision precision, HYPRE_ExecutionPolicy exec_policy );
-
-HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize_pre( HYPRE_Precision precision, HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes );
 
 HYPRE_Int
 HYPRE_SetGpuAwareMPI_pre( HYPRE_Precision precision, HYPRE_Int use_gpu_aware_mpi );
