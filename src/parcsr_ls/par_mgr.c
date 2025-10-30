@@ -4034,11 +4034,6 @@ hypre_MGRDataPrint(void *mgr_vdata)
    return hypre_error_flag;
 }
 
-/***************************************************************************
- ***************************************************************************/
-
-#ifdef HYPRE_USING_DSUPERLU
-
 /*--------------------------------------------------------------------------
  * hypre_MGRDirectSolverCreate
  *--------------------------------------------------------------------------*/
@@ -4046,8 +4041,9 @@ hypre_MGRDataPrint(void *mgr_vdata)
 void *
 hypre_MGRDirectSolverCreate()
 {
-   //   hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
-   //   return (void *) dslu_data;
+   /* TODO (VPM): implement direct solver creation and options setup, e.g., print_level */
+   // hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
+   // return (void *) dslu_data;
    return NULL;
 }
 
@@ -4064,7 +4060,13 @@ hypre_MGRDirectSolverSetup( void                *solver,
    HYPRE_UNUSED_VAR(f);
    HYPRE_UNUSED_VAR(u);
 
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistSetup(solver, A, 0);
+#else
+   HYPRE_UNUSED_VAR(solver);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -4079,7 +4081,15 @@ hypre_MGRDirectSolverSolve( void                *solver,
 {
    HYPRE_UNUSED_VAR(A);
 
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistSolve(solver, f, u);
+#else
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -4089,6 +4099,11 @@ hypre_MGRDirectSolverSolve( void                *solver,
 HYPRE_Int
 hypre_MGRDirectSolverDestroy( void *solver )
 {
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistDestroy(solver);
-}
+#else
+   HYPRE_UNUSED_VAR(solver);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
 #endif
+}

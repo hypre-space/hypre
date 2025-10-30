@@ -1027,21 +1027,24 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
             else if (Frelax_type[level] == 29)
             {
-#if defined(HYPRE_USING_DSUPERLU)
                hypre_MGRDirectSolverSolve((mgr_data -> aff_solver)[level],
                                           A_ff_array[level],
                                           F_fine_array[coarse_grid],
                                           U_fine_array[coarse_grid]);
-#else
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
-               return hypre_error_flag;
-#endif
             }
             else
             {
                /* Do F-relaxation using Gaussian Elimination */
                hypre_GaussElimSolve((mgr_data -> GSElimData)[fine_grid],
                                     level, Frelax_type[level]);
+            }
+
+            /* Exit early in case of issues */
+            if (HYPRE_GetError())
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                 "Detected issue during F-relaxation application!");
+               return hypre_error_flag;
             }
 
             /* Interpolate the solution back to the fine grid level */

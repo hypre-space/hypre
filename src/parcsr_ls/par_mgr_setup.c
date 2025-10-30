@@ -1344,7 +1344,6 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          else if (Frelax_type[lev] == 29)
          {
-#if defined(HYPRE_USING_DSUPERLU)
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
 
@@ -1353,10 +1352,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                                        A_ff_array[lev],
                                        F_fine_array[lev + 1],
                                        U_fine_array[lev + 1]);
-#else
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
-            return hypre_error_flag;
-#endif
          }
          else if (Frelax_type[lev] == 32) /* Construct default ILU solver */
          {
@@ -1378,6 +1373,13 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
+         }
+
+         /* Exit early in case of issues */
+         if (HYPRE_GetError())
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during F-relaxation setup!");
+            return hypre_error_flag;
          }
 
          /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
