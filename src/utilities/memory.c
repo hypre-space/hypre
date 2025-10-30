@@ -196,13 +196,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_DEVICE(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
    else if (location == hypre_MEMORY_HOST)
    {
-      HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                                            hypre_HandleComputeStream(hypre_handle())) );
+      HYPRE_MEM_PREFETCH_HOST(ptr, size, hypre_HandleComputeStream(hypre_handle()));
    }
 
 #elif defined(HYPRE_USING_HIP)
@@ -298,9 +296,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_DEVICE_POOL)
-      HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
-#elif defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
       HYPRE_CUDA_CALL( cudaMallocAsync(&ptr, size, NULL) );
 #else
       HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
@@ -348,11 +344,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_DEVICE_POOL)
-   HYPRE_CUDA_CALL( hypre_CachingMallocManaged(&ptr, size) );
-#else
    HYPRE_CUDA_CALL( cudaMallocManaged(&ptr, size, cudaMemAttachGlobal) );
-#endif
 #endif
 
 #if defined(HYPRE_USING_HIP)
@@ -450,7 +442,7 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, hypre_MemoryLocation location
 }
 
 void *
-_hypre_MAlloc(size_t size, hypre_MemoryLocation location)
+hypre__MAlloc(size_t size, hypre_MemoryLocation location)
 {
    return hypre_MAlloc_core(size, 0, location);
 }
@@ -490,9 +482,7 @@ hypre_DeviceFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_DEVICE_POOL)
-      HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
-#elif defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
       HYPRE_CUDA_CALL( cudaFreeAsync(ptr, NULL) );
 #else
       HYPRE_CUDA_CALL( cudaFree(ptr) );
@@ -523,10 +513,7 @@ hypre_UnifiedFree(void *ptr)
 #elif defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_DEVICE_OPENMP_ALLOC)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 
-#elif defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_DEVICE_POOL)
-   HYPRE_CUDA_CALL( hypre_CachingFreeManaged(ptr) );
-
-#elif defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_DEVICE_POOL)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFree(ptr) );
 
 #elif defined(HYPRE_USING_HIP)
@@ -592,7 +579,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
 }
 
 void
-_hypre_Free(void *ptr, hypre_MemoryLocation location)
+hypre__Free(void *ptr, hypre_MemoryLocation location)
 {
    hypre_Free_core(ptr, location);
 }
@@ -663,10 +650,12 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
+      /* Asynchronous (wrt host) D2D copies are default starting from rocm 5.6.1 */
+#if HIP_VERSION < 50631062
       HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+#else
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+#endif
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -794,10 +783,12 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
-      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
-      // https://github.com/mfem/mfem/pull/2780
+      /* Asynchronous (wrt host) D2D copies are default starting from rocm 5.6.1 */
+#if HIP_VERSION < 50631062
       HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
+#else
+      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+#endif
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -1367,12 +1358,12 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
 #endif
 
    /* Convert data from bytes to GiB (HYPRE_Real) */
-   mem[0] = vm_size  / b_to_gib;
-   mem[1] = vm_peak  / b_to_gib;
-   mem[2] = vm_rss   / b_to_gib;
-   mem[3] = vm_hwm   / b_to_gib;
-   mem[4] = (tot_mem - free_mem) / b_to_gib;
-   mem[5] = tot_mem  / b_to_gib;
+   mem[0] = (HYPRE_Real) vm_size  / b_to_gib;
+   mem[1] = (HYPRE_Real) vm_peak  / b_to_gib;
+   mem[2] = (HYPRE_Real) vm_rss   / b_to_gib;
+   mem[3] = (HYPRE_Real) vm_hwm   / b_to_gib;
+   mem[4] = (HYPRE_Real) (tot_mem - free_mem) / b_to_gib;
+   mem[5] = (HYPRE_Real) tot_mem  / b_to_gib;
 
    return hypre_error_flag;
 }
@@ -1569,7 +1560,7 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)")
+         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)");
 #endif
          hypre_printf("\n");
          hypre_printf("   ----+--------------+--------------+--------------+-------------");
@@ -1645,159 +1636,6 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------------
- * hypre_SetCubMemPoolSize
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
-                        hypre_uint cub_min_bin,
-                        hypre_uint cub_max_bin,
-                        size_t     cub_max_cached_bytes)
-{
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_DEVICE_POOL)
-   hypre_HandleCubBinGrowth(hypre_handle())      = cub_bin_growth;
-   hypre_HandleCubMinBin(hypre_handle())         = cub_min_bin;
-   hypre_HandleCubMaxBin(hypre_handle())         = cub_max_bin;
-   hypre_HandleCubMaxCachedBytes(hypre_handle()) = cub_max_cached_bytes;
-
-   //TODO XXX RL: cub_min_bin, cub_max_bin are not (re)set
-   if (hypre_HandleCubDevAllocator(hypre_handle()))
-   {
-      hypre_HandleCubDevAllocator(hypre_handle()) -> SetMaxCachedBytes(cub_max_cached_bytes);
-   }
-
-   if (hypre_HandleCubUvmAllocator(hypre_handle()))
-   {
-      hypre_HandleCubUvmAllocator(hypre_handle()) -> SetMaxCachedBytes(cub_max_cached_bytes);
-   }
-#else
-   HYPRE_UNUSED_VAR(cub_bin_growth);
-   HYPRE_UNUSED_VAR(cub_min_bin);
-   HYPRE_UNUSED_VAR(cub_max_bin);
-   HYPRE_UNUSED_VAR(cub_max_cached_bytes);
-#endif
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_SetGPUMemoryPoolSize
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth,
-                           HYPRE_Int min_bin,
-                           HYPRE_Int max_bin,
-                           size_t    max_cached_bytes)
-{
-   return hypre_SetCubMemPoolSize(bin_growth, min_bin, max_bin, max_cached_bytes);
-}
-
-#if defined(HYPRE_USING_DEVICE_POOL) && defined(HYPRE_USING_CUDA)
-
-/*--------------------------------------------------------------------------
- * hypre_CachingMallocDevice
- *--------------------------------------------------------------------------*/
-
-cudaError_t
-hypre_CachingMallocDevice(void **ptr, size_t nbytes)
-{
-   if (!hypre_HandleCubDevAllocator(hypre_handle()))
-   {
-      hypre_HandleCubDevAllocator(hypre_handle()) =
-         hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                    hypre_HandleCubMinBin(hypre_handle()),
-                                                    hypre_HandleCubMaxBin(hypre_handle()),
-                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                    false,
-                                                    false,
-                                                    false );
-   }
-
-   return hypre_HandleCubDevAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CachingFreeDevice
- *--------------------------------------------------------------------------*/
-
-cudaError_t
-hypre_CachingFreeDevice(void *ptr)
-{
-   return hypre_HandleCubDevAllocator(hypre_handle()) -> DeviceFree(ptr);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CachingMallocManaged
- *--------------------------------------------------------------------------*/
-
-cudaError_t
-hypre_CachingMallocManaged(void **ptr, size_t nbytes)
-{
-   if (!hypre_HandleCubUvmAllocator(hypre_handle()))
-   {
-      hypre_HandleCubUvmAllocator(hypre_handle()) =
-         hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                    hypre_HandleCubMinBin(hypre_handle()),
-                                                    hypre_HandleCubMaxBin(hypre_handle()),
-                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                    false,
-                                                    false,
-                                                    true );
-   }
-
-   return hypre_HandleCubUvmAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CachingFreeManaged
- *--------------------------------------------------------------------------*/
-
-cudaError_t
-hypre_CachingFreeManaged(void *ptr)
-{
-   return hypre_HandleCubUvmAllocator(hypre_handle()) -> DeviceFree(ptr);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_DeviceDataCubCachingAllocatorCreate
- *--------------------------------------------------------------------------*/
-
-hypre_cub_CachingDeviceAllocator *
-hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
-                                          hypre_uint min_bin,
-                                          hypre_uint max_bin,
-                                          size_t     max_cached_bytes,
-                                          bool       skip_cleanup,
-                                          bool       debug,
-                                          bool       use_managed_memory)
-{
-   hypre_cub_CachingDeviceAllocator *allocator =
-      new hypre_cub_CachingDeviceAllocator( bin_growth,
-                                            min_bin,
-                                            max_bin,
-                                            max_cached_bytes,
-                                            skip_cleanup,
-                                            debug,
-                                            use_managed_memory );
-
-   return allocator;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_DeviceDataCubCachingAllocatorDestroy
- *--------------------------------------------------------------------------*/
-
-void
-hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data)
-{
-   delete hypre_DeviceDataCubDevAllocator(data);
-   delete hypre_DeviceDataCubUvmAllocator(data);
-}
-
-#endif // #if defined(HYPRE_USING_DEVICE_POOL) && defined(HYPRE_USING_CUDA)
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
 

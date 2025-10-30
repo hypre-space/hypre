@@ -1243,7 +1243,6 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int find_row_map,
    MPI_Comm comm,
    hypre_ParCSRCommPkg * comm_pkg,
-   HYPRE_Int num_cols_B,
    HYPRE_Int num_recvs,
    HYPRE_Int num_sends,
    HYPRE_BigInt first_col_diag,
@@ -1267,8 +1266,6 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    // other interpolation: skip_fine = 0, skip_same_sign = 0
 )
 {
-   HYPRE_UNUSED_VAR(num_cols_B);
-
    hypre_ParCSRCommHandle *comm_handle, *row_map_comm_handle = NULL;
    hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
    HYPRE_Int *B_int_i;
@@ -1670,7 +1667,6 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int find_row_map,
    MPI_Comm comm,
    hypre_ParCSRCommPkg * comm_pkg,
-   HYPRE_Int num_cols_B,
    HYPRE_Int num_recvs,
    HYPRE_Int num_sends,
    HYPRE_BigInt first_col_diag,
@@ -1691,7 +1687,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
 
    hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
       pB_ext_i, pB_ext_j, pB_ext_data, pB_ext_row_map, num_nonzeros,
-      data, find_row_map, comm, comm_pkg, num_cols_B, num_recvs, num_sends,
+      data, find_row_map, comm, comm_pkg, num_recvs, num_sends,
       first_col_diag, row_starts, recv_vec_starts, send_map_starts, send_map_elmts,
       diag_i, diag_j, offd_i, offd_j, col_map_offd, diag_data, offd_data,
       &comm_handle_idx, &comm_handle_data,
@@ -1783,7 +1779,7 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
    ( &B_ext_i, &B_ext_j, &B_ext_data, &idummy,
      &num_nonzeros,
      data, 0, comm, comm_pkg,
-     num_cols_B, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, B->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
@@ -2516,23 +2512,26 @@ hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
 
 /* -----------------------------------------------------------------------------
  * extract submatrices based on given indices
+ *
+ * TODO (VPM): Deprecate this function?
  * ----------------------------------------------------------------------------- */
 
 void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
                                            HYPRE_Int *indices2,
                                            hypre_ParCSRMatrix ***submatrices )
 {
-   HYPRE_Int    nrows_A, nindices, *indices, *A_diag_i, *A_diag_j, mypid, nprocs;
-   HYPRE_Int    i, j, k, *proc_offsets1, *proc_offsets2, *exp_indices;
-   HYPRE_BigInt *itmp_array;
-   HYPRE_Int    nnz11, nnz12, nnz21, nnz22, col, ncols_offd, nnz_offd, nnz_diag;
-   HYPRE_Int    nrows, nnz;
-   HYPRE_BigInt global_nrows, global_ncols, *row_starts, *col_starts;
-   HYPRE_Int    *diag_i, *diag_j, row, *offd_i;
-   HYPRE_Complex *A_diag_a, *diag_a;
+   HYPRE_Int           nrows_A, nindices, *indices, *A_diag_i, *A_diag_j, mypid, nprocs;
+   HYPRE_Int           i, j, k, *exp_indices;
+   HYPRE_BigInt       *proc_offsets1, *proc_offsets2;
+   HYPRE_BigInt       *itmp_array;
+   HYPRE_Int           nnz11, nnz12, nnz21, nnz22, col, ncols_offd, nnz_offd, nnz_diag;
+   HYPRE_Int           nrows, nnz;
+   HYPRE_BigInt        global_nrows, global_ncols, *row_starts, *col_starts;
+   HYPRE_Int          *diag_i, *diag_j, row, *offd_i;
+   HYPRE_Complex      *A_diag_a, *diag_a;
    hypre_ParCSRMatrix *A11_csr, *A12_csr, *A21_csr, *A22_csr;
    hypre_CSRMatrix    *A_diag, *diag, *offd;
-   MPI_Comm           comm;
+   MPI_Comm            comm;
 
    /* -----------------------------------------------------
     * first make sure the incoming indices are in order
@@ -2564,14 +2563,14 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
     * compute new matrix dimensions
     * ----------------------------------------------------- */
 
-   proc_offsets1 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
-   proc_offsets2 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
+   proc_offsets1 = hypre_TAlloc(HYPRE_BigInt, (nprocs + 1), HYPRE_MEMORY_HOST);
+   proc_offsets2 = hypre_TAlloc(HYPRE_BigInt, (nprocs + 1), HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&nindices, 1, HYPRE_MPI_INT, proc_offsets1, 1,
                        HYPRE_MPI_INT, comm);
    k = 0;
    for (i = 0; i < nprocs; i++)
    {
-      j = proc_offsets1[i];
+      j = (HYPRE_Int) proc_offsets1[i];
       proc_offsets1[i] = k;
       k += j;
    }
@@ -2692,14 +2691,14 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    ncols_offd = 0;
    nnz_offd   = 0;
    nnz_diag   = nnz12;
-   global_nrows = (HYPRE_BigInt)proc_offsets1[nprocs];
-   global_ncols = (HYPRE_BigInt)proc_offsets2[nprocs];
+   global_nrows = proc_offsets1[nprocs];
+   global_ncols = proc_offsets2[nprocs];
    row_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    col_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    for (i = 0; i <= nprocs; i++)
    {
-      row_starts[i] = (HYPRE_BigInt)proc_offsets1[i];
-      col_starts[i] = (HYPRE_BigInt)proc_offsets2[i];
+      row_starts[i] = proc_offsets1[i];
+      col_starts[i] = proc_offsets2[i];
    }
    A12_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                                       row_starts, col_starts, ncols_offd,
@@ -2756,14 +2755,14 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    ncols_offd = 0;
    nnz_offd   = 0;
    nnz_diag   = nnz21;
-   global_nrows = (HYPRE_BigInt)proc_offsets2[nprocs];
-   global_ncols = (HYPRE_BigInt)proc_offsets1[nprocs];
+   global_nrows = proc_offsets2[nprocs];
+   global_ncols = proc_offsets1[nprocs];
    row_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    col_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    for (i = 0; i <= nprocs; i++)
    {
-      row_starts[i] = (HYPRE_BigInt)proc_offsets2[i];
-      col_starts[i] = (HYPRE_BigInt)proc_offsets1[i];
+      row_starts[i] = proc_offsets2[i];
+      col_starts[i] = proc_offsets1[i];
    }
    A21_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                                       row_starts, col_starts, ncols_offd,
@@ -2813,14 +2812,14 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    ncols_offd = 0;
    nnz_offd   = 0;
    nnz_diag   = nnz22;
-   global_nrows = (HYPRE_BigInt)proc_offsets2[nprocs];
-   global_ncols = (HYPRE_BigInt)proc_offsets2[nprocs];
+   global_nrows = proc_offsets2[nprocs];
+   global_ncols = proc_offsets2[nprocs];
    row_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    col_starts = hypre_CTAlloc(HYPRE_BigInt,  nprocs + 1, HYPRE_MEMORY_HOST);
    for (i = 0; i <= nprocs; i++)
    {
-      row_starts[i] = (HYPRE_BigInt)proc_offsets2[i];
-      col_starts[i] = (HYPRE_BigInt)proc_offsets2[i];
+      row_starts[i] = proc_offsets2[i];
+      col_starts[i] = proc_offsets2[i];
    }
    A22_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                                       row_starts, col_starts, ncols_offd,
@@ -4161,7 +4160,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncComputeStream();
    }
 #endif
 
@@ -5290,31 +5288,15 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    #pragma omp parallel
 #endif
    {
-      HYPRE_Int   ii, num_threads;
-      HYPRE_Int   size, rest, ns, ne;
+      HYPRE_Int   ns, ne;
       HYPRE_Int  *marker_diag;
       HYPRE_Int  *marker_offd;
-
-      ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
 
       /*-----------------------------------------------------------------------
        *  Compute C_diag = alpha*A_diag + beta*B_diag
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_diag_C / num_threads;
-      rest = num_rownnz_diag_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_diag_C);
       marker_diag = hypre_TAlloc(HYPRE_Int, num_cols_diag_A, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_diag,
                                   NULL, NULL, A_diag, B_diag,
@@ -5330,19 +5312,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
        *  Compute C_offd = alpha*A_offd + beta*B_offd
        *-----------------------------------------------------------------------*/
 
-      size = num_rownnz_offd_C / num_threads;
-      rest = num_rownnz_offd_C - size * num_threads;
-      if (ii < rest)
-      {
-         ns = ii * size + ii;
-         ne = (ii + 1) * size + ii + 1;
-      }
-      else
-      {
-         ns = ii * size + rest;
-         ne = (ii + 1) * size + rest;
-      }
-
+      hypre_GetSimpleThreadPartition(&ns, &ne, num_rownnz_offd_C);
       marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixAddFirstPass(ns, ne, twspace, marker_offd,
                                   A2C_offd, B2C_offd, A_offd, B_offd,
@@ -6807,7 +6777,6 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                HYPRE_Int                num_cols_block,
                                hypre_DenseBlockMatrix **B_ptr )
 {
-   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_BigInt             num_rows_A      = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt             num_cols_A      = hypre_ParCSRMatrixGlobalNumCols(A);
 
@@ -6857,10 +6826,11 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
                                     num_rows_block, num_cols_block);
 
    /* Initialize the output matrix */
-   hypre_DenseBlockMatrixInitializeOn(B, memory_location);
+   /* TODO: Change back to memory_location after implementing hypre_ParCSRMatrixBlockColSumDevice */
+   hypre_DenseBlockMatrixInitializeOn(B, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

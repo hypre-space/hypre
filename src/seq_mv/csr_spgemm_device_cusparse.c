@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 #include "csr_spgemm_device.h"

@@ -210,6 +210,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-debug``
      - ``-DCMAKE_BUILD_TYPE=Debug``
+   * - | Memory tracker
+       | (default is off)
+     - ``--with-memory-tracker``
+     - ``-DHYPRE_ENABLE_MEMORY_TRACKER=ON``
    * - | Print Errors
        | (default is off)
      - ``--with-print-errors``
@@ -351,6 +355,7 @@ when building for GPUs are:
 1. Only one GPU backend can be enabled at a time (CUDA, HIP, or SYCL)
 2. Some features like full support for 64-bit integers (`BigInt`) are not available
 3. Memory management options (device vs unified memory) affect solver availability
+4. Umpire is implicitly enabled by default when building with CUDA or HIP support
 
 The table below lists the available GPU-specific build options for both autotools and CMake
 build systems.
@@ -454,26 +459,44 @@ build systems.
      - ``--enable-onemklrand``
      - ``-DHYPRE_ENABLE_ONEMKLRAND=ON``
    * - | Umpire Support
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire``
      - ``-DHYPRE_ENABLE_UMPIRE=ON``
-   * - | Umpire Unified Memory
+   * - | Umpire Auto-Build
        | (default is off)
+     - N/A
+     - ``-DHYPRE_BUILD_UMPIRE=ON``
+   * - | Umpire Version
+       | (default is latest)
+     - N/A
+     - ``-DHYPRE_UMPIRE_VERSION=v2024.07.1``
+   * - | Umpire Unified Memory
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-um``
      - ``-DHYPRE_ENABLE_UMPIRE_UM=ON``
    * - | Umpire Device Memory
-       | (default is off)
+       | (default is on for **CUDA/HIP**)
      - ``--with-umpire-device``
      - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
+   * - | Umpire Host Memory
+       | (default is off)
+     - ``--with-umpire-host``
+     - ``-DHYPRE_ENABLE_UMPIRE_HOST=ON``
+   * - | Umpire Pinned Memory
+       | (default is off)
+     - ``--with-umpire-pinned``
+     - ``-DHYPRE_ENABLE_UMPIRE_PINNED=ON``
 
-.. warning::
+.. note::
 
-   Allocations and deallocations of GPU memory can be slow. Memory pooling is a
-   common approach to reduce such overhead and improve performance. We recommend using
-   [Umpire]_ for memory management, which provides robust pooling capabilities for both
-   device and unified memory. For Umpire support, the Umpire library must be installed
-   and properly configured. See the note in the previous section for more details on
-   how to specify the installation path for dependency libraries.
+    Allocations and deallocations of GPU memory can be slow. Memory pooling is a common
+    approach to reduce such overhead and improve performance. For better performance,
+    [Umpire]_ is enabled by default for CUDA and HIP builds and provides robust pooling
+    capabilities for both device and unified memory.
+
+    For SYCL builds, Umpire remains optional and must be enabled explicitly.
+
+    See :ref:`umpire_build` for detailed instructions on how to build and use Umpire with HYPRE.
 
 .. note::
 
@@ -483,6 +506,113 @@ build systems.
    memory, whereas only selected unstructured solvers can run with device memory.
    See :ref:`ch-boomeramg-gpu` for details. Some solver options for BoomerAMG
    require unified (managed) memory.
+
+.. _umpire_build:
+
+Building Umpire
+^^^^^^^^^^^^^^^
+
+HYPRE provides three primary methods for integrating Umpire for GPU memory management:
+the recommended Automatic Build, where HYPRE handles the download and configuration process
+automatically; a Manual Build from Source, which offers maximum control for advanced users;
+and installation via Package Managers like Spack, which is convenient for managing Umpire
+within an existing software environment.
+
+
+Automatic Umpire Build
+~~~~~~~~~~~~~~~~~~~~~~
+
+The easiest way to use Umpire with HYPRE is to enable the automatic build feature.
+This is recommended if you don't have Umpire pre-installed or want to ensure maximum
+compatibility. When enabled, HYPRE handles the entire process: it automatically
+downloads a compatible Umpire version, detects your GPU backend (CUDA, HIP, or SYCL),
+and configures Umpire with settings optimized for HYPRE's specific memory management
+needs. This approach simplifies setup by eliminating the need to manually manage
+Umpire's installation, dependencies, or build configuration.
+
+To enable this feature, set ``HYPRE_BUILD_UMPIRE=ON`` during CMake configuration:
+
+.. code-block:: bash
+
+    # Enable automatic Umpire build and CUDA
+    cmake -DHYPRE_BUILD_UMPIRE=ON \
+          -DHYPRE_ENABLE_CUDA=ON \
+          ../src
+
+    # Build HYPRE (Umpire will be built automatically)
+    make -j
+
+Manual Umpire Build
+~~~~~~~~~~~~~~~~~~~
+
+If you prefer to build Umpire separately or need specific Umpire configurations,
+you can build it manually from source:
+
+.. code-block:: bash
+
+   git clone --recursive https://github.com/LLNL/Umpire.git
+
+   cd Umpire
+   cmake -S . -B build \
+     -DUMPIRE_ENABLE_C=ON \
+     -DUMPIRE_ENABLE_TOOLS=OFF \
+     -DENABLE_CUDA=${ENABLE_CUDA} \
+     -DENABLE_HIP=${ENABLE_HIP} \
+     -DENABLE_SYCL=${ENABLE_SYCL} \
+     -DENABLE_BENCHMARKS=OFF \
+     -DENABLE_EXAMPLES=OFF \
+     -DENABLE_DOCS=OFF \
+     -DENABLE_TESTS=OFF \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DCMAKE_INSTALL_LIBDIR=/path-to-umpire-install/lib \
+     -DCMAKE_INSTALL_PREFIX=/path-to-umpire-install
+
+   cmake --build build -j
+   cmake --install build
+
+Enable either CUDA, HIP, or SYCL by setting the corresponding flag to ``ON`` and
+the others to ``OFF``.
+
+Using Spack Package Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Install Umpire with Spack
+   spack install umpire+cuda  # or +hip, +sycl
+
+Linking with Pre-built Umpire
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After building or installing Umpire manually, configure HYPRE to use it:
+
+**Autotools:**
+
+.. code-block:: bash
+
+   ./configure --with-umpire-include=/path-to-umpire-install/include \
+               --with-umpire-lib-dirs=/path-to-umpire-install/lib \
+               --with-umpire-libs="umpire camp" \
+
+**CMake:**
+
+.. code-block:: bash
+
+   # Method 1: Using Umpire's CMake config
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -Dumpire_DIR=/path-to-umpire-install/lib/cmake/umpire \
+         ../src
+
+   # Method 2: Using umpire_ROOT pattern
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -Dumpire_ROOT=/path-to-umpire-install \
+         ../src
+
+   # Method 3: Manual specification
+   cmake -DHYPRE_ENABLE_UMPIRE=ON \
+         -DTPL_UMPIRE_INCLUDE_DIRS=/path-to-umpire-install/include \
+         -DTPL_UMPIRE_LIBRARIES=/path-to-umpire-install/lib/libumpire.so \
+         ../src
 
 Make Targets
 =====================
@@ -798,55 +928,6 @@ effectively, please include:
 - Comparison with previous versions (if applicable)
 - Problem size and scaling information
 - Hardware configuration details
-
-.. _LSI_install:
-
-Using HYPRE in External FEI Implementations
-==============================================================================
-
-.. warning::
-   FEI is not actively supported by the hypre development team. For similar
-   functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
-   allows the representation of block-structured grid problems via hypre's
-   SStruct interface.
-
-To set up hypre for use in external, e.g. Sandia's, FEI implementations one
-needs to follow the following steps:
-
-#. obtain the hypre and Sandia's FEI source codes,
-#. compile Sandia's FEI (fei-2.5.0) to create the ``fei_base`` library.
-#. compile hypre
-
-   * unpack the archive and go into the ``src`` directory
-   * do a ``configure`` with the ``--with-fei-inc-dir`` option set to the FEI
-     include directory plus other compile options
-   * compile with ``make install`` to create the ``HYPRE_LSI`` library in
-     ``hypre/lib``.
-
-#. call the FEI functions in your application code (as shown in Chapters
-   :ref:`ch-FEI` and :ref:`ch-Solvers`)
-
-   * include ``cfei-hypre.h`` in your file
-   * include ``FEI_Implementation.h`` in your file
-
-#. Modify your ``Makefile``
-
-   * include hypre's ``include`` and ``lib`` directories in the search paths.
-   * Link with ``-lfei_base -lHYPRE_LSI``.  Note that the order in which the
-     libraries are listed may be important.
-
-Building an application executable often requires linking with many different
-software packages, and many software packages use some LAPACK and/or BLAS
-functions.  In order to alleviate the problem of multiply defined functions at
-link time, it is recommended that all software libraries are stripped of all
-LAPACK and BLAS function definitions.  These LAPACK and BLAS functions should
-then be resolved at link time by linking with the system LAPACK and BLAS
-libraries (e.g. dxml on DEC cluster).  Both hypre and SuperLU were built with
-this in mind.  However, some other software library files needed may have the
-BLAS functions defined in them.  To avoid the problem of multiply defined
-functions, it is recommended that the offending library files be stripped of the
-BLAS functions.
-
 
 Calling HYPRE from Other Languages
 ==============================================================================

@@ -18,7 +18,9 @@
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
+#if defined (hypre_DEFINE_GLOBAL)
 hypre_Handle *_hypre_handle = NULL;
+#endif
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
@@ -41,7 +43,8 @@ hypre_HandleCreate(void)
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
-   hypre_HandleLogLevel(hypre_handle_) = 0;
+   hypre_HandleLogLevel(hypre_handle_)       = 0;
+   hypre_HandleLogLevelSaved(hypre_handle_)  = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

@@ -300,3 +300,13 @@ hypre_SStructKrylovCommInfo( void  *A,
    hypre_MPI_Comm_rank(comm, my_id);
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructKrylovPrintVector( void *x,
+                                const char *filename)
+{
+   return ( HYPRE_SStructVectorPrint( filename, (hypre_SStructVector *) x, 0) );
+}

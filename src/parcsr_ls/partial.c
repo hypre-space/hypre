@@ -762,7 +762,7 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix  *A,
                   }
                }
             }
-            if (diagonal)
+            if (diagonal != 0.0)
             {
                for (jj = jj_begin_row; jj < jj_end_row; jj++)
                {
@@ -2556,7 +2556,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                }
             }
          }
-         if (diagonal)
+         if (diagonal != 0.0)
          {
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {

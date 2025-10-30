@@ -64,13 +64,20 @@ HYPRE_DRIVERS =\
  ij.c\
  ij_assembly.c\
  sstruct.c\
+ sstructmat.c\
  struct.c\
+ structmat.c\
  ams_driver.c\
- maxwell_unscaled.c\
  struct_migrate.c\
- sstruct_fac.c\
  ij_mm.c\
- zboxloop.c
+ zboxloop.c\
+
+HYPRE_MP_DRIVERS =\
+ ij_mp.c\
+ test_mp.c\
+ test_mp_pcg.c\
+ test_mp_pcg_3d.c\
+# struct_mp.c\
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\
@@ -89,6 +96,9 @@ HYPRE_DRIVERS_F77 =\
  f77_struct.f
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
+ifdef MP_BUILD
+   HYPRE_DRIVER_EXECS+=${HYPRE_MP_DRIVERS:.c=}
+endif
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
@@ -112,8 +122,6 @@ distclean: clean
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
-	rm -f TEST_fac/*.out*
-	rm -f TEST_fac/*.err*
 	rm -f TEST_ij/*.out*
 	rm -f TEST_ij/*.err*
 	rm -f TEST_ij/*.txt*
@@ -122,14 +130,15 @@ distclean: clean
 	rm -f TEST_sstruct/*.err*
 	rm -f TEST_struct/*.out*
 	rm -f TEST_struct/*.err*
-	rm -f ex1 ex2 ex3 ex4 ex5 ex5big ex5b ex5b77 ex6 ex7 ex8 ex9 ex15big ex18comp
+	rm -f TEST_structmat/*.out*
+	rm -f TEST_structmat/*.err*
+
 
 ##################################################################
 # Rules
 ##################################################################
 
 # C
-
 ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
@@ -138,11 +147,24 @@ ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
+# TODO (VPM): Update data structures on sstruct_helpers for GPUs
+# sstruct: sstruct_helpers.o sstruct.o
+# 	@echo  "Building" $@ "... "
+# 	${LINK_CC} -o $@ $^ ${LFLAGS}
+
 sstruct: sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+sstructmat: sstruct_helpers.o sstructmat.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+struct: struct.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.obj
+structmat: structmat.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -150,15 +172,7 @@ ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
 struct_migrate: struct_migrate.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -175,6 +189,26 @@ zboxloop: zboxloop.obj
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+ij_mp: ij_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+struct_mp: struct_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp: test_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp_pcg: test_mp_pcg.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp_pcg_3d: test_mp_pcg_3d.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -254,10 +288,6 @@ ex6_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex6_for.o
 ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${LFLAGS}
-
-for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o $@.o ${LFLAGS}
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "

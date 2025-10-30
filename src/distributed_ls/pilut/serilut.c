@@ -242,8 +242,10 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /* Allocate memory for the reduced matrix */
     rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
   rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
-    rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc(sizeof(HYPRE_Int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
-    rmat->rmat_rvalues =  (HYPRE_Real **)hypre_mymalloc(sizeof(HYPRE_Real *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
+    rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc((size_t) nbnd * sizeof(HYPRE_Int*),
+                                                      "hypre_SerILUT: rmat->rmat_rcolind");
+    rmat->rmat_rvalues =  (HYPRE_Real **)hypre_mymalloc((size_t) nbnd * sizeof(HYPRE_Real*),
+                                                        "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
 
@@ -474,7 +476,7 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
   hypre_TFree( *structural_union , HYPRE_MEMORY_HOST);
   *structural_union = hypre_TAlloc( HYPRE_Int,  lnrows , HYPRE_MEMORY_HOST);
 
-  hypre_memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
+  hypre_memcpy_int( *structural_union, &recv_unions[firstrow], (size_t) lnrows );
 
   /* deallocate recv_unions */
   hypre_TFree( recv_unions , HYPRE_MEMORY_HOST);

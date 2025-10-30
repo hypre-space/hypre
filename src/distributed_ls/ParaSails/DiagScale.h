@@ -16,6 +16,10 @@
 #include "Matrix.h"
 #include "Numbering.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_ParaSails_mup_def.h"
+#endif
+
 #ifndef _DIAGSCALE_H
 #define _DIAGSCALE_H
 

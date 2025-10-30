@@ -17,7 +17,7 @@
 #include <time.h>
 #include "_hypre_utilities.h"
 #include "_hypre_parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_parcsr_ls.h"
 typedef struct MLI_Function_Struct MLI_Function;
 #include "cmli.h"

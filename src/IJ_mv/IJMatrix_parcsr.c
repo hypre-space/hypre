@@ -577,7 +577,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       counter[0] = 0;
       for (i = 0; i < nrows; i++)
       {
-         counter[i + 1] = counter[i] + ncols[i];
+         counter[i + 1] = counter[i] + ((ncols) ? ncols[i] : 1);
       }
 
       indx = 0;
@@ -597,7 +597,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                   hypre_printf ("Error! Not enough memory! HYPRE_IJMatrixGetValues\n");
                }
             }
-            if (ncols[i] < row_size)
+            if (ncols && ncols[i] < row_size)
             {
                warning = 1;
             }
@@ -629,7 +629,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
             }
          }
       }
-      if (warning)
+      if (warning && ncols)
       {
          for (i = 0; i < nrows; i++)
          {
@@ -648,7 +648,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
-         n = ncols[ii];
+         n = (ncols) ? ncols[ii] : 1;
          if (n == 0) /* empty row */
          {
             continue;
@@ -1936,12 +1936,12 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
       HYPRE_Complex *off_proc_data_h = hypre_TAlloc(HYPRE_Complex,   current_num_elmts,
                                                     HYPRE_MEMORY_HOST);
 
-      hypre_TMemcpy(tmp,             off_proc_i,    HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(off_proc_j_h,    off_proc_j,    HYPRE_BigInt,  current_num_elmts, HYPRE_MEMORY_HOST,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(off_proc_data_h, off_proc_data, HYPRE_Complex, current_num_elmts, HYPRE_MEMORY_HOST,
-                    HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(tmp,             off_proc_i,    HYPRE_BigInt,  current_num_elmts,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(off_proc_j_h,    off_proc_j,    HYPRE_BigInt,  current_num_elmts,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(off_proc_data_h, off_proc_data, HYPRE_Complex, current_num_elmts,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       for (i = 0; i < current_num_elmts; i++)
       {
@@ -2001,7 +2001,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    real_proc_id          = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
    /* get the assumed processor id for each row */
-   if (num_rows > 0 )
+   if (num_rows > 0)
    {
       for (i = 0; i < num_rows; i++)
       {
@@ -2038,9 +2038,9 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
       processors and find out who the actual row owner is - we will contact with
       a range (2 numbers) */
 
-   ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  ex_num_contacts, HYPRE_MEMORY_HOST);
-   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int,  ex_num_contacts + 1, HYPRE_MEMORY_HOST);
-   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt,  ex_num_contacts * 2, HYPRE_MEMORY_HOST);
+   ex_contact_procs      = hypre_CTAlloc(HYPRE_Int, ex_num_contacts, HYPRE_MEMORY_HOST);
+   ex_contact_vec_starts = hypre_CTAlloc(HYPRE_Int, ex_num_contacts + 1, HYPRE_MEMORY_HOST);
+   ex_contact_buf        = hypre_CTAlloc(HYPRE_BigInt, ex_num_contacts * 2, HYPRE_MEMORY_HOST);
 
    counter = 0;
    range_end = -1;
@@ -2112,7 +2112,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    {
       upper_bound = response_buf[i * 2 + 1];
       counter = 0;
-      tmp_id = response_buf[i * 2];
+      tmp_id = (HYPRE_Int) response_buf[i * 2];
 
       /* loop through row_list entries - counting how many are in the range */
       while (j < num_rows && row_list[j] <= upper_bound)

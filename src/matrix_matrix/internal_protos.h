@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_matrix_matrix_mup_def.h"
+#endif
+
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */
 HYPRE_Int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix,
                                                        HYPRE_DistributedMatrix *DistributedMatrix );

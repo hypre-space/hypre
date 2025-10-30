@@ -14,8 +14,23 @@
 #ifndef hypre_PFMG_HEADER
 #define hypre_PFMG_HEADER
 
+//#define DEBUG_SETUP
+//#define DEBUG_SOLVE
+
+#define hypre_PFMGSetCIndex(cdir, cindex)       \
+   {                                            \
+      hypre_SetIndex(cindex, 0);                \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
+
+#define hypre_PFMGSetStride(cdir, stride)       \
+   {                                            \
+      hypre_SetIndex(stride, 1);                \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGData:
+ * hypre_PFMGData
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -33,6 +48,7 @@ typedef struct
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
 
    HYPRE_Int             rap_type;       /* controls choice of RAP codes */
+   HYPRE_Int             matmult_type;   /* controls choice of matrix-matrix mult. algorithm */
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
@@ -46,10 +62,6 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
-
-   HYPRE_MemoryLocation  memory_location; /* memory location of data */
-   HYPRE_Real           *data;
-   HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
@@ -69,8 +81,9 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int             num_iterations;
    HYPRE_Int             time_index;
-
    HYPRE_Int             print_level;
+   HYPRE_Int             print_freq;
+
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
@@ -78,7 +91,6 @@ typedef struct
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             devicelevel;
 #endif
-
 } hypre_PFMGData;
 
 #endif

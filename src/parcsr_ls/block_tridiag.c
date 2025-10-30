@@ -124,7 +124,8 @@ hypre_BlockTridiagSetup(void               *data,
    HYPRE_UNUSED_VAR(x);
 
    HYPRE_Int               i, j, *index_set1, print_level, nsweeps, relax_type;
-   HYPRE_Int               nrows, nrows1, nrows2, start1, start2, *index_set2;
+   HYPRE_Int               nrows, nrows1, nrows2, *index_set2;
+   HYPRE_BigInt            start1, start2;
    HYPRE_Int               count, ierr;
    HYPRE_Real              threshold;
    hypre_ParCSRMatrix    **submatrices;
@@ -159,22 +160,22 @@ hypre_BlockTridiagSetup(void               *data,
    nrows2 = hypre_ParCSRMatrixNumRows(submatrices[3]);
    start1 = hypre_ParCSRMatrixFirstRowIndex(submatrices[0]);
    start2 = hypre_ParCSRMatrixFirstRowIndex(submatrices[3]);
-   HYPRE_IJVectorCreate(comm, start1, start1 + nrows1 - 1, &ij_u1);
+   HYPRE_IJVectorCreate(comm, start1, start1 + (HYPRE_BigInt) (nrows1 - 1), &ij_u1);
    HYPRE_IJVectorSetObjectType(ij_u1, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(ij_u1);
    ierr += HYPRE_IJVectorAssemble(ij_u1);
    hypre_assert(!ierr);
-   HYPRE_IJVectorCreate(comm, start1, start1 + nrows1 - 1, &ij_f1);
+   HYPRE_IJVectorCreate(comm, start1, start1 + (HYPRE_BigInt) (nrows1 - 1), &ij_f1);
    HYPRE_IJVectorSetObjectType(ij_f1, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(ij_f1);
    ierr += HYPRE_IJVectorAssemble(ij_f1);
    hypre_assert(!ierr);
-   HYPRE_IJVectorCreate(comm, start2, start2 + nrows2 - 1, &ij_u2);
+   HYPRE_IJVectorCreate(comm, start2, start2 + (HYPRE_BigInt) (nrows2 - 1), &ij_u2);
    HYPRE_IJVectorSetObjectType(ij_u2, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(ij_u2);
    ierr += HYPRE_IJVectorAssemble(ij_u2);
    hypre_assert(!ierr);
-   HYPRE_IJVectorCreate(comm, start2, start2 + nrows1 - 1, &ij_f2);
+   HYPRE_IJVectorCreate(comm, start2, start2 + (HYPRE_BigInt) (nrows1 - 1), &ij_f2);
    HYPRE_IJVectorSetObjectType(ij_f2, HYPRE_PARCSR);
    ierr  = HYPRE_IJVectorInitialize(ij_f2);
    ierr += HYPRE_IJVectorAssemble(ij_f2);

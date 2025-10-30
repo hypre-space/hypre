@@ -56,7 +56,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    HYPRE_BigInt *nz_part;
 
    HYPRE_Int num_procs;
-   HYPRE_Int P_busy, Q_busy, R_busy;
+   HYPRE_BigInt P_busy, Q_busy, R_busy;
 
    hypre_MPI_Comm_size(comm, &num_procs);
 
@@ -78,9 +78,9 @@ GenerateLaplacian27pt(MPI_Comm comm,
    diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = hypre_min(nx, (HYPRE_BigInt) P);
+   Q_busy = hypre_min(ny, (HYPRE_BigInt) Q);
+   R_busy = hypre_min(nz, (HYPRE_BigInt) R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }

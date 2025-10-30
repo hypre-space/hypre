@@ -38,13 +38,28 @@ HYPRE_StructVectorDestroy( HYPRE_StructVector struct_vector )
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* RDF: Need a good user interface for setting the grid. */
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetStride(HYPRE_StructVector vector,
+                            HYPRE_Int         *stride)
+{
+   return ( hypre_StructVectorSetStride(vector, stride) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 {
-   return ( hypre_StructVectorInitialize(vector) );
+   return ( hypre_StructVectorInitialize(vector, 1) );
 }
 
 /*--------------------------------------------------------------------------
@@ -54,7 +69,7 @@ HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 HYPRE_Int
 HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
                              HYPRE_Int          *grid_index,
-                             HYPRE_Complex       values )
+                             HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
 
@@ -66,7 +81,7 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   hypre_StructVectorSetValues(vector, new_grid_index, &values, 0, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, values, 0, -1, 0);
 
    return hypre_error_flag;
 }
@@ -127,7 +142,7 @@ HYPRE_StructVectorSetBoxValues2( HYPRE_StructVector  vector,
 HYPRE_Int
 HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
                                HYPRE_Int          *grid_index,
-                               HYPRE_Complex       values )
+                               HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
 
@@ -139,7 +154,7 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   hypre_StructVectorSetValues(vector, new_grid_index, &values, 1, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, values, 1, -1, 0);
 
    return hypre_error_flag;
 }
@@ -191,6 +206,30 @@ HYPRE_StructVectorAddToBoxValues2( HYPRE_StructVector  vector,
    hypre_BoxDestroy(value_box);
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAxpy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorAxpy( HYPRE_Complex       alpha,
+                        HYPRE_StructVector  x,
+                        HYPRE_Complex       beta,
+                        HYPRE_StructVector  y )
+{
+   return hypre_StructVectorAxpy( alpha, x, beta, y, y );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorScale( HYPRE_Complex       alpha,
+                         HYPRE_StructVector  y )
+{
+   return hypre_StructVectorScaleValues( y, alpha );
 }
 
 /*--------------------------------------------------------------------------
@@ -332,15 +371,12 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructVectorCopy
- * copies data from x to y
- * y has its own data array, so this is a deep copy in that sense.
- * The grid and other size information are not copied - they are
- * assumed to be consistent already.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
 {
-   return ( hypre_StructVectorCopy( x, y ) );
+   return ( hypre_StructCopy( x, y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -349,9 +385,21 @@ HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
 
 HYPRE_Int
 HYPRE_StructVectorSetConstantValues( HYPRE_StructVector  vector,
-                                     HYPRE_Complex       values )
+                                     HYPRE_Complex       value )
 {
-   return ( hypre_StructVectorSetConstantValues(vector, values) );
+   return ( hypre_StructVectorSetConstantValues(vector, value) );
+}
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetRandomValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetRandomValues( HYPRE_StructVector  vector,
+                                   HYPRE_Int           seed )
+{
+   return ( hypre_StructVectorSetRandomValues(vector, seed) );
 }
 
 /*--------------------------------------------------------------------------
@@ -399,6 +447,20 @@ HYPRE_StructVectorClone( HYPRE_StructVector x,
                          HYPRE_StructVector *y_ptr )
 {
    *y_ptr = hypre_StructVectorClone(x);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorInnerProd( HYPRE_StructVector  x,
+                             HYPRE_StructVector  y,
+                             HYPRE_Real         *result )
+{
+   *result = hypre_StructInnerProd(x, y);
 
    return hypre_error_flag;
 }

@@ -10,10 +10,10 @@ BoomerAMG
 BoomerAMG is a parallel implementation of the algebraic multigrid method
 [RuSt1987]_.  It can be used both as a solver or as a preconditioner.  The user
 can choose between various different parallel coarsening techniques,
-interpolation and relaxation schemes. The default settings for CPUs, HMIS 
+interpolation and relaxation schemes. The default settings for CPUs, HMIS
 (coarsening 8) combined with a distance-two interpolation (6) truncated to 4
-or 5 elements per row, should work fairly well for two- and three-dimensional 
-diffusion problems. Additional reduction in complexity and increased scalability 
+or 5 elements per row, should work fairly well for two- and three-dimensional
+diffusion problems. Additional reduction in complexity and increased scalability
 can often be achieved using one or two levels of aggressive coarsening.
 
 
@@ -55,7 +55,7 @@ they want to apply aggressive coarsening (starting with the finest level) via
 ``HYPRE_BoomerAMGSetAggNumLevels``. Since aggressive coarsening requires long
 range interpolation, multipass interpolation is always used on levels with
 aggressive coarsening, unless the user specifies another long-range
-interpolation suitable for aggressive coarsening via 
+interpolation suitable for aggressive coarsening via
 ``HYPRE_BoomerAMGSetAggInterpType``..
 
 Note that the default coarsening for CPUs is HMIS, for GPUs PMIS [DeYH2004]_.
@@ -148,16 +148,16 @@ used. Functions that enable the user to access the systems AMG version are
 ``HYPRE_BoomerAMGSetNodal``.
 
 There are basically two approaches to deal with matrices derived from systems
-of PDEs. The unknown-based approach (which is the default) treats variables 
-corresponding to the same unknown or function separately, i.e., when coarsening 
-or generating interpolation, connections between variables associated with 
-different unknowns are ignored. This can work well for weakly coupled PDEs, 
-but will be problematic for strongly coupled PDEs. For such problems, we recommend 
-to use hypre's multigrid reduction (MGR) solver. The second approach, called 
-the nodal approach, considers all unknowns at a physical grid point together 
-such that coarsening, interpolation and relaxation occur in a point-wise fashion. 
-It is possible and sometimes prefered to combine nodal coarsening with unknown-based 
-interpolation. For this case, ``HYPRE_BoomerAMGSetNodal`` should be set > 1. 
+of PDEs. The unknown-based approach (which is the default) treats variables
+corresponding to the same unknown or function separately, i.e., when coarsening
+or generating interpolation, connections between variables associated with
+different unknowns are ignored. This can work well for weakly coupled PDEs,
+but will be problematic for strongly coupled PDEs. For such problems, we recommend
+to use hypre's multigrid reduction (MGR) solver. The second approach, called
+the nodal approach, considers all unknowns at a physical grid point together
+such that coarsening, interpolation and relaxation occur in a point-wise fashion.
+It is possible and sometimes prefered to combine nodal coarsening with unknown-based
+interpolation. For this case, ``HYPRE_BoomerAMGSetNodal`` should be set > 1.
 For details see the reference manual.
 
 If the user can provide the near null-space vectors, such as the rigid body
@@ -185,22 +185,24 @@ only be used with weighted Jacobi or l1-Jacobi smoothing.
 GPU-supported Options
 ------------------------------------------------------------------------------
 
-In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs.
-However, hypre can also be built without ``--enable-unified-memory`` if
-all the selected parameters have GPU-support.
-The currently available  GPU-supported BoomerAMG options include:
+In general, most BoomerAMG options are GPU-enabled and do not require unified memory.
+If any selected option lacks GPU support, then unified memory is required for those parts to run on the CPU.
+When building hypre without ``--enable-unified-memory``, make sure that all chosen BoomerAMG
+parameters are GPU-compatible. The currently supported GPU-enabled BoomerAMG options include:
 
 * Coarsening: PMIS (8)
-* Interpolation:  direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
+* Interpolation: direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
 * Aggressive coarsening
-* Second-stage interpolation with aggressive coarsening: extended (5) and extended+e (7)
+* Multipass interpolation with aggressive coarsening (4 or 8)
+* Second-stage interpolation with aggressive coarsening: extended (5), extended+i (6) and extended+e (7)
 * Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SSOR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_,  and Chebyshev (16)
 * Relaxation order can be 0, lexicographic order, or C/F for (7) and (18)
 
 Memory locations and execution policies
 ------------------------------------------------------------------------------
+
 Hypre provides two user-level memory locations, ``HYPRE_MEMORY_HOST`` and ``HYPRE_MEMORY_DEVICE``, where
-``HYPRE_MEMORY_HOST`` is always the CPU memory while ``HYPRE_MEMORY_DEVICE`` can be mapped to different memory spaces 
+``HYPRE_MEMORY_HOST`` is always the CPU memory while ``HYPRE_MEMORY_DEVICE`` can be mapped to different memory spaces
 based on the configure options of hypre.
 When built with ``--with-cuda``, ``--with-hip``, ``--with-sycl``, or ``--with-device-openmp``,
 ``HYPRE_MEMORY_DEVICE`` is the GPU device memory,
@@ -259,7 +261,7 @@ on GPUs is shown below.
  HYPRE_BoomerAMGSetCoarsenType(precon, coarsen_type); /* 8 */
  HYPRE_BoomerAMGSetInterpType(precon, interp_type); /* 3, 15, 6, 14, 18 */
  HYPRE_BoomerAMGSetAggNumLevels(precon, agg_num_levels);
- HYPRE_BoomerAMGSetAggInterpType(precon, agg_interp_type); /* 5 or 7 */
+ HYPRE_BoomerAMGSetAggInterpType(precon, agg_interp_type); /* 4, 5, 6, 7, 8 */
  HYPRE_BoomerAMGSetKeepTranspose(precon, TRUE); /* keep transpose to avoid SpMTV */
  HYPRE_BoomerAMGSetRAP2(precon, FALSE); /* RAP in two multiplications
                                            (default: FALSE) */

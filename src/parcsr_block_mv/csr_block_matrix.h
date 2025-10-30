@@ -18,7 +18,7 @@
 #ifndef hypre_CSR_BLOCK_MATRIX_HEADER
 #define hypre_CSR_BLOCK_MATRIX_HEADER
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.h"
 
 #ifdef __cplusplus

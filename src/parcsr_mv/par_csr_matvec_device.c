@@ -31,6 +31,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 {
    hypre_GpuProfilingPushRange("Matvec");
 
+   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int               *d_send_map_elmts;
@@ -61,9 +62,11 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    HYPRE_Complex           *x_buf_data;
 
    HYPRE_Int                sync_stream;
+   HYPRE_Int                num_procs;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
 
@@ -223,26 +226,29 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 #endif
 
    /* Non-blocking communication starts */
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
-                                                 HYPRE_MEMORY_DEVICE, x_buf_data,
-                                                 HYPRE_MEMORY_DEVICE, x_tmp_data);
-
-   /* Non-blocking communication ends */
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
-#endif
-
-   /* computation offd part */
-   if (num_cols_offd)
+   if (num_procs > 1)
    {
-      hypre_CSRMatrixMatvec(alpha, offd, x_tmp, 1.0, y_local);
-   }
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
+                                                    HYPRE_MEMORY_DEVICE, x_buf_data,
+                                                    HYPRE_MEMORY_DEVICE, x_tmp_data);
+
+      /* Non-blocking communication ends */
+      hypre_ParCSRCommHandleDestroy(comm_handle);
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+      hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
+
+      /* computation offd part */
+      if (num_cols_offd)
+      {
+         hypre_CSRMatrixMatvec(alpha, offd, x_tmp, 1.0, y_local);
+      }
+
+#ifdef HYPRE_PROFILE
+      hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
+   }
 
    /*---------------------------------------------------------------------
     * Free memory

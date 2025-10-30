@@ -932,16 +932,22 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
  *
  * If either RT_diag or RT_offd don't exist and the flag keep_transpose is
  * true, these local matrices are saved in the ParCSRMatrix R
+ *
+ * has_diagonal: enforces the presence of diagonal entries in C_diag
+ * by adding the identity matrix times zero to C_diag if needed
+ * (valid only for GPUs).
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
                          hypre_ParCSRMatrix  *A,
                          hypre_ParCSRMatrix  *P,
-                         HYPRE_Int            keep_transpose)
+                         HYPRE_Int            keep_transpose,
+                         HYPRE_Int            has_diagonal )
 {
    hypre_ParCSRMatrix *C = NULL;
 
+   HYPRE_UNUSED_VAR(has_diagonal);
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("TripleMat-RAP");
 
@@ -951,13 +957,17 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      C = hypre_ParCSRMatrixRAPKTDevice(R, A, P, keep_transpose);
+      C = hypre_ParCSRMatrixRAPKTDevice(R, A, P, keep_transpose, has_diagonal);
    }
    else
 #endif
    {
       C = hypre_ParCSRMatrixRAPKTHost(R, A, P, keep_transpose);
    }
+
+   /* Generate nonzero rows in the diag and offd matrices */
+   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(C));
+   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(C));
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
@@ -969,7 +979,8 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
  * hypre_ParCSRMatrixRAP
  *
  * Computes "C = R * A * P" and discards the temporary local matrices generated
- * in the algorithm (keep_transpose = 0).
+ * in the algorithm (keep_transpose = 0) while making sure that diagonal
+ * entries are present for GPU runs.
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
@@ -977,7 +988,7 @@ hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R,
                        hypre_ParCSRMatrix *A,
                        hypre_ParCSRMatrix *P )
 {
-   return hypre_ParCSRMatrixRAPKT(R, A, P, 0);
+   return hypre_ParCSRMatrixRAPKT(R, A, P, 0, 1);
 }
 
 /*--------------------------------------------------------------------------

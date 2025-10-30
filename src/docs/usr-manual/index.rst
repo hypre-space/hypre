@@ -19,9 +19,9 @@ Documentation for hypre
    ch-intro
    ch-struct
    ch-sstruct
-   ch-fei
    ch-ij
    ch-solvers
+   ch-mprecision
    ch-misc
    ch-references
 

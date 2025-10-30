@@ -203,6 +203,23 @@ HYPRE_StructPFMGGetRAPType( HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructPFMGSetMatmultType( HYPRE_StructSolver solver,
+                                HYPRE_Int          matmult_type  )
+{
+   return ( hypre_PFMGSetMatmultType( (void *) solver, matmult_type ) );
+}
+
+HYPRE_Int
+HYPRE_StructPFMGGetMatmultType( HYPRE_StructSolver solver,
+                                HYPRE_Int        * matmult_type  )
+{
+   return ( hypre_PFMGGetMatmultType( (void *) solver, matmult_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructPFMGSetNumPreRelax( HYPRE_StructSolver solver,
                                 HYPRE_Int          num_pre_relax )
 {

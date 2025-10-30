@@ -809,7 +809,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
    HYPRE_Int  obj_size_bytes, big_int_size, complex_size;
-   HYPRE_Int  first_index;
+   HYPRE_BigInt  first_index;
 
    void *void_contact_buf = NULL;
    void *index_ptr;

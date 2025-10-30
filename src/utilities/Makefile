@@ -21,12 +21,13 @@ CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 HEADERS =\
  amg_linklist.h\
  exchange_data.h\
- fortran.h\
- fortran_matrix.h\
+ _hypre_fortran.h\
+ _hypre_fortran_matrix.h\
  general.h\
  int_array.h\
  memory.h\
  memory_tracker.h\
+ multiprecision.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
@@ -56,10 +57,9 @@ FILES =\
  memory_tracker.c\
  merge_sort.c\
  mmio.c\
- mpi_comm_f2c.c\
  prefix_sum.c\
- printf.c\
  qsort.c\
+ unique.c\
  utilities.c\
  mpistubs.c\
  qsplit.c\
@@ -67,21 +67,49 @@ FILES =\
  state.c\
  threading.c\
  timer.c\
- timing.c
+ timing.c\
+ caliper_instrumentation.c
 
 CUFILES=\
+ device_markers.c\
  device_utils.c\
  general.c\
  handle.c\
  int_array_device.c\
  memory.c\
  omp_device.c\
- nvtx.c\
  stl_ops.c
+
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
+ifeq (${MP_BUILD}, 1)
+MP_FILES += printf.c multiprecision.c
+else
+FILES += printf.c multiprecision.c
+endif
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
+
+ifeq (${MP_BUILD}, 1)
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -91,20 +119,22 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_fortran*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
