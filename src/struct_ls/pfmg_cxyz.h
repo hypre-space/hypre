@@ -339,3 +339,19 @@
 #define HYPRE_CAP_SUM_UP_TO_18(d) \
   HYPRE_CAP_SUM_UP_TO_17(d) +     \
   HYPRE_CAP_EVAL(17, d)
+
+/* pfmg_cxyz_cc.c */
+HYPRE_Int hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A, HYPRE_Int Ab,
+                                        HYPRE_Int diag_is_constant, HYPRE_Int diag_entry,
+                                        HYPRE_Int *nentries, HYPRE_Int **entries,
+                                        hypre_IndexRef start, hypre_Index loop_size,
+                                        hypre_Box *A_dbox, hypre_Box *w_dbox,
+                                        HYPRE_Real **w_data);
+
+/* pfmg_cxyz_vc.c */
+HYPRE_Int hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A, HYPRE_Int Ab,
+                                        HYPRE_Int diag_is_constant, HYPRE_Int diag_entry,
+                                        HYPRE_Int *nentries, HYPRE_Int **entries,
+                                        hypre_IndexRef start, hypre_Index loop_size,
+                                        hypre_Box *A_dbox, hypre_Box *w_dbox,
+                                        HYPRE_Real **w_data);

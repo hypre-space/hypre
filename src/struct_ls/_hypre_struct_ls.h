@@ -236,22 +236,6 @@ HYPRE_Int hypre_PFMGPrintLogging ( void *pfmg_vdata );
 HYPRE_Int hypre_PFMGGetFinalRelativeResidualNorm ( void *pfmg_vdata,
                                                    HYPRE_Real *relative_residual_norm );
 
-/* pfmg_cxyz_cc.c */
-HYPRE_Int hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A, HYPRE_Int Ab,
-                                        HYPRE_Int diag_is_constant, HYPRE_Int diag_entry,
-                                        HYPRE_Int *nentries, HYPRE_Int **entries,
-                                        hypre_IndexRef start, hypre_Index loop_size,
-                                        hypre_Box *A_dbox, hypre_Box *w_dbox,
-                                        HYPRE_Real **w_data);
-
-/* pfmg_cxyz_vc.c */
-HYPRE_Int hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A, HYPRE_Int Ab,
-                                        HYPRE_Int diag_is_constant, HYPRE_Int diag_entry,
-                                        HYPRE_Int *nentries, HYPRE_Int **entries,
-                                        hypre_IndexRef start, hypre_Index loop_size,
-                                        hypre_Box *A_dbox, hypre_Box *w_dbox,
-                                        HYPRE_Real **w_data);
-
 /* pfmg_coarsen.c */
 HYPRE_Int hypre_PFMGComputeMaxLevels ( hypre_StructGrid *grid, HYPRE_Int *max_levels_ptr );
 HYPRE_Int hypre_PFMGComputeCxyz ( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz );
