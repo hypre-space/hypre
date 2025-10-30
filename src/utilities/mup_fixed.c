@@ -1249,14 +1249,6 @@ hypre_SeedRand( HYPRE_Int seed )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetCubMemPoolSize)( bin_growth, min_bin, max_bin, max_cached_bytes );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_SetDevice( hypre_int device_id, hypre_Handle *hypre_handle_ )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SetDevice)( device_id, hypre_handle_ );

@@ -77,9 +77,9 @@ void MemDestroy(Mem *m)
  * 3) memory exhausted.
  *--------------------------------------------------------------------------*/
 
-char *MemAlloc(Mem *m, HYPRE_Int size)
+char *MemAlloc(Mem *m, size_t size)
 {
-   HYPRE_Int req;
+   size_t req;
    char *p;
 
    /* Align on 16-byte boundary */
@@ -108,7 +108,7 @@ char *MemAlloc(Mem *m, HYPRE_Int size)
 
       m->blocks[m->num_blocks] = m->avail;
       m->num_blocks++;
-      m->bytes_left = req;
+      m->bytes_left = (hypre_longint) req;
       m->total_bytes += size;
       m->bytes_alloc += req;
       if (req > MEM_BLOCKSIZE)
@@ -136,9 +136,8 @@ void MemStat(Mem *m, FILE *stream, char *msg)
     hypre_fprintf(stream, "total_bytes: %ld\n", m->total_bytes);
     hypre_fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
     if (m->bytes_alloc != 0)
-        hypre_fprintf(stream, "efficiency : %f\n", m->total_bytes /
+        hypre_fprintf(stream, "efficiency : %f\n", (HYPRE_Real) m->total_bytes /
               (HYPRE_Real) m->bytes_alloc);
     hypre_fprintf(stream, "*********************\n");
     fflush(stream);
 }
-

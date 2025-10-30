@@ -75,7 +75,7 @@ SScanIntArray( char       *sdata_ptr,
    sdata_ptr += strspn(sdata_ptr, " \t\n(");
    for (i = 0; i < size; i++)
    {
-      array[i] = strtol(sdata_ptr, &sdata_ptr, 10);
+      array[i] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
    }
    sdata_ptr += strcspn(sdata_ptr, ")") + 1;
 
@@ -167,8 +167,8 @@ ReadData( char  *filename,
 
          if ( strcmp(key, "GridCreate:") == 0 )
          {
-            ndim = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.nboxes = strtol(sdata_ptr, &sdata_ptr, 10);
+            ndim = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            data.nboxes = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nboxes;
             data.ilowers  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
             data.iuppers  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
@@ -176,7 +176,7 @@ ReadData( char  *filename,
          }
          else if ( strcmp(key, "GridSetExtents:") == 0 )
          {
-            bi = strtol(sdata_ptr, &sdata_ptr, 10);
+            bi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.ilowers[bi]);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.iuppers[bi]);
             data.boxsizes[bi] = 1;
@@ -192,7 +192,7 @@ ReadData( char  *filename,
          }
          else if ( strcmp(key, "Matrix:") == 0 )
          {
-            data.nmatrices = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.nmatrices = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nmatrices;
             data.matrix_sizes     = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
             data.matrix_rstrides  = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
@@ -205,8 +205,8 @@ ReadData( char  *filename,
          }
          else if ( strcmp(key, "MatrixCreate:") == 0 )
          {
-            mi = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.matrix_sizes[mi] = strtol(sdata_ptr, &sdata_ptr, 10);
+            mi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            data.matrix_sizes[mi] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.matrix_rstrides[mi]);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.matrix_dstrides[mi]);
             n = data.matrix_sizes[mi];
@@ -215,35 +215,35 @@ ReadData( char  *filename,
          }
          else if ( strcmp(key, "MatrixSetCoeff:") == 0 )
          {
-            mi = strtol(sdata_ptr, &sdata_ptr, 10);
-            ei = strtol(sdata_ptr, &sdata_ptr, 10);
+            mi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            ei = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           ndim, data.matrix_offsets[mi][ei]);
             data.matrix_values[mi][ei] = strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "MatrixSetConstant:") == 0 )
          {
-            mi = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.matrix_ncentries[mi] = strtol(sdata_ptr, &sdata_ptr, 10);
+            mi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            data.matrix_ncentries[mi] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.matrix_ncentries[mi];
             data.matrix_centries[mi] = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, n, data.matrix_centries[mi]);
          }
          else if ( strcmp(key, "MatrixSetSymmetric:") == 0 )
          {
-            mi = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.matrix_symmetric[mi] = strtol(sdata_ptr, &sdata_ptr, 10);
+            mi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
+            data.matrix_symmetric[mi] = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
          }
          else if ( strcmp(key, "Vector:") == 0 )
          {
-            data.nvectors = strtol(sdata_ptr, &sdata_ptr, 10);
+            data.nvectors = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             n = data.nvectors;
             data.vector_strides = hypre_CTAlloc(Index, n, HYPRE_MEMORY_HOST);
             data.vector_values  = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "VectorCreate:") == 0 )
          {
-            vi = strtol(sdata_ptr, &sdata_ptr, 10);
+            vi = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, ndim, data.vector_strides[vi]);
             data.vector_values[vi] = strtod(sdata_ptr, &sdata_ptr);
          }

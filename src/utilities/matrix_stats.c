@@ -194,7 +194,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    /* Digits computation */
    ndigits[0]  = hypre_max(7, hypre_ndigits(hypre_MatrixStatsNumRows(stats_finest)));
    ndigits[1]  = 7;
-   ndigits[2]  = hypre_max(8, hypre_ndigits(hypre_MatrixStatsNumNonzeros(stats_finest)));
+   ndigits[2]  = hypre_max(8, hypre_ndigits_ull(hypre_MatrixStatsNumNonzeros(stats_finest)));
    ndigits[3]  = 7;
    ndigits[4]  = 4;
    ndigits[5]  = 4;

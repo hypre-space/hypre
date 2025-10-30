@@ -69,7 +69,7 @@ mv_MultiVectorAxpy( HYPRE_Complex a, mv_MultiVectorPtr x, mv_MultiVectorPtr y );
    h the number of rows and w the number of columns (cf. blas or lapack) */
 void
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-                             HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Real* v );
+                             HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w, HYPRE_Real* v );
 
 /*computes the diagonal of x'*y stored in diag(mask) */
 void
@@ -79,7 +79,7 @@ mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr, mv_MultiVectorPtr,
 /* computes y = x*v, where v is stored in fortran style */
 void
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x,
-                        HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
+                        HYPRE_BigInt gh, HYPRE_BigInt h, HYPRE_BigInt w, HYPRE_Complex* v,
                         mv_MultiVectorPtr y );
 
 /* computes y = x*v + y, where v is stored in fortran style */

@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #ifdef __cplusplus
-#define REGISTER 
+#define REGISTER
 #else
 #define REGISTER register
 #endif
@@ -137,7 +137,7 @@ static void qst(char *base, char *max)
     HYPRE_Int lo;
     HYPRE_Int hi;
 
-    lo = max - base;		/* number of elements as chars */
+    lo = (HYPRE_Int) (max - base);		/* number of elements as chars */
     do
     {
 	/* At the top here, lo is the number of characters of elements in the
@@ -147,7 +147,7 @@ static void qst(char *base, char *max)
 	   than that guy, then it's that guy, else compare max with loser of
 	   first and take larger.  Things are set up to prefer the middle,
 	   then the first in case of ties. */
-	mid = i = base + qsz * ((unsigned) (lo / qsz) >> 1);
+	mid = i = base + ((unsigned) qsz) * ((unsigned) (lo / qsz) >> 1);
 	if (lo >= mthresh)
 	{
 	    j = ((*qcmp) ((jj = base), i) > 0 ? jj : i);
@@ -218,7 +218,7 @@ static void qst(char *base, char *max)
 	   repeat (recursively or by branching) if the partition is of at
 	   least size THRESH. */
 	i = (j = mid) + qsz;
-	if ((lo = j - base) <= (hi = max - i))
+	if ((lo = (HYPRE_Int) (j - base)) <= (hi = (HYPRE_Int) (max - i)))
 	{
 	    if (lo >= thresh)
 		qst(base, j);

@@ -1605,7 +1605,8 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
                      size *= length_array[d];
                   }
 
-                  hypre_Memset(dptr, 0, size * sizeof(HYPRE_Complex), memory_location);
+                  hypre_Memset(dptr, 0, (size_t) size * sizeof(HYPRE_Complex),
+                               memory_location);
                   dptr += size;
                }
             }
@@ -1708,7 +1709,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
       hypre_MPI_Irecv(recv_buffers_mpi[i],
-                      recv_bufsizes[i] * sizeof(HYPRE_Complex),
+                      (HYPRE_Int) sizeof(HYPRE_Complex) * recv_bufsizes[i],
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
                       tag, comm, &requests[j++]);
    }
@@ -1718,7 +1719,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
       hypre_MPI_Isend(send_buffers_mpi[i],
-                      send_bufsizes[i] * sizeof(HYPRE_Complex),
+                      (HYPRE_Int) sizeof(HYPRE_Complex) * send_bufsizes[i],
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
                       tag, comm, &requests[j++]);
 

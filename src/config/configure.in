@@ -176,7 +176,6 @@ hypre_using_cusparse=no
 hypre_using_cublas=no
 hypre_using_curand=no
 hypre_using_cusolver=no
-hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_thrust_nosync=no
 hypre_using_umpire=no
@@ -448,17 +447,6 @@ AS_HELP_STRING([--enable-unified-memory],
     *)   hypre_using_um=no ;;
  esac],
 [hypre_using_um=no]
-)
-
-AC_ARG_ENABLE(device-memory-pool,
-AS_HELP_STRING([--enable-device-memory-pool],
-               [Use device pooling allocator (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_device_pool=yes ;;
-    no)  hypre_using_device_pool=no ;;
-    *)   hypre_using_device_pool=no ;;
- esac],
-[hypre_using_device_pool=no]
 )
 
 AC_ARG_ENABLE(device-malloc-async,
@@ -768,7 +756,7 @@ AS_HELP_STRING([--with-MPI-libs=LIBS],
                 --with-MPI-include --with-MPI-libs and --with-MPI-lib-dirs
                 must be used together.]),
 [for mpi_lib in $withval; do
-    MPILIBS="$MPILIBS -l$mpi_lib"
+    MPILIBS+=" -l$mpi_lib"
  done;
  hypre_user_chose_mpi=yes]
 )
@@ -781,7 +769,7 @@ AS_HELP_STRING([--with-MPI-lib-dirs=DIRS],
                 The options --with-MPI-include --with-MPI-libs and
                 --with-MPI-lib-dirs must be used together.]),
 [for mpi_lib_dir in $withval; do
-    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+    MPILIBDIRS+=" -L$mpi_lib_dir"
  done;
  hypre_user_chose_mpi=yes]
 )
@@ -859,7 +847,7 @@ dnl    if test $libprefix = "-L"
 dnl    then
 dnl       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
 dnl    else
-       BLASLIBS="$BLASLIBS $blas_lib"
+       BLASLIBS+=" $blas_lib"
 dnl    fi
  done;
  hypre_user_chose_blas=yes]
@@ -871,7 +859,7 @@ AS_HELP_STRING([--with-blas-libs=LIBS],
                 needed for BLAS (base name only). The options --with-blas-libs and
                 --with-blas-lib-dirs must be used together.]),
 [for blas_lib in $withval; do
-    BLASLIBS="$BLASLIBS -l$blas_lib"
+    BLASLIBS+=" -l$blas_lib"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_old_style=yes]
@@ -885,7 +873,7 @@ AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
                 The  options --with-blas-libs and --with-blas-lib-dirs
                 must be used together.]),
 [for blas_lib_dir in $withval; do
-    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+    BLASLIBDIRS+=" -L$blas_lib_dir"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_dir_old_style=yes]
@@ -903,7 +891,7 @@ dnl    if test $libprefix = "-L"
 dnl    then
 dnl       LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
 dnl    else
-       LAPACKLIBS="$LAPACKLIBS $lapack_lib"
+       LAPACKLIBS+=" $lapack_lib"
 dnl    fi
  done;
  hypre_user_chose_lapack=yes]
@@ -915,7 +903,7 @@ AS_HELP_STRING([--with-lapack-libs=LIBS],
                 needed for LAPACK (base name only). The options --with-lapack-libs and
                 --with-lapack-lib-dirs must be used together.]),
 [for lapack_lib in $withval; do
-    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+    LAPACKLIBS+=" -l$lapack_lib"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_old_style=yes]
@@ -929,7 +917,7 @@ AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
                 The options --with-lapack-libs and --with-lapack-lib-dirs
                 must be used together.]),
 [for lapack_lib_dir in $withval; do
-    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+    LAPACKLIBDIRS+=" -L$lapack_lib_dir"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_dir_old_style=yes]
@@ -1077,7 +1065,7 @@ AS_HELP_STRING([--with-superlu-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for SuperLU. OK to use -L and -l flags in the list]),
 [for superlu_lib in $withval; do
-    SUPERLU_LIBS="$SUPERLU_LIBS $superlu_lib"
+    SUPERLU_LIBS+=" $superlu_lib"
  done]
 )
 
@@ -1109,7 +1097,7 @@ AS_HELP_STRING([--with-dsuperlu-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for DSuperLU. OK to use -L and -l flags in the list]),
 [for dsuperlu_lib in $withval; do
-    DSUPERLU_LIBS="$DSUPERLU_LIBS $dsuperlu_lib"
+    DSUPERLU_LIBS+=" $dsuperlu_lib"
  done]
 )
 
@@ -1433,7 +1421,7 @@ AS_HELP_STRING([--with-raja-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for RAJA. OK to use -L and -l flags in the list]),
 [for raja_lib in $withval; do
-       HYPRE_RAJA_LIB="$raja_lib $HYPRE_RAJA_LIB"
+       HYPRE_RAJA_LIB+=" $raja_lib"
  done;
 hypre_user_chose_raja=yes]
 )
@@ -1444,7 +1432,7 @@ AS_HELP_STRING([--with-raja-libs=LIBS],
                 needed for RAJA (base name only). The options --with-raja-libs and
                 --with-raja-lib-dirs must be used together.]),
 [for raja_lib in $withval; do
-    HYPRE_RAJA_LIB="-l$raja_lib $HYPRE_RAJA_LIB"
+    HYPRE_RAJA_LIB+=" -l$raja_lib"
  done;
 hypre_user_chose_raja=yes]
 )
@@ -1457,7 +1445,7 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
                 The  options --with-raja-libs and --raja-blas-lib-dirs
                 must be used together.]),
 [for raja_lib_dir in $withval; do
-    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
+    HYPRE_RAJA_LIB_DIR+=" -L$raja_lib_dir"
  done;
  hypre_user_chose_raja=yes]
 )
@@ -1491,7 +1479,7 @@ AS_HELP_STRING([--with-kokkos-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for KOKKOS. OK to use -L and -l flags in the list]),
 [for kokkos_lib in $withval; do
-       HYPRE_KOKKOS_LIB="$kokkos_lib $HYPRE_KOKKOS_LIB"
+       HYPRE_KOKKOS_LIB+=" $kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1502,7 +1490,7 @@ AS_HELP_STRING([--with-kokkos-libs=LIBS],
                 needed for KOKKOS (base name only). The options --with-kokkos-libs and
                 --with-kokkos-dirs must be used together.]),
 [for kokkos_lib in $withval; do
-    HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
+    HYPRE_KOKKOS_LIB+=" -l$kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1515,7 +1503,7 @@ AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
                 The  options --with-kokkos-libs and --with-kokkos-dirs
                 must be used together.]),
 [for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+    HYPRE_KOKKOS_LIB_DIR+=" -L$kokkos_lib_dir"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1596,7 +1584,7 @@ AS_HELP_STRING([--with-umpire-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for UMPIRE. OK to use -L and -l flags in the list]),
 [for umpire_lib in $withval; do
-       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+       HYPRE_UMPIRE_LIB+=" $umpire_lib"
  done;
  hypre_user_gave_umpire_lib=yes]
 )
@@ -1607,7 +1595,7 @@ AS_HELP_STRING([--with-umpire-libs=LIBS],
                 needed for UMPIRE (base name only). The options --with-umpire-libs and
                 --with-umpire-dirs must be used together.]),
 [for umpire_lib in $withval; do
-    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+    HYPRE_UMPIRE_LIB+=" -l$umpire_lib"
  done;
  hypre_user_gave_umpire_libs=yes]
 )
@@ -1620,8 +1608,8 @@ AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
                 The  options --with-umpire-libs and --with-umpire-dirs
                 must be used together.]),
 [for umpire_lib_dir in $withval; do
-    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
-    HYPRE_UMPIRE_RPATH="${HYPRE_UMPIRE_RPATH} -Wl,-rpath,${umpire_lib_dir}"
+    HYPRE_UMPIRE_LIB_DIR+=" -L$umpire_lib_dir"
+    HYPRE_UMPIRE_RPATH+=" -Wl,-rpath,${umpire_lib_dir}"
  done;
  hypre_user_gave_umpire_lib_dirs=yes]
 )
@@ -1659,7 +1647,7 @@ AS_HELP_STRING([--with-magma-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for MAGMA. OK to use -L and -l flags in the list]),
 [for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" $magma_lib"
  done;
 hypre_user_gave_magma_lib=yes]
 )
@@ -1670,7 +1658,7 @@ AS_HELP_STRING([--with-magma-libs=LIBS],
                 needed for MAGMA (base name only). The options --with-magma-libs and
                 --with-magma-lib-dirs must be used together.]),
 [for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="-l$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" -l$magma_lib"
  done;
 hypre_user_gave_magma_libs=yes]
 )
@@ -1683,7 +1671,7 @@ AS_HELP_STRING([--with-magma-lib-dirs=DIRS],
                 The  options --with-magma-libs and --with-magma-lib-dirs
                 must be used together.]),
 [for magma_lib_dir in $withval; do
-    HYPRE_MAGMA_LIB_DIR="-L$magma_lib_dir $HYPRE_MAGMA_LIB_DIR"
+    HYPRE_MAGMA_LIB_DIR+=" -L$magma_lib_dir"
  done;
 hypre_user_gave_magma_lib_dirs=yes]
 )
@@ -1717,7 +1705,7 @@ AS_HELP_STRING([--with-caliper-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for Caliper. OK to use -L and -l flags in the list]),
 [for caliper_lib in $withval; do
-    CALIPER_LIBS="$CALIPER_LIBS $caliper_lib"
+    CALIPER_LIBS+=" $caliper_lib"
  done;
  hypre_user_gave_caliper_lib=yes]
 )
@@ -1906,7 +1894,7 @@ if test "$hypre_using_mpi" = "no"
 then
    AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
 else
-   AC_HYPRE_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
+   AC_HYPRE_CHECK_MPI([LIBS+=" $MPILIBS"])
    AC_CHECK_FUNCS([MPI_Comm_f2c])
    AC_CACHE_CHECK([whether MPI_Comm_f2c is a macro],
      hypre_cv_func_MPI_Comm_f2c_macro,
@@ -2048,7 +2036,7 @@ then
          AC_DEFINE(HAVE_MLI, 1, [Define to 1 if using MLI])
       fi
    fi
-   AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
+   AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS+=" -lstdc++")
 else
    HYPRE_FEI_SRC_DIR=
    HYPRE_FEI_BASE_DIR=
@@ -2124,7 +2112,7 @@ fi
 dnl *********************************************************************
 dnl * FIND libraries needed to link with hypre
 dnl *********************************************************************
-AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
+AC_CHECK_LIB(m, cabs, LIBS+=" -lm")
 dnl * Commenting this out because it doesn't really behave correctly.
 dnl * This should probably be deleted altogether at some point. (RDF)
 dnl AC_HYPRE_FIND_G2C
@@ -2538,6 +2526,8 @@ then
     if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
     then
       hypre_using_umpire=yes
+      hypre_using_umpire_device=yes
+      hypre_using_umpire_um=yes
       AC_MSG_NOTICE([Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out.])
     fi
   fi
@@ -2603,7 +2593,7 @@ However, Umpire include and/or library paths were not provided.
 Provide the following flags as appropriate:
   --with-umpire-include="/path-to-umpire-install/include"
   --with-umpire-lib-dirs="/path-to-umpire-install/lib"
-  --with-umpire-libs="umpire"  or  --with-umpire-lib="-lumpire"
+  --with-umpire-libs="umpire camp"
 
 To opt out (not recommended), configure with --without-umpire.
 ===============================================================])
@@ -2696,11 +2686,6 @@ then
    then
       AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSOLVER])
       HYPRE_CUDA_LIBS+=" -lcusolver"
-   fi
-
-   if test "$hypre_using_device_pool" = "yes"
-   then
-      AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
    fi
 
    if test "$hypre_using_device_malloc_async" = "yes"
@@ -2875,8 +2860,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
               [AC_CHECK_HEADER(["${MKLROOT}/include/mkl.h"],
                                [hypre_found_mkl=yes],
                                AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
+               HYPRE_SYCL_LIBS+=" -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL+=" -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])

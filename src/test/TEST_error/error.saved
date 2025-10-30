@@ -61,7 +61,7 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
                 operator = 2.667344
                    cycle = 5.332187
 
-0: hypre error in file "par_amg.c", line 2025, error code = 20
+0: hypre error in file "par_amg.c", line 2024, error code = 20
 0: hypre error in file "par_amg_solve.c", line 342, error code = 256
 0: hypre error in file "par_amg_solve.c", line 342, error code = 256
 0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors

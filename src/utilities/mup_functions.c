@@ -214,15 +214,6 @@ HYPRE_SetExecutionPolicy( HYPRE_ExecutionPolicy exec_policy )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize( HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes )
-{
-   HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_SetGPUMemoryPoolSize_pre( precision, bin_growth, min_bin, max_bin, max_cached_bytes );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
