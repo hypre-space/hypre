@@ -571,9 +571,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 
    hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
    hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
-   HYPRE_Int            (*fine_grid_solver_solve)(void*, void*, void*, void*) =
-      (mgr_data -> fine_grid_solver_solve);
-   hypre_ParCSRMatrix   **A_ff_array = (mgr_data -> A_ff_array);
+   hypre_ParCSRMatrix   **A_ff_array   = (mgr_data -> A_ff_array);
 
    HYPRE_Int              i, relax_points;
    HYPRE_Int              num_coarse_levels = (mgr_data -> num_coarse_levels);
