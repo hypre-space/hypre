@@ -82,7 +82,6 @@ CUFILES =\
  struct_innerprod.c\
  struct_matop.c\
  struct_matrix.c\
- struct_matvec.c\
  struct_scale.c\
  struct_vector.c
 

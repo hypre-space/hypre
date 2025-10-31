@@ -66,14 +66,15 @@ hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
 #define HYPRE_CORE_CASE(n)                                               \
    case n:                                                               \
       HYPRE_LOAD_AX_UP_TO_##n(transpose);                                \
-      hypre_BoxLoop3Begin(ndim, loop_size,                               \
+      hypre_BoxLoop4Begin(ndim, loop_size,                               \
                           A_data_box, Adstart, Adstride, Ai,             \
                           x_data_box, xdstart, xdstride, xi,             \
+                          y_data_box, ydstart, ydstride, yi,             \
                           z_data_box, zdstart, zdstride, zi)             \
       {                                                                  \
-         zp[zi] = beta * yp[zi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n); \
+         zp[zi] = beta * yp[yi] + alpha * (HYPRE_CALC_AX_ADD_UP_TO_##n); \
       }                                                                  \
-      hypre_BoxLoop3End(Ai, xi, zi)                                      \
+      hypre_BoxLoop4End(Ai, xi, yi, zi)                                  \
       break;
 
    switch (depth)
