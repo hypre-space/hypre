@@ -17,7 +17,7 @@
 #if 1 /* HYPRE */
 #include "HYPRE_config.h"
 #include "_hypre_utilities.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #ifdef HYPRE_USING_ESSL
 #define ESSL
 #endif

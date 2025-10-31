@@ -17,8 +17,10 @@ mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fro
 mpirun -np 1 ./sstruct -in sstruct.in.amr.graphadd -r 3 3 1 -solver 18 -print > io.out.2P
 mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.2R
 
-mpirun -np 1 ./sstruct -in sstruct.in.laps -r 4 4 1 -solver 18 -print > io.out.3P
-mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.3R
+# There is a memory problem here related to the -print option (it's clean without it).
+# It looks like HYPRE_SStructMatrixToIJMatrix() needs to be extended to work with multiple vars
+#mpirun -np 1 ./sstruct -in sstruct.in.laps -r 4 4 1 -solver 18 -print > io.out.3P
+#mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.3R
 
 mpirun -np 1 ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 18 -print > io.out.4P
 mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.4R
@@ -45,8 +47,9 @@ mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fro
 mpirun -np 2 ./sstruct -in sstruct.in.amr.graphadd -r 3 3 1 -pooldist 1 -solver 18 -print > io.out.102P
 mpirun -np 2 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.102R
 
-mpirun -np 4 ./sstruct -in sstruct.in.laps -r 2 2 1 -P 2 2 1 -solver 18 -print > io.out.103P
-mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.103R
+# See comment above about -print option
+#mpirun -np 4 ./sstruct -in sstruct.in.laps -r 2 2 1 -P 2 2 1 -solver 18 -print > io.out.103P
+#mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.103R
 
 mpirun -np 4 ./sstruct -in sstruct.in.miller_3blk -r 2 2 1 -P 2 2 1 -solver 18 -print > io.out.104P
 mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.104R

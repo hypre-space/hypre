@@ -517,7 +517,7 @@ L150:
 /* Computing 2nd power */
     i__1 = *n;
     z__[(*n << 1) + 4] = (doublereal) ndiv / (doublereal) (i__1 * i__1);
-    z__[(*n << 1) + 5] = nfail * 100. / (doublereal) iter;
+    z__[(*n << 1) + 5] = (doublereal) nfail * 100. / (doublereal) iter;
     return 0;
 
 /*     End of DLASQ2 */

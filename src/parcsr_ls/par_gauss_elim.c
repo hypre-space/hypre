@@ -208,14 +208,14 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
             {
                /* using row major */
-               col = A_diag_j[jj] + first_row_index;
+               col = (HYPRE_Int) (A_diag_j[jj] + first_row_index);
                A_mat_local[i * global_num_rows + col] = A_diag_data[jj];
             }
 
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                /* using row major */
-               col = col_map_offd[A_offd_j[jj]];
+               col = (HYPRE_Int) col_map_offd[A_offd_j[jj]];
                A_mat_local[i * global_num_rows + col] = A_offd_data[jj];
             }
          }
@@ -641,11 +641,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
          /* Run hypre's internal gaussian elimination */
-         hypre_gselim(A_work, b_vec, global_num_rows, ierr);
-         if (ierr != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
-         }
+         hypre_gselim(A_work, b_vec, global_num_rows);
 
          hypre_TMemcpy(u_data, b_data_h + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);

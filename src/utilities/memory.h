@@ -101,7 +101,7 @@ typedef enum _hypre_MemoryLocation
  * hypre_GetActualMemLocation
  *   return actual location based on the selected memory model
  *-------------------------------------------------------*/
-static inline hypre_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC hypre_MemoryLocation
 hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 {
    if (location == HYPRE_MEMORY_HOST)
@@ -129,28 +129,31 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 #if !defined(HYPRE_USING_MEMORY_TRACKER)
 
 #define hypre_TAlloc(type, count, location) \
-( (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+( (type *) hypre_MAlloc((size_t) (count) * sizeof(type), (location)) )
 
-#define _hypre_TAlloc(type, count, location) \
-( (type *) _hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+#define hypre__TAlloc(type, count, location) \
+( (type *) hypre__MAlloc((size_t)(sizeof(type) * (count)), location) )
 
 #define hypre_CTAlloc(type, count, location) \
-( (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
+( (type *) hypre_CAlloc((size_t) (count), (size_t) sizeof(type), (location)) )
 
 #define hypre_TReAlloc(ptr, type, count, location) \
-( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
+( (type *) hypre_ReAlloc((char *) (ptr), (size_t) (count) * sizeof(type), (location)) )
 
 #define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location) \
-( (new_type *) hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location) )
+( (new_type *) hypre_ReAlloc_v2((char *) ptr, \
+                                (size_t) (old_count) * sizeof(old_type), \
+                                (size_t) (new_count) * sizeof(new_type), \
+                                (location)) )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
-(hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
+(hypre_Memcpy((void *) (dst), (void *) (src), (size_t) (count) * sizeof(type), (locdst), (locsrc)))
 
 #define hypre_TFree(ptr, location) \
-( hypre_Free((void *)ptr, location), ptr = NULL )
+( hypre_Free((void *) (ptr), (location)), ptr = NULL )
 
-#define _hypre_TFree(ptr, location) \
-( _hypre_Free((void *)ptr, location), ptr = NULL )
+#define hypre__TFree(ptr, location) \
+( hypre__Free((void *)ptr, location), ptr = NULL )
 
 #endif /* #if !defined(HYPRE_USING_MEMORY_TRACKER) */
 
@@ -172,17 +175,14 @@ void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_
                     HYPRE_MemoryLocation loc_src);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location);
-
-void * _hypre_MAlloc(size_t size, hypre_MemoryLocation location);
-void   _hypre_Free(void *ptr, hypre_MemoryLocation location);
+void * hypre__MAlloc(size_t size, hypre_MemoryLocation location);
+void   hypre__Free(void *ptr, hypre_MemoryLocation location);
 
 HYPRE_ExecutionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                                            HYPRE_MemoryLocation location2);
 
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
-HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin,
-                                   size_t max_cached_bytes );
 HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
 void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);

@@ -101,7 +101,7 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
-      rzhound*|aztec*|cab*|quartz*|sierra*|syrah*|vulcan*)
+      rzhound*|aztec*|cab*|dane*|quartz*|sierra*|syrah*|vulcan*)
          shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
@@ -117,14 +117,6 @@ function MpirunString
       pascal*)
          shift
          RunString="srun -n$1"
-         ;;
-      rzansel*)
-         shift
-         RunString="lrun -T$1"
-         ;;
-      lassen*)
-         shift
-         RunString="lrun -n$1"
          ;;
       tioga*)
          shift
@@ -608,7 +600,6 @@ CleanUp $TestDirNames $ExecFileNames
 cat > runtest.filters <<EOF
 PMIX ERROR: PMIX_ERR_NOT_FOUND in file dstore_base.c at line 1567
 PMIX ERROR: PMIX_ERROR in file dstore_base.c at line 2334
-lrun warning: default mapping forced to idle
 srun: Warning: can't run 1 processes on 2 nodes, setting nnodes to 1
 hypre_MPI_Init
 job [0-9]* queued and waiting for resources

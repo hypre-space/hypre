@@ -7,8 +7,12 @@
 #include <HYPRE_config.h>
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "HYPRE_lobpcg.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_parcsr_ls_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +32,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -1151,6 +1155,89 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_ParCheby_DATA_HEADER
+#define hypre_ParCheby_DATA_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_ParChebyData
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_ParChebyData_struct
+{
+   /* Base solver data structure */
+   hypre_Solver          base;
+
+   /* Solver options */
+   HYPRE_Int             print_level;
+   HYPRE_Int             zero_guess;
+   HYPRE_Int             max_iter;
+   HYPRE_Int             order;
+   HYPRE_Int             variant;
+   HYPRE_Int             scale;
+   HYPRE_Int             eig_est;
+   HYPRE_Int             eig_provided;
+   HYPRE_Real            eig_ratio;
+   HYPRE_Real            min_eig_est;
+   HYPRE_Real            max_eig_est;
+   HYPRE_Real            tol;
+
+   /* log info */
+   HYPRE_Int             logging;
+   HYPRE_Int             num_iterations;
+   HYPRE_Real            rel_resid_norm;
+   hypre_ParVector      *residual; /* available if logging > 1 */
+
+   /* Work variables */
+   HYPRE_Real           *coefs;
+   hypre_ParVector      *scaling;
+   hypre_ParVector      *Ptemp;
+   hypre_ParVector      *Rtemp;
+   hypre_ParVector      *Vtemp;
+   hypre_ParVector      *Ztemp;
+   HYPRE_Int             owns_temp;
+
+   /* Statistics variables */
+
+} hypre_ParChebyData;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParChebyDataPrintLevel(data)     ((data) -> print_level)
+#define hypre_ParChebyDataZeroGuess(data)      ((data) -> zero_guess)
+#define hypre_ParChebyDataMaxIterations(data)  ((data) -> max_iter)
+#define hypre_ParChebyDataTol(data)            ((data) -> tol)
+#define hypre_ParChebyDataOrder(data)          ((data) -> order)
+#define hypre_ParChebyDataVariant(data)        ((data) -> variant)
+#define hypre_ParChebyDataScale(data)          ((data) -> scale)
+#define hypre_ParChebyDataEigEst(data)         ((data) -> eig_est)
+#define hypre_ParChebyDataEigProvided(data)    ((data) -> eig_provided)
+#define hypre_ParChebyDataEigRatio(data)       ((data) -> eig_ratio)
+#define hypre_ParChebyDataMinEigEst(data)      ((data) -> min_eig_est)
+#define hypre_ParChebyDataMaxEigEst(data)      ((data) -> max_eig_est)
+
+#define hypre_ParChebyDataLogging(data)        ((data) -> logging)
+#define hypre_ParChebyDataNumIterations(data)  ((data) -> num_iterations)
+#define hypre_ParChebyDataRelResidNorm(data)   ((data) -> rel_resid_norm)
+#define hypre_ParChebyDataResidual(data)       ((data) -> residual)
+
+#define hypre_ParChebyDataScaling(data)        ((data) -> scaling)
+#define hypre_ParChebyDataCoefs(data)          ((data) -> coefs)
+#define hypre_ParChebyDataPtemp(data)          ((data) -> Ptemp)
+#define hypre_ParChebyDataRtemp(data)          ((data) -> Rtemp)
+#define hypre_ParChebyDataVtemp(data)          ((data) -> Vtemp)
+#define hypre_ParChebyDataZtemp(data)          ((data) -> Ztemp)
+#define hypre_ParChebyDataOwnsTemp(data)       ((data) -> owns_temp)
+
+#endif /* #ifndef hypre_ParCheby_DATA_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef hypre_ParILU_DATA_HEADER
 #define hypre_ParILU_DATA_HEADER
 
@@ -1565,8 +1652,10 @@ HYPRE_Int hypre_AMGHybridSetKDim ( void *AMGhybrid_vdata, HYPRE_Int k_dim );
 HYPRE_Int hypre_AMGHybridSetStopCrit ( void *AMGhybrid_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_AMGHybridSetTwoNorm ( void *AMGhybrid_vdata, HYPRE_Int two_norm );
 HYPRE_Int hypre_AMGHybridSetRelChange ( void *AMGhybrid_vdata, HYPRE_Int rel_change );
-HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata, HYPRE_Int (*pcg_precond_solve )(void*, void*,
-                                                                                       void*, void*), HYPRE_Int (*pcg_precond_setup )(void*, void*, void*, void*), void *pcg_precond );
+HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata,
+                                      HYPRE_Int (*solve)(void*, void*, void*, void*),
+                                      HYPRE_Int (*setup)(void*, void*, void*, void*),
+                                      void *pcg_precond );
 HYPRE_Int hypre_AMGHybridSetLogging ( void *AMGhybrid_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_AMGHybridSetPrintLevel ( void *AMGhybrid_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_AMGHybridSetStrongThreshold ( void *AMGhybrid_vdata, HYPRE_Real strong_threshold );
@@ -1720,7 +1809,6 @@ HYPRE_Int hypre_index_of_minimum ( HYPRE_BigInt *data, HYPRE_Int n );
 void hypre_swap_int ( HYPRE_BigInt *data, HYPRE_Int a, HYPRE_Int b );
 void hypre_initialize_vecs ( HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc,
                              HYPRE_BigInt *offd_ftc, HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF );
-/*HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found , HYPRE_Int num_cols_A_offd , HYPRE_Int *A_ext_i , HYPRE_Int *A_ext_j, HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j, HYPRE_Int *CF_marker_offd );*/
 HYPRE_Int hypre_exchange_marker(hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *IN_marker,
                                 HYPRE_Int *OUT_marker);
 HYPRE_Int hypre_exchange_interp_data( HYPRE_Int **CF_marker_offd, HYPRE_Int **dof_func_offd,
@@ -1768,753 +1856,14 @@ HYPRE_Int hypre_seqAMGCycle ( hypre_ParAMGData *amg_data, HYPRE_Int p_level,
 HYPRE_Int hypre_GenerateSubComm ( MPI_Comm comm, HYPRE_Int participate, MPI_Comm *new_comm_ptr );
 void hypre_merge_lists ( HYPRE_Int *list1, HYPRE_Int *list2, hypre_int *np1,
                          hypre_MPI_Datatype *dptr );
-
-/* HYPRE_ads.c */
-HYPRE_Int HYPRE_ADSCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ADSDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ADSSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                           HYPRE_ParVector x );
-HYPRE_Int HYPRE_ADSSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                           HYPRE_ParVector x );
-HYPRE_Int HYPRE_ADSSetDiscreteCurl ( HYPRE_Solver solver, HYPRE_ParCSRMatrix C );
-HYPRE_Int HYPRE_ADSSetDiscreteGradient ( HYPRE_Solver solver, HYPRE_ParCSRMatrix G );
-HYPRE_Int HYPRE_ADSSetCoordinateVectors ( HYPRE_Solver solver, HYPRE_ParVector x, HYPRE_ParVector y,
-                                          HYPRE_ParVector z );
-HYPRE_Int HYPRE_ADSSetInterpolations ( HYPRE_Solver solver, HYPRE_ParCSRMatrix RT_Pi,
-                                       HYPRE_ParCSRMatrix RT_Pix, HYPRE_ParCSRMatrix RT_Piy, HYPRE_ParCSRMatrix RT_Piz,
-                                       HYPRE_ParCSRMatrix ND_Pi, HYPRE_ParCSRMatrix ND_Pix, HYPRE_ParCSRMatrix ND_Piy,
-                                       HYPRE_ParCSRMatrix ND_Piz );
-HYPRE_Int HYPRE_ADSSetMaxIter ( HYPRE_Solver solver, HYPRE_Int maxit );
-HYPRE_Int HYPRE_ADSSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ADSSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
-HYPRE_Int HYPRE_ADSSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ADSSetSmoothingOptions ( HYPRE_Solver solver, HYPRE_Int relax_type,
-                                         HYPRE_Int relax_times, HYPRE_Real relax_weight, HYPRE_Real omega );
-HYPRE_Int HYPRE_ADSSetChebySmoothingOptions ( HYPRE_Solver solver, HYPRE_Int cheby_order,
-                                              HYPRE_Real cheby_fraction );
-HYPRE_Int HYPRE_ADSSetAMSOptions ( HYPRE_Solver solver, HYPRE_Int cycle_type,
-                                   HYPRE_Int coarsen_type, HYPRE_Int agg_levels, HYPRE_Int relax_type, HYPRE_Real strength_threshold,
-                                   HYPRE_Int interp_type, HYPRE_Int Pmax );
-HYPRE_Int HYPRE_ADSSetAMGOptions ( HYPRE_Solver solver, HYPRE_Int coarsen_type,
-                                   HYPRE_Int agg_levels, HYPRE_Int relax_type, HYPRE_Real strength_threshold, HYPRE_Int interp_type,
-                                   HYPRE_Int Pmax );
-HYPRE_Int HYPRE_ADSGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *rel_resid_norm );
-
-/* HYPRE_ame.c */
-HYPRE_Int HYPRE_AMECreate ( HYPRE_Solver *esolver );
-HYPRE_Int HYPRE_AMEDestroy ( HYPRE_Solver esolver );
-HYPRE_Int HYPRE_AMESetup ( HYPRE_Solver esolver );
-HYPRE_Int HYPRE_AMESolve ( HYPRE_Solver esolver );
-HYPRE_Int HYPRE_AMESetAMSSolver ( HYPRE_Solver esolver, HYPRE_Solver ams_solver );
-HYPRE_Int HYPRE_AMESetMassMatrix ( HYPRE_Solver esolver, HYPRE_ParCSRMatrix M );
-HYPRE_Int HYPRE_AMESetBlockSize ( HYPRE_Solver esolver, HYPRE_Int block_size );
-HYPRE_Int HYPRE_AMESetMaxIter ( HYPRE_Solver esolver, HYPRE_Int maxit );
-HYPRE_Int HYPRE_AMESetMaxPCGIter ( HYPRE_Solver esolver, HYPRE_Int maxit );
-HYPRE_Int HYPRE_AMESetTol ( HYPRE_Solver esolver, HYPRE_Real tol );
-HYPRE_Int HYPRE_AMESetRTol ( HYPRE_Solver esolver, HYPRE_Real tol );
-HYPRE_Int HYPRE_AMESetPrintLevel ( HYPRE_Solver esolver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_AMEGetEigenvalues ( HYPRE_Solver esolver, HYPRE_Real **eigenvalues );
-HYPRE_Int HYPRE_AMEGetEigenvectors ( HYPRE_Solver esolver, HYPRE_ParVector **eigenvectors );
-
-/* HYPRE_ams.c */
-HYPRE_Int HYPRE_AMSCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_AMSDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_AMSSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                           HYPRE_ParVector x );
-HYPRE_Int HYPRE_AMSSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                           HYPRE_ParVector x );
-HYPRE_Int HYPRE_AMSSetDimension ( HYPRE_Solver solver, HYPRE_Int dim );
-HYPRE_Int HYPRE_AMSSetDiscreteGradient ( HYPRE_Solver solver, HYPRE_ParCSRMatrix G );
-HYPRE_Int HYPRE_AMSSetCoordinateVectors ( HYPRE_Solver solver, HYPRE_ParVector x, HYPRE_ParVector y,
-                                          HYPRE_ParVector z );
-HYPRE_Int HYPRE_AMSSetEdgeConstantVectors ( HYPRE_Solver solver, HYPRE_ParVector Gx,
-                                            HYPRE_ParVector Gy, HYPRE_ParVector Gz );
-HYPRE_Int HYPRE_AMSSetInterpolations ( HYPRE_Solver solver, HYPRE_ParCSRMatrix Pi,
-                                       HYPRE_ParCSRMatrix Pix, HYPRE_ParCSRMatrix Piy, HYPRE_ParCSRMatrix Piz );
-HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_alpha );
-HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_beta );
-HYPRE_Int HYPRE_AMSSetInteriorNodes ( HYPRE_Solver solver, HYPRE_ParVector interior_nodes );
-HYPRE_Int HYPRE_AMSSetProjectionFrequency ( HYPRE_Solver solver, HYPRE_Int projection_frequency );
-HYPRE_Int HYPRE_AMSSetMaxIter ( HYPRE_Solver solver, HYPRE_Int maxit );
-HYPRE_Int HYPRE_AMSSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_AMSSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
-HYPRE_Int HYPRE_AMSSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_AMSSetSmoothingOptions ( HYPRE_Solver solver, HYPRE_Int relax_type,
-                                         HYPRE_Int relax_times, HYPRE_Real relax_weight, HYPRE_Real omega );
-HYPRE_Int HYPRE_AMSSetChebySmoothingOptions ( HYPRE_Solver solver, HYPRE_Int cheby_order,
-                                              HYPRE_Real cheby_fraction );
-HYPRE_Int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver, HYPRE_Int alpha_coarsen_type,
-                                        HYPRE_Int alpha_agg_levels, HYPRE_Int alpha_relax_type, HYPRE_Real alpha_strength_threshold,
-                                        HYPRE_Int alpha_interp_type, HYPRE_Int alpha_Pmax );
-HYPRE_Int HYPRE_AMSSetAlphaAMGCoarseRelaxType ( HYPRE_Solver solver,
-                                                HYPRE_Int alpha_coarse_relax_type );
-HYPRE_Int HYPRE_AMSSetBetaAMGOptions ( HYPRE_Solver solver, HYPRE_Int beta_coarsen_type,
-                                       HYPRE_Int beta_agg_levels, HYPRE_Int beta_relax_type, HYPRE_Real beta_strength_threshold,
-                                       HYPRE_Int beta_interp_type, HYPRE_Int beta_Pmax );
-HYPRE_Int HYPRE_AMSSetBetaAMGCoarseRelaxType ( HYPRE_Solver solver,
-                                               HYPRE_Int beta_coarse_relax_type );
-HYPRE_Int HYPRE_AMSGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *rel_resid_norm );
-HYPRE_Int HYPRE_AMSProjectOutGradients ( HYPRE_Solver solver, HYPRE_ParVector x );
-HYPRE_Int HYPRE_AMSConstructDiscreteGradient ( HYPRE_ParCSRMatrix A, HYPRE_ParVector x_coord,
-                                               HYPRE_BigInt *edge_vertex, HYPRE_Int edge_orientation, HYPRE_ParCSRMatrix *G );
-HYPRE_Int HYPRE_AMSFEISetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                              HYPRE_ParVector x, HYPRE_BigInt *EdgeNodeList_, HYPRE_BigInt *NodeNumbers_, HYPRE_Int numEdges_,
-                              HYPRE_Int numLocalNodes_, HYPRE_Int numNodes_, HYPRE_Real *NodalCoord_ );
-HYPRE_Int HYPRE_AMSFEIDestroy ( HYPRE_Solver solver );
-
-/* HYPRE_parcsr_amg.c */
-HYPRE_Int HYPRE_BoomerAMGCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_BoomerAMGDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_BoomerAMGSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGSolveT ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                  HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGSetRestriction ( HYPRE_Solver solver, HYPRE_Int restr_par );
-HYPRE_Int HYPRE_BoomerAMGSetIsTriangular ( HYPRE_Solver solver, HYPRE_Int is_triangular );
-HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR ( HYPRE_Solver solver, HYPRE_Int gmres_switch );
-HYPRE_Int HYPRE_BoomerAMGSetMaxLevels ( HYPRE_Solver solver, HYPRE_Int max_levels );
-HYPRE_Int HYPRE_BoomerAMGGetMaxLevels ( HYPRE_Solver solver, HYPRE_Int *max_levels );
-HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize ( HYPRE_Solver solver, HYPRE_Int max_coarse_size );
-HYPRE_Int HYPRE_BoomerAMGGetMaxCoarseSize ( HYPRE_Solver solver, HYPRE_Int *max_coarse_size );
-HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize ( HYPRE_Solver solver, HYPRE_Int min_coarse_size );
-HYPRE_Int HYPRE_BoomerAMGGetMinCoarseSize ( HYPRE_Solver solver, HYPRE_Int *min_coarse_size );
-HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold ( HYPRE_Solver solver, HYPRE_Int seq_threshold );
-HYPRE_Int HYPRE_BoomerAMGGetSeqThreshold ( HYPRE_Solver solver, HYPRE_Int *seq_threshold );
-HYPRE_Int HYPRE_BoomerAMGSetRedundant ( HYPRE_Solver solver, HYPRE_Int redundant );
-HYPRE_Int HYPRE_BoomerAMGGetRedundant ( HYPRE_Solver solver, HYPRE_Int *redundant );
-HYPRE_Int HYPRE_BoomerAMGSetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int coarsen_cut_factor );
-HYPRE_Int HYPRE_BoomerAMGGetCoarsenCutFactor( HYPRE_Solver solver, HYPRE_Int *coarsen_cut_factor );
-HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver, HYPRE_Real strong_threshold );
-HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver, HYPRE_Real *strong_threshold );
-HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR ( HYPRE_Solver solver, HYPRE_Real strong_threshold );
-HYPRE_Int HYPRE_BoomerAMGGetStrongThresholdR ( HYPRE_Solver solver, HYPRE_Real *strong_threshold );
-HYPRE_Int HYPRE_BoomerAMGSetFilterThresholdR ( HYPRE_Solver solver, HYPRE_Real filter_threshold );
-HYPRE_Int HYPRE_BoomerAMGGetFilterThresholdR ( HYPRE_Solver solver, HYPRE_Real *filter_threshold );
-HYPRE_Int HYPRE_BoomerAMGSetGMRESSwitchR ( HYPRE_Solver solver, HYPRE_Int gmres_switch );
-HYPRE_Int HYPRE_BoomerAMGSetSabs ( HYPRE_Solver solver, HYPRE_Int Sabs );
-HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum ( HYPRE_Solver solver, HYPRE_Real max_row_sum );
-HYPRE_Int HYPRE_BoomerAMGGetMaxRowSum ( HYPRE_Solver solver, HYPRE_Real *max_row_sum );
-HYPRE_Int HYPRE_BoomerAMGSetTruncFactor ( HYPRE_Solver solver, HYPRE_Real trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGGetTruncFactor ( HYPRE_Solver solver, HYPRE_Real *trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGSetPMaxElmts ( HYPRE_Solver solver, HYPRE_Int P_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGGetPMaxElmts ( HYPRE_Solver solver, HYPRE_Int *P_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGSetJacobiTruncThreshold ( HYPRE_Solver solver,
-                                                   HYPRE_Real jacobi_trunc_threshold );
-HYPRE_Int HYPRE_BoomerAMGGetJacobiTruncThreshold ( HYPRE_Solver solver,
-                                                   HYPRE_Real *jacobi_trunc_threshold );
-HYPRE_Int HYPRE_BoomerAMGSetPostInterpType ( HYPRE_Solver solver, HYPRE_Int post_interp_type );
-HYPRE_Int HYPRE_BoomerAMGGetPostInterpType ( HYPRE_Solver solver, HYPRE_Int *post_interp_type );
-HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch ( HYPRE_Solver solver, HYPRE_Real S_commpkg_switch );
-HYPRE_Int HYPRE_BoomerAMGSetInterpType ( HYPRE_Solver solver, HYPRE_Int interp_type );
-HYPRE_Int HYPRE_BoomerAMGSetSepWeight ( HYPRE_Solver solver, HYPRE_Int sep_weight );
-HYPRE_Int HYPRE_BoomerAMGSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_BoomerAMGSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_BoomerAMGGetMaxIter ( HYPRE_Solver solver, HYPRE_Int *max_iter );
-HYPRE_Int HYPRE_BoomerAMGSetCoarsenType ( HYPRE_Solver solver, HYPRE_Int coarsen_type );
-HYPRE_Int HYPRE_BoomerAMGGetCoarsenType ( HYPRE_Solver solver, HYPRE_Int *coarsen_type );
-HYPRE_Int HYPRE_BoomerAMGSetMeasureType ( HYPRE_Solver solver, HYPRE_Int measure_type );
-HYPRE_Int HYPRE_BoomerAMGGetMeasureType ( HYPRE_Solver solver, HYPRE_Int *measure_type );
-HYPRE_Int HYPRE_BoomerAMGSetSetupType ( HYPRE_Solver solver, HYPRE_Int setup_type );
-HYPRE_Int HYPRE_BoomerAMGSetOldDefault ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_BoomerAMGSetFCycle ( HYPRE_Solver solver, HYPRE_Int fcycle );
-HYPRE_Int HYPRE_BoomerAMGGetFCycle ( HYPRE_Solver solver, HYPRE_Int *fcycle );
-HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
-HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver, HYPRE_Int *cycle_type );
-HYPRE_Int HYPRE_BoomerAMGSetKappaCycleVal( HYPRE_Solver solver, HYPRE_Int kappa );
-HYPRE_Int HYPRE_BoomerAMGGetKappaCycleVal( HYPRE_Solver solver, HYPRE_Int *kappa );
-HYPRE_Int HYPRE_BoomerAMGSetCycleStruct ( HYPRE_Solver solver, HYPRE_Int *cycle_struct, HYPRE_Int cycle_num_nodes);
-HYPRE_Int HYPRE_BoomerAMGGetCycleStruct ( HYPRE_Solver solver, HYPRE_Int **cycle_struct, HYPRE_Int *cycle_num_nodes);
-HYPRE_Int HYPRE_BoomerAMGSetConvergeType ( HYPRE_Solver solver, HYPRE_Int type );
-HYPRE_Int HYPRE_BoomerAMGGetConvergeType ( HYPRE_Solver solver, HYPRE_Int *type );
-HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_BoomerAMGGetTol ( HYPRE_Solver solver, HYPRE_Real *tol );
-HYPRE_Int HYPRE_BoomerAMGSetNumGridSweeps ( HYPRE_Solver solver, HYPRE_Int *num_grid_sweeps );
-HYPRE_Int HYPRE_BoomerAMGSetNumSweeps ( HYPRE_Solver solver, HYPRE_Int num_sweeps );
-HYPRE_Int HYPRE_BoomerAMGSetNodeNumSweeps ( HYPRE_Solver solver, HYPRE_Int *node_num_sweeps );
-HYPRE_Int HYPRE_BoomerAMGGetNodeNumSweeps ( HYPRE_Solver solver, HYPRE_Int **node_num_sweeps );
-HYPRE_Int HYPRE_BoomerAMGSetCycleNumSweeps ( HYPRE_Solver solver, HYPRE_Int num_sweeps,
-                                             HYPRE_Int k );
-HYPRE_Int HYPRE_BoomerAMGGetCycleNumSweeps ( HYPRE_Solver solver, HYPRE_Int *num_sweeps,
-                                             HYPRE_Int k );
-HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation ( HYPRE_Int **num_grid_sweeps_ptr,
-                                              HYPRE_Int **grid_relax_type_ptr, HYPRE_Int ***grid_relax_points_ptr, HYPRE_Int coarsen_type,
-                                              HYPRE_Real **relax_weights_ptr, HYPRE_Int max_levels );
-HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType ( HYPRE_Solver solver, HYPRE_Int *grid_relax_type );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
-HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeTypes( HYPRE_Solver solver, HYPRE_Int **relax_node_types );
-HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type,
-                                             HYPRE_Int k );
-HYPRE_Int HYPRE_BoomerAMGGetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int *relax_type,
-                                             HYPRE_Int k );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder ( HYPRE_Solver solver, HYPRE_Int relax_order );
-HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints ( HYPRE_Solver solver, HYPRE_Int **grid_relax_points );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight ( HYPRE_Solver solver, HYPRE_Real *relax_weight );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_outerweights );
-HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real **relax_node_outerweights );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
-HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real **relax_node_weights );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
-HYPRE_Int HYPRE_BoomerAMGGetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real **relax_edge_weights );
-HYPRE_Int HYPRE_BoomerAMGSetRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt );
-HYPRE_Int HYPRE_BoomerAMGSetLevelRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt,
-                                           HYPRE_Int level );
-HYPRE_Int HYPRE_BoomerAMGSetOmega ( HYPRE_Solver solver, HYPRE_Real *omega );
-HYPRE_Int HYPRE_BoomerAMGSetOuterWt ( HYPRE_Solver solver, HYPRE_Real outer_wt );
-HYPRE_Int HYPRE_BoomerAMGSetLevelOuterWt ( HYPRE_Solver solver, HYPRE_Real outer_wt,
-                                           HYPRE_Int level );
-HYPRE_Int HYPRE_BoomerAMGSetSmoothType ( HYPRE_Solver solver, HYPRE_Int smooth_type );
-HYPRE_Int HYPRE_BoomerAMGGetSmoothType ( HYPRE_Solver solver, HYPRE_Int *smooth_type );
-HYPRE_Int HYPRE_BoomerAMGSetSmoothNumLevels ( HYPRE_Solver solver, HYPRE_Int smooth_num_levels );
-HYPRE_Int HYPRE_BoomerAMGGetSmoothNumLevels ( HYPRE_Solver solver, HYPRE_Int *smooth_num_levels );
-HYPRE_Int HYPRE_BoomerAMGSetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int smooth_num_sweeps );
-HYPRE_Int HYPRE_BoomerAMGGetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int *smooth_num_sweeps );
-HYPRE_Int HYPRE_BoomerAMGSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_BoomerAMGGetLogging ( HYPRE_Solver solver, HYPRE_Int *logging );
-HYPRE_Int HYPRE_BoomerAMGSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_BoomerAMGGetPrintLevel ( HYPRE_Solver solver, HYPRE_Int *print_level );
-HYPRE_Int HYPRE_BoomerAMGSetPrintFileName ( HYPRE_Solver solver, const char *print_file_name );
-HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver, HYPRE_Int debug_flag );
-HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver, HYPRE_Int *debug_flag );
-HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver, HYPRE_Int *cum_num_iterations );
-HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm ( HYPRE_Solver solver,
-                                                        HYPRE_Real *rel_resid_norm );
-HYPRE_Int HYPRE_BoomerAMGSetVariant ( HYPRE_Solver solver, HYPRE_Int variant );
-HYPRE_Int HYPRE_BoomerAMGGetVariant ( HYPRE_Solver solver, HYPRE_Int *variant );
-HYPRE_Int HYPRE_BoomerAMGSetOverlap ( HYPRE_Solver solver, HYPRE_Int overlap );
-HYPRE_Int HYPRE_BoomerAMGGetOverlap ( HYPRE_Solver solver, HYPRE_Int *overlap );
-HYPRE_Int HYPRE_BoomerAMGSetDomainType ( HYPRE_Solver solver, HYPRE_Int domain_type );
-HYPRE_Int HYPRE_BoomerAMGGetDomainType ( HYPRE_Solver solver, HYPRE_Int *domain_type );
-HYPRE_Int HYPRE_BoomerAMGSetSchwarzRlxWeight ( HYPRE_Solver solver, HYPRE_Real schwarz_rlx_weight );
-HYPRE_Int HYPRE_BoomerAMGGetSchwarzRlxWeight ( HYPRE_Solver solver,
-                                               HYPRE_Real *schwarz_rlx_weight );
-HYPRE_Int HYPRE_BoomerAMGSetSchwarzUseNonSymm ( HYPRE_Solver solver, HYPRE_Int use_nonsymm );
-HYPRE_Int HYPRE_BoomerAMGSetSym ( HYPRE_Solver solver, HYPRE_Int sym );
-HYPRE_Int HYPRE_BoomerAMGSetLevel ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_BoomerAMGSetThreshold ( HYPRE_Solver solver, HYPRE_Real threshold );
-HYPRE_Int HYPRE_BoomerAMGSetFilter ( HYPRE_Solver solver, HYPRE_Real filter );
-HYPRE_Int HYPRE_BoomerAMGSetDropTol ( HYPRE_Solver solver, HYPRE_Real drop_tol );
-HYPRE_Int HYPRE_BoomerAMGSetMaxNzPerRow ( HYPRE_Solver solver, HYPRE_Int max_nz_per_row );
-HYPRE_Int HYPRE_BoomerAMGSetEuclidFile ( HYPRE_Solver solver, char *euclidfile );
-HYPRE_Int HYPRE_BoomerAMGSetEuLevel ( HYPRE_Solver solver, HYPRE_Int eu_level );
-HYPRE_Int HYPRE_BoomerAMGSetEuSparseA ( HYPRE_Solver solver, HYPRE_Real eu_sparse_A );
-HYPRE_Int HYPRE_BoomerAMGSetEuBJ ( HYPRE_Solver solver, HYPRE_Int eu_bj );
-HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver solver, HYPRE_Int ilu_type);
-HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver solver, HYPRE_Int ilu_lfil);
-HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_max_row_nnz);
-HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
-HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
-HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver solver, HYPRE_Int ilu_tri_solve);
-HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver solver,
-                                                 HYPRE_Int ilu_lower_jacobi_iters);
-HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver,
-                                                 HYPRE_Int ilu_upper_jacobi_iters);
-HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
-HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType ( HYPRE_Solver solver, HYPRE_Int algo_type );
-HYPRE_Int HYPRE_BoomerAMGSetFSAILocalSolveType ( HYPRE_Solver solver, HYPRE_Int local_solve_type );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int max_nnz_row );
-HYPRE_Int HYPRE_BoomerAMGSetFSAINumLevels ( HYPRE_Solver solver, HYPRE_Int num_levels );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters ( HYPRE_Solver solver, HYPRE_Int eig_max_iters );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold ( HYPRE_Solver solver, HYPRE_Real threshold );
-HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
-HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
-HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver, HYPRE_Int *num_functions );
-HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int filter_functions );
-HYPRE_Int HYPRE_BoomerAMGGetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int *filter_functions );
-HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver, HYPRE_Int nodal );
-HYPRE_Int HYPRE_BoomerAMGSetNodalLevels ( HYPRE_Solver solver, HYPRE_Int nodal_levels );
-HYPRE_Int HYPRE_BoomerAMGSetNodalDiag ( HYPRE_Solver solver, HYPRE_Int nodal );
-HYPRE_Int HYPRE_BoomerAMGSetKeepSameSign ( HYPRE_Solver solver, HYPRE_Int keep_same_sign );
-HYPRE_Int HYPRE_BoomerAMGSetDofFunc ( HYPRE_Solver solver, HYPRE_Int *dof_func );
-HYPRE_Int HYPRE_BoomerAMGSetNumPaths ( HYPRE_Solver solver, HYPRE_Int num_paths );
-HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels ( HYPRE_Solver solver, HYPRE_Int agg_num_levels );
-HYPRE_Int HYPRE_BoomerAMGSetAggInterpType ( HYPRE_Solver solver, HYPRE_Int agg_interp_type );
-HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor ( HYPRE_Solver solver, HYPRE_Real agg_trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor ( HYPRE_Solver solver, HYPRE_Real add_trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor ( HYPRE_Solver solver, HYPRE_Real add_trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor ( HYPRE_Solver solver,
-                                                HYPRE_Real agg_P12_trunc_factor );
-HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts ( HYPRE_Solver solver, HYPRE_Int agg_P_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts ( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts ( HYPRE_Solver solver, HYPRE_Int add_P_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGSetAddRelaxType ( HYPRE_Solver solver, HYPRE_Int add_rlx_type );
-HYPRE_Int HYPRE_BoomerAMGSetAddRelaxWt ( HYPRE_Solver solver, HYPRE_Real add_rlx_wt );
-HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts ( HYPRE_Solver solver, HYPRE_Int agg_P12_max_elmts );
-HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps ( HYPRE_Solver solver, HYPRE_Int num_CR_relax_steps );
-HYPRE_Int HYPRE_BoomerAMGSetCRRate ( HYPRE_Solver solver, HYPRE_Real CR_rate );
-HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh ( HYPRE_Solver solver, HYPRE_Real CR_strong_th );
-HYPRE_Int HYPRE_BoomerAMGSetADropTol( HYPRE_Solver solver, HYPRE_Real A_drop_tol  );
-HYPRE_Int HYPRE_BoomerAMGSetADropType( HYPRE_Solver solver, HYPRE_Int A_drop_type  );
-HYPRE_Int HYPRE_BoomerAMGSetISType ( HYPRE_Solver solver, HYPRE_Int IS_type );
-HYPRE_Int HYPRE_BoomerAMGSetCRUseCG ( HYPRE_Solver solver, HYPRE_Int CR_use_CG );
-HYPRE_Int HYPRE_BoomerAMGSetGSMG ( HYPRE_Solver solver, HYPRE_Int gsmg );
-HYPRE_Int HYPRE_BoomerAMGSetNumSamples ( HYPRE_Solver solver, HYPRE_Int gsmg );
-HYPRE_Int HYPRE_BoomerAMGSetCGCIts ( HYPRE_Solver solver, HYPRE_Int its );
-HYPRE_Int HYPRE_BoomerAMGSetPlotGrids ( HYPRE_Solver solver, HYPRE_Int plotgrids );
-HYPRE_Int HYPRE_BoomerAMGSetPlotFileName ( HYPRE_Solver solver, const char *plotfilename );
-HYPRE_Int HYPRE_BoomerAMGSetCoordDim ( HYPRE_Solver solver, HYPRE_Int coorddim );
-HYPRE_Int HYPRE_BoomerAMGSetCoordinates ( HYPRE_Solver solver, float *coordinates );
-HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver, HYPRE_Int *cgrid );
-HYPRE_Int HYPRE_BoomerAMGSetChebyOrder ( HYPRE_Solver solver, HYPRE_Int order );
-HYPRE_Int HYPRE_BoomerAMGSetChebyFraction ( HYPRE_Solver solver, HYPRE_Real ratio );
-HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst ( HYPRE_Solver solver, HYPRE_Int eig_est );
-HYPRE_Int HYPRE_BoomerAMGSetChebyVariant ( HYPRE_Solver solver, HYPRE_Int variant );
-HYPRE_Int HYPRE_BoomerAMGSetChebyScale ( HYPRE_Solver solver, HYPRE_Int scale );
-HYPRE_Int HYPRE_BoomerAMGSetInterpVectors ( HYPRE_Solver solver, HYPRE_Int num_vectors,
-                                            HYPRE_ParVector *vectors );
-HYPRE_Int HYPRE_BoomerAMGSetInterpVecVariant ( HYPRE_Solver solver, HYPRE_Int num );
-HYPRE_Int HYPRE_BoomerAMGSetInterpVecQMax ( HYPRE_Solver solver, HYPRE_Int q_max );
-HYPRE_Int HYPRE_BoomerAMGSetInterpVecAbsQTrunc ( HYPRE_Solver solver, HYPRE_Real q_trunc );
-HYPRE_Int HYPRE_BoomerAMGSetSmoothInterpVectors ( HYPRE_Solver solver,
-                                                  HYPRE_Int smooth_interp_vectors );
-HYPRE_Int HYPRE_BoomerAMGSetInterpRefine ( HYPRE_Solver solver, HYPRE_Int num_refine );
-HYPRE_Int HYPRE_BoomerAMGSetInterpVecFirstLevel ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_BoomerAMGSetAdditive ( HYPRE_Solver solver, HYPRE_Int additive );
-HYPRE_Int HYPRE_BoomerAMGGetAdditive ( HYPRE_Solver solver, HYPRE_Int *additive );
-HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver, HYPRE_Int mult_additive );
-HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver, HYPRE_Int *mult_additive );
-HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver, HYPRE_Int simple );
-HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver, HYPRE_Int *simple );
-HYPRE_Int HYPRE_BoomerAMGSetAddLastLvl ( HYPRE_Solver solver, HYPRE_Int add_last_lvl );
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol ( HYPRE_Solver solver, HYPRE_Real nongalerkin_tol );
-HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver, HYPRE_Real nongalerkin_tol,
-                                                  HYPRE_Int level );
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver, HYPRE_Int nongalerk_num_tol,
-                                           HYPRE_Real *nongalerk_tol );
-HYPRE_Int HYPRE_BoomerAMGSetRAP2 ( HYPRE_Solver solver, HYPRE_Int rap2 );
-HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2 ( HYPRE_Solver solver, HYPRE_Int mod_rap2 );
-HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver, HYPRE_Int keepTranspose );
-#ifdef HYPRE_USING_DSUPERLU
-HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver, HYPRE_Int slu_threshold );
-#endif
-HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level,
-                                           HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index);
-HYPRE_Int HYPRE_BoomerAMGSetCPoints( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level,
-                                     HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index);
-HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints( HYPRE_Solver solver, HYPRE_Int num_isolated_fpt,
-                                             HYPRE_BigInt *isolated_fpt_index );
-HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt,
-                                     HYPRE_BigInt *fpt_index );
-HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP ( HYPRE_Solver solver, HYPRE_Real cum_nnz_AP );
-HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP ( HYPRE_Solver solver, HYPRE_Real *cum_nnz_AP );
-
-/* HYPRE_parcsr_amgdd.c */
-HYPRE_Int HYPRE_BoomerAMGDDSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGDDSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_BoomerAMGDDSetStartLevel ( HYPRE_Solver solver, HYPRE_Int start_level );
-HYPRE_Int HYPRE_BoomerAMGDDGetStartLevel ( HYPRE_Solver solver, HYPRE_Int *start_level );
-HYPRE_Int HYPRE_BoomerAMGDDSetFACNumCycles ( HYPRE_Solver solver, HYPRE_Int fac_num_cycles );
-HYPRE_Int HYPRE_BoomerAMGDDGetFACNumCycles ( HYPRE_Solver solver, HYPRE_Int *fac_num_cycles );
-HYPRE_Int HYPRE_BoomerAMGDDSetFACCycleType ( HYPRE_Solver solver, HYPRE_Int fac_cycle_type );
-HYPRE_Int HYPRE_BoomerAMGDDGetFACCycleType ( HYPRE_Solver solver, HYPRE_Int *fac_cycle_type );
-HYPRE_Int HYPRE_BoomerAMGDDSetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int fac_num_relax );
-HYPRE_Int HYPRE_BoomerAMGDDGetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int *fac_num_relax );
-HYPRE_Int HYPRE_BoomerAMGDDSetFACRelaxType ( HYPRE_Solver solver, HYPRE_Int fac_relax_type );
-HYPRE_Int HYPRE_BoomerAMGDDGetFACRelaxType ( HYPRE_Solver solver, HYPRE_Int *fac_relax_type );
-HYPRE_Int HYPRE_BoomerAMGDDSetFACRelaxWeight ( HYPRE_Solver solver, HYPRE_Real fac_relax_weight );
-HYPRE_Int HYPRE_BoomerAMGDDGetFACRelaxWeight ( HYPRE_Solver solver, HYPRE_Real *fac_relax_weight );
-HYPRE_Int HYPRE_BoomerAMGDDSetPadding ( HYPRE_Solver solver, HYPRE_Int padding );
-HYPRE_Int HYPRE_BoomerAMGDDGetPadding ( HYPRE_Solver solver, HYPRE_Int *padding );
-HYPRE_Int HYPRE_BoomerAMGDDSetNumGhostLayers ( HYPRE_Solver solver, HYPRE_Int num_ghost_layers );
-HYPRE_Int HYPRE_BoomerAMGDDGetNumGhostLayers ( HYPRE_Solver solver, HYPRE_Int *num_ghost_layers );
-HYPRE_Int HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
-                                                 HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) );
-HYPRE_Int HYPRE_BoomerAMGDDGetAMG ( HYPRE_Solver solver, HYPRE_Solver *amg_solver );
-
-/* HYPRE_parcsr_bicgstab.c */
-HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRBiCGSTABDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                      HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                      HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                           HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRBiCGSTABGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRBiCGSTABSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm ( HYPRE_Solver solver,
-                                                             HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-
-/* HYPRE_parcsr_block.c */
-HYPRE_Int HYPRE_BlockTridiagCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_BlockTridiagDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_BlockTridiagSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_BlockTridiagSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_BlockTridiagSetIndexSet ( HYPRE_Solver solver, HYPRE_Int n, HYPRE_Int *inds );
-HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold ( HYPRE_Solver solver, HYPRE_Real thresh );
-HYPRE_Int HYPRE_BlockTridiagSetAMGNumSweeps ( HYPRE_Solver solver, HYPRE_Int num_sweeps );
-HYPRE_Int HYPRE_BlockTridiagSetAMGRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type );
-HYPRE_Int HYPRE_BlockTridiagSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-
-/* HYPRE_parcsr_cgnr.c */
-HYPRE_Int HYPRE_ParCSRCGNRCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRCGNRDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRCGNRSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                  HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRCGNRSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                  HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRCGNRSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRCGNRSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRCGNRSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRCGNRSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit );
-HYPRE_Int HYPRE_ParCSRCGNRSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                       HYPRE_PtrToParSolverFcn precondT, HYPRE_PtrToParSolverFcn precond_setup,
-                                       HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRCGNRGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRCGNRSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRCGNRGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-
-/* HYPRE_parcsr_Euclid.c */
-HYPRE_Int HYPRE_EuclidCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_EuclidDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_EuclidSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                              HYPRE_ParVector x );
-HYPRE_Int HYPRE_EuclidSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector bb,
-                              HYPRE_ParVector xx );
-HYPRE_Int HYPRE_EuclidSetParams ( HYPRE_Solver solver, HYPRE_Int argc, char *argv []);
-HYPRE_Int HYPRE_EuclidSetParamsFromFile ( HYPRE_Solver solver, char *filename );
-HYPRE_Int HYPRE_EuclidSetLevel ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_EuclidSetBJ ( HYPRE_Solver solver, HYPRE_Int bj );
-HYPRE_Int HYPRE_EuclidSetStats ( HYPRE_Solver solver, HYPRE_Int eu_stats );
-HYPRE_Int HYPRE_EuclidSetMem ( HYPRE_Solver solver, HYPRE_Int eu_mem );
-HYPRE_Int HYPRE_EuclidSetSparseA ( HYPRE_Solver solver, HYPRE_Real sparse_A );
-HYPRE_Int HYPRE_EuclidSetRowScale ( HYPRE_Solver solver, HYPRE_Int row_scale );
-HYPRE_Int HYPRE_EuclidSetILUT ( HYPRE_Solver solver, HYPRE_Real ilut );
-
-/* HYPRE_parcsr_flexgmres.c */
-HYPRE_Int HYPRE_ParCSRFlexGMRESCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRFlexGMRESDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                       HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                       HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                            HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRFlexGMRESGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver,
-                                                              HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC ( HYPRE_Solver solver,
-                                             HYPRE_PtrToModifyPCFcn modify_pc );
-
-/* HYPRE_parcsr_gmres.c */
-HYPRE_Int HYPRE_ParCSRGMRESCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRGMRESDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
-HYPRE_Int HYPRE_ParCSRGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRGMRESSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRGMRESSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRGMRESSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit );
-HYPRE_Int HYPRE_ParCSRGMRESSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                        HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRGMRESGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRGMRESSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRGMRESSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRGMRESGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-
-
-/*HYPRE_parcsr_cogmres.c*/
-HYPRE_Int HYPRE_ParCSRCOGMRESCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRCOGMRESDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                     HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRCOGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                     HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS2 ( HYPRE_Solver solver, HYPRE_Int cgs2 );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                          HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRCOGMRESGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRCOGMRESGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-
-
-
-/* HYPRE_parcsr_hybrid.c */
-HYPRE_Int HYPRE_ParCSRHybridCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRHybridDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRHybridSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRHybridSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRHybridSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRHybridSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRHybridSetConvergenceTol ( HYPRE_Solver solver, HYPRE_Real cf_tol );
-HYPRE_Int HYPRE_ParCSRHybridSetDSCGMaxIter ( HYPRE_Solver solver, HYPRE_Int dscg_max_its );
-HYPRE_Int HYPRE_ParCSRHybridSetPCGMaxIter ( HYPRE_Solver solver, HYPRE_Int pcg_max_its );
-HYPRE_Int HYPRE_ParCSRHybridSetSetupType ( HYPRE_Solver solver, HYPRE_Int setup_type );
-HYPRE_Int HYPRE_ParCSRHybridSetSolverType ( HYPRE_Solver solver, HYPRE_Int solver_type );
-HYPRE_Int HYPRE_ParCSRHybridSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
-HYPRE_Int HYPRE_ParCSRHybridSetTwoNorm ( HYPRE_Solver solver, HYPRE_Int two_norm );
-HYPRE_Int HYPRE_ParCSRHybridSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit );
-HYPRE_Int HYPRE_ParCSRHybridSetRelChange ( HYPRE_Solver solver, HYPRE_Int rel_change );
-HYPRE_Int HYPRE_ParCSRHybridSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                         HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRHybridSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRHybridSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRHybridSetStrongThreshold ( HYPRE_Solver solver, HYPRE_Real strong_threshold );
-HYPRE_Int HYPRE_ParCSRHybridSetMaxRowSum ( HYPRE_Solver solver, HYPRE_Real max_row_sum );
-HYPRE_Int HYPRE_ParCSRHybridSetTruncFactor ( HYPRE_Solver solver, HYPRE_Real trunc_factor );
-HYPRE_Int HYPRE_ParCSRHybridSetPMaxElmts ( HYPRE_Solver solver, HYPRE_Int p_max );
-HYPRE_Int HYPRE_ParCSRHybridSetMaxLevels ( HYPRE_Solver solver, HYPRE_Int max_levels );
-HYPRE_Int HYPRE_ParCSRHybridSetMeasureType ( HYPRE_Solver solver, HYPRE_Int measure_type );
-HYPRE_Int HYPRE_ParCSRHybridSetCoarsenType ( HYPRE_Solver solver, HYPRE_Int coarsen_type );
-HYPRE_Int HYPRE_ParCSRHybridSetInterpType ( HYPRE_Solver solver, HYPRE_Int interp_type );
-HYPRE_Int HYPRE_ParCSRHybridSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
-HYPRE_Int HYPRE_ParCSRHybridSetCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct, 
-                                            HYPRE_Int cycle_num_nodes );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_outerweights );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
-HYPRE_Int HYPRE_ParCSRHybridSetNodeNumSweeps ( HYPRE_Solver solver, HYPRE_Int *node_num_sweeps );
-HYPRE_Int HYPRE_ParCSRHybridSetNumGridSweeps ( HYPRE_Solver solver, HYPRE_Int *num_grid_sweeps );
-HYPRE_Int HYPRE_ParCSRHybridSetGridRelaxType ( HYPRE_Solver solver, HYPRE_Int *grid_relax_type );
-HYPRE_Int HYPRE_ParCSRHybridSetGridRelaxPoints ( HYPRE_Solver solver,
-                                                 HYPRE_Int **grid_relax_points );
-HYPRE_Int HYPRE_ParCSRHybridSetNumSweeps ( HYPRE_Solver solver, HYPRE_Int num_sweeps );
-HYPRE_Int HYPRE_ParCSRHybridSetCycleNumSweeps ( HYPRE_Solver solver, HYPRE_Int num_sweeps,
-                                                HYPRE_Int k );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type );
-HYPRE_Int HYPRE_ParCSRHybridSetKeepTranspose ( HYPRE_Solver solver, HYPRE_Int keepT );
-HYPRE_Int HYPRE_ParCSRHybridSetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type,
-                                                HYPRE_Int k );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxOrder ( HYPRE_Solver solver, HYPRE_Int relax_order );
-HYPRE_Int HYPRE_ParCSRHybridSetMaxCoarseSize ( HYPRE_Solver solver, HYPRE_Int max_coarse_size );
-HYPRE_Int HYPRE_ParCSRHybridSetMinCoarseSize ( HYPRE_Solver solver, HYPRE_Int min_coarse_size );
-HYPRE_Int HYPRE_ParCSRHybridSetSeqThreshold ( HYPRE_Solver solver, HYPRE_Int seq_threshold );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt );
-HYPRE_Int HYPRE_ParCSRHybridSetLevelRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt,
-                                              HYPRE_Int level );
-HYPRE_Int HYPRE_ParCSRHybridSetOuterWt ( HYPRE_Solver solver, HYPRE_Real outer_wt );
-HYPRE_Int HYPRE_ParCSRHybridSetLevelOuterWt ( HYPRE_Solver solver, HYPRE_Real outer_wt,
-                                              HYPRE_Int level );
-HYPRE_Int HYPRE_ParCSRHybridSetRelaxWeight ( HYPRE_Solver solver, HYPRE_Real *relax_weight );
-HYPRE_Int HYPRE_ParCSRHybridSetOmega ( HYPRE_Solver solver, HYPRE_Real *omega );
-HYPRE_Int HYPRE_ParCSRHybridSetAggNumLevels ( HYPRE_Solver solver, HYPRE_Int agg_num_levels );
-HYPRE_Int HYPRE_ParCSRHybridSetNumPaths ( HYPRE_Solver solver, HYPRE_Int num_paths );
-HYPRE_Int HYPRE_ParCSRHybridSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
-HYPRE_Int HYPRE_ParCSRHybridSetNodal ( HYPRE_Solver solver, HYPRE_Int nodal );
-HYPRE_Int HYPRE_ParCSRHybridSetDofFunc ( HYPRE_Solver solver, HYPRE_Int *dof_func );
-HYPRE_Int HYPRE_ParCSRHybridSetNonGalerkinTol ( HYPRE_Solver solver, HYPRE_Int nongalerk_num_tol,
-                                                HYPRE_Real *nongalerkin_tol );
-HYPRE_Int HYPRE_ParCSRHybridGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_its );
-HYPRE_Int HYPRE_ParCSRHybridGetDSCGNumIterations ( HYPRE_Solver solver, HYPRE_Int *dscg_num_its );
-HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations ( HYPRE_Solver solver, HYPRE_Int *pcg_num_its );
-HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver, HYPRE_Real *time );
-
+                         
 /* HYPRE_parcsr_int.c */
 HYPRE_Int hypre_ParSetRandomValues ( void *v, HYPRE_Int seed );
 HYPRE_Int hypre_ParPrintVector ( void *v, const char *file );
 void *hypre_ParReadVector ( MPI_Comm comm, const char *file );
 HYPRE_Int hypre_ParVectorSize ( void *x );
-HYPRE_Int HYPRE_ParCSRMultiVectorPrint ( void *x_, const char *fileName );
-void *HYPRE_ParCSRMultiVectorRead ( MPI_Comm comm, void *ii_, const char *fileName );
 HYPRE_Int aux_maskCount ( HYPRE_Int n, HYPRE_Int *mask );
 void aux_indexFromMask ( HYPRE_Int n, HYPRE_Int *mask, HYPRE_Int *index );
-HYPRE_Int HYPRE_TempParCSRSetupInterpreter ( mv_InterfaceInterpreter *i );
-HYPRE_Int HYPRE_ParCSRSetupInterpreter ( mv_InterfaceInterpreter *i );
-HYPRE_Int HYPRE_ParCSRSetupMatvec ( HYPRE_MatvecFunctions *mv );
-
-/* HYPRE_parcsr_lgmres.c */
-HYPRE_Int HYPRE_ParCSRLGMRESCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRLGMRESDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRLGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRLGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                    HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRLGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
-HYPRE_Int HYPRE_ParCSRLGMRESSetAugDim ( HYPRE_Solver solver, HYPRE_Int aug_dim );
-HYPRE_Int HYPRE_ParCSRLGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRLGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRLGMRESSetMinIter ( HYPRE_Solver solver, HYPRE_Int min_iter );
-HYPRE_Int HYPRE_ParCSRLGMRESSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRLGMRESSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                         HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRLGMRESGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRLGMRESSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParCSRLGMRESSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRLGMRESGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-
-/* HYPRE_parcsr_ParaSails.c */
-HYPRE_Int HYPRE_ParCSRParaSailsCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRParaSailsDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRParaSailsSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                       HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRParaSailsSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                       HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRParaSailsSetParams ( HYPRE_Solver solver, HYPRE_Real thresh,
-                                           HYPRE_Int nlevels );
-HYPRE_Int HYPRE_ParCSRParaSailsSetFilter ( HYPRE_Solver solver, HYPRE_Real filter );
-HYPRE_Int HYPRE_ParCSRParaSailsGetFilter ( HYPRE_Solver solver, HYPRE_Real *filter );
-HYPRE_Int HYPRE_ParCSRParaSailsSetSym ( HYPRE_Solver solver, HYPRE_Int sym );
-HYPRE_Int HYPRE_ParCSRParaSailsSetLoadbal ( HYPRE_Solver solver, HYPRE_Real loadbal );
-HYPRE_Int HYPRE_ParCSRParaSailsGetLoadbal ( HYPRE_Solver solver, HYPRE_Real *loadbal );
-HYPRE_Int HYPRE_ParCSRParaSailsSetReuse ( HYPRE_Solver solver, HYPRE_Int reuse );
-HYPRE_Int HYPRE_ParCSRParaSailsSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParaSailsCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParaSailsDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParaSailsSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParaSailsSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParaSailsSetParams ( HYPRE_Solver solver, HYPRE_Real thresh, HYPRE_Int nlevels );
-HYPRE_Int HYPRE_ParaSailsSetThresh ( HYPRE_Solver solver, HYPRE_Real thresh );
-HYPRE_Int HYPRE_ParaSailsGetThresh ( HYPRE_Solver solver, HYPRE_Real *thresh );
-HYPRE_Int HYPRE_ParaSailsSetNlevels ( HYPRE_Solver solver, HYPRE_Int nlevels );
-HYPRE_Int HYPRE_ParaSailsGetNlevels ( HYPRE_Solver solver, HYPRE_Int *nlevels );
-HYPRE_Int HYPRE_ParaSailsSetFilter ( HYPRE_Solver solver, HYPRE_Real filter );
-HYPRE_Int HYPRE_ParaSailsGetFilter ( HYPRE_Solver solver, HYPRE_Real *filter );
-HYPRE_Int HYPRE_ParaSailsSetSym ( HYPRE_Solver solver, HYPRE_Int sym );
-HYPRE_Int HYPRE_ParaSailsGetSym ( HYPRE_Solver solver, HYPRE_Int *sym );
-HYPRE_Int HYPRE_ParaSailsSetLoadbal ( HYPRE_Solver solver, HYPRE_Real loadbal );
-HYPRE_Int HYPRE_ParaSailsGetLoadbal ( HYPRE_Solver solver, HYPRE_Real *loadbal );
-HYPRE_Int HYPRE_ParaSailsSetReuse ( HYPRE_Solver solver, HYPRE_Int reuse );
-HYPRE_Int HYPRE_ParaSailsGetReuse ( HYPRE_Solver solver, HYPRE_Int *reuse );
-HYPRE_Int HYPRE_ParaSailsSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
-HYPRE_Int HYPRE_ParaSailsGetLogging ( HYPRE_Solver solver, HYPRE_Int *logging );
-HYPRE_Int HYPRE_ParaSailsBuildIJMatrix ( HYPRE_Solver solver, HYPRE_IJMatrix *pij_A );
-
-/* HYPRE_parcsr_fsai.c */
-HYPRE_Int HYPRE_FSAICreate ( HYPRE_Solver *solver);
-HYPRE_Int HYPRE_FSAIDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_FSAISetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                            HYPRE_ParVector x );
-HYPRE_Int HYPRE_FSAISolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                            HYPRE_ParVector x );
-HYPRE_Int HYPRE_FSAISetAlgoType ( HYPRE_Solver solver, HYPRE_Int algo_type );
-HYPRE_Int HYPRE_FSAIGetAlgoType ( HYPRE_Solver solver, HYPRE_Int *algo_type );
-HYPRE_Int HYPRE_FSAISetLocalSolveType ( HYPRE_Solver solver, HYPRE_Int local_solve_type );
-HYPRE_Int HYPRE_FSAIGetLocalSolveType ( HYPRE_Solver solver, HYPRE_Int *local_solve_type );
-HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
-HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver, HYPRE_Int *max_steps );
-HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
-HYPRE_Int HYPRE_FSAIGetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int *max_step_size );
-HYPRE_Int HYPRE_FSAISetMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int max_nnz_row );
-HYPRE_Int HYPRE_FSAIGetMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int *max_nnz_row );
-HYPRE_Int HYPRE_FSAISetNumLevels ( HYPRE_Solver solver, HYPRE_Int num_levels );
-HYPRE_Int HYPRE_FSAIGetNumLevels ( HYPRE_Solver solver, HYPRE_Int *num_levels );
-HYPRE_Int HYPRE_FSAISetThreshold ( HYPRE_Solver solver, HYPRE_Real threshold );
-HYPRE_Int HYPRE_FSAIGetThreshold ( HYPRE_Solver solver, HYPRE_Real *threshold );
-HYPRE_Int HYPRE_FSAISetKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
-HYPRE_Int HYPRE_FSAIGetKapTolerance ( HYPRE_Solver solver, HYPRE_Real *kap_tolerance );
-HYPRE_Int HYPRE_FSAISetTolerance ( HYPRE_Solver solver, HYPRE_Real tolerance );
-HYPRE_Int HYPRE_FSAIGetTolerance ( HYPRE_Solver solver, HYPRE_Real *tolerance );
-HYPRE_Int HYPRE_FSAISetOmega ( HYPRE_Solver solver, HYPRE_Real omega );
-HYPRE_Int HYPRE_FSAIGetOmega ( HYPRE_Solver solver, HYPRE_Real *omega );
-HYPRE_Int HYPRE_FSAISetMaxIterations ( HYPRE_Solver solver, HYPRE_Int max_iterations );
-HYPRE_Int HYPRE_FSAIGetMaxIterations ( HYPRE_Solver solver, HYPRE_Int *max_iterations );
-HYPRE_Int HYPRE_FSAISetEigMaxIters ( HYPRE_Solver solver, HYPRE_Int eig_max_iters );
-HYPRE_Int HYPRE_FSAIGetEigMaxIters ( HYPRE_Solver solver, HYPRE_Int *eig_max_iters );
-HYPRE_Int HYPRE_FSAISetZeroGuess ( HYPRE_Solver solver, HYPRE_Int zero_guess );
-HYPRE_Int HYPRE_FSAIGetZeroGuess ( HYPRE_Solver solver, HYPRE_Int *zero_guess );
-HYPRE_Int HYPRE_FSAISetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
-HYPRE_Int HYPRE_FSAIGetPrintLevel ( HYPRE_Solver solver, HYPRE_Int *print_level );
-
-/* HYPRE_parcsr_pcg.c */
-HYPRE_Int HYPRE_ParCSRPCGCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRPCGDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRPCGSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRPCGSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                 HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRPCGSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRPCGSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
-HYPRE_Int HYPRE_ParCSRPCGSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRPCGSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit );
-HYPRE_Int HYPRE_ParCSRPCGSetTwoNorm ( HYPRE_Solver solver, HYPRE_Int two_norm );
-HYPRE_Int HYPRE_ParCSRPCGSetRelChange ( HYPRE_Solver solver, HYPRE_Int rel_change );
-HYPRE_Int HYPRE_ParCSRPCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond,
-                                      HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver );
-HYPRE_Int HYPRE_ParCSRPCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int HYPRE_ParCSRPCGSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_ParCSRPCGSetLogging ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_ParCSRPCGGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );
-HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver, HYPRE_Real *norm );
-HYPRE_Int HYPRE_ParCSRPCGGetResidual ( HYPRE_Solver solver, HYPRE_ParVector *residual );
-HYPRE_Int HYPRE_ParCSRDiagScaleSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector y,
-                                       HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRDiagScale ( HYPRE_Solver solver, HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy,
-                                  HYPRE_ParVector Hx );
-HYPRE_Int HYPRE_ParCSROnProcTriSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix HA,
-                                       HYPRE_ParVector Hy, HYPRE_ParVector Hx );
-HYPRE_Int HYPRE_ParCSROnProcTriSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix HA,
-                                       HYPRE_ParVector Hy, HYPRE_ParVector Hx );
-
-/* HYPRE_parcsr_pilut.c */
-HYPRE_Int HYPRE_ParCSRPilutCreate ( MPI_Comm comm, HYPRE_Solver *solver );
-HYPRE_Int HYPRE_ParCSRPilutDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_ParCSRPilutSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRPilutSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                                   HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParCSRPilutSetMaxIter ( HYPRE_Solver solver, HYPRE_Int max_iter );
-HYPRE_Int HYPRE_ParCSRPilutSetDropTolerance ( HYPRE_Solver solver, HYPRE_Real tol );
-HYPRE_Int HYPRE_ParCSRPilutSetFactorRowSize ( HYPRE_Solver solver, HYPRE_Int size );
-
-/* HYPRE_parcsr_schwarz.c */
-HYPRE_Int HYPRE_SchwarzCreate ( HYPRE_Solver *solver );
-HYPRE_Int HYPRE_SchwarzDestroy ( HYPRE_Solver solver );
-HYPRE_Int HYPRE_SchwarzSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                               HYPRE_ParVector x );
-HYPRE_Int HYPRE_SchwarzSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
-                               HYPRE_ParVector x );
-HYPRE_Int HYPRE_SchwarzSetVariant ( HYPRE_Solver solver, HYPRE_Int variant );
-HYPRE_Int HYPRE_SchwarzSetOverlap ( HYPRE_Solver solver, HYPRE_Int overlap );
-HYPRE_Int HYPRE_SchwarzSetDomainType ( HYPRE_Solver solver, HYPRE_Int domain_type );
-HYPRE_Int HYPRE_SchwarzSetDomainStructure ( HYPRE_Solver solver, HYPRE_CSRMatrix domain_structure );
-HYPRE_Int HYPRE_SchwarzSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
-HYPRE_Int HYPRE_SchwarzSetNonSymm ( HYPRE_Solver solver, HYPRE_Int use_nonsymm );
-HYPRE_Int HYPRE_SchwarzSetRelaxWeight ( HYPRE_Solver solver, HYPRE_Real relax_weight );
-HYPRE_Int HYPRE_SchwarzSetDofFunc ( HYPRE_Solver solver, HYPRE_Int *dof_func );
 
 /* par_add_cycle.c */
 HYPRE_Int hypre_BoomerAMGAdditiveCycle ( void *amg_vdata );
@@ -2778,7 +2127,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC ( hypre_ParCSRMatrix *S, HYPRE_Int numberofg
                                       HYPRE_Int coarsen_type, HYPRE_Int *CF_marker );
 HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_Int *CF_marker,
                                 HYPRE_Int **CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_Int **vrange );
-//HYPRE_Int hypre_AmgCGCPrepare ( hypre_ParCSRMatrix *S , HYPRE_Int nlocal , HYPRE_Int *CF_marker , HYPRE_BigInt **CF_marker_offd , HYPRE_Int coarsen_type , HYPRE_BigInt **vrange );
 HYPRE_Int hypre_AmgCGCGraphAssemble ( hypre_ParCSRMatrix *S, HYPRE_Int *vertexrange,
                                       HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int coarsen_type, HYPRE_IJMatrix *ijG );
 HYPRE_Int hypre_AmgCGCChoose ( hypre_CSRMatrix *G, HYPRE_Int *vertexrange, HYPRE_Int mpisize,
@@ -2793,24 +2141,63 @@ HYPRE_Int hypre_Bisection ( HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd, HYP
                             HYPRE_Real z, HYPRE_Real tol, HYPRE_Int k, HYPRE_Real *ev_ptr );
 
 /* par_cheby.c */
-HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A, HYPRE_Real max_eig,
-                                          HYPRE_Real min_eig, HYPRE_Real fraction, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                          HYPRE_Real **coefs_ptr, HYPRE_Real **ds_ptr );
-HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                          HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                          hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                          hypre_ParVector *tmp_vec);
+hypre_ParChebyData * hypre_ParChebyCreate( void );
+HYPRE_Int hypre_ParChebyDestroy( hypre_ParChebyData *cheby_data );
+HYPRE_Int hypre_ParChebySetMaxIterations( hypre_ParChebyData *cheby_data,
+                                          HYPRE_Int max_iterations );
+HYPRE_Int hypre_ParChebyGetMaxIterations( hypre_ParChebyData *cheby_data,
+                                          HYPRE_Int *max_iterations );
+HYPRE_Int hypre_ParChebySetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int zero_guess );
+HYPRE_Int hypre_ParChebyGetZeroGuess( hypre_ParChebyData *cheby_data, HYPRE_Int *zero_guess );
+HYPRE_Int hypre_ParChebySetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real tol );
+HYPRE_Int hypre_ParChebyGetTolerance( hypre_ParChebyData *cheby_data, HYPRE_Real *tol );
+HYPRE_Int hypre_ParChebySetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int print_level );
+HYPRE_Int hypre_ParChebyGetPrintLevel( hypre_ParChebyData *cheby_data, HYPRE_Int *print_level );
+HYPRE_Int hypre_ParChebySetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int logging );
+HYPRE_Int hypre_ParChebyGetLogging( hypre_ParChebyData *cheby_data, HYPRE_Int *logging );
+HYPRE_Int hypre_ParChebySetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int order );
+HYPRE_Int hypre_ParChebyGetOrder( hypre_ParChebyData *cheby_data, HYPRE_Int *order );
+HYPRE_Int hypre_ParChebySetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int variant );
+HYPRE_Int hypre_ParChebyGetVariant( hypre_ParChebyData *cheby_data, HYPRE_Int *variant );
+HYPRE_Int hypre_ParChebySetScale( hypre_ParChebyData *cheby_data, HYPRE_Int scale );
+HYPRE_Int hypre_ParChebyGetScale( hypre_ParChebyData *cheby_data, HYPRE_Int *scale );
+HYPRE_Int hypre_ParChebySetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real eig_ratio );
+HYPRE_Int hypre_ParChebyGetEigRatio( hypre_ParChebyData *cheby_data, HYPRE_Real *eig_ratio );
+HYPRE_Int hypre_ParChebySetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int eig_est );
+HYPRE_Int hypre_ParChebyGetEigEst( hypre_ParChebyData *cheby_data, HYPRE_Int *eig_est );
+HYPRE_Int hypre_ParChebySetMinMaxEigEst( hypre_ParChebyData *cheby_data,
+                                         HYPRE_Real eig_min_est, HYPRE_Real eig_max_est );
+HYPRE_Int hypre_ParChebyGetMinMaxEigEst( hypre_ParChebyData *cheby_data,
+                                         HYPRE_Real *eig_min_est, HYPRE_Real *eig_max_est );
+HYPRE_Int hypre_ParChebySetTempVectors( hypre_ParChebyData *cheby_data,
+                                        hypre_ParVector *Ptemp, hypre_ParVector *Rtemp,
+                                        hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-HYPRE_Int hypre_ParCSRRelax_Cheby_SolveHost ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                              HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                              hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                              hypre_ParVector *tmp_vec);
+/* par_cheby_setup.c */
+HYPRE_Int hypre_ParChebySetup( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A,
+                               hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Setup( hypre_ParCSRMatrix *A, HYPRE_Real max_eig,
+                                         HYPRE_Real min_eig, HYPRE_Real fraction,
+                                         HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                         HYPRE_Real **coefs_ptr, HYPRE_Real **ds_ptr );
+
+/* par_cheby_solve.c */
+HYPRE_Int hypre_ParChebySolve( hypre_ParChebyData *cheby_data, hypre_ParCSRMatrix *A,
+                               hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Solve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                         HYPRE_Real *ds_data, HYPRE_Real *coefs,
+                                         HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                         hypre_ParVector *u, hypre_ParVector *v,
+                                         hypre_ParVector *r, hypre_ParVector *orig_u_vec,
+                                         hypre_ParVector *tmp_vec );
 
 /* par_cheby_device.c */
-HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                HYPRE_Real *ds_data, HYPRE_Real *coefs, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
-                                                hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r, hypre_ParVector *orig_u_vec,
-                                                hypre_ParVector *tmp_vec);
+HYPRE_Int hypre_ParCSRRelax_Cheby_SolveDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                               HYPRE_Real *ds_data, HYPRE_Real *coefs,
+                                               HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
+                                               hypre_ParVector *u, hypre_ParVector *v,
+                                               hypre_ParVector *r, hypre_ParVector *orig_u_vec,
+                                               hypre_ParVector *tmp_vec );
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int CF_init,
@@ -2850,11 +2237,6 @@ HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm, HYPRE_Int local_num_
 HYPRE_Int hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, HYPRE_Int local_size,
                                             HYPRE_Int offset, HYPRE_Int num_functions );
 
-/* par_coordinates.c */
-float *hypre_GenerateCoordinates ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                   HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R,
-                                   HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
-
 /* par_cr.c */
 HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A, hypre_IntArray **CF_marker_ptr,
                                       HYPRE_BigInt *coarse_size_ptr, HYPRE_Int num_CR_relax_steps, HYPRE_Int IS_type,
@@ -2893,11 +2275,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenCR ( hypre_ParCSRMatrix *A, hypre_IntArray **CF_
 /* par_cycle.c */
 HYPRE_Int hypre_BoomerAMGCycle ( void *amg_vdata, hypre_ParVector **F_array,
                                  hypre_ParVector **U_array );
-
-/* par_difconv.c */
-HYPRE_ParCSRMatrix GenerateDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                     HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                     HYPRE_Real *value );
 
 /* par_gsmg.c */
 HYPRE_Int hypre_ParCSRMatrixFillSmooth ( HYPRE_Int nsamples, HYPRE_Real *samples,
@@ -2987,23 +2364,15 @@ HYPRE_Int hypre_ParCSRMatrix_dof_func_offd ( hypre_ParCSRMatrix *A, HYPRE_Int nu
                                              HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd );
 
 /* par_laplace_27pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian27pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                           HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                           HYPRE_Real *value );
 HYPRE_Int hypre_map3 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p, HYPRE_Int q,
                        HYPRE_Int r, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part,
                        HYPRE_BigInt *nz_part );
 
 /* par_laplace_9pt.c */
-HYPRE_ParCSRMatrix GenerateLaplacian9pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                          HYPRE_Int P, HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real *value );
 HYPRE_BigInt hypre_map2 ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_Int p, HYPRE_Int q,
                           HYPRE_BigInt nx, HYPRE_BigInt *nx_part, HYPRE_BigInt *ny_part );
 
 /* par_laplace.c */
-HYPRE_ParCSRMatrix GenerateLaplacian ( MPI_Comm comm, HYPRE_BigInt ix, HYPRE_BigInt ny,
-                                       HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                       HYPRE_Real *value );
 HYPRE_BigInt hypre_map ( HYPRE_BigInt ix, HYPRE_BigInt iy, HYPRE_BigInt iz, HYPRE_Int p,
                          HYPRE_Int q, HYPRE_Int r, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt *nx_part,
                          HYPRE_BigInt *ny_part, HYPRE_BigInt *nz_part );
@@ -3358,18 +2727,12 @@ HYPRE_Real hypre_LINPACKcgpthy ( HYPRE_Real *a, HYPRE_Real *b );
 HYPRE_Int hypre_ParCSRRelax_L1_Jacobi ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                         HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
                                         hypre_ParVector *u, hypre_ParVector *Vtemp );
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*, HYPRE_Real*);
 
 /* par_relax_more_device.c */
 HYPRE_Int hypre_ParCSRMaxEigEstimateDevice ( hypre_ParCSRMatrix *A, HYPRE_Int scale,
                                              HYPRE_Real *max_eig, HYPRE_Real *min_eig );
 HYPRE_Int hypre_ParCSRMaxEigEstimateCGDevice ( hypre_ParCSRMatrix *A, HYPRE_Int scale,
                                                HYPRE_Int max_iter, HYPRE_Real *max_eig, HYPRE_Real *min_eig );
-
-/* par_rotate_7pt.c */
-HYPRE_ParCSRMatrix GenerateRotate7pt ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_Int P,
-                                       HYPRE_Int Q, HYPRE_Int p, HYPRE_Int q, HYPRE_Real alpha, HYPRE_Real eps );
 
 /* par_scaled_matnorm.c */
 HYPRE_Int hypre_ParCSRMatrixScaledNorm ( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm );
@@ -3478,9 +2841,6 @@ HYPRE_Int hypre_BoomerAMGBuildPartialExtInterp ( hypre_ParCSRMatrix *A, HYPRE_In
                                                  HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
 /* par_vardifconv.c */
-HYPRE_ParCSRMatrix GenerateVarDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                        HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                        HYPRE_Real eps, HYPRE_ParVector *rhs_ptr );
 HYPRE_Real afun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real cfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
@@ -3492,9 +2852,6 @@ HYPRE_Real rfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bndfun ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 
 /* par_vardifconv_rs.c */
-HYPRE_ParCSRMatrix GenerateRSVarDifConv ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
-                                          HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                          HYPRE_Real eps, HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
 HYPRE_Real afun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real bfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
 HYPRE_Real cfun_rs ( HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz );
@@ -3519,6 +2876,8 @@ HYPRE_Int hypre_ParKrylovMatvecT ( void *matvec_data, HYPRE_Complex alpha, void 
                                    HYPRE_Complex beta, void *y );
 HYPRE_Int hypre_ParKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_ParKrylovInnerProd ( void *x, void *y );
+HYPRE_Int hypre_ParKrylovInnerProdTagged( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                          HYPRE_Complex **iprod_ptr );
 HYPRE_Int hypre_ParKrylovMassInnerProd ( void *x, void **y, HYPRE_Int k, HYPRE_Int unroll,
                                          void *result );
 HYPRE_Int hypre_ParKrylovMassDotpTwo ( void *x, void *y, void **z, HYPRE_Int k, HYPRE_Int unroll,
@@ -3660,8 +3019,6 @@ HYPRE_Int hypre_MGRSetReservedCpointsLevelToKeep( void *mgr_vdata, HYPRE_Int lev
 HYPRE_Int hypre_MGRSetMaxGlobalSmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetGlobalSmoothType( void *mgr_vdata, HYPRE_Int iter_type );
 HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void *mgr_vdata, HYPRE_Int nonCptToFptFlag );
-//HYPRE_Int hypre_MGRInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
-//HYPRE_Int hypre_MGRUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
                                                   HYPRE_Int num_points, HYPRE_Int point_type,
                                                   HYPRE_Int *CF_marker, HYPRE_Int diag_size,
@@ -3699,16 +3056,10 @@ HYPRE_Int hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
 HYPRE_Int hypre_BlockDiagInvLapack( HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int hypre_MGRBlockRelaxSetup( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                     HYPRE_Real **diaginvptr );
-//HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
-//                           HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Int method, hypre_ParVector *Vtemp,
-//                           hypre_ParVector *Ztemp);
 HYPRE_Int hypre_block_jacobi_solve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                     hypre_ParVector *u, HYPRE_Int blk_size,
                                     HYPRE_Int method, HYPRE_Real *diaginv,
                                     hypre_ParVector *Vtemp );
-//HYPRE_Int hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
-//HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
-//hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker,
                                 HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag,
                                 hypre_ParCSRMatrix **A_ff_ptr );
@@ -3812,17 +3163,17 @@ HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_I
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRBuildRFromW( hypre_IntArray *C_map, hypre_IntArray *F_map,
-                                HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
-                                HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
-                                hypre_ParCSRMatrix *W, hypre_ParCSRMatrix **R_ptr );
+HYPRE_Int hypre_MGRBuildRFromWr( hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                 HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
+                                 HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
+                                 hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **W_ptr,
+                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **Wr_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                     hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
+                                     hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr);
 
 /* par_mgr_rap.c */
 HYPRE_Int hypre_MGRBuildCoarseOperator(void *mgr_data, hypre_ParCSRMatrix *A_FF,
@@ -3854,6 +3205,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                      hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
@@ -4419,6 +3772,17 @@ HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_parcsr_ls_mup_undef.h"
+#include "_hypre_parcsr_ls_mup.h"
+#endif
 #endif
 
 #endif

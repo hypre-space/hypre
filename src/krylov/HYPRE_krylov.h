@@ -10,6 +10,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,13 +41,10 @@ extern "C" {
  * @{
  **/
 
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
                                             HYPRE_Real);
 
-#endif
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -172,6 +173,10 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
                               HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_PCGSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the preconditioner to use in a generic fashion.
  * This function does not require explicit input of the setup and solve pointers
  * of the preconditioner object. Instead, it automatically extracts this information
@@ -270,8 +275,12 @@ HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
 
 /**
  **/
+HYPRE_Int HYPRE_PCGGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+
+/**
+ **/
 HYPRE_Int HYPRE_PCGGetLogging(HYPRE_Solver  solver,
-                              HYPRE_Int    *level);
+                              HYPRE_Int    *logging);
 
 /**
  **/
@@ -384,6 +393,10 @@ HYPRE_Int HYPRE_GMRESSetPrecond(HYPRE_Solver         solver,
                                 HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_GMRESSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
@@ -391,6 +404,30 @@ HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
 
 /**
  * (Optional) Set the amount of printing to do to the screen.
+ *
+ * @param solver The solver object
+ * @param level The print level:
+ *        - 0: no output
+ *        - 1: print warnings
+ *        - 2: print convergence history for the absolute and relative residual norms
+ *        - 3: print absolute residual norms for each tag in multi-tag vectors
+ *        - 4: print relative residual norms for each tag in multi-tag vectors,
+ *             where each residual norm is divided by the norm of its corresponding
+ *             tagged component of the right-hand side vector (RHS).
+ *        - 5: print relative residual norms for each tag in multi-tag vectors,
+ *             where the residual norm is divided by the norm of the original
+ *             right-hand side vector (RHS).
+ *        - 6: print convergence history for the absolute and relative error norms
+ *        - 7: print absolute error norms for each tag in multi-tag vectors.
+ *        - 8: print relative error norms for each tag in multi-tag vectors,
+ *             where each residual norm is divided by the norm of its corresponding
+ *             tagged component of the initial error vector.
+ *        - 9: print relative error norms for each tag in multi-tag vectors,
+ *             where the error norms are divided by the norm of the initial
+ *             error vector.
+ *
+ *        Options 6-9 are mainly for debugging purposes as they require setting up
+ *        a reference solution vector via \e HYPRE_GMRESSetRefSolution
  **/
 HYPRE_Int HYPRE_GMRESSetPrintLevel(HYPRE_Solver solver,
                                    HYPRE_Int    level);
@@ -468,6 +505,10 @@ HYPRE_Int HYPRE_GMRESGetPrecond(HYPRE_Solver  solver,
 
 /**
  **/
+HYPRE_Int HYPRE_GMRESGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+
+/**
+ **/
 HYPRE_Int HYPRE_GMRESGetLogging(HYPRE_Solver  solver,
                                 HYPRE_Int    *level);
 
@@ -480,6 +521,18 @@ HYPRE_Int HYPRE_GMRESGetPrintLevel(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_GMRESGetConverged(HYPRE_Solver  solver,
                                   HYPRE_Int    *converged);
+
+/**
+ * (Optional) Set a reference solution vector for error computation.
+ **/
+HYPRE_Int HYPRE_GMRESSetRefSolution(HYPRE_Solver solver,
+                                    HYPRE_Vector xref);
+
+/**
+ * Get the reference solution vector.
+ **/
+HYPRE_Int HYPRE_GMRESGetRefSolution(HYPRE_Solver  solver,
+                                    HYPRE_Vector *xref);
 
 /**@}*/
 
@@ -1093,6 +1146,10 @@ HYPRE_Int HYPRE_BiCGSTABSetPrecond(HYPRE_Solver         solver,
                                    HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_BiCGSTABSetLogging(HYPRE_Solver solver,
@@ -1126,6 +1183,10 @@ HYPRE_Int HYPRE_BiCGSTABGetResidual(HYPRE_Solver   solver,
  **/
 HYPRE_Int HYPRE_BiCGSTABGetPrecond(HYPRE_Solver  solver,
                                    HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 /**@}*/
 
@@ -1247,6 +1308,17 @@ HYPRE_Int HYPRE_CGNRGetPrecond(HYPRE_Solver  solver,
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_krylov_mup_undef.h"
+#include "HYPRE_krylov_mup.h"
+#endif
 #endif
 
 #endif

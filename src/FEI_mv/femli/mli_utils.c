@@ -569,7 +569,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    }
    hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
    hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= maxIter; i++) 
+   for (i = 0; i <= maxIter; i++)
       hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
    hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
    hypre_TFree(srdiag, HYPRE_MEMORY_HOST);
@@ -1134,7 +1134,7 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
  *    workLen   = suggest 5*(m+n)
  *--------------------------------------------------------------------------*/
 
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     double *workArray, int m, int n, int workLen)
@@ -1410,7 +1410,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    }
    hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
    hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= maxIter; i++) 
+   for (i = 0; i <= maxIter; i++)
       hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
    hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
    return 0;
@@ -2984,4 +2984,3 @@ int MLI_Utils_DenseMatvec( double **Amat, int ndim, double *x, double *Ax )
    }
    return 0;
 }
-

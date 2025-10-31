@@ -9,8 +9,11 @@ include ../config/Makefile.config
 
 C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../blas -I../utilities
 
-LAPACK_HEADERS =  f2c.h hypre_lapack.h
-LAPACK_FILES = \
+HEADERS =\
+ f2c.h\
+ hypre_lapack.h
+
+FILES =\
  dbdsqr.c\
  dgebd2.c\
  dgebrd.c\
@@ -29,6 +32,7 @@ LAPACK_FILES = \
  dlacpy.c\
  dlae2.c\
  dlaev2.c\
+ dlamch.c\
  dlange.c\
  dlanst.c\
  dlansy.c\
@@ -84,19 +88,40 @@ LAPACK_FILES = \
  lsame.c\
  xerbla.c
 
-OBJS = ${LAPACK_FILES:.c=.o}
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
+OBJS = ${FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+
+endif
 
 #################################################################
 # Targets
 #################################################################
 
-all: ${OBJS} dlamch.o
+all: ${OBJS}
+	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 
 install: all
 	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 
 clean:
 	rm -rf *.o
+	rm -f *.o_flt *.o_dbl *.o_ldbl
 
 distclean: clean
 
@@ -104,8 +129,4 @@ distclean: clean
 # Rules
 #################################################################
 
-# compile without optimization
-dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -c dlamch.c
-
-${OBJS}: ${LAPACK_HEADERS}
+${OBJS}: ${HEADERS}

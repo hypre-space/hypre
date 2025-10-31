@@ -8,10 +8,19 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(__linux__) && defined(HYPRE_DEBUG) && !defined(HYPRE_LONG_DOUBLE)
+#ifndef __USE_GNU
+#define __USE_GNU
+#endif
+#include <fenv.h>
+#endif
+
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
+#if defined (hypre_DEFINE_GLOBAL)
 hypre_Handle *_hypre_handle = NULL;
+#endif
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
@@ -34,7 +43,8 @@ hypre_HandleCreate(void)
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
-   hypre_HandleLogLevel(hypre_handle_) = 0;
+   hypre_HandleLogLevel(hypre_handle_)       = 0;
+   hypre_HandleLogLevelSaved(hypre_handle_)  = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -48,7 +58,7 @@ hypre_HandleCreate(void)
 #endif
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
 #else
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
@@ -153,11 +163,21 @@ hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
       }
 
 #if defined(HYPRE_USING_CUDA)
-      cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
-      cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+                         &max_size,
+                         cudaDevAttrMaxSharedMemoryPerBlock,
+                         device_id));
+
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+                         &max_size_optin,
+                         cudaDevAttrMaxSharedMemoryPerBlockOptin,
+                         device_id));
 
 #elif defined(HYPRE_USING_HIP)
-      hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+      HYPRE_HIP_CALL(hipDeviceGetAttribute(
+                        &max_size,
+                        hipDeviceAttributeMaxSharedMemoryPerBlock,
+                        device_id));
 
 #elif defined(HYPRE_USING_SYCL)
       auto device = *hypre_HandleDevice(hypre_handle());
@@ -395,6 +415,10 @@ HYPRE_Initialize(void)
    hypre_MagmaInitialize();
 #endif
 
+#if defined(__linux__) && defined(HYPRE_DEBUG) && !defined(HYPRE_LONG_DOUBLE)
+   feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
+#endif
+
    /* Update library state */
    hypre_SetInitialized();
 
@@ -462,16 +486,16 @@ HYPRE_PrintDeviceInfo(void)
 
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
 
 #elif defined(HYPRE_USING_HIP)
    hipDeviceProp_t deviceProp;
 
    HYPRE_HIP_CALL( hipGetDevice(&dev) );
    HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
 
 #elif defined(HYPRE_USING_SYCL)
    auto device = *hypre_HandleDevice(hypre_handle());

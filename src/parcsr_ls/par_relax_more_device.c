@@ -29,7 +29,6 @@ hypreGPUKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
                                  HYPRE_Int     *diag_ja,
                                  HYPRE_Complex *diag_aa,
                                  HYPRE_Int     *offd_ia,
-                                 HYPRE_Int     *offd_ja,
                                  HYPRE_Complex *offd_aa,
                                  HYPRE_Complex *row_sum_lower,
                                  HYPRE_Complex *row_sum_upper,
@@ -126,8 +125,6 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
    HYPRE_Int  *A_diag_i;
    HYPRE_Int  *A_offd_i;
    HYPRE_Int  *A_diag_j;
-   HYPRE_Int  *A_offd_j;
-
 
    A_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
@@ -140,7 +137,6 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
    A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
    A_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
    A_offd_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
-   A_offd_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(A));
    A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -153,7 +149,6 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
                     A_diag_j,
                     A_diag_data,
                     A_offd_i,
-                    A_offd_j,
                     A_offd_data,
                     rowsums_lower,
                     rowsums_upper,

@@ -6,34 +6,34 @@
 
 testname=`basename $0 .sh`
 
-drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac struct_migrate ij_assembly"
+drivers="ij sstruct struct ams_driver struct_migrate ij_assembly"
 
 # Echo usage information
 case $1 in
    -h|-help)
       cat <<EOF
 
-   $0 [-h] {src_dir} [options]
+   $0 [-h] {root_dir} [options]
 
-   where: {src_dir}     is the hypre source directory
+   where: {root_dir}    is the hypre root directory
           -co: <opts>   configuration options
           -mo: <opts>   make options
           -ro: <opts>   call the run script with these options
           -eo: <opts>   call the examples script with these options
           -h|-help      prints this usage information and exits
 
-   This script uses cmake to configure and compile the source in {src_dir}, then
+   This script uses cmake to configure and compile the source in {root_dir}/src, then
    optionally runs driver and example tests.
 
-   Example usage: $0 ../src -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
+   Example usage: $0 .. -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
 
 EOF
       exit
       ;;
 esac
 
-# Set src_dir
-src_dir=`cd $1; pwd`
+# Set root_dir
+root_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
@@ -68,38 +68,33 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-cd $src_dir
-src_dir=`pwd`
+cd $root_dir
+root_dir=`pwd`
 
-# Clean up the cmbuild directories (do it from src_dir as a precaution)
-cd $src_dir
-rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+# Clean up the build directories (do it from root_dir as a precaution)
+cd $root_dir
+rm -fr build/*
 
 # Clean up the previous install
-cd $src_dir
-rm -fr hypre
+cd $root_dir
+rm -fr src/hypre
 
 # Configure
-cd $src_dir/cmbuild
-eval cmake $copts ..
+cd $root_dir/build
+eval cmake $copts ../src
 make $mopts install
-
-# Make
-cd $src_dir/cmbuild/test
-make $mopts
-mv -f $drivers ../../test
 
 cd $test_dir
 
 # Run
 if [ -n "$rset" ]; then
-   ./test.sh run.sh $src_dir $ropts
+   ./test.sh run.sh $root_dir/src $ropts
    mv -f run.??? $output_dir
 fi
 
 # Examples
 if [ -n "$eset" ]; then
-   ./test.sh examples.sh $src_dir $eopts
+   ./test.sh examples.sh $root_dir/src $eopts
    mv -f examples.??? $output_dir
 fi
 
@@ -110,7 +105,7 @@ do
 done
 
 # Clean up
-cd $src_dir
-rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
-rm -fr hypre
-( cd $src_dir/test; rm -f $drivers; ./cleantest.sh )
+cd $root_dir
+rm -fr build/*
+rm -fr src/hypre
+( cd $root_dir/src/test; rm -f $drivers; ./cleantest.sh )

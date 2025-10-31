@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_GPU)
@@ -36,9 +36,9 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
                                             HYPRE_Int *d_rc,
                                             char      *d_rf )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
+   static constexpr HYPRE_Int BIN = 5;
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
@@ -144,7 +144,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    *rownnz_exact_ptr = !HYPRE_THRUST_CALL( any_of,
                                            d_rf,
                                            d_rf + m,
-                                           thrust::identity<char>() );
+                                           HYPRE_THRUST_IDENTITY(char) );
 #endif
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
@@ -181,9 +181,9 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
+   static constexpr HYPRE_Int BIN = 5;
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
@@ -231,7 +231,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
@@ -340,7 +340,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
-                               thrust::identity<char>() );
+                               HYPRE_THRUST_IDENTITY(char) );
 #endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);

@@ -53,6 +53,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
 {
    HYPRE_UNUSED_VAR(rc);
 
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(R);
    hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
@@ -60,21 +61,25 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
+   hypre_Index             ustride;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
     *----------------------------------------------------------*/
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, findex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
    hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(r), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(r), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------

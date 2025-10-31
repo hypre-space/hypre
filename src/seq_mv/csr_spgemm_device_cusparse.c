@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 #include "csr_spgemm_device.h"
@@ -91,9 +91,10 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
 
    //Initialize the descriptors for the mats
+   HYPRE_Int *d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
    cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(m, k, 0, nnzA, d_ia, d_ja, d_a);
    cusparseSpMatDescr_t matB = hypre_CSRMatrixToCusparseSpMat_core(k, n, 0, nnzB, d_ib, d_jb, d_b);
-   cusparseSpMatDescr_t matC = hypre_CSRMatrixToCusparseSpMat_core(m, n, 0, 0,    NULL, NULL, NULL);
+   cusparseSpMatDescr_t matC = hypre_CSRMatrixToCusparseSpMat_core(m, n, 0, 0,    d_ic, NULL, NULL);
    cusparseOperation_t opA = CUSPARSE_OPERATION_NON_TRANSPOSE;
    cusparseOperation_t opB = CUSPARSE_OPERATION_NON_TRANSPOSE;
 
@@ -165,7 +166,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 
    /* Required by cusparse api (as of 11) to be int64_t */
    int64_t C_num_rows, C_num_cols, nnzC;
-   HYPRE_Int *d_ic, *d_jc;
+   HYPRE_Int *d_jc;
    HYPRE_Complex *d_c;
 
    /* Get required information for C */
@@ -174,9 +175,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    hypre_assert(C_num_rows == m);
    hypre_assert(C_num_cols == n);
 
-   d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows + 1, HYPRE_MEMORY_DEVICE);
-   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC,         HYPRE_MEMORY_DEVICE);
-   d_c  = hypre_TAlloc(HYPRE_Complex, nnzC,         HYPRE_MEMORY_DEVICE);
+   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
+   d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
    /* Setup the required descriptor for C */
    HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));

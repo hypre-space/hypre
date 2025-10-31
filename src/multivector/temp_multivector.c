@@ -8,8 +8,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "temp_multivector.h"
-#include "interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
 #include "_hypre_utilities.h"
 
 static void
@@ -241,7 +241,7 @@ mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed )
 
    hypre_assert( x != NULL );
 
-   mysrand(seed);
+   mysrand((hypre_uint) seed);
 
    for ( i = 0; i < x->numVectors; i++ )
    {

@@ -80,12 +80,12 @@ void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int sizeIN)
    */
   while (size < sizeIN) size *= 2;  /* want table size to be a power of 2: */
   /* rule-of-thumb: ensure there's at least 10% padding */
-  if ( (size-sizeIN) < (.1 * size) ) { size *= 2; }
+  if ( (size-sizeIN) < (.1 * (HYPRE_Real) size) ) { size *= 2; }
   tmp->size = size;
 
 
   /* allocate and zero the hash table */
-  tmp2 = tmp->data = (Hash_i_Record*)MALLOC_DH(size*sizeof(Hash_i_Record)); CHECK_V_ERROR;
+  tmp2 = tmp->data = (Hash_i_Record*)MALLOC_DH((size_t) size * sizeof(Hash_i_Record)); CHECK_V_ERROR;
   for (i=0; i<size; ++i) {
     tmp2[i].key = -1;
     tmp2[i].mark = -1;
@@ -169,7 +169,7 @@ void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int dataIN)
   }
 
   /* enlarge table if necessary */
-  if (h->count >= 0.9 * h->size) {
+  if (h->count >= 0.9 * (HYPRE_Real) h->size) {
     rehash_private(h); CHECK_V_ERROR;
   }
 
@@ -231,7 +231,7 @@ void rehash_private(Hash_i_dh h)
   /* allocate new data table, and install it in the Hash_i_dh object;
      essentially, we reinitialize the hash object.
    */
-  newData = (Hash_i_Record*)MALLOC_DH(new_size*sizeof(Hash_i_Record)); CHECK_V_ERROR;
+  newData = (Hash_i_Record*)MALLOC_DH((size_t) new_size * sizeof(Hash_i_Record)); CHECK_V_ERROR;
   for (i=0; i<new_size; ++i) {
     newData[i].key = -1;
     newData[i].mark = -1;

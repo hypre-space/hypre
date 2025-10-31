@@ -14,6 +14,10 @@
 #ifndef _CONJGRAD_H
 #define _CONJGRAD_H
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_ParaSails_mup_def.h"
+#endif
+
 void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
    HYPRE_Real tol, HYPRE_Int max_iter);
 void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,

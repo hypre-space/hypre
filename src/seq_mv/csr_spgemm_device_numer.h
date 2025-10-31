@@ -8,7 +8,7 @@
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
            Perform SpGEMM with Row Nnz Upper Bound
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
@@ -862,17 +862,17 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   cudaOccupancyMaxActiveBlocksPerMultiprocessor(
-      &numBlocksPerSm,
-      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-      block_size, dynamic_shmem_size);
+   HYPRE_CUDA_CALL(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+                      &numBlocksPerSm,
+                      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                      block_size, dynamic_shmem_size));
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   hipOccupancyMaxActiveBlocksPerMultiprocessor(
-      &numBlocksPerSm,
-      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-      block_size, dynamic_shmem_size);
+   HYPRE_HIP_CALL(hipOccupancyMaxActiveBlocksPerMultiprocessor(
+                     &numBlocksPerSm,
+                     hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                     block_size, dynamic_shmem_size));
 #endif
 
 #if defined(HYPRE_USING_SYCL)

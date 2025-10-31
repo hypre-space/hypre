@@ -65,6 +65,7 @@ hypre_int get_num_groups(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_range(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return blockDim.z;
 #endif
 }
@@ -76,6 +77,7 @@ hypre_int get_group_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return threadIdx.z;
 #endif
 }
@@ -87,6 +89,7 @@ hypre_int get_group_lane_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);
 #else
+   HYPRE_UNUSED_VAR(item);
    return hypre_gpu_get_thread_id<2>(item);
 #endif
 }
@@ -356,10 +359,10 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
 }
 
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct spgemm_bin_op
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct spgemm_bin_op : public thrust::unary_function<T, char>
+#else
+struct spgemm_bin_op
 #endif
 {
    char s, t, u; /* s: base size of bins; t: lowest bin; u: highest bin */
@@ -469,4 +472,3 @@ hypre_spgemm_get_num_groups_per_block()
 
 #endif /* defined(HYPRE_USING_GPU) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */
-

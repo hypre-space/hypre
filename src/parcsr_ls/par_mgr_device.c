@@ -19,11 +19,7 @@
 #if defined (HYPRE_USING_GPU)
 
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
 struct functor
-#else
-struct functor : public thrust::binary_function<T, T, T>
-#endif
 {
    T scale;
 
@@ -458,10 +454,13 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Int         *B_j,
                                                 HYPRE_Complex     *B_a )
 {
+   HYPRE_UNUSED_VAR(B_i);
+   HYPRE_UNUSED_VAR(B_j);
+
    HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
-   HYPRE_Int   i, ii, j, pj, qj, k;
+   HYPRE_Int   i, ii, j, pj, qj;
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
@@ -487,17 +486,16 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
             /* Loop over columns */
             for (j = pj + lane; j < qj; j += HYPRE_WARP_SIZE)
             {
-               k = read_only_load(A_j + j);
-               col = A_j[k];
+               col = read_only_load(A_j + j);
 
                if (marker[col] == marker_val)
                {
                   if ((col >= ii) &&
                       (col <  ii + blk_size) &&
-                      (fabs(A_a[k]) > HYPRE_REAL_MIN))
+                      (fabs(A_a[j]) > HYPRE_REAL_MIN))
                   {
                      /* batch offset + column offset + row offset */
-                     B_a[marker_indices[ii] * blk_size + (col - ii) * blk_size + lidx] = A_a[k];
+                     B_a[marker_indices[ii] * blk_size + (col - ii) * blk_size + lidx] = A_a[j];
                   }
                }
             }
@@ -663,6 +661,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    if (num_points % blk_size)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO! num_points % blk_size != 0");
+      hypre_TFree(blk_row_indices, HYPRE_MEMORY_DEVICE);
       hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
@@ -703,9 +702,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       tmpdiag     = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
       diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_ONEMKLBLAS)
-      pivots      = hypre_CTAlloc(std::int64_t, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      pivots      = hypre_CTAlloc(std::int64_t, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
 #else
-      pivots      = hypre_CTAlloc(HYPRE_Int, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      pivots      = hypre_CTAlloc(HYPRE_Int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
       tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
       info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
@@ -733,15 +732,16 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                    blk_size,
-                                                    blk_size,
-                                                    tmpdiag_aop,
-                                                    blk_size,
-                                                    pivots,
-                                                    blk_size,
-                                                    info,
-                                                    num_blocks));
+      /* Use diag_aop to store factors in B_diag_data. This is necessary for subsequent in-place call to getri. */
+      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                         blk_size,
+                                                         blk_size,
+                                                         diag_aop,
+                                                         blk_size,
+                                                         pivots,
+                                                         blk_size,
+                                                         info,
+                                                         num_blocks));
 
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( work_sizes[0] =
@@ -766,10 +766,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       work_size  = hypre_max(work_sizes[0], work_sizes[1]);
       scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
 
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t m,
                                                            (std::int64_t) blk_size, // std::int64_t n,
-                                                           *diag_aop, // T *a,
+                                                           B_diag_data, // T *a,
                                                            (std::int64_t) blk_size, // std::int64_t lda,
                                                            (std::int64_t) bs2, // std::int64_t stride_a,
                                                            pivots, // std::int64_t *ipiv,
@@ -815,18 +816,20 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                    blk_size,
-                                                    tmpdiag_aop,
-                                                    blk_size,
-                                                    pivots,
-                                                    blk_size,
-                                                    info,
-                                                    num_blocks));
+      /* Note: This is an in-place operation and overwrites factorization with batched inverses. -DOK */
+      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                         blk_size,
+                                                         diag_aop,
+                                                         blk_size,
+                                                         pivots,
+                                                         blk_size,
+                                                         info,
+                                                         num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
+      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t n,
-                                                           *diag_aop, // T *a,
+                                                           B_diag_data, // T *a,
                                                            (std::int64_t) blk_size, // std::int64_t lda,
                                                            (std::int64_t) bs2, // std::int64_t stride_a,
                                                            pivots, // std::int64_t *ipiv,
@@ -1000,6 +1003,123 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
 
    /* Set output pointer */
    *B_ptr = par_B;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Constructs a classical restriction operator as R = [Wr I] on GPU.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildRFromWrDevice(hypre_IntArray      *C_map,
+                            hypre_IntArray      *F_map,
+                            hypre_ParCSRMatrix  *Wr,
+                            hypre_ParCSRMatrix  *R)
+{
+   /* Input matrix variables */
+   hypre_CSRMatrix       *Wr_diag          = hypre_ParCSRMatrixDiag(Wr);
+   HYPRE_Int             *Wr_diag_i        = hypre_CSRMatrixI(Wr_diag);
+   HYPRE_Int             *Wr_diag_j        = hypre_CSRMatrixJ(Wr_diag);
+   HYPRE_Complex         *Wr_diag_a        = hypre_CSRMatrixData(Wr_diag);
+   HYPRE_Int              Wr_diag_num_rows = hypre_CSRMatrixNumRows(Wr_diag);
+   HYPRE_Int             *C_map_data       = hypre_IntArrayData(C_map);
+   HYPRE_Int             *F_map_data       = hypre_IntArrayData(F_map);
+
+   /* Output matrix */
+   hypre_CSRMatrix       *R_diag           = hypre_ParCSRMatrixDiag(R);
+   HYPRE_Int             *R_diag_i         = hypre_CSRMatrixI(R_diag);
+   HYPRE_Int             *R_diag_j         = hypre_CSRMatrixJ(R_diag);
+   HYPRE_Complex         *R_diag_a         = hypre_CSRMatrixData(R_diag);
+
+   HYPRE_Int              nrows            = Wr_diag_num_rows;
+
+   /* 1. Compute row lengths: 1 (for I) + nnz in Wr row */
+   HYPRE_Int *row_lengths = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator<HYPRE_Int> row_begin(0);
+   HYPRE_ONEDPL_CALL(std::transform,
+                     row_begin, row_begin + nrows,
+                     row_lengths,
+                     [ = ](HYPRE_Int i)
+   {
+      return (1 + Wr_diag_i[i + 1] - Wr_diag_i[i]);
+   });
+#else
+   HYPRE_THRUST_CALL(transform,
+                     thrust::make_counting_iterator<HYPRE_Int>(0),
+                     thrust::make_counting_iterator<HYPRE_Int>(nrows),
+                     row_lengths,
+                     [ = ] __device__ (HYPRE_Int i)
+   {
+      return (1 + Wr_diag_i[i + 1] - Wr_diag_i[i]);
+   });
+#endif
+
+   /* 2. Inclusive scan to get R_diag_i */
+   HYPRE_Int zero = 0;
+   hypre_TMemcpy(R_diag_i, &zero, HYPRE_Int, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::inclusive_scan,
+                     row_lengths, row_lengths + nrows,
+                     R_diag_i + 1);
+#else
+   HYPRE_THRUST_CALL(inclusive_scan,
+                     row_lengths, row_lengths + nrows,
+                     R_diag_i + 1);
+#endif
+
+   // 3. Fill R_diag_j and R_diag_a in parallel, one row per thread
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::for_each,
+                     row_begin, row_begin + nrows,
+                     [ = ](HYPRE_Int i)
+   {
+      HYPRE_Int r_offset = R_diag_i[i];
+
+      /* I part */
+      R_diag_j[r_offset] = C_map_data[i];
+      R_diag_a[r_offset] = 1.0;
+      r_offset++;
+
+      /* Wr part */
+      for (HYPRE_Int jj = Wr_diag_i[i]; jj < Wr_diag_i[i + 1]; jj++)
+      {
+         R_diag_j[r_offset] = F_map_data[Wr_diag_j[jj]];
+         R_diag_a[r_offset] = Wr_diag_a[jj];
+         r_offset++;
+      }
+   });
+#else
+   HYPRE_THRUST_CALL(for_each,
+                     thrust::make_counting_iterator<HYPRE_Int>(0),
+                     thrust::make_counting_iterator<HYPRE_Int>(nrows),
+                     [ = ] __device__ (HYPRE_Int i)
+   {
+      HYPRE_Int r_offset = R_diag_i[i];
+
+      /* I part */
+      R_diag_j[r_offset] = C_map_data[i];
+      R_diag_a[r_offset] = 1.0;
+      r_offset++;
+
+      /* Wr part */
+      for (HYPRE_Int jj = Wr_diag_i[i]; jj < Wr_diag_i[i + 1]; jj++)
+      {
+         R_diag_j[r_offset] = F_map_data[Wr_diag_j[jj]];
+         R_diag_a[r_offset] = Wr_diag_a[jj];
+         r_offset++;
+      }
+   });
+#endif
+
+   /* 4. Free row_lengths */
+   hypre_TFree(row_lengths, HYPRE_MEMORY_DEVICE);
+
+   /* 5. Sync compute stream so that R_diag is ready for use */
+   hypre_SyncComputeStream();
 
    return hypre_error_flag;
 }

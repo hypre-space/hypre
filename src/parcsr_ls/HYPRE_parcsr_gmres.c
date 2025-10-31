@@ -34,7 +34,7 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec,
          hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd,
+         hypre_ParKrylovInnerProdTagged,
          hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector,
@@ -86,6 +86,28 @@ HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
                               (HYPRE_Matrix) A,
                               (HYPRE_Vector) b,
                               (HYPRE_Vector) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESSetRefSolution(HYPRE_Solver    solver,
+                                HYPRE_ParVector ref_solution)
+{
+   return (HYPRE_GMRESSetRefSolution(solver, (HYPRE_Vector) ref_solution));
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESGetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESGetRefSolution(HYPRE_Solver     solver,
+                                HYPRE_ParVector *ref_solution)
+{
+   return (HYPRE_GMRESGetRefSolution(solver, (HYPRE_Vector *) ref_solution));
 }
 
 /*--------------------------------------------------------------------------

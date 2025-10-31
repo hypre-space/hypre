@@ -9,12 +9,16 @@
 
 /*--------------------------------------------------------------------------
  * hypre_BinarySearch
+ *
  * performs a binary search for value on array list where list needs
  * to contain ordered nonnegative numbers
  * the routine returns the location of the value or -1
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length)
+HYPRE_Int
+hypre_BinarySearch(HYPRE_Int *list,
+                   HYPRE_Int  value,
+                   HYPRE_Int  list_length)
 {
    HYPRE_Int low, high, m;
    HYPRE_Int not_found = 1;
@@ -43,12 +47,16 @@ HYPRE_Int hypre_BinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_le
 
 /*--------------------------------------------------------------------------
  * hypre_BigBinarySearch
+ *
  * performs a binary search for value on array list where list needs
  * to contain ordered nonnegative numbers
  * the routine returns the location of the value or -1
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length)
+HYPRE_Int
+hypre_BigBinarySearch(HYPRE_BigInt *list,
+                      HYPRE_BigInt  value,
+                      HYPRE_Int     list_length)
 {
    HYPRE_Int low, high, m;
    HYPRE_Int not_found = 1;
@@ -77,18 +85,21 @@ HYPRE_Int hypre_BigBinarySearch(HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_In
 
 /*--------------------------------------------------------------------------
  * hypre_BinarySearch2
+ *
  * this one is a bit more robust:
  *   avoids overflow of m as can happen above when (low+high) overflows
  *   lets user specify high and low bounds for array (so a subset
-     of array can be used)
+ *   of array can be used)
  *  if not found, then spot returns where is should be inserted
-
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BinarySearch2(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int low, HYPRE_Int high,
-                              HYPRE_Int *spot)
+HYPRE_Int
+hypre_BinarySearch2(HYPRE_Int *list,
+                    HYPRE_Int  value,
+                    HYPRE_Int  low,
+                    HYPRE_Int  high,
+                    HYPRE_Int *spot)
 {
-
    HYPRE_Int m;
 
    while (low <= high)
@@ -120,10 +131,14 @@ HYPRE_Int hypre_BinarySearch2(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int low, H
  * Equivalent to C++ std::lower_bound
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value )
+HYPRE_Int*
+hypre_LowerBound( HYPRE_Int *first,
+                  HYPRE_Int *last,
+                  HYPRE_Int  value )
 {
    HYPRE_Int *it;
-   HYPRE_Int count = last - first, step;
+   HYPRE_Int  step;
+   HYPRE_Int  count = (HYPRE_Int) (last - first);
 
    while (count > 0)
    {
@@ -133,18 +148,26 @@ HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value 
          first = ++it;
          count -= step + 1;
       }
-      else { count = step; }
+      else
+      {
+         count = step;
+      }
    }
    return first;
 }
+
 /*--------------------------------------------------------------------------
  * Equivalent to C++ std::lower_bound
  *--------------------------------------------------------------------------*/
 
-HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value )
+HYPRE_BigInt*
+hypre_BigLowerBound( HYPRE_BigInt *first,
+                     HYPRE_BigInt *last,
+                     HYPRE_BigInt  value )
 {
    HYPRE_BigInt *it;
-   HYPRE_BigInt count = last - first, step;
+   HYPRE_BigInt  step;
+   HYPRE_BigInt  count = (HYPRE_BigInt) (last - first);
 
    while (count > 0)
    {
@@ -154,7 +177,10 @@ HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPR
          first = ++it;
          count -= step + 1;
       }
-      else { count = step; }
+      else
+      {
+         count = step;
+      }
    }
    return first;
 }

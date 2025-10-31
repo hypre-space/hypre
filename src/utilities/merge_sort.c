@@ -449,13 +449,14 @@ static void big_kth_element( HYPRE_Int *out1, HYPRE_Int *out2,
  *                      participate in this merge
  *--------------------------------------------------------------------------*/
 
-static void hypre_parallel_merge( HYPRE_Int *first1, HYPRE_Int *last1,
-                                  HYPRE_Int *first2, HYPRE_Int *last2,
-                                  HYPRE_Int *out, HYPRE_Int num_threads,
-                                  HYPRE_Int my_thread_num )
+static void
+hypre_parallel_merge( HYPRE_Int *first1, HYPRE_Int *last1,
+                      HYPRE_Int *first2, HYPRE_Int *last2,
+                      HYPRE_Int *out, HYPRE_Int num_threads,
+                      HYPRE_Int my_thread_num )
 {
-   HYPRE_Int n1 = last1 - first1;
-   HYPRE_Int n2 = last2 - first2;
+   HYPRE_Int n1 = (HYPRE_Int) (last1 - first1);
+   HYPRE_Int n2 = (HYPRE_Int) (last2 - first2);
    HYPRE_Int n = n1 + n2;
    HYPRE_Int n_per_thread = (n + num_threads - 1) / num_threads;
    HYPRE_Int begin_rank = hypre_min(n_per_thread * my_thread_num, n);
@@ -644,6 +645,8 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
 #endif
 }
 
+#if defined(HYPRE_USING_HOPSCOTCH)
+
 /*--------------------------------------------------------------------------
  * hypre_sort_and_create_inverse_map
  *
@@ -653,8 +656,11 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
  *      inverse_map[i] = j iff (*out)[j] = i
  *--------------------------------------------------------------------------*/
 
-void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out,
-                                       hypre_UnorderedIntMap *inverse_map)
+void
+hypre_sort_and_create_inverse_map(HYPRE_Int              *in,
+                                  HYPRE_Int               len,
+                                  HYPRE_Int             **out,
+                                  hypre_UnorderedIntMap  *inverse_map)
 {
    if (len == 0)
    {
@@ -712,6 +718,8 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
+
+#endif /* if defined(HYPRE_USING_HOPSCOTCH) */
 
 /*--------------------------------------------------------------------------
  * hypre_big_merge_sort
@@ -803,8 +811,11 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
  * hypre_big_sort_and_create_inverse_map
  *--------------------------------------------------------------------------*/
 
-void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out,
-                                           hypre_UnorderedBigIntMap *inverse_map)
+void
+hypre_big_sort_and_create_inverse_map(HYPRE_BigInt              *in,
+                                      HYPRE_Int                  len,
+                                      HYPRE_BigInt             **out,
+                                      hypre_UnorderedBigIntMap  *inverse_map)
 {
    if (len == 0)
    {
@@ -862,5 +873,3 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
-
-/* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */

@@ -32,13 +32,11 @@ main( hypre_int argc,
    HYPRE_Int         num_procs, myid;
    HYPRE_Int         dim;
    HYPRE_Int         rep, reps, fail, sum;
-   HYPRE_Int         size;
+   HYPRE_Int         size, xi1;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
-   //HYPRE_Int         xi1, xi2, xi3, xi4;
-   HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
-   hypre_Index       loop_size, start, unit_stride, index;
+   hypre_Index       loop_size, start, ustride, index;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -161,7 +159,7 @@ main( hypre_int argc,
 
    hypre_SetIndex3(start, 1, 1, 1);
    hypre_SetIndex3(loop_size, nx, ny, nz);
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
+   hypre_SetIndex3(ustride, 1, 1, 1);
 
    x1_data_box = hypre_BoxCreate(dim);
    x2_data_box = hypre_BoxCreate(dim);
@@ -209,7 +207,7 @@ main( hypre_int argc,
    /* xp1 is already initialized to 0 */
 
    zypre_BoxLoop1Begin(dim, loop_size,
-                       x1_data_box, start, unit_stride, xi1);
+                       x1_data_box, start, ustride, xi1);
    {
       xp1[xi1] ++;
    }
@@ -219,7 +217,7 @@ main( hypre_int argc,
    fail = 0;
    sum = 0;
    hypre_SerialBoxLoop1Begin(3, loop_size,
-                             x1_data_box, start, unit_stride, xi1);
+                             x1_data_box, start, ustride, xi1);
    {
       sum += (HYPRE_Int)xp1[xi1];
       if (xp1[xi1] != 1)
@@ -257,12 +255,10 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-      xi1 = 0;
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop0Begin(3, loop_size);
       {
-         d_xp1[xi1] += d_xp1[xi1];
-         //xi1++;
+         d_xp1[0] += 1.0;
       }
       hypre_BoxLoop0End();
 #undef DEVICE_VAR
@@ -276,7 +272,7 @@ main( hypre_int argc,
    {
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop1Begin(3, loop_size,
-                          x1_data_box, start, unit_stride, xi1);
+                          x1_data_box, start, ustride, xi1);
       {
          d_xp1[xi1] += d_xp1[xi1];
       }
@@ -292,8 +288,8 @@ main( hypre_int argc,
    {
 #define DEVICE_VAR is_device_ptr(d_xp1,d_xp2)
       hypre_BoxLoop2Begin(3, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2);
       {
          d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2];
       }
@@ -309,9 +305,9 @@ main( hypre_int argc,
    {
 #define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3)
       hypre_BoxLoop3Begin(3, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2,
-                          x3_data_box, start, unit_stride, xi3);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2,
+                          x3_data_box, start, ustride, xi3);
       {
          d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3];
       }
@@ -327,10 +323,10 @@ main( hypre_int argc,
    {
 #define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3,d_xp4)
       hypre_BoxLoop4Begin(3, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2,
-                          x3_data_box, start, unit_stride, xi3,
-                          x4_data_box, start, unit_stride, xi4);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2,
+                          x3_data_box, start, ustride, xi3,
+                          x4_data_box, start, ustride, xi4);
       {
          d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3] + d_xp4[xi4];
       }
@@ -370,7 +366,7 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       zypre_BoxLoop1Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1);
+                          x1_data_box, start, ustride, xi1);
       {
          xp1[xi1] += xp1[xi1];
       }
@@ -384,8 +380,8 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       zypre_BoxLoop2Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2);
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2];
       }
@@ -399,9 +395,9 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       zypre_BoxLoop3Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2,
-                          x3_data_box, start, unit_stride, xi3);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2,
+                          x3_data_box, start, ustride, xi3);
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
       }
@@ -415,10 +411,10 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       zypre_BoxLoop4Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2,
-                          x3_data_box, start, unit_stride, xi3,
-                          x4_data_box, start, unit_stride, xi4);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2,
+                          x3_data_box, start, ustride, xi3,
+                          x4_data_box, start, ustride, xi4);
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
       }
@@ -474,7 +470,7 @@ main( hypre_int argc,
       reducer = 0.0;
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop1ReductionBegin(3, loop_size,
-                                   x1_data_box, start, unit_stride, xi1,
+                                   x1_data_box, start, ustride, xi1,
                                    reducer);
       {
          reducer += 1.0 / d_xp1[xi1];
@@ -493,8 +489,8 @@ main( hypre_int argc,
       reducer = 0.0;
 #define DEVICE_VAR is_device_ptr(d_xp1,d_xp2)
       hypre_BoxLoop2ReductionBegin(3, loop_size,
-                                   x1_data_box, start, unit_stride, xi1,
-                                   x2_data_box, start, unit_stride, xi2,
+                                   x1_data_box, start, ustride, xi1,
+                                   x2_data_box, start, ustride, xi2,
                                    reducer);
       {
          reducer += 1.0 / d_xp1[xi1] + d_xp2[xi2] * 3.1415926;
@@ -522,7 +518,7 @@ main( hypre_int argc,
 #undef HYPRE_BOX_REDUCTION
 #define HYPRE_BOX_REDUCTION reduction(+:zbox_sum1)
       zypre_BoxLoop1Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1);
+                          x1_data_box, start, ustride, xi1);
       {
          zbox_sum1 += 1.0 / xp1[xi1];
       }
@@ -538,8 +534,8 @@ main( hypre_int argc,
 #undef HYPRE_BOX_REDUCTION
 #define HYPRE_BOX_REDUCTION reduction(+:zbox_sum2)
       zypre_BoxLoop2Begin(dim, loop_size,
-                          x1_data_box, start, unit_stride, xi1,
-                          x2_data_box, start, unit_stride, xi2);
+                          x1_data_box, start, ustride, xi1,
+                          x2_data_box, start, ustride, xi2);
       {
          zbox_sum2 += 1.0 / xp1[xi1] + xp2[xi2] * 3.1415926;
       }

@@ -40,7 +40,7 @@ typedef struct
    HYPRE_Int             num_nonzeros;
    hypre_int            *i_short;
    hypre_int            *j_short;
-   HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Int             owns_data;       /* Matrix creates/destroys `j`, `big_j`, and `data' */
    HYPRE_Int             pattern_only;    /* 1: data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
@@ -54,6 +54,10 @@ typedef struct
    HYPRE_Complex        *sorted_data;
    hypre_CsrsvData      *csrsv_data;
    hypre_GpuMatData     *mat_data;
+#endif
+
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision matrix_precision;
 #endif
 } hypre_CSRMatrix;
 
@@ -83,8 +87,9 @@ typedef struct
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
 #endif
 
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
+#ifdef HYPRE_MIXED_PRECISION
+#define hypre_CSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
+#endif
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix

@@ -71,7 +71,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   sptr    = ldu->lcomm.sptr;
   sindex  = ldu->lcomm.sindex;
   auxsptr = ldu->lcomm.auxsptr;
-  if( sptr != NULL ) hypre_memcpy_idx(auxsptr, sptr, snbrpes+1);
+  if( sptr != NULL ) hypre_memcpy_idx(auxsptr, sptr, (size_t) (snbrpes + 1));
 
   rnbrpes = ldu->lcomm.rnbrpes;
   raddr   = ldu->lcomm.raddr;
@@ -168,7 +168,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   sptr    = ldu->ucomm.sptr;
   sindex  = ldu->ucomm.sindex;
   auxsptr = ldu->ucomm.auxsptr;
-  hypre_memcpy_idx(auxsptr, sptr, snbrpes+1);
+  hypre_memcpy_idx(auxsptr, sptr, (size_t) (snbrpes + 1));
 
   rnbrpes = ldu->ucomm.rnbrpes;
   raddr   = ldu->ucomm.raddr;
@@ -430,8 +430,9 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 
           TriSolveComm->rdone   = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes");
   rpes  = TriSolveComm->rpes    = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes" );
-  raddr = TriSolveComm->raddr   = (HYPRE_Real**) hypre_mymalloc( sizeof(HYPRE_Real*)*(rnbrpes+1),
-					       "hypre_SetUpFactor: TriSolveComm->raddr");
+  raddr = TriSolveComm->raddr   = (HYPRE_Real**) hypre_mymalloc(
+                                   sizeof(HYPRE_Real*) * ((size_t) (rnbrpes + 1)),
+                                   "hypre_SetUpFactor: TriSolveComm->raddr");
 
   /* Save send addresses, lengths, and construct spes */
   snbrpes = 0;
@@ -551,9 +552,10 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
     imap[firstrow+perm[i]] = i;
 
   /* rnum is a 2D array of nlevels rows of rnbrpes columns each */
-  TriSolveComm->rnum = hypre_idx_malloc(nlevels * rnbrpes, "hypre_SetUpFactor: TriSolveComm->rnum");
-        rnum = hypre_idx_malloc(nlevels, "hypre_SetUpFactor: rnum"      );
-  hypre_memcpy_idx(TriSolveComm->auxsptr, sptr, snbrpes+1);
+  TriSolveComm->rnum = hypre_idx_malloc(nlevels * rnbrpes,
+                                        "hypre_SetUpFactor: TriSolveComm->rnum");
+  rnum = hypre_idx_malloc(nlevels, "hypre_SetUpFactor: rnum");
+  hypre_memcpy_idx(TriSolveComm->auxsptr, sptr, (size_t) snbrpes + 1);
 
   /**** send the number of elements we are going to send to each PE.
    **** Note the inner for loop has no body, and L and U differ slightly.
@@ -631,7 +633,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
     /* Use uvalues as a buffer to permute the dvalues */
     for (i=0; i<lnrows; i++)
       values[i] = ldu->dvalues[perm[i]];
-    hypre_memcpy_fp(ldu->dvalues, values, lnrows);
+    hypre_memcpy_fp(ldu->dvalues, values, (size_t) lnrows);
 
     /* Free memory that stored the U so far and relink the data structures */
     /*hypre_free_multi(ldu->usrowptr, ldu->uerowptr, ldu->ucolind, ldu->uvalues, -1);*/
@@ -653,4 +655,3 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<lnrows; i++)
     imap[firstrow+i] = -1;
 }
-

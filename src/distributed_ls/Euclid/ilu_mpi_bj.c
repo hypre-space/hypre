@@ -67,9 +67,9 @@ if (ctx->F->rp == NULL) {
   o2n_col = sg->o2n_col;
 
   /* allocate and initialize working space */
-  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH(((size_t) (m + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) {
     marker[i] = -1;
     work[i] = 0.0;
@@ -144,7 +144,7 @@ if (ctx->F->rp == NULL) {
     }
 
     /* check for zero diagonal */
-    if (! aval[diag[i]]) {
+    if (aval[diag[i]] == 0.0) {
       hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }

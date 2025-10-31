@@ -139,7 +139,7 @@ hypre_MGRSolve( void               *mgr_vdata,
           * for ieee_check self-equality works on all IEEE-compliant compilers/
           * machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
           * by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-          * found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+          * found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -247,7 +247,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
    if ((my_id == 0) && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
    {
-      if (iter > 0 && init_resnorm)
+      if (iter > 0 && init_resnorm != 0.0)
       {
          conv_factor = hypre_pow((resnorm / init_resnorm),
                                  (fp_one / (HYPRE_Real) iter));
@@ -283,6 +283,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
    HYPRE_Int            local_size;
    HYPRE_Int            num_sweeps = 1;
    HYPRE_Int            relax_order = hypre_ParAMGDataRelaxOrder(Frelax_data);
+   HYPRE_Int            amg_relax_order;
    HYPRE_Int            relax_type = 3;
    HYPRE_Real           relax_weight = 1.0;
    HYPRE_Real           omega = 1.0;
@@ -308,6 +309,10 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
    HYPRE_Complex        fp_one = 1.0;
    HYPRE_Complex        fp_neg_one = - fp_one;
 
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy  exec;
+#endif
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    F_array[0] = f;
@@ -317,6 +322,19 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
    if (CF_marker_array[0])
    {
       CF_marker = hypre_IntArrayData(CF_marker_array[0]);
+   }
+
+   /* Disable internal relax. order in AMG when running on GPUs */
+#if defined(HYPRE_USING_GPU)
+   exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A_array[0]));
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      amg_relax_order = 0;
+   }
+   else
+#endif
+   {
+      amg_relax_order = relax_order;
    }
 
    /* (Re)set local_size for Vtemp */
@@ -335,7 +353,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
                                                  F_array[0],
                                                  CF_marker,
                                                  relax_type,
-                                                 relax_order,
+                                                 amg_relax_order,
                                                  1,
                                                  relax_weight,
                                                  omega,
@@ -353,7 +371,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
                                                F_array[0],
                                                CF_marker,
                                                relax_type,
-                                               -1,
+                                               amg_relax_order,
                                                relax_weight,
                                                omega,
                                                NULL,
@@ -381,8 +399,12 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
          hypre_ParVectorSetZeros(U_array[coarse_grid]);
 
          /* Avoid unnecessary copy using out-of-place version of SpMV */
-         hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid], U_array[fine_grid],
-                                            fp_one, F_array[fine_grid], Vtemp);
+         hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one,
+                                            A_array[fine_grid],
+                                            U_array[fine_grid],
+                                            fp_one,
+                                            F_array[fine_grid],
+                                            Vtemp);
 
          hypre_ParCSRMatrixMatvecT(fp_one, R_array[fine_grid], Vtemp,
                                    fp_zero, F_array[coarse_grid]);
@@ -418,7 +440,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
                                                        Aux_F,
                                                        CF_marker,
                                                        relax_type,
-                                                       relax_order,
+                                                       amg_relax_order,
                                                        cycle_param,
                                                        relax_weight,
                                                        omega,
@@ -448,7 +470,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
                                                        Aux_F,
                                                        CF_marker,
                                                        relax_type,
-                                                       relax_order,
+                                                       amg_relax_order,
                                                        cycle_param,
                                                        relax_weight,
                                                        omega,

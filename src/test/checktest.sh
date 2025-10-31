@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+summary=0
+
 # Echo usage information
 case $1 in
    -h|-help)
@@ -26,17 +28,22 @@ cat <<EOF
 EOF
    exit
    ;;
+   -summary)
+      summary=1
+      shift
+   ;;
 esac
 
-RESET=`shopt -p nullglob`  # Save current nullglob setting
-shopt -s nullglob          # Return an empty string for failed wildcard matches 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RESET=`shopt -p nullglob`                # Save current nullglob setting
+shopt -s nullglob                        # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
-   testdirs=`echo TEST*`   # All TEST directories
+   testdirs=`echo ${SCRIPT_DIR}/TEST*`   # All TEST directories
 else
-   testdirs=`echo $*`      # Only the specified test directories
+   testdirs=`echo $*`                    # Only the specified test directories
 fi
-$RESET                     # Restore nullglob setting
+$RESET                                   # Restore nullglob setting
 
 error_code=0
 echo ""
@@ -48,13 +55,18 @@ do
       for file in $files
       do
          SZ=`ls -l $file | awk '{print $5}'`
+         relative_path=$(echo "$file" | sed 's|.*test/||')
          if [ $SZ != 0 ]
          then
-            echo -e "FAILED : $file  ($SZ)\n"
-            cat $file
-            error_code=1
+            echo "FAILED : $relative_path  ($SZ)"
+            if [ $summary != 1 ]
+            then
+               echo ""
+               cat $file
+               error_code=1
+            fi
          else
-            echo "    OK : $file"
+            echo "    OK : $relative_path"
          fi
       done
       echo ""
