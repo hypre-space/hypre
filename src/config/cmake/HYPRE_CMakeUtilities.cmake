@@ -1066,4 +1066,3 @@ macro(setup_mixed_precision_compilation module_name)
     $<TARGET_OBJECTS:${module_name}_ldbl>
   )
 endmacro()
-

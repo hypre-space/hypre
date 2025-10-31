@@ -4556,6 +4556,13 @@ hypre_ILUGetLocalPerm_dbl( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr, HYPRE_In
 HYPRE_Int
 hypre_ILUGetLocalPerm_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr, HYPRE_Int *nLU, HYPRE_Int reordering_type );
 
+const char*
+hypre_ILUGetName_flt( void *ilu_vdata );
+const char*
+hypre_ILUGetName_dbl( void *ilu_vdata );
+const char*
+hypre_ILUGetName_long_dbl( void *ilu_vdata );
+
 HYPRE_Int
 hypre_ILUGetNumIterations_flt( void *ilu_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
@@ -5381,6 +5388,34 @@ HYPRE_Int
 hypre_MGRDestroyGSElimData_dbl( void *mgr_vdata );
 HYPRE_Int
 hypre_MGRDestroyGSElimData_long_dbl( void *mgr_vdata );
+
+void *
+hypre_MGRDirectSolverCreate_flt( void );
+void *
+hypre_MGRDirectSolverCreate_dbl( void );
+void *
+hypre_MGRDirectSolverCreate_long_dbl( void );
+
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_flt( void *solver );
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_dbl( void *solver );
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_long_dbl( void *solver );
+
+HYPRE_Int
+hypre_MGRDirectSolverSetup_flt( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSetup_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSetup_long_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+
+HYPRE_Int
+hypre_MGRDirectSolverSolve_flt( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSolve_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSolve_long_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
 
 HYPRE_Int
 hypre_MGRFrelaxVcycle_flt( void *mgr_vdata, hypre_ParVector *f, hypre_ParVector *u );

@@ -571,9 +571,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 
    hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
    hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
-   HYPRE_Int            (*fine_grid_solver_solve)(void*, void*, void*, void*) =
-      (mgr_data -> fine_grid_solver_solve);
-   hypre_ParCSRMatrix   **A_ff_array = (mgr_data -> A_ff_array);
+   hypre_ParCSRMatrix   **A_ff_array   = (mgr_data -> A_ff_array);
 
    HYPRE_Int              i, relax_points;
    HYPRE_Int              num_coarse_levels = (mgr_data -> num_coarse_levels);
@@ -989,6 +987,8 @@ hypre_MGRCycle( void              *mgr_vdata,
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
          else if (Frelax_type[level] == 2  ||
+                  Frelax_type[level] == 29 ||
+                  Frelax_type[level] == 32 ||
                   Frelax_type[level] == 9  ||
                   Frelax_type[level] == 99 ||
                   Frelax_type[level] == 199)
@@ -1016,32 +1016,35 @@ hypre_MGRCycle( void              *mgr_vdata,
             /* Set initial guess to zeros */
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
-            if (Frelax_type[level] == 2)
+            if (Frelax_type[level] == 2 || Frelax_type[level] == 32)
             {
-               /* Do F-relaxation using AMG */
-               if (level == 0)
-               {
-                  /* TODO (VPM): unify with the next block */
-                  fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                         A_ff_array[fine_grid],
-                                         F_fine_array[coarse_grid],
-                                         U_fine_array[coarse_grid]);
-               }
-               else
-               {
-                  aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
+               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
 
-                  hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
-                                              (HYPRE_Matrix) A_ff_array[level],
-                                              (HYPRE_Vector) F_fine_array[level + 1],
-                                              (HYPRE_Vector) U_fine_array[level + 1]);
-               }
+               hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
+                                           (HYPRE_Matrix) A_ff_array[level],
+                                           (HYPRE_Vector) F_fine_array[coarse_grid],
+                                           (HYPRE_Vector) U_fine_array[coarse_grid]);
+            }
+            else if (Frelax_type[level] == 29)
+            {
+               hypre_MGRDirectSolverSolve((mgr_data -> aff_solver)[level],
+                                          A_ff_array[level],
+                                          F_fine_array[coarse_grid],
+                                          U_fine_array[coarse_grid]);
             }
             else
             {
                /* Do F-relaxation using Gaussian Elimination */
                hypre_GaussElimSolve((mgr_data -> GSElimData)[fine_grid],
                                     level, Frelax_type[level]);
+            }
+
+            /* Exit early in case of issues */
+            if (HYPRE_GetError())
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                 "Detected issue during F-relaxation application!");
+               return hypre_error_flag;
             }
 
             /* Interpolate the solution back to the fine grid level */

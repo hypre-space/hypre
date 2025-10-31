@@ -272,6 +272,34 @@ hypre_ILUDestroy( void *data )
 }
 
 /*--------------------------------------------------------------------------
+ * Return a human-readable ILU variant name based on type and fill level
+ *--------------------------------------------------------------------------*/
+
+const char*
+hypre_ILUGetName(void *ilu_vdata)
+{
+   hypre_ParILUData  *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   HYPRE_Int          ilu_type = hypre_ParILUDataIluType(ilu_data);
+   HYPRE_Int          ilu_fill = hypre_ParILUDataLfil(ilu_data);
+
+   switch (ilu_type)
+   {
+      case 0:  return (ilu_fill == 0) ? "BJ-ILU0"          : "BJ-ILUK";
+      case 1:  return "BJ-ILUT";
+      case 10: return (ilu_fill == 0) ? "GMRES-ILU0"       : "GMRES-ILUK";
+      case 11: return "GMRES-ILUT";
+      case 20: return (ilu_fill == 0) ? "NSH-ILU0"         : "NSH-ILUK";
+      case 21: return "NSH-ILUT";
+      case 30: return (ilu_fill == 0) ? "RAS-ILU0"         : "RAS-ILUK";
+      case 31: return "RAS-ILUT";
+      case 40: return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0"  : "ddPQ-GMRES-ILUK";
+      case 41: return "ddPQ-GMRES-ILUT";
+      case 50: return "RAP-modILU0";
+      default: return "Unknown";
+   }
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ILUSetLevelOfFill
  *
  * Set fill level for ILUK

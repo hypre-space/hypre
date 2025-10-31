@@ -25,7 +25,6 @@ typedef struct
    gridinfo_t              dslu_data_grid;
    dScalePermstruct_t      dslu_ScalePermstruct;
    dSOLVEstruct_t          dslu_solve;
-}
-hypre_DSLUData;
+} hypre_DSLUData;
 
 #endif
