@@ -123,7 +123,6 @@ cat predicates.h           >> $INTERNAL_HEADER
 cat device_allocator.h     >> $INTERNAL_HEADER
 cat device_utils.h         >> $INTERNAL_HEADER
 cat device_reducer.h       >> $INTERNAL_HEADER
-cat cub_allocator.h        >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
