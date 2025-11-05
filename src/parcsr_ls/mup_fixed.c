@@ -6145,9 +6145,9 @@ hypre_MGRCoarsen( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int final_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr )
+hypre_MGRColLumpedRestrict( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRColLumpedRestrict)( A, A_FF, A_CF, CF_marker, Wr_ptr, R_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRColLumpedRestrict)( colsum_type, A, A_FF, A_CF, CF_marker, Wr_ptr, R_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

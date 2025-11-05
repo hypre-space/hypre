@@ -322,7 +322,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       hypre_ParCSRMatrixDestroy(WrT);
       hypre_ParCSRMatrixDestroy(A_FF_blkinv);
    }
-   else if (restrict_type == 14)
+   else if (restrict_type == 14 || restrict_type == 15)
    {
       if (blk_size > 1)
       {
@@ -332,7 +332,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       else
       {
          /* Column-lumped restriction */
-         hypre_MGRColLumpedRestrict(A, A_FF, A_CF, CF_marker, &Wr, &R);
+         hypre_MGRColLumpedRestrict(restrict_type == 15, A, A_FF, A_CF, CF_marker, &Wr, &R);
       }
    }
    else
@@ -2429,7 +2429,8 @@ hypre_MGRBuildRFromWr(hypre_IntArray       *C_map,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
+hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
+                           hypre_ParCSRMatrix  *A,
                            hypre_ParCSRMatrix  *A_FF,
                            hypre_ParCSRMatrix  *A_CF,
                            hypre_IntArray      *CF_marker,
@@ -2468,7 +2469,7 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
     * 1) b_FF = approx(A_FF)
     *-------------------------------------------------------*/
 
-   if (global_num_fine == global_num_coarse)
+   if (colsum_type == 0 || global_num_fine == global_num_coarse)
    {
       /* Compute column sum */
       hypre_ParCSRMatrixColSum(A_FF, &b_FF);
@@ -2499,7 +2500,7 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
     * 2) b_CF = approx(A_CF)
     *-------------------------------------------------------*/
 
-   if (global_num_fine == global_num_coarse)
+   if (colsum_type == 0 || global_num_fine == global_num_coarse)
    {
       /* Compute column sum */
       hypre_ParCSRMatrixColSum(A_CF, &b_CF);
