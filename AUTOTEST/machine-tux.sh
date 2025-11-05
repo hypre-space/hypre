@@ -96,7 +96,7 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes -Wno-deprecated\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 
@@ -130,7 +130,7 @@ co="--enable-longdouble --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
-co="--enable-debug CC=mpiCC"
+co="--enable-debug CC=mpiCC --with-extra-CFLAGS=\\'-Wno-deprecated\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug-cpp
 
