@@ -13,6 +13,7 @@
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
+#include "struct_matvec_core.h"
 
 /*--------------------------------------------------------------------------
  * Matvec data structure
