@@ -32,7 +32,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
-   HYPRE_Int            global_size     = hypre_BigIntSafeMult(global_num_rows, global_num_rows);
+   HYPRE_Int            global_size     = hypre_IntSafeMult(global_num_rows, global_num_rows);
 
    /* Local variables */
    HYPRE_Int            buffer_size     = 0;
