@@ -22,6 +22,47 @@ function(set_hypre_option category name description default_value)
   endif()
 endfunction()
 
+# Scope interface -std flags to the appropriate languages so C files do not
+# inherit C++ standard flags from TPLs (e.g., pkg-config Cflags like -std=c++14)
+function(scope_language_standard_flags TARGET_NAME)
+  if(NOT TARGET ${TARGET_NAME})
+    return()
+  endif()
+
+  get_target_property(_opts ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
+  if(NOT _opts)
+    return()
+  endif()
+
+  set(_new_opts)
+  foreach(_o IN LISTS _opts)
+    # Preserve existing generator expressions untouched
+    if("${_o}" MATCHES "^\$<")
+      list(APPEND _new_opts "${_o}")
+      continue()
+    endif()
+
+    set(_is_std_flag FALSE)
+    if("${_o}" MATCHES "^-std=")
+      set(_is_std_flag TRUE)
+    endif()
+
+    if(_is_std_flag)
+      # Classify by presence of '++' (C++) vs C
+      string(FIND "${_o}" "++" _has_plusplus)
+      if(_has_plusplus GREATER -1)
+        list(APPEND _new_opts "$<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:CUDA>,$<COMPILE_LANGUAGE:HIP>>:${_o}>")
+      else()
+        list(APPEND _new_opts "$<$<COMPILE_LANGUAGE:C>:${_o}>")
+      endif()
+    else()
+      list(APPEND _new_opts "${_o}")
+    endif()
+  endforeach()
+
+  set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_OPTIONS "${_new_opts}")
+endfunction()
+
 # Function to set internal hypre build options
 function(set_internal_hypre_option var_prefix var_name)
   if(HYPRE_ENABLE_${var_name})
@@ -394,6 +435,8 @@ function(setup_tpl LIBNAME)
           else()
             target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME}::${LIBNAME})
           endif()
+          # Ensure imported standard flags are scoped to valid languages
+          scope_language_standard_flags(${LIBNAME}::${LIBNAME})
           message(STATUS "Found ${LIBNAME} target: ${LIBNAME}::${LIBNAME}")
         elseif(TARGET ${LIBNAME})
           if(${LIBNAME_UPPER} STREQUAL "UMPIRE")
@@ -406,6 +449,8 @@ function(setup_tpl LIBNAME)
           else()
             target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME})
           endif()
+          # Ensure imported standard flags are scoped to valid languages
+          scope_language_standard_flags(${LIBNAME})
           message(STATUS "Found ${LIBNAME} target: ${LIBNAME}")
         else()
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
@@ -470,6 +515,8 @@ function(setup_tpl LIBNAME)
               # Prefer linking the generated IMPORTED target when available
               if(TARGET PkgConfig::PC_${LIBNAME_UPPER})
                 target_link_libraries(${PROJECT_NAME} PUBLIC PkgConfig::PC_${LIBNAME_UPPER})
+                # Prevent C++ standard flags from leaking into C compiles
+                scope_language_standard_flags(PkgConfig::PC_${LIBNAME_UPPER})
               else()
                 target_link_libraries(${PROJECT_NAME} PUBLIC ${PC_${LIBNAME_UPPER}_LINK_LIBRARIES})
               endif()
