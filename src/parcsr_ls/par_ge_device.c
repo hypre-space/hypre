@@ -46,7 +46,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
       return hypre_error_flag;
    }
 
-   if (global_size == HYPRE_BIG_INT_MAX)
+   if (global_size == HYPRE_INT_MAX)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected overflow!");
       return hypre_error_flag;
