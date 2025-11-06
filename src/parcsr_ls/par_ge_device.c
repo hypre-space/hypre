@@ -32,7 +32,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
-   HYPRE_Int            global_size     = global_num_rows * global_num_rows;
+   HYPRE_Int            global_size     = hypre_BigIntSafeMult(global_num_rows, global_num_rows);
 
    /* Local variables */
    HYPRE_Int            buffer_size     = 0;
@@ -46,7 +46,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
       return hypre_error_flag;
    }
 
-   if (global_size < 0)
+   if (global_size == HYPRE_BIG_INT_MAX)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected overflow!");
       return hypre_error_flag;
