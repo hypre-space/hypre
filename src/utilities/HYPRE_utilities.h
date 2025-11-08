@@ -94,38 +94,6 @@ typedef int HYPRE_Int;
 #define HYPRE_INT_MIN INT_MIN
 #endif
 
-static inline HYPRE_Int
-hypre_IntSafeMult(HYPRE_Int a, HYPRE_Int b)
-{
-   if (a == 0 || b == 0)
-   {
-      return 0;
-   }
-
-   if (a > HYPRE_INT_MAX / b)
-   {
-      return HYPRE_INT_MAX;
-   }
-
-   return a * b;
-}
-
-static inline HYPRE_BigInt
-hypre_BigIntSafeMult(HYPRE_BigInt a, HYPRE_BigInt b)
-{
-   if (a == 0 || b == 0)
-   {
-      return 0;
-   }
-
-   if (a > HYPRE_BIG_INT_MAX / b)
-   {
-      return HYPRE_BIG_INT_MAX;
-   }
-
-   return a * b;
-}
-
 /*--------------------------------------------------------------------------
  * Real and Complex Types
  *--------------------------------------------------------------------------*/
