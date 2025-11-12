@@ -36,8 +36,8 @@ typedef struct
    struct _hypre_ParCSRCommPkg *comm_pkg;
    HYPRE_MemoryLocation  send_memory_location;
    HYPRE_MemoryLocation  recv_memory_location;
-   HYPRE_Int             num_send_bytes;
-   HYPRE_Int             num_recv_bytes;
+   size_t                num_send_bytes;
+   size_t                num_recv_bytes;
    void                 *send_data;
    void                 *recv_data;
    void                 *send_data_buffer;

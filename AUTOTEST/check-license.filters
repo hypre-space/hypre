@@ -4,8 +4,6 @@
 ./AUTOTEST/.*.log
 ./AUTOTEST/runtests-.*
 ./src/test/struct_migrate
-./src/test/maxwell_unscaled
-./src/test/sstruct_fac
 ./src/test/ams_driver
 ./src/test/zboxloop
 ./src/test/ij

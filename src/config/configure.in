@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.33.0])
-m4_define([M4_HYPRE_NUMBER],  [23300])
-m4_define([M4_HYPRE_DATE],    [2025/04/03])
+m4_define([M4_HYPRE_VERSION], [3.0.0])
+m4_define([M4_HYPRE_NUMBER],  [30000])
+m4_define([M4_HYPRE_DATE],    [2025/09/26])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -176,7 +176,6 @@ hypre_using_cusparse=no
 hypre_using_cublas=no
 hypre_using_curand=no
 hypre_using_cusolver=no
-hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_thrust_nosync=no
 hypre_using_umpire=no
@@ -184,6 +183,12 @@ hypre_using_umpire_host=no
 hypre_using_umpire_device=no
 hypre_using_umpire_um=no
 hypre_using_umpire_pinned=no
+hypre_user_disabled_umpire=no
+hypre_user_gave_umpire_inc=no
+hypre_user_gave_umpire_lib=no
+hypre_user_gave_umpire_lib_dirs=no
+hypre_user_gave_umpire_libs=no
+hypre_warp_size=32
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -196,7 +201,7 @@ hypre_using_memory_tracker=no
 
 hypre_test_using_host=no
 
-hypre_cxxstd=11
+hypre_cxxstd=17
 
 dnl *********************************************************************
 dnl * Initialize hypre-MAGMA variables
@@ -362,6 +367,26 @@ then
    AC_DEFINE(HYPRE_COMPLEX, 1, [Define to 1 if using complex values])
 fi
 
+dnl *** Mixed-precision support build option
+AC_ARG_ENABLE(mixed-precision,
+AS_HELP_STRING([--enable-mixed-precision],
+               [Enable mixed-precision build (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_mixed_precision=yes ;;
+    no)  hypre_using_mixed_precision=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-mixed-precision]) ;;
+ esac],
+[hypre_using_mixed_precision=no]
+)
+dnl MP_BUILD=0
+if test "$hypre_using_mixed_precision" = "yes"
+then
+   AC_DEFINE(HYPRE_MIXED_PRECISION, 1, [Define to 1 if using mixed-precision for HYPRE_Real type])
+   MP_BUILD=1
+   AC_SUBST(MP_BUILD)
+fi
+
 AC_ARG_ENABLE(maxdim,
 AS_HELP_STRING([--enable-maxdim=MAXDIM],
                [Change max dimension size to MAXDIM (default is 3).
@@ -422,17 +447,6 @@ AS_HELP_STRING([--enable-unified-memory],
     *)   hypre_using_um=no ;;
  esac],
 [hypre_using_um=no]
-)
-
-AC_ARG_ENABLE(device-memory-pool,
-AS_HELP_STRING([--enable-device-memory-pool],
-               [Use device pooling allocator (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_device_pool=yes ;;
-    no)  hypre_using_device_pool=no ;;
-    *)   hypre_using_device_pool=no ;;
- esac],
-[hypre_using_device_pool=no]
 )
 
 AC_ARG_ENABLE(device-malloc-async,
@@ -585,7 +599,7 @@ fi
 
 AC_ARG_WITH(cxxstandard,
 AS_HELP_STRING([--with-cxxstandard=val],
-               [User specifies c++ starndard in val.]),
+               [User specifies c++ standard in val.]),
 [hypre_cxxstd=$withval]
 )
 
@@ -677,9 +691,8 @@ AS_HELP_STRING([--with-strict-checking],
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant"
-    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
-    CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
+    CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla"
  elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
@@ -743,7 +756,7 @@ AS_HELP_STRING([--with-MPI-libs=LIBS],
                 --with-MPI-include --with-MPI-libs and --with-MPI-lib-dirs
                 must be used together.]),
 [for mpi_lib in $withval; do
-    MPILIBS="$MPILIBS -l$mpi_lib"
+    MPILIBS+=" -l$mpi_lib"
  done;
  hypre_user_chose_mpi=yes]
 )
@@ -756,7 +769,7 @@ AS_HELP_STRING([--with-MPI-lib-dirs=DIRS],
                 The options --with-MPI-include --with-MPI-libs and
                 --with-MPI-lib-dirs must be used together.]),
 [for mpi_lib_dir in $withval; do
-    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+    MPILIBDIRS+=" -L$mpi_lib_dir"
  done;
  hypre_user_chose_mpi=yes]
 )
@@ -834,7 +847,7 @@ dnl    if test $libprefix = "-L"
 dnl    then
 dnl       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
 dnl    else
-       BLASLIBS="$BLASLIBS $blas_lib"
+       BLASLIBS+=" $blas_lib"
 dnl    fi
  done;
  hypre_user_chose_blas=yes]
@@ -846,7 +859,7 @@ AS_HELP_STRING([--with-blas-libs=LIBS],
                 needed for BLAS (base name only). The options --with-blas-libs and
                 --with-blas-lib-dirs must be used together.]),
 [for blas_lib in $withval; do
-    BLASLIBS="$BLASLIBS -l$blas_lib"
+    BLASLIBS+=" -l$blas_lib"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_old_style=yes]
@@ -860,7 +873,7 @@ AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
                 The  options --with-blas-libs and --with-blas-lib-dirs
                 must be used together.]),
 [for blas_lib_dir in $withval; do
-    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
+    BLASLIBDIRS+=" -L$blas_lib_dir"
  done;
  hypre_user_chose_blas=yes
  hypre_blas_lib_dir_old_style=yes]
@@ -878,7 +891,7 @@ dnl    if test $libprefix = "-L"
 dnl    then
 dnl       LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
 dnl    else
-       LAPACKLIBS="$LAPACKLIBS $lapack_lib"
+       LAPACKLIBS+=" $lapack_lib"
 dnl    fi
  done;
  hypre_user_chose_lapack=yes]
@@ -890,7 +903,7 @@ AS_HELP_STRING([--with-lapack-libs=LIBS],
                 needed for LAPACK (base name only). The options --with-lapack-libs and
                 --with-lapack-lib-dirs must be used together.]),
 [for lapack_lib in $withval; do
-    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
+    LAPACKLIBS+=" -l$lapack_lib"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_old_style=yes]
@@ -904,7 +917,7 @@ AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
                 The options --with-lapack-libs and --with-lapack-lib-dirs
                 must be used together.]),
 [for lapack_lib_dir in $withval; do
-    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
+    LAPACKLIBDIRS+=" -L$lapack_lib_dir"
  done;
  hypre_user_chose_lapack=yes
  hypre_lapack_lib_dir_old_style=yes]
@@ -1052,7 +1065,7 @@ AS_HELP_STRING([--with-superlu-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for SuperLU. OK to use -L and -l flags in the list]),
 [for superlu_lib in $withval; do
-    SUPERLU_LIBS="$SUPERLU_LIBS $superlu_lib"
+    SUPERLU_LIBS+=" $superlu_lib"
  done]
 )
 
@@ -1084,7 +1097,7 @@ AS_HELP_STRING([--with-dsuperlu-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for DSuperLU. OK to use -L and -l flags in the list]),
 [for dsuperlu_lib in $withval; do
-    DSUPERLU_LIBS="$DSUPERLU_LIBS $dsuperlu_lib"
+    DSUPERLU_LIBS+=" $dsuperlu_lib"
  done]
 )
 
@@ -1210,6 +1223,13 @@ esac],
 )
 
 dnl ***** CUDA options
+
+AC_ARG_WITH(gpu-warp-size,
+AS_HELP_STRING([--with-gpu-warp-size=WARP_SIZE],
+               [set GPU warp size (default: 32 for CUDA/SYCL, 64 for HIP) @<:@default=auto@:>@]),
+[hypre_warp_size=$withval],
+[hypre_warp_size=auto]
+)
 
 AC_ARG_WITH(cuda-home,
 AS_HELP_STRING([--with-cuda-home=DIR],
@@ -1401,7 +1421,7 @@ AS_HELP_STRING([--with-raja-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for RAJA. OK to use -L and -l flags in the list]),
 [for raja_lib in $withval; do
-       HYPRE_RAJA_LIB="$raja_lib $HYPRE_RAJA_LIB"
+       HYPRE_RAJA_LIB+=" $raja_lib"
  done;
 hypre_user_chose_raja=yes]
 )
@@ -1412,7 +1432,7 @@ AS_HELP_STRING([--with-raja-libs=LIBS],
                 needed for RAJA (base name only). The options --with-raja-libs and
                 --with-raja-lib-dirs must be used together.]),
 [for raja_lib in $withval; do
-    HYPRE_RAJA_LIB="-l$raja_lib $HYPRE_RAJA_LIB"
+    HYPRE_RAJA_LIB+=" -l$raja_lib"
  done;
 hypre_user_chose_raja=yes]
 )
@@ -1425,7 +1445,7 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
                 The  options --with-raja-libs and --raja-blas-lib-dirs
                 must be used together.]),
 [for raja_lib_dir in $withval; do
-    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
+    HYPRE_RAJA_LIB_DIR+=" -L$raja_lib_dir"
  done;
  hypre_user_chose_raja=yes]
 )
@@ -1459,7 +1479,7 @@ AS_HELP_STRING([--with-kokkos-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for KOKKOS. OK to use -L and -l flags in the list]),
 [for kokkos_lib in $withval; do
-       HYPRE_KOKKOS_LIB="$kokkos_lib $HYPRE_KOKKOS_LIB"
+       HYPRE_KOKKOS_LIB+=" $kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1470,7 +1490,7 @@ AS_HELP_STRING([--with-kokkos-libs=LIBS],
                 needed for KOKKOS (base name only). The options --with-kokkos-libs and
                 --with-kokkos-dirs must be used together.]),
 [for kokkos_lib in $withval; do
-    HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
+    HYPRE_KOKKOS_LIB+=" -l$kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1483,7 +1503,7 @@ AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
                 The  options --with-kokkos-libs and --with-kokkos-dirs
                 must be used together.]),
 [for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+    HYPRE_KOKKOS_LIB_DIR+=" -L$kokkos_lib_dir"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -1539,9 +1559,10 @@ AC_ARG_WITH(umpire,
 AS_HELP_STRING([--with-umpire],
                [Use Umpire Allocator for device and unified memory (default is NO).]),
 [case "${withval}" in
-    yes) hypre_using_umpire_device=yes
+    yes) hypre_using_umpire=yes
+         hypre_using_umpire_device=yes
          hypre_using_umpire_um=yes ;;
-    no) ;;
+    no)  hypre_user_disabled_umpire=yes ;;
     *) ;;
  esac],
 []
@@ -1555,7 +1576,7 @@ AS_HELP_STRING([--with-umpire-include=DIR],
 [for umpire_dir in $withval; do
 HYPRE_UMPIRE_INCLUDE="-I$umpire_dir $HYPRE_UMPIRE_INCLUDE"
 done;
-]
+hypre_user_gave_umpire_inc=yes]
 )
 
 AC_ARG_WITH(umpire-lib,
@@ -1563,9 +1584,9 @@ AS_HELP_STRING([--with-umpire-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for UMPIRE. OK to use -L and -l flags in the list]),
 [for umpire_lib in $withval; do
-       HYPRE_UMPIRE_LIB="$umpire_lib $HYPRE_UMPIRE_LIB"
+       HYPRE_UMPIRE_LIB+=" $umpire_lib"
  done;
-]
+ hypre_user_gave_umpire_lib=yes]
 )
 
 AC_ARG_WITH(umpire-libs,
@@ -1574,9 +1595,9 @@ AS_HELP_STRING([--with-umpire-libs=LIBS],
                 needed for UMPIRE (base name only). The options --with-umpire-libs and
                 --with-umpire-dirs must be used together.]),
 [for umpire_lib in $withval; do
-    HYPRE_UMPIRE_LIB="-l$umpire_lib $HYPRE_UMPIRE_LIB"
+    HYPRE_UMPIRE_LIB+=" -l$umpire_lib"
  done;
-]
+ hypre_user_gave_umpire_libs=yes]
 )
 
 AC_ARG_WITH(umpire-lib-dirs,
@@ -1587,9 +1608,10 @@ AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
                 The  options --with-umpire-libs and --with-umpire-dirs
                 must be used together.]),
 [for umpire_lib_dir in $withval; do
-    HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
+    HYPRE_UMPIRE_LIB_DIR+=" -L$umpire_lib_dir"
+    HYPRE_UMPIRE_RPATH+=" -Wl,-rpath,${umpire_lib_dir}"
  done;
-]
+ hypre_user_gave_umpire_lib_dirs=yes]
 )
 
 dnl ***** MAGMA
@@ -1625,7 +1647,7 @@ AS_HELP_STRING([--with-magma-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for MAGMA. OK to use -L and -l flags in the list]),
 [for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" $magma_lib"
  done;
 hypre_user_gave_magma_lib=yes]
 )
@@ -1636,7 +1658,7 @@ AS_HELP_STRING([--with-magma-libs=LIBS],
                 needed for MAGMA (base name only). The options --with-magma-libs and
                 --with-magma-lib-dirs must be used together.]),
 [for magma_lib in $withval; do
-    HYPRE_MAGMA_LIB="-l$magma_lib $HYPRE_MAGMA_LIB"
+    HYPRE_MAGMA_LIB+=" -l$magma_lib"
  done;
 hypre_user_gave_magma_libs=yes]
 )
@@ -1649,7 +1671,7 @@ AS_HELP_STRING([--with-magma-lib-dirs=DIRS],
                 The  options --with-magma-libs and --with-magma-lib-dirs
                 must be used together.]),
 [for magma_lib_dir in $withval; do
-    HYPRE_MAGMA_LIB_DIR="-L$magma_lib_dir $HYPRE_MAGMA_LIB_DIR"
+    HYPRE_MAGMA_LIB_DIR+=" -L$magma_lib_dir"
  done;
 hypre_user_gave_magma_lib_dirs=yes]
 )
@@ -1683,7 +1705,7 @@ AS_HELP_STRING([--with-caliper-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for Caliper. OK to use -L and -l flags in the list]),
 [for caliper_lib in $withval; do
-    CALIPER_LIBS="$CALIPER_LIBS $caliper_lib"
+    CALIPER_LIBS+=" $caliper_lib"
  done;
  hypre_user_gave_caliper_lib=yes]
 )
@@ -1872,7 +1894,7 @@ if test "$hypre_using_mpi" = "no"
 then
    AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
 else
-   AC_HYPRE_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
+   AC_HYPRE_CHECK_MPI([LIBS+=" $MPILIBS"])
    AC_CHECK_FUNCS([MPI_Comm_f2c])
    AC_CACHE_CHECK([whether MPI_Comm_f2c is a macro],
      hypre_cv_func_MPI_Comm_f2c_macro,
@@ -2014,7 +2036,7 @@ then
          AC_DEFINE(HAVE_MLI, 1, [Define to 1 if using MLI])
       fi
    fi
-   AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS="$LIBS -lstdc++")
+   AC_CHECK_LIB(stdc++, __gxx_personality_v0, LIBS+=" -lstdc++")
 else
    HYPRE_FEI_SRC_DIR=
    HYPRE_FEI_BASE_DIR=
@@ -2090,7 +2112,7 @@ fi
 dnl *********************************************************************
 dnl * FIND libraries needed to link with hypre
 dnl *********************************************************************
-AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
+AC_CHECK_LIB(m, cabs, LIBS+=" -lm")
 dnl * Commenting this out because it doesn't really behave correctly.
 dnl * This should probably be deleted altogether at some point. (RDF)
 dnl AC_HYPRE_FIND_G2C
@@ -2391,6 +2413,58 @@ AS_IF([ test x"$hypre_using_hip" == x"yes" ],
                          [])
 
 dnl *********************************************************************
+dnl * Set GPU warp size
+dnl *********************************************************************
+
+if test "x$hypre_warp_size" = "xauto"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  then
+    hypre_warp_size=32
+  elif test "x$hypre_using_hip" = "xyes"
+  then
+    # Check for CDNA vs RDNA architecture
+    AC_MSG_CHECKING([for GPU architecture using rocm-smi])
+    rocm_smi_cmd=$(rocm-smi --showproductname 2>/dev/null)
+    rocm_smi_status=$?
+    gfx_versions=$(echo "$rocm_smi_cmd" | grep 'gfx' | awk '{print $NF}' | tr '\n' ' ')
+
+    if test $rocm_smi_status -eq 0
+    then
+      if test -z "$gfx_versions"
+      then
+        hypre_warp_size=64
+        AC_MSG_RESULT([no gfx version found in rocm-smi output, defaulting to warp size 64])
+      else
+        cdna_found=no
+        for gfx_version in $gfx_versions
+        do
+          case "$gfx_version" in
+            gfx9* )
+              cdna_found=yes
+              break
+              ;;
+          esac
+        done
+
+        if test "$cdna_found" = "yes"
+        then
+          hypre_warp_size=64
+          AC_MSG_RESULT([CDNA detected ( $gfx_versions), setting warp size to 64])
+        else
+          hypre_warp_size=32
+          AC_MSG_RESULT([RDNA detected ( $gfx_versions), setting warp size to 32])
+        fi
+      fi
+    else
+      hypre_warp_size=64
+      AC_MSG_RESULT([AMD GPU detection failed, defaulting to warp size 64])
+    fi
+  fi
+fi
+AC_DEFINE_UNQUOTED(HYPRE_WARP_SIZE, [$hypre_warp_size], [GPU warp size])
+
+dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
 if test "x$hypre_using_raja" = "xyes"
@@ -2443,6 +2517,36 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Auto-enable Umpire for GPU backends (before AC_DEFINEs)
+dnl *********************************************************************
+if test "x$hypre_user_disabled_umpire" != "xyes"
+then
+  if test "x$hypre_using_umpire" != "xyes"
+  then
+    if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
+    then
+      hypre_using_umpire=yes
+      hypre_using_umpire_device=yes
+      hypre_using_umpire_um=yes
+      AC_MSG_NOTICE([Enabling Umpire automatically for GPU build (CUDA/HIP) for performance and allocator features. Use --without-umpire to opt out.])
+    fi
+  fi
+fi
+
+dnl Warn if Umpire explicitly disabled while using a GPU backend
+if test "x$hypre_user_disabled_umpire" = "xyes"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_hip" = "xyes"
+  then
+    AC_MSG_WARN([***************************************************************])
+    AC_MSG_WARN([ Umpire is explicitly disabled while building hypre for GPUs.])
+    AC_MSG_WARN([ This is not recommended for performance reasons!])
+    AC_MSG_WARN([ Enable it with --with-umpire.])
+    AC_MSG_WARN([***************************************************************])
+  fi
+fi
+
+dnl *********************************************************************
 dnl * Set umpire options
 dnl *********************************************************************
 if test "x$hypre_using_umpire_host" = "xyes"
@@ -2472,6 +2576,28 @@ fi
 if test "x$hypre_using_umpire" = "xyes"
 then
    AC_DEFINE(HYPRE_USING_UMPIRE, 1, [Define to 1 if using UMPIRE])
+   if test "x$HYPRE_UMPIRE_RPATH" != "x"
+   then
+      LDFLAGS="${LDFLAGS} ${HYPRE_UMPIRE_RPATH}"
+      AC_MSG_NOTICE([Adding Umpire rpath to LDFLAGS: ${HYPRE_UMPIRE_RPATH}])
+   fi
+   if test "$hypre_user_gave_umpire_inc" != "yes" || \
+      test "$hypre_user_gave_umpire_lib" != "yes" && test "$hypre_user_gave_umpire_libs" != "yes" || \
+      test "$hypre_user_gave_umpire_lib_dirs" != "yes"
+   then
+      AC_MSG_ERROR([
+===============================================================
+Umpire has been enabled for GPU builds to improve performance.
+However, Umpire include and/or library paths were not provided.
+
+Provide the following flags as appropriate:
+  --with-umpire-include="/path-to-umpire-install/include"
+  --with-umpire-lib-dirs="/path-to-umpire-install/lib"
+  --with-umpire-libs="umpire camp"
+
+To opt out (not recommended), configure with --without-umpire.
+===============================================================])
+   fi
 fi
 
 dnl *********************************************************************
@@ -2562,11 +2688,6 @@ then
       HYPRE_CUDA_LIBS+=" -lcusolver"
    fi
 
-   if test "$hypre_using_device_pool" = "yes"
-   then
-      AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
-   fi
-
    if test "$hypre_using_device_malloc_async" = "yes"
    then
       AC_DEFINE(HYPRE_USING_DEVICE_MALLOC_ASYNC, 1, [Define to 1 if using device async malloc])
@@ -2619,7 +2740,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
         dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
         dnl from the configure line.
-        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
+        HIPCXXFLAGS="-x hip -fPIE -std=c++${hypre_cxxstd} ${HIPCXXFLAGS}"
 
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
@@ -2634,7 +2755,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl things that don't play nice, like openmp.
         if test "$hypre_using_shared" = "yes"
         then
-           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+           HIPCXXFLAGS="${HIPCXXFLAGS} ${SHARED_COMPILE_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture HIP compilation flags
@@ -2709,6 +2830,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         else
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
@@ -2725,7 +2847,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         if test "$hypre_using_shared" = "yes"
         then
            SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
-           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+           BUILD_CC_SHARED="${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
@@ -2738,8 +2860,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
               [AC_CHECK_HEADER(["${MKLROOT}/include/mkl.h"],
                                [hypre_found_mkl=yes],
                                AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
+               HYPRE_SYCL_LIBS+=" -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL+=" -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])
@@ -3047,6 +3169,11 @@ dnl * DSuperLU
 dnl *********************************************************************
 AC_SUBST(DSUPERLU_INCLUDE)
 AC_SUBST(DSUPERLU_LIBS)
+
+dnl *********************************************************************
+dnl * Mixed precision build
+dnl *********************************************************************
+dnl AC_SUBST(MP_BUILD)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution

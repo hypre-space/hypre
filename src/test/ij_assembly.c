@@ -68,9 +68,11 @@ main( hypre_int  argc,
    HYPRE_BigInt             *rows_coo = NULL,  *h_rows_coo,  *d_rows_coo = NULL;
    HYPRE_BigInt             *cols = NULL,   *h_cols,   *d_cols = NULL;
    HYPRE_Real               *coefs = NULL,  *h_coefs,  *d_coefs = NULL;
-   HYPRE_IJMatrix            ij_A, ij_AT;
-   HYPRE_ParCSRMatrix        parcsr_ref = NULL, parcsr_trans = NULL;
-   // Driver input parameters
+   HYPRE_IJMatrix            ij_A, ij_B, ij_AT;
+   HYPRE_ParCSRMatrix        parcsr_ref = NULL, parcsr_trans = NULL, parcsr_B = NULL;
+   void                     *obj_B;
+
+   /* Driver input parameters */
    HYPRE_Int                 Px, Py, Pz;
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Real                cx, cy, cz;
@@ -248,12 +250,15 @@ main( hypre_int  argc,
          hypre_printf("             1 = DEVICE (default)\n");
          hypre_printf("      -nchunks <val>         : number of chunks passed to Set/AddValues\n");
          hypre_printf("      -base <val>            : matrix index base\n");
-         hypre_printf("      -mode <val>            : tests to be performed\n");
-         hypre_printf("             1 = Set (default)\n");
-         hypre_printf("             2 = SetOffProc\n");
-         hypre_printf("             4 = SetSet\n");
-         hypre_printf("             8 = AddSet\n");
-         hypre_printf("            16 = SetAddSet\n");
+         hypre_printf("      -mode <val>            : tests to be performed (code)\n");
+         hypre_printf("             1 = Set (Default)      (sA)\n");
+         hypre_printf("             2 = SetOffProc         (aaaaaA)\n");
+         hypre_printf("             4 = SetSet             (ssA)\n");
+         hypre_printf("             8 = AddSet             (asA)\n");
+         hypre_printf("            16 = SetAdd             (saA)\n");
+         hypre_printf("            32 = SetAddAssembleSet  (saAsA)\n");
+         hypre_printf("            64 = AddAddAddAddAddSet (aaaaasA)\n");
+         hypre_printf("           128 = SetAssembleGet     (sAg)\n");
          hypre_printf("      -option <val>          : interface option of Set/AddToValues\n");
          hypre_printf("             1 = CSR-like (default)\n");
          hypre_printf("             2 = COO-like\n");
@@ -308,7 +313,8 @@ main( hypre_int  argc,
     *-----------------------------------------------------------*/
    buildMatrixEntries(comm, nx, ny, nz, Px, Py, Pz, cx, cy, cz, base,
                       &ilower, &iupper, &jlower, &jupper, &nrows, &num_nonzeros,
-                      &h_nnzrow, &h_rows, &h_rows_coo, &h_cols, &h_coefs, stencil, &parcsr_ref);
+                      &h_nnzrow, &h_rows, &h_rows_coo, &h_cols, &h_coefs, stencil,
+                      &parcsr_ref);
 
    switch (memory_location)
    {
@@ -319,16 +325,16 @@ main( hypre_int  argc,
          d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
          d_coefs  = hypre_TAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE);
 
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE,
-                       HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE,
-                       HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows_coo,  h_rows_coo,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
-                       HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
-                       HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE,
-                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int, nrows,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows, h_rows, HYPRE_BigInt, nrows,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows_coo, h_rows_coo, HYPRE_BigInt, num_nonzeros,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols, h_cols, HYPRE_BigInt, num_nonzeros,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs, h_coefs, HYPRE_Real, num_nonzeros,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
@@ -355,9 +361,10 @@ main( hypre_int  argc,
    /* Test Set */
    if (mode & 1)
    {
-      test_all(comm, "set", memory_location, option, "sA", ilower, iupper, jlower, jupper, nrows,
-               num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "set", memory_location, option, "sA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
@@ -374,9 +381,10 @@ main( hypre_int  argc,
     */
    if (mode & 2)
    {
-      test_all(comm, "addtrans", memory_location, 2, "aaaaaA", ilower, iupper, jlower, jupper, nrows,
-               num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
+      test_all(comm, "addtrans", memory_location, 2, "aaaaaA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
 
       hypre_ParCSRMatrixTranspose(parcsr_ref, &parcsr_trans, 1);
       hypre_ParCSRMatrixScale(parcsr_trans, 5.0);
@@ -393,9 +401,10 @@ main( hypre_int  argc,
    /* Test Set/Set */
    if (mode & 4)
    {
-      test_all(comm, "set/set", memory_location, option, "ssA", ilower, iupper, jlower, jupper, nrows,
-               num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "set/set", memory_location, option, "ssA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
@@ -409,9 +418,10 @@ main( hypre_int  argc,
    /* Test Add/Set */
    if (mode & 8)
    {
-      test_all(comm, "add/set", memory_location, option, "asA", ilower, iupper, jlower, jupper, nrows,
-               num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "add/set", memory_location, option, "asA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
@@ -425,9 +435,10 @@ main( hypre_int  argc,
    /* Test Set/Add */
    if (mode & 16)
    {
-      test_all(comm, "set/add", memory_location, option, "saA", ilower, iupper, jlower, jupper, nrows,
-               num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "set/add", memory_location, option, "saA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
@@ -445,9 +456,10 @@ main( hypre_int  argc,
    /* Test Set/Add/Assemble/Set */
    if (mode & 32)
    {
-      test_all(comm, "set/add/assemble/set", memory_location, option, "saAsA", ilower, iupper, jlower,
-               jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "set/add/assemble/set", memory_location, option, "saAsA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
@@ -461,9 +473,10 @@ main( hypre_int  argc,
    /* Test Adds */
    if (mode & 64)
    {
-      test_all(comm, "5adds/set", memory_location, option, "aaaaasA", ilower, iupper, jlower, jupper,
-               nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+      test_all(comm, "5adds/set", memory_location, option, "aaaaasA",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
                cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
@@ -476,6 +489,36 @@ main( hypre_int  argc,
       }
       HYPRE_IJMatrixDestroy(ij_A);
       HYPRE_ParCSRMatrixDestroy(parcsr_ref2);
+   }
+
+   /* Test Get */
+   if (mode & 128)
+   {
+      test_all(comm, "set/get", memory_location, option, "sAg",
+               ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor,
+               h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
+
+      /* Create matrix with (rows, cols, coefs) gotten from ij_A */
+      HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &ij_B);
+      HYPRE_IJMatrixSetObjectType(ij_B, HYPRE_PARCSR);
+      HYPRE_IJMatrixInitialize_v2(ij_B, memory_location);
+      HYPRE_IJMatrixSetValues(ij_B, nrows, nnzrow, rows, cols, coefs);
+      HYPRE_IJMatrixAssemble(ij_B);
+      HYPRE_IJMatrixMigrate(ij_B, HYPRE_MEMORY_HOST);
+      HYPRE_IJMatrixGetObject(ij_B, &obj_B);
+      parcsr_B = (HYPRE_ParCSRMatrix) obj_B;
+
+      /* Check matrices */
+      ierr += checkMatrix(parcsr_B, ij_A) > tol;
+
+      if (print_matrix)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "ij_sAg");
+      }
+      HYPRE_IJMatrixDestroy(ij_A);
+      HYPRE_IJMatrixDestroy(ij_B);
    }
 
    /* Print the error code */
@@ -612,11 +655,10 @@ buildMatrixEntries(MPI_Comm            comm,
    }
 
    /* get I, J, data from A */
-   getParCSRMatrixData(A, base, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows_coo_ptr,
-                       cols_ptr,
-                       coefs_ptr);
+   getParCSRMatrixData(A, base, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr,
+                       rows_ptr, rows_coo_ptr, cols_ptr, coefs_ptr);
 
-   // Set pointers
+   /* Set pointers */
    *ilower_ptr = hypre_ParCSRMatrixFirstRowIndex(A) + base;
    *iupper_ptr = hypre_ParCSRMatrixLastRowIndex(A) + base;
    *jlower_ptr = hypre_ParCSRMatrixFirstColDiag(A) + base;
@@ -779,10 +821,10 @@ test_all(MPI_Comm             comm,
          HYPRE_IJMatrix      *ij_A_ptr)
 {
    HYPRE_IJMatrix  ij_A;
-   HYPRE_Int       i, j, chunk, chunk_size;
+   HYPRE_Int       i, j, chunk, chunk_size, chunk_nnz;
    HYPRE_Int       time_index;
    HYPRE_Int      *h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int       cmd_len = strlen(cmd_sequence);
+   HYPRE_Int       cmd_len = (HYPRE_Int) strlen(cmd_sequence);
    HYPRE_Int       myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
@@ -822,7 +864,9 @@ test_all(MPI_Comm             comm,
 
    for (j = 0; j < cmd_len; j++)
    {
-      if (cmd_sequence[j] == 's' || cmd_sequence[j] == 'a')
+      if (cmd_sequence[j] == 's' ||
+          cmd_sequence[j] == 'a' ||
+          cmd_sequence[j] == 'g')
       {
          for (chunk = 0; chunk < nrows; chunk += chunk_size)
          {
@@ -831,28 +875,52 @@ test_all(MPI_Comm             comm,
             {
                if (cmd_sequence[j] == 's')
                {
-                  HYPRE_IJMatrixSetValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
-                                          &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+                  HYPRE_IJMatrixSetValues(ij_A, chunk_size,
+                                          &nnzrow[chunk],
+                                          &rows[chunk],
+                                          &cols[h_rowptr[chunk]],
+                                          &coefs[h_rowptr[chunk]]);
                }
-               else
+               else if (cmd_sequence[j] == 'a')
                {
-                  HYPRE_IJMatrixAddToValues(ij_A, chunk_size, &nnzrow[chunk], &rows[chunk],
-                                            &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+                  HYPRE_IJMatrixAddToValues(ij_A, chunk_size,
+                                            &nnzrow[chunk],
+                                            &rows[chunk],
+                                            &cols[h_rowptr[chunk]],
+                                            &coefs[h_rowptr[chunk]]);
+               }
+               else /* if (cmd_sequence[j] == 'g') */
+               {
+                  HYPRE_IJMatrixGetValues(ij_A, chunk_size,
+                                          &nnzrow[chunk],
+                                          &rows[chunk],
+                                          &cols[h_rowptr[chunk]],
+                                          &coefs[h_rowptr[chunk]]);
                }
             }
             else
             {
+               chunk_nnz = h_rowptr[chunk + chunk_size] - h_rowptr[chunk];
                if (cmd_sequence[j] == 's')
                {
-                  HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
-                                          NULL, &rows[h_rowptr[chunk]],
-                                          &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+                  HYPRE_IJMatrixSetValues(ij_A, chunk_nnz, NULL,
+                                          &rows[h_rowptr[chunk]],
+                                          &cols[h_rowptr[chunk]],
+                                          &coefs[h_rowptr[chunk]]);
                }
-               else
+               else if (cmd_sequence[j] == 'a')
                {
-                  HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
-                                            NULL, &rows[h_rowptr[chunk]],
-                                            &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+                  HYPRE_IJMatrixAddToValues(ij_A, chunk_nnz, NULL,
+                                            &rows[h_rowptr[chunk]],
+                                            &cols[h_rowptr[chunk]],
+                                            &coefs[h_rowptr[chunk]]);
+               }
+               else /* if (cmd_sequence[j] == 'g') */
+               {
+                  HYPRE_IJMatrixGetValues(ij_A, chunk_nnz, NULL,
+                                          &rows[h_rowptr[chunk]],
+                                          &cols[h_rowptr[chunk]],
+                                          &coefs[h_rowptr[chunk]]);
                }
             }
          }
@@ -884,8 +952,3 @@ test_all(MPI_Comm             comm,
 
    return hypre_error_flag;
 }
-
-
-
-
-

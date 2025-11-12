@@ -13,7 +13,7 @@
 
 #include "block_tridiag.h"
 #include "_hypre_parcsr_ls.h"
-#include "fortran.h"
+#include "_hypre_fortran.h"
 
 #ifdef __cplusplus
 extern "C" {

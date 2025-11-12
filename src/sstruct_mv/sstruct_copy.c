@@ -14,7 +14,6 @@
 #include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPCopy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -34,8 +33,8 @@ hypre_SStructPCopy( hypre_SStructPVector *px,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPartialPCopy: Copy the components on only a subset of the
- * pgrid. For each box of an sgrid, an array of subboxes are copied.
+ * Copy the components on only a subset of the pgrid.
+ * For each box of an sgrid, an array of subboxes are copied.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -59,7 +58,6 @@ hypre_SStructPartialPCopy( hypre_SStructPVector *px,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructCopy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

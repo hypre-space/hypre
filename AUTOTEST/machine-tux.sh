@@ -40,7 +40,6 @@ shift
 # Organizing the tests from "fast" to "slow"
 
 # Check license header info
-#( cd $src_dir; make distclean )
 ./test.sh check-license.sh $src_dir/..
 mv -f check-license.??? $output_dir
 
@@ -62,7 +61,7 @@ mv -f check-case.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -struct -lobpcg"
+ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
 eo=""
 
 co=""
@@ -97,7 +96,7 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes -Wno-deprecated\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 
@@ -114,7 +113,7 @@ mv basic.tmp basic.err
 ./renametest.sh basic $output_dir/basic--enable-complex
 
 co="--with-openmp"
-RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
+RO="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--with-openmp
 
@@ -131,7 +130,7 @@ co="--enable-longdouble --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh basic $output_dir/basic--enable-longdouble
 
-co="--enable-debug CC=mpiCC"
+co="--enable-debug CC=mpiCC --with-extra-CFLAGS=\\'-Wno-deprecated\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug-cpp
 
@@ -139,18 +138,23 @@ co="--enable-bigint --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
+co="--enable-debug --enable-mixed-precision"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic--mixed-precision
+
 co="--enable-mixedint --enable-debug"
 RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
-co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind
+# RDF: This is currently in 'machine-tux-valgrind.sh'.
+# co="--enable-debug --with-print-errors"
+# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
+# ./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
 mo="-j"
-ro="-ams -ij -sstruct -struct -lobpcg"
+ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
 eo=""
 
 co=""
@@ -180,6 +184,10 @@ co="-DCMAKE_BUILD_TYPE=Debug"
 co="-DHYPRE_BIGINT=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-bigint
+
+co="-DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_MIXED_PRECISION=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-mixed-precision
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex

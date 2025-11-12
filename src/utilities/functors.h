@@ -96,5 +96,22 @@ struct hypreFunctor_IndexCycle
    }
 };
 
+/*--------------------------------------------------------------------------
+ * Functor to check: |x| > tol
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_NonzeroAboveTol
+{
+   HYPRE_Real tol;
+
+   hypreFunctor_NonzeroAboveTol(HYPRE_Real tol_) : tol(tol_) {}
+
+   __host__ __device__
+   bool operator()(const HYPRE_Complex& x) const
+   {
+      return hypre_cabs(x) > tol;
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */

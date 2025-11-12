@@ -381,8 +381,8 @@ main( hypre_int argc,
     * Check the migration and print the result
     *-----------------------------------------------------------*/
 
-   hypre_StructAxpy(-1.0, to_vector, check_vector);
-   check = hypre_StructInnerProd (check_vector, check_vector);
+   hypre_StructVectorAxpy(-1.0, to_vector, 1.0, check_vector, check_vector);
+   check = hypre_StructInnerProd(check_vector, check_vector);
 
    if (myid == 0)
    {

@@ -11,6 +11,10 @@
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_IJ_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +23,7 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /**
- * @defgroup IJSystemInterface IJ System Interface
+ * @defgroup IJInterface IJ System Interface
  *
  * A linear-algebraic conceptual interface. This interface represents a
  * linear-algebraic conceptual view of a linear system.  The 'I' and 'J' in the
@@ -462,6 +466,8 @@ HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
 HYPRE_Int HYPRE_IJMatrixMigrate(HYPRE_IJMatrix       matrix,
                                 HYPRE_MemoryLocation memory_location);
 
+HYPRE_Int HYPRE_IJMatrixPartialClone ( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -528,6 +534,24 @@ HYPRE_Int HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
                                 HYPRE_Complex  *data);
+
+/**
+ * (Optional) Set an array of tags for the vector.
+ *
+ * @param vector The vector object.
+ * @param owns_tags Whether the vector owns the tags.
+ *         If true, vector will allocate and copy tags.
+ *         If false, vector will just point to the input tags array.
+ * @param num_tags The number of tags.
+ * @param tags The tags array. Must reside in the same memory location as the
+ *         vector data (e.g., if vector is on GPU, tags must also be on GPU).
+ *
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
+                                HYPRE_Int       owns_tags,
+                                HYPRE_Int       num_tags,
+                                HYPRE_Int      *tags);
 
 /**
  * Prepare a vector object for setting coefficient values. This
@@ -721,10 +745,25 @@ HYPRE_Int HYPRE_IJVectorMigrate(HYPRE_IJVector       vector,
                                 HYPRE_MemoryLocation memory_location);
 
 /**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /**@}*/
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_IJ_mv_mup_undef.h"
+#include "HYPRE_IJ_mv_mup.h"
+#endif
 #endif
 
 #endif

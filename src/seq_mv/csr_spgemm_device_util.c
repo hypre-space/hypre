@@ -6,12 +6,12 @@
  ******************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_GPU)
 
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 #else
 struct row_size

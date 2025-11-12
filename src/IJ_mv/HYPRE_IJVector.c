@@ -243,6 +243,36 @@ HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetTags
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
+                      HYPRE_Int       owns_tags,
+                      HYPRE_Int       num_tags,
+                      HYPRE_Int      *tags)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorSetTagsPar(vec, owns_tags, num_tags, tags);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
@@ -811,58 +841,53 @@ HYPRE_Int
 HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
                      const char     *filename )
 {
-   MPI_Comm        comm;
-   HYPRE_BigInt   *partitioning;
-   HYPRE_BigInt    jlower, jupper, j;
-   HYPRE_Complex  *h_values = NULL, *d_values = NULL, *values = NULL;
-   HYPRE_Int       myid, n_local;
-   char            new_filename[255];
-   FILE           *file;
-
    if (!vector)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
+   MPI_Comm              comm;
+
+   HYPRE_MemoryLocation  memory_location = hypre_IJVectorMemoryLocation(vector);
+   HYPRE_BigInt         *partitioning    = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt          jlower          = partitioning[0];
+   HYPRE_BigInt          jupper          = partitioning[1] - 1;
+   HYPRE_Int             n_local         = (HYPRE_Int) (jupper - jlower) + 1;
+
+   HYPRE_Complex        *h_values = NULL, *d_values = NULL, *values = NULL;
+   HYPRE_Int             myid, j;
+   char                  new_filename[255];
+   FILE                 *file;
+
    comm = hypre_IJVectorComm(vector);
    hypre_MPI_Comm_rank(comm, &myid);
 
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
-
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-
-   partitioning = hypre_IJVectorPartitioning(vector);
-   jlower = partitioning[0];
-   jupper = partitioning[1] - 1;
-   n_local = jupper - jlower + 1;
-
    hypre_fprintf(file, "%b %b\n", jlower, jupper);
 
-   HYPRE_MemoryLocation memory_location = hypre_IJVectorMemoryLocation(vector);
-
    d_values = hypre_TAlloc(HYPRE_Complex, n_local, memory_location);
-
    HYPRE_IJVectorGetValues(vector, n_local, NULL, d_values);
-
-   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
    {
       values = d_values;
    }
    else
    {
       h_values = hypre_TAlloc(HYPRE_Complex, n_local, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(h_values, d_values, HYPRE_Complex, n_local, HYPRE_MEMORY_HOST, memory_location);
+      hypre_TMemcpy(h_values, d_values, HYPRE_Complex, n_local,
+                    HYPRE_MEMORY_HOST, memory_location);
       values = h_values;
    }
 
-   for (j = jlower; j <= jupper; j++)
+   for (j = 0; j < n_local; j++)
    {
-      hypre_fprintf(file, "%b %.14e\n", j, values[j - jlower]);
+      hypre_fprintf(file, "%b %.14e\n", (HYPRE_BigInt) j + jlower, values[j]);
    }
 
    hypre_TFree(d_values, memory_location);

@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
 
          for (entry = 0; entry < 5; entry++)
          {
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
          }
       }
    }

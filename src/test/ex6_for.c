@@ -33,7 +33,7 @@
 
 /*     include fortran headers       */
 #ifdef HYPRE_FORTRAN
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #include "hypre_struct_fortran_test.h"
 #include "hypre_sstruct_fortran_test.h"
 #endif
@@ -233,9 +233,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Create the graph object */
 
 #ifdef HYPRE_FORTRAN
-      HYPRE_SStructGraphCreate(&temp_COMM, &grid, &graph);
+      HYPRE_SStructGraphCreate(&temp_COMM, &grid, &grid, &graph);
 #else
-      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, grid, &graph);
 #endif
 
       /* Now we need to tell the graph which stencil to use for each

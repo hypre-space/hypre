@@ -43,7 +43,7 @@ void Vec_dhInit(Vec_dh v, HYPRE_Int size)
 {
   START_FUNC_DH
   v->n = size;
-  v->vals = (HYPRE_Real*)MALLOC_DH(size*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  v->vals = (HYPRE_Real*)MALLOC_DH((size_t) size * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
@@ -71,7 +71,7 @@ void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
   Vec_dhCreate(out); CHECK_V_ERROR;
   tmp = *out;
   tmp->n = size;
-  tmp->vals = (HYPRE_Real*)MALLOC_DH(size*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  tmp->vals = (HYPRE_Real*)MALLOC_DH((size_t) size * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
@@ -256,7 +256,7 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
 
   /* allocate storage */
   tmp->n = n;
-  v = tmp->vals =  (HYPRE_Real*)MALLOC_DH(n*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  v = tmp->vals =  (HYPRE_Real*)MALLOC_DH((size_t) n * sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* reset file, and skip over header again */
   rewind(fp);

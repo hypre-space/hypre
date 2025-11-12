@@ -1,0 +1,243 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# 2D one proc RAP
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x -mat-mat 3 1T 0 1 -r 10 10 > structmat.out.2D0.x
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x -mat-mat 3 1T 0 1 -r 10 10 > structmat.out.2D1.x
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x -mat-mat 3 1T 0 1 -r 10 10 > structmat.out.2D2.x
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x -mat-mat 3 1T 0 1 -r 10 10 > structmat.out.2D3.x
+
+# interpolate in y direction
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y -mat-mat 3 3T 0 3 -r 10 10 > structmat.out.2D0.y
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y -mat-mat 3 3T 0 3 -r 10 10 > structmat.out.2D1.y
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y -mat-mat 3 3T 0 3 -r 10 10 > structmat.out.2D2.y
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y -mat-mat 3 3T 0 3 -r 10 10 > structmat.out.2D3.y
+
+#=============================================================================
+# 2D four procs RAP
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x.4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 > structmat.out.2D0.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x.4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 > structmat.out.2D1.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x.4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 > structmat.out.2D2.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 > structmat.out.2D3.x.4
+
+# interpolate in y direction
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y.4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.y.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y.4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.y.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y.4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 > structmat.out.2D2.y.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y.4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.y.4
+
+#=============================================================================
+# 2D idle procs RAP
+#=============================================================================
+
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.xidle   -mat-mat 3 1T 0 1 -r 4 4 -P 1 1 > structmat.out.2D1.xidle
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.xidle.4 -mat-mat 3 1T 0 1 -r 1 4 -P 4 1 > structmat.out.2D1.xidle.4
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle   -mat-mat 3 3T 0 3 -r 4 5 -P 1 1 > structmat.out.2D1.yidle
+mpirun -np 5 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle.5 -mat-mat 3 3T 0 3 -r 4 1 -P 1 5 > structmat.out.2D1.yidle.5
+
+#=============================================================================
+# 2D one proc RA and AP (to test the print routine)
+#=============================================================================
+
+# RA (interpolate in x direction)
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.RA -mat-mat 2 1T 0 -r 10 10 > structmat.out.2D3.x.RA
+# AP (interpolate in x direction)
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.AP -mat-mat 2 0 1 -r 10 10 > structmat.out.2D3.x.AP
+
+#=============================================================================
+# 2D one proc Matvec
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv0 -mat-vec 0 0 3 -r 10 10 > structmat.out.2D0.mv0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv1 -mat-vec 1 1 3 -r 10 10 > structmat.out.2D0.mv1
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv2 -mat-vec 2 0 4 -r 10 10 > structmat.out.2D0.mv2
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv3 -mat-vec 3 2 3 -r 10 10 > structmat.out.2D0.mv3
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv4 -mat-vec 4 0 5 -r 10 10 > structmat.out.2D0.mv4
+
+# all variable coefficients
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv0 -mat-vec 0 0 3 -r 10 10 > structmat.out.2D1.mv0
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv1 -mat-vec 1 1 3 -r 10 10 > structmat.out.2D1.mv1
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv2 -mat-vec 2 0 4 -r 10 10 > structmat.out.2D1.mv2
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv3 -mat-vec 3 2 3 -r 10 10 > structmat.out.2D1.mv3
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv4 -mat-vec 4 0 5 -r 10 10 > structmat.out.2D1.mv4
+
+# variable diagonal
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mv0 -mat-vec 0 0 3 -r 10 10 > structmat.out.2D3.mv0
+
+# Test x==y and beta=0 by comparing to results above
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv0.zzz -mat-vec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D0.mv0.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv1.zzz -mat-vec 1 1 0 -r 10 10 -ab 1 0 > structmat.out.2D0.mv1.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv2.zzz -mat-vec 2 0 1 -r 10 10 -ab 1 0 > structmat.out.2D0.mv2.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv0.zzz -mat-vec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D1.mv0.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv1.zzz -mat-vec 1 1 0 -r 10 10 -ab 1 0 > structmat.out.2D1.mv1.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv2.zzz -mat-vec 2 0 1 -r 10 10 -ab 1 0 > structmat.out.2D1.mv2.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mv0.zzz -mat-vec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D3.mv0.zzz
+
+#=============================================================================
+# 2D four procs Matvec
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv0.4 -mat-vec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mv0.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv1.4 -mat-vec 1 1 3 -r 5 5 -P 2 2 > structmat.out.2D0.mv1.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv2.4 -mat-vec 2 0 4 -r 5 5 -P 2 2 > structmat.out.2D0.mv2.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv3.4 -mat-vec 3 2 3 -r 5 5 -P 2 2 > structmat.out.2D0.mv3.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv4.4 -mat-vec 4 0 5 -r 5 5 -P 2 2 > structmat.out.2D0.mv4.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv0.4 -mat-vec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mv0.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv1.4 -mat-vec 1 1 3 -r 5 5 -P 2 2 > structmat.out.2D1.mv1.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv2.4 -mat-vec 2 0 4 -r 5 5 -P 2 2 > structmat.out.2D1.mv2.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv3.4 -mat-vec 3 2 3 -r 5 5 -P 2 2 > structmat.out.2D1.mv3.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv4.4 -mat-vec 4 0 5 -r 5 5 -P 2 2 > structmat.out.2D1.mv4.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mv0.4 -mat-vec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mv0.4
+
+# Test x==y and beta=0 by comparing to results above
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv0.4.zzz -mat-vec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mv0.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv1.4.zzz -mat-vec 1 1 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mv1.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mv2.4.zzz -mat-vec 2 0 1 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mv2.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv0.4.zzz -mat-vec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mv0.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv1.4.zzz -mat-vec 1 1 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mv1.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mv2.4.zzz -mat-vec 2 0 1 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mv2.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mv0.4.zzz -mat-vec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D3.mv0.4.zzz
+
+#=============================================================================
+# 2D one proc MatvecT
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT0 -matTvec 0 0 3 -r 10 10 > structmat.out.2D0.mvT0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT1 -matTvec 2 1 3 -r 10 10 > structmat.out.2D0.mvT1
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT2 -matTvec 1 0 4 -r 10 10 > structmat.out.2D0.mvT2
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT3 -matTvec 4 2 3 -r 10 10 > structmat.out.2D0.mvT3
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT4 -matTvec 3 0 5 -r 10 10 > structmat.out.2D0.mvT4
+
+# all variable coefficients
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT0 -matTvec 0 0 3 -r 10 10 > structmat.out.2D1.mvT0
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT1 -matTvec 2 1 3 -r 10 10 > structmat.out.2D1.mvT1
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT2 -matTvec 1 0 4 -r 10 10 > structmat.out.2D1.mvT2
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT3 -matTvec 4 2 3 -r 10 10 > structmat.out.2D1.mvT3
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT4 -matTvec 3 0 5 -r 10 10 > structmat.out.2D1.mvT4
+
+# variable diagonal
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mvT0 -matTvec 0 0 3 -r 10 10 > structmat.out.2D3.mvT0
+
+# Test x==y and beta=0 by comparing to results above
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT0.zzz -matTvec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D0.mvT0.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT1.zzz -matTvec 2 1 0 -r 10 10 -ab 1 0 > structmat.out.2D0.mvT1.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT2.zzz -matTvec 1 0 1 -r 10 10 -ab 1 0 > structmat.out.2D0.mvT2.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT0.zzz -matTvec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D1.mvT0.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT1.zzz -matTvec 2 1 0 -r 10 10 -ab 1 0 > structmat.out.2D1.mvT1.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT2.zzz -matTvec 1 0 1 -r 10 10 -ab 1 0 > structmat.out.2D1.mvT2.zzz
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mvT0.zzz -matTvec 0 0 0 -r 10 10 -ab 1 0 > structmat.out.2D3.mvT0.zzz
+
+#=============================================================================
+# 2D four procs MatvecT
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT0.4 -matTvec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mvT0.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT1.4 -matTvec 2 1 3 -r 5 5 -P 2 2 > structmat.out.2D0.mvT1.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT2.4 -matTvec 1 0 4 -r 5 5 -P 2 2 > structmat.out.2D0.mvT2.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT3.4 -matTvec 4 2 3 -r 5 5 -P 2 2 > structmat.out.2D0.mvT3.4
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT4.4 -matTvec 3 0 5 -r 5 5 -P 2 2 > structmat.out.2D0.mvT4.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT0.4 -matTvec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mvT0.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT1.4 -matTvec 2 1 3 -r 5 5 -P 2 2 > structmat.out.2D1.mvT1.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT2.4 -matTvec 1 0 4 -r 5 5 -P 2 2 > structmat.out.2D1.mvT2.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT3.4 -matTvec 4 2 3 -r 5 5 -P 2 2 > structmat.out.2D1.mvT3.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT4.4 -matTvec 3 0 5 -r 5 5 -P 2 2 > structmat.out.2D1.mvT4.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mvT0.4 -matTvec 0 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mvT0.4
+
+# Test x==y and beta=0 by comparing to results above
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT0.4.zzz -matTvec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mvT0.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT1.4.zzz -matTvec 2 1 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mvT1.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.mvT2.4.zzz -matTvec 1 0 1 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D0.mvT2.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT0.4.zzz -matTvec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mvT0.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT1.4.zzz -matTvec 2 1 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mvT1.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.mvT2.4.zzz -matTvec 1 0 1 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D1.mvT2.4.zzz
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.mvT0.4.zzz -matTvec 0 0 0 -r 5 5 -P 2 2 -ab 1 0 > structmat.out.2D3.mvT0.4.zzz
+
+#=============================================================================
+# 2D one proc constant Matvec alpha/beta tests
+#
+# NOTE: Don't need to test variable coefficient, multi-proc, or MatvecT
+# NOTE: First dimension must be even because the problem is periodic in x
+#=============================================================================
+
+# alpha = 0, beta = 0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab0.mv0 -mat-vec 0 0 3 -r 8 7 -ab 0 0 > structmat.out.ab0.mv0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab0.mv1 -mat-vec 1 1 3 -r 8 7 -ab 0 0 > structmat.out.ab0.mv1
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab0.mv2 -mat-vec 2 0 4 -r 8 7 -ab 0 0 > structmat.out.ab0.mv2
+
+# alpha = 0, beta = 2
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab1.mv0 -mat-vec 0 0 0 -r 8 7 -ab 0 2 > structmat.out.ab1.mv0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab1.mv1 -mat-vec 1 1 0 -r 8 7 -ab 0 2 > structmat.out.ab1.mv1
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab1.mv2 -mat-vec 2 0 1 -r 8 7 -ab 0 2 > structmat.out.ab1.mv2
+
+# alpha = -0.3, beta = 1.7
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv0 -mat-vec 0 0 0 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv0
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv1 -mat-vec 1 1 0 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv1
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv2 -mat-vec 2 0 1 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv2
+
+#=============================================================================
+# Symmetric A - 2D one proc RAP
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.x -mat-mat 3 1T 5 1 -r 10 10 > structmat.out.2D0.sym.x
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.x -mat-mat 3 1T 5 1 -r 10 10 > structmat.out.2D1.sym.x
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.x -mat-mat 3 1T 5 1 -r 10 10 > structmat.out.2D2.sym.x
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.x -mat-mat 3 1T 5 1 -r 10 10 > structmat.out.2D3.sym.x
+
+#=============================================================================
+# Symmetric A - 2D four procs RAP
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D0.sym.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D1.sym.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D2.sym.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D3.sym.x.4
+
+#=============================================================================
+# Symmetric A - 2D four procs Matvec
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mv0.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mv0.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mv0.4
+
+#=============================================================================
+# Symmetric A - 2D four procs MatvecT
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mvT0.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mvT0.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mvT0.4

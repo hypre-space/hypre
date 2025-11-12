@@ -457,7 +457,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_DeviceItem    &item,
 }
 
 #if !defined(HYPRE_USING_SYCL)
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 #else
 struct setTo1minus1

@@ -47,12 +47,3 @@ HYPRE_Real time_getCPUSeconds(void)
 #endif
 }
 
-HYPRE_Real time_get_wallclock_seconds_(void)
-{
-   return (time_getWallclockSeconds());
-}
-
-HYPRE_Real time_get_cpu_seconds_(void)
-{
-   return (time_getCPUSeconds());
-}

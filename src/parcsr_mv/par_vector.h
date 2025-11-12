@@ -42,6 +42,9 @@ typedef struct hypre_ParVector_struct
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision vector_precision;
+#endif
 } hypre_ParVector;
 
 /*--------------------------------------------------------------------------
@@ -61,10 +64,17 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalData(vector)        ((vector) -> local_vector -> data)
 #define hypre_ParVectorLocalStorage(vector)     ((vector) -> local_vector -> multivec_storage_method)
 #define hypre_ParVectorNumVectors(vector)       ((vector) -> local_vector -> num_vectors)
+#define hypre_ParVectorNumTags(vector)          ((vector) -> local_vector -> num_tags)
+#define hypre_ParVectorOwnsTags(vector)         ((vector) -> local_vector -> owns_tags)
+#define hypre_ParVectorTags(vector)             ((vector) -> local_vector -> tags)
 #define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
 #define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
+
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_ParVectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)

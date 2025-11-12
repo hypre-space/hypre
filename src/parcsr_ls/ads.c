@@ -1064,14 +1064,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          }
       }
 
-      if (HYPRE_AssumedPartitionCheck())
-      {
-         hypre_ParCSRMatrixDestroy(F2V);
-      }
-      else
-      {
-         hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
-      }
+      hypre_ParCSRMatrixDestroy(F2V);
    }
 
    hypre_ParVectorDestroy(RT100);
@@ -1213,7 +1206,7 @@ hypre_ADSSetup(void *solver,
          {
             ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C,
                                                       ads_data -> A,
-                                                      ads_data -> C, 1);
+                                                      ads_data -> C, 1, 1);
          }
          else
 #endif
@@ -1326,7 +1319,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix,
                                                      ads_data -> A,
-                                                     ads_data -> Pix, 1);
+                                                     ads_data -> Pix, 1, 1);
       }
       else
 #endif
@@ -1351,7 +1344,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy,
                                                      ads_data -> A,
-                                                     ads_data -> Piy, 1);
+                                                     ads_data -> Piy, 1, 1);
       }
       else
 #endif
@@ -1376,7 +1369,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz,
                                                      ads_data -> A,
-                                                     ads_data -> Piz, 1);
+                                                     ads_data -> Piz, 1, 1);
       }
       else
 #endif
@@ -1430,7 +1423,7 @@ hypre_ADSSetup(void *solver,
          {
             ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi,
                                                        ads_data -> A,
-                                                       ads_data -> Pi, 1);
+                                                       ads_data -> Pi, 1, 1);
          }
          else
 #endif
@@ -1616,7 +1609,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          r0_norm = r_norm;
          b_norm = hypre_sqrt(hypre_ParVectorInnerProd(b, b));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }
@@ -1659,7 +1652,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
          r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
-         if (b_norm)
+         if (b_norm != 0.0)
          {
             relative_resid = r_norm / b_norm;
          }

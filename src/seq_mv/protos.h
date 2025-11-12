@@ -40,15 +40,18 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix *Bs_ext, HYPRE_BigInt first_col_d
                                hypre_CSRMatrix **Bext_offd_ptr);
 hypre_CSRMatrix * hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                                              HYPRE_Int *row_nums);
-void hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
-                                       HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
-void hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
-                                   HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
+HYPRE_Int hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
+                                        HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal,
+                                        const char *set_or_add);
+HYPRE_Int hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A, HYPRE_Complex *col_sum,
+                                        HYPRE_Int type, HYPRE_Complex scal );
 HYPRE_Int hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
 HYPRE_Int hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
 HYPRE_Int hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Complex scalar);
 HYPRE_Int hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A, HYPRE_Complex value);
 HYPRE_Int hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
+HYPRE_Int hypre_CSRMatrixTaggedFnorm( hypre_CSRMatrix *A, HYPRE_Int num_tags, HYPRE_Int *tags,
+                                      HYPRE_Real **tnorms_ptr );
 
 /* csr_matop_device.c */
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix *A,
@@ -56,6 +59,7 @@ hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix
 hypre_CSRMatrix *hypre_CSRMatrixMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
                                                        hypre_CSRMatrix *C );
+hypre_CSRMatrix *hypre_CSRMatrixDeleteZerosDevice ( hypre_CSRMatrix *A, HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixMergeColMapOffd( HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                           HYPRE_Int B_ext_offd_nnz, HYPRE_BigInt *B_ext_offd_bigj, HYPRE_Int *num_cols_offd_C_ptr,
                                           HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int **map_B_to_C_ptr );
@@ -71,6 +75,7 @@ HYPRE_Int hypre_CSRMatrixSplitDevice(hypre_CSRMatrix *B_ext, HYPRE_BigInt first_
                                      HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
                                      HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr,
                                      hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr);
+HYPRE_Int hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixTransposeDevice ( hypre_CSRMatrix *A, hypre_CSRMatrix **AT,
                                            HYPRE_Int data );
 hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
@@ -84,6 +89,10 @@ HYPRE_Int hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A, HYPRE_Complex *n
 HYPRE_Int hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
                                               HYPRE_Complex *row_sum, HYPRE_Int type,
                                               HYPRE_Complex scal, const char *set_or_add );
+HYPRE_Int hypre_CSRMatrixComputeColSumDevice( hypre_CSRMatrix *A,  HYPRE_Complex *col_sum,
+                                              HYPRE_Int type, HYPRE_Complex scal );
+HYPRE_Int hypre_CSRMatrixTaggedFnormDevice(hypre_CSRMatrix *A, HYPRE_Int num_tags,
+                                           HYPRE_Int *tags, HYPRE_Real *tnorms);
 HYPRE_Int hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d,
                                                 HYPRE_Int type );
 hypre_CSRMatrix* hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B);
@@ -147,10 +156,13 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
                                        HYPRE_BigInt *col_map_offd_A,
                                        HYPRE_BigInt *col_map_offd_B,
                                        HYPRE_BigInt **col_map_offd_C );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,
                                  HYPRE_Int new_num_cols, HYPRE_Int new_num_nonzeros );
+HYPRE_Int hypre_CSRMatrixEliminateRowsCols(hypre_CSRMatrix *A, HYPRE_Int nrows, HYPRE_Int *rows);
 
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
@@ -188,47 +200,6 @@ HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length, HYPRE_Int num_procs,
 HYPRE_Int hypre_GenerateLocalPartitioning ( HYPRE_BigInt length, HYPRE_Int num_procs,
                                             HYPRE_Int myid, HYPRE_BigInt *part );
 
-/* HYPRE_csr_matrix.c */
-HYPRE_CSRMatrix HYPRE_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
-                                        HYPRE_Int *row_sizes );
-HYPRE_Int HYPRE_CSRMatrixDestroy ( HYPRE_CSRMatrix matrix );
-HYPRE_Int HYPRE_CSRMatrixInitialize ( HYPRE_CSRMatrix matrix );
-HYPRE_CSRMatrix HYPRE_CSRMatrixRead ( char *file_name );
-void HYPRE_CSRMatrixPrint ( HYPRE_CSRMatrix matrix, char *file_name );
-HYPRE_Int HYPRE_CSRMatrixGetNumRows ( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows );
-
-/* HYPRE_mapped_matrix.c */
-HYPRE_MappedMatrix HYPRE_MappedMatrixCreate ( void );
-HYPRE_Int HYPRE_MappedMatrixDestroy ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixLimitedDestroy ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixInitialize ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixAssemble ( HYPRE_MappedMatrix matrix );
-void HYPRE_MappedMatrixPrint ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixGetColIndex ( HYPRE_MappedMatrix matrix, HYPRE_Int j );
-void *HYPRE_MappedMatrixGetMatrix ( HYPRE_MappedMatrix matrix );
-HYPRE_Int HYPRE_MappedMatrixSetMatrix ( HYPRE_MappedMatrix matrix, void *matrix_data );
-HYPRE_Int HYPRE_MappedMatrixSetColMap ( HYPRE_MappedMatrix matrix, HYPRE_Int (*ColMap )(HYPRE_Int,
-                                                                                        void *));
-HYPRE_Int HYPRE_MappedMatrixSetMapData ( HYPRE_MappedMatrix matrix, void *MapData );
-
-/* HYPRE_multiblock_matrix.c */
-HYPRE_MultiblockMatrix HYPRE_MultiblockMatrixCreate ( void );
-HYPRE_Int HYPRE_MultiblockMatrixDestroy ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixLimitedDestroy ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixInitialize ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixAssemble ( HYPRE_MultiblockMatrix matrix );
-void HYPRE_MultiblockMatrixPrint ( HYPRE_MultiblockMatrix matrix );
-HYPRE_Int HYPRE_MultiblockMatrixSetNumSubmatrices ( HYPRE_MultiblockMatrix matrix, HYPRE_Int n );
-HYPRE_Int HYPRE_MultiblockMatrixSetSubmatrixType ( HYPRE_MultiblockMatrix matrix, HYPRE_Int j,
-                                                   HYPRE_Int type );
-
-/* HYPRE_vector.c */
-HYPRE_Vector HYPRE_VectorCreate ( HYPRE_Int size );
-HYPRE_Int HYPRE_VectorDestroy ( HYPRE_Vector vector );
-HYPRE_Int HYPRE_VectorInitialize ( HYPRE_Vector vector );
-HYPRE_Int HYPRE_VectorPrint ( HYPRE_Vector vector, char *file_name );
-HYPRE_Vector HYPRE_VectorRead ( char *file_name );
-
 /* mapped_matrix.c */
 hypre_MappedMatrix *hypre_MappedMatrixCreate ( void );
 HYPRE_Int hypre_MappedMatrixDestroy ( hypre_MappedMatrix *matrix );
@@ -262,18 +233,26 @@ hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size, HYPRE_Int num_vectors
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorInitializeShell( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetData( hypre_Vector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_SeqVectorSetOwnsTags( hypre_Vector *vector, HYPRE_Int owns_tags );
+HYPRE_Int hypre_SeqVectorSetNumTags( hypre_Vector *vector, HYPRE_Int num_tags );
+HYPRE_Int hypre_SeqVectorSetTags( hypre_Vector *vector,
+                                  HYPRE_MemoryLocation memory_location,
+                                  HYPRE_Int *tags );
+HYPRE_Int hypre_SeqVectorSetValuesTagged( hypre_Vector *vector, HYPRE_Complex *values );
 HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector, HYPRE_Int owns_data );
 HYPRE_Int hypre_SeqVectorSetSize ( hypre_Vector *vector, HYPRE_Int size );
-HYPRE_Int hypre_SeqVectorResize ( hypre_Vector *vector, HYPRE_Int num_vectors_in );
+HYPRE_Int hypre_SeqVectorResize ( hypre_Vector *vector, HYPRE_Int size_in,
+                                  HYPRE_Int num_vectors_in );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector, char *file_name );
 HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetConstantValuesHost ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v, HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorCopyTags ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data);
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
@@ -307,48 +286,50 @@ HYPRE_Int hypre_SeqVectorMassAxpy4(HYPRE_Complex *alpha, hypre_Vector **x, hypre
                                    HYPRE_Int k);
 HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y,
                                    HYPRE_Int k);
+HYPRE_Int hypre_SeqVectorInnerProdTagged( hypre_Vector *x, hypre_Vector *y, HYPRE_Complex *iprod );
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorPointwiseDivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                               HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_SeqVectorPointwiseProduct( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseDivision( hypre_Vector *x, hypre_Vector *y,
+                                            hypre_Vector **z_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseInverse( hypre_Vector *x, hypre_Vector **y_ptr );
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
+/* csr_spadd_device.c */
 HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA,
                                HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa,
                                HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab,
                                HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
                                HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
 
+/* csr_sptrans_device.c */
 HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                  HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                  HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-
 HYPRE_Int hypreDevice_CSRSpTransCusparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                          HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                          HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-
 HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                           HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                           HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-
 HYPRE_Int hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA,
                                              HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                              HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
+/* csr_spgemm_device.c */
 HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
-
 HYPRE_Int hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                                   HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB,
                                                   HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
                                                   HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 
-HYPRE_Int hypre_SeqVectorElmdivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorElmdivpyHost( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                       HYPRE_Int *marker, HYPRE_Int marker_val );
+/* csr_spmv_device.c */
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,
                                      hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
-
 HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzeros,
                                         HYPRE_Int alpha, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
                                         HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta,
@@ -374,13 +355,19 @@ HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
 
 /* vector_device.c */
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
+HYPRE_Int hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector *vector, HYPRE_Complex *values );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
                                        HYPRE_Complex beta, hypre_Vector *y,
                                        hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                               HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x, hypre_Vector *y,
+                                                 hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x, hypre_Vector *y,
+                                                  hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,

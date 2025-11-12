@@ -120,6 +120,25 @@ hypre_IJVectorSetParData(hypre_IJVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_IJVectorSetTagsPar
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorSetTagsPar(hypre_IJVector *vector,
+                         HYPRE_Int       owns_tags,
+                         HYPRE_Int       num_tags,
+                         HYPRE_Int      *tags)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   hypre_ParVectorSetOwnsTags(par_vector, owns_tags);
+   hypre_ParVectorSetNumTags(par_vector, num_tags);
+   hypre_ParVectorSetTags(par_vector, hypre_IJVectorMemoryLocation(vector), tags);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_IJVectorInitializePar
  *--------------------------------------------------------------------------*/
 
@@ -790,7 +809,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
    HYPRE_Int  obj_size_bytes, big_int_size, complex_size;
-   HYPRE_Int  first_index;
+   HYPRE_BigInt  first_index;
 
    void *void_contact_buf = NULL;
    void *index_ptr;

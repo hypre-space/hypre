@@ -323,7 +323,7 @@
 
       call HYPRE_StructStencilCreate(dim, (dim+1), stencil, ierr)
       do s=1,dim+1
-         call HYPRE_StructStencilSetElement(stencil, (s - 1),
+         call HYPRE_StructStencilSetEntry(stencil, (s - 1),
      & offsets(1,s), ierr)
       enddo
 

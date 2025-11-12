@@ -50,6 +50,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfo       *comm_info;
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
+   HYPRE_Complex        *data;
+   hypre_Index           ustride;
 
    HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             i, j, s, dim;
@@ -58,6 +60,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    {
       return hypre_error_flag;
    }
+
+   hypre_SetIndex(ustride, 1);
 
    /* set num_ghost */
    dim = hypre_StructGridNDim(grid);
@@ -74,7 +78,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
 
    /* comm_info <-- From fine grid grown by num_ghost */
 
-   hypre_CreateCommInfoFromNumGhost(grid, num_ghost, &comm_info);
+   hypre_CreateCommInfoFromNumGhost(grid, ustride, num_ghost, &comm_info);
 
    /* Project and map comm_info onto coarsened index space */
 
@@ -118,27 +122,19 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
       }
    }
 
-   comm_pkg = hypre_StructMatrixCommPkg(P);
-   if (comm_pkg)
-   {
-      hypre_CommPkgDestroy(comm_pkg);
-   }
-
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixNumValues(P), NULL, 0,
                        hypre_StructMatrixComm(P),
+                       hypre_StructMatrixMemoryLocation(P),
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
-   hypre_StructMatrixCommPkg(P) = comm_pkg;
 
-   hypre_InitializeCommunication(comm_pkg,
-                                 hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
-                                 hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
-                                 0, 0,
-                                 &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   data = hypre_StructMatrixVData(P);
+   hypre_StructCommunicationInitialize(comm_pkg, &data, &data, 0, 0, &comm_handle);
+   hypre_StructCommunicationFinalize(comm_handle);
+   hypre_CommPkgDestroy(comm_pkg);
 
    return hypre_error_flag;
 }
