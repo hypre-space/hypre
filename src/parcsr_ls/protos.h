@@ -110,20 +110,6 @@ HYPRE_Int hypre_AMGHybridSetCycleType ( void *AMGhybrid_vdata, HYPRE_Int cycle_t
 HYPRE_Int hypre_AMGHybridSetNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps );
 HYPRE_Int hypre_AMGHybridSetCycleNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps,
                                              HYPRE_Int k );
-
-HYPRE_Int hypre_AMGHybridSetCycleStruct ( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct,
-                                             HYPRE_Int cycle_num_nodes );
-HYPRE_Int hypre_AMGHybridSetRelaxNodeTypes ( void *AMGhybrid_vdata, HYPRE_Int *relax_node_types );
-HYPRE_Int hypre_AMGHybridSetRelaxNodeOrder ( void *AMGhybrid_vdata, HYPRE_Int *relax_node_order );
-HYPRE_Int hypre_AMGHybridSetRelaxNodeOuterWeights ( void *AMGhybrid_vdata,
-                                                     HYPRE_Real *relax_node_outerweights );
-HYPRE_Int hypre_AMGHybridSetRelaxNodeWeights ( void *AMGhybrid_vdata,
-                                                 HYPRE_Real *relax_node_weights );
-HYPRE_Int hypre_AMGHybridSetRelaxEdgeWeights ( void *AMGhybrid_vdata,
-                                                 HYPRE_Real *relax_edge_weights );
- 
-HYPRE_Int hypre_AMGHybridSetNodeNumSweeps ( void *AMGhybrid_vdata,
-                                                 HYPRE_Int *node_num_sweeps );
 HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_AMGHybridSetKeepTranspose ( void *AMGhybrid_vdata, HYPRE_Int keepT );
 HYPRE_Int hypre_AMGHybridSetSplittingStrategy( void *AMGhybrid_vdata,
@@ -146,6 +132,14 @@ HYPRE_Int hypre_AMGHybridSetLevelRelaxWt ( void *AMGhybrid_vdata, HYPRE_Real rel
 HYPRE_Int hypre_AMGHybridSetOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt );
 HYPRE_Int hypre_AMGHybridSetLevelOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt,
                                            HYPRE_Int level );
+/* flexible AMG cycling parameter setters*/
+HYPRE_Int hypre_AMGHybridFlexibleSetCycleStruct ( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxTypes ( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxOrders ( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxWeights ( void *AMGhybrid_vdata, HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetOuterWeights ( void *AMGhybrid_vdata, HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetCGCScalingFactors ( void *AMGhybrid_vdata, HYPRE_Real *cgc_scaling_factors_flexible);
+/* end of flexible AMG cycling parameter setters*/
 HYPRE_Int hypre_AMGHybridSetNumPaths ( void *AMGhybrid_vdata, HYPRE_Int num_paths );
 HYPRE_Int hypre_AMGHybridSetDofFunc ( void *AMGhybrid_vdata, HYPRE_Int *dof_func );
 HYPRE_Int hypre_AMGHybridSetAggNumLevels ( void *AMGhybrid_vdata, HYPRE_Int agg_num_levels );
@@ -363,25 +357,16 @@ HYPRE_Int hypre_BoomerAMGSetFCycle ( void *data, HYPRE_Int fcycle );
 HYPRE_Int hypre_BoomerAMGGetFCycle ( void *data, HYPRE_Int *fcycle );
 HYPRE_Int hypre_BoomerAMGSetCycleType ( void *data, HYPRE_Int cycle_type );
 HYPRE_Int hypre_BoomerAMGGetCycleType ( void *data, HYPRE_Int *cycle_type );
-HYPRE_Int hypre_BoomerAMGSetKappaCycleVal( void *data, HYPRE_Int kappa );
-HYPRE_Int hypre_BoomerAMGGetKappaCycleVal( void *data, HYPRE_Int *kappa );
-HYPRE_Int hypre_BoomerAMGSetCycleStruct ( void *data, HYPRE_Int *cycle_struct, HYPRE_Int cycle_num_nodes);
-HYPRE_Int hypre_BoomerAMGGetCycleStruct ( void *data, HYPRE_Int **cycle_struct, HYPRE_Int *cycle_num_nodes);
 HYPRE_Int hypre_BoomerAMGSetConvergeType ( void *data, HYPRE_Int type );
 HYPRE_Int hypre_BoomerAMGGetConvergeType ( void *data, HYPRE_Int *type );
 HYPRE_Int hypre_BoomerAMGSetTol ( void *data, HYPRE_Real tol );
 HYPRE_Int hypre_BoomerAMGGetTol ( void *data, HYPRE_Real *tol );
-HYPRE_Int hypre_BoomerAMGSetNodeNumSweeps ( void *data, HYPRE_Int *node_num_sweeps );
-HYPRE_Int hypre_BoomerAMGGetNodeNumSweeps (void *data, HYPRE_Int **node_num_sweeps );
 HYPRE_Int hypre_BoomerAMGSetNumSweeps ( void *data, HYPRE_Int num_sweeps );
 HYPRE_Int hypre_BoomerAMGSetCycleNumSweeps ( void *data, HYPRE_Int num_sweeps, HYPRE_Int k );
 HYPRE_Int hypre_BoomerAMGGetCycleNumSweeps ( void *data, HYPRE_Int *num_sweeps, HYPRE_Int k );
 HYPRE_Int hypre_BoomerAMGSetNumGridSweeps ( void *data, HYPRE_Int *num_grid_sweeps );
 HYPRE_Int hypre_BoomerAMGGetNumGridSweeps ( void *data, HYPRE_Int **num_grid_sweeps );
 HYPRE_Int hypre_BoomerAMGSetRelaxType ( void *data, HYPRE_Int relax_type );
-HYPRE_Int hypre_BoomerAMGSetRelaxNodeTypes ( void *data, HYPRE_Int *relax_node_types );
-HYPRE_Int hypre_BoomerAMGSetRelaxNodeOrder ( void *data, HYPRE_Int *relax_node_order );
-HYPRE_Int hypre_BoomerAMGGetRelaxNodeTypes( void *data, HYPRE_Int **relax_node_types );
 HYPRE_Int hypre_BoomerAMGSetCycleRelaxType ( void *data, HYPRE_Int relax_type, HYPRE_Int k );
 HYPRE_Int hypre_BoomerAMGGetCycleRelaxType ( void *data, HYPRE_Int *relax_type, HYPRE_Int k );
 HYPRE_Int hypre_BoomerAMGSetRelaxOrder ( void *data, HYPRE_Int relax_order );
@@ -392,12 +377,6 @@ HYPRE_Int hypre_BoomerAMGSetGridRelaxPoints ( void *data, HYPRE_Int **grid_relax
 HYPRE_Int hypre_BoomerAMGGetGridRelaxPoints ( void *data, HYPRE_Int ***grid_relax_points );
 HYPRE_Int hypre_BoomerAMGSetRelaxWeight ( void *data, HYPRE_Real *relax_weight );
 HYPRE_Int hypre_BoomerAMGGetRelaxWeight ( void *data, HYPRE_Real **relax_weight );
-HYPRE_Int hypre_BoomerAMGSetRelaxNodeOuterWeights ( void *data, HYPRE_Real *relax_node_outerweights );
-HYPRE_Int hypre_BoomerAMGGetRelaxNodeOuterWeights ( void *data, HYPRE_Real **relax_node_outerweights );
-HYPRE_Int hypre_BoomerAMGSetRelaxNodeWeights ( void *data, HYPRE_Real *relax_node_weights );
-HYPRE_Int hypre_BoomerAMGGetRelaxNodeWeights ( void *data, HYPRE_Real **relax_node_weights );
-HYPRE_Int hypre_BoomerAMGSetRelaxEdgeWeights ( void *data, HYPRE_Real *relax_edge_weights );
-HYPRE_Int hypre_BoomerAMGGetRelaxEdgeWeights ( void *data, HYPRE_Real **relax_edge_weights );
 HYPRE_Int hypre_BoomerAMGSetRelaxWt ( void *data, HYPRE_Real relax_weight );
 HYPRE_Int hypre_BoomerAMGSetLevelRelaxWt ( void *data, HYPRE_Real relax_weight, HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGGetLevelRelaxWt ( void *data, HYPRE_Real *relax_weight, HYPRE_Int level );
@@ -412,6 +391,14 @@ HYPRE_Int hypre_BoomerAMGSetSmoothNumLevels ( void *data, HYPRE_Int smooth_num_l
 HYPRE_Int hypre_BoomerAMGGetSmoothNumLevels ( void *data, HYPRE_Int *smooth_num_levels );
 HYPRE_Int hypre_BoomerAMGSetSmoothNumSweeps ( void *data, HYPRE_Int smooth_num_sweeps );
 HYPRE_Int hypre_BoomerAMGGetSmoothNumSweeps ( void *data, HYPRE_Int *smooth_num_sweeps );
+/* flexible AMG cycling parameters setters */
+HYPRE_Int hypre_BoomerAMGFlexibleSetCycleStruct ( void *data, HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxTypes ( void *data, HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxOrders ( void *data, HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxWeights ( void *data, HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetOuterWeights ( void *data, HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetCGCScalingFactors ( void *data, HYPRE_Real *cgc_scaling_factors_flexible);
+/* End of flexible AMG cycling parameters setters */
 HYPRE_Int hypre_BoomerAMGSetLogging ( void *data, HYPRE_Int logging );
 HYPRE_Int hypre_BoomerAMGGetLogging ( void *data, HYPRE_Int *logging );
 HYPRE_Int hypre_BoomerAMGSetPrintLevel ( void *data, HYPRE_Int print_level );

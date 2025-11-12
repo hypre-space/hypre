@@ -431,6 +431,14 @@ hypre_BoomerAMGCreate( void )
    hypre_BoomerAMGSetSmoothType(amg_data, smooth_type);
    hypre_BoomerAMGSetSmoothNumLevels(amg_data, smooth_num_levels);
    hypre_BoomerAMGSetSmoothNumSweeps(amg_data, smooth_num_sweeps);
+   hypre_ParAMGDataFlexibleNumLevels(amg_data) = 0;
+   hypre_ParAMGDataFlexibleCycleLength(amg_data) = 0;
+   hypre_ParAMGDataFlexibleCycleStruct(amg_data) = NULL;
+   hypre_ParAMGDataFlexibleRelaxTypes(amg_data) = NULL;
+   hypre_ParAMGDataFlexibleRelaxOrders(amg_data) = NULL;
+   hypre_ParAMGDataFlexibleRelaxWeights(amg_data) = NULL;
+   hypre_ParAMGDataFlexibleOuterWeights(amg_data) = NULL;
+   hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data) = NULL;
 
    hypre_BoomerAMGSetChebyOrder(amg_data, cheby_order);
    hypre_BoomerAMGSetChebyFraction(amg_data, cheby_eig_ratio);
@@ -655,6 +663,42 @@ hypre_BoomerAMGDestroy( void *data )
          hypre_IntArrayDestroy(hypre_ParAMGDataDofFunc(amg_data));
          hypre_ParAMGDataDofFunc(amg_data) = NULL;
       }
+
+      /* flexible cycles params */
+      if (hypre_ParAMGDataFlexibleCycleStruct(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleCycleStruct(amg_data)[i], HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleCycleStruct(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataFlexibleRelaxTypes(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleRelaxTypes(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleRelaxTypes(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataFlexibleRelaxOrders(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleRelaxOrders(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleRelaxOrders(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataFlexibleRelaxWeights(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleRelaxWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleRelaxWeights(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataFlexibleOuterWeights(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleOuterWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleOuterWeights(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data) = NULL;
+      }
+      hypre_ParAMGDataFlexibleCycleLength(amg_data) = 0;
+      hypre_ParAMGDataFlexibleNumLevels(amg_data) = 0;
+      /* end of flexible cycle params */
+
       for (i = 1; i < num_levels; i++)
       {
          hypre_ParVectorDestroy(hypre_ParAMGDataFArray(amg_data)[i]);
@@ -918,44 +962,6 @@ hypre_BoomerAMGDestroy( void *data )
       if (new_comm != hypre_MPI_COMM_NULL)
       {
          hypre_MPI_Comm_free(&new_comm);
-      }
-
-      /* destroy inputs for user defined cycle structures */
-
-      if (hypre_ParAMGDataCycleStruct(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataCycleStruct(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataCycleStruct(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataRelaxNodeTypes(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataRelaxNodeTypes(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataRelaxNodeTypes(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataRelaxNodeOrder(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataRelaxNodeOrder(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataRelaxNodeOrder(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataRelaxNodeOuterWeights(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataRelaxNodeOuterWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataRelaxNodeOuterWeights(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataRelaxNodeWeights(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataRelaxNodeWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataRelaxNodeWeights(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataRelaxEdgeWeights(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataRelaxEdgeWeights(amg_data) = NULL;
-      }
-      if (hypre_ParAMGDataNodeNumSweeps(amg_data))
-      {
-         hypre_TFree(hypre_ParAMGDataNodeNumSweeps(amg_data), HYPRE_MEMORY_HOST);
-         hypre_ParAMGDataNodeNumSweeps(amg_data) = NULL;
       }
 
       hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
@@ -1896,59 +1902,13 @@ hypre_BoomerAMGSetCycleType( void  *data,
       return hypre_error_flag;
    }
 
-   if (cycle_type < 0 || cycle_type > 4)
+   if (cycle_type < 0 || cycle_type > 2)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
    hypre_ParAMGDataCycleType(amg_data) = cycle_type;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetKappaCycleVal( void  *data,
-                             HYPRE_Int    kappa )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (kappa <= 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   hypre_ParAMGDataKappaCycleVal(amg_data) = kappa;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetKappaCycleVal( void  *data,
-                             HYPRE_Int    *kappa )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!kappa)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   *kappa = hypre_ParAMGDataKappaCycleVal(amg_data);
 
    return hypre_error_flag;
 }
@@ -1966,55 +1926,6 @@ hypre_BoomerAMGGetCycleType( void  *data,
    }
 
    *cycle_type = hypre_ParAMGDataCycleType(amg_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetCycleStruct( void  *data,
-                             HYPRE_Int    *cycle_struct,
-                             HYPRE_Int    cycle_num_nodes)
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!cycle_struct)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataCycleStruct(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataCycleStruct(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataCycleStruct(amg_data) = cycle_struct;
-   hypre_ParAMGDataCycleNumNodes(amg_data) = cycle_num_nodes;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetCycleStruct( void  *data,
-                             HYPRE_Int    **cycle_struct,
-                             HYPRE_Int    *cycle_num_nodes)
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *cycle_struct=hypre_ParAMGDataCycleStruct(amg_data);
-   *cycle_num_nodes=hypre_ParAMGDataCycleNumNodes(amg_data);
 
    return hypre_error_flag;
 }
@@ -2173,51 +2084,6 @@ hypre_BoomerAMGSetNumSweeps( void     *data,
    num_grid_sweeps[3] = 1;
 
    hypre_ParAMGDataUserNumSweeps(amg_data) = num_sweeps;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetNodeNumSweeps( void  *data,
-                             HYPRE_Int    *node_num_sweeps )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!node_num_sweeps)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataNodeNumSweeps(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataNodeNumSweeps(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataNodeNumSweeps(amg_data) = node_num_sweeps;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetNodeNumSweeps( void  *data,
-                             HYPRE_Int    **node_num_sweeps )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *node_num_sweeps=hypre_ParAMGDataNodeNumSweeps(amg_data);
 
    return hypre_error_flag;
 }
@@ -2478,78 +2344,6 @@ hypre_BoomerAMGGetRelaxOrder( void     *data,
    return hypre_error_flag;
 }
 
-HYPRE_Int
-hypre_BoomerAMGSetRelaxNodeTypes( void  *data,
-                             HYPRE_Int    *relax_node_types )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!relax_node_types)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxNodeTypes(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataRelaxNodeTypes(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataRelaxNodeTypes(amg_data) = relax_node_types;
-
-   return hypre_error_flag;
-}
-
-
-HYPRE_Int
-hypre_BoomerAMGGetRelaxNodeTypes( void  *data,
-                             HYPRE_Int    **relax_node_types )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *relax_node_types=hypre_ParAMGDataRelaxNodeTypes(amg_data);
-
-   return hypre_error_flag;
-}
-HYPRE_Int
-hypre_BoomerAMGSetRelaxNodeOrder( void  *data,
-                             HYPRE_Int    *relax_node_order )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!relax_node_order)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxNodeOrder(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataRelaxNodeOrder(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataRelaxNodeOrder(amg_data) = relax_node_order;
-
-   return hypre_error_flag;
-}
 
 HYPRE_Int
 hypre_BoomerAMGSetGridRelaxType( void     *data,
@@ -2679,139 +2473,6 @@ hypre_BoomerAMGGetRelaxWeight( void     *data,
       return hypre_error_flag;
    }
    *relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
-
-   return hypre_error_flag;
-}
-HYPRE_Int
-hypre_BoomerAMGSetRelaxNodeOuterWeights( void  *data,
-                             HYPRE_Real    *relax_node_outerweights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!relax_node_outerweights)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxNodeOuterWeights(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataRelaxNodeOuterWeights(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataRelaxNodeOuterWeights(amg_data) = relax_node_outerweights;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetRelaxNodeOuterWeights( void  *data,
-                             HYPRE_Real    **relax_node_outerweights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *relax_node_outerweights=hypre_ParAMGDataRelaxNodeOuterWeights(amg_data);
-
-   return hypre_error_flag;
-}
-HYPRE_Int
-hypre_BoomerAMGSetRelaxNodeWeights( void  *data,
-                             HYPRE_Real    *relax_node_weights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!relax_node_weights)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxNodeWeights(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataRelaxNodeWeights(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataRelaxNodeWeights(amg_data) = relax_node_weights;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetRelaxNodeWeights( void  *data,
-                             HYPRE_Real    **relax_node_weights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *relax_node_weights=hypre_ParAMGDataRelaxNodeWeights(amg_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetRelaxEdgeWeights( void  *data,
-                             HYPRE_Real    *relax_edge_weights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (!relax_edge_weights)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxEdgeWeights(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_ParAMGDataRelaxEdgeWeights(amg_data) = relax_edge_weights;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_BoomerAMGGetRelaxEdgeWeights( void  *data,
-                             HYPRE_Real    **relax_edge_weights )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *relax_edge_weights=hypre_ParAMGDataRelaxEdgeWeights(amg_data);
 
    return hypre_error_flag;
 }
@@ -3143,6 +2804,194 @@ hypre_BoomerAMGGetSmoothNumSweeps( void     *data,
 
    return hypre_error_flag;
 }
+
+/* -------------FLEXIBLE AMG CYCLING FUNCTIONS ------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetCycleStruct( void     *data,
+                                        HYPRE_Int  *cycle_struct_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!cycle_struct_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int num_levels_flexible = 0;
+   HYPRE_Int i = 0;
+   HYPRE_Int lvl = 0;
+
+   while ( cycle_struct_flexible[i] == 0 || // same level
+           cycle_struct_flexible[i] == 1 || // cycle up
+           cycle_struct_flexible[i] == -1 ) // cycle down
+   {
+   lvl += (-cycle_struct_flexible[i]); // depth of the flexible cycle
+   if (lvl > num_levels_flexible)
+   {
+      num_levels_flexible = lvl;
+   }
+   i++;
+   }
+
+   if ((num_levels_flexible <= 0) || (i <= 0))
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataFlexibleCycleStruct(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleCycleStruct(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleCycleStruct(amg_data) = cycle_struct_flexible;
+   hypre_ParAMGDataFlexibleCycleLength(amg_data) = i;
+   hypre_ParAMGDataFlexibleNumLevels(amg_data) = num_levels_flexible;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetRelaxTypes( void     *data,
+                                    HYPRE_Int  *relax_types_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_types_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataFlexibleRelaxTypes(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleRelaxTypes(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleRelaxTypes(amg_data) = relax_types_flexible;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetRelaxOrders( void     *data,
+                                    HYPRE_Int  *relax_orders_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_orders_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataFlexibleRelaxOrders(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleRelaxOrders(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleRelaxOrders(amg_data) = relax_orders_flexible;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetRelaxWeights( void     *data,
+                                    HYPRE_Real  *relax_weights_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_weights_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataFlexibleRelaxWeights(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleRelaxWeights(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleRelaxWeights(amg_data) = relax_weights_flexible;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetOuterWeights( void     *data,
+                                    HYPRE_Real  *outer_weights_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!outer_weights_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataFlexibleOuterWeights(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleOuterWeights(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleOuterWeights(amg_data) = outer_weights_flexible;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGFlexibleSetCGCScalingFactors( void     *data,
+                                    HYPRE_Real  *cgc_scaling_factors_flexible)
+
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!cgc_scaling_factors_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   
+   if (hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data), HYPRE_MEMORY_HOST);
+   }
+   hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data) = cgc_scaling_factors_flexible;
+
+   return hypre_error_flag;
+}
+/*------------------END OF FLEXIBLE AMG CYCLING FUNCTIONS -------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGSetLogging( void     *data,

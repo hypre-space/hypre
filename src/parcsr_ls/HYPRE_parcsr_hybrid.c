@@ -414,75 +414,6 @@ HYPRE_ParCSRHybridSetCycleNumSweeps( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetCycleStruct
- *--------------------------------------------------------------------------*/
-
- HYPRE_Int
- HYPRE_ParCSRHybridSetCycleStruct( HYPRE_Solver solver,
-                               HYPRE_Int      *cycle_struct,
-                               HYPRE_Int      cycle_num_nodes )
- {
-    return ( hypre_AMGHybridSetCycleStruct( (void *) solver, cycle_struct, cycle_num_nodes ) );
- }
-
-/*--------------------------------------------------------------------------
-   * HYPRE_ParCSRHybridSetRelaxNodeTypes
-*--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetRelaxNodeTypes( HYPRE_Solver solver,
-                                      HYPRE_Int   *relax_node_types )
-{
-   return ( hypre_AMGHybridSetRelaxNodeTypes( (void *) solver, relax_node_types ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetRelaxNodeOrder
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetRelaxNodeOrder( HYPRE_Solver solver,
-                                      HYPRE_Int   *relax_node_order )
-{
-   return ( hypre_AMGHybridSetRelaxNodeOrder( (void *) solver, relax_node_order ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetRelaxNodeOuterWeights
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetRelaxNodeOuterWeights( HYPRE_Solver solver,
-                                             HYPRE_Real  *relax_node_outerweights )
-{
-   return ( hypre_AMGHybridSetRelaxNodeOuterWeights( (void *) solver, relax_node_outerweights ) );
-}
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetRelaxNodeWeights
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetRelaxNodeWeights( HYPRE_Solver solver,
-                                         HYPRE_Real  *relax_node_weights )
-{
-   return ( hypre_AMGHybridSetRelaxNodeWeights( (void *) solver, relax_node_weights ) );
-}
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetRelaxEdgeWeights
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetRelaxEdgeWeights( HYPRE_Solver solver,
-                                         HYPRE_Real  *relax_edge_weights )
-{
-   return ( hypre_AMGHybridSetRelaxEdgeWeights( (void *) solver, relax_edge_weights ) );
-}
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetNodeNumSweeps
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_ParCSRHybridSetNodeNumSweeps( HYPRE_Solver solver,
-                                       HYPRE_Int   *node_num_sweeps )
-{
-   return ( hypre_AMGHybridSetNodeNumSweeps( (void *) solver, node_num_sweeps ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetRelaxType
  *--------------------------------------------------------------------------*/
 
@@ -626,6 +557,52 @@ HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
                             HYPRE_Real  *omega    )
 {
    return ( hypre_AMGHybridSetOmega( (void *) solver, omega ) );
+}
+
+/*----------------------------------------------------------------------------------------
+ *                               FLEXIBLE AMG CYCLING
+ *----------------------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetCycleStruct( HYPRE_Solver    solver,
+                                        HYPRE_Int     *cycle_struct_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetCycleStruct( (void *) solver, cycle_struct_flexible ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxTypes( HYPRE_Solver    solver,
+                                     HYPRE_Int    *relax_types_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetRelaxTypes( (void *) solver, relax_types_flexible ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxOrders( HYPRE_Solver    solver,
+                                      HYPRE_Int    *relax_orders_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetRelaxOrders( (void *) solver, relax_orders_flexible ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxWeights( HYPRE_Solver    solver,
+                                       HYPRE_Real   *relax_weights_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetRelaxWeights( (void *) solver, relax_weights_flexible ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetOuterWeights( HYPRE_Solver    solver,
+                                      HYPRE_Real   *outer_weights_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetOuterWeights( (void *) solver, outer_weights_flexible ) );
+}
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors( HYPRE_Solver    solver,
+                                        HYPRE_Real   *cgc_scaling_factors_flexible )
+{
+   return ( hypre_AMGHybridFlexibleSetCGCScalingFactors( (void *) solver, cgc_scaling_factors_flexible ) );
 }
 
 /*--------------------------------------------------------------------------
