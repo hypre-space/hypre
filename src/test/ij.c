@@ -4865,7 +4865,6 @@ main( hypre_int argc,
       //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-      HYPRE_BoomerAMGSetKappaCycleVal(amg_solver, kappa);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);

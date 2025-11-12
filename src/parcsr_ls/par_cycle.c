@@ -65,7 +65,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       cheby_order;
 
    /* Flexible Cycle variables */
-   HYPRE_Int      *is_flexible, cycle_length_flexible, num_levels_flexible;
+   HYPRE_Int      *is_flexible, length_cycle_flexible, num_levels_flexible;
    HYPRE_Int      *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
    HYPRE_Real     *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
    HYPRE_Real     cgc_scaling_factor_tmp;
@@ -159,7 +159,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    num_levels_flexible           = hypre_ParAMGDataFlexibleNumLevels(amg_data);
-   cycle_length_flexible         = hypre_ParAMGDataFlexibleCycleLength(amg_data);
+   length_cycle_flexible         = hypre_ParAMGDataFlexibleCycleLength(amg_data);
    cycle_struct_flexible         = hypre_ParAMGDataFlexibleCycleStruct(amg_data);
    relax_types_flexible          = hypre_ParAMGDataFlexibleRelaxTypes(amg_data);
    relax_orders_flexible         = hypre_ParAMGDataFlexibleRelaxOrders(amg_data);
@@ -706,7 +706,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       if (num_levels_flexible > 0) 
          if (is_flexible[level])
          {
-            if (index == (cycle_length_flexible - 1))
+            if (index == (length_cycle_flexible - 1))
                {
                   Not_Finished=0; 
                   continue;

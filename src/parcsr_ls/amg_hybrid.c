@@ -230,6 +230,8 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          hypre_TFree( (AMGhybrid_data -> dof_func), HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> dof_func) = NULL;
       }
+
+      /**
       if (AMGhybrid_data -> cycle_struct_flexible)
       {
          hypre_TFree( (AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST);
@@ -260,6 +262,7 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          hypre_TFree( (AMGhybrid_data -> cgc_scaling_factors_flexible), HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> cgc_scaling_factors_flexible) = NULL;
       }
+      **/
       
   
       hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
@@ -1513,8 +1516,8 @@ hypre_AMGHybridFlexibleSetCycleStruct( void  *AMGhybrid_vdata,
       hypre_TFree((AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST);
    }
    (AMGhybrid_data -> cycle_struct_flexible) = cycle_struct_flexible;
-   (AMGhybrid_data -> cycle_length_flexible) = i;
-   (AMGhybrid_data -> num_levels_flexible) = num_levels_flexible;
+   (AMGhybrid_data -> length_cycle_flexible) = i + 1;
+   (AMGhybrid_data -> num_levels_flexible) = num_levels_flexible + 1;
 
     return hypre_error_flag;
    }
@@ -2002,7 +2005,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Real        *omega;
    HYPRE_Int         *dof_func;
    /* flexible AMG cycling info */
-   HYPRE_Int         num_levels_flexible, cycle_length_flexible;
+   HYPRE_Int         num_levels_flexible, length_cycle_flexible;
    HYPRE_Int         *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
    HYPRE_Real        *relax_weights_flexible, *outer_weights_flexible, *cgc_scaling_factors_flexible;
 
@@ -2096,7 +2099,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    dof_func = (AMGhybrid_data -> dof_func);
    /* flexible AMG cycling info */
    num_levels_flexible = (AMGhybrid_data -> num_levels_flexible);
-   cycle_length_flexible = (AMGhybrid_data -> cycle_length_flexible);
+   length_cycle_flexible = (AMGhybrid_data -> length_cycle_flexible);
    cycle_struct_flexible = (AMGhybrid_data -> cycle_struct_flexible);
    relax_types_flexible = (AMGhybrid_data -> relax_types_flexible);
    relax_orders_flexible = (AMGhybrid_data -> relax_orders_flexible);
