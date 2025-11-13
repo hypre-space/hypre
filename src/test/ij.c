@@ -4661,7 +4661,7 @@ main( hypre_int argc,
       if (flexible_cycle)
       {
          // set cycle structure from usr inputs 
-         i=0;
+         i = 0;
          HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct);
          HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver,iconfig_ptr[i].relax_node_types);
          HYPRE_ParCSRHybridFlexibleSetRelaxOrders(amg_solver,iconfig_ptr[i].relax_node_order);
@@ -4928,7 +4928,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (flexible_cycle)
-      {
+      {  
+         i = 0;
          // reset the initial guess
          if (build_x0_type == -1)
             HYPRE_ParVectorSetConstantValues(x,0);
