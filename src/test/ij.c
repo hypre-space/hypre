@@ -5058,7 +5058,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStart();
 #endif
-         
+
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
          hypre_BeginTiming(time_index);
 
@@ -6011,7 +6011,7 @@ main( hypre_int argc,
 
       HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-   
+
       HYPRE_ParCSRPCGDestroy(pcg_solver);
 
       if (solver_id == 1)
@@ -6074,16 +6074,16 @@ main( hypre_int argc,
 
          HYPRE_BoomerAMGDestroy(amg_solver);
          HYPRE_MGRDestroy(pcg_precond);
-
-         if (myid == 0)
-         {
-            hypre_printf("\n");
-            hypre_printf("Iterations = %d\n", num_iterations);
-            hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-            hypre_printf("\n");
-         }
-
       }
+
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
+
    }
 
    /* begin lobpcg */
@@ -7659,7 +7659,7 @@ main( hypre_int argc,
       hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-      
+
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
