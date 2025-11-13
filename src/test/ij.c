@@ -5494,22 +5494,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFSAIThreshold(pcg_precond, fsai_threshold);
          HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
-         if (flexible_cycle)
-         {  
-            i = 0;
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-	       HYPRE_ParVectorSetRandomValues(x,0);
-            // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond,iconfig_ptr[i].relax_edge_weights);
-         }
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -5944,7 +5928,22 @@ main( hypre_int argc,
       hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-
+      if (flexible_cycle)
+      {
+         i = 0;
+         // reset the initial guess
+         if (build_x0_type == -1)
+            HYPRE_ParVectorSetConstantValues(x,0);
+         else if (build_x0_type == 1)
+       HYPRE_ParVectorSetRandomValues(x,0);
+         // set cycle structure from usr inputs 
+         HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct);
+         HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
+         HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond,iconfig_ptr[i].relax_node_order);
+         HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
+         HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
+         HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond,iconfig_ptr[i].relax_edge_weights);
+      }
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
       hypre_GpuProfilingPushRange("PCG-Solve-1");
