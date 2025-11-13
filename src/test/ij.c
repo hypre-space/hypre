@@ -763,7 +763,7 @@ main( hypre_int argc,
                len_cycle = i + 1;
                cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle - 1, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle - 1; j++)
                {
                   cycle_struct_flexible[j] = tmp1[j];
                }
@@ -785,7 +785,7 @@ main( hypre_int argc,
                len_cycle = i;
                relax_types_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle; j++)
                {
                   relax_types_flexible[j] = tmp1[j];
                }
@@ -807,7 +807,7 @@ main( hypre_int argc,
                len_cycle = i;
                relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle; j++)
                {
                   relax_orders_flexible[j] = tmp1[j];
                }
@@ -829,7 +829,7 @@ main( hypre_int argc,
                len_cycle = i;
                outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle; j++)
                {
                   outer_weights_flexible[j] = tmp2[j];
                }
@@ -851,7 +851,7 @@ main( hypre_int argc,
                len_cycle = i;
                relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle; j++)
                {
                   relax_weights_flexible[j] = tmp2[j];
                }
@@ -873,7 +873,7 @@ main( hypre_int argc,
                len_cycle = i + 1;
                cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle - 1, HYPRE_MEMORY_HOST);
 
-               for (j = 0; j < length_cycle_flexible; j++)
+               for (j = 0; j < len_cycle - 1; j++)
                {
                   cgc_scaling_factors_flexible[j] = tmp2[j];
                }
