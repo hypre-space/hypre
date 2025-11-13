@@ -113,8 +113,7 @@ typedef struct
    HYPRE_Int      num_levels_flexible, length_cycle_flexible;
    HYPRE_Int     *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
    HYPRE_Real    *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
-
-
+   
    /* problem data */
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
@@ -1665,7 +1664,7 @@ HYPRE_Int hypre_AMGHybridSetInterpType ( void *AMGhybrid_vdata, HYPRE_Int interp
 HYPRE_Int hypre_AMGHybridSetCycleType ( void *AMGhybrid_vdata, HYPRE_Int cycle_type );
 HYPRE_Int hypre_AMGHybridSetNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps );
 HYPRE_Int hypre_AMGHybridSetCycleNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps,
-                                              HYPRE_Int k );                                       
+                                             HYPRE_Int k );
 HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_AMGHybridSetKeepTranspose ( void *AMGhybrid_vdata, HYPRE_Int keepT );
 HYPRE_Int hypre_AMGHybridSetSplittingStrategy( void *AMGhybrid_vdata,
@@ -1688,6 +1687,14 @@ HYPRE_Int hypre_AMGHybridSetLevelRelaxWt ( void *AMGhybrid_vdata, HYPRE_Real rel
 HYPRE_Int hypre_AMGHybridSetOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt );
 HYPRE_Int hypre_AMGHybridSetLevelOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt,
                                            HYPRE_Int level );
+/* flexible AMG cycling parameter setters*/
+HYPRE_Int hypre_AMGHybridFlexibleSetCycleStruct ( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxTypes ( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxOrders ( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetRelaxWeights ( void *AMGhybrid_vdata, HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetOuterWeights ( void *AMGhybrid_vdata, HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_AMGHybridFlexibleSetCGCScalingFactors ( void *AMGhybrid_vdata, HYPRE_Real *cgc_scaling_factors_flexible);
+/* end of flexible AMG cycling parameter setters*/
 HYPRE_Int hypre_AMGHybridSetNumPaths ( void *AMGhybrid_vdata, HYPRE_Int num_paths );
 HYPRE_Int hypre_AMGHybridSetDofFunc ( void *AMGhybrid_vdata, HYPRE_Int *dof_func );
 HYPRE_Int hypre_AMGHybridSetAggNumLevels ( void *AMGhybrid_vdata, HYPRE_Int agg_num_levels );
@@ -1839,7 +1846,7 @@ HYPRE_Int hypre_seqAMGCycle ( hypre_ParAMGData *amg_data, HYPRE_Int p_level,
 HYPRE_Int hypre_GenerateSubComm ( MPI_Comm comm, HYPRE_Int participate, MPI_Comm *new_comm_ptr );
 void hypre_merge_lists ( HYPRE_Int *list1, HYPRE_Int *list2, hypre_int *np1,
                          hypre_MPI_Datatype *dptr );
-                         
+
 /* HYPRE_parcsr_int.c */
 HYPRE_Int hypre_ParSetRandomValues ( void *v, HYPRE_Int seed );
 HYPRE_Int hypre_ParPrintVector ( void *v, const char *file );
@@ -1939,6 +1946,14 @@ HYPRE_Int hypre_BoomerAMGSetSmoothNumLevels ( void *data, HYPRE_Int smooth_num_l
 HYPRE_Int hypre_BoomerAMGGetSmoothNumLevels ( void *data, HYPRE_Int *smooth_num_levels );
 HYPRE_Int hypre_BoomerAMGSetSmoothNumSweeps ( void *data, HYPRE_Int smooth_num_sweeps );
 HYPRE_Int hypre_BoomerAMGGetSmoothNumSweeps ( void *data, HYPRE_Int *smooth_num_sweeps );
+/* flexible AMG cycling parameters setters */
+HYPRE_Int hypre_BoomerAMGFlexibleSetCycleStruct ( void *data, HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxTypes ( void *data, HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxOrders ( void *data, HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetRelaxWeights ( void *data, HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetOuterWeights ( void *data, HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_BoomerAMGFlexibleSetCGCScalingFactors ( void *data, HYPRE_Real *cgc_scaling_factors_flexible);
+/* End of flexible AMG cycling parameters setters */
 HYPRE_Int hypre_BoomerAMGSetLogging ( void *data, HYPRE_Int logging );
 HYPRE_Int hypre_BoomerAMGGetLogging ( void *data, HYPRE_Int *logging );
 HYPRE_Int hypre_BoomerAMGSetPrintLevel ( void *data, HYPRE_Int print_level );

@@ -646,13 +646,9 @@ HYPRE_Int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
                                        HYPRE_Int    num_samples);
 /**
- * (Optional) Defines the type of cycle. For a V-cycle, 
- * set \e cycle_type to 1, for a W-cycle set \e cycle_type 
- * to 2, for \e kappa cycles set \e cycle_type to 3, to 
- * define arbitrary cycle structures set \e cycle_type 
- * to 4. 
- * 
- * The default is 1.
+ * (Optional) Defines the type of cycle.
+ * For a V-cycle, set \e cycle_type to 1, for a W-cycle
+ *  set \e cycle_type to 2. The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
@@ -3880,7 +3876,6 @@ HYPRE_ParCSRHybridSetCycleType(HYPRE_Solver solver,
 /**
  *
  **/
-
 HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxType(HYPRE_Solver  solver,
                                    HYPRE_Int    *grid_relax_type);
@@ -4104,7 +4099,6 @@ HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors( HYPRE_Solver  solver,
                      END OF FLEXIBLE AMG CYCLES
 ---------------------------------------------------------------------------*/
                               
-
 HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);

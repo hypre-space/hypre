@@ -170,7 +170,6 @@ hypre_AMGHybridCreate( void )
    (AMGhybrid_data -> relax_weights_flexible) = NULL;
    (AMGhybrid_data -> cgc_scaling_factors_flexible) = NULL;
    
-
    return (void *) AMGhybrid_data;
 }
 
@@ -231,40 +230,6 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          (AMGhybrid_data -> dof_func) = NULL;
       }
 
-      /**
-      if (AMGhybrid_data -> cycle_struct_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> cycle_struct_flexible) = NULL;
-      }
-      if (AMGhybrid_data -> relax_types_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> relax_types_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> relax_types_flexible) = NULL;
-      }
-      if (AMGhybrid_data -> relax_orders_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> relax_orders_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> relax_orders_flexible) = NULL;
-      }
-      if (AMGhybrid_data -> outer_weights_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> outer_weights_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> outer_weights_flexible) = NULL;
-      }
-      if (AMGhybrid_data -> relax_weights_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> relax_weights_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> relax_weights_flexible) = NULL;
-      }
-      if (AMGhybrid_data -> cgc_scaling_factors_flexible)
-      {
-         hypre_TFree( (AMGhybrid_data -> cgc_scaling_factors_flexible), HYPRE_MEMORY_HOST);
-         (AMGhybrid_data -> cgc_scaling_factors_flexible) = NULL;
-      }
-      **/
-      
-  
       hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
    }
 
@@ -889,7 +854,7 @@ hypre_AMGHybridSetCycleType( void *AMGhybrid_vdata,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   if (cycle_type < 1 || cycle_type > 4)
+   if (cycle_type < 1 || cycle_type > 2)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
@@ -2198,9 +2163,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
-         tt2 = hypre_MPI_Wtime();
-         AMGhybrid_data->solve_time1 = tt2 - tt1;
-	 /*---------------------------------------------------------------------
+         /*---------------------------------------------------------------------
           * Get information for DSCG.
           *---------------------------------------------------------------------*/
          hypre_PCGGetNumIterations(pcg_solver, &dscg_num_its);
@@ -2209,8 +2172,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGGetConverged(pcg_solver, &converged);
 
-
-
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time1 = tt2 - tt1;
       }
       else if (solver_type == 2)
       {
@@ -2523,8 +2486,6 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
          
-	 tt2 = hypre_MPI_Wtime();
-         AMGhybrid_data->solve_time2 = tt2 - tt1;
          /* Get information from PCG that is always logged in AMGhybrid solver*/
          hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
@@ -2534,8 +2495,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             (AMGhybrid_data -> final_rel_res_norm) = res_norm;
          }
 
-
-
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time2 = tt2 - tt1;
       }
       else if (solver_type == 2)
       {

@@ -588,7 +588,6 @@ hypre_BoomerAMGDestroy( void *data )
    if (amg_data)
    {
       HYPRE_Int     num_levels = hypre_ParAMGDataNumLevels(amg_data);
-      HYPRE_Int     cycle_type = hypre_ParAMGDataCycleType(amg_data);
       HYPRE_Int     smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
       HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
       void         *amg = hypre_ParAMGDataCoarseSolver(amg_data);
@@ -2343,7 +2342,6 @@ hypre_BoomerAMGGetRelaxOrder( void     *data,
 
    return hypre_error_flag;
 }
-
 
 HYPRE_Int
 hypre_BoomerAMGSetGridRelaxType( void     *data,

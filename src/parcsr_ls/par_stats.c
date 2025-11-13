@@ -1400,28 +1400,27 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
    /* amg solve params */
-   HYPRE_Int      num_levels;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;
-   HYPRE_Int      fcycle;
-   HYPRE_Int     *num_grid_sweeps;
-   HYPRE_Int     *grid_relax_type;
-   HYPRE_Int    **grid_relax_points;
-   HYPRE_Int      relax_order;
-   HYPRE_Real  *relax_weight;
-   HYPRE_Real  *omega;
-   HYPRE_Real   tol;
-   HYPRE_Int      smooth_type;
-   HYPRE_Int      smooth_num_levels;
-   /* amg output params */
-   HYPRE_Int      amg_print_level;
-   HYPRE_Int      one = 1;
-   HYPRE_Int      minus_one = -1;
-   HYPRE_Int      zero = 0;
-   
-   /* local params */
-   HYPRE_Int      i,j,sum,*bool_print;
+   HYPRE_Int          num_levels;
+   HYPRE_Int          max_iter;
+   HYPRE_Int          cycle_type;
+   HYPRE_Int          fcycle;
+   HYPRE_Int         *num_grid_sweeps;
+   HYPRE_Int         *grid_relax_type;
+   HYPRE_Int        **grid_relax_points;
+   HYPRE_Int          relax_order;
+   HYPRE_Real        *relax_weight;
+   HYPRE_Real        *omega;
+   HYPRE_Real         tol;
+   HYPRE_Int          smooth_type;
+   HYPRE_Int          smooth_num_levels;
 
+   /* amg output params */
+   HYPRE_Int          amg_print_level;
+
+   HYPRE_Int          j;
+   HYPRE_Int          one = 1;
+   HYPRE_Int          minus_one = -1;
+   HYPRE_Int          zero = 0;
 
    /*----------------------------------------------------------
     * Get the amg_data data
@@ -1442,10 +1441,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    tol = hypre_ParAMGDataTol(amg_data);
 
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
-   
-   /*--------------------------------------------------------
-   * allocate memory and initalize local variables
-   *--------------------------------------------------------*/
+
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/

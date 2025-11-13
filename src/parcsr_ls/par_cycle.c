@@ -131,6 +131,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
    fcycle            = hypre_ParAMGDataFCycle(amg_data);
+
    A_block_array     = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array     = hypre_ParAMGDataPBlockArray(amg_data);
    R_block_array     = hypre_ParAMGDataRBlockArray(amg_data);
@@ -156,6 +157,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
    cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
    cheby_order = hypre_ParAMGDataChebyOrder(amg_data);
+
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    num_levels_flexible           = hypre_ParAMGDataFlexibleNumLevels(amg_data);
@@ -168,8 +170,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    cgc_scaling_factors_flexible  = hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data);
 
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   if (cycle_type==4)
-      cycle_type = 1;
+
    if (num_levels_flexible > 0)
       is_flexible = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
@@ -244,14 +245,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    level = 0;
    cycle_param = 1;
 
-   // initialize override cycling
+   // set flags for each level indicating the flexible portion of the cycle
    if (num_levels_flexible > 0)
    {
       for (k=0; k < num_levels; ++k)
       {
-         if (num_levels_flexible < num_levels) // the cycle is composed of: flexible + recursive parts
+         if (num_levels_flexible < num_levels) // the cycle is composed of: a flexible part + a recursive part (V-,W-cycles)
          {
-            if ((k >= 0 && k < num_levels_flexible - 1) || (k == num_levels - 1)) // flexible levels + coarsest level
+            if ((k >= 0 && k < num_levels_flexible - 1) || (k == num_levels - 1)) // flexible levels 
                is_flexible[k] = 1;
             else // recursive levels
                is_flexible[k] = 0;
@@ -698,6 +699,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       /*------------------------------------------------------------------
        * Decrement the control counter and determine which grid to visit next
        *-----------------------------------------------------------------*/
+
       --lev_counter[level];
       
       /*-------------------------------------------
@@ -711,14 +713,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   Not_Finished=0; 
                   continue;
                }
-            else if (cycle_struct_flexible[index] == -1)
+            else if (cycle_struct_flexible[index] == -1) // cycle down
                lev_counter[level]=0;
-            else if (cycle_struct_flexible[index] == 1)
+            else if (cycle_struct_flexible[index] == 1) // cycle up
                {
-                  cgc_scaling_factor_tmp = cgc_scaling_factors_flexible[index]; 
+                  cgc_scaling_factor_tmp = cgc_scaling_factors_flexible[index]; // scaling factor for CGC
                   lev_counter[level] = -1;
                }
-            else if (cycle_struct_flexible[index] == 0)
+            else if (cycle_struct_flexible[index] == 0) // relax again on the same level
                {
                   index++; 
                   continue;
@@ -792,7 +794,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          ++level;
          lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
-
          cycle_param = 1;
          if (level == num_levels - 1)
          {
@@ -820,9 +821,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          
          if (num_levels_flexible > 0)
             if (is_flexible[fine_grid])
-            {
-               alpha = cgc_scaling_factor_tmp;
-            }
+               {
+                  alpha = cgc_scaling_factor_tmp;
+               }
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
