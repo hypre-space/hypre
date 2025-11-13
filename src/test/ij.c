@@ -4927,6 +4927,22 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
+      if (flexible_cycle)
+      {
+         // reset the initial guess
+         if (build_x0_type == -1)
+            HYPRE_ParVectorSetConstantValues(x,0);
+         else if (build_x0_type == 1)
+            HYPRE_ParVectorSetRandomValues(x,0);
+      
+         // set cycle structure from usr inputs 
+         HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct);
+         HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver,iconfig_ptr[i].relax_node_types);
+         HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver,iconfig_ptr[i].relax_node_order);
+         HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
+         HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
+         HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_solver,iconfig_ptr[i].relax_edge_weights);
+      }
       if (ns_down > -1)
       {
          HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
@@ -4997,51 +5013,76 @@ main( hypre_int argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      // loop over input configurations (from evostencils)
-      for (i = 0; i < n_configs; i++)
-      {     
-         // get the initial residual norm
-         if (i==0)
-         {
-            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
-            hypre_ParVectorCopy(b, residual);
-            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
-            init_res_norm = hypre_sqrt(init_res_norm);
-            HYPRE_ParVectorInnerProd( b, b, &b_norm );
-            b_norm = hypre_sqrt( b_norm );
-            if (b_norm == 0)
-               b_norm = 1;       
-            init_res_norm = init_res_norm/b_norm;
-         }
-         if (flexible_cycle)
-         {
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-               HYPRE_ParVectorSetRandomValues(x,0);
-         
-            // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_solver,iconfig_ptr[i].relax_edge_weights);
-         }
+      if (solver_id == 0)
+      {
+         time_index = hypre_InitializeTiming("BoomerAMG Solve");
+      }
+      else if (solver_id == 90)
+      {
+         time_index = hypre_InitializeTiming("BoomerAMG-DD Solve");
+      }
+      hypre_BeginTiming(time_index);
+
+      hypre_GpuProfilingPushRange("AMG-Solve-1");
+
+      if (solver_id == 0)
+      {
+         HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+      }
+      else if (solver_id == 90)
+      {
+         HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
+      }
+
+      hypre_GpuProfilingPopRange();
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
+
+      if (second_time)
+      {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
+         HYPRE_SetExecutionPolicy(exec2_policy);
+
+         /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+         hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
+         hypre_ParVectorCopy(x0_save, x);
+
+#if defined(HYPRE_USING_CUDA)
+         cudaProfilerStart();
+#endif
+         time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
+         hypre_BeginTiming(time_index);
+
+         hypre_GpuProfilingPushRange("AMG-Setup-2");
+
          if (solver_id == 0)
          {
-            time_index = hypre_InitializeTiming("BoomerAMG Solve");
+            HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
          }
          else if (solver_id == 90)
          {
-            time_index = hypre_InitializeTiming("BoomerAMG-DD Solve");
+            HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
          }
+
+         hypre_GpuProfilingPopRange();
+
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Setup phase times", comm);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
          hypre_BeginTiming(time_index);
-   
-         hypre_GpuProfilingPushRange("AMG-Solve-1");
-   
+
+         hypre_GpuProfilingPushRange("AMG-Solve-2");
+
          if (solver_id == 0)
          {
             HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
@@ -5050,108 +5091,46 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
          }
-   
+
          hypre_GpuProfilingPopRange();
-   
+
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", comm);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
-         HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
-         if (second_time)
-         {
-            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
-            HYPRE_SetExecutionPolicy(exec2_policy);
-   
-            /* run a second time [for timings, to check for memory leaks] */
-            HYPRE_ParVectorSetRandomValues(x, 775);
-   #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-            hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
-   #endif
-            hypre_ParVectorCopy(x0_save, x);
-   
-   #if defined(HYPRE_USING_CUDA)
-            cudaProfilerStart();
-   #endif
-   
-            time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
-            hypre_BeginTiming(time_index);
-   
-            hypre_GpuProfilingPushRange("AMG-Setup-2");
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
+#if defined(HYPRE_USING_CUDA)
+         cudaProfilerStop();
+#endif
+      }
 
-            if (solver_id == 0)
-            {
-               HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
-            }
-            else if (solver_id == 90)
-            {
-               HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
-            }
-   
-            hypre_GpuProfilingPopRange();
-   
-            hypre_EndTiming(time_index);
-            hypre_PrintTiming("Setup phase times", comm);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-   
-            time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
-            hypre_BeginTiming(time_index);
-   
-            hypre_GpuProfilingPushRange("AMG-Solve-2");
-            if (solver_id == 0)
-            {
-               HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-            }
-            else if (solver_id == 90)
-            {
-               HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
-            }
-   
-            hypre_GpuProfilingPopRange();
-   
-            hypre_EndTiming(time_index);
-            hypre_PrintTiming("Solve phase times", comm);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-   
-            HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
-   #if defined(HYPRE_USING_CUDA)
-            cudaProfilerStop();
-   #endif
-         }
+      if (solver_id == 0)
+      {
+         HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
+         HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
+      }
+      else if (solver_id == 90)
+      {
+         HYPRE_BoomerAMGDDGetNumIterations(amgdd_solver, &num_iterations);
+         HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm(amgdd_solver, &final_res_norm);
+      }
 
+      if (myid == 0)
+      {
+         hypre_printf("\n");
          if (solver_id == 0)
          {
-            HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
-            HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
+            hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
          }
          else if (solver_id == 90)
          {
-            HYPRE_BoomerAMGDDGetNumIterations(amgdd_solver, &num_iterations);
-            HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm(amgdd_solver, &final_res_norm);
+            hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
          }
-
-         if (myid == 0)
-         {
-            hypre_printf("\n");
-            if (solver_id == 0)
-            {
-               hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
-            }
-            else if (solver_id == 90)
-            {
-               hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
-            }
-            hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-            if (flexible_cycle) 
-            {
-               hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
-            }
-            hypre_printf("\n");
-         }
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
+
       if (solver_id == 0)
       {
          HYPRE_BoomerAMGDestroy(amg_solver);
@@ -5161,7 +5140,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDDestroy(amgdd_solver);
       }
       if (flexible_cycle)
+      {
          hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
+      }
+         iconfig_ptr = NULL;  
    }
 
    /*-----------------------------------------------------------
