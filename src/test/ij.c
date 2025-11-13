@@ -168,8 +168,6 @@ main( hypre_int argc,
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          b_dot_b;
-   HYPRE_Real          init_res_norm=1.0;
-   HYPRE_Real          b_norm=1.0;
    HYPRE_Real          final_res_norm;
    void               *object;
 
@@ -255,19 +253,6 @@ main( hypre_int argc,
    /* solve -Ax = b, for testing SND matrices */
    HYPRE_Int           negA = 0;
 
-   /* input configurations (from evostencils) */
-   struct Config {
-   // constructor
-   HYPRE_Int *cycle_struct;
-   HYPRE_Int *relax_node_types;
-   HYPRE_Int *relax_node_order;
-   HYPRE_Int *node_num_sweeps;
-   HYPRE_Int cycle_num_nodes;
-   HYPRE_Real *relax_node_outerweights;
-   HYPRE_Real *relax_node_weights;
-   HYPRE_Real *relax_edge_weights;
-   } *iconfig_ptr;
-
    HYPRE_Int n_configs=1;
    char *token[8], *subtoken;
    char *config_str;
@@ -287,9 +272,12 @@ main( hypre_int argc,
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type;
+   /* flexible cycling params*/
    HYPRE_Int      flexible_cycle = 0;
-   HYPRE_Int      *cycle_struct,*relax_node_types, *relax_node_order, *node_num_sweeps,cycle_num_nodes;
-   HYPRE_Real     *relax_node_outerweights, *relax_node_weights,*relax_edge_weights;
+   HYPRE_Int      length_cycle_flexible;
+   HYPRE_Int      *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
+   HYPRE_Real     *relax_weights_flexible, *outer_weights_flexible, *cgc_scaling_factors_flexible;
+   /* end of flexible cycling params*/
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
    HYPRE_Int      measure_type = 0;
@@ -757,94 +745,71 @@ main( hypre_int argc,
          arg_index++;
          flexible_cycle = 1;
          n_configs = atoi(argv[arg_index++]);
+         n_configs = 1;
 
-         // check if the number of input configurations is valid
-         if (n_configs < 1)
+         // read the input configuration
+         config_str = argv[arg_index++];
+         token[0] = strtok(config_str, "/");
+         for (j=1;j<8;j++)
+            token[j] = strtok(NULL, "/");
+         length_cycle_flexible = atoi(token[0]);
+         // allocate memory for the member variables
+         cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int,  length_cycle_flexible - 1, HYPRE_MEMORY_HOST);
+         relax_types_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
+         relax_orders_flexible = hypre_CTAlloc(HYPRE_Int,  length_cycle_flexible, HYPRE_MEMORY_HOST);
+         outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
+         relax_weights_flexible = hypre_CTAlloc(HYPRE_Real,  length_cycle_flexible, HYPRE_MEMORY_HOST);
+         cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real,  length_cycle_flexible - 1, HYPRE_MEMORY_HOST);
+            
+         // parse the cycle structure array values
+         subtoken = strtok(token[1], ",");
+         for (j = 0; j < length_cycle_flexible - 1; j++)
          {
-            hypre_printf("Error: Invalid number of input configurations!\n");
-            exit(1);
+            cycle_struct_flexible[j] = atoi(subtoken);
+            subtoken = strtok(NULL, ",");
+         }
+         // parse the relaxation types array values
+         subtoken = strtok(token[2], ",");
+         for (j = 0; j < length_cycle_flexible; j++)
+         {
+            relax_types_flexible[j] = atoi(subtoken);
+            subtoken = strtok(NULL, ",");
+         }
+         // parse the number of sweeps array values
+         subtoken = strtok(token[3], ",");
+         for (j = 0; j < length_cycle_flexible; j++)
+         {
+            subtoken = strtok(NULL, ",");
          }
 
-         // allocate memory for the input configurations
-         iconfig_ptr = hypre_CTAlloc(struct Config,  n_configs, HYPRE_MEMORY_HOST);
-
-         // parse the input configurations
-         for (i=0;i<n_configs;i++)
+         // parse the relax order array values
+         subtoken = strtok(token[4], ",");
+         for (j = 0; j < length_cycle_flexible; j++)
          {
-            
-            // check if this is a argument value and not a switch
-            if (argv[arg_index][0] == '-')
-            {
-               hypre_printf("Error: Invalid input configuration!\n");
-               exit(1);
-            }
-            // read the input configuration
-            config_str = argv[arg_index++];
-            token[0] = strtok(config_str, "/");
-            for (j=1;j<8;j++)
-               token[j] = strtok(NULL, "/");
-            iconfig_ptr[i].cycle_num_nodes = atoi(token[0]);
-            // allocate memory for the member variables
-            iconfig_ptr[i].cycle_struct = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].relax_node_types = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].node_num_sweeps = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].relax_node_order = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].relax_node_outerweights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].relax_node_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
-            iconfig_ptr[i].relax_edge_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
-            
-            // parse the cycle structure array values
-            subtoken = strtok(token[1], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes-1;j++)
-            {
-               iconfig_ptr[i].cycle_struct[j] = atoi(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-            // parse the relaxation types array values
-            subtoken = strtok(token[2], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
-            {
-               iconfig_ptr[i].relax_node_types[j] = atoi(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-            // parse the number of sweeps array values
-            subtoken = strtok(token[3], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
-            {
-               iconfig_ptr[i].node_num_sweeps[j] = atoi(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
+            relax_orders_flexible[j] = atoi(subtoken);
+            subtoken = strtok(NULL, ",");
+         }
 
-            // parse the relax order array values
-            subtoken = strtok(token[4], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
-            {
-               iconfig_ptr[i].relax_node_order[j] = atoi(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-
-            // parse the outer relaxation weights array values
-            subtoken = strtok(token[5], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
-            {
-               iconfig_ptr[i].relax_node_outerweights[j] = atof(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-            // parse the relaxation smoother weights array values
-            subtoken = strtok(token[6], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
-            {
-               iconfig_ptr[i].relax_node_weights[j] = atof(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-            // parse the relaxation cgc weights array values
-            subtoken = strtok(token[7], ",");
-            for (j=0;j<iconfig_ptr[i].cycle_num_nodes-1;j++)
-            {
-               iconfig_ptr[i].relax_edge_weights[j] = atof(subtoken);
-               subtoken = strtok(NULL, ",");
-            }
-
+         // parse the outer relaxation weights array values
+         subtoken = strtok(token[5], ",");
+         for (j = 0; j < length_cycle_flexible; j++)
+         {
+            outer_weights_flexible[j] = atof(subtoken);
+            subtoken = strtok(NULL, ",");
+         }
+         // parse the relaxation smoother weights array values
+         subtoken = strtok(token[6], ",");
+         for (j = 0; j < length_cycle_flexible; j++)
+         {
+            relax_weights_flexible[j] = atof(subtoken);
+            subtoken = strtok(NULL, ",");
+         }
+         // parse the relaxation cgc weights array values
+         subtoken = strtok(token[7], ",");
+         for (j = 0; j < length_cycle_flexible - 1; j++)
+         {
+            cgc_scaling_factors_flexible[j] = atof(subtoken);
+            subtoken = strtok(NULL, ",");
          }
       }
       else if ( strcmp(argv[arg_index], "-auxfromfile") == 0 )
@@ -4662,12 +4627,12 @@ main( hypre_int argc,
       {
          // set cycle structure from usr inputs 
          i = 0;
-         HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct);
-         HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver,iconfig_ptr[i].relax_node_types);
-         HYPRE_ParCSRHybridFlexibleSetRelaxOrders(amg_solver,iconfig_ptr[i].relax_node_order);
-         HYPRE_ParCSRHybridFlexibleSetOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
-         HYPRE_ParCSRHybridFlexibleSetRelaxWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
-         HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors(amg_solver,iconfig_ptr[i].relax_edge_weights);
+         HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
+         HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
+         HYPRE_ParCSRHybridFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
+         HYPRE_ParCSRHybridFlexibleSetOuterWeights(amg_solver, outer_weights_flexible);
+         HYPRE_ParCSRHybridFlexibleSetRelaxWeights(amg_solver, relax_weights_flexible);
+         HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (level_w > -1)
       {
@@ -4759,8 +4724,6 @@ main( hypre_int argc,
       }
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
-      if (flexible_cycle)
-         hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -4937,12 +4900,12 @@ main( hypre_int argc,
             HYPRE_ParVectorSetRandomValues(x,0);
       
          // set cycle structure from usr inputs 
-         HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct);
-         HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver,iconfig_ptr[i].relax_node_types);
-         HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver,iconfig_ptr[i].relax_node_order);
-         HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
-         HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
-         HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_solver,iconfig_ptr[i].relax_edge_weights);
+         HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
+         HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
+         HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
+         HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_solver, outer_weights_flexible);
+         HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_solver, relax_weights_flexible);
+         HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (ns_down > -1)
       {
@@ -5141,11 +5104,6 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDDDestroy(amgdd_solver);
       }
-      if (flexible_cycle)
-      {
-         hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
-      }
-         iconfig_ptr = NULL;  
    }
 
    /*-----------------------------------------------------------
@@ -5503,12 +5461,12 @@ main( hypre_int argc,
             else if (build_x0_type == 1)
           HYPRE_ParVectorSetRandomValues(x,0);
             // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond,iconfig_ptr[i].relax_edge_weights);
+            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond, cycle_struct_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond, relax_types_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond, relax_orders_flexible);
+            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond, outer_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond, relax_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
          }
          if (num_functions > 1)
          {
@@ -6017,8 +5975,6 @@ main( hypre_int argc,
       if (solver_id == 1)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
-         if (flexible_cycle)
-            hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
       }
       else if (solver_id == 8)
       {
@@ -7502,12 +7458,12 @@ main( hypre_int argc,
             else if (build_x0_type == 1)
                HYPRE_ParVectorSetRandomValues(x,0);
             // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond,iconfig_ptr[i].relax_edge_weights);
+            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond, cycle_struct_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond, relax_types_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond, relax_orders_flexible);
+            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond, outer_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond, relax_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
          }
          if (num_functions > 1)
          {
@@ -7743,8 +7699,6 @@ main( hypre_int argc,
       if (solver_id == 3)
       {
          HYPRE_BoomerAMGDestroy(amg_precond);
-         if (flexible_cycle)
-            hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
       }
       else if (solver_id == 15)
       {
