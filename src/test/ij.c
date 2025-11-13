@@ -286,7 +286,7 @@ main( hypre_int argc,
    HYPRE_Real     CR_strong_th = 0.0;
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
-   HYPRE_Int      cycle_type = 1;
+   HYPRE_Int      cycle_type;
    HYPRE_Int      flexible_cycle = 0;
    HYPRE_Int      *cycle_struct,*relax_node_types, *relax_node_order, *node_num_sweeps,cycle_num_nodes;
    HYPRE_Real     *relax_node_outerweights, *relax_node_weights,*relax_edge_weights;
@@ -328,9 +328,6 @@ main( hypre_int argc,
    HYPRE_Int    dslu_threshold = -1;
 #endif
    HYPRE_Real   relax_wt;
-   HYPRE_Real   *rlxwts;
-   HYPRE_Int    n_rlxwts = 0;
-   HYPRE_Int    *rlxlvls;
    HYPRE_Real   add_relax_wt = 1.0;
    HYPRE_Real   relax_wt_level = 0.0;
    HYPRE_Real   outer_wt;
@@ -415,7 +412,6 @@ main( hypre_int argc,
    HYPRE_Real   agg_P12_trunc_factor  = 0; /* default value */
 
    HYPRE_Int    print_system = 0;
-   HYPRE_Int    print_solution = 0;
    HYPRE_Int    print_system_binary = 0;
    HYPRE_Int    print_system_csr = 0;
    HYPRE_Int    rel_change = 0;
@@ -1850,6 +1846,7 @@ main( hypre_int argc,
       filter_thresholdR = 0.00;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
+      cycle_type = 1;
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
@@ -1916,25 +1913,6 @@ main( hypre_int argc,
          arg_index++;
          relax_wt_level = (HYPRE_Real)atof(argv[arg_index++]);
          level_w = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-wls") == 0 )
-      {
-         arg_index++;
-         // get number of rlx weights
-         n_rlxwts = atoi(argv[arg_index++]);
-         
-         // allocate memory for rlxwts and rlxlvls
-         rlxwts = hypre_CTAlloc(HYPRE_Real, n_rlxwts, HYPRE_MEMORY_HOST);
-         rlxlvls = hypre_CTAlloc(HYPRE_Int, n_rlxwts, HYPRE_MEMORY_HOST);
-
-         // get relaxation weight and level until next flag
-         i=0;
-         while( arg_index < argc && argv[arg_index][0] != '-' )
-         {
-            rlxwts[i] = (HYPRE_Real)atof(argv[arg_index++]);
-            rlxlvls[i] = atoi(argv[arg_index++]);
-            i++;
-         }
       }
       else if ( strcmp(argv[arg_index], "-ow") == 0 )
       {
@@ -2352,11 +2330,6 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
-      }
-      else if (strcmp(argv[arg_index], "-printsolution")==0)
-      {
-         arg_index++;
-         print_solution = 1;
       }
       else if ( strcmp(argv[arg_index], "-printbin") == 0 )
       {
@@ -4904,13 +4877,6 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGSetLevelOuterWt(amg_solver, outer_wt_level, level_ow);
       }
-      if (n_rlxwts > 0)
-      {
-         for (i=0 ; i< n_rlxwts ; i++)
-         {
-            HYPRE_BoomerAMGSetLevelRelaxWt(amg_solver, rlxwts[i], rlxlvls[i]);
-         }
-      }
       HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
       HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
       HYPRE_BoomerAMGSetSmoothNumLevels(amg_solver, smooth_num_levels);
@@ -5196,11 +5162,6 @@ main( hypre_int argc,
       }
       if (flexible_cycle)
          hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
-      if (n_rlxwts > 0)
-      {
-         hypre_TFree(rlxwts, HYPRE_MEMORY_HOST);
-         hypre_TFree(rlxlvls, HYPRE_MEMORY_HOST);
-      }
    }
 
    /*-----------------------------------------------------------
@@ -5498,13 +5459,6 @@ main( hypre_int argc,
          if (level_ow > -1)
          {
             HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
-         }
-         if (n_rlxwts > 0)
-         {
-            for (i=0 ; i< n_rlxwts ; i++)
-            {
-               HYPRE_BoomerAMGSetLevelRelaxWt(amg_solver, rlxwts[i], rlxlvls[i]);
-            }
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -6108,11 +6062,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDestroy(pcg_precond);
          if (flexible_cycle)
             hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
-         if (n_rlxwts > 0)
-         {
-            hypre_TFree(rlxwts, HYPRE_MEMORY_HOST);
-            hypre_TFree(rlxlvls, HYPRE_MEMORY_HOST);
-         }
       }
       else if (solver_id == 8)
       {
