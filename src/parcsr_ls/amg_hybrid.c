@@ -229,7 +229,6 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          hypre_TFree( (AMGhybrid_data -> dof_func), HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> dof_func) = NULL;
       }
-
       hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
    }
 
@@ -2485,7 +2484,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          tt1 = tt2;
 
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
-         
+
          /* Get information from PCG that is always logged in AMGhybrid solver*/
          hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;

@@ -2803,7 +2803,7 @@ hypre_BoomerAMGGetSmoothNumSweeps( void     *data,
    return hypre_error_flag;
 }
 
-/* -------------FLEXIBLE AMG CYCLING FUNCTIONS ------------------------------*/
+/* -------------FLEXIBLE AMG CYCLING SETTERS------------------------------*/
 HYPRE_Int
 hypre_BoomerAMGFlexibleSetCycleStruct( void     *data,
                                         HYPRE_Int  *cycle_struct_flexible)
@@ -2989,7 +2989,7 @@ hypre_BoomerAMGFlexibleSetCGCScalingFactors( void     *data,
 
    return hypre_error_flag;
 }
-/*------------------END OF FLEXIBLE AMG CYCLING FUNCTIONS -------------------*/
+/*------------------END OF FLEXIBLE AMG CYCLING SETTERS-------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGSetLogging( void     *data,

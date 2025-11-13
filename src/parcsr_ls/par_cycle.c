@@ -819,6 +819,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          alpha = 1.0;
          beta = 1.0;
          
+         // set scaling factor for coarse-grid correction in flexible cycles
          if (num_levels_flexible > 0)
             if (is_flexible[fine_grid])
                {
