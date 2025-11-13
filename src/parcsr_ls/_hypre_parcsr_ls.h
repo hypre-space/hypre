@@ -3081,14 +3081,13 @@ HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetLevelPMaxElmts( void *mgr_vdata, HYPRE_Int *P_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRDataPrint(void *mgr_vdata);
-#ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
 HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
-#endif
+
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
@@ -3182,6 +3181,7 @@ HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
 HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );
+const char* hypre_ILUGetName( void *ilu_vdata );
 HYPRE_Int hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil );
 HYPRE_Int hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax );
 HYPRE_Int hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold );
