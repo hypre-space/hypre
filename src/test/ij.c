@@ -5058,6 +5058,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStart();
 #endif
+         
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
          hypre_BeginTiming(time_index);
 
@@ -5889,6 +5890,22 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
             HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
+         if (flexible_cycle)
+         {  
+            i = 0;
+            // reset the initial guess
+            if (build_x0_type == -1)
+               HYPRE_ParVectorSetConstantValues(x,0);
+            else if (build_x0_type == 1)
+	       HYPRE_ParVectorSetRandomValues(x,0);
+            // set cycle structure from usr inputs 
+            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct);
+            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond,iconfig_ptr[i].relax_node_order);
+            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
+            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
+            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond,iconfig_ptr[i].relax_edge_weights);
+         }
          HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
@@ -5928,38 +5945,6 @@ main( hypre_int argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      // loop over amg precond input configurations (from evostencils)
-      for (i = 0; i < n_configs; i++)
-      {     
-         // get the initial residual norm
-         if (i==0)
-         {
-            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
-            hypre_ParVectorCopy(b, residual);
-            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
-            init_res_norm = hypre_sqrt(init_res_norm);
-            HYPRE_ParVectorInnerProd( b, b, &b_norm );
-            b_norm = hypre_sqrt( b_norm );
-            if (b_norm == 0)
-               b_norm = 1;       
-            init_res_norm = init_res_norm/b_norm;
-         }
-         if (flexible_cycle)
-         {
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-	       HYPRE_ParVectorSetRandomValues(x,0);
-            // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond,iconfig_ptr[i].relax_edge_weights);
-         }
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
       hypre_GpuProfilingPushRange("PCG-Solve-1");
@@ -6026,18 +6011,7 @@ main( hypre_int argc,
 
       HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-      if (myid == 0)
-      {
-         hypre_printf("\n");
-         hypre_printf("Iterations = %d\n", num_iterations);
-         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         if (flexible_cycle)
-         {
-         hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
-         }
-         hypre_printf("\n");
-      }
-   }
+   
       HYPRE_ParCSRPCGDestroy(pcg_solver);
 
       if (solver_id == 1)
@@ -6100,6 +6074,15 @@ main( hypre_int argc,
 
          HYPRE_BoomerAMGDestroy(amg_solver);
          HYPRE_MGRDestroy(pcg_precond);
+
+         if (myid == 0)
+         {
+            hypre_printf("\n");
+            hypre_printf("Iterations = %d\n", num_iterations);
+            hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+            hypre_printf("\n");
+         }
+
       }
    }
 
@@ -7510,6 +7493,22 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
+         if (flexible_cycle)
+         {
+            i = 0;
+            // reset the initial guess
+            if (build_x0_type == -1)
+               HYPRE_ParVectorSetConstantValues(x,0);
+            else if (build_x0_type == 1)
+               HYPRE_ParVectorSetRandomValues(x,0);
+            // set cycle structure from usr inputs 
+            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond,iconfig_ptr[i].cycle_struct);
+            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond,iconfig_ptr[i].relax_node_order);
+            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond,iconfig_ptr[i].relax_node_outerweights);
+            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond,iconfig_ptr[i].relax_node_weights);
+            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond,iconfig_ptr[i].relax_edge_weights);
+         }
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -7661,38 +7660,6 @@ main( hypre_int argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
       
-      // loop over amg precond input configurations (from evostencils)
-      for (i = 0; i < n_configs; i++)
-      {     
-         // get the initial residual norm
-         if (i==0)
-         {
-            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
-            hypre_ParVectorCopy(b, residual);
-            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
-	    init_res_norm = hypre_sqrt(init_res_norm);
-	    HYPRE_ParVectorInnerProd( b, b, &b_norm );
-	    b_norm = hypre_sqrt( b_norm );
-            if (b_norm == 0)
-               b_norm = 1;       
-            init_res_norm = init_res_norm/b_norm;
-         }
-         if (flexible_cycle)
-         {
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-               HYPRE_ParVectorSetRandomValues(x,0);
-            // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond,iconfig_ptr[i].cycle_struct);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond,iconfig_ptr[i].relax_node_outerweights);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond,iconfig_ptr[i].relax_node_weights);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond,iconfig_ptr[i].relax_edge_weights);
-         }
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
@@ -7770,18 +7737,7 @@ main( hypre_int argc,
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-      if (myid == 0)
-      {
-         hypre_printf("\n");
-         hypre_printf("GMRES Iterations = %d\n", num_iterations);
-         hypre_printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
-         if (flexible_cycle) 
-         {
-            hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
-         }
-         hypre_printf("\n");
-      }
-   }
+
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
 
       if (solver_id == 3)
@@ -7819,6 +7775,13 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDDestroy(pcg_precond);
       }
 
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("GMRES Iterations = %d\n", num_iterations);
+         hypre_printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
    }
    /*-----------------------------------------------------------
     * Solve the system using LGMRES
