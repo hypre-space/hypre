@@ -4720,8 +4720,6 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
       if (flexible_cycle)
       {
-         // set cycle structure from usr inputs 
-         i = 0;
          HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
          HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
          HYPRE_ParCSRHybridFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
@@ -4987,14 +4985,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (flexible_cycle)
       {  
-         i = 0;
-         // reset the initial guess
-         if (build_x0_type == -1)
-            HYPRE_ParVectorSetConstantValues(x,0);
-         else if (build_x0_type == 1)
-            HYPRE_ParVectorSetRandomValues(x,0);
-      
-         // set cycle structure from usr inputs 
          HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
          HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
          HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
@@ -5549,13 +5539,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (flexible_cycle)
          {
-            i = 0;
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-          HYPRE_ParVectorSetRandomValues(x,0);
-            // set cycle structure from usr inputs 
             HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond, cycle_struct_flexible);
             HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond, relax_types_flexible);
             HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond, relax_orders_flexible);
@@ -7342,6 +7325,15 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetDofFunc(amg_precond, dof_func);
             free_dof_func = 0;
          }
+         if (flexible_cycle)
+         {
+            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond, cycle_struct_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond, relax_types_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond, relax_orders_flexible);
+            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond, outer_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond, relax_weights_flexible);
+            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
+         }
          HYPRE_BoomerAMGSetAdditive(amg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(amg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(amg_precond, simple);
@@ -7544,22 +7536,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
-         if (flexible_cycle)
-         {
-            i = 0;
-            // reset the initial guess
-            if (build_x0_type == -1)
-               HYPRE_ParVectorSetConstantValues(x,0);
-            else if (build_x0_type == 1)
-               HYPRE_ParVectorSetRandomValues(x,0);
-            // set cycle structure from usr inputs 
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond, cycle_struct_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond, relax_types_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond, relax_orders_flexible);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond, outer_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond, relax_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
-         }
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
