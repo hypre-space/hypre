@@ -157,7 +157,7 @@ hypre_RealArrayCopy_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocatio
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_GetActualMemLocation(location_y));
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(location_y);
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -320,7 +320,7 @@ hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision pr
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Not Implemented!\n");
 /*
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_GetActualMemLocation(location));
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(location);
       
       hypre_long_double d_alpha = (hypre_long_double)(*alpha);
 
@@ -340,7 +340,7 @@ hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision pr
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_GetActualMemLocation(location));
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(location);
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

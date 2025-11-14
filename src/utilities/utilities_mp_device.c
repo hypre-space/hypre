@@ -12,6 +12,8 @@
  *****************************************************************************/
  
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
+#include "_hypre_onedpl.hpp"
  
 #if defined(HYPRE_MIXED_PRECISION)
 
@@ -123,7 +125,7 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
                   hypre_double *yp = (hypre_double *)y;
 
 #if defined(HYPRE_USING_GPU)
-                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_float)a, 1.0);
+                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_float)alpha, 1.0);
                   hypre_SyncComputeStream();
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    		  HYPRE_Int i;
@@ -150,7 +152,7 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
                   hypre_float *yp = (hypre_float *)y;
                   
 #if defined(HYPRE_USING_GPU)
-                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)a, 1.0f);
+                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
                   hypre_SyncComputeStream(); 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    		  HYPRE_Int i;
