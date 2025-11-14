@@ -7,8 +7,8 @@
 
 /******************************************************************************
  *
- * Header file for HYPRE_parcsr_mv librarys
- *s
+ * Header file for Mixed-precision HYPRE_parcsr_mv_mp library
+ *
  *****************************************************************************/
 
 #ifndef HYPRE_PARCSR_MV_MP_HEADER

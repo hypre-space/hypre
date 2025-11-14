@@ -82,7 +82,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    local_num_rows  = (HYPRE_Int) (row_starts[1] - first_row_index);
    first_col_diag  = col_starts[0];
    local_num_cols  = (HYPRE_Int) (col_starts[1] - first_col_diag);
-printf("nnzdiag = %d, nnzoffd = %d, numcols = %d \n", num_nonzeros_diag, num_nonzeros_offd, local_num_cols);
+
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixDiag(matrix) =
       hypre_CSRMatrixCreate(local_num_rows, local_num_cols, num_nonzeros_diag);

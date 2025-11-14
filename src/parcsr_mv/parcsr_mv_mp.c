@@ -115,7 +115,7 @@ hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
    {
       return hypre_ParCSRMatrixCopy_pre( hypre_ParCSRMatrixPrecision(A), A, B, 1 );
    }
-printf("888888888888888888888888888\n");
+
    A_diag = hypre_ParCSRMatrixDiag(A);
    A_offd = hypre_ParCSRMatrixOffd(A);
    B_diag = hypre_ParCSRMatrixDiag(B);
