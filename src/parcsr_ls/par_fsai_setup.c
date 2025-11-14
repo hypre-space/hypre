@@ -1080,8 +1080,8 @@ hypre_FSAIPrintStats( void *fsai_vdata,
    /* Compute density */
    hypre_ParCSRMatrixSetDNumNonzeros(G);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
-   density = hypre_ParCSRMatrixDNumNonzeros(G) /
-             hypre_ParCSRMatrixDNumNonzeros(A);
+   density = (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(G) /
+             hypre_ParCSRMatrixDNumNonzeros(A));
    hypre_ParFSAIDataDensity(fsai_data) = density;
 
    if (!my_id)

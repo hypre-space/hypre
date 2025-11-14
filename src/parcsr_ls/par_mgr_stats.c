@@ -674,23 +674,23 @@ hypre_MGRSetupStats(void *mgr_vdata)
             }
 
             gridcomp[i] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[k]);
-            opcomp[i]   += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
-            memcomp[i]  += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
+            opcomp[i]   += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
+            memcomp[i]  += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
             if (k < (num_sublevels_amg[i] - 1))
             {
-               memcomp[i] += hypre_ParCSRMatrixDNumNonzeros(P_array[k]) +
-                             hypre_ParCSRMatrixDNumNonzeros(RT_array[k]);
+               memcomp[i] += (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(P_array[k]) +
+                             hypre_ParCSRMatrixDNumNonzeros(RT_array[k]));
             }
          }
          gridcomp[num_levels_mgr + 1] += gridcomp[i];
          opcomp[num_levels_mgr + 1]   += opcomp[i] /
-                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
+                                         (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += memcomp[i] /
-                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
+                                         (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_finest);
 
          gridcomp[i] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
-         opcomp[i]   /= hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
-         memcomp[i]  /= hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
+         opcomp[i]   /= (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
+         memcomp[i]  /= (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
       }
       else
       {
@@ -701,10 +701,10 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
          A_array[i] = hypre_ParMGRDataA(mgr_data, i);
          gridcomp[num_levels_mgr + 1] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
-         opcomp[num_levels_mgr + 1]   += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
-         memcomp[num_levels_mgr + 1]  += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
+         opcomp[num_levels_mgr + 1]   += (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest));
+         memcomp[num_levels_mgr + 1]  += (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest));
       }
    }
    gridcomp[num_levels_mgr + 1] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_finest);
