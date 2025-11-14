@@ -78,13 +78,15 @@ CUFILES=\
  int_array_device.c\
  memory.c\
  omp_device.c\
- stl_ops.c
+ stl_ops.c\
+ utilities_mp_device.c
 
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c
+ mup_pre.c\
+ utilities_mp.c
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c

@@ -1668,6 +1668,50 @@ hypreDevice_ComplexAxpyzn( HYPRE_Int       n,
    return hypreDevice_Axpyzn(n, d_x, d_y, d_z, a, b);
 }
 
+/*--------------------------------------------------------------------
+ * Mixed-precision hypreGPUKernel_Axpyzn_mp
+ * Lifts or drops x and y to precision of z.
+ *--------------------------------------------------------------------*/
+
+template<typename T1, typename T2, typename T3>
+__global__ void
+hypreGPUKernel_Axpyzn_mp( hypre_DeviceItem &item,
+                       HYPRE_Int         n,
+                       T1                *x,
+                       T2                *y,
+                       T3                *z,
+                       T1       	 a,
+                       T2       	 b )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      z[i] = static_cast<T3>(a * x[i]) + static_cast<T3>(b * y[i]);
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_Axpyzn_mp
+ *--------------------------------------------------------------------*/
+
+template<typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
+{
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_Axpyzn_mp, gDim, bDim, n, d_x, d_y, d_z, a, b );
+
+   return hypre_error_flag;
+}
+
 #if defined(HYPRE_USING_CURAND)
 
 /*--------------------------------------------------------------------
@@ -3078,3 +3122,42 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
+
+/*--------------------------------------------------------------------------
+ * hypreDevice_ComplexDeviceArrayAxpyn
+ *--------------------------------------------------------------------------*/
+/*
+HYPRE_Int
+hypreDevice_ComplexDeviceArrayAxpyn( HYPRE_Complex alpha,
+                           HYPRE_Complex *x,
+                           HYPRE_Complex *y,
+                           HYPRE_Int n )
+{
+
+#if defined(HYPRE_USING_GPU)
+
+#if ( defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) ) && defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()),
+                                        n, &alpha, x, 1, y, 1) );
+#elif defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
+                                              n, alpha, x, 1, y, 1).wait() );
+#else
+   hypreDevice_ComplexAxpyn(x, n, y, y, alpha);
+#endif
+
+   hypre_SyncComputeStream();
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int i;
+
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y, x)
+   for (i = 0; i < n; i++)
+   {
+      y[i] += alpha * x[i];
+   }
+#endif
+
+   return hypre_error_flag;
+}
+*/

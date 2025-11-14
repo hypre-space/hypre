@@ -265,3 +265,11 @@ hypre_ConvertIndicesToString(HYPRE_Int  size,
 
    return string;
 }
+
+/*--------------------------------------------------------------------------*
+* hypre_GetSizeOfPrecision: get size of precision type
+*--------------------------------------------------------------------------*/
+size_t hypre_GetSizeOfPrecision(void)
+{
+   return sizeof(HYPRE_Real);
+}

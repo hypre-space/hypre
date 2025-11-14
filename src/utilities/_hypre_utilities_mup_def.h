@@ -49,6 +49,7 @@
 #define HYPRE_SetUseGpuRand HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetUseGpuRand )
 #define HYPRE_Version HYPRE_MULTIPRECISION_FUNC ( HYPRE_Version )
 #define HYPRE_VersionNumber HYPRE_MULTIPRECISION_FUNC ( HYPRE_VersionNumber )
+#define hypre_GetSizeOfPrecision HYPRE_MULTIPRECISION_FUNC ( hypre_GetSizeOfPrecision )
 #define hypre_BeginTiming_fcn HYPRE_FIXEDPRECISION_FUNC ( hypre_BeginTiming_fcn )
 #define hypre_BigBinarySearch HYPRE_FIXEDPRECISION_FUNC ( hypre_BigBinarySearch )
 #define hypre_BigLowerBound HYPRE_FIXEDPRECISION_FUNC ( hypre_BigLowerBound )
