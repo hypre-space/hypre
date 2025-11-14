@@ -32,4 +32,4 @@ HYPRE_SetSpTransUseVendor
 HYPRE_SetUseGpuRand
 HYPRE_Version
 HYPRE_VersionNumber
-hypre_GetSizeOfPrecision
+hypre_GetSizeOfReal

@@ -46,7 +46,7 @@
 #undef HYPRE_SetUseGpuRand
 #undef HYPRE_Version
 #undef HYPRE_VersionNumber
-#undef hypre_GetSizeOfPrecision
+#undef hypre_GetSizeOfReal
 #undef hypre_BeginTiming_fcn
 #undef hypre_BigBinarySearch
 #undef hypre_BigLowerBound

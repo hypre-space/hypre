@@ -133,7 +133,7 @@ hypre_RealArrayCopy_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocatio
    void               *xp = NULL;
 
    /* get sizeof x data */
-   sizeof_x = hypre_GetSizeOfPrecision_pre(precision_x);
+   sizeof_x = hypre_GetSizeOfReal_pre(precision_x);
    
    nbytes = n * sizeof_x;
    /* Call standard memory copy if precisions match. */
@@ -192,7 +192,7 @@ hypre_RealArrayClone_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocati
    size_t	  sizeof_y;
 
    /* get sizeof new_precision data */
-   sizeof_y = hypre_GetSizeOfPrecision_pre(new_precision); 
+   sizeof_y = hypre_GetSizeOfReal_pre(new_precision); 
    /* Allocate memory for cloned data */
    y = hypre_CAlloc(n, sizeof_y, new_location);
 
