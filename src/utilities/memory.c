@@ -1721,7 +1721,7 @@ hypre_umpire_host_pooled_realloc(void *ptr, size_t size)
  * hypre_umpire_device_pooled_allocate
  *--------------------------------------------------------------------------*/
 #include "umpire/Umpire.hpp"
-#include "umpire/strategy/NamedAllocationStrategy.hpp"
+#include "umpire/strategy/QuickPool.hpp"
 #include "umpire/util/MemoryResourceTraits.hpp"
 #include "umpire/ResourceManager.hpp"
 
@@ -1751,26 +1751,31 @@ hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
    }
    else
    {
+/* #if defined(HYPRE_USING_SYCL) */
+      /* WM: the code below doesn't work... I get:  Allocator with name "DEVICE::0" is already registered */
+      /* umpire::ResourceManager *rm = static_cast<umpire::ResourceManager *>(rm_ptr->addr); */
+      /* auto traits{umpire::get_default_resource_traits(resource_name)}; */
+      /* traits.queue = hypre_HandleComputeStream(hypre_handle()); */
+      /* auto resource_allocator{rm->makeResource(resource_name, traits)}; */
+      /* umpire::Allocator *pooled_allocator_obj_ptr = new umpire::Allocator; */
+      /* *pooled_allocator_obj_ptr = rm->makeAllocator<umpire::strategy::QuickPool>( */
+      /*     resource_name, resource_allocator, hypre_HandleUmpireDevicePoolSize(handle), hypre_HandleUmpireBlockSize(handle)); */
+      /* pooled_allocator.addr = (void *) pooled_allocator_obj_ptr; */
+      /* pooled_allocator.idtor = 1; */
+/* #else */
       umpire_allocator allocator;
-#if defined(HYPRE_USING_SYCL)
-      umpire::ResourceManager *rm = static_cast<umpire::ResourceManager *>(rm_ptr->addr);
-      auto traits{umpire::get_default_resource_traits(resource_name)};
-      traits.queue = hypre_HandleComputeStream(hypre_handle());
-      auto sycl_allocator{rm->makeResource(resource_name, traits)};
-      allocator.addr = (void*)&sycl_allocator;
-#else
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-#endif
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpireDevicePoolSize(handle),
                                                        hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+/* #endif */
 
       hypre_HandleOwnUmpireDevicePool(handle) = 1;
    }
 
-   umpire::Allocator *pooled_allocator_obj = static_cast<umpire::Allocator *>(pooled_allocator.addr);
-   hypre_printf("WM: debug - allocator queue = %p\n", pooled_allocator_obj->getAllocationStrategy()->getTraits().queue);
-   hypre_printf("WM: debug - hypre queue = %p\n", hypre_HandleComputeStream(hypre_handle()));
+   /* umpire::Allocator *pooled_allocator_obj = static_cast<umpire::Allocator *>(pooled_allocator.addr); */
+   /* hypre_printf("WM: debug - allocator queue = %p\n", pooled_allocator_obj->getAllocationStrategy()->getTraits().queue); */
+   /* hypre_printf("WM: debug - hypre queue = %p\n", hypre_HandleComputeStream(hypre_handle())); */
    *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
 
    return hypre_error_flag;
