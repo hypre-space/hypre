@@ -140,33 +140,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
    HYPRE_Int      size        = hypre_VectorSize(x);
    HYPRE_Int      total_size  = size * num_vectors;
 
-#if defined(HYPRE_USING_GPU)
-
-#if ( defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) ) && defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()),
-                                        total_size, &alpha, x_data, 1,
-                                        y_data, 1) );
-#elif defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
-                                              total_size, alpha,
-                                              x_data, 1, y_data, 1).wait() );
-#else
-   hypreDevice_ComplexAxpyn(x_data, total_size, y_data, y_data, alpha);
-#endif
-
-   hypre_SyncComputeStream();
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int i;
-
-   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
-   for (i = 0; i < total_size; i++)
-   {
-      y_data[i] += alpha * x_data[i];
-   }
-#endif
-
-   return hypre_error_flag;
+   return hypreDevice_ComplexDeviceArrayAxpyn(alpha, x_data, y_data, total_size);
 }
 
 /*--------------------------------------------------------------------------

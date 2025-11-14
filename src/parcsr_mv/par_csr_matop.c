@@ -4872,7 +4872,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixColMapOffd(Anew) = col_map_offd_A_new;
 
    hypre_ParCSRMatrixSetNumNonzeros(Anew);
-   hypre_ParCSRMatrixDNumNonzeros(Anew) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(Anew);
+   hypre_ParCSRMatrixDNumNonzeros(Anew) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(Anew);
    //printf("nnz_diag %d --> %d, nnz_offd %d --> %d\n", nnz_diag, nnz_diag_new, nnz_offd, nnz_offd_new);
 
    /* create CommPkg of Anew */
@@ -5346,7 +5346,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    hypre_ParCSRMatrixOffd(C) = C_offd;
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
    hypre_ParCSRMatrixSetNumNonzeros(C);
-   hypre_ParCSRMatrixDNumNonzeros(C) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(C);
+   hypre_ParCSRMatrixDNumNonzeros(C) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(C);
 
    /* create CommPkg of C */
    hypre_MatvecCommPkgCreate(C);
@@ -6001,7 +6001,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixColMapOffd(B) = col_map_offd_B;
 
    hypre_ParCSRMatrixSetNumNonzeros(B);
-   hypre_ParCSRMatrixDNumNonzeros(B) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(B);
+   hypre_ParCSRMatrixDNumNonzeros(B) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(B);
 
    hypre_MatvecCommPkgCreate(B);
 
@@ -6145,7 +6145,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixNumNonzeros(A_diag) = nnz_diag;
    hypre_CSRMatrixNumNonzeros(A_offd) = nnz_offd;
    hypre_ParCSRMatrixSetNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(A) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A);
 
    for (i = 0, k = 0; i < num_cols_A_offd; i++)
    {

@@ -39,3 +39,7 @@ HYPRE_ParVectorScale
 HYPRE_ParVectorSetConstantValues
 HYPRE_ParVectorSetRandomValues
 HYPRE_VectorToParVector
+hypre_ParCSRMatrixClone
+hypre_ParCSRMatrixCopy
+hypre_ParCSRMatrixCreate
+hypre_ParCSRMatrixInitialize_v2

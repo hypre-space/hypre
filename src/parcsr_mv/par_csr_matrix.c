@@ -82,7 +82,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    local_num_rows  = (HYPRE_Int) (row_starts[1] - first_row_index);
    first_col_diag  = col_starts[0];
    local_num_cols  = (HYPRE_Int) (col_starts[1] - first_col_diag);
-
+printf("nnzdiag = %d, nnzoffd = %d, numcols = %d \n", num_nonzeros_diag, num_nonzeros_offd, local_num_cols);
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixDiag(matrix) =
       hypre_CSRMatrixCreate(local_num_rows, local_num_cols, num_nonzeros_diag);
@@ -279,7 +279,7 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(S) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(S) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A);
 
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
@@ -377,7 +377,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix,
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                           HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-      hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+      hypre_ParCSRMatrixDNumNonzeros(matrix) = (hypre_double)total_num_nonzeros;
    }
    else
    {
@@ -2694,7 +2694,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
 }
 
 /*--------------------------------------------------------------------------
- * copies a ParCSR matrix B to A.
+ * copies a ParCSR matrix A to B.
  * If copy_data = 0, only the structure of A is copied to B
  * the routine does not check whether the dimensions of A and B are compatible
  *--------------------------------------------------------------------------*/

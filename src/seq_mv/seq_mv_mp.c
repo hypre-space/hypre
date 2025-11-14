@@ -22,8 +22,7 @@
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * Mixed precision hypre_SeqVectorCopy -- TODO: Needs GPU support - DOK
- * copies data from x to y
+ * Mixed precision hypre_SeqVectorCopy
  * if size of x is larger than y only the first size_y elements of x are
  * copied to y
  *--------------------------------------------------------------------------*/
@@ -31,190 +30,56 @@ HYPRE_Int
 hypre_SeqVectorCopy_mp( hypre_Vector *x,
                         hypre_Vector *y )
 {
-   /*
-   #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
-   #endif
-
-      hypre_GpuProfilingPushRange("SeqVectorCopy");
-   */
-   /* determine type of output vector data  ==> Precision of y. */
-   HYPRE_Precision precision_y = hypre_VectorPrecision (y);
-
-   HYPRE_Int      i;
-
+   HYPRE_Int      size;
    /* Generic pointer type */
    void               *xp, *yp;
 
    /* Call standard vector copy if precisions match. */
-   if (precision_y == hypre_VectorPrecision (x))
+   if (hypre_VectorPrecision (y) == hypre_VectorPrecision (x))
    {
-      return HYPRE_VectorCopy_pre(precision_y, (HYPRE_Vector)x, (HYPRE_Vector)y);
+      return HYPRE_VectorCopy_pre(hypre_VectorPrecision (y), (HYPRE_Vector)x, (HYPRE_Vector)y);
    }
 
-   HYPRE_Int size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
+   size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
 
-   /* Implicit conversion to generic data type (void pointer) */
    xp = hypre_VectorData(x);
    yp = hypre_VectorData(y);
-
-   switch (hypre_VectorPrecision (x))
-   {
-      case HYPRE_REAL_SINGLE:
-         switch (precision_y)
-         {
-            case HYPRE_REAL_DOUBLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_double *)yp)[i] = (hypre_double)((hypre_float *)xp)[i];
-               }
-               break;
-            case HYPRE_REAL_LONGDOUBLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_long_double *)yp)[i] = (hypre_long_double)((hypre_float *)xp)[i];
-               }
-               break;
-            default:
-               break;
-         }
-         break;
-      case HYPRE_REAL_DOUBLE:
-         switch (precision_y)
-         {
-            case HYPRE_REAL_SINGLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_float *)yp)[i] = (hypre_float)((hypre_double *)xp)[i];
-               }
-               break;
-            case HYPRE_REAL_LONGDOUBLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_long_double *)yp)[i] = (hypre_long_double)((hypre_double *)xp)[i];
-               }
-               break;
-            default:
-               break;
-         }
-         break;
-      case HYPRE_REAL_LONGDOUBLE:
-         switch (precision_y)
-         {
-            case HYPRE_REAL_SINGLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_float *)yp)[i] = (hypre_float)((hypre_long_double *)xp)[i];
-               }
-               break;
-            case HYPRE_REAL_DOUBLE:
-#ifdef HYPRE_USING_OPENMP
-               #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-               for (i = 0; i < size; i++)
-               {
-                  ((hypre_double *)yp)[i] = (hypre_double)((hypre_long_double *)xp)[i];
-               }
-               break;
-            default:
-               break;
-         }
-         break;
-      default:
-         hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
-         break;
-   }
-
-   /*
-   #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
-   #endif
-      hypre_GpuProfilingPopRange();
-   */
+   /* copy data */
+   hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(y),
+   			  hypre_VectorPrecision (y), yp, hypre_VectorMemoryLocation(y), size);
+   
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * Mixed-precision hypre_SeqVectorAxpy -- TODO: Needs GPU support - DOK
+ * Mixed-precision hypre_SeqVectorAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorAxpy_mp( hypre_double alpha,
+hypre_SeqVectorAxpy_mp( hypre_long_double alpha,
                         hypre_Vector *x,
                         hypre_Vector *y     )
 {
-   /*
-   #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
-   #endif
-   */
-   /* determine type of output vector data  ==> Precision of y. */
-   HYPRE_Precision precision = hypre_VectorPrecision (y);
-
    void               *xp, *yp;
 
    HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Int      i;
+
+   /* Call standard vector axpy if precisions match. */
+   if (hypre_VectorPrecision (y) == hypre_VectorPrecision (x))
+   {
+      return HYPRE_VectorAxpy_pre(hypre_VectorPrecision (y), alpha, (HYPRE_Vector)x, (HYPRE_Vector)y);
+   }
 
    size *= hypre_VectorNumVectors(x);
 
    /* Implicit conversion to generic data type (void pointer) */
    xp = hypre_VectorData(x);
    yp = hypre_VectorData(y);
-
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < size; i++)
-         {
-            ((hypre_float *)yp)[i] += (hypre_float)(alpha * ((hypre_double *)xp)[i]);
-         }
-         break;
-      case HYPRE_REAL_DOUBLE:
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < size; i++)
-         {
-            ((hypre_double *)yp)[i] += (hypre_double)(alpha * ((hypre_float *)xp)[i]);
-         }
-         break;
-      case HYPRE_REAL_LONGDOUBLE:
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < size; i++)
-         {
-            ((hypre_long_double *)yp)[i] += (hypre_long_double)(alpha * ((hypre_double *)xp)[i]);
-         }
-         break;
-      default:
-         hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
-   }
-   /*
-   #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
-   #endif
-   */
-   return hypre_error_flag;
+   
+   /* Call mixed-precision axpy on vector data */
+   return hypre_RealArrayAxpyn_mp(hypre_VectorPrecision (x), xp, hypre_VectorPrecision (y), yp,
+		        hypre_VectorMemoryLocation(y), size, alpha);
 }
 
 /*--------------------------------------------------------------------------
@@ -225,129 +90,31 @@ HYPRE_Int
 hypre_SeqVectorConvert_mp (hypre_Vector *v,
                            HYPRE_Precision new_precision)
 {
-   HYPRE_Precision precision = hypre_VectorPrecision (v);
+   HYPRE_Precision data_precision = hypre_VectorPrecision (v);
    void *data = hypre_VectorData(v);
    void *data_mp = NULL;
-   HYPRE_Int size = hypre_VectorSize(v);
-   HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(v);
+   HYPRE_Int size = hypre_VectorSize(v) * hypre_VectorNumVectors(v);
+
+   HYPRE_MemoryLocation data_location = hypre_VectorMemoryLocation(v);
    HYPRE_Int i;
 
-   if (new_precision == precision)
+   if (new_precision == data_precision)
    {
       return hypre_error_flag;
    }
    else
    {
-      switch (precision)
-      {
-         case HYPRE_REAL_SINGLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_DOUBLE:
-               {
-                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double),
-                                                           memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_float *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_LONGDOUBLE:
-               {
-                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double),
-                                                                memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_float *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         case HYPRE_REAL_DOUBLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_SINGLE:
-               {
-                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_double *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_LONGDOUBLE:
-               {
-                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double),
-                                                                memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_double *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         case HYPRE_REAL_LONGDOUBLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_SINGLE:
-               {
-                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_long_double *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_DOUBLE:
-               {
-                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double),
-                                                           memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_long_double *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         default:
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
-      hypre_Free(data, memory_location);
-      hypre_VectorData(v) = data_mp;
+      /* clone vector data and convert to new precision type */
+      data_mp = hypre_RealArrayClone_mp(data_precision, data, data_location, new_precision, data_location, size);
+
+      /* reset data pointer for vector */
+      hypre_SeqVectorSetData_pre(new_precision, v, data_mp);
+      /* Note:
+       * SeqVectorSetData() frees old vector data and resets ownership to 0.
+       * We need to set data ownership here to ensure new data memory is cleaned up later.
+       */
+      hypre_SeqVectorSetDataOwner(v, 1);
+      /* Update precision */
       hypre_VectorPrecision(v) = new_precision;
    }
    return hypre_error_flag;
@@ -355,138 +122,112 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
 
 /*--------------------------------------------------------------------------
  * Convert precision in a mixed precision matrix
+ *
+ * 1. Save matrix data pointer
+ * 2. Set the matrix data pointer to NULL
+ * 3. Call ResetData() to allocate new data in new precision
+ * 4. Copy data
+ * 5. Free pointer to old data  and update precision
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
                            HYPRE_Precision new_precision)
 {
-   HYPRE_Precision precision = hypre_CSRMatrixPrecision (A);
-   void *data = hypre_CSRMatrixData(A);
-   void *data_mp = NULL;
+   HYPRE_Precision data_precision = hypre_CSRMatrixPrecision (A);
+   void *data, *data_mp;
    HYPRE_Int size = hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)];
-   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation data_location = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_Int i;
 
-   if (new_precision == precision)
+   if (new_precision == data_precision)
    {
       return hypre_error_flag;
    }
    else
    {
-      switch (precision)
-      {
-         case HYPRE_REAL_SINGLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_DOUBLE:
-               {
-                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double),
-                                                           memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_float *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_LONGDOUBLE:
-               {
-                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double),
-                                                                memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_float *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         case HYPRE_REAL_DOUBLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_SINGLE:
-               {
-                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_double *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_LONGDOUBLE:
-               {
-                  data_mp = (hypre_long_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_long_double),
-                                                                memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_long_double *)data_mp)[i] = (hypre_long_double) ((hypre_double *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         case HYPRE_REAL_LONGDOUBLE:
-         {
-            switch (new_precision)
-            {
-               case HYPRE_REAL_SINGLE:
-               {
-                  data_mp = (hypre_float *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_float *)data_mp)[i] = (hypre_float) ((hypre_long_double *) data)[i];
-                  }
-               }
-               break;
-               case HYPRE_REAL_DOUBLE:
-               {
-                  data_mp = (hypre_double *) hypre_CAlloc ((size_t)size, (size_t)sizeof(hypre_double),
-                                                           memory_location);
-#ifdef HYPRE_USING_OPENMP
-                  #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-                  for (i = 0; i < size; i++)
-                  {
-                     ((hypre_double *)data_mp)[i] = (hypre_double) ((hypre_long_double *) data)[i];
-                  }
-               }
-               break;
-               default:
-                  hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-            }
-         }
-         break;
-         default:
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
-      hypre_Free(data, memory_location);
-      hypre_CSRMatrixData(A) = data_mp;
+      /* Set pointer to current data */
+      data = hypre_CSRMatrixData(A);
+      /* Set matrix data pointer to NULL */
+      hypre_CSRMatrixData(A) = NULL;
+      
+      /* reset matrix A's data storage to match new precision */
+      hypre_CSRMatrixResetData_pre(new_precision, A);
+
+      /* copy data to newly reset storage */
+      data_mp = hypre_CSRMatrixData(A);
+      hypre_RealArrayCopy_mp(data_precision, data, data_location,
+   			  new_precision, data_mp, data_location, size);
+
+      /* Now free old data */
+      hypre_Free(data, data_location);
+      /* Update precision */
       hypre_CSRMatrixPrecision(A) = new_precision;
    }
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Mixed precision matrix copy.
+ * NOTE: This copies the entire matrix and not just the structure.
+ *	 For structure only, use hypre_CSRMatrixCopy(A, B, 0);
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B)
+{
+   HYPRE_Precision precision_A = hypre_CSRMatrixPrecision (A);
+   HYPRE_Precision precision_B = hypre_CSRMatrixPrecision (B);
+   HYPRE_Int size = hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)];
+   
+   /* Implicit conversion to generic data type (void pointer) */
+   void *Ap = hypre_CSRMatrixData(A);
+   void *Bp = hypre_CSRMatrixData(B);
+
+   /* Call standard vector copy if precisions match. */
+   if (precision_A == precision_B)
+   {
+      hypre_CSRMatrixCopy_pre(precision_A, A, B, 1);
+   }
+   
+   /* Copy structure of A to B.
+    * Note: We are only copying structure here so we 
+    *       can use the default function call
+   */
+   hypre_CSRMatrixCopy(A, B, 0);
+      
+   /* Now copy data from A to B */
+   hypre_RealArrayCopy_mp(precision_A, Ap, hypre_CSRMatrixMemoryLocation(A),
+   			  precision_B, Bp, hypre_CSRMatrixMemoryLocation(B), size); 
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixClone_mp
+ * Clone matrix A to a new_precision matrix at the same memory location.
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix*
+hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision )
+{
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   
+   HYPRE_Precision precision_A = hypre_CSRMatrixPrecision (A);
+   hypre_CSRMatrix *B = NULL;
+
+   HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;
+
+   /* Create and initialize new matrix B in new precision */
+   B = hypre_CSRMatrixCreate_pre(new_precision, num_rows, num_cols, num_nonzeros);
+   hypre_CSRMatrixInitialize_v2_pre(new_precision, B, bigInit, memory_location);   
+
+   /* Call mixed-precision copy */
+   hypre_CSRMatrixCopy_mp(A, B);
+
+   return B;
 }
 
 #endif
