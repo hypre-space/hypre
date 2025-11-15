@@ -125,7 +125,6 @@ hypre_RealArrayCopy_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocatio
 
    hypre_GpuProfilingPushRange("RealArrayCopy");
 
-   HYPRE_Int      i;
    HYPRE_Int	  nbytes;
    size_t	  sizeof_x;
 
@@ -311,8 +310,6 @@ hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision pr
 #endif
 
    hypre_GpuProfilingPushRange("RealArrayAxpyn");
-
-   HYPRE_Int      i;
 
    /* Call standard memory copy if precisions match. */
    if (precision_x == precision_y)

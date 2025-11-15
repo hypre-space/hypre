@@ -63,7 +63,6 @@ hypre_SeqVectorAxpy_mp( hypre_long_double alpha,
    void               *xp, *yp;
 
    HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Int      i;
 
    /* Call standard vector axpy if precisions match. */
    if (hypre_VectorPrecision (y) == hypre_VectorPrecision (x))
@@ -96,7 +95,6 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
    HYPRE_Int size = hypre_VectorSize(v) * hypre_VectorNumVectors(v);
 
    HYPRE_MemoryLocation data_location = hypre_VectorMemoryLocation(v);
-   HYPRE_Int i;
 
    if (new_precision == data_precision)
    {
@@ -138,7 +136,6 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
    void *data, *data_mp;
    HYPRE_Int size = hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)];
    HYPRE_MemoryLocation data_location = hypre_CSRMatrixMemoryLocation(A);
-   HYPRE_Int i;
 
    if (new_precision == data_precision)
    {
@@ -215,7 +212,6 @@ hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision )
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
    
-   HYPRE_Precision precision_A = hypre_CSRMatrixPrecision (A);
    hypre_CSRMatrix *B = NULL;
 
    HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;

@@ -17,6 +17,7 @@
  
 #if defined(HYPRE_MIXED_PRECISION)
 
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 /*--------------------------------------------------------------------------*
 * hypre_RealArrayCopyDevice_mp: copy n array contents from x to y.
 * Assumes arrays x and y are both on device memory.
@@ -152,16 +153,17 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
                   hypre_float *yp = (hypre_float *)y;
                   
 #if defined(HYPRE_USING_GPU)
+                  
                   hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
                   hypre_SyncComputeStream(); 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
-   		  HYPRE_Int i;
+   		         HYPRE_Int i;
 
-		  #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
-   		  for (i = 0; i < n; i++)
-   		  {
-      		     yp[i] += static_cast<hypre_float>((hypre_double)alpha * xp[i]);      		     
-   		  }
+		            #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
+   		         for (i = 0; i < n; i++)
+   		         {
+      		         yp[i] += static_cast<hypre_float>((hypre_double)alpha * xp[i]);      		     
+   		         }
 #endif
                }
                break;
@@ -177,5 +179,6 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
    return hypre_error_flag;
 }
 
-#endif
+#endif // HYPRE_USING_GPU || HYPRE_USING_DEVICE_OPENMP
+#endif // HYPRE_MIXED_PRECISION
  
