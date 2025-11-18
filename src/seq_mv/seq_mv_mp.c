@@ -183,7 +183,7 @@ hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B)
    /* Call standard vector copy if precisions match. */
    if (precision_A == precision_B)
    {
-      hypre_CSRMatrixCopy_pre(precision_A, A, B, 1);
+      return hypre_CSRMatrixCopy_pre(precision_A, A, B, 1);
    }
    
    /* Copy structure of A to B.

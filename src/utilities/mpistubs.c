@@ -887,31 +887,6 @@ hypre_MPI_Op_free( hypre_MPI_Op *op )
    return (0);
 }
 
-#if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
-{
-   HYPRE_UNUSED_VAR(comm);
-   HYPRE_UNUSED_VAR(split_type);
-   HYPRE_UNUSED_VAR(key);
-   HYPRE_UNUSED_VAR(info);
-   HYPRE_UNUSED_VAR(newcomm);
-   return (0);
-}
-
-HYPRE_Int hypre_MPI_Info_create( hypre_MPI_Info *info )
-{
-   HYPRE_UNUSED_VAR(info);
-   return (0);
-}
-
-HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
-{
-   HYPRE_UNUSED_VAR(info);
-   return (0);
-}
-#endif
-
 HYPRE_Int
 hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
                            HYPRE_Int        num_recvs,
@@ -1652,27 +1627,6 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
 {
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
-
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int
-hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                           hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
-{
-   return (HYPRE_Int) MPI_Comm_split_type(comm, split_type, key, info, newcomm );
-}
-
-HYPRE_Int
-hypre_MPI_Info_create( hypre_MPI_Info *info )
-{
-   return (HYPRE_Int) MPI_Info_create(info);
-}
-
-HYPRE_Int
-hypre_MPI_Info_free( hypre_MPI_Info *info )
-{
-   return (HYPRE_Int) MPI_Info_free(info);
-}
-#endif
 
 HYPRE_Int
 hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,

@@ -78,7 +78,9 @@ CUFILES=\
  int_array_device.c\
  memory.c\
  omp_device.c\
- stl_ops.c\
+ stl_ops.c
+ 
+MP_CUFILES=\
  utilities_mp_device.c
 
 # Mixed precision files
@@ -107,9 +109,10 @@ CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
+MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
 
 endif
 

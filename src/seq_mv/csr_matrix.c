@@ -1544,31 +1544,6 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix      *A,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE) ||\
-    defined(HYPRE_USING_ONEMKLSPARSE)
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixGetGPUMatData
- *--------------------------------------------------------------------------*/
-
-hypre_GpuMatData*
-hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
-{
-   if (!matrix)
-   {
-      return NULL;
-   }
-
-   if (!hypre_CSRMatrixGPUMatData(matrix))
-   {
-      hypre_CSRMatrixGPUMatData(matrix) = hypre_GpuMatDataCreate();
-      hypre_GPUMatDataSetCSRData(matrix);
-   }
-
-   return hypre_CSRMatrixGPUMatData(matrix);
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixSetData
  * Reinitialize matrix data array

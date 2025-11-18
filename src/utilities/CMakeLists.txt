@@ -50,7 +50,6 @@ set(REGULAR_SRCS
   memory_tracker.c
   merge_sort.c
   mmio.c
-  omp_device.c
   prefix_sum.c
   qsort.c
   unique.c
