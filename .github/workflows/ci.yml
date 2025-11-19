@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  require-label:
+    name: Require Run CI label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Ensure Run CI label is present
+        env:
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'Run CI') }}
+        run: |
+          if [ "${HAS_LABEL}" != "true" ]; then
+            echo "::error::Add the 'Run CI' label to this pull request to trigger CI."
+            exit 1
+          fi
+        shell: bash
+
+  build-and-check:
+    name: Build & Check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [[ "${RUNNER_OS}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y mpich
+          else
+            brew update
+            brew install open-mpi
+          fi
+
+      - name: Configure (Debug)
+        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run check target
+        run: cmake --build build --target check
+
