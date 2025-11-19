@@ -2291,15 +2291,4 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-/* mpistubs device calls */
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#define MPI_Comm_split_type hypre_MPI_Comm_split_type
-#define MPI_Info_create     hypre_MPI_Info_create
-#define MPI_Info_free     hypre_MPI_Info_free
-HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                                    hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
-HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
-HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
-#endif
-
 #endif /* #ifndef HYPRE_DEVICE_UTILS_H */

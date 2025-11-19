@@ -273,3 +273,6 @@ utilities_FortranMatrixValuePtr
 utilities_FortranMatrixValues
 utilities_FortranMatrixWidth
 utilities_FortranMatrixWrap
+hypre_MPI_Comm_split_type
+hypre_MPI_Info_create
+hypre_MPI_Info_free
