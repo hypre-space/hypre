@@ -5,6 +5,8 @@ on:
     branches: ["master"]
   pull_request:
     branches: ["**"]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+  workflow_dispatch:
 
 jobs:
   require-label:
