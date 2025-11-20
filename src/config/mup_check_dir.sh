@@ -15,6 +15,8 @@
 
 scriptdir=`dirname $0`
 
+BUILD_TYPE=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+
 # Check if terminal supports colors
 if [ -t 1 ]; then
     # Use colors
@@ -30,7 +32,16 @@ fi
 
 export LC_COLLATE=C  # sort by listing capital letters first
 
-cat mup.fixed mup.functions mup.methods | sort | uniq  > mup_check.old
+
+if [ "$BUILD_TYPE" = "GPU" ]; then
+    cat mup.fixed mup.fixed.gpu \
+        mup.functions mup.functions.gpu \
+        mup.methods mup.methods.gpu \
+        | sort | uniq  > mup_check.old
+else
+    cat mup.fixed mup.functions mup.methods | sort | uniq  > mup_check.old
+fi
+
 $scriptdir/generate_function_list.sh    | sort | uniq  > mup_check.new
 
 # Remove functions listed in mup.exclude (if it exists)
