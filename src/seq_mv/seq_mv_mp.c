@@ -46,8 +46,8 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
    yp = hypre_VectorData(y);
    /* copy data */
    hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(y),
-   			  hypre_VectorPrecision (y), yp, hypre_VectorMemoryLocation(y), size);
-   
+                          hypre_VectorPrecision (y), yp, hypre_VectorMemoryLocation(y), size);
+
    return hypre_error_flag;
 }
 
@@ -75,10 +75,10 @@ hypre_SeqVectorAxpy_mp( hypre_long_double alpha,
    /* Implicit conversion to generic data type (void pointer) */
    xp = hypre_VectorData(x);
    yp = hypre_VectorData(y);
-   
+
    /* Call mixed-precision axpy on vector data */
    return hypre_RealArrayAxpyn_mp(hypre_VectorPrecision (x), xp, hypre_VectorPrecision (y), yp,
-		        hypre_VectorMemoryLocation(y), size, alpha);
+                                  hypre_VectorMemoryLocation(y), size, alpha);
 }
 
 /*--------------------------------------------------------------------------
@@ -103,7 +103,8 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
    else
    {
       /* clone vector data and convert to new precision type */
-      data_mp = hypre_RealArrayClone_mp(data_precision, data, data_location, new_precision, data_location, size);
+      data_mp = hypre_RealArrayClone_mp(data_precision, data, data_location, new_precision, data_location,
+                                        size);
 
       /* reset data pointer for vector */
       hypre_SeqVectorSetData_pre(new_precision, v, data_mp);
@@ -147,14 +148,14 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
       data = hypre_CSRMatrixData(A);
       /* Set matrix data pointer to NULL */
       hypre_CSRMatrixData(A) = NULL;
-      
+
       /* reset matrix A's data storage to match new precision */
       hypre_CSRMatrixResetData_pre(new_precision, A);
 
       /* copy data to newly reset storage */
       data_mp = hypre_CSRMatrixData(A);
       hypre_RealArrayCopy_mp(data_precision, data, data_location,
-   			  new_precision, data_mp, data_location, size);
+                             new_precision, data_mp, data_location, size);
 
       /* Now free old data */
       hypre_Free(data, data_location);
@@ -167,7 +168,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix *A,
 /*--------------------------------------------------------------------------
  * Mixed precision matrix copy.
  * NOTE: This copies the entire matrix and not just the structure.
- *	 For structure only, use hypre_CSRMatrixCopy(A, B, 0);
+ *  For structure only, use hypre_CSRMatrixCopy(A, B, 0);
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B)
@@ -175,7 +176,7 @@ hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B)
    HYPRE_Precision precision_A = hypre_CSRMatrixPrecision (A);
    HYPRE_Precision precision_B = hypre_CSRMatrixPrecision (B);
    HYPRE_Int size = hypre_CSRMatrixI(A)[hypre_CSRMatrixNumRows(A)];
-   
+
    /* Implicit conversion to generic data type (void pointer) */
    void *Ap = hypre_CSRMatrixData(A);
    void *Bp = hypre_CSRMatrixData(B);
@@ -185,16 +186,16 @@ hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B)
    {
       return hypre_CSRMatrixCopy_pre(precision_A, A, B, 1);
    }
-   
+
    /* Copy structure of A to B.
-    * Note: We are only copying structure here so we 
+    * Note: We are only copying structure here so we
     *       can use the default function call
    */
    hypre_CSRMatrixCopy(A, B, 0);
-      
+
    /* Now copy data from A to B */
    hypre_RealArrayCopy_mp(precision_A, Ap, hypre_CSRMatrixMemoryLocation(A),
-   			  precision_B, Bp, hypre_CSRMatrixMemoryLocation(B), size); 
+                          precision_B, Bp, hypre_CSRMatrixMemoryLocation(B), size);
 
    return hypre_error_flag;
 }
@@ -211,14 +212,14 @@ hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision )
    HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
-   
+
    hypre_CSRMatrix *B = NULL;
 
    HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;
 
    /* Create and initialize new matrix B in new precision */
    B = hypre_CSRMatrixCreate_pre(new_precision, num_rows, num_cols, num_nonzeros);
-   hypre_CSRMatrixInitialize_v2_pre(new_precision, B, bigInit, memory_location);   
+   hypre_CSRMatrixInitialize_v2_pre(new_precision, B, bigInit, memory_location);
 
    /* Call mixed-precision copy */
    hypre_CSRMatrixCopy_mp(A, B);

@@ -1676,12 +1676,12 @@ hypreDevice_ComplexAxpyzn( HYPRE_Int       n,
 template<typename T1, typename T2, typename T3>
 __global__ void
 hypreGPUKernel_Axpyzn_mp( hypre_DeviceItem &item,
-                       HYPRE_Int         n,
-                       T1                *x,
-                       T2                *y,
-                       T3                *z,
-                       T1       	 a,
-                       T2       	 b )
+                          HYPRE_Int         n,
+                          T1                *x,
+                          T2                *y,
+                          T3                *z,
+                          T1         a,
+                          T2         b )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 

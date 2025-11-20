@@ -28,7 +28,8 @@ HYPRE_Int HYPRE_ParVectorConvert_mp( HYPRE_ParVector v, HYPRE_Precision new_prec
 
 HYPRE_Int HYPRE_ParCSRMatrixConvert_mp( HYPRE_ParCSRMatrix A, HYPRE_Precision new_precision );
 
-HYPRE_ParCSRMatrix HYPRE_ParCSRMatrixClone_mp(HYPRE_ParCSRMatrix   A, HYPRE_Precision new_precision);
+HYPRE_ParCSRMatrix HYPRE_ParCSRMatrixClone_mp(HYPRE_ParCSRMatrix   A,
+                                              HYPRE_Precision new_precision);
 
 HYPRE_Int HYPRE_ParCSRMatrixCopy_mp( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B );
 
