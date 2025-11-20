@@ -149,12 +149,15 @@
 #undef hypre_MPI_Comm_rank
 #undef hypre_MPI_Comm_size
 #undef hypre_MPI_Comm_split
+#undef hypre_MPI_Comm_split_type
 #undef hypre_MPI_Finalize
 #undef hypre_MPI_Gather
 #undef hypre_MPI_Gatherv
 #undef hypre_MPI_Get_count
 #undef hypre_MPI_Group_free
 #undef hypre_MPI_Group_incl
+#undef hypre_MPI_Info_create
+#undef hypre_MPI_Info_free
 #undef hypre_MPI_Init
 #undef hypre_MPI_Iprobe
 #undef hypre_MPI_Irecv
@@ -381,9 +384,6 @@
 #undef hypre_IntArraySeparateByValueDevice
 #undef hypre_IntArraySetConstantValuesDevice
 #undef hypre_IntArraySetInterleavedValuesDevice
-#undef hypre_MPI_Comm_split_type
-#undef hypre_MPI_Info_create
-#undef hypre_MPI_Info_free
 #undef hypre_ResetDevice
 #undef hypre_ResetDeviceRandGenerator
 #undef hypre_RestoreSyncCudaCompute

@@ -100,12 +100,15 @@ hypre_MPI_Comm_group
 hypre_MPI_Comm_rank
 hypre_MPI_Comm_size
 hypre_MPI_Comm_split
+hypre_MPI_Comm_split_type
 hypre_MPI_Finalize
 hypre_MPI_Gather
 hypre_MPI_Gatherv
 hypre_MPI_Get_count
 hypre_MPI_Group_free
 hypre_MPI_Group_incl
+hypre_MPI_Info_create
+hypre_MPI_Info_free
 hypre_MPI_Init
 hypre_MPI_Iprobe
 hypre_MPI_Irecv
@@ -273,6 +276,3 @@ utilities_FortranMatrixValuePtr
 utilities_FortranMatrixValues
 utilities_FortranMatrixWidth
 utilities_FortranMatrixWrap
-hypre_MPI_Comm_split_type
-hypre_MPI_Info_create
-hypre_MPI_Info_free

@@ -721,6 +721,13 @@ HYPRE_Int
 hypre_MPI_Comm_split_long_dbl( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m, hypre_MPI_Comm * comms );
 
 HYPRE_Int
+hypre_MPI_Comm_split_type_flt( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
+HYPRE_Int
+hypre_MPI_Comm_split_type_dbl( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
+HYPRE_Int
+hypre_MPI_Comm_split_type_long_dbl( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
+
+HYPRE_Int
 hypre_MPI_Finalize_flt( void );
 HYPRE_Int
 hypre_MPI_Finalize_dbl( void );
@@ -761,6 +768,20 @@ HYPRE_Int
 hypre_MPI_Group_incl_dbl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks, hypre_MPI_Group *newgroup );
 HYPRE_Int
 hypre_MPI_Group_incl_long_dbl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks, hypre_MPI_Group *newgroup );
+
+HYPRE_Int
+hypre_MPI_Info_create_flt( hypre_MPI_Info *info );
+HYPRE_Int
+hypre_MPI_Info_create_dbl( hypre_MPI_Info *info );
+HYPRE_Int
+hypre_MPI_Info_create_long_dbl( hypre_MPI_Info *info );
+
+HYPRE_Int
+hypre_MPI_Info_free_flt( hypre_MPI_Info *info );
+HYPRE_Int
+hypre_MPI_Info_free_dbl( hypre_MPI_Info *info );
+HYPRE_Int
+hypre_MPI_Info_free_long_dbl( hypre_MPI_Info *info );
 
 HYPRE_Int
 hypre_MPI_Init_flt( hypre_int *argc, char ***argv );
@@ -2142,27 +2163,6 @@ HYPRE_Int
 hypre_IntArraySetInterleavedValuesDevice_dbl( hypre_IntArray *v, HYPRE_Int cycle );
 HYPRE_Int
 hypre_IntArraySetInterleavedValuesDevice_long_dbl( hypre_IntArray *v, HYPRE_Int cycle );
-
-HYPRE_Int
-hypre_MPI_Comm_split_type_flt( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
-HYPRE_Int
-hypre_MPI_Comm_split_type_dbl( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
-HYPRE_Int
-hypre_MPI_Comm_split_type_long_dbl( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm );
-
-HYPRE_Int
-hypre_MPI_Info_create_flt( hypre_MPI_Info *info );
-HYPRE_Int
-hypre_MPI_Info_create_dbl( hypre_MPI_Info *info );
-HYPRE_Int
-hypre_MPI_Info_create_long_dbl( hypre_MPI_Info *info );
-
-HYPRE_Int
-hypre_MPI_Info_free_flt( hypre_MPI_Info *info );
-HYPRE_Int
-hypre_MPI_Info_free_dbl( hypre_MPI_Info *info );
-HYPRE_Int
-hypre_MPI_Info_free_long_dbl( hypre_MPI_Info *info );
 
 HYPRE_Int
 hypre_ResetDevice_flt( );

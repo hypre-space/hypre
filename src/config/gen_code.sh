@@ -39,6 +39,9 @@ OUTP=$3
 #     for c in "" $gpu    --> c=""               when gpu=""
 #                         --> c="", c="$gpu"     when gpu="non-empty-string"
 #
+# This is useful below for executing the same lines of code for the normal case
+# and the gpu case (and potential future cases).
+#
 ############################################################################
 
 gpu=""
@@ -248,7 +251,6 @@ then
    echo "#if defined(HYPRE_USING_GPU)"   >> $FOUT
    cat ${OUTP}_${i}${gpu}_ext.h          >> $FOUT
    echo "#endif"                         >> $FOUT
-   rm -f ${OUTP}_${i}${gpu}_ext.h
 fi
 cat > $FOUT.tmp <<@
 
@@ -267,7 +269,6 @@ then
    echo "#if defined(HYPRE_USING_GPU)"   >> $FOUT
    cat ${OUTP}_${i}${gpu}_int.h          >> $FOUT
    echo "#endif"                         >> $FOUT
-   rm -f ${OUTP}_${i}${gpu}_int.h
 fi
 cat > $FOUT.tmp <<@
 
@@ -279,14 +280,6 @@ cat $FOUT >> $FOUT.tmp
 mv $FOUT.tmp $FOUT
 
 done
-
-############################################################################
-# Remove temporary files
-############################################################################
-
-rm -f ${OUTP}.*.proto
-rm -f ${OUTP}_*_ext.c
-rm -f ${OUTP}_*_int.c
 
 ############################################################################
 # Generate header files
@@ -315,7 +308,6 @@ extern "C" {
 for i in fixed functions pre
 do
    cat ${OUTP}_${i}_ext.h      >> $MUP_HEADER
-   rm -f ${OUTP}_${i}_ext.h
 done
 
 cat >> $MUP_HEADER <<@
@@ -353,7 +345,6 @@ extern "C" {
 for i in fixed functions pre
 do
    cat ${OUTP}_${i}_int.h      >> $MUP_HEADER
-   rm -f ${OUTP}_${i}_int.h
 done
 
 cat >> $MUP_HEADER <<@
@@ -367,4 +358,20 @@ cat >> $MUP_HEADER <<@
 #endif
 
 @
+
+############################################################################
+# Remove temporary files
+############################################################################
+
+for c in "" $gpu
+do
+   for i in fixed functions methods pre
+   do
+      tag=${i}${c}
+      rm -f ${OUTP}.${tag}.ext.proto
+      rm -f ${OUTP}.${tag}.int.proto
+      rm -f ${OUTP}_${tag}_ext.[ch]
+      rm -f ${OUTP}_${tag}_int.[ch]
+   done
+done
 
