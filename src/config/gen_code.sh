@@ -31,13 +31,34 @@ OUTP=$3
 #### automatically as below.
 
 ############################################################################
+# Define gpu tag - set to an empty string if there are no gpu list files
+#
+# Note that the following line will always generate an empty-string value for c,
+# but it will only generate another value for c when $gpu is non-empty
+#
+#     for c in "" $gpu    --> c=""               when gpu=""
+#                         --> c="", c="$gpu"     when gpu="non-empty-string"
+#
+############################################################################
+
+gpu=""
+if [ -f mup.fixed.gpu ]
+then
+   gpu=".gpu"
+fi
+
+############################################################################
 # Make sure the function list files are sorted (list capital letters first)
 ############################################################################
 
-for i in fixed functions methods
+for c in "" $gpu
 do
-    (export LC_COLLATE=C; sort mup.${i} | uniq) > mup.${i}.tmp
-    mv mup.${i}.tmp mup.${i}
+   for i in fixed functions methods
+   do
+      tag=${i}${c}
+      (export LC_COLLATE=C; sort mup.${tag} | uniq) > mup.${tag}.tmp
+      mv mup.${tag}.tmp mup.${tag}
+   done
 done
 
 ############################################################################
@@ -78,14 +99,25 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup.functions mup.methods | while read -r func_name
-do
-   echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
-done
-cat mup.fixed | while read -r func_name
-do
-   echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
-done
+   for c in "" $gpu
+   do
+      for i in functions methods
+      do
+         tag=${i}${c}
+         cat mup.${tag} | while read -r func_name
+         do
+            echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
+         done
+      done
+      for i in fixed
+      do
+         tag=${i}${c}
+         cat mup.${tag} | while read -r func_name
+         do
+            echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
+         done
+      done
+   done
 )
 
 #endif
@@ -97,7 +129,7 @@ done
 
 if [ "${OUTP}" = "onlydef" ]
 then
-    exit
+   exit
 fi
 
 #===========================================================================
@@ -124,10 +156,17 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup.functions mup.methods mup.fixed | while read -r func_name
-do
-   echo "#undef $func_name"
-done
+   for c in "" $gpu
+   do
+      for i in functions methods fixed
+      do
+         tag=${i}${c}
+         cat mup.${tag} | while read -r func_name
+         do
+            echo "#undef $func_name"
+         done
+      done
+   done
 )
 @
 
@@ -135,23 +174,28 @@ done
 # Create temporary files and initial code
 ############################################################################
 
-# Create file with list of MUP functions and methods
-cat mup.functions mup.methods > mup.pre
-
 # Create prototype information files
-for i in fixed functions
+for c in "" $gpu
 do
-    $scriptdir/gen_proto_info.sh mup.${i} ${EXTH} > ${OUTP}.${i}.ext.proto
-    $scriptdir/gen_proto_info.sh mup.${i} ${INTH} > ${OUTP}.${i}.int.proto
+   for i in fixed functions methods
+   do
+      tag=${i}${c}
+      $scriptdir/gen_proto_info.sh mup.${tag} ${EXTH} > ${OUTP}.${tag}.ext.proto
+      $scriptdir/gen_proto_info.sh mup.${tag} ${INTH} > ${OUTP}.${tag}.int.proto
+   done
+   cat ${OUTP}.functions${c}.ext.proto ${OUTP}.methods${c}.ext.proto > ${OUTP}.pre${c}.ext.proto
+   cat ${OUTP}.functions${c}.int.proto ${OUTP}.methods${c}.int.proto > ${OUTP}.pre${c}.int.proto
 done
-cat ${OUTP}.functions.ext.proto > ${OUTP}.pre.ext.proto
-cat ${OUTP}.functions.int.proto > ${OUTP}.pre.int.proto
 
 # Create C implementation files and header files
-for i in fixed functions pre
+for c in "" $gpu
 do
-    $scriptdir/gen_code_awk.sh ${OUTP}.${i}.ext.proto ${OUTP}_${i}_ext ${i}
-    $scriptdir/gen_code_awk.sh ${OUTP}.${i}.int.proto ${OUTP}_${i}_int ${i}
+   for i in fixed functions pre
+   do
+      tag=${i}${c}
+      $scriptdir/gen_code_awk.sh ${OUTP}.${tag}.ext.proto ${OUTP}_${tag}_ext ${i}
+      $scriptdir/gen_code_awk.sh ${OUTP}.${tag}.int.proto ${OUTP}_${tag}_int ${i}
+   done
 done
 
 ############################################################################
@@ -179,6 +223,12 @@ cat > $FOUT <<@
 
 $scriptdir/write_header.sh >> $FOUT
 cat ${OUTP}_${i}_ext.c ${OUTP}_${i}_int.c >> $FOUT
+if [ -n "$gpu" ]
+then
+   echo "#if defined(HYPRE_USING_GPU)"                   >> $FOUT
+   cat ${OUTP}_${i}${gpu}_ext.c ${OUTP}_${i}${gpu}_int.c >> $FOUT
+   echo "#endif"                                         >> $FOUT
+fi
 
 cat >> $FOUT <<@
 
@@ -190,7 +240,16 @@ cat >> $FOUT <<@
 # add header info to the prototype files
 #========================================
 
+# external file
+
 FOUT=${OUTP}_${i}_ext.h
+if [ -n "$gpu" ]
+then
+   echo "#if defined(HYPRE_USING_GPU)"   >> $FOUT
+   cat ${OUTP}_${i}${gpu}_ext.h          >> $FOUT
+   echo "#endif"                         >> $FOUT
+   rm -f ${OUTP}_${i}${gpu}_ext.h
+fi
 cat > $FOUT.tmp <<@
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use $0 to generate) ***/
@@ -200,7 +259,16 @@ $scriptdir/write_header.sh >> $FOUT.tmp
 cat $FOUT >> $FOUT.tmp
 mv $FOUT.tmp $FOUT
 
+# internal file
+
 FOUT=${OUTP}_${i}_int.h
+if [ -n "$gpu" ]
+then
+   echo "#if defined(HYPRE_USING_GPU)"   >> $FOUT
+   cat ${OUTP}_${i}${gpu}_int.h          >> $FOUT
+   echo "#endif"                         >> $FOUT
+   rm -f ${OUTP}_${i}${gpu}_int.h
+fi
 cat > $FOUT.tmp <<@
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use $0 to generate) ***/
@@ -216,7 +284,6 @@ done
 # Remove temporary files
 ############################################################################
 
-rm -f mup.pre
 rm -f ${OUTP}.*.proto
 rm -f ${OUTP}_*_ext.c
 rm -f ${OUTP}_*_int.c
@@ -245,9 +312,11 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat ${OUTP}_fixed_ext.h      >> $MUP_HEADER
-cat ${OUTP}_functions_ext.h  >> $MUP_HEADER
-cat ${OUTP}_pre_ext.h        >> $MUP_HEADER
+for i in fixed functions pre
+do
+   cat ${OUTP}_${i}_ext.h      >> $MUP_HEADER
+   rm -f ${OUTP}_${i}_ext.h
+done
 
 cat >> $MUP_HEADER <<@
 
@@ -260,8 +329,6 @@ cat >> $MUP_HEADER <<@
 #endif
 
 @
-
-rm -f ${OUTP}_fixed_ext.h ${OUTP}_functions_ext.h ${OUTP}_pre_ext.h
 
 #===========================================================================
 # Create internal header file
@@ -283,9 +350,11 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat ${OUTP}_fixed_int.h      >> $MUP_HEADER
-cat ${OUTP}_functions_int.h  >> $MUP_HEADER
-cat ${OUTP}_pre_int.h        >> $MUP_HEADER
+for i in fixed functions pre
+do
+   cat ${OUTP}_${i}_int.h      >> $MUP_HEADER
+   rm -f ${OUTP}_${i}_int.h
+done
 
 cat >> $MUP_HEADER <<@
 
@@ -299,4 +368,3 @@ cat >> $MUP_HEADER <<@
 
 @
 
-rm -f ${OUTP}_fixed_int.h ${OUTP}_functions_int.h ${OUTP}_pre_int.h

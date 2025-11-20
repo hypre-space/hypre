@@ -329,6 +329,10 @@ hypre_GetSizeOfReal( void )
    return hypre_GetSizeOfReal_pre( precision );
 }
 
+#if defined(HYPRE_USING_GPU)
+
+
+#endif
 
 #endif
 

@@ -644,6 +644,10 @@ hypre_GetSizeOfReal_pre( HYPRE_Precision precision )
    }
 }
 
+#if defined(HYPRE_USING_GPU)
+
+
+#endif
 
 #endif
 
