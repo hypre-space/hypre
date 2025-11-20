@@ -1340,7 +1340,7 @@ hypre_ParCSRMatrixClone_mp(hypre_ParCSRMatrix   *A, HYPRE_Precision new_precisio
 
 HYPRE_Int
 hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
-                        hypre_ParCSRMatrix *B );
+                           hypre_ParCSRMatrix *B );
 
 #endif
 

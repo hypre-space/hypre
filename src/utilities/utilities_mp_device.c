@@ -4,17 +4,17 @@
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
- 
- /******************************************************************************
- *
- * hypre utilities mixed-precision interface on device
- *
- *****************************************************************************/
- 
+
+/******************************************************************************
+*
+* hypre utilities mixed-precision interface on device
+*
+*****************************************************************************/
+
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 #include "_hypre_onedpl.hpp"
- 
+
 #if defined(HYPRE_MIXED_PRECISION)
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -26,8 +26,8 @@
         However, inner switch-statement allows for additional future cases - DOK.
 *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x, 
-		       HYPRE_Precision precision_y, void *y, HYPRE_Int n)
+hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
+                             HYPRE_Precision precision_y, void *y, HYPRE_Int n)
 {
 
    /* Mixed-precision copy of data.
@@ -40,25 +40,26 @@ hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
          {
             case HYPRE_REAL_DOUBLE:
             case HYPRE_REAL_LONGDOUBLE:
-               {
-                  hypre_float *xp = (hypre_float *)x;
-                  hypre_double *yp = (hypre_double *)y;
-                  
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   		  HYPRE_THRUST_CALL( transform, xp, xp+n, yp, hypreFunctor_ElementCast<hypre_float, hypre_double>() );
-#elif defined(HYPRE_USING_SYCL)
-   		  HYPRE_ONEDPL_CALL( std::transform, xp, xp+n, yp, [](const auto &x){return static_cast<hypre_double>(x);} );  
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-   		  HYPRE_Int i;
+            {
+               hypre_float *xp = (hypre_float *)x;
+               hypre_double *yp = (hypre_double *)y;
 
-		  #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
-   		  for (i = 0; i < n; i++)
-   		  {
-      		     yp[i] = static_cast<hypre_double>(xp[i]);
-   		  }
-#endif
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+               HYPRE_THRUST_CALL( transform, xp, xp + n, yp,
+                                  hypreFunctor_ElementCast<hypre_float, hypre_double>() );
+#elif defined(HYPRE_USING_SYCL)
+               HYPRE_ONEDPL_CALL( std::transform, xp, xp + n, yp, [](const auto & x) {return static_cast<hypre_double>(x);} );
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+               HYPRE_Int i;
+
+               #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
+               for (i = 0; i < n; i++)
+               {
+                  yp[i] = static_cast<hypre_double>(xp[i]);
                }
-               break;
+#endif
+            }
+            break;
             default:
                break;
          }
@@ -68,28 +69,29 @@ hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
          switch (precision_y)
          {
             case HYPRE_REAL_SINGLE:
-               {            
-                  hypre_double *xp = (hypre_double *)x;
-                  hypre_float *yp = (hypre_float *)y;
-                  
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   		  HYPRE_THRUST_CALL( transform, xp, xp+n, yp, hypreFunctor_ElementCast<hypre_double, hypre_float>() );
-#elif defined(HYPRE_USING_SYCL)
-   		  HYPRE_ONEDPL_CALL( std::transform, xp, xp+n, yp, [](const auto &x){return static_cast<hypre_float>(x);});  
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-   		  HYPRE_Int i;
+            {
+               hypre_double *xp = (hypre_double *)x;
+               hypre_float *yp = (hypre_float *)y;
 
-		  #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
-   		  for (i = 0; i < n; i++)
-   		  {
-      		     yp[i] = static_cast<hypre_float>(xp[i]);
-   		  }
-#endif
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+               HYPRE_THRUST_CALL( transform, xp, xp + n, yp,
+                                  hypreFunctor_ElementCast<hypre_double, hypre_float>() );
+#elif defined(HYPRE_USING_SYCL)
+               HYPRE_ONEDPL_CALL( std::transform, xp, xp + n, yp, [](const auto & x) {return static_cast<hypre_float>(x);});
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+               HYPRE_Int i;
+
+               #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
+               for (i = 0; i < n; i++)
+               {
+                  yp[i] = static_cast<hypre_float>(xp[i]);
                }
-               break;
+#endif
+            }
+            break;
             default:
                break;
-         }      
+         }
          break;
       default:
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for array Copy!\n");
@@ -107,8 +109,8 @@ hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
         However, inner switch-statement allows for additional future cases - DOK.
 *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alpha, void *x, 
-		       HYPRE_Precision precision_y, void *y, HYPRE_Int n)
+hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alpha, void *x,
+                              HYPRE_Precision precision_y, void *y, HYPRE_Int n)
 {
 
    /* Mixed-precision copy of data.
@@ -121,24 +123,24 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
          {
             case HYPRE_REAL_DOUBLE:
             case HYPRE_REAL_LONGDOUBLE:
-               {
-                  hypre_float *xp = (hypre_float *)x;
-                  hypre_double *yp = (hypre_double *)y;
+            {
+               hypre_float *xp = (hypre_float *)x;
+               hypre_double *yp = (hypre_double *)y;
 
 #if defined(HYPRE_USING_GPU)
-                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_float)alpha, 1.0);
-                  hypre_SyncComputeStream();
+               hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_float)alpha, 1.0);
+               hypre_SyncComputeStream();
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
-   		  HYPRE_Int i;
+               HYPRE_Int i;
 
-		  #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
-   		  for (i = 0; i < n; i++)
-   		  {
-      		     yp[i] += static_cast<hypre_double>((hypre_float)alpha * xp[i]);
-   		  }
-#endif
+               #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
+               for (i = 0; i < n; i++)
+               {
+                  yp[i] += static_cast<hypre_double>((hypre_float)alpha * xp[i]);
                }
-               break;
+#endif
+            }
+            break;
             default:
                break;
          }
@@ -148,28 +150,28 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
          switch (precision_y)
          {
             case HYPRE_REAL_SINGLE:
-               {            
-                  hypre_double *xp = (hypre_double *)x;
-                  hypre_float *yp = (hypre_float *)y;
-                  
-#if defined(HYPRE_USING_GPU)
-                  
-                  hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
-                  hypre_SyncComputeStream(); 
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-   		         HYPRE_Int i;
+            {
+               hypre_double *xp = (hypre_double *)x;
+               hypre_float *yp = (hypre_float *)y;
 
-		            #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
-   		         for (i = 0; i < n; i++)
-   		         {
-      		         yp[i] += static_cast<hypre_float>((hypre_double)alpha * xp[i]);      		     
-   		         }
-#endif
+#if defined(HYPRE_USING_GPU)
+
+               hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
+               hypre_SyncComputeStream();
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+               HYPRE_Int i;
+
+               #pragma omp target teams distribute parallel for private(i) is_device_ptr(xp, yp)
+               for (i = 0; i < n; i++)
+               {
+                  yp[i] += static_cast<hypre_float>((hypre_double)alpha * xp[i]);
                }
-               break;
+#endif
+            }
+            break;
             default:
                break;
-         }      
+         }
          break;
       default:
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for array Axpyn!\n");
@@ -181,4 +183,4 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
 
 #endif // HYPRE_USING_GPU || HYPRE_USING_DEVICE_OPENMP
 #endif // HYPRE_MIXED_PRECISION
- 
+

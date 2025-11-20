@@ -45,7 +45,7 @@ HYPRE_ParVectorConvert_mp( HYPRE_ParVector v,
                            HYPRE_Precision new_precision)
 {
    return (hypre_ParVectorConvert_mp( (hypre_ParVector *) v,
-                              new_precision ));
+                                      new_precision ));
 }
 
 /*--------------------------------------------------------------------------
@@ -56,7 +56,7 @@ HYPRE_ParCSRMatrixConvert_mp( HYPRE_ParCSRMatrix A,
                               HYPRE_Precision new_precision)
 {
    return (hypre_ParCSRMatrixConvert_mp( (hypre_ParCSRMatrix *) A,
-                                 new_precision ));
+                                         new_precision ));
 }
 
 /*--------------------------------------------------------------------------

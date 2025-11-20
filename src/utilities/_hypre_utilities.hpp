@@ -132,7 +132,7 @@ struct hypreFunctor_NonzeroAboveTol
 /*--------------------------------------------------------------------------
  * hypreFunctor_ElementCast
  *
- * Functor for performing casting data between datatypes 
+ * Functor for performing casting data between datatypes
  *--------------------------------------------------------------------------*/
 
 template <typename T, typename T2>
@@ -2524,7 +2524,7 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+#endif /* #ifndef HYPRE_DEVICE_UTILS_H */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

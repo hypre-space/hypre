@@ -116,7 +116,7 @@ struct hypreFunctor_NonzeroAboveTol
 /*--------------------------------------------------------------------------
  * hypreFunctor_ElementCast
  *
- * Functor for performing casting data between datatypes 
+ * Functor for performing casting data between datatypes
  *--------------------------------------------------------------------------*/
 
 template <typename T, typename T2>

@@ -26,7 +26,7 @@ hypre_CSRMatrixConvert_mp ( hypre_CSRMatrix *A,
 HYPRE_Int
 hypre_SeqVectorConvert_mp ( hypre_Vector *v,
                             HYPRE_Precision new_precision);
-                            
+
 HYPRE_Int
 hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B);
 

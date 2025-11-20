@@ -4835,7 +4835,7 @@ hypre_NSHSetup( void               *nsh_vdata,
 
    /* Compute complexity */
    hypre_ParNSHDataOperatorComplexity(nsh_data) = (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(matM) /
-                                                  hypre_ParCSRMatrixDNumNonzeros(matA));
+                                                               hypre_ParCSRMatrixDNumNonzeros(matA));
    if (my_id == 0 && print_level > 0)
    {
       hypre_printf("NSH SETUP: operator complexity = %f  \n",

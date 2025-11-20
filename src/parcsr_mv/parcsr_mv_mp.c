@@ -90,7 +90,7 @@ hypre_ParCSRMatrixConvert_mp( hypre_ParCSRMatrix *A,
 
 HYPRE_Int
 hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
-                        hypre_ParCSRMatrix *B )
+                           hypre_ParCSRMatrix *B )
 {
    hypre_CSRMatrix *A_diag;
    hypre_CSRMatrix *A_offd;
@@ -111,7 +111,7 @@ hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   if(hypre_ParCSRMatrixPrecision(A) == hypre_ParCSRMatrixPrecision(B))
+   if (hypre_ParCSRMatrixPrecision(A) == hypre_ParCSRMatrixPrecision(B))
    {
       return hypre_ParCSRMatrixCopy_pre( hypre_ParCSRMatrixPrecision(A), A, B, 1 );
    }
@@ -156,24 +156,24 @@ hypre_ParCSRMatrixClone_mp(hypre_ParCSRMatrix   *A, HYPRE_Precision new_precisio
    hypre_ParCSRMatrix *S;
 
    hypre_GpuProfilingPushRange("hypre_ParCSRMatrixClone_mp");
-   
-   if(hypre_ParCSRMatrixPrecision(A) == new_precision)
+
+   if (hypre_ParCSRMatrixPrecision(A) == new_precision)
    {
       return hypre_ParCSRMatrixClone_pre( hypre_ParCSRMatrixPrecision(A), A, 1 );
    }
 
    S = hypre_ParCSRMatrixCreate_pre( new_precision, hypre_ParCSRMatrixComm(A),
-                                 hypre_ParCSRMatrixGlobalNumRows(A),
-                                 hypre_ParCSRMatrixGlobalNumCols(A),
-                                 hypre_ParCSRMatrixRowStarts(A),
-                                 hypre_ParCSRMatrixColStarts(A),
-                                 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),
-                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(A)),
-                                 hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
+                                     hypre_ParCSRMatrixGlobalNumRows(A),
+                                     hypre_ParCSRMatrixGlobalNumCols(A),
+                                     hypre_ParCSRMatrixRowStarts(A),
+                                     hypre_ParCSRMatrixColStarts(A),
+                                     hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)),
+                                     hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(A)),
+                                     hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
    hypre_ParCSRMatrixDNumNonzeros(S) = hypre_ParCSRMatrixNumNonzeros(A);
-   
+
    hypre_ParCSRMatrixInitialize_v2_pre(new_precision, S, hypre_ParCSRMatrixMemoryLocation(A));
 
    hypre_ParCSRMatrixCopy_mp(A, S);
