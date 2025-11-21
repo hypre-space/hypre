@@ -32,11 +32,13 @@ fi
 
 export LC_COLLATE=C  # sort by listing capital letters first
 
-
 if [ "$BUILD_TYPE" = "GPU" ]; then
+    # Combine CPU and GPU function lists.
+    # Some directories may not have GPU lists so we suppress "file not found" warnings
     cat mup.fixed mup.fixed.gpu \
         mup.functions mup.functions.gpu \
         mup.methods mup.methods.gpu \
+        2>/dev/null \
         | sort | uniq  > mup_check.old
 else
     cat mup.fixed mup.functions mup.methods | sort | uniq  > mup_check.old
