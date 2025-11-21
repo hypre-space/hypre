@@ -21,6 +21,7 @@ HYPRE_Int
 hypre_StructVectorMapDataIndex( hypre_StructVector *vector,
                                 hypre_Index         dindex )
 {
+   RDF COMPILE ERROR CI TEST
    hypre_MapToCoarseIndex(dindex, NULL,
                           hypre_StructVectorStride(vector), hypre_StructVectorNDim(vector));
 
