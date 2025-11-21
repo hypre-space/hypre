@@ -132,11 +132,10 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix  *A,
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-   HYPRE_Real       wall_1 = 0;
-   HYPRE_Real       wall_2 = 0;
-   HYPRE_Real       wall_3 = 0;
-
+   HYPRE_Real       wall_time = 0.0;
+   HYPRE_Real       wall_1 = 0.0;
+   HYPRE_Real       wall_2 = 0.0;
+   HYPRE_Real       wall_3 = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 
@@ -1246,6 +1245,8 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
        */
 
       /* initialize thread-wise variables */
+      P_marker = NULL;
+      P_marker_offd = NULL;
       strong_f_marker = -2;
       coarse_counter = 0;
       jj_counter = start_indexing;
@@ -1786,7 +1787,7 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
                   }
                }
             }
-            if (diagonal)
+            if (diagonal != 0.0)
             {
                for (jj = jj_begin_row; jj < jj_end_row; jj++)
                {
@@ -2825,7 +2826,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix  *A,
                }
             }
          }
-         if (diagonal)
+         if (diagonal != 0.0)
          {
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {
@@ -3745,7 +3746,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix  *A,
                }
             }
          }
-         if (diagonal)
+         if (diagonal != 0.0)
          {
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {
@@ -4677,7 +4678,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix  *A,
                }
             }
          }
-         if (diagonal)
+         if (diagonal != 0.0)
          {
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {
@@ -4876,8 +4877,7 @@ hypre_BoomerAMGBuildExtInterpHost(hypre_ParCSRMatrix  *A,
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-
+   HYPRE_Real       wall_time = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 
@@ -5414,7 +5414,7 @@ hypre_BoomerAMGBuildExtInterpHost(hypre_ParCSRMatrix  *A,
                }
             }
          }
-         if (diagonal)
+         if (diagonal != 0.0)
          {
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {

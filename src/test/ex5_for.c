@@ -32,7 +32,7 @@
 #include "HYPRE_parcsr_ls.h"
 
 #ifdef HYPRE_FORTRAN
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #include "hypre_ij_fortran_test.h"
 #include "hypre_parcsr_fortran_test.h"
 #endif

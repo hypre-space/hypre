@@ -22,7 +22,6 @@ constexpr HYPRE_Int SYMBL_HASH_SIZE[11] = { 0, 32, 64, 128, 256, 512, 1024, 2048
 constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0, 16, 32,  64, 128, 256,  512, 1024, 2048, 4096,  8192 };
 #elif defined(HYPRE_USING_HIP)
 constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512, 1024, 2048,  4096 };
-/* WM: todo - what should this be for intel? */
 #elif defined(HYPRE_USING_SYCL)
 constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512, 1024, 2048,  4096 };
 #endif
@@ -32,7 +31,6 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 #define HYPRE_SPGEMM_DEFAULT_BIN 5
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_SPGEMM_DEFAULT_BIN 6
-/* WM: todo - what should this be for intel? */
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_SPGEMM_DEFAULT_BIN 6
 #endif
@@ -44,7 +42,6 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_SPGEMM_NUMER_UNROLL 256
 #define HYPRE_SPGEMM_SYMBL_UNROLL 512
-/* WM: todo - what should this be for intel? */
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_SPGEMM_NUMER_UNROLL 256
 #define HYPRE_SPGEMM_SYMBL_UNROLL 512
@@ -57,7 +54,7 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 /* ----------------------------------------------------------------------------------------------- *
  * these are under the assumptions made in spgemm on block sizes: only use in csr_spgemm routines
  * where we assume CUDA block is 3D and blockDim.x * blockDim.y = GROUP_SIZE
- * WM: note - sycl linearizes indices differently from cuda, i.e. a cuda block with dimensions
+ * Note - sycl linearizes indices differently from cuda, i.e. a cuda block with dimensions
  * (x, y, z) is equivalent to a sycl nd_range (z, y, x)
  *------------------------------------------------------------------------------------------------ */
 
@@ -68,6 +65,7 @@ hypre_int get_num_groups(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_range(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return blockDim.z;
 #endif
 }
@@ -79,6 +77,7 @@ hypre_int get_group_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(0);
 #else
+   HYPRE_UNUSED_VAR(item);
    return threadIdx.z;
 #endif
 }
@@ -90,6 +89,7 @@ hypre_int get_group_lane_id(hypre_DeviceItem &item)
 #if defined(HYPRE_USING_SYCL)
    return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);
 #else
+   HYPRE_UNUSED_VAR(item);
    return hypre_gpu_get_thread_id<2>(item);
 #endif
 }
@@ -359,10 +359,10 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
 }
 
 template<typename T>
-#if defined(HYPRE_USING_SYCL)
-struct spgemm_bin_op
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct spgemm_bin_op : public thrust::unary_function<T, char>
+#else
+struct spgemm_bin_op
 #endif
 {
    char s, t, u; /* s: base size of bins; t: lowest bin; u: highest bin */
@@ -459,7 +459,6 @@ hypre_spgemm_get_num_groups_per_block()
    return hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
 #elif defined(HYPRE_USING_HIP)
    return hypre_max(512 / GROUP_SIZE, 1);
-   /* WM: todo - what should this be for intel? */
 #elif defined(HYPRE_USING_SYCL)
    return hypre_max(512 / GROUP_SIZE, 1);
 #endif
@@ -473,4 +472,3 @@ hypre_spgemm_get_num_groups_per_block()
 
 #endif /* defined(HYPRE_USING_GPU) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */
-

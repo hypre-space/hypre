@@ -11,11 +11,21 @@
 #define hypre_SEQ_BLOCK_MV_HEADER
 
 #include <HYPRE_config.h>
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_seq_block_mv_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_DENSE_BLOCK_MATRIX_HEADER
 #define hypre_DENSE_BLOCK_MATRIX_HEADER
@@ -44,6 +54,10 @@ typedef struct hypre_DenseBlockMatrix_struct
    HYPRE_Complex        *data;               /* Matrix coefficients */
    HYPRE_Complex       **data_aop;           /* Array of pointers to data */
    HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
+
+#if defined(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_DenseBlockMatrix;
 
 /*--------------------------------------------------------------------------
@@ -74,28 +88,76 @@ typedef struct hypre_DenseBlockMatrix_struct
                      (matrix) -> row_stride * i + \
                      (matrix) -> col_stride * j])
 
+#ifdef HYPRE_MIXED_PRECISION
+#define hypre_DenseBlockMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
 #endif
 
+#endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* dense_block_matrix.c */
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int,
-                                                     HYPRE_Int, HYPRE_Int);
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreateByBlock(HYPRE_Int, HYPRE_Int,
-                                                            HYPRE_Int, HYPRE_Int);
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixClone(hypre_DenseBlockMatrix*, HYPRE_Int);
-HYPRE_Int hypre_DenseBlockMatrixDestroy(hypre_DenseBlockMatrix*);
-HYPRE_Int hypre_DenseBlockMatrixInitializeOn(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
-HYPRE_Int hypre_DenseBlockMatrixInitialize(hypre_DenseBlockMatrix*);
-HYPRE_Int hypre_DenseBlockMatrixBuildAOP(hypre_DenseBlockMatrix*);
-HYPRE_Int hypre_DenseBlockMatrixCopy(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*);
-HYPRE_Int hypre_DenseBlockMatrixMigrate(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
-HYPRE_Int hypre_DenseBlockMatrixPrint(MPI_Comm, hypre_DenseBlockMatrix*, const char*);
+hypre_DenseBlockMatrix *
+hypre_DenseBlockMatrixCreate( HYPRE_Int  row_major,
+                              HYPRE_Int  num_rows,
+                              HYPRE_Int  num_cols,
+                              HYPRE_Int  num_rows_block,
+                              HYPRE_Int  num_cols_block );
+hypre_DenseBlockMatrix *
+hypre_DenseBlockMatrixCreateByBlock( HYPRE_Int  row_major,
+                                     HYPRE_Int  num_blocks,
+                                     HYPRE_Int  num_rows_block,
+                                     HYPRE_Int  num_cols_block );
+hypre_DenseBlockMatrix*
+hypre_DenseBlockMatrixClone( hypre_DenseBlockMatrix *A,
+                             HYPRE_Int               copy_data );
+HYPRE_Int
+hypre_DenseBlockMatrixDestroy( hypre_DenseBlockMatrix *A );
+HYPRE_Int
+hypre_DenseBlockMatrixInitializeOn( hypre_DenseBlockMatrix  *A,
+                                    HYPRE_MemoryLocation     memory_location );
+HYPRE_Int
+hypre_DenseBlockMatrixInitialize( hypre_DenseBlockMatrix *A );
+HYPRE_Int
+hypre_DenseBlockMatrixBuildAOP( hypre_DenseBlockMatrix *A );
+HYPRE_Int
+hypre_DenseBlockMatrixCopy( hypre_DenseBlockMatrix *A,
+                            hypre_DenseBlockMatrix *B );
+HYPRE_Int
+hypre_DenseBlockMatrixMigrate( hypre_DenseBlockMatrix *A,
+                               HYPRE_MemoryLocation    memory_location );
+HYPRE_Int
+hypre_DenseBlockMatrixPrint( MPI_Comm                comm,
+                             hypre_DenseBlockMatrix *A,
+                             const char*             filename );
 
 /* dense_block_matmult.c */
-HYPRE_Int hypre_DenseBlockMatrixMultiply(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*,
-                                         hypre_DenseBlockMatrix**);
+HYPRE_Int
+hypre_DenseBlockMatrixMultiplyHost( hypre_DenseBlockMatrix  *A,
+                                    hypre_DenseBlockMatrix  *B,
+                                    hypre_DenseBlockMatrix  *C);
+HYPRE_Int
+hypre_DenseBlockMatrixMultiply( hypre_DenseBlockMatrix   *A,
+                                hypre_DenseBlockMatrix   *B,
+                                hypre_DenseBlockMatrix  **C_ptr);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_seq_block_mv_mup_undef.h"
+#include "_hypre_seq_block_mv_mup.h"
+#endif
 #endif
 
 #endif

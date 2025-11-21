@@ -18,13 +18,16 @@
 # 16: emptyProc.out.120
 #=============================================================================
 
+# solvers.jobs tests
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 21 > nonmixedint.out.0
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 22 > nonmixedint.out.1
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > nonmixedint.out.2
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > nonmixedint.out.3
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 > nonmixedint.out.4
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 22 > nonmixedint.out.14
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 > nonmixedint.out.5
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 42 > nonmixedint.out.15
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 > nonmixedint.out.6
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 62 > nonmixedint.out.16
+
+# emptyProc.jobs tests
+mpirun -np 1  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 22 > nonmixedint.out.4
+mpirun -np 2  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 22 > nonmixedint.out.14
+mpirun -np 1  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 42 > nonmixedint.out.5
+mpirun -np 2  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 42 > nonmixedint.out.15
+mpirun -np 1  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 62 > nonmixedint.out.6
+mpirun -np 2  ./sstruct -in sstruct.in.cube -r 5 5 5 -rhsone -solver 62 > nonmixedint.out.16

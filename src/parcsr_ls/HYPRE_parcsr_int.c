@@ -6,9 +6,8 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "interpreter.h"
-#include "HYPRE_MatvecFunctions.h"
-#include "temp_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
 
 HYPRE_Int
 hypre_ParSetRandomValues( void* v, HYPRE_Int seed )

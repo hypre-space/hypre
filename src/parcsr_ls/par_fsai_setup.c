@@ -422,8 +422,6 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int               num_nnzs_diag_A  = hypre_CSRMatrixNumNonzeros(A_diag);
-   HYPRE_Int               avg_nnzrow_diag_A;
 
    /* Matrix G variables */
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -432,16 +430,13 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    HYPRE_Int              *G_j;
    HYPRE_Complex          *G_a;
    HYPRE_Int               max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
-   HYPRE_Int               max_cand_size;       /* Max size of kg_pos */
 
    /* Local variables */
-   char                     msg[512];    /* Warning message */
-   HYPRE_Int           *twspace;     /* shared work space for omp threads */
+   char                    msg[512];    /* Warning message */
+   HYPRE_Int              *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
-   avg_nnzrow_diag_A = (num_rows_diag_A > 0) ? num_nnzs_diag_A / num_rows_diag_A : 0;
    max_nnzrow_diag_G = max_steps * max_step_size + 1;
-   max_cand_size     = avg_nnzrow_diag_A * max_nnzrow_diag_G;
 
    G_diag = hypre_ParCSRMatrixDiag(G);
    G_a = hypre_CSRMatrixData(G_diag);
@@ -490,10 +485,10 @@ hypre_FSAISetupNative( void               *fsai_vdata,
       /* Allocate and initialize local vector variables */
       G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
       A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-      kap_grad  = hypre_SeqVectorCreate(max_cand_size);
+      kap_grad  = hypre_SeqVectorCreate(num_rows_diag_A);
       A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G * max_nnzrow_diag_G);
       pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-      kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST);
+      kg_pos    = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
@@ -501,7 +496,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
       hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
-      hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      hypre_Memset(marker, -1, (size_t) num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
       G_temp_data   = hypre_VectorData(G_temp);
@@ -706,8 +701,6 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int               num_nnzs_diag_A  = hypre_CSRMatrixNumNonzeros(A_diag);
-   HYPRE_Int               avg_nnzrow_diag_A;
 
    /* Matrix G variables */
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -717,17 +710,14 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Complex          *G_a;
    HYPRE_Int              *G_nnzcnt;          /* Array holding number of nonzeros of row G[i,:] */
    HYPRE_Int               max_nnzrow_diag_G; /* Max. number of nonzeros per row in G_diag */
-   HYPRE_Int               max_cand_size;     /* Max size of kg_pos */
 
    /* Local variables */
-   HYPRE_Int                i, j, jj;
-   char                     msg[512];    /* Warning message */
-   HYPRE_Complex           *twspace;     /* shared work space for omp threads */
+   HYPRE_Int               i, j, jj;
+   char                    msg[512];    /* Warning message */
+   HYPRE_Complex          *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
-   avg_nnzrow_diag_A = num_nnzs_diag_A / num_rows_diag_A;
    max_nnzrow_diag_G = max_steps * max_step_size + 1;
-   max_cand_size     = avg_nnzrow_diag_A * max_nnzrow_diag_G;
 
    G_diag = hypre_ParCSRMatrixDiag(G);
    G_a = hypre_CSRMatrixData(G_diag);
@@ -765,14 +755,13 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       HYPRE_Complex  *G_temp_data;
       HYPRE_Complex  *A_subrow_data;
 
-
       /* Allocate and initialize local vector variables */
       G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
       A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-      kap_grad  = hypre_SeqVectorCreate(max_cand_size);
+      kap_grad  = hypre_SeqVectorCreate(num_rows_diag_A);
       A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G * max_nnzrow_diag_G);
       pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-      kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST);
+      kg_pos    = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
@@ -780,7 +769,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
       hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
-      hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      hypre_Memset(marker, -1, (size_t) num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
       G_temp_data   = hypre_VectorData(G_temp);
@@ -1276,7 +1265,7 @@ hypre_FSAIDumpLocalLSDense( void               *fsai_vdata,
    indices = hypre_CTAlloc(HYPRE_Int, data_size, HYPRE_MEMORY_HOST);
    data    = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_HOST);
    marker  = hypre_TAlloc(HYPRE_Int, num_rows_diag_G, HYPRE_MEMORY_HOST);
-   hypre_Memset(marker, -1, num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   hypre_Memset(marker, -1, (size_t) num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
    /* Write header info */
    hypre_fprintf(fp, "num_linear_sys = %d\n", num_rows_diag_G);

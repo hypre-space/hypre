@@ -17,10 +17,10 @@
  * option == 2, T = HYPRE_Int,
  */
 template<HYPRE_Int option, typename T>
-#if defined(HYPRE_USING_SYCL)
-struct RAP_functor
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
+#else
+struct RAP_functor
 #endif
 {
    HYPRE_Int num_col;
@@ -60,7 +60,10 @@ struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
    }
 };
 
-/* C = A * B */
+/*--------------------------------------------------------------------------
+ * Computes C = A * B on the device
+ *--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                           hypre_ParCSRMatrix  *B )
@@ -116,13 +119,13 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 #endif
       Abar = hypre_ConcatDiagAndOffdDevice(A);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t2;
       hypre_ParPrintf(comm, "Time Concat %f\n", t2);
 #endif
       Bext = hypre_ParCSRMatrixExtractBExtDeviceWait(request);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1 - t2;
       hypre_ParPrintf(comm, "Time Bext %f\n", t2);
       hypre_ParPrintf(comm, "Size Bext %d %d %d\n", hypre_CSRMatrixNumRows(Bext),
@@ -135,7 +138,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_ConcatDiagOffdAndExtDevice(B, Bext, &Bbar, &num_cols_offd_C, &col_map_offd_C);
       hypre_CSRMatrixDestroy(Bext);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Concat %f\n", t2);
 #endif
@@ -145,7 +148,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 #endif
       Cbar = hypre_CSRMatrixMultiplyDevice(Abar, Bbar);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
 #endif
@@ -233,7 +236,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                                                 hypre_CSRMatrixData(Cbar))) + hypre_CSRMatrixNumNonzeros(Cbar),
                    hypre_CSRMatrixJ(Cbar),
                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
-                   thrust::not1(pred) );
+                   HYPRE_THRUST_NOT(pred) );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
 #endif
 
@@ -259,7 +262,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(Cbar_ii, HYPRE_MEMORY_DEVICE);
       hypre_CSRMatrixDestroy(Cbar);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Split %f\n", t2);
 #endif
@@ -271,7 +274,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 #endif
       C_diag = hypre_CSRMatrixMultiplyDevice(hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B));
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
 #endif
@@ -302,7 +305,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
 #if PARCSRGEMM_TIMING > 0
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    tb = hypre_MPI_Wtime() - ta;
    hypre_ParPrintf(comm, "Time hypre_ParCSRMatMatDevice %f\n", tb);
 #endif
@@ -310,7 +313,10 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    return C;
 }
 
-/* C = A^T * B */
+/*--------------------------------------------------------------------------
+ * Computes C = A^T * B on the device
+ *--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix*
 hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix  *B,
@@ -357,7 +363,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #endif
       Bbar = hypre_ConcatDiagAndOffdDevice(B);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Concat %f\n", t2);
 #endif
@@ -385,7 +391,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       }
 
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Transpose %f\n", t2);
 #endif
@@ -395,7 +401,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #endif
       AbarT = hypre_CSRMatrixStack2Device(AT_diag, AT_offd);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Stack %f\n", t2);
 #endif
@@ -429,7 +435,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #endif
       Cbar = hypre_CSRMatrixMultiplyDevice(AbarT, Bbar);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
 #endif
@@ -496,14 +502,14 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
 
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Cint %f\n", t2);
 #endif
@@ -520,7 +526,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_TMemcpy(hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A), &local_nnz_Cbar, HYPRE_Int, 1,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Cext %f\n", t2);
       hypre_ParPrintf(comm, "Size Cext %d %d %d\n", hypre_CSRMatrixNumRows(Cext),
@@ -552,7 +558,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #endif
       hypre_CSRMatrixTransposeDevice(A_diag, &AT_diag, 1);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Transpose %f\n", t2);
 #endif
@@ -561,7 +567,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #endif
       C_diag = hypre_CSRMatrixMultiplyDevice(AT_diag, B_diag);
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
 #endif
@@ -603,10 +609,10 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #if PARCSRGEMM_TIMING > 0
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    tb = hypre_MPI_Wtime() - ta;
    hypre_ParPrintf(comm, "Time hypre_ParCSRTMatMatKTDevice %f\n", tb);
 #endif
@@ -614,23 +620,30 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    return C;
 }
 
-/* C = R^{T} * A * P */
+/*--------------------------------------------------------------------------
+ * Computes C = R^{T} * A * P on the device.
+ *
+ * See hypre_ParCSRMatrixRAPKT for notes about the input arguments.
+ *--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *A,
                                hypre_ParCSRMatrix *P,
-                               HYPRE_Int           keep_transpose )
+                               HYPRE_Int           keep_transpose,
+                               HYPRE_Int           has_diagonal )
 {
    MPI_Comm             comm   = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix     *R_diag = hypre_ParCSRMatrixDiag(R);
    hypre_CSRMatrix     *R_offd = hypre_ParCSRMatrixOffd(R);
 
    hypre_ParCSRMatrix  *C;
-   hypre_CSRMatrix     *C_diag;
+   hypre_CSRMatrix     *C_diag, *C_diag_new;
    hypre_CSRMatrix     *C_offd;
+   hypre_CSRMatrix     *zero;
+
    HYPRE_Int            num_cols_offd_C = 0;
    HYPRE_BigInt        *col_map_offd_C = NULL;
-
    HYPRE_Int            num_procs;
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -650,6 +663,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_printf(" Error! Incompatible matrix local dimensions!\n");
       return NULL;
    }
+
+   hypre_GpuProfilingPushRange("ParCSRMatrixRAPKT");
 
    if (num_procs > 1)
    {
@@ -774,7 +789,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -862,28 +877,35 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    hypre_ParCSRMatrixCompressOffdMapDevice(C);
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
-   /* Ensure that the diagonal entries exist in the matrix structure (even if numerically zero) */
-   if (hypre_CSRMatrixCheckForMissingDiagonal(C_diag))
+   if (has_diagonal)
    {
-      hypre_CSRMatrix *zero = hypre_CSRMatrixIdentityDevice(hypre_CSRMatrixNumRows(C_diag), 0.0);
+      /* Ensure that the diagonal entries exist in the matrix structure
+         (even if numerically zero) */
+      if (hypre_CSRMatrixCheckForMissingDiagonal(C_diag))
+      {
+         zero = hypre_CSRMatrixIdentityDevice(hypre_CSRMatrixNumRows(C_diag), 0.0);
+         C_diag_new = hypre_CSRMatrixAddDevice(1.0, C_diag, 1.0, zero);
 
-      hypre_CSRMatrix *C_diag_new = hypre_CSRMatrixAddDevice(1.0, C_diag, 1.0, zero);
+         hypre_CSRMatrixDestroy(C_diag);
+         hypre_CSRMatrixDestroy(zero);
 
-      hypre_CSRMatrixDestroy(C_diag);
-      hypre_CSRMatrixDestroy(zero);
+         hypre_ParCSRMatrixDiag(C) = C_diag_new;
+      }
 
-      hypre_ParCSRMatrixDiag(C) = C_diag_new;
+      /* Move the diagonal entry to the first of each row */
+      hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
+      hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
    }
 
-   /* Move the diagonal entry to the first of each row */
-   hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
+   hypre_SyncComputeStream();
 
-   hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
-
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
    return C;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
@@ -913,7 +935,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    hypre_CSRMatrix *Cz;
 
    // local part of Cbar
-   hypre_CSRMatrix *Cbar_local = hypre_CSRMatrixCreate(num_rows, hypre_CSRMatrixNumCols(Cbar),
+   hypre_CSRMatrix *Cbar_local = hypre_CSRMatrixCreate(num_rows,
+                                                       hypre_CSRMatrixNumCols(Cbar),
                                                        local_nnz_Cbar);
    hypre_CSRMatrixI(Cbar_local) = hypre_CSRMatrixI(Cbar);
    hypre_CSRMatrixJ(Cbar_local) = hypre_CSRMatrixJ(Cbar);
@@ -962,7 +985,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                                                                      Cext_bigj)) + Cext_nnz,
                                         Cext_bigj,
                                         thrust::make_zip_iterator(thrust::make_tuple(work, big_work)),
-                                        thrust::not1(pred1) );
+                                        HYPRE_THRUST_NOT(pred1) );
 
       HYPRE_Int Cext_offd_nnz = thrust::get<0>(off_end.get_iterator_tuple()) - work;
 #endif
@@ -1070,7 +1093,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       hypre_CSRMatrixBigJ(Cext) = NULL;
 
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time PartialAdd1 %f\n", t2);
 #endif
@@ -1131,7 +1154,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       hypre_CSRMatrixDestroy(Cext);
 
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time PartialAdd2 %f\n", t2);
 #endif
@@ -1146,7 +1169,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       hypre_CSRMatrixDestroy(CC);
 
 #if PARCSRGEMM_TIMING > 1
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time PartialAdd-SpGemm %f\n", t2);
 #endif
@@ -1224,7 +1247,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                 thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
                                 zmp_j,
                                 thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
-                                thrust::not1(pred) );
+                                HYPRE_THRUST_NOT(pred) );
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
 #endif
    hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,
@@ -1261,7 +1284,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    }
 
 #if PARCSRGEMM_TIMING > 1
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    t2 = hypre_MPI_Wtime() - t1;
    hypre_ParPrintf(comm, "Time Split %f\n", t2);
 #endif

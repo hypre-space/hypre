@@ -13,6 +13,10 @@
 
 #include <stdio.h>
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_ParaSails_mup_def.h"
+#endif
+
 #ifndef _MEM_H
 #define _MEM_H
 
@@ -21,12 +25,11 @@
 
 typedef struct
 {
-    HYPRE_Int   num_blocks;
-    HYPRE_Int   bytes_left;
-
+    HYPRE_Int      num_blocks;
+    hypre_longint  bytes_left;
     hypre_longint  total_bytes;
     hypre_longint  bytes_alloc;
-    HYPRE_Int   num_over;
+    HYPRE_Int      num_over;
 
     char *avail;
     char *blocks[MEM_MAXBLOCKS];
@@ -35,7 +38,7 @@ Mem;
 
 Mem  *MemCreate(void);
 void  MemDestroy(Mem *m);
-char *MemAlloc(Mem *m, HYPRE_Int size);
+char *MemAlloc(Mem *m, size_t size);
 void  MemStat(Mem *m, FILE *stream, char *msg);
 
 #endif /* _MEM_H */

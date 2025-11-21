@@ -1236,16 +1236,16 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
     *-----------------------------------------------------------------*/
    if (relax_points)
    {
-      hypre_ParVectorElmdivpyMarked(Vtemp, &l1_norms_parvec, u, cf_marker, relax_points);
+      hypre_ParVectorPointwiseDivpyMarked(Vtemp, &l1_norms_parvec, u, cf_marker, relax_points);
    }
    else
    {
-      hypre_ParVectorElmdivpy(Vtemp, &l1_norms_parvec, u);
+      hypre_ParVectorPointwiseDivpy(Vtemp, &l1_norms_parvec, u);
    }
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    hypre_GpuProfilingPopRange();

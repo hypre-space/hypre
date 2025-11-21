@@ -24,15 +24,19 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_SEQ_BLOCK_MV_HEADER
 
 #include <HYPRE_config.h>
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_seq_block_mv_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 @
 
-tail +7 dense_block_matrix.h >> $INTERNAL_HEADER
-tail +7 protos.h             >> $INTERNAL_HEADER
+cat dense_block_matrix.h >> $INTERNAL_HEADER
+cat protos.h             >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
@@ -42,6 +46,17 @@ cat >> $INTERNAL_HEADER <<@
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_seq_block_mv_mup_undef.h"
+#include "_hypre_seq_block_mv_mup.h"
+#endif
 #endif
 
 #endif

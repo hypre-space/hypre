@@ -1,1 +1,2 @@
-TEST_ij/[^f]*.sh
+TEST_ij/[^m]*.sh
+TEST_ij/matrix.sh

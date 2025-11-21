@@ -26,9 +26,6 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
 
    switch (smoother_type)
    {
-      case -1:
-         return "--";
-
       case 0:
          return "Blk-Jacobi";
 
@@ -63,52 +60,7 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
          return "Backward L1-hGS";
 
       case 16:
-         /* TODO (VPM): Move this to hypre_ILUGetName */
-      {
-         hypre_ParILUData *ilu_smoother = (hypre_ParILUData*)
-                                          hypre_ParMGRDataLevelSmootherI(mgr_data, level);
-         HYPRE_Int         ilu_type = hypre_ParILUDataIluType(ilu_smoother);
-         HYPRE_Int         ilu_fill = hypre_ParILUDataLfil(ilu_smoother);
-
-         switch (ilu_type)
-         {
-            case 0:
-               return (ilu_fill == 0) ? "BJ-ILU0" : "BJ-ILUK";
-
-            case 1:
-               return "BJ-ILUT";
-
-            case 10:
-               return (ilu_fill == 0) ? "GMRES-ILU0" : "GMRES-ILUK";
-
-            case 11:
-               return "GMRES-ILUT";
-
-            case 20:
-               return (ilu_fill == 0) ? "NSH-ILU0" : "NSH-ILUK";
-
-            case 21:
-               return "NSH-ILUT";
-
-            case 30:
-               return (ilu_fill == 0) ? "RAS-ILU0" : "RAS-ILUK";
-
-            case 31:
-               return "RAS-ILUT";
-
-            case 40:
-               return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0" : "ddPQ-GMRES-ILUK";
-
-            case 41:
-               return "ddPQ-GMRES-ILUT";
-
-            case 50:
-               return "RAP-modILU0";
-
-            default:
-               return "Unknown";
-         }
-      }
+         return hypre_ILUGetName((void*) hypre_ParMGRDataLevelSmootherI(mgr_data, level));
 
       default:
          return "Unknown";
@@ -177,6 +129,9 @@ hypre_MGRGetFRelaxName(hypre_ParMGRData  *mgr_data,
 
       case 19:
          return "LU";
+
+      case 32:
+         return hypre_ILUGetName((void*) hypre_ParMGRDataAFFsolverI(mgr_data, level));
 
       case 99:
          return "LU piv";
@@ -290,7 +245,7 @@ hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
          return "NG-ApproxInv";
 
       case 5:
-         return "Glk-RAI";
+         return "NG-A_CC";
 
       default:
          return "Unknown";
@@ -317,6 +272,9 @@ hypre_MGRSetupStats(void *mgr_vdata)
    HYPRE_Solver               coarse_solver   = hypre_ParMGRDataCoarseGridSolver(mgr_data);
    HYPRE_Solver             **A_FF_solver     = hypre_ParMGRDataAFFsolver(mgr_data);
    HYPRE_Int                 *Frelax_type     = hypre_ParMGRDataFRelaxType(mgr_data);
+   HYPRE_Int                  block_size      = hypre_ParMGRDataBlockSize(mgr_data);
+   HYPRE_Int                 *block_num_Cpts  = hypre_ParMGRDataBlockNumCoarseIndexes(mgr_data);
+   HYPRE_Int                **block_CF_marker = hypre_ParMGRDataBlockCFMarker(mgr_data);
 
    /* Finest matrix variables */
    MPI_Comm                   comm            = hypre_ParCSRMatrixComm(A_finest);
@@ -328,12 +286,16 @@ hypre_MGRSetupStats(void *mgr_vdata)
    hypre_ParAMGData          *coarse_amg_solver = NULL;
    hypre_ParCSRMatrix       **A_array;
    hypre_ParCSRMatrix       **P_array;
+   hypre_ParCSRMatrix       **R_array;
    hypre_ParCSRMatrix       **RT_array;
    hypre_MatrixStatsArray    *stats_array;
 
    HYPRE_Real                *gridcomp;
    HYPRE_Real                *opcomp;
    HYPRE_Real                *memcomp;
+
+   HYPRE_Int                  max_length;
+   char                      *coarse_dofs_str = NULL;
 
    HYPRE_Int                  coarsest_mgr_level;
    HYPRE_Int                  num_levels_total;
@@ -384,6 +346,12 @@ hypre_MGRSetupStats(void *mgr_vdata)
    }
    num_levels_total = num_levels_mgr + num_sublevels_amg[coarsest_mgr_level];
 
+   /* Compute global number of nonzeros if not done before */
+   if (hypre_ParCSRMatrixDNumNonzeros(A_finest) <= 0.0)
+   {
+      hypre_ParCSRMatrixSetDNumNonzeros(A_finest);
+   }
+
    /* Compute number of AMG sublevels at each MGR level */
    max_levels = num_levels_total;
    for (i = 0; i < num_levels_mgr; i++)
@@ -406,6 +374,18 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    if (!myid)
    {
+      /* Determine max_length for printing coarse DOFs */
+      if (block_num_Cpts)
+      {
+         coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[0], block_CF_marker[0]);
+         max_length = hypre_min((HYPRE_Int) strlen(coarse_dofs_str) + 2, 50);
+         hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         max_length = 10;
+      }
+
       hypre_printf("\n\n");
       hypre_printf(" Num MPI tasks = %d\n",  num_procs);
       hypre_printf(" Num OpenMP threads = %d\n", num_threads);
@@ -416,22 +396,34 @@ hypre_MGRSetupStats(void *mgr_vdata)
       hypre_printf(" coarse AMG num levels = %d\n", num_sublevels_amg[coarsest_mgr_level]);
       hypre_printf("      Total num levels = %d\n\n", num_levels_total);
 
-      divisors[0] = 84;
+      divisors[0] = 83 + max_length;
       //hypre_printf("\nMGR level options:\n\n");
-      hypre_printf("%18s %14s %16s\n", "Global", "Fine", "Coarse");
-      hypre_printf("%3s %14s %14s %16s %16s %16s\n", "lev",
-                   "relaxation", "relaxation", "grid method",
-                   "Prolongation", "Restriction");
+      hypre_printf("%10s %*s %11s %14s %14s\n",
+                   "Total", max_length, "Coarse", "Global", "Fine", "Coarse");
+      hypre_printf("%3s %6s %*s %11s %14s %14s %14s %14s\n", "lev",
+                   "DOFs", max_length, "DOFs", "relaxation", "relaxation",
+                   "grid method", "Prolongation", "Restriction");
       HYPRE_PRINT_TOP_DIVISOR(1, divisors);
       for (i = 0; i < num_levels_mgr; i++)
       {
-         hypre_printf("%3d %14s %14s %16s %16s %16s\n",
+         if (block_num_Cpts)
+         {
+            coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[i],
+                                                           block_CF_marker[i]);
+         }
+
+         hypre_printf("%3d %6d %*s %11s %14s %14s %14s %14s\n",
                       i,
+                      (i > 0 && block_num_Cpts) ? block_num_Cpts[i - 1] : block_size,
+                      max_length,
+                      (block_num_Cpts) ? coarse_dofs_str : "--",
                       hypre_MGRGetGlobalRelaxName(mgr_data, i),
                       hypre_MGRGetFRelaxName(mgr_data, i),
                       hypre_MGRGetCoarseGridName(mgr_data, i),
                       hypre_MGRGetProlongationName(mgr_data, i),
                       hypre_MGRGetRestrictionName(mgr_data, i));
+
+         hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
       }
       hypre_printf("\n\n");
    }
@@ -475,18 +467,33 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    /* Set pointer to level matrices */
    P_array  = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
+   R_array  = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
    RT_array = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_levels_mgr; i++)
    {
       P_array[i] = hypre_ParMGRDataP(mgr_data, i);
+
+      if (hypre_ParMGRDataR(mgr_data, i))
+      {
+         R_array[i] = hypre_ParMGRDataR(mgr_data, i);
+      }
+      else if (hypre_ParMGRDataRT(mgr_data, i))
+      {
+         hypre_ParCSRMatrixTranspose(hypre_ParMGRDataRT(mgr_data, i), &R_array[i], 1);
+      }
+      else
+      {
+         R_array[i] = NULL;
+      }
    }
 
-   for (i = 0; i < num_sublevels_amg[coarsest_mgr_level]; i++)
+   for (i = 0; i < num_sublevels_amg[coarsest_mgr_level] - 1; i++)
    {
       P_array[num_levels_mgr + i] = hypre_ParAMGDataPArray(coarse_amg_solver)[i];
+      R_array[num_levels_mgr + i] = NULL;
    }
 
-   /* Compute statistics data structure */
+   /* Compute statistics data structure for Prolongation operator */
    hypre_ParCSRMatrixStatsArrayCompute(num_levels_total - 1, P_array, stats_array);
 
    if (!myid)
@@ -500,6 +507,17 @@ hypre_MGRSetupStats(void *mgr_vdata)
       num_levels[0] = num_levels_mgr;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] - 1;
       hypre_MatrixStatsArrayPrint(2, num_levels, 1, 0, msg, stats_array);
+   }
+
+   /* Compute statistics data structure for Restriction operator (only for MGR) */
+   hypre_ParCSRMatrixStatsArrayCompute(num_levels_mgr, R_array, stats_array);
+
+   if (!myid)
+   {
+      const char *msg[] = { "MGR Restriction Matrix Hierarchy Information:\n\n" };
+
+      num_levels[0] = num_levels_mgr;
+      hypre_MatrixStatsArrayPrint(1, num_levels, 1, 0, msg, stats_array);
    }
 
    /*-------------------------------------------------
@@ -599,20 +617,34 @@ hypre_MGRSetupStats(void *mgr_vdata)
             RT_array[k] = (k < (num_sublevels_amg[i] - 1)) ?
                           hypre_ParAMGDataRArray(amg_solver)[k] : NULL;
 
+            /* Compute global number of nonzeros if not done before */
+            if (hypre_ParCSRMatrixDNumNonzeros(A_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(A_array[k]);
+            }
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(P_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(P_array[k]);
+            }
+            if (k < (num_sublevels_amg[i] - 1) && hypre_ParCSRMatrixDNumNonzeros(RT_array[k]) <= 0.0)
+            {
+               hypre_ParCSRMatrixSetDNumNonzeros(RT_array[k]);
+            }
+
             gridcomp[i] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[k]);
-            opcomp[i]   += (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[k]);
+            opcomp[i]   += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
+            memcomp[i]  += hypre_ParCSRMatrixDNumNonzeros(A_array[k]);
             if (k < (num_sublevels_amg[i] - 1))
             {
-               memcomp[i] += (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[k]) +
-                             (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P_array[k]) +
-                             (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(RT_array[k]);
+               memcomp[i] += hypre_ParCSRMatrixDNumNonzeros(P_array[k]) +
+                             hypre_ParCSRMatrixDNumNonzeros(RT_array[k]);
             }
          }
          gridcomp[num_levels_mgr + 1] += gridcomp[i];
          opcomp[num_levels_mgr + 1]   += opcomp[i] /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += memcomp[i] /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
 
          gridcomp[i] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
          opcomp[i]   /= hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
@@ -626,11 +658,11 @@ hypre_MGRSetupStats(void *mgr_vdata)
          memcomp[i]  = 1.0;
 
          A_array[i] = hypre_ParMGRDataA(mgr_data, i);
-         gridcomp[num_levels_mgr + 1] += hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
+         gridcomp[num_levels_mgr + 1] += (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[i]);
          opcomp[num_levels_mgr + 1]   += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
          memcomp[num_levels_mgr + 1]  += hypre_ParCSRMatrixDNumNonzeros(A_array[i]) /
-                                         hypre_ParCSRMatrixNumNonzeros(A_finest);
+                                         hypre_ParCSRMatrixDNumNonzeros(A_finest);
       }
    }
    gridcomp[num_levels_mgr + 1] /= (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_finest);
@@ -669,9 +701,18 @@ hypre_MGRSetupStats(void *mgr_vdata)
     *  Free memory
     *-------------------------------------------------*/
 
+   for (i = 0; i < num_levels_mgr; i++)
+   {
+      if (hypre_ParMGRDataRT(mgr_data, i))
+      {
+         hypre_ParCSRMatrixDestroy(R_array[i]);
+      }
+   }
+
    hypre_MatrixStatsArrayDestroy(stats_array);
    hypre_TFree(A_array, HYPRE_MEMORY_HOST);
    hypre_TFree(P_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(R_array, HYPRE_MEMORY_HOST);
    hypre_TFree(RT_array, HYPRE_MEMORY_HOST);
    hypre_TFree(num_sublevels_amg, HYPRE_MEMORY_HOST);
    hypre_TFree(gridcomp, HYPRE_MEMORY_HOST);

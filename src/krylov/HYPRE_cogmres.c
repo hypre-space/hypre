@@ -10,7 +10,8 @@
  * HYPRE_COGMRES interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_COGMRESDestroy
@@ -308,8 +309,7 @@ HYPRE_Int HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void *residual )
  *--------------------------------------------------------------------------*/
 
 
-HYPRE_Int HYPRE_COGMRESSetModifyPC( HYPRE_Solver  solver,
-                                    HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, HYPRE_Real) )
+HYPRE_Int HYPRE_COGMRESSetModifyPC(HYPRE_Solver   solver, HYPRE_PtrToModifyPCFcn modify_pc)
 {
    return hypre_COGMRESSetModifyPC( (void *) solver, (HYPRE_Int(*)(void*, HYPRE_Int,
                                                                    HYPRE_Real))modify_pc);

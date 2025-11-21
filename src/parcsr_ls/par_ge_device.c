@@ -27,12 +27,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 {
    /* Input data */
    hypre_ParCSRMatrix  *par_A           = hypre_ParAMGDataAArray(amg_data)[level];
-   HYPRE_Int            global_num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_A);
+   HYPRE_BigInt         global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_A);
    HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(par_A);
    HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
-   HYPRE_Int            global_size     = global_num_rows * global_num_rows;
+   HYPRE_BigInt         global_size     = hypre_squared(global_num_rows);
 
    /* Local variables */
    HYPRE_Int            buffer_size     = 0;
@@ -43,12 +43,6 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    /* Sanity checks */
    if (!num_rows || !global_size)
    {
-      return hypre_error_flag;
-   }
-
-   if (global_size < 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected overflow!");
       return hypre_error_flag;
    }
 
@@ -102,6 +96,10 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    /**************
     * TODO (VPM) *
     **************/
+   HYPRE_UNUSED_VAR(A_piv);
+   HYPRE_UNUSED_VAR(A_mat);
+   HYPRE_UNUSED_VAR(A_work);
+   HYPRE_UNUSED_VAR(buffer_size);
 
 #else
    /* Silence declared but never referenced warnings */
@@ -312,6 +310,11 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    /**************
     * TODO (VPM) *
     **************/
+   HYPRE_UNUSED_VAR(A_piv);
+   HYPRE_UNUSED_VAR(A_mat);
+   HYPRE_UNUSED_VAR(i_one);
+   HYPRE_UNUSED_VAR(d_one);
+   HYPRE_UNUSED_VAR(zero);
 
 #else
    /* Silence declared but never referenced warnings */

@@ -184,7 +184,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -401,7 +401,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
          }
 
-         if (old_resnorm)
+         if (old_resnorm != 0.0)
          {
             conv_factor = resnorm / old_resnorm;
          }
@@ -445,7 +445,7 @@ hypre_ILUSolve( void               *ilu_vdata,
     *    Add operator and grid complexity stats
     *-----------------------------------------------------------------------*/
 
-   if (iter > 0 && init_resnorm)
+   if (iter > 0 && init_resnorm != 0.0)
    {
       conv_factor = hypre_pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }
@@ -1380,7 +1380,7 @@ hypre_ILUSolveRAPGMRESHost(hypre_ParCSRMatrix *A,
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
    hypre_Vector      *x_local = NULL;
-   HYPRE_Real        *x_data;
+   HYPRE_Real        *x_data  = NULL;
 
    /* xtemp might be null when we have no Schur complement */
    if (xtemp)
@@ -1680,7 +1680,7 @@ hypre_NSHSolve( void               *nsh_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -1757,7 +1757,7 @@ hypre_NSHSolve( void               *nsh_vdata,
             resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
          }
 
-         if (old_resnorm) { conv_factor = resnorm / old_resnorm; }
+         if (old_resnorm != 0.0) { conv_factor = resnorm / old_resnorm; }
          else { conv_factor = resnorm; }
          if (rhs_norm > HYPRE_REAL_EPSILON)
          {
@@ -1794,7 +1794,7 @@ hypre_NSHSolve( void               *nsh_vdata,
     *    Add operator and grid complexity stats
     *-----------------------------------------------------------------------*/
 
-   if (iter > 0 && init_resnorm)
+   if (iter > 0 && init_resnorm != 0.0)
    {
       conv_factor = hypre_pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }

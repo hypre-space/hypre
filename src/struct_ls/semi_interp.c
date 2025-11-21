@@ -53,6 +53,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
 {
    HYPRE_UNUSED_VAR(xc);
 
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(P);
    hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
@@ -60,6 +61,11 @@ hypre_SemiInterpSetup( void               *interp_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
+   hypre_Index             ustride;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -68,11 +74,12 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
    hypre_ComputeInfoProjectComp(compute_info, findex, stride);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(e), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(e), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------
@@ -85,6 +92,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_CopyIndex(cindex, (interp_data -> cindex));
    hypre_CopyIndex(findex, (interp_data -> findex));
    hypre_CopyIndex(stride, (interp_data -> stride));
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -143,6 +152,8 @@ hypre_SemiInterp( void               *interp_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_BeginTiming(interp_data -> time_index);
 
@@ -338,6 +349,8 @@ hypre_SemiInterp( void               *interp_vdata,
 
    hypre_IncFLOPCount(3 * hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

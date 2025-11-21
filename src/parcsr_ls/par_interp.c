@@ -123,7 +123,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1090,7 +1090,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -2237,6 +2237,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
    {
       HYPRE_Int       *P_marker, *P_marker_offd;
 
+      alfa = 1.0;
+      beta = 1.0;
       size = n_fine / num_threads;
       rest = n_fine - size * num_threads;
       if (jl < rest)
@@ -2430,8 +2432,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
                }
             }
-            if (sum_P_neg) { alfa = sum_N_neg / sum_P_neg / diagonal; }
-            if (sum_P_pos) { beta = sum_N_pos / sum_P_pos / diagonal; }
+            if (sum_P_neg != 0.0) { alfa = sum_N_neg / sum_P_neg / diagonal; }
+            if (sum_P_pos != 0.0) { beta = sum_N_pos / sum_P_pos / diagonal; }
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -2623,7 +2625,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 {
    if (trunc_factor <= 0.0 && max_elmts == 0)
    {
-      return 0;
+      return hypre_error_flag;
    }
 
 #if defined(HYPRE_USING_GPU)
@@ -2759,7 +2761,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);

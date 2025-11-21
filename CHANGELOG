@@ -7,6 +7,62 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 3.0.0 released 2025/09/26
+
+- Major rewrite of the semi-structured code (Struct and SStruct)
+  * Extended matrices to be rectangular (not just square as before)
+  * Added support for rectangular Matvec and Matmat
+  * Generalized support for matrices with constant coefficients
+  * Added a new semi-structured algebraic multigrid solver (SSAMG) that takes
+    advantage of structure and builds on the PFMG and BoomerAMG solvers
+- Added new mixed precision functionality
+  * Provides support to switch between precisions at runtime
+  * Provides mixed-precision preconditioned Krylov solvers (lower-order
+    preconditioning of higher-order Krylov method)
+- API changes:
+  * HYPRE_StructVectorSetValues, HYPRE_StructVectorAddToValues
+  * Removed SStruct solvers FAC and Maxwell
+  * Removed Struct solver MSG
+- Added support for tagged residual norms (allows norms on subsets of values)
+- Added support for block scaling of IJ matrices and vectors
+- Various bug fixes
+
+#====================================
+
+Version 2.33.0 released 2025/04/03
+
+- Added verbosity control to error printing
+- Updated cmake to provide full build support (matches autotools)
+- Added early assembly feature to IJ to minimize memory use
+- Added new IJ matrix and vector APIs
+- Various bug fixes
+
+#====================================
+
+Version 2.32.0 released 2024/10/08
+
+- New MGR features and updates
+- New filtering option to AMG for block-diagonal preconditioning
+- New memory usage monitoring functions
+- Added non-UVM support for ILUT and HMIS coarsening
+- Various bug fixes
+
+#====================================
+
+Version 2.31.0 released 2024/02/14
+
+- Added iterative ILU0 option
+- Refactored MGR interpolation, added column-sum restriction, improved robustness
+- Added new print level options for MGR
+- Updated IJ vector I/O functions
+- Updated default compiler list for configure
+- Added a feature to avoid GPU device initialization for CPU runs
+- Improved FSAI performance on GPUs
+- Added MGR function to set the F-relaxation solver on a specific level
+- Various bug fixes
+
+#====================================
+
 Version 2.30.0 released 2023/11/06
 
 - Added FSAI support with CUDA and HIP

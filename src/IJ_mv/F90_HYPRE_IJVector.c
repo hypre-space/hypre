@@ -11,8 +11,8 @@
  *
  *****************************************************************************/
 
-#include "./_hypre_IJ_mv.h"
-#include "fortran.h"
+#include "_hypre_IJ_mv.h"
+#include "_hypre_fortran.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +64,38 @@ hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)
    *ierr = (hypre_F90_Int)
            ( HYPRE_IJVectorInitialize(
                 hypre_F90_PassObj (HYPRE_IJVector, vector) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitialize_v2
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijvectorinitialize_v2, HYPRE_IJVECTORINITIALIZE_V2)
+( hypre_F90_Obj *vector,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJVectorInitialize_v2(
+                hypre_F90_PassObj (HYPRE_IJVector, vector),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorMigrate
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijvectormigrate, HYPRE_IJVECTORMIGRATE)
+( hypre_F90_Obj *vector,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJVectorMigrate(
+                hypre_F90_PassObj (HYPRE_IJVector, vector),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
 }
 
 /*--------------------------------------------------------------------------

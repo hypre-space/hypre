@@ -194,12 +194,12 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    /* Digits computation */
    ndigits[0]  = hypre_max(7, hypre_ndigits(hypre_MatrixStatsNumRows(stats_finest)));
    ndigits[1]  = 7;
-   ndigits[2]  = hypre_max(8, hypre_ndigits(hypre_MatrixStatsNumNonzeros(stats_finest)));
+   ndigits[2]  = hypre_max(8, hypre_ndigits_ull(hypre_MatrixStatsNumNonzeros(stats_finest)));
    ndigits[3]  = 7;
    ndigits[4]  = 4;
    ndigits[5]  = 4;
    ndigits[6]  = 4;
-   ndigits[7]  = 4;
+   ndigits[7]  = 5;
    ndigits[8]  = 8;
    ndigits[9]  = 8;
    ndigits[10] = 8;
@@ -246,8 +246,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    offsets[1] = 0 + ndigits[2];
    offsets[2] = 2 + ndigits[3];
    offsets[3] = 7 + (ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) / 2;
-   offsets[4] = (ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) / 2 +
-                (ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) % 2 - 3;
+   offsets[4] = (1 + ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) / 2 - 3;
    offsets[5] = 4 + (ndigits[8] + ndigits[9] + ndigits[10] + ndigits[11]) / 2;
    if (!square)
    {

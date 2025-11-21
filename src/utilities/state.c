@@ -8,7 +8,10 @@
 #include "_hypre_utilities.h"
 
 /* Global variable: library state (initialized, finalized, or none) */
+/* guard definition of global variables to avoid linker errors for multiprecision build */
+#if defined (hypre_DEFINE_GLOBAL)
 hypre_State hypre__global_state = HYPRE_STATE_NONE;
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_Initialized

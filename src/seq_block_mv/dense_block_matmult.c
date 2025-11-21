@@ -103,7 +103,7 @@ hypre_DenseBlockMatrixMultiply( hypre_DenseBlockMatrix   *A,
    {
       /* Reset output coefficients to zero */
       hypre_Memset(hypre_DenseBlockMatrixData(C), 0,
-                   hypre_DenseBlockMatrixNumNonzeros(C) * sizeof(HYPRE_Complex),
+                   (size_t) hypre_DenseBlockMatrixNumNonzeros(C) * sizeof(HYPRE_Complex),
                    hypre_DenseBlockMatrixMemoryLocation(C));
    }
 

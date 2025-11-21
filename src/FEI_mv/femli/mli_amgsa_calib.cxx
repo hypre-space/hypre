@@ -25,7 +25,7 @@
 #include "HYPRE.h"
 #include "_hypre_utilities.h"
 #include "HYPRE_IJ_mv.h"
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_parcsr_mv.h"
 
 #include "mli_method_amgsa.h"

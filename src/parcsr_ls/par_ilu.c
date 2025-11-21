@@ -272,6 +272,34 @@ hypre_ILUDestroy( void *data )
 }
 
 /*--------------------------------------------------------------------------
+ * Return a human-readable ILU variant name based on type and fill level
+ *--------------------------------------------------------------------------*/
+
+const char*
+hypre_ILUGetName(void *ilu_vdata)
+{
+   hypre_ParILUData  *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   HYPRE_Int          ilu_type = hypre_ParILUDataIluType(ilu_data);
+   HYPRE_Int          ilu_fill = hypre_ParILUDataLfil(ilu_data);
+
+   switch (ilu_type)
+   {
+      case 0:  return (ilu_fill == 0) ? "BJ-ILU0"          : "BJ-ILUK";
+      case 1:  return "BJ-ILUT";
+      case 10: return (ilu_fill == 0) ? "GMRES-ILU0"       : "GMRES-ILUK";
+      case 11: return "GMRES-ILUT";
+      case 20: return (ilu_fill == 0) ? "NSH-ILU0"         : "NSH-ILUK";
+      case 21: return "NSH-ILUT";
+      case 30: return (ilu_fill == 0) ? "RAS-ILU0"         : "RAS-ILUK";
+      case 31: return "RAS-ILUT";
+      case 40: return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0"  : "ddPQ-GMRES-ILUK";
+      case 41: return "ddPQ-GMRES-ILUT";
+      case 50: return "RAP-modILU0";
+      default: return "Unknown";
+   }
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ILUSetLevelOfFill
  *
  * Set fill level for ILUK
@@ -2278,7 +2306,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix  *A,
          {
             HYPRE_Int tmp;
             tmp = E_init_alloc;
-            E_init_alloc   = (HYPRE_Int)(E_init_alloc * EXPAND_FACT + 1);
+            E_init_alloc   = (HYPRE_Int)((HYPRE_Real) E_init_alloc * EXPAND_FACT) + 1;
             E_ext_j        = hypre_TReAlloc_v2(E_ext_j, HYPRE_Int, tmp, HYPRE_Int,
                                                E_init_alloc, HYPRE_MEMORY_HOST);
             E_ext_data     = hypre_TReAlloc_v2(E_ext_data, HYPRE_Real, tmp, HYPRE_Real,
@@ -2569,7 +2597,7 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
             if (G_nnz >= G_capacity)
             {
                HYPRE_Int tmp = G_capacity;
-               G_capacity = (HYPRE_Int) (G_capacity * EXPAND_FACT + 1);
+               G_capacity = (HYPRE_Int)((HYPRE_Real) G_capacity * EXPAND_FACT) + 1;
                G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int,
                                        G_capacity, HYPRE_MEMORY_HOST);
             }
@@ -3013,6 +3041,9 @@ hypre_ParILUSchurGMRESDummySolveDevice( void             *ilu_vdata,
                                         hypre_ParVector  *f,
                                         hypre_ParVector  *u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata);
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData    *ilu_data = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix  *S        = hypre_ParILUDataMatS(ilu_data);
    HYPRE_Int            n_local  = hypre_ParCSRMatrixNumRows(S);
@@ -3058,6 +3089,9 @@ hypre_ParILURAPSchurGMRESSolveDevice( void               *ilu_vdata,
                                       hypre_ParVector    *par_f,
                                       hypre_ParVector    *par_u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata);
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData        *ilu_data  = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix      *S         = hypre_ParILUDataMatS(ilu_data);
    hypre_CSRMatrix         *SLU       = hypre_ParCSRMatrixDiag(S);
@@ -3092,6 +3126,8 @@ hypre_ParILURAPSchurGMRESMatvecDevice( void           *matvec_data,
                                        HYPRE_Complex   beta,
                                        void           *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* Get matrix information first */
    hypre_ParILUData       *ilu_data    = (hypre_ParILUData*) ilu_vdata;
    HYPRE_Int               test_opt    = hypre_ParILUDataTestOption(ilu_data);
@@ -4106,7 +4142,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while (ctrA + drop_len > capacity)
          {
             HYPRE_Int tmp = capacity;
-            capacity = (HYPRE_Int)(capacity * EXPAND_FACT + 1);
+            capacity = (HYPRE_Int)((HYPRE_Real) capacity * EXPAND_FACT) + 1;
             new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp,
                                       HYPRE_Int, capacity, memory_location);
             new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp,
@@ -4149,7 +4185,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while (ctrA + drop_len > capacity)
          {
             HYPRE_Int tmp = capacity;
-            capacity = (HYPRE_Int)(capacity * EXPAND_FACT + 1);
+            capacity = (HYPRE_Int)((HYPRE_Real) capacity * EXPAND_FACT) + 1;
             new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp,
                                       HYPRE_Int, capacity, memory_location);
             new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp,
@@ -4432,7 +4468,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix         *M_offd;
    HYPRE_Int               *M_offd_i;
 
-   HYPRE_Real              time_s, time_e;
+   HYPRE_Real              time_s = 0.0, time_e;
 
    HYPRE_Int               n = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int               i;

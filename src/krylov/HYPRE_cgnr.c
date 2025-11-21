@@ -10,7 +10,8 @@
  * HYPRE_CGNR interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_CGNRCreate does not exist.  Call the appropriate function which

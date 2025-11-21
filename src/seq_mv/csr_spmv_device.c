@@ -11,12 +11,10 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) ||\
-    defined(HYPRE_USING_HIP)  ||\
-    defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #include "csr_spmv_device.h"
 
@@ -167,6 +165,8 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
                                 T                 beta,
                                 T                *d_y )
 {
+   HYPRE_UNUSED_VAR(num_vectors);
+
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int grid_ngroups  = item.get_group_range(2) * (HYPRE_SPMV_BLOCKDIM / K);
    HYPRE_Int grid_group_id = (item.get_group(2) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(2)) / K;

@@ -337,7 +337,8 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetLogging(
 
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
-   HYPRE_Int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
+   HYPRE_Int nprocs, *rowdist, ierr;
+   HYPRE_BigInt m, n, start, end, col0, coln;
    hypre_DistributedMatrixPilutSolver *solver =
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);

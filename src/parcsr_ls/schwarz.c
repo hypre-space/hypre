@@ -398,7 +398,7 @@ hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix  *par_A,
    HYPRE_Real *rhs_ext = NULL;
    HYPRE_Real *vtemp_data;
    HYPRE_Real *aux;
-   HYPRE_Real *buf_data;
+   HYPRE_Real *buf_data = NULL;
    /*hypre_Vector *x_vector;*/
    MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
    HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
@@ -742,7 +742,7 @@ hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix  *par_A,
 
    if (comm_pkg)
    {
-      comm_handle = hypre_ParCSRCommHandleCreate (2, comm_pkg, x_ext, buf_data);
+      comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, x_ext, buf_data);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
@@ -3064,7 +3064,7 @@ hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
    HYPRE_Int num_variables;
    HYPRE_Int num_cols_offd;
    HYPRE_Real *scale_ext = NULL;
-   HYPRE_Real *buf_data;
+   HYPRE_Real *buf_data = NULL;
    HYPRE_Int index;
 
    HYPRE_Int piv_counter = 0;
@@ -3195,7 +3195,7 @@ hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 
    if (comm_pkg)
    {
-      comm_handle = hypre_ParCSRCommHandleCreate (2, comm_pkg, x_ext_data, buf_data);
+      comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, x_ext_data, buf_data);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
@@ -3825,8 +3825,8 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int    num_sends = 0;
-   HYPRE_Int   *send_map_starts;
-   HYPRE_Int   *send_map_elmts;
+   HYPRE_Int   *send_map_starts = NULL;
+   HYPRE_Int   *send_map_elmts = NULL;
 
    HYPRE_Int    num_variables = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int    num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
@@ -3862,7 +3862,7 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix  *A,
 
    if (comm_pkg)
    {
-      scale_int = hypre_CTAlloc(HYPRE_Real,  send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+      scale_int = hypre_CTAlloc(HYPRE_Real, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
       comm_handle = hypre_ParCSRCommHandleCreate (2, comm_pkg, scale_ext, scale_int);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);

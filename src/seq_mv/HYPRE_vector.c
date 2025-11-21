@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_VectorCreate
@@ -63,4 +63,14 @@ HYPRE_Vector
 HYPRE_VectorRead( char         *file_name )
 {
    return ( (HYPRE_Vector) hypre_SeqVectorRead( file_name ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_VectorCopy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_VectorCopy( HYPRE_Vector  xvec, HYPRE_Vector  yvec)
+{
+   return ( hypre_SeqVectorCopy( (hypre_Vector *) xvec, (hypre_Vector *) yvec) );
 }

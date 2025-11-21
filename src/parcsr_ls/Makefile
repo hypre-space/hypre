@@ -31,6 +31,7 @@ C_COMPILE_FLAGS =\
 
 HEADERS =\
  HYPRE_parcsr_ls.h\
+ HYPRE_parcsr_ls_mp.h\
  _hypre_parcsr_ls.h\
  aux_interp.h\
  block_tridiag.h\
@@ -69,6 +70,7 @@ FILES =\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
  HYPRE_parcsr_cgnr.c\
+ HYPRE_parcsr_cheby.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_cogmres.c\
@@ -103,6 +105,8 @@ FILES =\
  par_coarsen.c\
  par_cgc_coarsen.c\
  par_cheby.c\
+ par_cheby_setup.c\
+ par_cheby_solve.c\
  par_coarse_parms.c\
  par_coordinates.c\
  par_cr.c\
@@ -127,6 +131,7 @@ FILES =\
  par_mgr.c\
  par_mgr_coarsen.c\
  par_mgr_interp.c\
+ par_mgr_rap.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
  par_mgr_stats.c\
@@ -180,9 +185,31 @@ CUFILES =\
  par_mgr_device.c\
  par_fsai_device.c
 
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c\
+ HYPRE_parcsr_ls_mp.c
+
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -192,16 +219,18 @@ SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

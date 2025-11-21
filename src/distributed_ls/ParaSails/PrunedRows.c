@@ -64,7 +64,7 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
                 count++;
         }
 
-        p->ind[row] = (HYPRE_Int *) MemAlloc(p->mem, count*sizeof(HYPRE_Int));
+        p->ind[row] = (HYPRE_Int *) MemAlloc(p->mem, (size_t) count * sizeof(HYPRE_Int));
         p->len[row] = count;
 
         data = p->ind[row];
@@ -100,7 +100,7 @@ void PrunedRowsDestroy(PrunedRows *p)
 
 HYPRE_Int *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len)
 {
-    return (HYPRE_Int *) MemAlloc(p->mem, len*sizeof(HYPRE_Int));
+    return (HYPRE_Int *) MemAlloc(p->mem, (size_t) len * sizeof(HYPRE_Int));
 }
 
 /*--------------------------------------------------------------------------

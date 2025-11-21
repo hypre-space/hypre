@@ -34,7 +34,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              A_stencil_size;
 
    HYPRE_Int              k, j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
 
    RAP_stencil_dim = 3;
 
@@ -45,7 +45,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -69,12 +69,12 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
                {
 
                   /*--------------------------------------------------------
-                   * Storage for c,w,e,n,s elements in each plane
+                   * Storage for c,w,e,n,s entries in each plane
                    *--------------------------------------------------------*/
-                  if ( i * j == 0 )
+                  if (i * j == 0)
                   {
-                     hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, k);
-                     stencil_rank++;
+                     hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, k);
+                     stencil_entry++;
                   }
                }
             }
@@ -96,11 +96,11 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
                {
 
                   /*--------------------------------------------------------
-                   * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se) in
+                   * Storage for 9 entries (c,w,e,n,s,sw,se,nw,se) in
                    * each plane
                    *--------------------------------------------------------*/
-                  hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, k);
-                  stencil_rank++;
+                  hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, k);
+                  stencil_entry++;
                }
             }
          }
@@ -132,13 +132,13 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
                {
 
                   /*--------------------------------------------------------
-                   * Store  5 elements in lower plane (c,w,e,s,n)
-                   * and 3 elements in same plane (c,w,s)
+                   * Store  5 entries in lower plane (c,w,e,s,n)
+                   * and 3 entries in same plane (c,w,s)
                    *--------------------------------------------------------*/
-                  if ( i * j == 0 && i + j + k <= 0)
+                  if (i * j == 0 && i + j + k <= 0)
                   {
-                     hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, k);
-                     stencil_rank++;
+                     hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, k);
+                     stencil_entry++;
                   }
                }
             }
@@ -163,13 +163,13 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
                {
 
                   /*--------------------------------------------------------
-                   * Store  9 elements in lower plane (c,w,e,s,n,sw,se,nw,ne)
-                   * and 5 elements in same plane (c,w,s,sw,se)
+                   * Store  9 entries in lower plane (c,w,e,s,n,sw,se,nw,ne)
+                   * and 5 entries in same plane (c,w,s,sw,se)
                    *--------------------------------------------------------*/
-                  if ( k < 0 || (i + j + k <= 0 && j < 1) )
+                  if (k < 0 || (i + j + k <= 0 && j < 1))
                   {
-                     hypre_SetIndex3(RAP_stencil_shape[stencil_rank], i, j, k);
-                     stencil_rank++;
+                     hypre_SetIndex3(RAP_stencil_shape[stencil_entry], i, j, k);
+                     stencil_entry++;
                   }
                }
             }
@@ -198,7 +198,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
       RAP_num_ghost[3] = 0;
       RAP_num_ghost[5] = 0;
    }
-   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }
@@ -1817,8 +1817,8 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
    HYPRE_Real           *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
    HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
-   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-   HYPRE_Real           *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_bsw = NULL, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_csw = NULL, *rap_cse, *rap_cnw, *rap_cne;
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    HYPRE_Real           zero = 0.0;

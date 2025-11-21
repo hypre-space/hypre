@@ -48,7 +48,7 @@ PROJECT_NAME           = hypre
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER = 2.30.0
+PROJECT_NUMBER = 3.0.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -902,11 +902,13 @@ INPUT                  = \
 ../../struct_mv/HYPRE_struct_mv.h \
 ../../sstruct_mv/HYPRE_sstruct_mv.h \
 ../../IJ_mv/HYPRE_IJ_mv.h \
+../../parcsr_mv/HYPRE_parcsr_mv.h \
 ../../struct_ls/HYPRE_struct_ls.h \
 ../../sstruct_ls/HYPRE_sstruct_ls.h \
 ../../parcsr_ls/HYPRE_parcsr_ls.h \
 ../../krylov/HYPRE_krylov.h \
-../../krylov/HYPRE_lobpcg.h
+../../krylov/HYPRE_lobpcg.h \
+../../utilities/HYPRE_utilities.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

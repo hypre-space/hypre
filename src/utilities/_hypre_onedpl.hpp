@@ -15,6 +15,9 @@
 /* oneAPI DPL headers */
 /* NOTE: these must be included before standard C++ headers */
 
+/* WM: workaround - this is a workaround for a bug in oneDPL reduce by segment */
+#define ONEDPL_WORKAROUND_FOR_IGPU_64BIT_REDUCTION 1
+
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
 #include <oneapi/dpl/numeric>
@@ -23,11 +26,14 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+/* WM: dpct below currently needed for constant iterators */
+#include <dpct/dpl_extras/iterators.h>
+
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
 template <typename T, typename Predicate, typename Operator>
-struct transform_if_unary_zip_mask_fun
+struct hypreSycl_transform_if_unary_zip_mask_fun
 {
-   transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
+   hypreSycl_transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
    template <typename _T>
    void operator()(_T&& t) const
    {
@@ -61,15 +67,15 @@ Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
    auto begin_for_each = oneapi::dpl::make_zip_iterator(first, mask, result);
    HYPRE_ONEDPL_CALL( std::for_each,
                       begin_for_each, begin_for_each + n,
-                      transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(pred, unary_op) );
+                      hypreSycl_transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(pred, unary_op) );
    return result + n;
 }
 
 // Functor evaluates second element of tied sequence with predicate.
 // Used by: copy_if
-template <typename Predicate> struct predicate_key_fun
+template <typename Predicate> struct hypreSycl_predicate_key_fun
 {
-   predicate_key_fun(Predicate _pred) : pred(_pred) {}
+   hypreSycl_predicate_key_fun(Predicate _pred) : pred(_pred) {}
 
    template <typename _T1> bool operator()(_T1 &&a) const
    {
@@ -99,7 +105,7 @@ Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
                                      oneapi::dpl::make_zip_iterator(first, mask),
                                      oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
                                      oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-                                     predicate_key_fun<Pred>(pred));
+                                     hypreSycl_predicate_key_fun<Pred>(pred));
    return std::get<0>(ret_val.base());
 }
 
@@ -121,7 +127,7 @@ Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
    auto ret_val = HYPRE_ONEDPL_CALL( std::remove_if,
                                      oneapi::dpl::make_zip_iterator(first, mask_cpy),
                                      oneapi::dpl::make_zip_iterator(last, mask_cpy + std::distance(first, last)),
-                                     predicate_key_fun<Pred>(pred));
+                                     hypreSycl_predicate_key_fun<Pred>(pred));
    hypre_TFree(mask_cpy, HYPRE_MEMORY_DEVICE);
    return std::get<0>(ret_val.base());
 }
@@ -140,7 +146,7 @@ Iter3 hypreSycl_remove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result
                                      oneapi::dpl::make_zip_iterator(first, mask),
                                      oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
                                      oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-                                     predicate_key_fun<Pred>(pred));
+                                     hypreSycl_predicate_key_fun<Pred>(pred));
    return std::get<0>(ret_val.base());
 }
 
@@ -271,6 +277,25 @@ void hypreSycl_stable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 value
                       zipped_begin,
                       zipped_begin + n,
    [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+}
+
+// WM: workaround - A workaround for a bug in inclusive_scan and exclusive_scan in oneDPL with oneAPI 2025.0
+// and oneAPI 2025.1.
+template <class To, class F>
+struct func_converter
+{
+    template <typename... Args>
+    To operator()(Args&&... args) const
+    {
+        return To(f(std::forward<Args>(args)...));
+    }
+    F f;
+};
+
+template <class To, class F>
+auto make_func_converter(F f)
+{
+    return func_converter<To, F>{std::move(f)};
 }
 
 #endif
