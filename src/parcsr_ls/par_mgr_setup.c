@@ -885,7 +885,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       for (j = 1; j < (old_num_coarse_levels); j++)
       {
-         if (aff_solver[j])
+         if ((mgr_data -> Frelax_type)[i] == 29)
+         {
+            hypre_MGRDirectSolverDestroy(aff_solver[j]);
+            aff_solver[j] = NULL;
+         }
+         else if (aff_solver[j])
          {
             aff_base = (hypre_Solver*) aff_solver[j];
             hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
@@ -1246,15 +1251,17 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* User-prescribed F-solver */
       if (Frelax_type[lev] == 2  ||
+          Frelax_type[lev] == 29 ||
+          Frelax_type[lev] == 32 ||
           Frelax_type[lev] == 9  ||
           Frelax_type[lev] == 99 ||
           Frelax_type[lev] == 199)
       {
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
-            if (Frelax_type[lev] == 2)
+            if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
             {
-               if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
+               if (Frelax_type[lev] == 2 && ((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
                {
                   if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                   {
@@ -1294,14 +1301,14 @@ hypre_MGRSetup( void               *mgr_vdata,
                hypre_error_w_msg(0, msg);
             }
          }
+         /* Give preference to user-set aff_solver at a given level */
          else if (aff_solver[lev])
          {
-            aff_base = (hypre_Solver*) aff_solver[lev];
-
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
 
             /* Call setup function */
+            aff_base = (hypre_Solver*) aff_solver[lev];
             hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
                                         (HYPRE_Matrix) A_ff_array[lev],
                                         (HYPRE_Vector) F_fine_array[lev + 1],
@@ -1326,17 +1333,53 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
             hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
 
-            fgrid_solver_setup(aff_solver[lev],
-                               A_ff_array[lev],
-                               F_fine_array[lev + 1],
-                               U_fine_array[lev + 1]);
+            /* Call setup function */
+            aff_base = (hypre_Solver*) aff_solver[lev];
+            hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                        (HYPRE_Matrix) A_ff_array[lev],
+                                        (HYPRE_Vector) F_fine_array[lev + 1],
+                                        (HYPRE_Vector) U_fine_array[lev + 1]);
 
             (mgr_data -> fsolver_mode) = 2;
+         }
+         else if (Frelax_type[lev] == 29)
+         {
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
+
+            /* Call setup function */
+            hypre_MGRDirectSolverSetup(&aff_solver[lev],
+                                       A_ff_array[lev],
+                                       F_fine_array[lev + 1],
+                                       U_fine_array[lev + 1]);
+         }
+         else if (Frelax_type[lev] == 32) /* Construct default ILU solver */
+         {
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
+
+            /* Create ILU solver for A_FF */
+            aff_solver[lev] = (HYPRE_Solver*) hypre_ILUCreate();
+            HYPRE_ILUSetLocalReordering(*aff_solver[lev], 0);
+
+            /* Call setup function */
+            aff_base = (hypre_Solver*) aff_solver[lev];
+            hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                        (HYPRE_Matrix) A_ff_array[lev],
+                                        (HYPRE_Vector) F_fine_array[lev + 1],
+                                        (HYPRE_Vector) U_fine_array[lev + 1]);
          }
          else
          {
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
+         }
+
+         /* Exit early in case of issues */
+         if (HYPRE_GetError())
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during F-relaxation setup!");
+            return hypre_error_flag;
          }
 
          /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */

@@ -420,6 +420,9 @@
 #undef hypre_StructMatvec
 #undef hypre_StructMatvecCompute
 #undef hypre_StructMatvecCompute_core_CC
+#undef hypre_StructMatvecCompute_core_ICC
+#undef hypre_StructMatvecCompute_core_IVC
+#undef hypre_StructMatvecCompute_core_IVCC
 #undef hypre_StructMatvecCompute_core_VC
 #undef hypre_StructMatvecCompute_core_VCC
 #undef hypre_StructMatvecCreate
