@@ -3124,7 +3124,8 @@ HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMa
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                            HYPRE_Int blk_dim, hypre_ParCSRMatrix **Wr_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
-HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+HYPRE_Int hypre_MGRColLumpedRestrict(HYPRE_Int colsum_type,
+                                     hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                      hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr);
 
