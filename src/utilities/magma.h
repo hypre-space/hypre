@@ -20,7 +20,9 @@ extern "C++"
 #endif
 
 #if !defined(MAGMA_GLOBAL)
+#if !defined(ADD_)
 #define ADD_
+#endif
 #endif
 #include <magma_v2.h>
 

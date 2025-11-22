@@ -4494,6 +4494,8 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver,
  *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
  *    - 2 : AMG
+ *    - 29: Sparse direct solver (requires SuperLU_Dist support)
+ *    - 32: ILU
  *    - 9, 99, 199 : Gaussian Elimination variants (GE, GE with pivoting, direct inversion respectively)
  **/
 HYPRE_Int
@@ -4561,6 +4563,7 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver,
  *    - 12   : Block Jacobi
  *    - 13   : CPR-like restriction operator
  *    - 14   : (Block) Column-lumped restriction
+ *    - 15   : partial Column-lumped restriction
  *    - else : use classical modified interpolation
  *
  * The default is injection.

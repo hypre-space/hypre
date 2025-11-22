@@ -348,6 +348,10 @@ if (HYPRE_ENABLE_FEI)
   message(WARNING "CMake support for FEI is not complete!")
 endif ()
 
+if (HYPRE_BUILD_UMPIRE)
+  set(HYPRE_ENABLE_UMPIRE ON CACHE BOOL "Use Umpire Allocator for device and unified memory" FORCE)
+endif ()
+
 # FEI doesn't currently compile with shared
 if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
   set(HYPRE_USING_FEI OFF CACHE INTERNAL "")
