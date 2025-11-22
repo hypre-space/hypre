@@ -64,6 +64,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       block_mode;
    HYPRE_Int       cheby_order;
 
+   /* Flexible Cycle variables */
+   HYPRE_Int      *is_flexible, length_cycle_flexible, num_levels_flexible;
+   HYPRE_Int      *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
+   HYPRE_Real     *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
+   HYPRE_Real     cgc_scaling_factor_tmp;
+   HYPRE_Int      index;
+   
    /* Local variables  */
    HYPRE_Int      *lev_counter;
    HYPRE_Int       Solve_err_flag;
@@ -153,7 +160,19 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
+   num_levels_flexible           = hypre_ParAMGDataFlexibleNumLevels(amg_data);
+   length_cycle_flexible         = hypre_ParAMGDataFlexibleCycleLength(amg_data);
+   cycle_struct_flexible         = hypre_ParAMGDataFlexibleCycleStruct(amg_data);
+   relax_types_flexible          = hypre_ParAMGDataFlexibleRelaxTypes(amg_data);
+   relax_orders_flexible         = hypre_ParAMGDataFlexibleRelaxOrders(amg_data);
+   outer_weights_flexible        = hypre_ParAMGDataFlexibleOuterWeights(amg_data);
+   relax_weights_flexible        = hypre_ParAMGDataFlexibleRelaxWeights(amg_data);
+   cgc_scaling_factors_flexible  = hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data);
+
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+
+   if (num_levels_flexible > 0)
+      is_flexible = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data))
    {
@@ -222,9 +241,28 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    }
    fcycle_lev = num_levels - 2;
 
+   index = 0;
    level = 0;
    cycle_param = 1;
 
+   // set flags for each level indicating the flexible portion of the cycle
+   if (num_levels_flexible > 0)
+   {
+      for (k=0; k < num_levels; ++k)
+      {
+         if (num_levels_flexible < num_levels) // the cycle is composed of: a flexible part + a recursive part (V-,W-cycles)
+         {
+            if ((k >= 0 && k < num_levels_flexible - 1) || (k == num_levels - 1)) // flexible levels 
+               is_flexible[k] = 1;
+            else // recursive levels
+               is_flexible[k] = 0;
+         }
+         else  // the entire cycle is flexible
+         {
+            is_flexible[k] = 1;
+         }
+      }
+   }
    smoother = hypre_ParAMGDataSmoother(amg_data);
 
    if (smooth_num_levels > 0)
@@ -378,6 +416,22 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
       else
       {
+         /*---------------------------------------------------------------------------------
+         * Override relaxation type, order, weights and outer weights for flexible cycles
+         *----------------------------------------------------------------------------------*/
+         if (num_levels_flexible > 0) 
+         {
+            relax_order = hypre_ParAMGDataRelaxOrder(amg_data);
+            if (is_flexible[level])
+            {
+               relax_type          = relax_types_flexible[index];
+               relax_order         = relax_orders_flexible[index];
+               relax_weight[level] = relax_weights_flexible[index];
+               omega[level]        = outer_weights_flexible[index];
+               num_sweep           = 1;
+            }
+         }
+
          /*------------------------------------------------------------------
          * Do the relaxation num_sweep times
          *-----------------------------------------------------------------*/
@@ -647,6 +701,32 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        *-----------------------------------------------------------------*/
 
       --lev_counter[level];
+      
+      /*-------------------------------------------
+       * Override lev_counter for flexible cycles
+       *-------------------------------------------*/
+      if (num_levels_flexible > 0) 
+         if (is_flexible[level])
+         {
+            if (index == (length_cycle_flexible - 1))
+               {
+                  Not_Finished=0; 
+                  continue;
+               }
+            else if (cycle_struct_flexible[index] == -1) // cycle down
+               lev_counter[level]=0;
+            else if (cycle_struct_flexible[index] == 1) // cycle up
+               {
+                  cgc_scaling_factor_tmp = cgc_scaling_factors_flexible[index]; // scaling factor for CGC
+                  lev_counter[level] = -1;
+               }
+            else if (cycle_struct_flexible[index] == 0) // relax again on the same level
+               {
+                  index++; 
+                  continue;
+               } 
+            index++;
+         }
 
       //if ( level != num_levels-1 && lev_counter[level] >= 0 )
       if (lev_counter[level] >= 0 && level != num_levels - 1)
@@ -738,6 +818,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
+         
+         // set scaling factor for coarse-grid correction in flexible cycles
+         if (num_levels_flexible > 0)
+            if (is_flexible[fine_grid])
+               {
+                  alpha = cgc_scaling_factor_tmp;
+               }
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
