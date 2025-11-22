@@ -441,9 +441,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
 
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation loc;
-   HYPRE_GetMemoryLocation(&loc);
-   if (loc == HYPRE_EXEC_DEVICE)
+   if (hypre_GetExecPolicy1(hypre_StructMatrixMemoryLocation(smatrix)) == HYPRE_EXEC_DEVICE)
    {
       hypre_SyncDevice();
    }
