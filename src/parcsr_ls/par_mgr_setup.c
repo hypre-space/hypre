@@ -1607,7 +1607,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_GpuProfilingPushRange(region_name);
    HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-   cgrid_solver_setup(&(mgr_data -> coarse_grid_solver),
+   cgrid_solver_setup((mgr_data -> coarse_grid_solver),
                       A_array[num_c_levels],
                       F_array[num_c_levels],
                       U_array[num_c_levels]);
