@@ -360,7 +360,8 @@ hypre_MGRDestroy( void *data )
             hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
          }
       }
-      if (mgr_data -> fsolver_mode == 2)
+      /* TODO (VPM): remove fsolver_mode */
+      if ((mgr_data -> fsolver_mode == 2) && (mgr_data -> aff_solver)[0])
       {
          hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
       }

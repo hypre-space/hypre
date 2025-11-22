@@ -2452,7 +2452,8 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
    HYPRE_Int                num_points = 2;
    HYPRE_Int                points[2]  = {1, -1}; // {C, F}
    HYPRE_Int                sizes[2]   = {hypre_ParCSRMatrixNumRows(A_CF),
-                                          hypre_ParCSRMatrixNumCols(A_CF)};
+                                          hypre_ParCSRMatrixNumCols(A_CF)
+                                         };
    hypre_IntArrayArray     *CF_maps;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
