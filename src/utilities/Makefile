@@ -79,12 +79,16 @@ CUFILES=\
  memory.c\
  omp_device.c\
  stl_ops.c
+ 
+MP_CUFILES=\
+ utilities_mp_device.c
 
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c
+ mup_pre.c\
+ utilities_mp.c
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c
@@ -105,9 +109,10 @@ CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
+MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
 
 endif
 

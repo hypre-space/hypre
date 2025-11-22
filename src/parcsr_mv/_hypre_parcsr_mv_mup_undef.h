@@ -53,6 +53,10 @@
 #undef HYPRE_ParVectorSetConstantValues
 #undef HYPRE_ParVectorSetRandomValues
 #undef HYPRE_VectorToParVector
+#undef hypre_ParCSRMatrixClone
+#undef hypre_ParCSRMatrixCopy
+#undef hypre_ParCSRMatrixCreate
+#undef hypre_ParCSRMatrixInitialize_v2
 #undef hypre_AssumedPartitionCreate
 #undef hypre_AssumedPartitionDestroy
 #undef hypre_BooleanGenerateDiagAndOffd
@@ -134,17 +138,14 @@
 #undef hypre_ParCSRMatrixBlkFilterHost
 #undef hypre_ParCSRMatrixBlockColSum
 #undef hypre_ParCSRMatrixBlockColSumHost
-#undef hypre_ParCSRMatrixClone
 #undef hypre_ParCSRMatrixClone_v2
 #undef hypre_ParCSRMatrixColSum
 #undef hypre_ParCSRMatrixColSumHost
 #undef hypre_ParCSRMatrixCompressOffdMap
 #undef hypre_ParCSRMatrixComputeScalingTagged
-#undef hypre_ParCSRMatrixCopy
 #undef hypre_ParCSRMatrixCopyColMapOffdToDevice
 #undef hypre_ParCSRMatrixCopyColMapOffdToHost
 #undef hypre_ParCSRMatrixCopy_C
-#undef hypre_ParCSRMatrixCreate
 #undef hypre_ParCSRMatrixCreateAssumedPartition
 #undef hypre_ParCSRMatrixCreateFromDenseBlockMatrix
 #undef hypre_ParCSRMatrixCreateFromParVector
@@ -173,7 +174,6 @@
 #undef hypre_ParCSRMatrixGetRowHost
 #undef hypre_ParCSRMatrixInfNorm
 #undef hypre_ParCSRMatrixInitialize
-#undef hypre_ParCSRMatrixInitialize_v2
 #undef hypre_ParCSRMatrixLocalSumElts
 #undef hypre_ParCSRMatrixLocalTranspose
 #undef hypre_ParCSRMatrixMatvec

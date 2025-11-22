@@ -62,6 +62,7 @@ cat hopscotch_hash.h           >> $INTERNAL_HEADER
 cat mmio.h                     >> $INTERNAL_HEADER
 cat _hypre_fortran_matrix.h    >> $INTERNAL_HEADER
 cat multiprecision.h           >> $INTERNAL_HEADER
+cat protos_mp.h                >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

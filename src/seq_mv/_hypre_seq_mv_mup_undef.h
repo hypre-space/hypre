@@ -37,12 +37,18 @@
 #undef HYPRE_MultiblockMatrixPrint
 #undef HYPRE_MultiblockMatrixSetNumSubmatrices
 #undef HYPRE_MultiblockMatrixSetSubmatrixType
+#undef HYPRE_VectorAxpy
 #undef HYPRE_VectorCopy
 #undef HYPRE_VectorCreate
 #undef HYPRE_VectorDestroy
 #undef HYPRE_VectorInitialize
 #undef HYPRE_VectorPrint
 #undef HYPRE_VectorRead
+#undef hypre_CSRMatrixCopy
+#undef hypre_CSRMatrixCreate
+#undef hypre_CSRMatrixInitialize_v2
+#undef hypre_CSRMatrixResetData
+#undef hypre_SeqVectorSetData
 #undef hypre_CSRMatrixAdd
 #undef hypre_CSRMatrixAddFirstPass
 #undef hypre_CSRMatrixAddHost
@@ -57,8 +63,6 @@
 #undef hypre_CSRMatrixComputeColSumHost
 #undef hypre_CSRMatrixComputeRowSum
 #undef hypre_CSRMatrixComputeRowSumHost
-#undef hypre_CSRMatrixCopy
-#undef hypre_CSRMatrixCreate
 #undef hypre_CSRMatrixDeleteZeros
 #undef hypre_CSRMatrixDestroy
 #undef hypre_CSRMatrixDiagScale
@@ -70,7 +74,6 @@
 #undef hypre_CSRMatrixGetLoadBalancedPartitionBegin
 #undef hypre_CSRMatrixGetLoadBalancedPartitionEnd
 #undef hypre_CSRMatrixInitialize
-#undef hypre_CSRMatrixInitialize_v2
 #undef hypre_CSRMatrixJtoBigJ
 #undef hypre_CSRMatrixMatvec
 #undef hypre_CSRMatrixMatvecOutOfPlace
@@ -173,7 +176,6 @@
 #undef hypre_SeqVectorScaleHost
 #undef hypre_SeqVectorSetConstantValues
 #undef hypre_SeqVectorSetConstantValuesHost
-#undef hypre_SeqVectorSetData
 #undef hypre_SeqVectorSetDataOwner
 #undef hypre_SeqVectorSetNumTags
 #undef hypre_SeqVectorSetOwnsTags

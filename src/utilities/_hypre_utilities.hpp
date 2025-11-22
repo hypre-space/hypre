@@ -129,6 +129,21 @@ struct hypreFunctor_NonzeroAboveTol
    }
 };
 
+/*--------------------------------------------------------------------------
+ * hypreFunctor_ElementCast
+ *
+ * Functor for performing casting data between datatypes
+ *--------------------------------------------------------------------------*/
+
+template <typename T, typename T2>
+struct hypreFunctor_ElementCast
+{
+   __host__ __device__ T2 operator()(T a)
+   {
+      return static_cast<T2>(a);
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */
 /******************************************************************************
@@ -2455,6 +2470,8 @@ template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
+template<typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
@@ -2467,7 +2484,7 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+#endif /* #ifndef HYPRE_DEVICE_UTILS_H */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
