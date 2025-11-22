@@ -2097,10 +2097,10 @@ HYPRE_Int hypre_BoomerAMGDD_MarkCoarse ( HYPRE_Int *list, HYPRE_Int *marker,
                                          HYPRE_Int num_owned, HYPRE_Int total_num_nodes, HYPRE_Int num_owned_coarse, HYPRE_Int list_size,
                                          HYPRE_Int dist, HYPRE_Int use_sort, HYPRE_Int *nodes_to_add );
 HYPRE_Int hypre_BoomerAMGDD_UnpackRecvBuffer ( hypre_ParAMGDDData *amgdd_data,
-                                               HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size,
+                                               HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size,
                                                HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
-HYPRE_Int* hypre_BoomerAMGDD_PackSendBuffer ( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
-                                              HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
+HYPRE_BigInt* hypre_BoomerAMGDD_PackSendBuffer ( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
+                                                 HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
 HYPRE_Int hypre_BoomerAMGDD_PackRecvMapSendBuffer ( HYPRE_Int *recv_map_send_buffer,
                                                     HYPRE_Int **recv_red_marker, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size,
                                                     HYPRE_Int current_level, HYPRE_Int num_levels );

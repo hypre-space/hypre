@@ -10,6 +10,8 @@
 
 /*--------------------------------------------------------------------------
  * hypre_SSAMGPrintStats
+ *
+ * TODO: Use HYPRE_BigInt for global quantities
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -177,9 +179,9 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       }
       if (myid == 0)
       {
-         global_num_rows[l]     = hypre_ParCSRMatrixGlobalNumRows(umatrix);
-         global_num_rownnz[l]   = hypre_ParCSRMatrixGlobalNumRownnz(umatrix);
-         global_num_nonzeros[l] = hypre_ParCSRMatrixNumNonzeros(umatrix);
+         global_num_rows[l]     = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(umatrix);
+         global_num_rownnz[l]   = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRownnz(umatrix);
+         global_num_nonzeros[l] = (HYPRE_Int) hypre_ParCSRMatrixNumNonzeros(umatrix);
          if (global_num_rownnz[l])
          {
             global_avg_entries[l] = global_num_nonzeros[l] / (HYPRE_Real) global_num_rownnz[l];
@@ -300,8 +302,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          global_num_boxes[l]  = (HYPRE_Int) recv_buffer[0];
          global_num_dofs[l]   = (HYPRE_Int) recv_buffer[1];
-         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[2] +
-                                hypre_ParCSRMatrixGlobalNumRows(umatrix);
+         global_num_ghrows[l] = (HYPRE_Int) ((HYPRE_BigInt) recv_buffer[2] +
+                                             hypre_ParCSRMatrixGlobalNumRows(umatrix));
          global_avg_stsize[l] = recv_buffer[3] / global_num_dofs[l];
       }
 

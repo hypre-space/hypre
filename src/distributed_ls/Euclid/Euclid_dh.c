@@ -127,7 +127,8 @@ void Euclid_dhDestroy(Euclid_dh ctx)
 void Euclid_dhSetup(Euclid_dh ctx)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n, beg_row;
   HYPRE_Real t1;
   bool isSetup = ctx->isSetup;
   bool bj = false;

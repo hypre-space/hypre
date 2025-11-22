@@ -133,7 +133,7 @@ static void create_fake_mat_private(Factor_dh mat, Mat_dh *matFakeIN)
   matFake->rp = mat->rp;
   matFake->cval = mat->cval;
   matFake->aval = mat->aval;
-  matFake->beg_row = mat->beg_row;
+  matFake->beg_row = (HYPRE_Int) mat->beg_row;
   END_FUNC_DH
 }
 
@@ -169,7 +169,7 @@ HYPRE_Int Factor_dhReadNz(Factor_dh mat)
 void Factor_dhPrintRows(Factor_dh mat, FILE *fp)
 {
   START_FUNC_DH
-  HYPRE_Int beg_row = mat->beg_row;
+  HYPRE_BigInt beg_row = mat->beg_row;
   HYPRE_Int m = mat->m, i, j;
   bool noValues;
 
@@ -205,7 +205,7 @@ void Factor_dhPrintRows(Factor_dh mat, FILE *fp)
 void Factor_dhPrintDiags(Factor_dh mat, FILE *fp)
 {
   START_FUNC_DH
-  HYPRE_Int beg_row = mat->beg_row;
+  HYPRE_BigInt beg_row = mat->beg_row;
   HYPRE_Int m = mat->m, i, pe, *diag = mat->diag;
   REAL_DH *aval = mat->aval;
 
@@ -273,7 +273,7 @@ void Factor_dhPrintTriples(Factor_dh mat, char *filename)
   START_FUNC_DH
   HYPRE_Int pe, i, j;
   HYPRE_Int m = mat->m, *rp = mat->rp;
-  HYPRE_Int beg_row = mat->beg_row;
+  HYPRE_BigInt beg_row = mat->beg_row;
   REAL_DH *aval = mat->aval;
   bool noValues;
   FILE *fp;
@@ -391,14 +391,15 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
 #undef __FUNC__
 #define __FUNC__ "setup_sends_private"
 static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
-                                  HYPRE_Int *o2n_subdomain, bool debug)
+                                HYPRE_Int *o2n_subdomain, bool debug)
 {
   START_FUNC_DH
-  HYPRE_Int         i, jLo, jHi, sendlenLo, sendlenHi, first = mat->beg_row;
+  HYPRE_Int         i, jLo, jHi, sendlenLo, sendlenHi;
+  HYPRE_BigInt      first = mat->beg_row;
   hypre_MPI_Request *requests = mat->requests, *sendReq;
   hypre_MPI_Status  *statuses = mat->status;
   bool        isHigher;
-  HYPRE_Int         *rcvBuf;
+  HYPRE_BigInt         *rcvBuf;
   HYPRE_Real  *sendBuf;
   HYPRE_Int         myidNEW = o2n_subdomain[myid_dh];
   HYPRE_Int         count;
@@ -418,10 +419,10 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
 
   mat->sendlenLo = sendlenLo;
   mat->sendlenHi = sendlenHi;
-  mat->sendbufLo = (HYPRE_Real*) MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendbufHi = (HYPRE_Real*) MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_Real)); CHECK_V_ERROR;
-  mat->sendindLo = (HYPRE_Int*)  MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  mat->sendindHi = (HYPRE_Int*)  MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  mat->sendbufLo = (HYPRE_Real*)    MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendbufHi = (HYPRE_Real*)    MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendindLo = (HYPRE_BigInt*)  MALLOC_DH((size_t) sendlenLo * sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
+  mat->sendindHi = (HYPRE_BigInt*)  MALLOC_DH((size_t) sendlenHi * sizeof(HYPRE_BigInt)); CHECK_V_ERROR;
 
   count = 0;  /* number of calls to hypre_MPI_Irecv() */
   jLo = jHi = 0;
@@ -449,7 +450,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
       /* matching receive, for list of unknowns that will be sent,
          during the triangular solves, from ourselves to P_i
        */
-      hypre_MPI_Irecv(rcvBuf, inlist[i], HYPRE_MPI_INT, i, 444, comm_dh, requests+count);
+      hypre_MPI_Irecv(rcvBuf, inlist[i], HYPRE_MPI_BIG_INT, i, 444, comm_dh, requests+count);
       ++count;
 
       /* Set up the send */
@@ -477,7 +478,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
         }
 
         hypre_fprintf(logFile, "FACT  send to P_%i: ", i);
-        for (j=0; j<inlist[i]; ++j) hypre_fprintf(logFile, "%i ", rcvBuf[j]+1);
+        for (j=0; j<inlist[i]; ++j) hypre_fprintf(logFile, "%b ", (HYPRE_BigInt)(rcvBuf[j]+1));
         hypre_fprintf(logFile, "\n");
       }
     }
@@ -620,7 +621,7 @@ void Factor_dhSolve(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx)
   HYPRE_Int    offsetHi = mat->numbSolve->num_extHi;
   HYPRE_Int    *rp = mat->rp, *cval = mat->cval, *diag = mat->diag;
   HYPRE_Real *aval = mat->aval;
-  HYPRE_Int    *sendindLo = mat->sendindLo, *sendindHi = mat->sendindHi;
+  HYPRE_BigInt *sendindLo = mat->sendindLo, *sendindHi = mat->sendindHi;
   HYPRE_Int    sendlenLo = mat->sendlenLo, sendlenHi = mat->sendlenHi;
   HYPRE_Real *sendbufLo = mat->sendbufLo, *sendbufHi = mat->sendbufHi;
   HYPRE_Real *work_y = mat->work_y_lo;
@@ -628,7 +629,7 @@ void Factor_dhSolve(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx)
   bool debug = false;
 
   if (mat->debug && logFile != NULL) debug = true;
-  if (debug) beg_rowG = ctx->F->beg_row;
+  if (debug) beg_rowG = (HYPRE_Int) ctx->F->beg_row;
 
 /*
 for (i=0; i<m+offsetLo+offsetHi; ++i) {
@@ -902,7 +903,8 @@ void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
                           HYPRE_Real rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *Fout)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row, alloc;
+  HYPRE_Int m, alloc;
+  HYPRE_BigInt n, beg_row;
   Factor_dh F;
 
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
@@ -911,7 +913,7 @@ void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
 
   *Fout = F;
   F->m = m;
-  F->n = n;
+  F->n = (HYPRE_Int) n;
   F->beg_row = beg_rowP;
   F->id = id;
   F->alloc = alloc;
@@ -1093,8 +1095,8 @@ void adjust_bj_private(Factor_dh mat)
   START_FUNC_DH
   HYPRE_Int i;
   HYPRE_Int nz = mat->rp[mat->m];
-  HYPRE_Int beg_row = mat->beg_row;
-  for (i=0; i<nz; ++i) mat->cval[i] += beg_row;
+  HYPRE_BigInt beg_row = mat->beg_row;
+  for (i=0; i<nz; ++i) mat->cval[i] += (HYPRE_Int) beg_row;
   END_FUNC_DH
 }
 
@@ -1105,8 +1107,8 @@ void unadjust_bj_private(Factor_dh mat)
   START_FUNC_DH
   HYPRE_Int i;
   HYPRE_Int nz = mat->rp[mat->m];
-  HYPRE_Int beg_row = mat->beg_row;
-  for (i=0; i<nz; ++i) mat->cval[i] -= beg_row;
+  HYPRE_BigInt beg_row = mat->beg_row;
+  for (i=0; i<nz; ++i) mat->cval[i] -= (HYPRE_Int) beg_row;
   END_FUNC_DH
 }
 
