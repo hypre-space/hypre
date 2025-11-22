@@ -4040,7 +4040,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_MGRDirectSolverCreate()
+hypre_MGRDirectSolverCreate(void)
 {
    /* TODO (VPM): implement direct solver creation and options setup, e.g., print_level */
    // hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);

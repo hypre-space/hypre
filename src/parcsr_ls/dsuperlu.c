@@ -285,20 +285,23 @@ hypre_SLUDistDestroy(void* solver)
 {
    hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
 
-   PStatFree(&(dslu_data->dslu_data_stat));
-   Destroy_CompRowLoc_Matrix_dist(&(dslu_data->A_dslu));
-   dScalePermstructFree(&(dslu_data->dslu_ScalePermstruct));
-   dDestroy_LU(dslu_data->global_num_rows,
-               &(dslu_data->dslu_data_grid),
-               &(dslu_data->dslu_data_LU));
-   dLUstructFree(&(dslu_data->dslu_data_LU));
-   if (dslu_data->dslu_options.SolveInitialized)
+   if (dslu_data)
    {
-      dSolveFinalize(&(dslu_data->dslu_options), &(dslu_data->dslu_solve));
+      PStatFree(&(dslu_data->dslu_data_stat));
+      Destroy_CompRowLoc_Matrix_dist(&(dslu_data->A_dslu));
+      dScalePermstructFree(&(dslu_data->dslu_ScalePermstruct));
+      dDestroy_LU(dslu_data->global_num_rows,
+                  &(dslu_data->dslu_data_grid),
+                  &(dslu_data->dslu_data_LU));
+      dLUstructFree(&(dslu_data->dslu_data_LU));
+      if (dslu_data->dslu_options.SolveInitialized)
+      {
+         dSolveFinalize(&(dslu_data->dslu_options), &(dslu_data->dslu_solve));
+      }
+      superlu_gridexit(&(dslu_data->dslu_data_grid));
+      hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST);
+      hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
    }
-   superlu_gridexit(&(dslu_data->dslu_data_grid));
-   hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST);
-   hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

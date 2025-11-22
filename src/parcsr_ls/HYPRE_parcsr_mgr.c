@@ -287,11 +287,6 @@ HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   else if (!coarse_grid_solver)
-   {
-      hypre_error_in_arg(4);
-      return hypre_error_flag;
-   }
 
    return ( hypre_MGRSetCoarseSolver( (void *) solver,
                                       (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
