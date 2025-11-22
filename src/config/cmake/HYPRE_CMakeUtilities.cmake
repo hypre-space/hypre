@@ -825,6 +825,9 @@ function(maybe_build_umpire)
   set(ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
   set(ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
 
+  # Rename Umpire's 'check' target to 'umpire_check' to avoid conflicts
+  set(BLT_CODE_CHECK_TARGET_NAME "umpire_check" CACHE STRING "Rename Umpire's check target" FORCE)
+
   # Ensure Umpire installs to the same prefix as hypre
   set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Install prefix" FORCE)
 

@@ -5327,11 +5327,11 @@ HYPRE_Int
 hypre_MGRCoarsen_long_dbl( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int final_coarse_size, HYPRE_Int *final_coarse_indexes, HYPRE_Int debug_flag, hypre_IntArray **CF_marker, HYPRE_Int last_level );
 
 HYPRE_Int
-hypre_MGRColLumpedRestrict_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_flt( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int
-hypre_MGRColLumpedRestrict_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_dbl( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int
-hypre_MGRColLumpedRestrict_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_long_dbl( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 
 void *
 hypre_MGRCreate_flt( void );
