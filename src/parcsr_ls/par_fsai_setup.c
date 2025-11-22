@@ -712,7 +712,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Int               max_nnzrow_diag_G; /* Max. number of nonzeros per row in G_diag */
 
    /* Local variables */
-   HYPRE_Int               i, j, jj;
+   HYPRE_Int               iG, jG, jjG;
    char                    msg[512];    /* Warning message */
    HYPRE_Complex          *twspace;     /* shared work space for omp threads */
 

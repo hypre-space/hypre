@@ -8,27 +8,16 @@
 #include "_hypre_utilities.h"
 
 /******************************************************************************
- * This routine is the same in both the sequential and normal cases
- *
- * The 'comm' argument for MPI_Comm_f2c is MPI_Fint, which is always the size of
- * a Fortran integer and hence usually the size of hypre_int.
- ****************************************************************************/
-
-hypre_MPI_Comm
-hypre_MPI_Comm_f2c( hypre_int comm )
-{
-#ifdef HYPRE_HAVE_MPI_COMM_F2C
-   return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
-#else
-   return (hypre_MPI_Comm) (size_t)comm;
-#endif
-}
-
-/******************************************************************************
  * MPI stubs to generate serial codes without mpi
  *****************************************************************************/
 
 #if defined(HYPRE_SEQUENTIAL)
+
+hypre_MPI_Comm
+hypre_MPI_Comm_f2c( hypre_int comm )
+{
+   return (hypre_MPI_Comm) (size_t)comm;
+}
 
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
@@ -932,6 +921,23 @@ hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
  *****************************************************************************/
 
 #else
+
+/******************************************************************************
+ * This routine is the same in both the sequential and normal cases
+ *
+ * The 'comm' argument for MPI_Comm_f2c is MPI_Fint, which is always the size of
+ * a Fortran integer and hence usually the size of hypre_int.
+ ****************************************************************************/
+
+hypre_MPI_Comm
+hypre_MPI_Comm_f2c( hypre_int comm )
+{
+#ifdef HYPRE_HAVE_MPI_COMM_F2C
+   return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
+#else
+   return (hypre_MPI_Comm) (size_t)comm;
+#endif
+}
 
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,

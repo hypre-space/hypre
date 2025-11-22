@@ -618,7 +618,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 
    HYPRE_Real               diag, row_scale, row_sum;
    HYPRE_Int                i, jj, jA, jS;
-   HYPRE_Int                num_sends, start, j, index;
+   HYPRE_Int                num_sends, start, stop, j, index;
    HYPRE_Int               *int_buf_data;
 
    HYPRE_Int                ierr = 0;
