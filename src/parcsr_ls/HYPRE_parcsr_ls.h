@@ -4563,6 +4563,7 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver,
  *    - 12   : Block Jacobi
  *    - 13   : CPR-like restriction operator
  *    - 14   : (Block) Column-lumped restriction
+ *    - 15   : partial Column-lumped restriction
  *    - else : use classical modified interpolation
  *
  * The default is injection.
