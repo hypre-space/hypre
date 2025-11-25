@@ -12,9 +12,14 @@
  *****************************************************************************/
 
 #define HYPRE_TIMING
-#define HYPRE_TIMING_GLOBALS
 #include "_hypre_utilities.h"
 #include "timing.h"
+
+/* Global variable for timing */
+/* guard definition of global variables to avoid linker errors for multiprecision build */
+#if defined (hypre_DEFINE_GLOBAL)
+hypre_TimingType *hypre_global_timing = NULL;
+#endif
 
 /*-------------------------------------------------------
  * Timing macros

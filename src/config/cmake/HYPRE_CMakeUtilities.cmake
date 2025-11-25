@@ -1228,6 +1228,13 @@ macro(setup_mixed_precision_compilation module_name)
       ${CMAKE_SOURCE_DIR}/matrix_matrix
       ${CMAKE_SOURCE_DIR}/multivector
     )
+    # Set position independent code for shared library builds
+    # Object libraries need explicit -fPIC when used in shared libraries
+    if(BUILD_SHARED_LIBS)
+      set_target_properties(${module_name}_${precision} PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+      )
+    endif()
     # Link to MPI if it's enabled
     if(HYPRE_ENABLE_MPI)
       target_link_libraries(${module_name}_${precision} PRIVATE MPI::MPI_C)
