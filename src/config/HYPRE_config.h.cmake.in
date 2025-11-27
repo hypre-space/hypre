@@ -47,6 +47,9 @@
 /* Debug mode */
 #cmakedefine HYPRE_DEBUG 1
 
+/* Enable floating-point exception trap */
+#cmakedefine HYPRE_USING_FPE_TRAP 1
+
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
 
