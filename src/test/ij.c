@@ -269,9 +269,9 @@ main( hypre_int argc,
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type;
    /* flexible cycling params*/
-   HYPRE_Int      flexible_cycle = 0, length_cycle_flexible = 0;
-   HYPRE_Int      *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
-   HYPRE_Real     *relax_weights_flexible, *outer_weights_flexible, *cgc_scaling_factors_flexible;
+   HYPRE_Int      length_cycle_flexible = 0;
+   HYPRE_Int      *cycle_struct_flexible = NULL, *relax_types_flexible = NULL, *relax_orders_flexible = NULL;
+   HYPRE_Real     *relax_weights_flexible = NULL, *outer_weights_flexible = NULL, *cgc_scaling_factors_flexible = NULL;
    /* end of flexible cycling params*/
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
@@ -735,177 +735,206 @@ main( hypre_int argc,
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-flexamg") == 0 )
+      else if ( strcmp(argv[arg_index], "-flexamg_cycle_struct") == 0 )
       {
          arg_index++;
-         flexible_cycle = atoi(argv[arg_index++]);
-
-         HYPRE_Int subargs_count = 0, len_cycle = 0;
+         HYPRE_Int len_cycle = 0;
          char *arg_ptr, *val_ptr;
          HYPRE_Int tmp1[100];
-         HYPRE_Real tmp2[100];
-
 
          // parse flexible amg cycle parameters
-         while ( subargs_count < 6 )
-         {  
-            if ( strcmp(argv[arg_index], "-cycle_struct") == 0 )
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[i] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i;
+         cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle - 1; j++)
+            cycle_struct_flexible[j] = tmp1[j];
+
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
             {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp1[i] = atoi(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-
-               len_cycle = i + 1;
-               cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle - 1, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle - 1; j++)
-               {
-                  cycle_struct_flexible[j] = tmp1[j];
-               }
-               subargs_count++;
-            }
-            else if (strcmp(argv[arg_index], "-relax_types") == 0 )
-            {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp1[i] = atoi(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-               
-               len_cycle = i;
-               relax_types_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle; j++)
-               {
-                  relax_types_flexible[j] = tmp1[j];
-               }
-               subargs_count++;
-            }
-            else if ( strcmp(argv[arg_index], "-relax_orders") == 0 )
-            {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp1[i] = atoi(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-
-               len_cycle = i;
-               relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle; j++)
-               {
-                  relax_orders_flexible[j] = tmp1[j];
-               }
-               subargs_count++;
-            }
-            else if ( strcmp(argv[arg_index], "-outer_weights") == 0 )
-            {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp2[i] = atof(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-
-               len_cycle = i;
-               outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle; j++)
-               {
-                  outer_weights_flexible[j] = tmp2[j];
-               }
-               subargs_count++;
-            }
-            else if ( strcmp(argv[arg_index], "-relax_weights") == 0 )
-            {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp2[i] = atof(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-
-               len_cycle = i;
-               relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle; j++)
-               {
-                  relax_weights_flexible[j] = tmp2[j];
-               }
-               subargs_count++;
-            }
-            else if ( strcmp(argv[arg_index], "-cgc_scaling") == 0 )
-            {
-               arg_index++;
-               arg_ptr = argv[arg_index++];
-               val_ptr = strtok(arg_ptr, ",");
-               i = 0;
-               while (val_ptr != NULL)
-               {
-                  tmp2[i] = atof(val_ptr);
-                  val_ptr = strtok(NULL, ",");
-                  i++;
-               }
-
-               len_cycle = i + 1;
-               cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle - 1, HYPRE_MEMORY_HOST);
-
-               for (j = 0; j < len_cycle - 1; j++)
-               {
-                  cgc_scaling_factors_flexible[j] = tmp2[j];
-               }
-               subargs_count++;
-            } 
-            else
-            {
-               hypre_printf("Error: Incorrect / Missing flexible AMG cycle parameter(s).\n");
-               hypre_printf("Valid options are:\n");
-               hypre_printf("  -cycle_struct <comma separated integers>\n");
-               hypre_printf("  -relax_types <comma separated integers>\n");
-               hypre_printf("  -relax_orders <comma separated integers>\n");
-               hypre_printf("  -outer_weights <comma separated reals>\n");
-               hypre_printf("  -relax_weights <comma separated reals>\n");
-               hypre_printf("  -cgc_scaling <comma separated reals>\n");
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
                exit(1);
             }
-            if (subargs_count == 1)
-            {
-               length_cycle_flexible = len_cycle;
-            }
-            else
-            {
-               if (len_cycle != length_cycle_flexible)
-               {
-                  hypre_printf("Error: All flexible AMG cycle parameters must have the same length.\n");
-                  exit(1);
-               }
-            }
+         else
+         {
+            length_cycle_flexible = len_cycle;
          }
+
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_types") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Int tmp1[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[i] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i;
+         relax_types_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
+            relax_types_flexible[j] = tmp1[j];
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
+            {
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+               exit(1);
+            }
+         else
+            length_cycle_flexible = len_cycle;
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_orders") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Int tmp1[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[i] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i;
+         relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
+            relax_orders_flexible[j] = tmp1[j];
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
+            {
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+               exit(1);
+            }
+         else
+            length_cycle_flexible = len_cycle;
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_outer_weights") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[i] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i;
+         outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
+            outer_weights_flexible[j] = tmp2[j];
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
+            {
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+               exit(1);
+            }
+         else
+            length_cycle_flexible = len_cycle;
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_weights") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[i] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i;
+         relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
+            relax_weights_flexible[j] = tmp2[j];
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
+            {
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+               exit(1);
+            }
+         else
+            length_cycle_flexible = len_cycle;
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_cgc_scaling") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int i = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[i] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            i++;
+         }
+
+         len_cycle = i + 1;
+         cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle - 1, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int j = 0; j < len_cycle - 1; j++)
+            cgc_scaling_factors_flexible[j] = tmp2[j];
+
+         if (length_cycle_flexible)
+            if (length_cycle_flexible != len_cycle)
+            {
+               hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+               exit(1);
+            }
+         else
+            length_cycle_flexible = len_cycle;
       }
       else if ( strcmp(argv[arg_index], "-auxfromfile") == 0 )
       {
@@ -1910,6 +1939,12 @@ main( hypre_int argc,
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
+
+
+      /* for flexible amg the array 'cycle_struct_flexible' should be user defined */
+      if (length_cycle_flexible)
+         if (!cycle_struct_flexible)
+            hypre_printf("Error: cycle structure (-flexamg_cycle_struct) should be set to enable flexible amg cycles .. \n");
 
       /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
          implemented, i.e. Jacobi relaxation, and needs to be used without CF
@@ -4718,7 +4753,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
       HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
-      if (flexible_cycle)
+      if (length_cycle_flexible)
       {
          HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
          HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
@@ -4983,7 +5018,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
-      if (flexible_cycle)
+      if (length_cycle_flexible)
       {  
          HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
          HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
@@ -5537,7 +5572,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFSAIThreshold(pcg_precond, fsai_threshold);
          HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
-         if (flexible_cycle)
+         if (length_cycle_flexible)
          {
             HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond, cycle_struct_flexible);
             HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond, relax_types_flexible);
@@ -7325,7 +7360,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetDofFunc(amg_precond, dof_func);
             free_dof_func = 0;
          }
-         if (flexible_cycle)
+         if (length_cycle_flexible)
          {
             HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond, cycle_struct_flexible);
             HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond, relax_types_flexible);
