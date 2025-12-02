@@ -142,6 +142,10 @@ co="--enable-debug --enable-mixed-precision"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic--mixed-precision
 
+co="--enable-debug --enable-mixed-precision --enable-shared"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--mixed-precision-shared
+
 co="--enable-mixedint --enable-debug"
 RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
@@ -188,6 +192,10 @@ co="-DHYPRE_BIGINT=ON"
 co="-DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_MIXED_PRECISION=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-mixed-precision
+
+co="-DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_MIXED_PRECISION=ON -DBUILD_SHARED_LIBS=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-mixed-precision-shared
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex
