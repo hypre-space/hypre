@@ -813,6 +813,7 @@ enable_mixed_precision
 enable_maxdim
 enable_persistent
 enable_hopscotch
+enable_fpe_trap
 enable_fortran
 enable_unified_memory
 enable_device_malloc_async
@@ -1566,6 +1567,8 @@ Optional Features:
   --enable-persistent     Uses persistent communication (default is NO).
   --enable-hopscotch      Uses hopscotch hashing if configured with OpenMP and
                           atomic capability available(default is NO).
+  --enable-fpe-trap       Enable floating-point exception trap (default is YES
+                          in debug mode, NO otherwise).
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
@@ -3705,6 +3708,31 @@ if test "$hypre_using_hopscotch" = "yes"
 then
 
 printf "%s\n" "#define HYPRE_USING_HOPSCOTCH 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-fpe-trap was given.
+if test ${enable_fpe_trap+y}
+then :
+  enableval=$enable_fpe_trap; case "${enableval}" in
+    yes) hypre_using_fpe_trap=yes ;;
+    no)  hypre_using_fpe_trap=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-fpe-trap" "$LINENO" 5 ;;
+ esac
+else $as_nop
+  if test "$hypre_using_debug" = "yes"
+ then
+    hypre_using_fpe_trap=yes
+ else
+    hypre_using_fpe_trap=no
+ fi
+
+fi
+
+if test "$hypre_using_fpe_trap" = "yes"
+then
+
+printf "%s\n" "#define HYPRE_USING_FPE_TRAP 1" >>confdefs.h
 
 fi
 

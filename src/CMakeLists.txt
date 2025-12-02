@@ -86,6 +86,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeR
 # Set debug flags based on compiler
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(HYPRE_DEBUG ON CACHE INTERNAL "")
+  set(_hypre_fpe_trap_default ON CACHE INTERNAL "")
   if(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wremarks>
@@ -127,6 +128,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       $<$<COMPILE_LANGUAGE:C>:-O0>
       $<$<COMPILE_LANGUAGE:CXX>:-O0>)
   endif()
+else()
+  set(_hypre_fpe_trap_default OFF CACHE INTERNAL "")
 endif()
 
 # Print the configuration
@@ -155,6 +158,7 @@ set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Use strict error checking (Sequential only)" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_MEMORY_TRACKER       "Use internal memory tracker (Debug only)" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_FPE_TRAP             "Enable floating-point exception trap" ${_hypre_fpe_trap_default})
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
@@ -261,6 +265,7 @@ set_internal_hypre_option(USING HIP)
 set_internal_hypre_option(USING SYCL)
 set_internal_hypre_option(USING MAGMA)
 set_internal_hypre_option(USING CALIPER)
+set_internal_hypre_option(USING FPE_TRAP)
 
 # Check for conflicting options
 ensure_options_differ(SINGLE LONG_DOUBLE)
