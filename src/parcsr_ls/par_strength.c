@@ -673,6 +673,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
       S_temp_offd_j = hypre_CSRMatrixJ(S_offd);
       HYPRE_BigInt *col_map_offd_S = hypre_TAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
+      HYPRE_BigInt *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
       if (num_functions > 1)
       {
          dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
