@@ -764,7 +764,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
          intersected box into the Box Manager */
 
       hypre_SStructNeighbor    *vneighbor;
-      HYPRE_Int                 b, i;
+      HYPRE_Int                 b_local, i;
       hypre_Box                *vbox;
       HYPRE_Int               **nvneighbors = hypre_SStructGridNVNeighbors(grid);
       hypre_SStructNeighbor  ***vneighbors  = hypre_SStructGridVNeighbors(grid);
@@ -806,9 +806,9 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
                hypre_BoxGrowByIndex(grow_box, max_distance);
 
                /* loop through neighbors */
-               for (b = 0; b < nvneighbors[part][var]; b++)
+               for (b_local = 0; b_local < nvneighbors[part][var]; b_local++)
                {
-                  vneighbor = &vneighbors[part][var][b];
+                  vneighbor = &vneighbors[part][var][b_local];
                   vbox = hypre_SStructNeighborBox(vneighbor);
 
                   /* grow neighbor box by 1 to account for shared parts */
@@ -942,9 +942,9 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
             hypre_CopyToCleanIndex( hypre_BoxIMin(bounding_box), ndim, min_index);
             hypre_CopyToCleanIndex( hypre_BoxIMax(bounding_box), ndim, max_index);
 
-            for (b = 0; b < nvneighbors[part][var]; b++)
+            for (b_local = 0; b_local < nvneighbors[part][var]; b_local++)
             {
-               vneighbor = &vneighbors[part][var][b];
+               vneighbor = &vneighbors[part][var][b_local];
                vbox = hypre_SStructNeighborBox(vneighbor);
                /* find min and max box extents */
                for (d = 0; d < ndim; d++)
