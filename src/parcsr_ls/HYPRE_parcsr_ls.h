@@ -1079,6 +1079,31 @@ HYPRE_Int HYPRE_BoomerAMGSetSmoothNumSweeps(HYPRE_Solver solver,
 
 HYPRE_Int HYPRE_BoomerAMGGetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int *smooth_num_sweeps );
 
+/*-----------------------------------------------------------------------------------
+                      FLEXIBLE AMG CYCLES
+-------------------------------------------------------------------------------------
+* Flexible AMG cycles passed as a list of arrays, defining:  
+* the cycling pattern (which could be arbitrary, non-recursive), 
+* relaxation types / orders / weights, and outer weights (omega),
+* scaling factors during coarse-grid correction (alpha); 
+* each list provides SEPARATE VALUES for each step during the cycling */
+
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetCycleStruct(HYPRE_Solver  solver,
+                                               HYPRE_Int    *cycle_struct_flexible);
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxTypes(HYPRE_Solver  solver,
+                                              HYPRE_Int    *relax_types_flexible);
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxOrders(HYPRE_Solver  solver,
+                                               HYPRE_Int    *relax_orders_flexible);
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxWeights(HYPRE_Solver  solver,
+                                                HYPRE_Real   *relax_weights_flexible);
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetOuterWeights(HYPRE_Solver  solver,
+                                                HYPRE_Real   *outer_weights_flexible);
+HYPRE_Int HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(HYPRE_Solver  solver,
+                                               HYPRE_Real   *cgc_scaling_factors_flexible);
+/*------------------------------------------------------------------------------------
+                  END OF FLEXIBLE AMG CYCLES
+--------------------------------------------------------------------------------------       
+
 /**
  * (Optional) Defines which variant of the Schwarz method is used.
  * The following options exist for \e variant:
@@ -4042,6 +4067,38 @@ HYPRE_ParCSRHybridSetOmega(HYPRE_Solver  solver,
  * starting with the finest level.
  * The default is 0, i.e. no aggressive coarsening.
  **/
+
+/*-------------------------------------------------------------------------
+                      FLEXIBLE AMG CYCLES
+---------------------------------------------------------------------------
+* Flexible AMG cycles passed as a list of arrays defining:  
+* the cycling pattern (which could be arbitrary, non-recursive), 
+* relaxation types / orders / weights, and outer weights (omega),
+* scaling factors during coarse-grid correction (alpha); 
+* each list provides SEPARATE VALUES for each step during the cycling */
+
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetCycleStruct( HYPRE_Solver  solver,
+                                             HYPRE_Int    *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxTypes( HYPRE_Solver  solver,
+                                        HYPRE_Int    *relax_types_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxOrders( HYPRE_Solver  solver,
+                                         HYPRE_Int    *relax_orders_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetRelaxWeights( HYPRE_Solver  solver,
+                                          HYPRE_Real   *relax_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetOuterWeights( HYPRE_Solver  solver,
+                                 HYPRE_Real   *outer_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors( HYPRE_Solver  solver,
+                                     HYPRE_Real   *cgc_scaling_factors_flexible );
+/*-------------------------------------------------------------------------
+                     END OF FLEXIBLE AMG CYCLES
+---------------------------------------------------------------------------*/
+                              
 HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
