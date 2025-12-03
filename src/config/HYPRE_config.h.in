@@ -199,6 +199,9 @@
 /* Using ESSL for Lapack */
 #undef HYPRE_USING_ESSL
 
+/* Define to 1 if enabling floating-point exception trap */
+#undef HYPRE_USING_FPE_TRAP
+
 /* Define to 1 if executing on GPU device */
 #undef HYPRE_USING_GPU
 

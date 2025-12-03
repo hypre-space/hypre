@@ -1745,8 +1745,8 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
    HYPRE_Int *offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Real *offd_data = hypre_CSRMatrixData(offd);
 
-   HYPRE_Int num_cols_B, num_nonzeros;
-   HYPRE_Int num_rows_B_ext;
+   HYPRE_BigInt num_cols_B;
+   HYPRE_Int num_rows_B_ext, num_nonzeros;
 
    hypre_CSRMatrix *B_ext;
 
@@ -1789,7 +1789,7 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
      skip_fine, skip_same_sign
    );
 
-   B_ext = hypre_CSRMatrixCreate(num_rows_B_ext, num_cols_B, num_nonzeros);
+   B_ext = hypre_CSRMatrixCreate(num_rows_B_ext, (HYPRE_Int) num_cols_B, num_nonzeros);
    hypre_CSRMatrixMemoryLocation(B_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(B_ext) = B_ext_i;
    hypre_CSRMatrixBigJ(B_ext) = B_ext_j;
@@ -5086,7 +5086,9 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    }
 
    /* create A_ext */
-   A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
+   A_ext = hypre_CSRMatrixCreate(num_rows_recv,
+                                 (HYPRE_Int) hypre_ParCSRMatrixGlobalNumCols(A),
+                                 num_nnz_recv);
    hypre_CSRMatrixMemoryLocation(A_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI   (A_ext) = recv_i;
    hypre_CSRMatrixBigJ(A_ext) = recv_j;

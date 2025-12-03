@@ -49,6 +49,7 @@ hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
 #define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
    HYPRE_DECLARE_OFFSETS_UP_TO_26;
    HYPRE_DECLARE_OFFSETS(26);
+   HYPRE_UNUSED_VAR(nentries);
    HYPRE_UNUSED_VAR(y_data_box);
    HYPRE_UNUSED_VAR(ydstart);
    HYPRE_UNUSED_VAR(ydstride);

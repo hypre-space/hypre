@@ -124,7 +124,7 @@ typedef struct
    HYPRE_Int             num_nonowned_real_nodes;
    HYPRE_Int             num_missing_col_indices;
 
-   HYPRE_Int            *nonowned_global_indices;
+   HYPRE_BigInt         *nonowned_global_indices;
    HYPRE_Int            *nonowned_coarse_indices;
    HYPRE_Int            *nonowned_real_marker;
    HYPRE_Int            *nonowned_sort;
