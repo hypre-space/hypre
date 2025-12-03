@@ -228,6 +228,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_Int              vi, vj;
    HYPRE_Int              nvars;
    HYPRE_Int              dim;
+   HYPRE_BigInt           global_size;
 
    HYPRE_MemoryLocation   memory_location;
 
@@ -486,10 +487,10 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
       frac  *= hypre_IndexZ(stride);
       scale += (nodeset_sizes[p] / frac);
    }
+
    /* REALLY Rough Estimate = num_nodes * nvar^3 */
-   (relax_data -> flops) = (HYPRE_Int)(scale * nvars * nvars * nvars *
-                                       hypre_StructVectorGlobalSize(
-                                          hypre_SStructPVectorSVector(x, 0) ) );
+   global_size = hypre_StructVectorGlobalSize(hypre_SStructPVectorSVector(x, 0));
+   (relax_data -> flops) = (HYPRE_Int)((HYPRE_Int) scale * nvars * nvars * nvars * global_size);
 
    return hypre_error_flag;
 }

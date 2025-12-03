@@ -25,23 +25,23 @@ struct _extrows_dh {
     Factor_dh F;           /* not owned! */
 
     hypre_MPI_Status status[MAX_MPI_TASKS];
-    hypre_MPI_Request req1[MAX_MPI_TASKS]; 
+    hypre_MPI_Request req1[MAX_MPI_TASKS];
     hypre_MPI_Request req2[MAX_MPI_TASKS];
-    hypre_MPI_Request req3[MAX_MPI_TASKS]; 
+    hypre_MPI_Request req3[MAX_MPI_TASKS];
     hypre_MPI_Request req4[MAX_MPI_TASKS];
     hypre_MPI_Request cval_req[MAX_MPI_TASKS];
     hypre_MPI_Request fill_req[MAX_MPI_TASKS];
     hypre_MPI_Request aval_req[MAX_MPI_TASKS];
 
     /*------------------------------------------------------------------------
-     *  data structures for receiving, storing, and accessing external rows 
+     *  data structures for receiving, storing, and accessing external rows
      *  from lower-ordered nabors
      *------------------------------------------------------------------------*/
     /* for reception of row counts, row numbers, and row lengths: */
     HYPRE_Int rcv_row_counts[MAX_MPI_TASKS]; /* P_i will send rcv_row_counts[i] rows */
     HYPRE_Int rcv_nz_counts[MAX_MPI_TASKS];  /* P_i's rows contain rcv_nz_counts[i] nonzeros */
     HYPRE_Int *rcv_row_lengths[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
-    HYPRE_Int *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
+    HYPRE_BigInt *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
 
     /* for reception of the actual rows: */
     HYPRE_Int      *cvalExt;
@@ -56,7 +56,7 @@ struct _extrows_dh {
      *--------------------------------------------------------------------------*/
     /* for sending row counts, numbers, and lengths: */
     HYPRE_Int *my_row_counts;     /* my_row_counts[i] = nzcount in upper tri portion o */
-    HYPRE_Int *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
+    HYPRE_BigInt *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
 
     /* for sending the actual rows: */
     HYPRE_Int     nzSend;      /* total entries in upper tri portions of bdry rows */
