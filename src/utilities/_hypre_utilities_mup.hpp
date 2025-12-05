@@ -140,6 +140,13 @@ HYPRE_Int
 hypreDevice_DiagScaleVector2_long_dbl( HYPRE_Int num_vectors, HYPRE_Int num_rows, hypre_long_double *diag, hypre_long_double *x, hypre_long_double beta, hypre_long_double *y, hypre_long_double *z, HYPRE_Int computeY );
 
 HYPRE_Int
+hypreDevice_GenScatterAdd_flt( hypre_float *x, HYPRE_Int ny, HYPRE_Int *map, hypre_float *y, char *work );
+HYPRE_Int
+hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_double *y, char *work );
+HYPRE_Int
+hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
+
+HYPRE_Int
 hypreDevice_GetRowNnz_flt( HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz );
 HYPRE_Int
 hypreDevice_GetRowNnz_dbl( HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz );
@@ -244,6 +251,90 @@ hypre_CurandUniformSingle_dbl( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hy
 HYPRE_Int
 hypre_CurandUniformSingle_long_dbl( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );
 
+cudaStream_t
+hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
+cudaStream_t
+hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
+cudaStream_t
+hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
+
+hipStream_t
+hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
+hipStream_t
+hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
+hipStream_t
+hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
+
+queue*
+hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
+queue*
+hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
+queue*
+hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
+
+hypre_DeviceData*
+hypre_DeviceDataCreate_flt( );
+hypre_DeviceData*
+hypre_DeviceDataCreate_dbl( );
+hypre_DeviceData*
+hypre_DeviceDataCreate_long_dbl( );
+
+curandGenerator_t
+hypre_DeviceDataCurandGenerator_flt( hypre_DeviceData *data );
+curandGenerator_t
+hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
+curandGenerator_t
+hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
+
+rocrand_generator
+hypre_DeviceDataCurandGenerator_flt( hypre_DeviceData *data );
+rocrand_generator
+hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
+rocrand_generator
+hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
+
+cusparseHandle_t
+hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
+cusparseHandle_t
+hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
+cusparseHandle_t
+hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
+
+rocsparse_handle
+hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
+rocsparse_handle
+hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
+rocsparse_handle
+hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
+
+void
+hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );
+void
+hypre_DeviceDataDestroy_dbl( hypre_DeviceData* data );
+void
+hypre_DeviceDataDestroy_long_dbl( hypre_DeviceData* data );
+
+cudaStream_t
+hypre_DeviceDataStream_flt( hypre_DeviceData *data, HYPRE_Int i );
+cudaStream_t
+hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
+cudaStream_t
+hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
+
+hipStream_t
+hypre_DeviceDataStream_flt( hypre_DeviceData *data, HYPRE_Int i );
+hipStream_t
+hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
+hipStream_t
+hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
+
+queue*
+hypre_DeviceDataStream_flt( hypre_DeviceData *data, HYPRE_Int i );
+queue*
+hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
+queue*
+hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
+
 HYPRE_Int
 hypre_DeviceMemoryGetUsage_flt( hypre_float *mem );
 HYPRE_Int
@@ -257,6 +348,20 @@ HYPRE_Int
 hypre_ForceSyncComputeStream_dbl( );
 HYPRE_Int
 hypre_ForceSyncComputeStream_long_dbl( );
+
+dim3
+hypre_GetDefaultDeviceBlockDimension_flt( );
+dim3
+hypre_GetDefaultDeviceBlockDimension_dbl( );
+dim3
+hypre_GetDefaultDeviceBlockDimension_long_dbl( );
+
+dim3
+hypre_GetDefaultDeviceGridDimension_flt( HYPRE_Int n, const char *granularity, dim3 bDim );
+dim3
+hypre_GetDefaultDeviceGridDimension_dbl( HYPRE_Int n, const char *granularity, dim3 bDim );
+dim3
+hypre_GetDefaultDeviceGridDimension_long_dbl( HYPRE_Int n, const char *granularity, dim3 bDim );
 
 HYPRE_Int
 hypre_GetSyncCudaCompute_flt( HYPRE_Int *cuda_compute_stream_sync_ptr );
@@ -348,6 +453,27 @@ HYPRE_Int
 hypre_SyncDevice_dbl( );
 HYPRE_Int
 hypre_SyncDevice_long_dbl( );
+
+dim3
+hypre_dim3_flt( HYPRE_Int x );
+dim3
+hypre_dim3_dbl( HYPRE_Int x );
+dim3
+hypre_dim3_long_dbl( HYPRE_Int x );
+
+dim3
+hypre_dim3_flt( HYPRE_Int x, HYPRE_Int y );
+dim3
+hypre_dim3_dbl( HYPRE_Int x, HYPRE_Int y );
+dim3
+hypre_dim3_long_dbl( HYPRE_Int x, HYPRE_Int y );
+
+dim3
+hypre_dim3_flt( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
+dim3
+hypre_dim3_dbl( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
+dim3
+hypre_dim3_long_dbl( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
 
 /* functions_gpu */
 
