@@ -358,6 +358,10 @@ HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *
 HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
+                                         HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
+                                         HYPRE_Int use_abs,
+                                         hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
                                                   HYPRE_MemoryLocation memloc_tags,

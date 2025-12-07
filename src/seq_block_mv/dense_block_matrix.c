@@ -233,6 +233,102 @@ hypre_DenseBlockMatrixCopy( hypre_DenseBlockMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_DenseBlockMatrixTranspose
+ *
+ * Computes B = A^T for uniformly blocked dense matrices (block-diagonal set).
+ * The result swaps (num_rows, num_cols) and (num_rows_block, num_cols_block),
+ * and transposes every local block.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DenseBlockMatrixTranspose( hypre_DenseBlockMatrix  *A,
+                                 hypre_DenseBlockMatrix **B_ptr )
+{
+   hypre_DenseBlockMatrix  *B = *B_ptr;
+
+  /* Create and initialize output if needed */
+  if (!B)
+  {
+     B = hypre_DenseBlockMatrixCreate(hypre_DenseBlockMatrixRowMajor(A),
+                                      hypre_DenseBlockMatrixNumCols(A),
+                                      hypre_DenseBlockMatrixNumRows(A),
+                                      hypre_DenseBlockMatrixNumColsBlock(A),
+                                      hypre_DenseBlockMatrixNumRowsBlock(A));
+     hypre_DenseBlockMatrixInitializeOn(B, hypre_DenseBlockMatrixMemoryLocation(A));
+  }
+   else
+   {
+      /* Reuse provided storage: zero out coefficients */
+      hypre_Memset(hypre_DenseBlockMatrixData(B), 0,
+                   (size_t) hypre_DenseBlockMatrixNumNonzeros(B) * sizeof(HYPRE_Complex),
+                   hypre_DenseBlockMatrixMemoryLocation(B));
+   }
+
+#if defined(HYPRE_USING_GPU)
+   {
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2(hypre_DenseBlockMatrixMemoryLocation(A),
+                                                        hypre_DenseBlockMatrixMemoryLocation(B));
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         /* For now, do the work on host */
+         hypre_DenseBlockMatrixMigrate(A, HYPRE_MEMORY_HOST);
+         hypre_DenseBlockMatrixMigrate(B, HYPRE_MEMORY_HOST);
+      }
+   }
+#endif
+
+   {
+      const HYPRE_Int num_blocks       = hypre_DenseBlockMatrixNumBlocks(A);
+      const HYPRE_Int a_rows_blk       = hypre_DenseBlockMatrixNumRowsBlock(A);
+      const HYPRE_Int a_cols_blk       = hypre_DenseBlockMatrixNumColsBlock(A);
+      const HYPRE_Int b_rows_blk       = hypre_DenseBlockMatrixNumRowsBlock(B); /* should equal a_cols_blk */
+      const HYPRE_Int b_cols_blk       = hypre_DenseBlockMatrixNumColsBlock(B); /* should equal a_rows_blk */
+      const HYPRE_Int a_nnz_blk        = hypre_DenseBlockMatrixNumNonzerosBlock(A);
+      const HYPRE_Int b_nnz_blk        = hypre_DenseBlockMatrixNumNonzerosBlock(B);
+
+      /* Basic shape consistency (local) */
+      if (b_rows_blk != a_cols_blk || b_cols_blk != a_rows_blk)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Local block dims mismatch in transpose");
+         return hypre_error_flag;
+      }
+
+      /* For each diagonal block, transpose locally */
+      for (HYPRE_Int ib = 0; ib < num_blocks; ib++)
+      {
+         HYPRE_Complex *data_A = hypre_DenseBlockMatrixData(A) + ib * a_nnz_blk;
+         HYPRE_Complex *data_B = hypre_DenseBlockMatrixData(B) + ib * b_nnz_blk;
+
+         for (HYPRE_Int i = 0; i < b_rows_blk; i++)
+         {
+            for (HYPRE_Int j = 0; j < b_cols_blk; j++)
+            {
+               /* B[i,j] = A[j,i] */
+               hypre_DenseBlockMatrixDataIJ(B, data_B, i, j) =
+                  hypre_DenseBlockMatrixDataIJ(A, data_A, j, i);
+            }
+         }
+      }
+   }
+
+#if defined(HYPRE_USING_GPU)
+   {
+      /* Move matrices back if they were device-resident */
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2(hypre_DenseBlockMatrixMemoryLocation(A),
+                                                        hypre_DenseBlockMatrixMemoryLocation(B));
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_DenseBlockMatrixMigrate(A, hypre_DenseBlockMatrixMemoryLocation(A));
+         hypre_DenseBlockMatrixMigrate(B, hypre_DenseBlockMatrixMemoryLocation(B));
+      }
+   }
+#endif
+
+   *B_ptr = B;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_DenseBlockMatrixMigrate
  *--------------------------------------------------------------------------*/
 
