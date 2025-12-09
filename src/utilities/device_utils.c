@@ -398,14 +398,8 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
  * hypre_DeviceDataComputeStream
  *--------------------------------------------------------------------*/
 
-/* CUDA/HIP stream */
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
+/* CUDA/HIP/SYCL stream */
+hypre_DeviceStream
 hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
@@ -415,22 +409,10 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
  * hypre_DeviceDataStream
  *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
+hypre_DeviceStream
 hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_CUDA)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_HIP)
-   hipStream_t stream = 0;
-#elif defined(HYPRE_USING_SYCL)
-   sycl::queue *stream = NULL;
-#endif
+   hypre_DeviceStream stream = NULL;
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
    if (i >= HYPRE_MAX_NUM_STREAMS)
@@ -1718,7 +1700,7 @@ hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
-curandGenerator_t
+hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
@@ -1787,7 +1769,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
-rocrand_generator
+hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
