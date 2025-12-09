@@ -144,6 +144,7 @@ cat >> $INTERNAL_HEADER <<@
 #ifndef hypre_MP_BUILD
 #include "_hypre_utilities_mup_undef.h"
 #include "_hypre_utilities_mup.h"
+#include "_hypre_utilities_mup.hpp"
 #endif
 #endif
 
