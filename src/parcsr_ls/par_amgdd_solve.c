@@ -21,7 +21,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    hypre_ParCSRMatrix  **P_array;
    hypre_ParVector     **F_array;
    hypre_ParVector     **U_array;
-   hypre_ParVector      *res;
+   hypre_ParVector      *res = NULL;
    hypre_ParVector      *Vtemp;
    hypre_ParVector      *Ztemp;
 
@@ -37,9 +37,9 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    HYPRE_Int             amg_print_level;
    HYPRE_Int             amg_logging;
    HYPRE_Real            tol;
-   HYPRE_Real            resid_nrm;
-   HYPRE_Real            resid_nrm_init;
-   HYPRE_Real            rhs_norm;
+   HYPRE_Real            resid_nrm = 0.0;
+   HYPRE_Real            resid_nrm_init = 1.0;
+   HYPRE_Real            rhs_norm = 1.0;
    HYPRE_Real            old_resid;
    HYPRE_Real            relative_resid;
    HYPRE_Real            conv_factor;
@@ -148,7 +148,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (amg_print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -167,7 +167,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       if (0 == converge_type)
       {
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
-         if (rhs_norm)
+         if (rhs_norm != 0.0)
          {
             relative_resid = resid_nrm_init / rhs_norm;
          }
@@ -295,7 +295,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
             resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
-         if (old_resid)
+         if (old_resid != 0.0)
          {
             conv_factor = resid_nrm / old_resid;
          }
@@ -306,7 +306,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
 
          if (0 == converge_type)
          {
-            if (rhs_norm)
+            if (rhs_norm != 0.0)
             {
                relative_resid = resid_nrm / rhs_norm;
             }

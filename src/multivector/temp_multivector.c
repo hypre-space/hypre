@@ -8,8 +8,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "temp_multivector.h"
-#include "interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
 #include "_hypre_utilities.h"
 
 static void
@@ -241,7 +241,7 @@ mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed )
 
    hypre_assert( x != NULL );
 
-   mysrand(seed);
+   mysrand((hypre_uint) seed);
 
    for ( i = 0; i < x->numVectors; i++ )
    {
@@ -325,12 +325,13 @@ mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ )
 
 void
 mv_TempMultiVectorByMultiVector( void* x_, void* y_,
-                                 HYPRE_Int xyGHeight, HYPRE_Int xyHeight,
+                                 HYPRE_BigInt xyGHeight, HYPRE_Int xyHeight,
                                  HYPRE_Int xyWidth, HYPRE_Complex* xyVal )
 {
    /* xy = x'*y */
 
-   HYPRE_Int ix, iy, mx, my, jxy;
+   HYPRE_Int ix, iy, mx, my;
+   HYPRE_BigInt jxy;
    HYPRE_Complex* p;
    void** px;
    void** py;
@@ -355,7 +356,7 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
    mv_collectVectorPtr( x->mask, x, px );
    mv_collectVectorPtr( y->mask, y, py );
 
-   jxy = xyGHeight - xyHeight;
+   jxy = xyGHeight - (HYPRE_BigInt) xyHeight;
    for ( iy = 0, p = xyVal; iy < my; iy++ )
    {
       for ( ix = 0; ix < mx; ix++, p++ )
@@ -416,12 +417,13 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
 
 void
 mv_TempMultiVectorByMatrix( void* x_,
-                            HYPRE_Int rGHeight, HYPRE_Int rHeight,
+                            HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                             HYPRE_Int rWidth, HYPRE_Complex* rVal,
                             void* y_ )
 {
 
-   HYPRE_Int i, j, jump;
+   HYPRE_Int i, j;
+   HYPRE_BigInt jump;
    HYPRE_Int mx, my;
    HYPRE_Complex* p;
    void** px;
@@ -446,7 +448,7 @@ mv_TempMultiVectorByMatrix( void* x_,
    mv_collectVectorPtr( x->mask, x, px );
    mv_collectVectorPtr( y->mask, y, py );
 
-   jump = rGHeight - rHeight;
+   jump = rGHeight - (HYPRE_BigInt) rHeight;
    for ( j = 0, p = rVal; j < my; j++ )
    {
       (x->interpreter->ClearVector)( py[j] );
@@ -463,12 +465,13 @@ mv_TempMultiVectorByMatrix( void* x_,
 
 void
 mv_TempMultiVectorXapy( void* x_,
-                        HYPRE_Int rGHeight, HYPRE_Int rHeight,
+                        HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                         HYPRE_Int rWidth, HYPRE_Complex* rVal,
                         void* y_ )
 {
 
-   HYPRE_Int i, j, jump;
+   HYPRE_Int i, j;
+   HYPRE_BigInt jump;
    HYPRE_Int mx, my;
    HYPRE_Complex* p;
    void** px;
@@ -493,7 +496,7 @@ mv_TempMultiVectorXapy( void* x_,
    mv_collectVectorPtr( x->mask, x, px );
    mv_collectVectorPtr( y->mask, y, py );
 
-   jump = rGHeight - rHeight;
+   jump = rGHeight - (HYPRE_BigInt) rHeight;
    for ( j = 0, p = rVal; j < my; j++ )
    {
       for ( i = 0; i < mx; i++, p++ )

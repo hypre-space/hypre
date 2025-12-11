@@ -507,5 +507,4 @@
       stat = device_free(p_tmpi)
       stat = device_free(p_values)
 
-      stop
       end

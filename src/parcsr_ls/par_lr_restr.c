@@ -16,10 +16,6 @@
 //       hypre_dense_topo_sort(HYPRE_Real *L, HYPRE_Int *ordering, HYPRE_Int n)
 //    to get ordering for triangular solve. Can provide
 
-
-HYPRE_Int AIR_TOT_SOL_SIZE = 0;
-HYPRE_Int AIR_MAX_SOL_SIZE = 0;
-
 #define AIR_DEBUG 0
 #define EPSILON 1e-18
 #define EPSIMAC 1e-16
@@ -52,6 +48,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int             is_triangular,
                                    HYPRE_Int             gmres_switch)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
 
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
@@ -1169,10 +1166,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        * we need from these rows and put them in Ai and bi*/
 
       /* clear DAi and bi */
-      memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Complex));
-      memset(Dxi, 0, local_size * sizeof(HYPRE_Complex));
-      memset(Dbi, 0, local_size * sizeof(HYPRE_Complex));
-
+      hypre_Memset(DAi, 0, (size_t) (local_size * local_size) * sizeof(HYPRE_Complex),
+                   HYPRE_MEMORY_HOST);
+      hypre_Memset(Dxi, 0, (size_t) local_size * sizeof(HYPRE_Complex), HYPRE_MEMORY_HOST);
+      hypre_Memset(Dbi, 0, (size_t) local_size * sizeof(HYPRE_Complex), HYPRE_MEMORY_HOST);
 
       /* we will populate Ai row-by-row */
       for (rr = 0; rr < local_size; rr++)
@@ -1676,6 +1673,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
                                          HYPRE_Int             debug_flag,
                                          hypre_ParCSRMatrix  **R_ptr)
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;

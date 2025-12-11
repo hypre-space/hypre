@@ -16,11 +16,13 @@ API
    api-int-struct
    api-int-sstruct
    api-int-ij
+   api-int-parcsr
    api-sol-struct
    api-sol-sstruct
    api-sol-parcsr
    api-sol-krylov
    api-sol-eigen
+   api-utilities
 
 .. Add blank lines to help with navigation pane formatting
 |

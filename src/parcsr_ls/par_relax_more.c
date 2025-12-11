@@ -45,7 +45,8 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
    HYPRE_Real *A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
    HYPRE_Real *diag        = NULL;
    HYPRE_Int   i, j;
-   HYPRE_Real  e_max, e_min;
+   HYPRE_Real  e_max = 0.0;
+   HYPRE_Real  e_min = 0.0;
    HYPRE_Real  send_buf[2], recv_buf[2];
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
@@ -722,7 +723,7 @@ hypre_LINPACKcgpthy(HYPRE_Real *a, HYPRE_Real *b)
    /* Computing MAX */
    d__1 = hypre_abs(*a), d__2 = hypre_abs(*b);
    p = hypre_max(d__1, d__2);
-   if (!p)
+   if (p == 0.0)
    {
       goto L20;
    }

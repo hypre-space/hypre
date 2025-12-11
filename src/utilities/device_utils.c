@@ -23,7 +23,9 @@
 hypre_DeviceData*
 hypre_DeviceDataCreate()
 {
-   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
+   /* Note: this allocation is done directly with calloc in order to
+      avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
+   hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;
@@ -67,16 +69,6 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataUseGpuRand(data) = 1;
 #else
    hypre_DeviceDataUseGpuRand(data) = 0;
-#endif
-
-   /* device pool */
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubBinGrowth(data)      = 8u;
-   hypre_DeviceDataCubMinBin(data)         = 1u;
-   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
-   hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
-   hypre_DeviceDataCubDevAllocator(data)   = NULL;
-   hypre_DeviceDataCubUvmAllocator(data)   = NULL;
 #endif
 
    return data;
@@ -156,24 +148,21 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubCachingAllocatorDestroy(data);
-#endif
-
 #if defined(HYPRE_USING_SYCL)
    delete data->device;
    data->device = nullptr;
 #endif
 
-   hypre_TFree(data, HYPRE_MEMORY_HOST);
+   /* Note: Directly using free since this variable was allocated with calloc */
+   free((void*) data);
 }
 
 /*--------------------------------------------------------------------
- * hypre_SyncCudaDevice
+ * hypre_SyncDevice
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
+hypre_SyncDevice()
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
@@ -182,7 +171,7 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 #elif defined(HYPRE_USING_SYCL)
    try
    {
-      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->wait_and_throw() );
    }
    catch (sycl::exception const &exc)
    {
@@ -195,16 +184,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 }
 
 /*--------------------------------------------------------------------
- * hypre_ResetCudaDevice
+ * hypre_ResetDevice
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+hypre_ResetDevice()
 {
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
+   HYPRE_CUDA_CALL(cudaDeviceReset());
+
 #elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
+   HYPRE_HIP_CALL(hipDeviceReset());
 #endif
    return hypre_error_flag;
 }
@@ -314,9 +304,9 @@ hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncComputeStream()
 {
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle(), NULL);
 
    return hypre_error_flag;
 }
@@ -326,12 +316,12 @@ hypre_SyncComputeStream(hypre_Handle *hypre_handle)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
+hypre_ForceSyncComputeStream()
 {
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(1);
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle(), NULL);
    hypre_SetSyncCudaCompute(sync_stream);
 
    return hypre_error_flag;
@@ -344,6 +334,51 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_GPU)
+
+/*--------------------------------------------------------------------------
+ * hypre_DeviceMemoryGetUsage
+ *
+ * Retrieves memory usage statistics for the current GPU device. The function
+ * fills an array with memory data, converted to gibibytes (GiB):
+ *
+ *    - mem[0]: Current memory usage (allocated by the process).
+ *    - mem[1]: Total device memory available on the GPU.
+ *
+ * This implementation supports NVIDIA GPUs using CUDA and AMD GPUs using HIP.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
+{
+   size_t       free_mem  = 0;
+   size_t       total_mem = 0;
+   HYPRE_Real   b_to_gib  = (HYPRE_Real)(1 << 30);
+
+   /* Sanity check */
+   if (!mem)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Mem is a NULL pointer!");
+      return hypre_error_flag;
+   }
+
+   /* Get free and total memory available on the device */
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL(cudaMemGetInfo(&free_mem, &total_mem));
+
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipMemGetInfo(&free_mem, &total_mem));
+
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No supported GPU backend found!");
+   return hypre_error_flag;
+#endif
+
+   /* Convert data from bytes to GiB (HYPRE_Real) */
+   mem[0] = (total_mem - free_mem) / b_to_gib;
+   mem[1] = total_mem / b_to_gib;
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataComputeStream
@@ -405,25 +440,37 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
 #elif defined(HYPRE_USING_SYCL)
-   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   /* Reserve the last stream as a debugging stream on the CPU */
+   if (i == HYPRE_MAX_NUM_STREAMS - 1)
    {
-      for (std::exception_ptr const& e : exceptions)
+      stream = new sycl::queue(sycl::cpu_selector_v, sycl::property_list{sycl::property::queue::in_order{}});
+   }
+   else
+   {
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
       {
-         try
+         for (std::exception_ptr const& e : exceptions)
          {
-            std::rethrow_exception(e);
+            try
+            {
+               std::rethrow_exception(e);
+            }
+            catch (sycl::exception const& ex)
+            {
+               std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+            }
          }
-         catch (sycl::exception const& ex)
-         {
-            std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-         }
-      }
-   };
+      };
 
-   sycl::device* sycl_device = data->device;
-   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
-   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+      if (!data->device)
+      {
+         HYPRE_DeviceInitialize();
+      }
+      sycl::device* sycl_device = data->device;
+      sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   }
 #endif
 
    data->streams[i] = stream;
@@ -902,7 +949,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                                     HYPRE_Int *d_row_ptr )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
+   /* Note: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
    /* Note that this is different from thrust's behavior, where lower_bound zeros out the row pointer when nnz = 0 */
    if (nnz <= 0)
    {
@@ -1137,6 +1184,8 @@ hypreDevice_CopyParCSRRows( HYPRE_Int      nrows,
                             HYPRE_BigInt  *d_jb,
                             HYPRE_Complex *d_ab )
 {
+   HYPRE_UNUSED_VAR(job);
+
    /* trivial case */
    if (nrows <= 0)
    {
@@ -1172,12 +1221,7 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
-   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   /* HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0); */
-   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, tmp, 0);
-   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -1383,6 +1427,10 @@ hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item,
                                  HYPRE_Int        *map,
                                  HYPRE_Real       *y)
 {
+#if !defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(item);
+#endif
+
    for (HYPRE_Int i = 0; i < n; i++)
    {
       x[map[i]] += y[i];
@@ -1468,19 +1516,12 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
       [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
 
-      // WM: todo - ABB: The below code has issues because of name mangling issues,
-      //       similar to https://github.com/oneapi-src/oneDPL/pull/166
-      //       https://github.com/oneapi-src/oneDPL/issues/507
-      //       should be fixed by now?
-      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-      /*                                   map2, */
-      /*                                   map2 + ny, */
-      /*                                   y, */
-      /*                                   reduced_map, */
-      /*                                   reduced_y ); */
-      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
-                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                        map2,
+                                        map2 + ny,
+                                        y,
+                                        reduced_map,
+                                        reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
@@ -1766,7 +1807,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   /* WM: if n is zero, onemkl rand throws an error */
+   /* Note: if n is zero, onemkl rand throws an error */
    if (n <= 0)
    {
       return hypre_error_flag;
@@ -1849,7 +1890,7 @@ hypreGPUKernel_filln(hypre_DeviceItem &item, T *x, size_t n, T v)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
-   if (i < n)
+   if (i < (HYPRE_Int) n)
    {
       x[i] = v;
    }
@@ -2097,7 +2138,7 @@ hypreGPUKernel_scalen( hypre_DeviceItem &item,
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
-   if (i < n)
+   if (i < (HYPRE_Int) n)
    {
       y[i] = x[i] * v;
    }
@@ -2645,8 +2686,12 @@ __global__ void
 hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
                                        hypre_int        *cuda_arch_compile )
 {
+   HYPRE_UNUSED_VAR(item);
+
 #if defined(__CUDA_ARCH__)
    cuda_arch_compile[0] = __CUDA_ARCH__;
+#else
+   HYPRE_UNUSED_VAR(cuda_arch_compile);
 #endif
 }
 
@@ -2670,7 +2715,7 @@ hypre_CudaCompileFlagCheck()
    hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
+   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
    hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
    hypre_int cuda_arch_compile = -1;
    dim3 gDim(1, 1, 1), bDim(1, 1, 1);
@@ -2688,7 +2733,7 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   if (cuda_arch_actual != cuda_arch_compile)
+   if (cuda_arch_actual < cuda_arch_compile)
    {
       char msg[256];
 
@@ -2699,7 +2744,7 @@ hypre_CudaCompileFlagCheck()
       else
       {
          hypre_sprintf(msg,
-                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') is greater than device arch %d",
                        cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
       }
 
@@ -2912,6 +2957,8 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
    {
       delete data->device;
    }
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->streams[i])
@@ -2920,6 +2967,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
          data->streams[i] = nullptr;
       }
    }
+#endif
 
    /* Setup new device and compute stream */
    data->device = new sycl::device(user_device);
@@ -2941,14 +2989,15 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  * users' GPU binding approaches
  * It is supposed to be called before HYPRE_Init,
  * so that HYPRE_Init can get the wanted device id
- * WM: note - sycl has no analogue to cudaSetDevice(),
+ * Note - sycl has no analogue to cudaSetDevice(),
  * so this has no effect on the sycl implementation.
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_bind_device( HYPRE_Int myid,
-                   HYPRE_Int nproc,
-                   MPI_Comm  comm )
+hypre_bind_device_id( HYPRE_Int device_id_in,
+                      HYPRE_Int myid,
+                      HYPRE_Int nproc,
+                      MPI_Comm  comm )
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* proc id (rank) on the running node */
@@ -2966,20 +3015,52 @@ hypre_bind_device( HYPRE_Int myid,
    hypre_MPI_Comm_rank(node_comm, &myNodeid);
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
-
-   /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
 
+   if (-1 == device_id_in)
+   {
+      /* get number of devices on this node */
+      device_id = myNodeid % nDevices;
+   }
+   else
+   {
+      device_id = (hypre_int) device_id_in;
+   }
+
    /* set device */
-   device_id = myNodeid % nDevices;
-   hypre_SetDevice(device_id, NULL);
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   omp_set_default_device(device_id);
+
+#elif defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipSetDevice(device_id) );
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(device_id);
+#endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif
 
+#else
+   HYPRE_UNUSED_VAR(device_id_in);
+   HYPRE_UNUSED_VAR(myid);
+   HYPRE_UNUSED_VAR(comm);
+
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_UNUSED_VAR(nproc);
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_bind_device( HYPRE_Int myid,
+                   HYPRE_Int nproc,
+                   MPI_Comm  comm )
+{
+   return hypre_bind_device_id(-1, myid, nproc, comm);
 }

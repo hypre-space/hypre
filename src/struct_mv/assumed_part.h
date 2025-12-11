@@ -24,11 +24,13 @@ typedef struct
                                             (this is size num_regions +1) */
    hypre_Index        *divisions;        /* number of proc divisions in each
                                             direction for each region */
+
+   hypre_Index         origin, stride;   /* coarsening parameters for the AP */
+
    /* these entries are specific to each proc */
    hypre_BoxArray     *my_partition;        /* my portion of grid (at most 2) */
    hypre_BoxArray     *my_partition_boxes;  /* boxes in my portion */
    HYPRE_Int          *my_partition_proc_ids;
-   HYPRE_Int          *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;
    HYPRE_Int           my_partition_ids_alloc;
    HYPRE_Int           my_partition_num_distinct_procs;
@@ -45,14 +47,14 @@ typedef struct
 #define hypre_StructAssumedPartDivision(apart, i) ((apart)->divisions[i])
 #define hypre_StructAssumedPartProcPartitions(apart) ((apart)->proc_partitions)
 #define hypre_StructAssumedPartProcPartition(apart, i) ((apart)->proc_partitions[i])
+#define hypre_StructAssumedPartOrigin(apart) ((apart)->origin)
+#define hypre_StructAssumedPartStride(apart) ((apart)->stride)
 #define hypre_StructAssumedPartMyPartition(apart) ((apart)->my_partition)
 #define hypre_StructAssumedPartMyPartitionBoxes(apart) ((apart)->my_partition_boxes)
 #define hypre_StructAssumedPartMyPartitionProcIds(apart) ((apart)->my_partition_proc_ids)
 #define hypre_StructAssumedPartMyPartitionIdsSize(apart) ((apart)->my_partition_ids_size)
 #define hypre_StructAssumedPartMyPartitionIdsAlloc(apart) ((apart)->my_partition_ids_alloc)
 #define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
-#define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
-
 #define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
-#define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
+
 #endif

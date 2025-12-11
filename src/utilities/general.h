@@ -17,6 +17,7 @@
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -32,9 +33,32 @@ typedef unsigned long long int hypre_ulonglongint;
 typedef uint32_t               hypre_uint32;
 typedef uint64_t               hypre_uint64;
 
-/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
-typedef float                  hypre_float;
-typedef double                 hypre_double;
+/*--------------------------------------------------------------------------
+ * Define macros
+ *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused function warning */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
+#elif defined(_MSC_VER)
+#define HYPRE_MAYBE_UNUSED_FUNC
+#else
+#define HYPRE_MAYBE_UNUSED_FUNC
+#endif
+
+/* Macro for marking fallthrough in switch statements */
+#if (defined(__GNUC__) && __GNUC__ >= 7) ||\
+    (defined(__clang__) && __clang_major__ >= 10)
+#define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
+#else
+#define HYPRE_FALLTHROUGH ((void)0)
+#endif
+
+/* Macro for silencing unused variable warning */
+#define HYPRE_UNUSED_VAR(var) ((void) var)
+
+/* Macro for marking deprecated functions */
+#define HYPRE_DEPRECATED(reason) _Pragma(reason)
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -81,6 +105,12 @@ typedef double                 hypre_double;
 #else
 #define hypre_pow pow
 #endif
+#endif
+
+/* Macro for ceiling division. It assumes non-negative dividend and positive divisor.
+   The result of this macro might need to be casted to an integer type depending on the use case */
+#ifndef hypre_ceildiv
+#define hypre_ceildiv(a, b) (((a) + (b) - 1) / (b))
 #endif
 
 #ifndef hypre_ceil

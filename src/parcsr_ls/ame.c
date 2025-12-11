@@ -7,10 +7,10 @@
 
 #include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
-#include "float.h"
+//#include "float.h"
 #include "ams.h"
-#include "temp_multivector.h"
-#include "lobpcg.h"
+#include "_hypre_lobpcg_temp_multivector.h"
+#include "_hypre_lobpcg.h"
 #include "ame.h"
 #include "_hypre_utilities.hpp"
 
@@ -501,9 +501,12 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
             /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-            hypre_ForceSyncComputeStream(hypre_handle());
+            if (hypre_GetGpuAwareMPI())
+            {
+               hypre_ForceSyncComputeStream();
+            }
 #endif
          }
          else
@@ -601,7 +604,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1);
+         ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1, 1);
       }
       else
 #endif
@@ -696,7 +699,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                   data,
                                   data + ne,
                                   edge_bc,
-                                  thrust::identity<HYPRE_Int>(),
+                                  HYPRE_THRUST_IDENTITY(HYPRE_Int),
                                   0.0 );
 #endif
             }
@@ -704,10 +707,12 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 #endif
             {
                for (j = 0; j < ne; j++)
+               {
                   if (edge_bc[j])
                   {
                      data[j] = 0.0;
                   }
+               }
             }
             hypre_AMEDiscrDivFreeComponent(esolver, vi);
          }

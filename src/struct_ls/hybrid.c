@@ -421,8 +421,13 @@ HYPRE_Int
 hypre_HybridSetup( void               *hybrid_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
-                   hypre_StructVector *x            )
+                   hypre_StructVector *x )
 {
+   HYPRE_UNUSED_VAR(hybrid_vdata);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    return hypre_error_flag;
 }
 
@@ -498,7 +503,7 @@ hypre_HybridSolveUseGMRES( hypre_HybridData  *hybrid_data )
          hypre_StructKrylovCreateVectorArray,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+         hypre_StructKrylovInnerProdTagged, hypre_StructKrylovCopyVector,
          hypre_StructKrylovClearVector,
          hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
          hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
@@ -835,4 +840,3 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    return hypre_error_flag;
 }
-

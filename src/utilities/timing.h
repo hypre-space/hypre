@@ -54,6 +54,18 @@ HYPRE_Real time_get_cpu_seconds_( void );
 
 #else
 
+#define hypre_InitializeTiming    hypre_InitializeTiming_fcn
+#define hypre_FinalizeTiming      hypre_FinalizeTiming_fcn
+#define hypre_FinalizeAllTimings  hypre_FinalizeAllTimings_fcn
+#define hypre_IncFLOPCount        hypre_IncFLOPCount_fcn
+#define hypre_BeginTiming         hypre_BeginTiming_fcn
+#define hypre_EndTiming           hypre_EndTiming_fcn
+#define hypre_PrintTiming         hypre_PrintTiming_fcn
+#define hypre_ClearTiming         hypre_ClearTiming_fcn
+#define hypre_GetTiming           hypre_GetTiming_fcn
+
+#endif
+
 /*-------------------------------------------------------
  * Global timing structure
  *-------------------------------------------------------*/
@@ -76,11 +88,7 @@ typedef struct
 
 } hypre_TimingType;
 
-#ifdef HYPRE_TIMING_GLOBALS
-hypre_TimingType *hypre_global_timing = NULL;
-#else
 extern hypre_TimingType *hypre_global_timing;
-#endif
 
 /*-------------------------------------------------------
  * Accessor functions
@@ -101,17 +109,15 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 /* timing.c */
-HYPRE_Int hypre_InitializeTiming( const char *name );
-HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_FinalizeAllTimings( void );
-HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
-HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_ClearTiming( void );
-HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
-
-#endif
+HYPRE_Int hypre_InitializeTiming_fcn( const char *name );
+HYPRE_Int hypre_FinalizeTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_FinalizeAllTimings_fcn( void );
+HYPRE_Int hypre_IncFLOPCount_fcn( HYPRE_BigInt inc );
+HYPRE_Int hypre_BeginTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_EndTiming_fcn( HYPRE_Int time_index );
+HYPRE_Int hypre_ClearTiming_fcn( void );
+HYPRE_Int hypre_PrintTiming_fcn( const char *heading, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming_fcn( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
 
 #ifdef __cplusplus
 }

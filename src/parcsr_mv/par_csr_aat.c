@@ -52,13 +52,13 @@ void hypre_ParAat_RowSizes(
    HYPRE_Int i1, i3, jj2, jj3;
    HYPRE_BigInt big_i2;
    HYPRE_Int jj_count_diag, jj_count_offd, jj_row_begin_diag, jj_row_begin_offd;
-   HYPRE_Int last_col_diag_C;
+   HYPRE_BigInt last_col_diag_C;
    HYPRE_Int start_indexing = 0; /* start indexing for C_data at 0 */
 
-   *C_diag_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A + 1, HYPRE_MEMORY_HOST);
-   *C_offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A + 1, HYPRE_MEMORY_HOST);
+   *C_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A + 1, HYPRE_MEMORY_HOST);
+   *C_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A + 1, HYPRE_MEMORY_HOST);
 
-   last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
+   last_col_diag_C = first_row_index_A + (HYPRE_BigInt) num_rows_diag_A - 1;
 
    jj_count_diag = start_indexing;
    jj_count_offd = start_indexing;
@@ -316,7 +316,8 @@ void hypre_ParAat_RowSizes(
    going on, nothing is being done to take advantage of symmetry, and probably
    more things. */
 
-hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
+hypre_ParCSRMatrix*
+hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
 {
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
@@ -356,14 +357,14 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    HYPRE_Int        C_diag_size;
    HYPRE_Int        C_offd_size;
-   HYPRE_Int        last_col_diag_C;
+   HYPRE_BigInt     last_col_diag_C;
    HYPRE_Int        num_cols_offd_C;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
-   HYPRE_Complex   *A_ext_data;
-   HYPRE_Int       *A_ext_i;
-   HYPRE_BigInt    *A_ext_j;
+   HYPRE_Complex   *A_ext_data = NULL;
+   HYPRE_Int       *A_ext_i = NULL;
+   HYPRE_BigInt    *A_ext_j = NULL;
    HYPRE_Int        num_rows_A_ext = 0;
 
    HYPRE_BigInt     first_row_index_A = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -458,14 +459,11 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
     *  Allocate C_offd_data and C_offd_j arrays.
     *-----------------------------------------------------------------------*/
 
-   last_col_diag_C = first_row_index_A + (HYPRE_BigInt)num_rows_diag_A - 1;
-   C_diag_data = hypre_CTAlloc(HYPRE_Complex,  C_diag_size, HYPRE_MEMORY_HOST);
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
-   if (C_offd_size)
-   {
-      C_offd_data = hypre_CTAlloc(HYPRE_Complex,  C_offd_size, HYPRE_MEMORY_HOST);
-      C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
-   }
+   last_col_diag_C = first_row_index_A + (HYPRE_BigInt) num_rows_diag_A - 1;
+   C_diag_data = hypre_CTAlloc(HYPRE_Complex, C_diag_size, HYPRE_MEMORY_HOST);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size, HYPRE_MEMORY_HOST);
+   C_offd_data = hypre_CTAlloc(HYPRE_Complex, C_offd_size, HYPRE_MEMORY_HOST);
+   C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Fill in C_diag_data and C_diag_j.
@@ -844,7 +842,6 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
       hypre_CSRMatrixJ(C_offd) = C_offd_j;
       hypre_ParCSRMatrixOffd(C) = C_offd;
       hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
-
    }
    else
    {
@@ -867,9 +864,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    }
 
    return C;
-
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractAExt : extracts rows from A which are located on other
@@ -931,14 +926,14 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
    ( &A_ext_i, &A_ext_j, &A_ext_data, pA_ext_row_map,
      &num_nonzeros,
      data, 1, comm, comm_pkg,
-     num_cols_A, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, A->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
      diag_data, offd_data
    );
 
-   A_ext = hypre_CSRMatrixCreate(num_rows_A_ext, num_cols_A, num_nonzeros);
+   A_ext = hypre_CSRMatrixCreate(num_rows_A_ext, (HYPRE_Int) num_cols_A, num_nonzeros);
    hypre_CSRMatrixI(A_ext) = A_ext_i;
    hypre_CSRMatrixBigJ(A_ext) = A_ext_j;
    if (data) { hypre_CSRMatrixData(A_ext) = A_ext_data; }

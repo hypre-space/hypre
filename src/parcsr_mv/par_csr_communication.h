@@ -36,8 +36,8 @@ typedef struct
    struct _hypre_ParCSRCommPkg *comm_pkg;
    HYPRE_MemoryLocation  send_memory_location;
    HYPRE_MemoryLocation  recv_memory_location;
-   HYPRE_Int             num_send_bytes;
-   HYPRE_Int             num_recv_bytes;
+   size_t                num_send_bytes;
+   size_t                num_recv_bytes;
    void                 *send_data;
    void                 *recv_data;
    void                 *send_data_buffer;
@@ -105,7 +105,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
 #endif
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -125,6 +125,8 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
                     HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_HOST);
    }
+#else
+   HYPRE_UNUSED_VAR(comm_pkg);
 #endif
 }
 

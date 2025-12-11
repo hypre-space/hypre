@@ -19,6 +19,9 @@
 // S_*_j is the special j-array from device SoC
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__
 void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem    &item,
                                           HYPRE_Int      nr_of_rows,
@@ -709,6 +712,9 @@ void hypreGPUKernel_compute_aff_afc_epe( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__
 void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem    &item,
                                        HYPRE_Int      nr_of_rows,
@@ -795,6 +801,10 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            max_elmts,
                                     hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(debug_flag);
+   HYPRE_UNUSED_VAR(dof_func);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -999,6 +1009,11 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_cpts_global);
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1101,9 +1116,12 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
@@ -1271,6 +1289,11 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            max_elmts,
                                       hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_cpts_global);
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1398,9 +1421,12 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,

@@ -6,13 +6,14 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
-
-#include <dirent.h>
 #include <errno.h>
+
 #ifdef _WIN32
+#include <windows.h>
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path)
 #else
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
@@ -106,6 +107,7 @@ hypre_strcpy(char *destination, const char *source)
 HYPRE_Int
 hypre_CheckDirExists(const char *path)
 {
+#ifndef _WIN32
    DIR *dir = opendir(path);
 
    if (dir)
@@ -113,6 +115,20 @@ hypre_CheckDirExists(const char *path)
       closedir(dir);
       return 1;
    }
+#else
+   DWORD att = GetFileAttributesA(path);
+
+   if (att == INVALID_FILE_ATTRIBUTES)
+   {
+      return 0;
+   }
+
+   if (att & FILE_ATTRIBUTE_DIRECTORY)
+   {
+      return 1;
+   }
+#endif
+
    return 0;
 }
 
@@ -141,11 +157,14 @@ hypre_CreateDir(const char *path)
 HYPRE_Int
 hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **fullpath_ptr)
 {
+   HYPRE_Int       max_suffix = -1;
+   char           *fullpath;
+
+#ifndef _WIN32
+   HYPRE_Int       suffix;
+   char            msg[HYPRE_MAX_MSG_LEN];
    DIR            *dir;
    struct dirent  *entry;
-   HYPRE_Int       max_suffix, suffix;
-   char            msg[HYPRE_MAX_MSG_LEN];
-   char           *fullpath;
 
    if ((dir = opendir(basepath)) == NULL)
    {
@@ -169,6 +188,9 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
       }
    }
    closedir(dir);
+#else
+   /* TODO (VPM) */
+#endif
 
    /* Create directory */
    fullpath = hypre_TAlloc(char, strlen(basepath) + 10, HYPRE_MEMORY_HOST);
@@ -179,4 +201,67 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
    *fullpath_ptr = fullpath;
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypre_ConvertIndicesToString
+ *
+ * Converts an array of integers (indices) into a formatted string.
+ * The function creates a string representing the array in a comma-
+ * separated format, enclosed within square brackets ("[]").
+ *
+ * - If the input array is empty (size = 0), it returns a string "[]".
+ * - The resulting string includes the list of integers with proper
+ *   formatting: each integer is separated by a comma and a space.
+ *
+ * Parameters:
+ * - size: Number of elements in the input array.
+ * - indices: Pointer to the array of integers (HYPRE_Int) to convert.
+ *
+ * Returns:
+ * - A dynamically allocated string representing the integer array.
+ *--------------------------------------------------------------------*/
+
+char*
+hypre_ConvertIndicesToString(HYPRE_Int  size,
+                             HYPRE_Int *indices)
+{
+   HYPRE_Int    max_length;
+   HYPRE_Int    i, length;
+   char        *string;
+   char        *pos;
+
+   if (!size)
+   {
+      string = hypre_TAlloc(char, 3, HYPRE_MEMORY_HOST);
+      hypre_sprintf(string, "[]");
+
+      return string;
+   }
+
+   /* Estimate maximum string needed */
+   max_length = 12 * size + 3;
+   string = hypre_TAlloc(char, max_length, HYPRE_MEMORY_HOST);
+
+   pos    = string;
+   length = hypre_sprintf(pos, "[");
+   pos    += length;
+
+   for (i = 0; i < size; i++)
+   {
+      /* Add comma before all but the first element */
+      if (i > 0)
+      {
+         length = hypre_sprintf(pos, ", ");
+         pos += length;
+      }
+
+      /* Write integer as string */
+      length = hypre_sprintf(pos, "%d", indices[i]);
+      pos += length;
+   }
+
+   hypre_sprintf(pos, "]");
+
+   return string;
 }

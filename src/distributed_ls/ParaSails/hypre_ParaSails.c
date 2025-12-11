@@ -14,7 +14,7 @@
 #include "Common.h"
 #include "HYPRE_distributed_matrix_types.h"
 #include "HYPRE_distributed_matrix_protos.h"
-#include "hypre_ParaSails.h"
+#include "_hypre_ParaSails.h"
 #include "Matrix.h"
 #include "ParaSails.h"
 
@@ -31,7 +31,7 @@ typedef struct
    hypre_ParaSails_struct;
 
 /*--------------------------------------------------------------------------
- * balance_info - Dump out information about the partitioning of the 
+ * balance_info - Dump out information about the partitioning of the
  * matrix, which affects load balance
  *--------------------------------------------------------------------------*/
 
@@ -120,7 +120,7 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 
    hypre_MPI_Comm_rank(comm, &mype);
    if (mype == 0)
-      hypre_printf("Timings: %f %f %f Serial: %f %f %f\n", 
+      hypre_printf("Timings: %f %f %f Serial: %f %f %f\n",
                    trial1, trial2, trial3, trial4, trial5, trial6);
 
    fflush(stdout);
@@ -131,26 +131,28 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 #endif
 
 /*--------------------------------------------------------------------------
- * convert_matrix - Create and convert distributed matrix to native 
+ * convert_matrix - Create and convert distributed matrix to native
  * data structure of ParaSails
  *--------------------------------------------------------------------------*/
 
 static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix distmat)
 {
-   HYPRE_Int beg_row, end_row, row, dummy;
-   HYPRE_Int len, *ind;
+   HYPRE_Int row;
+   HYPRE_BigInt beg_row, end_row, dummy;
+   HYPRE_Int len;
+   HYPRE_BigInt *ind;
    HYPRE_Real *val;
    Matrix *mat;
 
    HYPRE_DistributedMatrixGetLocalRange(distmat, &beg_row, &end_row,
                                         &dummy, &dummy);
 
-   mat = MatrixCreate(comm, beg_row, end_row);
+   mat = MatrixCreate(comm, (HYPRE_Int) beg_row, (HYPRE_Int) end_row);
 
-   for (row=beg_row; row<=end_row; row++)
+   for (row= (HYPRE_Int) beg_row; row<= (HYPRE_Int) end_row; row++)
    {
       HYPRE_DistributedMatrixGetRow(distmat, row, &len, &ind, &val);
-      MatrixSetRow(mat, row, len, ind, val);
+      MatrixSetRow(mat, row, len, (HYPRE_Int*) ind, val);
       HYPRE_DistributedMatrixRestoreRow(distmat, row, &len, &ind, &val);
    }
 
@@ -216,7 +218,7 @@ HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
 
    ParaSailsDestroy(internal->ps);
 
-   internal->ps = ParaSailsCreate(internal->comm, 
+   internal->ps = ParaSailsCreate(internal->comm,
                                   mat->beg_row, mat->end_row, sym);
 
    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
@@ -256,7 +258,7 @@ HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
 
    ParaSailsDestroy(internal->ps);
 
-   internal->ps = ParaSailsCreate(internal->comm, 
+   internal->ps = ParaSailsCreate(internal->comm,
                                   mat->beg_row, mat->end_row, sym);
 
    ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
@@ -301,7 +303,7 @@ HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParaSailsApply - Apply the ParaSails preconditioner to an array 
+ * hypre_ParaSailsApply - Apply the ParaSails preconditioner to an array
  * "u", and return the result in the array "v".
  *--------------------------------------------------------------------------*/
 
@@ -341,9 +343,9 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    ParaSails *ps = internal->ps;
    Matrix *mat = internal->ps->M;
 
-   HYPRE_Int *diag_sizes, *offdiag_sizes, local_row, i, j;
+   HYPRE_Int *col_inds, *diag_sizes, *offdiag_sizes, local_row, j;
+   HYPRE_BigInt i;
    HYPRE_Int size;
-   HYPRE_Int *col_inds;
    HYPRE_Real *values;
 
    HYPRE_IJMatrixCreate( ps->comm, ps->beg_row, ps->end_row,
@@ -382,7 +384,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    {
       MatrixGetRow(mat, local_row, &size, &col_inds, &values);
 
-      HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i, (const HYPRE_Int *) col_inds,
+      HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i,
+                               (const HYPRE_BigInt *) col_inds,
                                (const HYPRE_Real *) values );
 
       NumberingGlobalToLocal(ps->numb, size, col_inds, col_inds);

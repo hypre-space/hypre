@@ -14,6 +14,8 @@ HYPRE_Int
 HYPRE_SStructPCGCreate( MPI_Comm             comm,
                         HYPRE_SStructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
          hypre_SStructKrylovCAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
@@ -193,7 +195,6 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructVector y,
                              HYPRE_SStructVector x      )
 {
-
    return ( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
                                         (HYPRE_StructMatrix) A,
                                         (HYPRE_StructVector) y,
@@ -242,6 +243,3 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
 
    return hypre_error_flag;
 }
-
-
-

@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_CGNRFunctions * cgnr_functions;
 
    if (!solver)
@@ -25,15 +27,21 @@ HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
       hypre_CGNRFunctionsCreate(
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
-         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecT,
+         hypre_ParKrylovDestroyVector,
+         hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvecT,
          hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd,
-         hypre_ParKrylovCopyVector, hypre_ParKrylovClearVector,
-         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
+         hypre_ParKrylovScaleVector,
+         hypre_ParKrylovAxpy,
          hypre_ParKrylovIdentitySetup,
-         hypre_ParKrylovIdentity, hypre_ParKrylovIdentity );
+         hypre_ParKrylovIdentity,
+         hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_CGNRCreate( cgnr_functions) );
+
    return hypre_error_flag;
 }
 

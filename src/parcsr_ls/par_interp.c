@@ -56,7 +56,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int         *CF_marker_offd = NULL;
    HYPRE_Int         *dof_func_offd = NULL;
 
-   hypre_CSRMatrix   *A_ext;
+   hypre_CSRMatrix   *A_ext = NULL;
 
    HYPRE_Real        *A_ext_data = NULL;
    HYPRE_Int         *A_ext_i = NULL;
@@ -123,7 +123,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -960,7 +960,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
 
    hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse, tmp_map_offd);
 
-
    *P_ptr = P;
 
    hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
@@ -972,12 +971,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
-
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildInterpHE
@@ -1029,7 +1026,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -1093,7 +1090,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1862,11 +1859,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1)
-   {
-      hypre_CSRMatrixDestroy(A_ext);
-   }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
@@ -2244,6 +2237,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
    {
       HYPRE_Int       *P_marker, *P_marker_offd;
 
+      alfa = 1.0;
+      beta = 1.0;
       size = n_fine / num_threads;
       rest = n_fine - size * num_threads;
       if (jl < rest)
@@ -2437,8 +2432,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
                }
             }
-            if (sum_P_neg) { alfa = sum_N_neg / sum_P_neg / diagonal; }
-            if (sum_P_pos) { beta = sum_N_pos / sum_P_pos / diagonal; }
+            if (sum_P_neg != 0.0) { alfa = sum_N_neg / sum_P_neg / diagonal; }
+            if (sum_P_pos != 0.0) { beta = sum_N_pos / sum_P_pos / diagonal; }
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -2594,30 +2589,29 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                HYPRE_Int             interp_type,
                                hypre_ParCSRMatrix  **P_ptr)
 {
-   hypre_GpuProfilingPushRange("DirInterp");
+   HYPRE_UNUSED_VAR(interp_type);
 
-   HYPRE_Int ierr = 0;
+   hypre_GpuProfilingPushRange("DirInterp");
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildDirInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
-                                                 dof_func,
-                                                 debug_flag, trunc_factor, max_elmts,
-                                                 interp_type, P_ptr);
+      hypre_BoomerAMGBuildDirInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
+                                          dof_func, debug_flag, trunc_factor, max_elmts,
+                                          interp_type, P_ptr);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGBuildDirInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
-                                               debug_flag, trunc_factor, max_elmts, P_ptr);
+      hypre_BoomerAMGBuildDirInterpHost(A, CF_marker, S, num_cpts_global, num_functions,
+                                        dof_func, debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
    hypre_GpuProfilingPopRange();
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*------------------------------------------------
@@ -2631,7 +2625,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 {
    if (trunc_factor <= 0.0 && max_elmts == 0)
    {
-      return 0;
+      return hypre_error_flag;
    }
 
 #if defined(HYPRE_USING_GPU)
@@ -2695,12 +2689,12 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrix *P;
    HYPRE_BigInt       *col_map_offd_P;
-   HYPRE_Int          *tmp_map_offd;
+   HYPRE_Int          *tmp_map_offd = NULL;
 
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -2767,7 +2761,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -3636,11 +3630,9 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
-
 }
 
 /*---------------------------------------------------------------------------
@@ -3860,6 +3852,8 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            debug_flag,
                                       hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;

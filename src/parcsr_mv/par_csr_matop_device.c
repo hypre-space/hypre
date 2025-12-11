@@ -684,6 +684,9 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             want_data,
                                        void                **request_ptr)
 {
+   HYPRE_UNUSED_VAR(indices);
+   HYPRE_UNUSED_VAR(indices_len);
+
    HYPRE_Int      i, j;
    HYPRE_Int      num_sends, num_rows_send, num_nnz_send, num_recvs, num_rows_recv, num_nnz_recv;
    HYPRE_Int     *d_send_i, *send_i, *d_send_map, *d_recv_i, *recv_i;
@@ -837,10 +840,11 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
                                     NULL,
                                     &comm_pkg_j);
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure d_send_j/d_send_a is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
-#endif
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 
    /* init communication */
    /* ja */
@@ -1004,6 +1008,7 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
 HYPRE_Int
 hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
 {
+   hypre_GpuProfilingPushRange("CompressOffdMap");
    hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
@@ -1030,6 +1035,8 @@ hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
                     HYPRE_BigInt, num_cols_A_offd_new,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -1315,7 +1322,7 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    hypre_CSRMatrixData(B) = B_a;
    hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    return B;
 }
@@ -1436,7 +1443,7 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
       *values = hypre_ParCSRMatrixRowvalues(mat);
    }
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    return hypre_error_flag;
 }
@@ -1488,9 +1495,12 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
                          thrust::plus<HYPRE_BigInt>() );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       if (!hypre_ParCSRMatrixCommPkg(A))
@@ -1733,7 +1743,6 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
       hypreDevice_CSRSpAdd( hypre_CSRMatrixNumRows(A_offd),
                             hypre_CSRMatrixNumRows(B_offd),
-                            num_cols_offd_C,
                             hypre_CSRMatrixNumNonzeros(A_offd),
                             hypre_CSRMatrixNumNonzeros(B_offd),
                             hypre_CSRMatrixI(A_offd),
@@ -1806,6 +1815,90 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixColSumDevice( hypre_ParCSRMatrix *A,
+                                hypre_ParVector    *b )
+{
+   hypre_ParCSRCommPkg    *comm_pkg       = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CSRMatrix        *A_diag         = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix        *A_offd         = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int               num_cols_diag  = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int               num_cols_offd  = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Complex          *b_data         = hypre_ParVectorLocalData(b);
+   HYPRE_Int               num_sends      = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int               send_map_num_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+
+   hypre_ParCSRCommHandle *comm_handle;
+   HYPRE_Complex          *d_send_buf;
+   HYPRE_Complex          *d_recv_buf;
+
+   /*---------------------------------------------------------------------
+    * Allocate/reuse data buffers
+    *--------------------------------------------------------------------*/
+
+   if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          num_cols_offd,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   d_send_buf = hypre_ParCSRCommPkgTmpData(comm_pkg);
+   hypreDevice_ComplexFilln(d_send_buf, num_cols_offd, 0.0);
+
+   /* send_map_elmts on device */
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+
+   /* Allocate receive data buffer */
+   if (!hypre_ParCSRCommPkgBufData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          send_map_num_elmts,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   d_recv_buf = hypre_ParCSRCommPkgBufData(comm_pkg);
+
+   /*---------------------------------------------------------------------
+    * Overlap communication and computation
+    *--------------------------------------------------------------------*/
+
+   /* Compute off-diagonal contribution to be sent to neighboring ranks */
+   hypre_CSRMatrixComputeColSum(A_offd, d_send_buf, 0, 1.0);
+
+   /* Make sure d_send_buf is ready before communicating it */
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
+
+   /* Non-blocking communication starts */
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg,
+                                                 HYPRE_MEMORY_DEVICE, d_send_buf,
+                                                 HYPRE_MEMORY_DEVICE, d_recv_buf );
+
+   /* Compute diagonal contribution */
+   hypre_CSRMatrixComputeColSum(A_diag, b_data, 0, 1.0);
+
+   /* Non-blocking communication ends */
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+
+   /* Make sure b_data is ready before updating it below */
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
+
+   /* Compute off-diagonal contribution by unpacking data via SpMV */
+   hypre_ParCSRMatrixMatvecT_unpack(comm_pkg, num_cols_diag, d_recv_buf, b_data);
+
+   /* Final sync to ensure all updates are complete before returning */
+   hypre_SyncComputeStream();
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -1830,7 +1923,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    hypre_CSRMatrix        *A_offd        = hypre_ParCSRMatrixOffd(par_A);
    HYPRE_Int               num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_Vector          *ld             = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
+   hypre_Vector           *ld            = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
    hypre_Vector           *rd            = hypre_ParVectorLocalVector(par_rd);
    HYPRE_Complex          *rd_data       = hypre_VectorData(rd);
 
@@ -1858,7 +1951,10 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    }
 
    /* Communicate a single vector component */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, par_rd);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg,
+                                      hypre_VectorNumVectors(rd),
+                                      hypre_VectorVectorStride(rd),
+                                      hypre_VectorIndexStride(rd));
 
    /* send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -1924,9 +2020,12 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
 #endif
 
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* make sure send_rdbuf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    /* A_diag = diag(ld) * A_diag * diag(rd) */
@@ -1946,7 +2045,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /* Free memory */
@@ -1991,6 +2090,8 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypre_assert(y_vecstride == y_size);
    hypre_assert(x_num_vectors == y_num_vectors);
 
+   hypre_GpuProfilingPushRange("ParCSRDiagScaleVector");
+
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
@@ -2003,7 +2104,7 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
 #endif // #if defined(HYPRE_USING_DEVICE_OPENMP)
 
-   //hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

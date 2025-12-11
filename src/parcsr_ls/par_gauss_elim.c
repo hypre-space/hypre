@@ -66,10 +66,10 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 
    /* Local variables */
    MPI_Comm              new_comm;
-   HYPRE_Int             global_size     = global_num_rows * global_num_rows;
-   HYPRE_Real           *A_mat           = NULL;
-   HYPRE_Real           *AT_mat;
-   HYPRE_Int            *A_piv;
+   HYPRE_Int             global_size = global_num_rows * global_num_rows;
+   HYPRE_Real           *A_mat       = NULL;
+   HYPRE_Real           *AT_mat      = NULL;
+   HYPRE_Int            *A_piv       = NULL;
    HYPRE_MemoryLocation  ge_memory_location;
    HYPRE_Int             i, jj, col;
    HYPRE_Int             ierr = 0;
@@ -96,7 +96,13 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    }
    else
    {
+      /* Fallback to host execution when dependency libraries are not met (cuSOLVER/MAGMA) */
+#if defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_CUSOLVER) && !defined(HYPRE_USING_MAGMA) ||\
+    (defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_MAGMA))
+      ge_memory_location = HYPRE_MEMORY_HOST;
+#else
       ge_memory_location = memory_location;
+#endif
    }
    hypre_ParAMGDataGEMemoryLocation(amg_data) = ge_memory_location;
 
@@ -202,14 +208,14 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
             {
                /* using row major */
-               col = A_diag_j[jj] + first_row_index;
+               col = (HYPRE_Int) (A_diag_j[jj] + first_row_index);
                A_mat_local[i * global_num_rows + col] = A_diag_data[jj];
             }
 
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                /* using row major */
-               col = col_map_offd[A_offd_j[jj]];
+               col = (HYPRE_Int) col_map_offd[A_offd_j[jj]];
                A_mat_local[i * global_num_rows + col] = A_offd_data[jj];
             }
          }
@@ -272,6 +278,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       {
          /* Skip setup if this rank has no rows. */
          hypre_ParAMGDataGSSetup(amg_data) = 1;
+
+         /* Finalize profiling */
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
    }
@@ -320,6 +331,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 
          /* Skip setup if this rank has no rows. */
          hypre_ParAMGDataGSSetup(amg_data) = 1;
+
+         /* Finalize profiling */
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -331,6 +347,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    if (!num_rows)
    {
       hypre_ParAMGDataGSSetup(amg_data) = 1;
+
+      /* Finalize profiling */
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -357,6 +378,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          if (ierr != 0)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+
+            /* Finalize profiling */
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_FUNC_END;
+
             return hypre_error_flag;
          }
 
@@ -373,6 +399,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             if (ierr != 0)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri (query)!");
+
+               /* Finalize profiling */
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_FUNC_END;
+
                return hypre_error_flag;
             }
 
@@ -386,6 +417,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             if (ierr != 0)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri!");
+
+               /* Finalize profiling */
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_FUNC_END;
+
                return hypre_error_flag;
             }
             hypre_TFree(work, HYPRE_MEMORY_HOST);
@@ -399,11 +435,12 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 
    hypre_ParAMGDataGSSetup(amg_data) = 1;
 
+   /* Finalize profiling */
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
 #endif
-   hypre_GpuProfilingPopRange();
-   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -512,6 +549,10 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
             hypre_TFree(b_data_h, HYPRE_MEMORY_HOST);
          }
 
+         /* Finalize profiling */
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+
          return hypre_error_flag;
       }
 
@@ -572,6 +613,10 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TFree(b_data_h, HYPRE_MEMORY_HOST);
       }
 
+      /* Finalize profiling */
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -596,11 +641,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
          /* Run hypre's internal gaussian elimination */
-         hypre_gselim(A_work, b_vec, global_num_rows, ierr);
-         if (ierr != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
-         }
+         hypre_gselim(A_work, b_vec, global_num_rows);
 
          hypre_TMemcpy(u_data, b_data_h + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
@@ -641,6 +682,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
       hypre_TFree(b_data_h, HYPRE_MEMORY_HOST);
    }
 
+   /* Finalize profiling */
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 #ifdef HYPRE_PROFILE

@@ -152,6 +152,8 @@ hypre_ParCSRCommPkgCreateApart_core(
 
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-----------------------------------------------------------
     *  Everyone knows where their assumed range is located
     * (because of the assumed partition object (apart).
@@ -197,9 +199,9 @@ hypre_ParCSRCommPkgCreateApart_core(
    /* it is ok to contact yourself - because then there doesn't
       need to be separate code */
 
-   ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
-   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int,  size + 1, HYPRE_MEMORY_HOST);
-   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt,  size * 2, HYPRE_MEMORY_HOST);
+   ex_contact_procs = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+   ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int, size + 1, HYPRE_MEMORY_HOST);
+   ex_contact_buf =  hypre_CTAlloc(HYPRE_BigInt, size * 2, HYPRE_MEMORY_HOST);
 
    range_end = -1;
    for (i = 0; i < num_cols_off_d; i++)
@@ -212,7 +214,8 @@ hypre_ParCSRCommPkgCreateApart_core(
          if (ex_num_contacts == size) /*need more space? */
          {
             size += 20;
-            ex_contact_procs = hypre_TReAlloc(ex_contact_procs, HYPRE_Int, size, HYPRE_MEMORY_HOST);
+            ex_contact_procs = hypre_TReAlloc(ex_contact_procs, HYPRE_Int, size,
+                                              HYPRE_MEMORY_HOST);
             ex_contact_vec_starts = hypre_TReAlloc(ex_contact_vec_starts,  HYPRE_Int,  size + 1,
                                                    HYPRE_MEMORY_HOST);
             ex_contact_buf = hypre_TReAlloc(ex_contact_buf,  HYPRE_BigInt,  size * 2,
@@ -255,10 +258,14 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    max_response_size = 6;  /* 6 means we can fit 3 ranges*/
 
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Exchange_1");
+
    hypre_DataExchangeList(ex_num_contacts, ex_contact_procs,
                           ex_contact_buf, ex_contact_vec_starts, sizeof(HYPRE_BigInt),
                           sizeof(HYPRE_BigInt), &response_obj1, max_response_size, 1,
                           comm, (void**) &response_buf, &response_buf_starts);
+
+   HYPRE_ANNOTATE_REGION_END("%s", "Exchange_1");
 
    /*now create recv_procs[] and recv_vec_starts[] and num_recvs
      from the complete data in response_buf - this array contains
@@ -294,13 +301,13 @@ hypre_ParCSRCommPkgCreateApart_core(
       }
       if (count > 0)
       {
-         /*add the range if the proc id != myid*/
-         tmp_id = response_buf[i * 2];
+         /* Add the range if the proc id != myid*/
+         tmp_id = (HYPRE_Int) response_buf[i * 2];
          if (tmp_id != myid)
          {
             if (tmp_id != prev_id) /*increment the number of recvs */
             {
-               /*check size of recv buffers*/
+               /* Check size of recv buffers */
                if (num_recvs == size)
                {
                   size += 20;
@@ -365,10 +372,15 @@ hypre_ParCSRCommPkgCreateApart_core(
 
    max_response_size = 0;
 
+
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Exchange_2");
+
    hypre_DataExchangeList(num_recvs, recv_procs,
                           col_map_off_d, recv_vec_starts, sizeof(HYPRE_BigInt),
                           sizeof(HYPRE_BigInt), &response_obj2, max_response_size, 2,
                           comm,  (void **) &response_buf, &response_buf_starts);
+
+   HYPRE_ANNOTATE_REGION_END("%s", "Exchange_2");
 
    num_sends = send_proc_obj.length;
 
@@ -394,9 +406,7 @@ hypre_ParCSRCommPkgCreateApart_core(
     *  the same result as with the standard comm package)
     *   11/07/05
     *-----------------------------------------------------------*/
-
    {
-
       HYPRE_Int *orig_order;
       HYPRE_Int *orig_send_map_starts;
       HYPRE_BigInt *orig_send_elements;
@@ -477,7 +487,6 @@ hypre_ParCSRCommPkgCreateApart_core(
       *p_send_map_elements =  tmp_elements;
       hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
       send_proc_obj.elements = NULL;
-
    }
    else
    {
@@ -501,6 +510,8 @@ hypre_ParCSRCommPkgCreateApart_core(
    /* don't free send_proc_obj.id,send_proc_obj.vec_starts,send_proc_obj.elements;
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -606,6 +617,10 @@ hypre_RangeFillResponseIJDetermineRecvProcs( void      *p_recv_contact_buf,
                                              void     **p_send_response_buf,
                                              HYPRE_Int *response_message_size )
 {
+   HYPRE_UNUSED_VAR(contact_size);
+   HYPRE_UNUSED_VAR(contact_proc);
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid, tmp_id;
    HYPRE_BigInt row_end;
    HYPRE_Int    j;
@@ -699,6 +714,8 @@ hypre_FillResponseIJDetermineSendProcs(void       *p_recv_contact_buf,
                                        void      **p_send_response_buf,
                                        HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid;
    HYPRE_Int    i, index, count, elength;
 
@@ -718,7 +735,8 @@ hypre_FillResponseIJDetermineSendProcs(void       *p_recv_contact_buf,
       send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int,
                                          send_proc_obj->storage_length, HYPRE_MEMORY_HOST);
       send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts, HYPRE_Int,
-                                                 send_proc_obj->storage_length + 1, HYPRE_MEMORY_HOST);
+                                                 send_proc_obj->storage_length + 1,
+                                                 HYPRE_MEMORY_HOST);
    }
 
    /*initialize*/

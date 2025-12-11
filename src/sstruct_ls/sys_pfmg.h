@@ -43,7 +43,6 @@ typedef struct
    HYPRE_Int            *active_l;  /* flags to relax on level l*/
 
    hypre_SStructPGrid    **grid_l;
-   hypre_SStructPGrid    **P_grid_l;
 
    HYPRE_Real             *data;
    hypre_SStructPMatrix  **A_l;
@@ -66,6 +65,7 @@ typedef struct
    HYPRE_Int             num_iterations;
    HYPRE_Int             time_index;
    HYPRE_Int             print_level;
+   HYPRE_Int             print_freq;
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;

@@ -24,6 +24,10 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
                                              HYPRE_Int            max_elmts,
                                              hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -131,8 +135,8 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
    if (my_id == (num_procs - 1)) { total_old_global_cpts = num_old_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
-   n_old_Cpts = num_old_cpts_global[1] - num_old_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
+   n_old_Cpts = (HYPRE_Int) (num_old_cpts_global[1] - num_old_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFC3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -376,11 +380,11 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
                }
                for (j = As_FF_diag_i[row] + 1; j < As_FF_diag_i[row + 1]; j++)
                {
-                  if (D_q[As_FF_diag_j[j]]) { D_w[row] -= As_FF_diag_data[j]; }
+                  if (D_q[As_FF_diag_j[j]] != 0.0) { D_w[row] -= As_FF_diag_data[j]; }
                }
                for (j = As_FF_offd_i[row]; j < As_FF_offd_i[row + 1]; j++)
                {
-                  if (D_q_offd[As_FF_offd_j[j]]) { D_w[row] -= As_FF_offd_data[j]; }
+                  if (D_q_offd[As_FF_offd_j[j]] != 0.0) { D_w[row] -= As_FF_offd_data[j]; }
                }
                D_w[row] -= D_q[new_fine_to_fine[row]];
                row++;
@@ -398,7 +402,7 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
       for (i = startnewf; i < stopnewf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i])
+         if (D_w[i] != 0.0)
          {
             beta = 1.0 / D_w[i];
             As_FF_diag_data[j] = beta * D_q[new_fine_to_fine[i]];
@@ -414,7 +418,7 @@ hypre_BoomerAMGBuildModPartialExtInterpHost( hypre_ParCSRMatrix  *A,
       }
       for (i = startf; i < stopf; i++)
       {
-         if (D_q[i]) { gamma = -1.0 / D_q[i]; }
+         if (D_q[i] != 0.0) { gamma = -1.0 / D_q[i]; }
          else { gamma = 0.0; }
          for (j = As_FC_diag_i[i]; j < As_FC_diag_i[i + 1]; j++)
          {
@@ -667,6 +671,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
                                                HYPRE_Int            max_elmts,
                                                hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -774,8 +780,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
    if (my_id == (num_procs - 1)) { total_old_global_cpts = num_old_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
-   n_old_Cpts = num_old_cpts_global[1] - num_old_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
+   n_old_Cpts = (HYPRE_Int) (num_old_cpts_global[1] - num_old_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFCD3(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF, &D_lambda);
 
@@ -902,7 +908,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
          {
             D_q[i] += As_FC_offd_data[j];
          }
-         if (D_q[i] + D_lambda[i]) { D_inv[i] = 1.0 / (D_q[i] + D_lambda[i]); }
+         if (D_q[i] + D_lambda[i] != 0.0) { D_inv[i] = 1.0 / (D_q[i] + D_lambda[i]); }
       }
 
       row = 0;
@@ -1067,11 +1073,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
                }
                for (j = As_FF_diag_i[row] + 1; j < As_FF_diag_i[row + 1]; j++)
                {
-                  if (D_inv[As_FF_diag_j[j]]) { D_w[row] -= As_FF_diag_data[j]; }
+                  if (D_inv[As_FF_diag_j[j]] != 0.0) { D_w[row] -= As_FF_diag_data[j]; }
                }
                for (j = As_FF_offd_i[row]; j < As_FF_offd_i[row + 1]; j++)
                {
-                  if (D_inv_offd[As_FF_offd_j[j]]) { D_w[row] -= As_FF_offd_data[j]; }
+                  if (D_inv_offd[As_FF_offd_j[j]] != 0.0) { D_w[row] -= As_FF_offd_data[j]; }
                }
                D_w[row] += D_tau[row] - D_q[new_fine_to_fine[row]];
                row++;
@@ -1089,7 +1095,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpHost( hypre_ParCSRMatrix  *A,
       for (i = startnewf; i < stopnewf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i])
+         if (D_w[i] != 0.0)
          {
             beta = -1.0 / D_w[i];
             As_FF_diag_data[j] = beta * (D_q[new_fine_to_fine[i]] + D_lambda[new_fine_to_fine[i]]);

@@ -22,11 +22,9 @@ HEADERS =\
  _hypre_struct_ls.h\
  pfmg.h\
  red_black_gs.h\
- smg.h\
- sparse_msg.h
+ smg.h
 
 FILES =\
- coarsen.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
  F90_HYPRE_struct_flexgmres.c\
@@ -38,8 +36,6 @@ FILES =\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
- F90_HYPRE_struct_sparse_msg.c\
- hybrid.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
  HYPRE_struct_flexgmres.c\
@@ -49,8 +45,7 @@ FILES =\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
- HYPRE_struct_sparse_msg.c\
- jacobi.c\
+ hybrid.c\
  pcg_struct.c\
  pfmg.c\
  pfmg_relax.c\
@@ -61,23 +56,23 @@ FILES =\
  smg_setup.c\
  smg_setup_rap.c\
  smg_setup_restrict.c\
- smg_solve.c\
- sparse_msg.c\
- sparse_msg_setup.c\
- sparse_msg_setup_rap.c\
- sparse_msg_solve.c
+ smg_solve.c
 
 CUFILES =\
- cyclic_reduction.c\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
+ cyclic_reduction.c\
+ diagscale.c\
+ jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
+ pfmg_coarsen.c\
+ pfmg_cxyz_cc.c\
+ pfmg_cxyz_vc.c\
  pfmg_setup.c\
  pfmg_setup_interp.c\
  pfmg_setup_rap5.c\
  pfmg_setup_rap7.c\
- point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
  semi_interp.c\
@@ -88,16 +83,33 @@ CUFILES =\
  smg.c\
  smg_axpy.c\
  smg_residual.c\
- smg_setup_interp.c\
- sparse_msg2_setup_rap.c\
- sparse_msg3_setup_rap.c\
- sparse_msg_filter.c\
- sparse_msg_interp.c\
- sparse_msg_restrict.c
+ smg_setup_interp.c
+
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c\
+ HYPRE_struct_ls_mp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
+
+ifeq (${MP_BUILD}, 1)
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+
+endif
 
 SONAME = libHYPRE_struct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -107,16 +119,18 @@ SONAME = libHYPRE_struct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_struct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_struct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

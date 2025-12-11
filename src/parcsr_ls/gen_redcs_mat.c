@@ -19,6 +19,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                    HYPRE_Int         p_level,
                    HYPRE_Int         coarse_threshold)
 {
+   HYPRE_UNUSED_VAR(coarse_threshold);
 
    /* Par Data Structure variables */
    hypre_ParCSRMatrix **Par_A_array = hypre_ParAMGDataAArray(amg_data);
@@ -73,7 +74,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int *info = NULL;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *displs2 = NULL;
-      HYPRE_Int i, j, size, num_nonzeros, total_nnz, cnt;
+      HYPRE_Int i, j, size, num_nonzeros, total_nnz = 0, cnt;
 
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
@@ -592,6 +593,8 @@ hypre_merge_lists(HYPRE_Int          *list1,
                   hypre_int          *np1,
                   hypre_MPI_Datatype *dptr)
 {
+   HYPRE_UNUSED_VAR(dptr);
+
    HYPRE_Int i, len1, len2, indx1, indx2;
 
    if (list1[0] == 0)

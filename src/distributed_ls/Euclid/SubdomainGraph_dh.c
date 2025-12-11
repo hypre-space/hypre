@@ -283,7 +283,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n, beg_row;
   HYPRE_Real t1;
 
   /*-------------------------------------------------------
@@ -292,7 +293,7 @@ void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    * (for sequential, beg_row=0 and m == n
    *-------------------------------------------------------*/
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
-  s->m = n;
+  s->m = (HYPRE_Int) n;
 
   /*-------------------------------------------------------
    * allocate storage for all data structures
@@ -433,25 +434,25 @@ void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m
   START_FUNC_DH
 
   if (!bj) {
-    s->ptrs = (HYPRE_Int*)MALLOC_DH((blocks+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->ptrs = (HYPRE_Int*)MALLOC_DH(((size_t) (blocks + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     s->ptrs[0] = 0;
-    s->colorVec = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    s->loNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    s->hiNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    s->allNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->colorVec = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->loNabors = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->hiNabors = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->allNabors = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
 
-  s->n2o_row = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->o2n_col = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->n2o_row = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->o2n_col = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* these are probably only needed for single mpi task -- ?? */
   /* nope; beg_row and row_ct are needed by ilu_mpi_bj; yuck! */
-  s->beg_row = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->beg_rowP = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->row_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->bdry_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->o2n_sub = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  s->n2o_sub = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->beg_row = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->beg_rowP = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->row_count = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->bdry_count = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->o2n_sub = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->n2o_sub = (HYPRE_Int*)MALLOC_DH((size_t) blocks * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   END_FUNC_DH
 }
@@ -464,7 +465,8 @@ void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m
 void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n, beg_row;
   bool symmetric;
   HYPRE_Real t1;
 
@@ -479,7 +481,6 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    *-------------------------------------------------------*/
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
   s->m = m;
-
 
   /*-------------------------------------------------------
    * allocate storage for all data structures
@@ -498,8 +499,8 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
     hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
     hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
-    s->beg_row[myid_dh] = beg_row;
-    s->beg_rowP[myid_dh] = beg_row;
+    s->beg_row[myid_dh] = (HYPRE_Int) beg_row;
+    s->beg_rowP[myid_dh] = (HYPRE_Int) beg_row;
     s->row_count[myid_dh] = m;
   }
 
@@ -529,12 +530,12 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   t1 = hypre_MPI_Wtime();
   if (!bj) {
       HYPRE_Int *interiorNodes, *bdryNodes;
-      HYPRE_Int interiorCount, bdryCount;
+      HYPRE_Int interiorCount = 0, bdryCount;
       HYPRE_Int *o2n = s->o2n_col, idx;
       HYPRE_Int i;
 
-      interiorNodes = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-      bdryNodes     = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      interiorNodes = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      bdryNodes     = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
       /* divide this subdomain's rows into interior and boundary rows;
          the returned lists are with respect to local numbering.
@@ -655,8 +656,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   /* allocate send buffer, and copy permutation info to buffer;
      each entry is a <old_value, new_value> pair.
    */
-  sendBuf = (HYPRE_Int*)MALLOC_DH(2*myBdryCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-
+  sendBuf = (HYPRE_Int*)MALLOC_DH((size_t) (2 * myBdryCount) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   if (debug) {
     hypre_fprintf(logFile, "\nSUBG myFirstBdry= %i  myBdryCount= %i  m= %i  beg_rowP= %i\n", 1+ myFirstBdry, myBdryCount, m, 1+beg_rowP);
@@ -680,7 +680,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
      and set up index array for locating the beginning of each
      nabor's buffers.
    */
-  naborIdx = (HYPRE_Int*)MALLOC_DH((1+naborCount)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  naborIdx = (HYPRE_Int*)MALLOC_DH(((size_t) (1 + naborCount)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   naborIdx[0] = 0;
   nz = 0;
   for (i=0; i<naborCount; ++i) {
@@ -689,15 +689,15 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   }
 
 
-  recvBuf = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  recvBuf = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
 
 /* for (i=0; i<nz; ++i) recvBuf[i] = -10; */
 
   /* perform sends and receives */
-  recv_req = (hypre_MPI_Request*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-  send_req = (hypre_MPI_Request*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-  status = (hypre_MPI_Status*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
+  recv_req = (hypre_MPI_Request*)MALLOC_DH((size_t) naborCount * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  send_req = (hypre_MPI_Request*)MALLOC_DH((size_t) naborCount * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  status = (hypre_MPI_Status*)MALLOC_DH((size_t) naborCount * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
   for (i=0; i<naborCount; ++i) {
     HYPRE_Int nabr = nabors[i];
@@ -768,7 +768,7 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 
   /* all processors tell root how many nabors they have */
   if (myid_dh == 0) {
-    idxAll = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    idxAll = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
   hypre_MPI_Gather(&nct, 1, HYPRE_MPI_INT, idxAll, 1, HYPRE_MPI_INT, 0, comm_dh);
 
@@ -782,12 +782,12 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
   /* allocate space for adjacency lists (memory for the
      pointer array was previously allocated)
    */
-  adj = s->adj = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  adj = s->adj = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* root receives adjacency lists from all processors */
   if (myid_dh == 0) {
-    recvReqs = (hypre_MPI_Request*)MALLOC_DH(np_dh*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-    statuses = (hypre_MPI_Status*)MALLOC_DH(np_dh*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
+    recvReqs = (hypre_MPI_Request*)MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+    statuses = (hypre_MPI_Status*)MALLOC_DH((size_t) np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
     /* first, set up row pointer array */
     ptrs[0] = 0;
@@ -828,6 +828,8 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 #define __FUNC__ "form_subdomaingraph_seq_private"
 void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int *dense, i, j, row, blocks = s->blocks;
   HYPRE_Int *cval, len, *adj;
@@ -838,9 +840,9 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
      relatively small, we'll punt and allocate the maximum
      possibly needed.
   */
-  adj = s->adj = (HYPRE_Int*)MALLOC_DH(blocks*blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  adj = s->adj = (HYPRE_Int*)MALLOC_DH((size_t) (blocks * blocks) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
-  dense = (HYPRE_Int*)MALLOC_DH(blocks*blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  dense = (HYPRE_Int*)MALLOC_DH((size_t) (blocks * blocks) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<blocks*blocks; ++i) dense[i] = 0;
 
   /* loop over each block's rows to identify all boundary nodes */
@@ -889,7 +891,7 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
   HYPRE_Int row, len, *cval, ct = 0;
   HYPRE_Int *nabors = s->allNabors;
 
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = 0;
 
   SET_INFO("finding nabors in subdomain graph for structurally symmetric matrix");
@@ -924,14 +926,16 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 #define __FUNC__ "find_all_neighbors_unsym_private"
 void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int i, j, row, beg_row, end_row;
   HYPRE_Int *marker;
   HYPRE_Int *cval, len, idx = 0;
   HYPRE_Int nz, *nabors = s->allNabors, *myNabors;
 
-  myNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  marker = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  myNabors = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<np_dh; ++i) marker[i] = 0;
 
   SET_INFO("finding nabors in subdomain graph for structurally unsymmetric matrix");
@@ -1022,6 +1026,8 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
                      HYPRE_Int *interiorNodes, HYPRE_Int *bdryNodes,
                      HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int beg_row = s->beg_row[myid_dh];
   HYPRE_Int end_row = beg_row + s->row_count[myid_dh];
@@ -1111,9 +1117,9 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
    * scan the sorted list to determine what boundary
    * node information to send to whom
    *-----------------------------------------------------*/
-  sendBuf = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  recvBuf = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  rpOUT = (HYPRE_Int*)MALLOC_DH((np_dh+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  sendBuf = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  recvBuf = (HYPRE_Int*)MALLOC_DH((size_t) np_dh * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  rpOUT = (HYPRE_Int*)MALLOC_DH(((size_t) (np_dh + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   rpOUT[0] = 0;
   for (i=0; i<np_dh; ++i) sendBuf[i] = 0;
 
@@ -1148,7 +1154,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
    *-----------------------------------------------------*/
 
   /* first, set up data structures to hold incoming information */
-  rpIN = (HYPRE_Int*)MALLOC_DH((np_dh+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  rpIN = (HYPRE_Int*)MALLOC_DH(((size_t) (np_dh + 1)) * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   rpIN[0] = 0;
   nz = 0;
   recvCt = 0;
@@ -1159,11 +1165,11 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
       rpIN[recvCt] = nz;
     }
   }
-  bdryNodes = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  sendReq = (hypre_MPI_Request*)MALLOC_DH(sendCt*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
-  recvReq = (hypre_MPI_Request*)MALLOC_DH(recvCt*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  bdryNodes = (HYPRE_Int*)MALLOC_DH((size_t) nz * sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  sendReq = (hypre_MPI_Request*)MALLOC_DH((size_t) sendCt * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  recvReq = (hypre_MPI_Request*)MALLOC_DH((size_t) recvCt * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
   max = MAX(sendCt, recvCt);
-  status = (hypre_MPI_Status*)MALLOC_DH(max*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
+  status = (hypre_MPI_Status*)MALLOC_DH((size_t) max*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
   /* second, start receives for incoming data */
   j = 0;
@@ -1196,7 +1202,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
    * consolidate information from all processors to
    * identify all local boundary nodes
    *-----------------------------------------------------*/
-  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = 0;
   for (i=0; i<nz; ++i) marker[bdryNodes[i]] = 1;
 
@@ -1268,8 +1274,8 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
 
   if (np_dh == 1) n = s->blocks;
 
-  marker = (HYPRE_Int*)MALLOC_DH((n+1)*sizeof(HYPRE_Int));
-  colorCounter = (HYPRE_Int*)MALLOC_DH((n+1)*sizeof(HYPRE_Int));
+  marker = (HYPRE_Int*)MALLOC_DH(((size_t) (n + 1)) * sizeof(HYPRE_Int));
+  colorCounter = (HYPRE_Int*)MALLOC_DH(((size_t) (n + 1)) * sizeof(HYPRE_Int));
   for (i=0; i<=n; ++i) {
     marker[i] = -1;
     colorCounter[i] = 0;
@@ -1564,7 +1570,7 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
   HYPRE_Int i, j, row, blocks = s->blocks;
   HYPRE_Int *cval, *tmp;
 
-    tmp = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    tmp = (HYPRE_Int*)MALLOC_DH((size_t) m * sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) tmp[i] = 0;
 
     /*------------------------------------------

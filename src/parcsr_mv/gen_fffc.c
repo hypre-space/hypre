@@ -491,6 +491,10 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
  * hypre_ParCSRMatrixGenerateFFFC
  *
  * Generate AFF or AFC
+ *
+ * TODO (VPM): build the communication package of the resulting matrices
+ * (A_FF and A_FC) from the communication package of the original matrix
+ * without doing MPI calls.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1502,7 +1506,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   A_FF_offd_data[o_count_FF++] = A_offd_data[jA++];
                }
             }
-            if (sum) { D_lambda[rowc] = D_lambda[rowc] / sum; }
+            if (sum != 0.0) { D_lambda[rowc] = D_lambda[rowc] / sum; }
             rowc++;
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[rowc] = d_count_FC;
@@ -1545,7 +1549,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   D_lambda[rowc] += A_offd_data[jA];
                }
             }
-            if (sum) { D_lambda[rowc] = D_lambda[rowc] / sum; }
+            if (sum != 0.0) { D_lambda[rowc] = D_lambda[rowc] / sum; }
             rowc++;
             A_FC_diag_i[rowc] = d_count_FC;
             A_FC_offd_i[rowc] = o_count_FC;

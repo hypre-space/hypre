@@ -10,7 +10,7 @@
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -18,7 +18,11 @@
 
 typedef struct
 {
-   HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors in AMGData */
+   /* Base solver data structure */
+   hypre_Solver   base;
+
+   /* Memory location of matrices/vectors in AMGData */
+   HYPRE_MemoryLocation  memory_location;
 
    /* setup params */
    HYPRE_Int      max_levels;
@@ -88,6 +92,7 @@ typedef struct
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
    HYPRE_Int            num_functions;
+   HYPRE_Int            filter_functions;
    HYPRE_Int            nodal;
    HYPRE_Int            nodal_levels;
    HYPRE_Int            nodal_diag;
@@ -137,6 +142,8 @@ typedef struct
    HYPRE_Real           pi_drop_tol;
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
+
+   /* ILU parameters */
    HYPRE_Int            ilu_lfil;
    HYPRE_Int            ilu_type;
    HYPRE_Int            ilu_max_row_nnz;
@@ -146,7 +153,12 @@ typedef struct
    HYPRE_Int            ilu_lower_jacobi_iters;
    HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
+   HYPRE_Int            ilu_iter_setup_type;
+   HYPRE_Int            ilu_iter_setup_option;
+   HYPRE_Int            ilu_iter_setup_max_iter;
+   HYPRE_Real           ilu_iter_setup_tolerance;
 
+   /* FSAI parameters */
    HYPRE_Int            fsai_algo_type;
    HYPRE_Int            fsai_local_solve_type;
    HYPRE_Int            fsai_max_steps;
@@ -287,7 +299,6 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 /* setup params */
-
 #define hypre_ParAMGDataMemoryLocation(amg_data)       ((amg_data) -> memory_location)
 #define hypre_ParAMGDataRestriction(amg_data)          ((amg_data) -> restr_par)
 #define hypre_ParAMGDataIsTriangular(amg_data)         ((amg_data) -> is_triangular)
@@ -352,8 +363,9 @@ typedef struct
 #define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
 
 /* problem data parameters */
-#define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
+#define hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataFilterFunctions(amg_data) ((amg_data)->filter_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
@@ -407,6 +419,10 @@ typedef struct
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataILUIterSetupType(amg_data) ((amg_data)->ilu_iter_setup_type)
+#define hypre_ParAMGDataILUIterSetupOption(amg_data) ((amg_data)->ilu_iter_setup_option)
+#define hypre_ParAMGDataILUIterSetupMaxIter(amg_data) ((amg_data)->ilu_iter_setup_max_iter)
+#define hypre_ParAMGDataILUIterSetupTolerance(amg_data) ((amg_data)->ilu_iter_setup_tolerance)
 #define hypre_ParAMGDataFSAIAlgoType(amg_data) ((amg_data)->fsai_algo_type)
 #define hypre_ParAMGDataFSAILocalSolveType(amg_data) ((amg_data)->fsai_local_solve_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)

@@ -8,7 +8,16 @@
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
 
+#ifdef __cplusplus
+extern "C++"
+{
+#endif
+
 #include <assert.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 /*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
@@ -17,7 +26,9 @@
 typedef struct
 {
    HYPRE_Int  error_flag;
+   HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
+   HYPRE_Int  verbosity;
    char      *memory;
    HYPRE_Int  mem_sz;
    HYPRE_Int  msg_sz;
@@ -26,13 +37,20 @@ typedef struct
 
 extern hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
+#define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+void hypre_error_handler_clear_messages(void);
+void hypre_error_code_save(void);
+void hypre_error_code_restore(void);
 
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_error_w_msg_mp(IERR, msg)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, msg)
+#endif
 #define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
 #define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
@@ -60,4 +78,3 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif /* hypre_ERROR_HEADER */
-

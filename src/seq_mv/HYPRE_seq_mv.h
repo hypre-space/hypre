@@ -16,6 +16,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_seq_mv_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,11 +34,6 @@ struct hypre_MappedMatrix_struct;
 typedef struct hypre_MappedMatrix_struct *HYPRE_MappedMatrix;
 struct hypre_MultiblockMatrix_struct;
 typedef struct hypre_MultiblockMatrix_struct *HYPRE_MultiblockMatrix;
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -80,6 +79,7 @@ HYPRE_Int HYPRE_VectorDestroy( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorInitialize( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorPrint( HYPRE_Vector vector, char *file_name );
 HYPRE_Vector HYPRE_VectorRead( char *file_name );
+HYPRE_Int HYPRE_VectorCopy( HYPRE_Vector  xvec, HYPRE_Vector  yvec);
 
 typedef enum HYPRE_TimerID
 {
@@ -142,6 +142,17 @@ extern HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT];
 #ifdef __cplusplus
 }
 
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_seq_mv_mup_undef.h"
+#include "HYPRE_seq_mv_mup.h"
+#endif
 #endif
 
 #endif

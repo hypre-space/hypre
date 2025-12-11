@@ -19,6 +19,7 @@
 #include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 #if defined(HYPRE_USING_CUSPARSE)
+#define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
 
@@ -142,12 +143,13 @@ main (hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
@@ -162,6 +164,9 @@ main (hypre_int argc,
 #endif
    /* use vendor implementation for SpGEMM */
    HYPRE_SetSpGemmUseVendor(0);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_SetSpGemmUseVendor(1);
+#endif
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 #endif

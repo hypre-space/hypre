@@ -32,6 +32,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                            HYPRE_Int             debug_flag,
                                            hypre_ParCSRMatrix  **R_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -283,9 +285,12 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                          thrust::plus<HYPRE_BigInt>() );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure send_buf_i is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i,
@@ -452,7 +457,11 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_DeviceItem    &item,
 }
 
 #if !defined(HYPRE_USING_SYCL)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+#else
+struct setTo1minus1
+#endif
 {
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
    {

@@ -60,7 +60,7 @@ hypre_longint hypre_IDX_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *
   hypre_ulongint sum = 0;
 
   for (i=0; i<len; i++)
-    sum += v[i] * i;
+    sum += (hypre_ulongint) (v[i] * i);
 
   if (logging)
   {
@@ -71,7 +71,7 @@ hypre_longint hypre_IDX_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *
 
   numChk++;
 
-  return sum;
+  return (hypre_longint) sum;
 }
 
 /*************************************************************************
@@ -86,7 +86,7 @@ hypre_longint hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *
   hypre_ulongint sum = 0;
 
   for (i=0; i<len; i++)
-    sum += v[i] * i;
+    sum += (hypre_ulongint) (v[i] * i);
 
   if (logging)
   {
@@ -97,7 +97,7 @@ hypre_longint hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *
 
   numChk++;
 
-  return sum;
+  return (hypre_longint) sum;
 }
 
 /*************************************************************************
@@ -113,7 +113,7 @@ hypre_longint hypre_FP_Checksum(const HYPRE_Real *v, HYPRE_Int len, const char *
   HYPRE_Int *vv = (HYPRE_Int*)v;
 
   for (i=0; i<len; i++)
-    sum += vv[i] * i;
+    sum += (hypre_ulongint) (vv[i] * i);
 
   if (logging)
   {
@@ -124,7 +124,7 @@ hypre_longint hypre_FP_Checksum(const HYPRE_Real *v, HYPRE_Int len, const char *
 
   numChk++;
 
-  return sum;
+  return (hypre_longint) sum;
 }
 
 /*************************************************************************
@@ -207,17 +207,17 @@ hypre_longint hypre_LDU_Checksum(const FactorMatType *ldu,
 
   for (i=0; i<lnrows; i++) {
     for (j=ldu->lsrowptr[i]; j<ldu->lerowptr[i]; j++) {
-      lisum += ldu->lcolind[j];
-      ldsum += (hypre_longint)ldu->lvalues[j];
+      lisum += (hypre_ulongint) ldu->lcolind[j];
+      ldsum += (hypre_ulongint) ldu->lvalues[j];
     }
 
     for (j=ldu->usrowptr[i]; j<ldu->uerowptr[i]; j++) {
-      uisum += ldu->ucolind[j];
-      udsum += (hypre_longint)ldu->uvalues[j];
+      uisum += (hypre_ulongint) ldu->ucolind[j];
+      udsum += (hypre_ulongint) ldu->uvalues[j];
     }
 
     if (ldu->usrowptr[i] < ldu->uerowptr[i])
-      dsum += (hypre_longint)ldu->dvalues[i];
+      dsum += (hypre_ulongint) ldu->dvalues[i];
   }
 
   if (logging)
@@ -227,8 +227,7 @@ hypre_longint hypre_LDU_Checksum(const FactorMatType *ldu,
      fflush(stdout);
   }
 
-  hypre_FP_Checksum(ldu->nrm2s, lnrows, "2-norms", numChk,
-      globals);
+  hypre_FP_Checksum(ldu->nrm2s, lnrows, "2-norms", numChk, globals);
 
   return 1;
 }

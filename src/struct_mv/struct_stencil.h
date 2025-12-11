@@ -20,12 +20,13 @@
 
 typedef struct hypre_StructStencil_struct
 {
-   hypre_Index   *shape;   /* Description of a stencil's shape */
-   HYPRE_Int      size;    /* Number of stencil coefficients */
-
-   HYPRE_Int      ndim;    /* Number of dimensions */
+   hypre_Index   *shape;      /* Description of a stencil's shape */
+   HYPRE_Int      size;       /* Number of stencil coefficients */
+   HYPRE_Int      ndim;       /* Number of dimensions */
+   HYPRE_Int      diag_entry; /* Index of the diagonal entry (zero offset) */
 
    HYPRE_Int      ref_count;
+
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
@@ -35,7 +36,10 @@ typedef struct hypre_StructStencil_struct
 #define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
 #define hypre_StructStencilNDim(stencil)       ((stencil) -> ndim)
+#define hypre_StructStencilDiagEntry(stencil)  ((stencil) -> diag_entry)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
-#define hypre_StructStencilElement(stencil, i) hypre_StructStencilShape(stencil)[i]
+
+#define hypre_StructStencilOffset(stencil, i) \
+hypre_StructStencilShape(stencil)[i]
 
 #endif

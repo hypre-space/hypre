@@ -23,10 +23,10 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
   HYPRE_Real atol = ctx->atol, rtol = ctx->rtol;
 
   /* scalars */
-  HYPRE_Real alpha, alpha_1,
+  HYPRE_Real alpha, alpha_1 = 1.0,
          beta_1,
-         widget, widget_1,
-         rho_1, rho_2,
+         widget, widget_1 = 1.0,
+         rho_1, rho_2 = 1.0,
          s_norm, eps,
          exit_a, b_iprod, r_iprod;
 
@@ -36,14 +36,14 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
   monitor = Parser_dhHasSwitch(parser_dh, "-monitor");
 
   /* allocate working space */
-  t = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  s = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  s_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  v = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  p = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  p_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  r = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
-  r_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  t = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  v = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  p = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  p_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r_hat = (HYPRE_Real*)MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, s); /* s = Ax */
@@ -58,7 +58,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
 
   its = 0;
   while(1) {
-    ++its;  
+    ++its;
     rho_1 = InnerProd(m, r_hat, r);
     if (rho_1 == 0) {
       SET_V_ERROR("(r_hat . r) = 0; method fails");
@@ -68,7 +68,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
       CopyVec(m, r, p);   /* p = r_0 */ CHECK_V_ERROR;
     } else {
       beta_1 = (rho_1/rho_2)*(alpha_1/widget_1);
-      
+
       /* p_i = r_(i-1) + beta_(i-1)*( p_(i-1) - w_(i-1)*v_(i-1) ) */
       Axpy(m, -widget_1, v, p); CHECK_V_ERROR;
       ScaleVec(m, beta_1, p); CHECK_V_ERROR;
@@ -179,9 +179,9 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
   bi_prod = InnerProd(m, b, b); CHECK_V_ERROR;
   eps = (rtol*rtol)*bi_prod;
 
-  p = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
-  s = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
-  r = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
+  p = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  s = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
+  r = (HYPRE_Real *) MALLOC_DH((size_t) m * sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, r);       /* r = Ax */ CHECK_V_ERROR;
@@ -212,7 +212,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
 
     /* r = r - alpha*s */
     Axpy(m, -alpha, s, r); CHECK_V_ERROR;
-         
+
     /* solve Ms = r */
     Euclid_dhApply(ctx, r, s); CHECK_V_ERROR;
 

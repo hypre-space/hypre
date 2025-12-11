@@ -43,7 +43,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int   num_cols_offd_B = hypre_CSRBooleanMatrix_Get_NCols(B_offd);
 
    hypre_ParCSRBooleanMatrix *C;
-   HYPRE_BigInt            *col_map_offd_C;
+   HYPRE_BigInt            *col_map_offd_C = NULL;
    HYPRE_Int            *map_B_to_C = NULL;
 
    hypre_CSRBooleanMatrix *C_diag;
@@ -58,17 +58,17 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int              C_offd_size;
    HYPRE_Int          num_cols_offd_C = 0;
 
-   hypre_CSRBooleanMatrix *Bs_ext;
-   HYPRE_Int             *Bs_ext_i;
-   HYPRE_BigInt          *Bs_ext_j;
+   hypre_CSRBooleanMatrix *Bs_ext = NULL;
+   HYPRE_Int             *Bs_ext_i = NULL;
+   HYPRE_BigInt          *Bs_ext_j = NULL;
 
-   HYPRE_Int             *B_ext_diag_i;
-   HYPRE_Int             *B_ext_diag_j;
+   HYPRE_Int             *B_ext_diag_i = NULL;
+   HYPRE_Int             *B_ext_diag_j = NULL;
    HYPRE_Int        B_ext_diag_size;
 
-   HYPRE_Int             *B_ext_offd_i;
-   HYPRE_Int             *B_ext_offd_j;
-   HYPRE_BigInt          *B_tmp_offd_j;
+   HYPRE_Int             *B_ext_offd_i = NULL;
+   HYPRE_Int             *B_ext_offd_j = NULL;
+   HYPRE_BigInt          *B_tmp_offd_j = NULL;
    HYPRE_Int        B_ext_offd_size;
 
    HYPRE_Int       *B_marker;
@@ -86,7 +86,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int              allsquare = 0;
    HYPRE_Int              cnt, cnt_offd, cnt_diag;
    HYPRE_Int              num_procs;
-   HYPRE_Int              value;
+   HYPRE_BigInt           value;
 
    n_rows_A = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(A);
    n_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);
@@ -487,8 +487,8 @@ hypre_ParCSRBooleanMatrixExtractBExt
    HYPRE_Int *offd_i = hypre_CSRBooleanMatrix_Get_I(offd);
    HYPRE_Int *offd_j = hypre_CSRBooleanMatrix_Get_J(offd);
 
-   HYPRE_Int num_cols_B, num_nonzeros;
-   HYPRE_Int num_rows_B_ext;
+   HYPRE_BigInt num_cols_B;
+   HYPRE_Int num_rows_B_ext, num_nonzeros;
 
    hypre_CSRBooleanMatrix *B_ext;
    HYPRE_Int *B_ext_i;
@@ -505,14 +505,14 @@ hypre_ParCSRBooleanMatrixExtractBExt
    ( &B_ext_i, &B_ext_j, &B_ext_data, &B_ext_row_map,
      &num_nonzeros,
      0, 0, comm, comm_pkg,
-     num_cols_B, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, B->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
      diag_data, offd_data
    );
 
-   B_ext = hypre_CSRBooleanMatrixCreate(num_rows_B_ext, num_cols_B, num_nonzeros);
+   B_ext = hypre_CSRBooleanMatrixCreate(num_rows_B_ext, (HYPRE_Int) num_cols_B, num_nonzeros);
    hypre_CSRBooleanMatrix_Get_I(B_ext) = B_ext_i;
    hypre_CSRBooleanMatrix_Get_BigJ(B_ext) = B_ext_j;
 
@@ -579,14 +579,14 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
    ( &A_ext_i, &A_ext_j, &A_ext_data, pA_ext_row_map,
      &num_nonzeros,
      data, 1, comm, comm_pkg,
-     num_cols_A, num_recvs, num_sends,
+     num_recvs, num_sends,
      first_col_diag, A->row_starts,
      recv_vec_starts, send_map_starts, send_map_elmts,
      diag_i, diag_j, offd_i, offd_j, col_map_offd,
      diag_data, offd_data
    );
 
-   A_ext = hypre_CSRBooleanMatrixCreate(num_rows_A_ext, num_cols_A, num_nonzeros);
+   A_ext = hypre_CSRBooleanMatrixCreate(num_rows_A_ext, (HYPRE_Int) num_cols_A, num_nonzeros);
    hypre_CSRBooleanMatrix_Get_I(A_ext) = A_ext_i;
    hypre_CSRBooleanMatrix_Get_BigJ(A_ext) = A_ext_j;
 
@@ -600,7 +600,8 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
  * This is based on hypre_ParCSRAAt.
  *--------------------------------------------------------------------------*/
 
-hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A )
+hypre_ParCSRBooleanMatrix*
+hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
 {
    MPI_Comm       comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
 
@@ -636,13 +637,13 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 
    HYPRE_Int              C_diag_size;
    HYPRE_Int              C_offd_size;
-   HYPRE_Int          last_col_diag_C;
-   HYPRE_Int          num_cols_offd_C;
+   HYPRE_BigInt           last_col_diag_C;
+   HYPRE_Int              num_cols_offd_C;
 
-   hypre_CSRBooleanMatrix *A_ext;
+   hypre_CSRBooleanMatrix *A_ext = NULL;
 
-   HYPRE_Int             *A_ext_i;
-   HYPRE_BigInt          *A_ext_j;
+   HYPRE_Int             *A_ext_i = NULL;
+   HYPRE_BigInt          *A_ext_j = NULL;
    HYPRE_Int             num_rows_A_ext = 0;
 
    HYPRE_BigInt   first_row_index_A = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(A);
@@ -731,13 +732,9 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
     *  Allocate C_offd_j arrays.
     *-----------------------------------------------------------------------*/
 
-   last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
-   if (C_offd_size)
-   {
-      C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
-   }
-
+   last_col_diag_C = first_row_index_A + (HYPRE_BigInt) (num_rows_diag_A - 1);
+   C_diag_j = hypre_CTAlloc(HYPRE_Int, C_diag_size, HYPRE_MEMORY_HOST);
+   C_offd_j = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Fill in C_diag_j.

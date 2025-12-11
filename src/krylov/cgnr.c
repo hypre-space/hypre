@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
@@ -59,7 +59,7 @@ hypre_CGNRFunctionsCreate(
    /* default preconditioner must be set here but can be changed later... */
    cgnr_functions->precond_setup = PrecondSetup;
    cgnr_functions->precond       = Precond;
-   cgnr_functions->precondT       = Precond;
+   cgnr_functions->precondT      = PrecondT;
 
    return cgnr_functions;
 }
@@ -246,7 +246,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -303,7 +303,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (logging > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -339,7 +339,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");

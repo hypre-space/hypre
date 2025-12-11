@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_multivector.h"
+#include "_hypre_lobpcg_seq_multivector.h"
 #include "_hypre_utilities.h"
 
 #include <stdlib.h>
@@ -465,21 +465,22 @@ HYPRE_Int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x,
 }
 
 HYPRE_Int
-hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                              HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_Multivector *y)
 {
-   HYPRE_Int    i, j, k, size, gap, *x_active_ind, *y_active_ind;
-   HYPRE_Complex *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Complex  *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Int       i, j, k, size, *x_active_ind, *y_active_ind;
+   HYPRE_BigInt    gap;
 
    hypre_assert(rHeight > 0);
-   hypre_assert (rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
+   hypre_assert(rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
 
    x_data = x->data;
    y_data = y->data;
    size = x->size;
    x_active_ind = x->active_indices;
    y_active_ind = y->active_indices;
-   gap = rGHeight - rHeight;
+   gap = rGHeight - (HYPRE_BigInt) rHeight;
 
    for (j = 0; j < rWidth; j++)
    {
@@ -519,20 +520,21 @@ hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int
 }
 
 HYPRE_Int
-hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                           HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_Multivector *y)
 {
-   HYPRE_Complex *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
-   HYPRE_Int    i, j, k, size, gap, *x_active_ind, *y_active_ind;
+   HYPRE_Complex  *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Int       i, j, k, size, *x_active_ind, *y_active_ind;
+   HYPRE_BigInt    gap;
 
-   hypre_assert (rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
+   hypre_assert(rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
 
    x_data = x->data;
    y_data = y->data;
    size = x->size;
    x_active_ind = x->active_indices;
    y_active_ind = y->active_indices;
-   gap = rGHeight - rHeight;
+   gap = rGHeight - (HYPRE_BigInt) rHeight;
 
    for (j = 0; j < rWidth; j++)
    {
@@ -557,4 +559,3 @@ hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rH
 
    return 0;
 }
-

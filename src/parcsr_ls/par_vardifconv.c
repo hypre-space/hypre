@@ -36,10 +36,10 @@ GenerateVarDifConv( MPI_Comm         comm,
    HYPRE_Int          *diag_j;
    HYPRE_Real         *diag_data;
 
-   HYPRE_Int          *offd_i;
-   HYPRE_Int          *offd_j;
-   HYPRE_BigInt       *big_offd_j;
-   HYPRE_Real         *offd_data;
+   HYPRE_Int          *offd_i = NULL;
+   HYPRE_Int          *offd_j = NULL;
+   HYPRE_BigInt       *big_offd_j = NULL;
+   HYPRE_Real         *offd_data = NULL;
 
    HYPRE_BigInt        global_part[2];
    HYPRE_BigInt        ix, iy, iz;
@@ -58,7 +58,7 @@ GenerateVarDifConv( MPI_Comm         comm,
    HYPRE_BigInt       *nz_part;
 
    HYPRE_Int           num_procs;
-   HYPRE_Int           P_busy, Q_busy, R_busy;
+   HYPRE_BigInt        P_busy, Q_busy, R_busy;
 
    HYPRE_Real          hhx, hhy, hhz;
    HYPRE_Real          xx, yy, zz;
@@ -85,9 +85,9 @@ GenerateVarDifConv( MPI_Comm         comm,
    offd_i   = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
    rhs_data = hypre_CTAlloc(HYPRE_Real, local_num_rows,   HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = hypre_min(nx, (HYPRE_BigInt) P);
+   Q_busy = hypre_min(ny, (HYPRE_BigInt) Q);
+   R_busy = hypre_min(nz, (HYPRE_BigInt) R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }
@@ -487,6 +487,10 @@ HYPRE_Real cfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real dfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    /*HYPRE_Real pi;
    pi = 4.0 * hypre_atan(1.0);
@@ -497,6 +501,10 @@ HYPRE_Real dfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real efun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    /*HYPRE_Real pi;
    pi = 4.0 * hypre_atan(1.0);
@@ -507,6 +515,10 @@ HYPRE_Real efun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real ffun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;
@@ -514,6 +526,10 @@ HYPRE_Real ffun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real gfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;
@@ -521,6 +537,10 @@ HYPRE_Real gfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real rfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    /* HYPRE_Real value, pi;
    pi = 4.0 * hypre_atan(1.0);
    value = -4.0*pi*pi*hypre_sin(pi*xx)*hypre_sin(pi*yy)*hypre_cos(pi*xx)*hypre_cos(pi*yy); */
@@ -532,6 +552,10 @@ HYPRE_Real rfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real bndfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    /*HYPRE_Real pi;
    pi = 4.0 * atan(1.0);

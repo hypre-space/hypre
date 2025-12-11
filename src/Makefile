@@ -29,6 +29,7 @@ HYPRE_KRYLOV_DIRS =\
 #These are the directories for the IJ interface
 HYPRE_IJ_DIRS =\
  seq_mv\
+ seq_block_mv\
  parcsr_mv\
  parcsr_block_mv\
  distributed_matrix\
@@ -131,6 +132,10 @@ help:
 	@echo "     runs etags to create tags table"
 	@echo "     file is named TAGS and is saved in current directory"
 	@echo "     "
+	@echo "tagsnomup:"
+	@echo "     ignores auto-generated mup files and runs etags"
+	@echo "     file is named TAGS and is saved in current directory"
+	@echo "     "
 	@echo "test:"
 	@echo "     depends on the all target to be completed"
 	@echo "     removes existing temporary installation sub-directory"
@@ -185,7 +190,7 @@ checkpar:
         echo "Testing SStruct ..."; \
         (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
-        (cd test; ./cleantest.sh); 
+        (cd test; ./cleantest.sh);
 
 install: all
 	@ \
@@ -244,5 +249,11 @@ distclean:
 	rm -rf ./HYPRE_config.h
 
 tags:
-	find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+	@find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
 	-name "*.c??" -o -name "*.h??" -o -name "*.f" | etags -
+
+tagsnomup:
+	@find . \( -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+		  -name "*.c??" -o -name "*.h??" -o -name "*.f" \) -type f \
+	| grep -vE 'mup_|mup.h' \
+	| etags -

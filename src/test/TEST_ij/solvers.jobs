@@ -56,11 +56,20 @@ mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -mu 2            -rlx 18 > solv
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -mu 2            -rlx 18 > solvers.out.22
 mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -fmg             -rlx 18 > solvers.out.23
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -fmg             -rlx 18 > solvers.out.24
+#flexible CG vs CG; AMG with CG smoother
+mpirun -np 2 ./ij -solver 1 -rlx 15 -flex 1 > solvers.out.25
+mpirun -np 2 ./ij -solver 1 -rlx 15 > solvers.out.26
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 > solvers.out.sysn
+
+#systems AMG using unknown approach and filtering
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.27
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.28
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.29
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.30
 
 #LGMRS and FlexGMRES
 mpirun -np 2 ./ij -solver 50 -rhsrand > solvers.out.101
@@ -96,43 +105,74 @@ mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -nongalerk_tol 3 0.0 0.01 0.05 > solvers.
 mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 0 > solvers.out.116
 mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 1 > solvers.out.117
 
-#
-# MGR and MGR-PCG
-#
-# coarse grid solver checks (1-level MGR == AMG (or coarse grid solver))
-# Also checks for keeping coarse nodes to coarsest level
-# coarse grid size in output should be ~ mgr_num_reserved_nodes
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes 0 > solvers.out.200
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 0 -mgr_bsize 2 -mgr_num_reserved_nodes 100 > solvers.out.201
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 0 > solvers.out.202
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 1 -mgr_num_reserved_nodes 100 > solvers.out.203
-# multi level MGR tests with different coarse grid type strategies
-# Fix non C points to F points with different F-relaxation methods (single/multilevel F-relaxation)
-# with/ without reserved coarse nodes
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.204
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 0 -mgr_num_reserved_nodes 100 > solvers.out.205
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 1 -mgr_num_reserved_nodes 0 > solvers.out.206
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 1 -mgr_frelax_method 1 -mgr_num_reserved_nodes 100 > solvers.out.207
-# Not fixed non C points to F points with different F-relaxation methods (single/multilevel F-relaxation)
-# with/ without reserved coarse nodes
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.208
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 100 > solvers.out.209
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 1 -mgr_num_reserved_nodes 0 > solvers.out.210
-mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 1 -mgr_num_reserved_nodes 100 > solvers.out.211
-# MGR-PCG tests
-mpirun -np 2 ./ij -solver 71 -mgr_nlevels 0 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.212
-mpirun -np 2 ./ij -solver 71 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.213
-
-## Solve Ax=b and -Ax=b, convergence should be the same
-mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > solvers.out.400.p
-mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > solvers.out.400.n
-mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > solvers.out.401.p
-mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > solvers.out.401.n
-mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.402.p
-mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.402.n
-mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
-mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
-
 ## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
 mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404
 mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 89 > solvers.out.405
+
+## Test residual and error norms computation for multi-tag vectors (Sequential)
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 1 > solvers.out.501
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 2 > solvers.out.502
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 3 > solvers.out.503
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 4 > solvers.out.504
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 5 > solvers.out.505
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 6 > solvers.out.506
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 7 > solvers.out.507
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 8 > solvers.out.508
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 9 > solvers.out.509
+
+## Test residual and error norms computation for multi-tag vectors (Parallel)
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 1 > solvers.out.511
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 2 > solvers.out.512
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 3 > solvers.out.513
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 4 > solvers.out.514
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 5 > solvers.out.515
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 6 > solvers.out.516
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 7 > solvers.out.517
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 8 > solvers.out.518
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 9 > solvers.out.519

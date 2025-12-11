@@ -18,7 +18,7 @@ HYPRE_Int
 hypre_AMGDDCompGridLocalIndexBinarySearch( hypre_AMGDDCompGrid *compGrid,
                                            HYPRE_Int            global_index )
 {
-   HYPRE_Int   *nonowned_global_indices;
+   HYPRE_BigInt *nonowned_global_indices;
    HYPRE_Int   *inv_map;
    HYPRE_Int    left;
    HYPRE_Int    right;
@@ -683,7 +683,8 @@ hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data,
       // Initialize P owned offd col ind to their global indices
       for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_AMGDDCompGridMatrixOwnedOffd(P)); i++)
       {
-         hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(P))[i] = hypre_ParCSRMatrixColMapOffd(
+         hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(P))[i] = (HYPRE_Int)
+                                                                      hypre_ParCSRMatrixColMapOffd(
                                                                          P_array[level])[ hypre_CSRMatrixJ(P_offd_original)[i] ];
       }
 
@@ -698,31 +699,32 @@ hypre_AMGDDCompGridInitialize( hypre_ParAMGDDData *amgdd_data,
 
          // Use original rowptr and data from R, but need to use new col indices (init to global index, then setup local indices later)
          R_offd_original = hypre_ParCSRMatrixOffd(R_array[level]);
-         hypre_AMGDDCompGridMatrixOwnedOffd(R) = hypre_CSRMatrixCreate(hypre_CSRMatrixNumRows(
-                                                                          R_offd_original),
-                                                                       hypre_CSRMatrixNumCols(R_offd_original),
-                                                                       hypre_CSRMatrixNumNonzeros(R_offd_original));
+         hypre_AMGDDCompGridMatrixOwnedOffd(R) =
+            hypre_CSRMatrixCreate(hypre_CSRMatrixNumRows(R_offd_original),
+                                  hypre_CSRMatrixNumCols(R_offd_original),
+                                  hypre_CSRMatrixNumNonzeros(R_offd_original));
          hypre_CSRMatrixI(hypre_AMGDDCompGridMatrixOwnedOffd(R))    = hypre_CSRMatrixI(R_offd_original);
          hypre_CSRMatrixData(hypre_AMGDDCompGridMatrixOwnedOffd(R)) = hypre_CSRMatrixData(R_offd_original);
-         hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R))    = hypre_CTAlloc(HYPRE_Int,
-                                                                                    hypre_CSRMatrixNumNonzeros(R_offd_original),
-                                                                                    memory_location);
+         hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R))    =
+            hypre_CTAlloc(HYPRE_Int,
+                          hypre_CSRMatrixNumNonzeros(R_offd_original),
+                          memory_location);
 
          // Initialize R owned offd col ind to their global indices
          for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_AMGDDCompGridMatrixOwnedOffd(R)); i++)
          {
-            hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R))[i] = hypre_ParCSRMatrixColMapOffd(
-                                                                            R_array[level])[ hypre_CSRMatrixJ(R_offd_original)[i] ];
+            hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(R))[i] =
+               (HYPRE_Int) hypre_ParCSRMatrixColMapOffd(R_array[level])[hypre_CSRMatrixJ(R_offd_original)[i]];
          }
 
-         hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(R) = 0;
+         hypre_AMGDDCompGridMatrixOwnsOwnedMatrices(R)  = 0;
          hypre_AMGDDCompGridMatrixOwnsOffdColIndices(R) = 1;
          hypre_AMGDDCompGridR(compGrid) = R;
       }
    }
 
    // Allocate some extra arrays used during AMG-DD setup
-   hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, max_nonowned,
+   hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_BigInt, max_nonowned,
                                                                       memory_location);
    hypre_AMGDDCompGridNonOwnedRealMarker(compGrid)    = hypre_CTAlloc(HYPRE_Int, max_nonowned,
                                                                       memory_location);
@@ -908,27 +910,27 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    hypre_CSRMatrix      *P_offd;
 
    HYPRE_Int             P_diag_nnz;
-   HYPRE_Int            *new_P_diag_rowPtr;
-   HYPRE_Int            *new_P_diag_colInd;
+   HYPRE_Int            *new_P_diag_rowPtr = NULL;
+   HYPRE_Int            *new_P_diag_colInd = NULL;
    HYPRE_Complex        *new_P_diag_data;
 
    HYPRE_Int             P_offd_nnz;
-   HYPRE_Int            *new_P_offd_rowPtr;
-   HYPRE_Int            *new_P_offd_colInd;
+   HYPRE_Int            *new_P_offd_rowPtr = NULL;
+   HYPRE_Int            *new_P_offd_colInd = NULL;
    HYPRE_Complex        *new_P_offd_data;
 
-   hypre_CSRMatrix      *R_diag;
-   hypre_CSRMatrix      *R_offd;
+   hypre_CSRMatrix      *R_diag = NULL;
+   hypre_CSRMatrix      *R_offd = NULL;
 
    HYPRE_Int             R_diag_nnz;
-   HYPRE_Int            *new_R_diag_rowPtr;
-   HYPRE_Int            *new_R_diag_colInd;
-   HYPRE_Complex        *new_R_diag_data;
+   HYPRE_Int            *new_R_diag_rowPtr = NULL;
+   HYPRE_Int            *new_R_diag_colInd = NULL;
+   HYPRE_Complex        *new_R_diag_data   = NULL;
 
    HYPRE_Int             R_offd_nnz;
-   HYPRE_Int            *new_R_offd_rowPtr;
-   HYPRE_Int            *new_R_offd_colInd;
-   HYPRE_Complex        *new_R_offd_data;
+   HYPRE_Int            *new_R_offd_rowPtr = NULL;
+   HYPRE_Int            *new_R_offd_colInd = NULL;
+   HYPRE_Complex        *new_R_offd_data   = NULL;
 
    HYPRE_Int             A_diag_cnt;
    HYPRE_Int             A_offd_cnt;
@@ -1615,7 +1617,7 @@ hypre_AMGDDCompGridResize( hypre_AMGDDCompGrid *compGrid,
    HYPRE_Int            old_size = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
 
    hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid) = hypre_TReAlloc_v2(
-                                                           hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size,
+                                                           hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid), HYPRE_BigInt, old_size, HYPRE_BigInt, new_size,
                                                            memory_location);
    hypre_AMGDDCompGridNonOwnedRealMarker(compGrid) = hypre_TReAlloc_v2(
                                                         hypre_AMGDDCompGridNonOwnedRealMarker(compGrid), HYPRE_Int, old_size, HYPRE_Int, new_size,
@@ -1697,10 +1699,10 @@ hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid,
                      hypre_CSRMatrixResize(nonowned_offd,
                                            hypre_CSRMatrixNumRows(nonowned_offd),
                                            hypre_CSRMatrixNumCols(nonowned_offd),
-                                           (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_offd)));
+                                           (HYPRE_Int)hypre_ceil(1.5 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(nonowned_offd)));
                   }
-                  hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = incoming_index -
-                                                                   hypre_AMGDDCompGridFirstGlobalIndex(compGrid[current_level]);
+                  hypre_CSRMatrixJ(nonowned_offd)[offd_rowptr++] = (HYPRE_Int)
+                                                                   (incoming_index - hypre_AMGDDCompGridFirstGlobalIndex(compGrid[current_level]));
                }
                else
                {
@@ -1712,11 +1714,11 @@ hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid,
                                           HYPRE_Int,
                                           hypre_CSRMatrixNumNonzeros(nonowned_diag),
                                           HYPRE_Int,
-                                          (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)),
+                                          (HYPRE_Int)hypre_ceil(1.5 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(nonowned_diag)),
                                           hypre_AMGDDCompGridMemoryLocation(compGrid[current_level]));
                      hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag),
                                            hypre_CSRMatrixNumCols(nonowned_diag),
-                                           (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)));
+                                           (HYPRE_Int)hypre_ceil(1.5 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(nonowned_diag)));
                   }
                   // If we dof not found in comp grid, then mark this as a missing connection
                   hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(
@@ -1736,13 +1738,13 @@ hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid,
                                        HYPRE_Int,
                                        hypre_CSRMatrixNumNonzeros(nonowned_diag),
                                        HYPRE_Int,
-                                       (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)),
+                                       (HYPRE_Int)hypre_ceil(1.5 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(nonowned_diag)),
                                        hypre_AMGDDCompGridMemoryLocation(compGrid[current_level]));
 
                   hypre_CSRMatrixResize(nonowned_diag,
                                         hypre_CSRMatrixNumRows(nonowned_diag),
                                         hypre_CSRMatrixNumCols(nonowned_diag),
-                                        (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)));
+                                        (HYPRE_Int)hypre_ceil(1.5 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(nonowned_diag)));
                }
                local_index = recv_map[current_level][proc][current_level][ incoming_index ];
                if (local_index < 0)

@@ -51,8 +51,7 @@ struct globalC_functor
 };
 #else
 template<typename T>
-struct tuple_plus : public
-   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
+struct tuple_plus
 {
    __host__ __device__
    thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
@@ -63,8 +62,7 @@ struct tuple_plus : public
 };
 
 template<typename T>
-struct tuple_minus : public
-   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
+struct tuple_minus
 {
    __host__ __device__
    thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
@@ -74,8 +72,7 @@ struct tuple_minus : public
    }
 };
 
-struct local_equal_plus_constant : public
-   thrust::binary_function<HYPRE_BigInt, HYPRE_BigInt, HYPRE_BigInt>
+struct local_equal_plus_constant
 {
    HYPRE_BigInt _value;
 
@@ -86,7 +83,11 @@ struct local_equal_plus_constant : public
 };
 
 /* transform from local C index to global C index */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
+#else
+struct globalC_functor
+#endif
 {
    HYPRE_BigInt C_first;
 
@@ -127,8 +128,8 @@ __global__ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item,
                                                          HYPRE_Int num_points,
                                                          HYPRE_Int color,
                                                          HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
-                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
-                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
+                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i,
+                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_data,
                                                          HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i,
                                                          HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *P_offd_j, HYPRE_Complex *P_offd_data,
                                                          HYPRE_Complex *row_sums );
@@ -319,8 +320,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    equal<HYPRE_Int>(1) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,          equal<HYPRE_Int>(1)),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine, equal<HYPRE_Int>(1)),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 #else
@@ -330,7 +333,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                               thrust::make_counting_iterator(n_fine),
                                               CF_marker,
                                               points_left,
-                                              thrust::not1(equal<HYPRE_Int>(1)) );
+                                              HYPRE_THRUST_NOT(equal<HYPRE_Int>(1)) );
    remaining = points_end - points_left;
 
    /* Cpts; number of C pts */
@@ -383,9 +386,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       dof_func_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_DEVICE);
@@ -418,9 +424,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       /* allocate one more see comments in hypre_modmp_compute_num_cols_offd_fine_to_coarse */
@@ -517,7 +526,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             thrust::make_permutation_iterator(pass_marker, points_left),
                             thrust::make_permutation_iterator(pass_marker, points_left + remaining),
                             diag_shifts,
-                            thrust::identity<HYPRE_Int>(),
+                            HYPRE_THRUST_IDENTITY(HYPRE_Int),
                             current_pass + 1 );
 
          hypre_TMemcpy(points_left_old, points_left, HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE,
@@ -529,7 +538,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       pass_order + cnt_old,
-                                      thrust::identity<HYPRE_Int>() );
+                                      HYPRE_THRUST_IDENTITY(HYPRE_Int) );
 
          hypre_assert(new_end - pass_order == cnt);
 
@@ -538,7 +547,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       points_left,
-                                      thrust::not1(thrust::identity<HYPRE_Int>()) );
+                                      HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Int)) );
 #endif
 
          hypre_assert(new_end - points_left == cnt_rem);
@@ -572,9 +581,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-         hypre_ForceSyncComputeStream(hypre_handle());
+         if (hypre_GetGpuAwareMPI())
+         {
+            hypre_ForceSyncComputeStream();
+         }
 #endif
 
          /* create a handle to start communication. 11: for integer */
@@ -711,22 +723,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    auto zip2 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
-   HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       zip2,
                       zip2 + n_fine + 1,
-                      oneapi::dpl::make_zip_iterator(P_diag_i_tmp, P_offd_i_tmp),
+                      oneapi::dpl::make_zip_iterator(P_diag_i, P_offd_i),
                       std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                       tuple_plus<HYPRE_Int>() );
-   hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
@@ -993,12 +996,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i    = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int       *A_diag_j    = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int        n_fine      = hypre_CSRMatrixNumRows(A_diag);
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int       *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int       *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_Real      *A_offd_data     = hypre_CSRMatrixData(A_offd);
    HYPRE_Int        num_cols_offd_A = hypre_CSRMatrixNumCols(A_offd);
 
@@ -1096,9 +1097,12 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
@@ -1156,22 +1160,13 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(P_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip3 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
-      HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip3,
                          zip3 + num_points + 1,
-                         oneapi::dpl::make_zip_iterator( P_diag_i_tmp, P_offd_i_tmp ),
+                         oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
-      hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
@@ -1206,10 +1201,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                         fine_to_coarse,
                         fine_to_coarse_offd,
                         A_diag_i,
-                        A_diag_j,
                         A_diag_data,
                         A_offd_i,
-                        A_offd_j,
                         A_offd_data,
                         Soc_diag_j,
                         Soc_offd_j,
@@ -1392,9 +1385,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
@@ -1452,22 +1448,13 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(Q_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip4 = oneapi::dpl::make_zip_iterator( Q_diag_i, Q_offd_i );
-      HYPRE_Int *Q_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *Q_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip4,
                          zip4 + num_points + 1,
-                         oneapi::dpl::make_zip_iterator( Q_diag_i_tmp, Q_offd_i_tmp ),
+                         oneapi::dpl::make_zip_iterator( Q_diag_i, Q_offd_i ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
-      hypre_TMemcpy(Q_diag_i, Q_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(Q_offd_i, Q_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(Q_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(Q_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(Q_diag_i, Q_offd_i) ),
@@ -1603,8 +1590,10 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
-                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
+                      oneapi::dpl::make_transform_iterator(pass_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 
@@ -1625,7 +1614,7 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                       fine_to_coarse,
                       fine_to_coarse + n_fine,
                       pass_marker,
-                      thrust::not1(equal<HYPRE_Int>(color)),
+                      HYPRE_THRUST_NOT(equal<HYPRE_Int>(color)),
                       -1 );
 #endif
 }
@@ -1646,9 +1635,9 @@ hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(pass_marker_offd,
-                                                           equal<HYPRE_Int>(color)),
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1,
-                                                           equal<HYPRE_Int>(color)),
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       fine_to_coarse_offd,
                       HYPRE_Int(0) );
 #else
@@ -1949,10 +1938,8 @@ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
                                               HYPRE_Int     *fine_to_coarse,
                                               HYPRE_Int     *fine_to_coarse_offd,
                                               HYPRE_Int     *A_diag_i,
-                                              HYPRE_Int     *A_diag_j,
                                               HYPRE_Complex *A_diag_data,
                                               HYPRE_Int     *A_offd_i,
-                                              HYPRE_Int     *A_offd_j,
                                               HYPRE_Complex *A_offd_data,
                                               HYPRE_Int     *Soc_diag_j,
                                               HYPRE_Int     *Soc_offd_j,

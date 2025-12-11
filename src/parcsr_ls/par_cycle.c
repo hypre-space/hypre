@@ -13,7 +13,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "_hypre_parcsr_block_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
@@ -32,7 +32,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParCSRMatrix      **A_array;
    hypre_ParCSRMatrix      **P_array;
    hypre_ParCSRMatrix      **R_array;
-   hypre_ParVector          *Utemp;
+   hypre_ParVector          *Utemp = NULL;
    hypre_ParVector          *Vtemp;
    hypre_ParVector          *Rtemp;
    hypre_ParVector          *Ptemp;
@@ -43,8 +43,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParCSRBlockMatrix **P_block_array;
    hypre_ParCSRBlockMatrix **R_block_array;
 
-   HYPRE_Real      *Ztemp_data;
-   HYPRE_Real      *Ptemp_data;
+   HYPRE_Real      *Ztemp_data = NULL;
+   HYPRE_Real      *Ptemp_data = NULL;
    hypre_IntArray **CF_marker_array;
    HYPRE_Int       *CF_marker;
    /*
@@ -77,7 +77,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       num_sweep;
    HYPRE_Int       cg_num_sweep = 1;
    HYPRE_Int       relax_type;
-   HYPRE_Int       relax_points;
+   HYPRE_Int       relax_points = 0;
    HYPRE_Int       relax_order;
    HYPRE_Int       relax_local;
    HYPRE_Int       old_version = 0;
@@ -85,7 +85,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real     *omega;
    HYPRE_Real      alfa, beta, gammaold;
    HYPRE_Real      gamma = 1.0;
-   HYPRE_Int       local_size;
+   HYPRE_Int       local_size = 0;
    /*   HYPRE_Int      *smooth_option; */
    HYPRE_Int       smooth_type;
    HYPRE_Int       smooth_num_levels;
@@ -177,7 +177,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    {
       for (j = 1; j < num_levels; j++)
       {
-         num_coeffs[j] = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+         num_coeffs[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
       }
    }
    else
@@ -229,19 +229,18 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (smooth_num_levels > 0)
    {
-      if (smooth_type == 7 || smooth_type == 8
-          || smooth_type == 17 || smooth_type == 18
-          || smooth_type == 9 || smooth_type == 19)
+      if (smooth_type == 7  || smooth_type == 8  || smooth_type == 9 ||
+          smooth_type == 17 || smooth_type == 18 || smooth_type == 19)
       {
          HYPRE_Int actual_local_size = hypre_ParVectorActualLocalSize(Vtemp);
          Utemp = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(Vtemp),
                                        hypre_ParVectorPartitioning(Vtemp));
-         local_size
-            = hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp));
+         local_size = hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp));
          if (local_size < actual_local_size)
          {
-            hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) =
-               hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
+            hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) = hypre_CTAlloc(HYPRE_Complex,
+                                                                                actual_local_size,
+                                                                                HYPRE_MEMORY_HOST);
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
@@ -290,6 +289,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
          hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         if (Ztemp) { hypre_ParVectorSetLocalSize(Ztemp, local_size); }
+         if (Rtemp) { hypre_ParVectorSetLocalSize(Rtemp, local_size); }
+         if (Ptemp) { hypre_ParVectorSetLocalSize(Ptemp, local_size); }
 
          if (smooth_num_levels <= level)
          {
@@ -300,10 +302,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else if (smooth_type > 9)
          {
-            hypre_ParVectorSetLocalSize(Ztemp, local_size);
-            hypre_ParVectorSetLocalSize(Rtemp, local_size);
-            hypre_ParVectorSetLocalSize(Ptemp, local_size);
-
             Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
             Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
             hypre_ParVectorSetConstantValues(Ztemp, 0.0);
@@ -398,7 +396,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                if (num_levels == 1 && max_levels > 1)
                {
                   relax_points = 0;
-                  relax_local = 0;
+                  relax_local  = 0;
                }
                else
                {
@@ -433,10 +431,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                /*-----------------------------------------------
                   Choose Smoother
                 -----------------------------------------------*/
-               if ( smooth_num_levels > level &&
-                    (smooth_type == 7 || smooth_type == 17 ||
-                     smooth_type == 8 || smooth_type == 18 ||
-                     smooth_type == 9 || smooth_type == 19) )
+               if ( (smooth_num_levels > level) &&
+                    (smooth_type == 7  || smooth_type == 8  || smooth_type == 9 ||
+                     smooth_type == 17 || smooth_type == 18 || smooth_type == 19) )
                {
                   hypre_ParVectorSetLocalSize(Utemp, local_size);
 
@@ -444,19 +441,19 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   beta = 1.0;
                   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level],
                                                      U_array[level], beta, Aux_F, Vtemp);
-                  if (smooth_type == 8 || smooth_type == 18)
-                  {
-                     HYPRE_ParCSRParaSailsSolve(smoother[level],
-                                                (HYPRE_ParCSRMatrix) A_array[level],
-                                                (HYPRE_ParVector) Vtemp,
-                                                (HYPRE_ParVector) Utemp);
-                  }
-                  else if (smooth_type == 7 || smooth_type == 17)
+                  if (smooth_type == 7 || smooth_type == 17)
                   {
                      HYPRE_ParCSRPilutSolve(smoother[level],
                                             (HYPRE_ParCSRMatrix) A_array[level],
                                             (HYPRE_ParVector) Vtemp,
                                             (HYPRE_ParVector) Utemp);
+                  }
+                  else if (smooth_type == 8 || smooth_type == 18)
+                  {
+                     HYPRE_ParCSRParaSailsSolve(smoother[level],
+                                                (HYPRE_ParCSRMatrix) A_array[level],
+                                                (HYPRE_ParVector) Vtemp,
+                                                (HYPRE_ParVector) Utemp);
                   }
                   else if (smooth_type == 9 || smooth_type == 19)
                   {
@@ -521,11 +518,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   /* CG */
                   if (j == 0) /* do num sweep iterations of CG */
                   {
-                     hypre_ParCSRRelax_CG( smoother[level],
-                                           A_array[level],
-                                           Aux_F,
-                                           Aux_U,
-                                           num_sweep);
+                     hypre_ParCSRRelax_CG(smoother[level],
+                                          A_array[level],
+                                          Aux_F, Aux_U,
+                                          num_sweep);
                   }
                }
                else if (relax_type == 16)
@@ -534,9 +530,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
-                                                hypre_VectorData(ds[level]), coefs[level],
+                                                hypre_VectorData(ds[level]),
+                                                coefs[level],
                                                 cheby_order, scale,
-                                                variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
+                                                variant, Aux_U,
+                                                Vtemp, Ztemp, Ptemp, Rtemp);
                }
                else if (relax_type == 17)
                {
@@ -545,12 +543,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                      /* if we are on the coarsest level, the cf_marker will be null
                         and we just do one sweep regular Jacobi */
                      hypre_assert(cycle_param == 3);
-                     hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker, 0, 0, relax_weight[level],
+                     hypre_BoomerAMGRelax(A_array[level], Aux_F,
+                                          CF_marker, 0, 0, relax_weight[level],
                                           0.0, NULL, Aux_U, Vtemp, NULL);
                   }
                   else
                   {
-                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker, relax_weight[level],
+                     hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F,
+                                                    CF_marker, relax_weight[level],
                                                     Aux_U, Vtemp);
                   }
                }
@@ -613,7 +613,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                }
             } /* for (j = 0; j < num_sweep; j++) */
 
-            if  (smooth_num_levels > level && smooth_type > 9)
+            if (smooth_num_levels > level && smooth_type > 9)
             {
                gammaold = gamma;
                gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
@@ -624,6 +624,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                else
                {
                   beta = gamma / gammaold;
+                  /* TODO (VPM): Use a ParVector routine to do the following */
                   for (i = 0; i < local_size; i++)
                   {
                      Ptemp_data[i] = Ztemp_data[i] + beta * Ptemp_data[i];

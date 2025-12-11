@@ -12,9 +12,14 @@
  *****************************************************************************/
 
 #define HYPRE_TIMING
-#define HYPRE_TIMING_GLOBALS
 #include "_hypre_utilities.h"
 #include "timing.h"
+
+/* Global variable for timing */
+/* guard definition of global variables to avoid linker errors for multiprecision build */
+#if defined (hypre_DEFINE_GLOBAL)
+hypre_TimingType *hypre_global_timing = NULL;
+#endif
 
 /*-------------------------------------------------------
  * Timing macros
@@ -35,7 +40,7 @@ hypre_TimingCPUCount += time_getCPUSeconds()
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_InitializeTiming( const char *name )
+hypre_InitializeTiming_fcn( const char *name )
 {
    HYPRE_Int      time_index;
 
@@ -151,7 +156,7 @@ hypre_InitializeTiming( const char *name )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_FinalizeTiming( HYPRE_Int time_index )
+hypre_FinalizeTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
@@ -195,7 +200,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
 }
 
 HYPRE_Int
-hypre_FinalizeAllTimings( void )
+hypre_FinalizeAllTimings_fcn( void )
 {
    HYPRE_Int time_index, ierr = 0;
 
@@ -219,7 +224,7 @@ hypre_FinalizeAllTimings( void )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IncFLOPCount( HYPRE_BigInt inc )
+hypre_IncFLOPCount_fcn( HYPRE_BigInt inc )
 {
    HYPRE_Int  ierr = 0;
 
@@ -238,7 +243,7 @@ hypre_IncFLOPCount( HYPRE_BigInt inc )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BeginTiming( HYPRE_Int time_index )
+hypre_BeginTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
 
@@ -266,7 +271,7 @@ hypre_BeginTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_EndTiming( HYPRE_Int time_index )
+hypre_EndTiming_fcn( HYPRE_Int time_index )
 {
    HYPRE_Int  ierr = 0;
 
@@ -282,7 +287,7 @@ hypre_EndTiming( HYPRE_Int time_index )
       hypre_Handle *hypre_handle_ = hypre_handle();
       if (hypre_HandleDefaultExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
       {
-         hypre_SyncCudaDevice(hypre_handle_);
+         hypre_SyncDevice();
       }
 #endif
       hypre_StopTiming();
@@ -300,7 +305,7 @@ hypre_EndTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ClearTiming( void )
+hypre_ClearTiming_fcn( void )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
@@ -325,8 +330,8 @@ hypre_ClearTiming( void )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PrintTiming( const char     *heading,
-                   MPI_Comm        comm  )
+hypre_PrintTiming_fcn( const char     *heading,
+                       MPI_Comm        comm  )
 {
    HYPRE_Int  ierr = 0;
 
@@ -372,7 +377,7 @@ hypre_PrintTiming( const char     *heading,
 
             /* print wall clock info */
             hypre_printf("  wall clock time = %f seconds\n", wall_time);
-            if (wall_time)
+            if (wall_time != 0.0)
             {
                wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
             }
@@ -384,7 +389,7 @@ hypre_PrintTiming( const char     *heading,
 
             /* print CPU clock info */
             hypre_printf("  cpu clock time  = %f seconds\n", cpu_time);
-            if (cpu_time)
+            if (cpu_time != 0.0)
             {
                cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
             }
@@ -405,9 +410,9 @@ hypre_PrintTiming( const char     *heading,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_GetTiming( const char     *heading,
-                 HYPRE_Real     *wall_time_ptr,
-                 MPI_Comm        comm  )
+hypre_GetTiming_fcn( const char     *heading,
+                     HYPRE_Real     *wall_time_ptr,
+                     MPI_Comm        comm  )
 {
    HYPRE_Int  ierr = 0;
 

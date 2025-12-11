@@ -12,6 +12,10 @@
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_struct_ls_mup_def.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,21 +51,6 @@ typedef HYPRE_Int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
                                                 HYPRE_StructMatrix,
                                                 HYPRE_StructVector,
                                                 HYPRE_StructVector);
-
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
-/* if pc not defined, then may need HYPRE_SOLVER also */
-
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
-
-typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                            HYPRE_Int,
-                                            HYPRE_Real);
-#endif
 
 /**@}*/
 
@@ -298,6 +287,21 @@ HYPRE_Int HYPRE_StructPFMGGetRAPType(HYPRE_StructSolver solver,
                                      HYPRE_Int *rap_type );
 
 /**
+ * (Optional) Set the kernel type used for computing struct matrix-matrix multiplication.
+ *
+ * Current values set by \e matmult_type are:
+ *
+ *    - -1 : proxy to the default depending on hypre's build type (CPU or GPU)
+ *    - 0  : standard (core) algorithm (default for CPUs)
+ *    - 1  : fused algorithm with less, but more computationally intensive BoxLoops (default for GPUs)
+ **/
+HYPRE_Int HYPRE_StructPFMGSetMatmultType(HYPRE_StructSolver solver,
+                                         HYPRE_Int          matmult_type);
+
+HYPRE_Int HYPRE_StructPFMGGetMatmultType(HYPRE_StructSolver solver,
+                                         HYPRE_Int         *matmult_type);
+
+/**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
@@ -342,7 +346,10 @@ HYPRE_Int HYPRE_StructPFMGGetLogging(HYPRE_StructSolver solver,
                                      HYPRE_Int *logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
                                         HYPRE_Int          print_level);
@@ -492,7 +499,10 @@ HYPRE_Int HYPRE_StructSMGGetLogging(HYPRE_StructSolver solver,
                                     HYPRE_Int *logging);
 
 /**
- * (Optional) Set the amount of printing to do to the screen.
+ * (Optional) Control how much information is printed.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print convergence history
  **/
 HYPRE_Int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
                                        HYPRE_Int          print_level);
@@ -1116,72 +1126,6 @@ HYPRE_Int HYPRE_StructHybridSetPCGAbsoluteTolFactor(HYPRE_StructSolver solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/*
- * @name Struct SparseMSG Solver
- **/
-
-HYPRE_Int HYPRE_StructSparseMSGCreate(MPI_Comm            comm,
-                                      HYPRE_StructSolver *solver);
-
-HYPRE_Int HYPRE_StructSparseMSGDestroy(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetup(HYPRE_StructSolver solver,
-                                     HYPRE_StructMatrix A,
-                                     HYPRE_StructVector b,
-                                     HYPRE_StructVector x);
-
-HYPRE_Int HYPRE_StructSparseMSGSolve(HYPRE_StructSolver solver,
-                                     HYPRE_StructMatrix A,
-                                     HYPRE_StructVector b,
-                                     HYPRE_StructVector x);
-
-HYPRE_Int HYPRE_StructSparseMSGSetTol(HYPRE_StructSolver solver,
-                                      HYPRE_Real         tol);
-
-HYPRE_Int HYPRE_StructSparseMSGSetMaxIter(HYPRE_StructSolver solver,
-                                          HYPRE_Int          max_iter);
-
-HYPRE_Int HYPRE_StructSparseMSGSetJump(HYPRE_StructSolver solver,
-                                       HYPRE_Int          jump);
-
-HYPRE_Int HYPRE_StructSparseMSGSetRelChange(HYPRE_StructSolver solver,
-                                            HYPRE_Int          rel_change);
-
-HYPRE_Int HYPRE_StructSparseMSGSetZeroGuess(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNonZeroGuess(HYPRE_StructSolver solver);
-
-HYPRE_Int HYPRE_StructSparseMSGSetRelaxType(HYPRE_StructSolver solver,
-                                            HYPRE_Int          relax_type);
-
-HYPRE_Int HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
-                                               HYPRE_Real         weight);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumPreRelax(HYPRE_StructSolver solver,
-                                              HYPRE_Int          num_pre_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumPostRelax(HYPRE_StructSolver solver,
-                                               HYPRE_Int          num_post_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetNumFineRelax(HYPRE_StructSolver solver,
-                                               HYPRE_Int          num_fine_relax);
-
-HYPRE_Int HYPRE_StructSparseMSGSetLogging(HYPRE_StructSolver solver,
-                                          HYPRE_Int          logging);
-
-HYPRE_Int HYPRE_StructSparseMSGSetPrintLevel(HYPRE_StructSolver solver,
-                                             HYPRE_Int   print_level);
-
-
-HYPRE_Int HYPRE_StructSparseMSGGetNumIterations(HYPRE_StructSolver  solver,
-                                                HYPRE_Int          *num_iterations);
-
-HYPRE_Int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
-                                                            HYPRE_Real         *norm);
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
 /**
  * @name Struct LOBPCG Eigensolver
  *
@@ -1215,5 +1159,16 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 }
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_ls_mup_undef.h"
+#include "HYPRE_struct_ls_mup.h"
+#include "HYPRE_struct_ls_mp.h"
+#endif
 #endif
 
+#endif

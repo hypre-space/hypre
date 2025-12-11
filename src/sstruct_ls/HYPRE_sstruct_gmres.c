@@ -14,6 +14,8 @@ HYPRE_Int
 HYPRE_SStructGMRESCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_GMRESFunctions * gmres_functions =
       hypre_GMRESFunctionsCreate(
          hypre_SStructKrylovCAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
@@ -21,7 +23,7 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
          hypre_SStructKrylovCreateVectorArray,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
-         hypre_SStructKrylovInnerProd, hypre_SStructKrylovCopyVector,
+         hypre_SStructKrylovInnerProdTagged, hypre_SStructKrylovCopyVector,
          hypre_SStructKrylovClearVector,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );

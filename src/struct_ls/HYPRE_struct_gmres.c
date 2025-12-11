@@ -12,6 +12,8 @@
 HYPRE_Int
 HYPRE_StructGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_GMRESFunctions * gmres_functions =
       hypre_GMRESFunctionsCreate(
          hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
@@ -20,7 +22,7 @@ HYPRE_StructGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
          hypre_StructKrylovCreateVectorArray,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+         hypre_StructKrylovInnerProdTagged, hypre_StructKrylovCopyVector,
          hypre_StructKrylovClearVector,
          hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
          hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
@@ -151,5 +153,3 @@ HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 {
    return ( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
-
-

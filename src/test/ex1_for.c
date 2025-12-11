@@ -30,7 +30,7 @@
 #include "HYPRE_struct_ls.h"
 
 #ifdef HYPRE_FORTRAN
-#include "fortran.h"
+#include "_hypre_fortran.h"
 #include "hypre_struct_fortran_test.h"
 #endif
 
@@ -122,12 +122,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #ifdef HYPRE_FORTRAN
          for (entry = 0; entry < 5; entry++)
          {
-            HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(&stencil, &entry, offsets[entry]);
          }
 #else
          for (entry = 0; entry < 5; entry++)
          {
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
          }
 #endif
       }

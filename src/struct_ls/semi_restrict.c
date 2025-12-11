@@ -51,6 +51,9 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
                          hypre_Index         findex,
                          hypre_Index         stride                )
 {
+   HYPRE_UNUSED_VAR(rc);
+
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(R);
    hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
@@ -58,6 +61,11 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
+   hypre_Index             ustride;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -66,11 +74,12 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, findex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
    hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(r), 1,
+   hypre_ComputePkgCreate(memory_location, compute_info,
+                          hypre_StructVectorDataSpace(r), 1,
                           grid, &compute_pkg);
 
    /*----------------------------------------------------------
@@ -82,6 +91,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex, (restrict_data -> cindex));
    hypre_CopyIndex(stride, (restrict_data -> stride));
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -138,6 +149,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things.
     *-----------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_BeginTiming(restrict_data -> time_index);
 
@@ -308,6 +321,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_IncFLOPCount(4 * hypre_StructVectorGlobalSize(rc));
    hypre_EndTiming(restrict_data -> time_index);
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -329,4 +344,3 @@ hypre_SemiRestrictDestroy( void *restrict_vdata )
 
    return hypre_error_flag;
 }
-

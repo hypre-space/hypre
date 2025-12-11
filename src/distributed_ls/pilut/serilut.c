@@ -45,7 +45,8 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
   HYPRE_Int *perm, *iperm,
           *usrowptr, *uerowptr, *ucolind;
-  HYPRE_Int row_size, *col_ind;
+  HYPRE_Int row_size;
+  HYPRE_BigInt *col_ind;
   HYPRE_Real *values, *uvalues, *dvalues, *nrm2s;
   HYPRE_Int nlocal, nbnd;
   HYPRE_Real mult, rtol;
@@ -163,7 +164,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
         jr[col_ind[j]] = lastjr;
-        jw[lastjr] = col_ind[j];
+        jw[lastjr] = (HYPRE_Int) col_ind[j];
         w[lastjr] = values[j];
         lastjr++;
       }
@@ -241,8 +242,10 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /* Allocate memory for the reduced matrix */
     rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
   rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
-    rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc(sizeof(HYPRE_Int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
-    rmat->rmat_rvalues =  (HYPRE_Real **)hypre_mymalloc(sizeof(HYPRE_Real *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
+    rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc((size_t) nbnd * sizeof(HYPRE_Int*),
+                                                      "hypre_SerILUT: rmat->rmat_rcolind");
+    rmat->rmat_rvalues =  (HYPRE_Real **)hypre_mymalloc((size_t) nbnd * sizeof(HYPRE_Real*),
+                                                        "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
 
@@ -263,7 +266,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
         jr[col_ind[j]] = lastjr;
-        jw[lastjr] = col_ind[j];
+        jw[lastjr] = (HYPRE_Int) col_ind[j];
         w[lastjr] = values[j];
         lastjr++;
       }
@@ -356,7 +359,8 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
 {
   HYPRE_Int nbnd, nlocal, i, j;
   HYPRE_Int break_loop; /* marks finding an element making this row exterior. -AC */
-  HYPRE_Int row_size, *col_ind;
+  HYPRE_Int row_size;
+  HYPRE_BigInt *col_ind;
   HYPRE_Real *values;
 
   /* Determine which vertices are in the boundary,
@@ -412,7 +416,8 @@ HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int ierr=0, i, j, row_size, *col_ind;
+  HYPRE_Int ierr=0, i, j, row_size;
+  HYPRE_BigInt *col_ind;
 
   /* Allocate and clear structural_union vector */
   *structural_union = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);
@@ -457,6 +462,8 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 {
+  HYPRE_UNUSED_VAR(ddist);
+
   HYPRE_Int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
@@ -469,7 +476,7 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
   hypre_TFree( *structural_union , HYPRE_MEMORY_HOST);
   *structural_union = hypre_TAlloc( HYPRE_Int,  lnrows , HYPRE_MEMORY_HOST);
 
-  hypre_memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
+  hypre_memcpy_int( *structural_union, &recv_unions[firstrow], (size_t) lnrows );
 
   /* deallocate recv_unions */
   hypre_TFree( recv_unions , HYPRE_MEMORY_HOST);
@@ -486,6 +493,9 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
                 HYPRE_Int *perm, HYPRE_Int *iperm,
                 FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(iperm);
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, j;
   HYPRE_Int diag, lrow;
   HYPRE_Int first, last, itmp;
@@ -641,6 +651,8 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
       FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, j, nl;
   HYPRE_Int max, nz, lrow, rrow;
   HYPRE_Int last, first, itmp;

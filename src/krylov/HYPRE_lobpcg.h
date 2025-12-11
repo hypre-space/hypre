@@ -5,20 +5,37 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_LOBPCG_SOLVER
-#define hypre_LOBPCG_SOLVER
+#ifndef HYPRE_LOBPCG_HEADER
+#define HYPRE_LOBPCG_HEADER
 
 #include "HYPRE_krylov.h"
 
-#include "fortran_matrix.h"
-#include "multivector.h"
-#include "interpreter.h"
-#include "temp_multivector.h"
-#include "HYPRE_MatvecFunctions.h"
+#include "_hypre_fortran_matrix.h"
+#include "_hypre_lobpcg_multivector.h"
+#include "_hypre_lobpcg_interpreter.h"
+#include "_hypre_lobpcg_temp_multivector.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct
+{
+   void*  (*MatvecCreate)     ( void *A, void *x );
+   HYPRE_Int (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int (*MatvecDestroy) ( void *matvec_data );
+
+   void*  (*MatMultiVecCreate)     ( void *A, void *x );
+   HYPRE_Int (*MatMultiVec)        ( void *data, HYPRE_Complex alpha, void *A,
+                                     void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int (*MatMultiVecDestroy) ( void *data );
+
+} HYPRE_MatvecFunctions;
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -41,33 +58,6 @@ extern "C" {
  *
  * @{
  **/
-
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-/**
- * The solver object.
- **/
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
-
-#ifndef HYPRE_MATRIX_STRUCT
-#define HYPRE_MATRIX_STRUCT
-struct hypre_Matrix_struct;
-/**
- * The matrix object.
- **/
-typedef struct hypre_Matrix_struct *HYPRE_Matrix;
-#endif
-
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-/**
- * The vector object.
- **/
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
 
 /**@}*/
 
@@ -182,14 +172,6 @@ HYPRE_LOBPCGEigenvaluesHistory(HYPRE_Solver solver);
 /* Returns the number of iterations performed by LOBPCG */
 HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 
-void hypre_LOBPCGMultiOperatorB(void *data,
-                                void *x,
-                                void *y);
-
-void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
-                                     mv_MultiVectorPtr        y,
-                                     utilities_FortranMatrix *xy);
-
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -199,6 +181,17 @@ void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_krylov_mup_undef.h"
+#include "HYPRE_lobpcg_mup.h"
+#endif
 #endif
 
 #endif

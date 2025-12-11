@@ -208,9 +208,10 @@ HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver (
  * HYPRE_DistributedMatrixPilutSolverInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_DistributedMatrixPilutSolverInitialize (
-                  HYPRE_DistributedMatrixPilutSolver solver )
+HYPRE_Int
+HYPRE_DistributedMatrixPilutSolverInitialize( HYPRE_DistributedMatrixPilutSolver solver )
 {
+   HYPRE_UNUSED_VAR(solver);
 
    return(0);
 }
@@ -336,7 +337,8 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetLogging(
 
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
-   HYPRE_Int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
+   HYPRE_Int nprocs, *rowdist, ierr;
+   HYPRE_BigInt m, n, start, end, col0, coln;
    hypre_DistributedMatrixPilutSolver *solver =
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
@@ -354,13 +356,13 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
    HYPRE_DistributedMatrixGetDims(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &m, &n);
 
-   DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = m;
+  DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = (HYPRE_Int) m;
 
    HYPRE_DistributedMatrixGetLocalRange(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end, &col0, &coln);
 
    DataDistTypeLnrows(hypre_DistributedMatrixPilutSolverDataDist( solver )) =
-      end - start + 1;
+      (HYPRE_Int)(end - start) + 1;
 
    /* Set up DataDist entry in distributed_solver */
    /* This requires that each processor know which rows are owned by each proc */
@@ -371,7 +373,7 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
    hypre_MPI_Allgather( &start, 1, HYPRE_MPI_INT, rowdist, 1, HYPRE_MPI_INT,
       hypre_DistributedMatrixPilutSolverComm(solver) );
 
-   rowdist[ nprocs ] = n;
+  rowdist[ nprocs ] = (HYPRE_Int) n;
 
 #ifdef HYPRE_TIMING
    {

@@ -131,7 +131,9 @@ integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
     extern integer ieeeck_(integer *, real *, real *);
     integer iz, nx;
     char subnam[6];
-
+    HYPRE_UNUSED_VAR(opts);
+    HYPRE_UNUSED_VAR(n3);
+    HYPRE_UNUSED_VAR(opts_len);
 
 
 
@@ -167,11 +169,11 @@ L100:
 /*        ASCII character set */
 
 	if (ic >= 97 && ic <= 122) {
-	    *(unsigned char *)subnam = (char) (ic - 32);
+	    *(unsigned char *)subnam = (unsigned char) (ic - 32);
 	    for (i__ = 2; i__ <= 6; ++i__) {
 		ic = *(unsigned char *)&subnam[i__ - 1];
 		if (ic >= 97 && ic <= 122) {
-		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic - 32);
+		    *(unsigned char *)&subnam[i__ - 1] = (unsigned char) (ic - 32);
 		}
 /* L10: */
 	    }
@@ -184,13 +186,13 @@ L100:
 	if (((ic >= 129) && (ic <= 137)) ||
             ((ic >= 145) && (ic <= 153)) ||
             ((ic >= 162) && (ic <= 169))) {
-	    *(unsigned char *)subnam = (char) (ic + 64);
+	    *(unsigned char *)subnam = (unsigned char) (ic + 64);
 	    for (i__ = 2; i__ <= 6; ++i__) {
 		ic = *(unsigned char *)&subnam[i__ - 1];
 		if (((ic >= 129) && (ic <= 137)) ||
                     ((ic >= 145) && (ic <= 153)) ||
                     ((ic >= 162) && (ic <= 169))) {
-		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic + 64);
+		    *(unsigned char *)&subnam[i__ - 1] = (unsigned char) (ic + 64);
 		}
 /* L20: */
 	    }
@@ -201,11 +203,11 @@ L100:
 /*        Prime machines:  ASCII+128 */
 
 	if (ic >= 225 && ic <= 250) {
-	    *(unsigned char *)subnam = (char) (ic - 32);
+	    *(unsigned char *)subnam = (unsigned char) (ic - 32);
 	    for (i__ = 2; i__ <= 6; ++i__) {
 		ic = *(unsigned char *)&subnam[i__ - 1];
 		if (ic >= 225 && ic <= 250) {
-		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic - 32);
+		    *(unsigned char *)&subnam[i__ - 1] = (unsigned char) (ic - 32);
 		}
 /* L30: */
 	    }

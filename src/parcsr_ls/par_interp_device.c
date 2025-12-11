@@ -162,9 +162,12 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
@@ -194,9 +197,12 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream();
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
@@ -237,8 +243,10 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
     * coarse point index in the range from 0 to n_coarse-1 */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,          is_nonnegative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine, is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       fine_to_coarse_d,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else
@@ -1035,6 +1043,11 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                                         HYPRE_Int            debug_flag,
                                         hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_cpts_global);
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -1101,8 +1114,10 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,          is_nonnegative<HYPRE_Int>()),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine, is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       fine_to_coarse,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else
@@ -1149,9 +1164,12 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    /* create a handle to start communication. 11: for integer */
@@ -1216,9 +1234,12 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       thrust::plus<HYPRE_BigInt>() );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure big_int_buf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
 #endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data,

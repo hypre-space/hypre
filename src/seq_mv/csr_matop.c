@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_seq_mv.h"
 #include "csr_matrix.h"
 
 /*--------------------------------------------------------------------------
@@ -167,20 +167,23 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
          }
       }
 
-      if (ii < (num_threads - 1))
+      if (lastrow > firstrow)
       {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+         if ((ii < (num_threads - 1)) && (lastrow < nnzrows_C))
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < rownnz_C[lastrow]; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
-      }
-      else
-      {
-         for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+         else
          {
-            hypre_assert(C_i[iic + 1] == 0);
-            C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            for (iic = rownnz_C[lastrow - 1] + 1; iic < nrows_C; iic++)
+            {
+               hypre_assert(C_i[iic + 1] == 0);
+               C_i[iic + 1] = C_i[rownnz_C[lastrow - 1] + 1];
+            }
          }
       }
    }
@@ -219,7 +222,6 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
 HYPRE_Int
 hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               HYPRE_Int          lastrow,
-                              HYPRE_Int         *twspace,
                               HYPRE_Int         *marker,
                               HYPRE_Int         *map_A2C,
                               HYPRE_Int         *map_B2C,
@@ -230,6 +232,12 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               hypre_CSRMatrix   *B,
                               hypre_CSRMatrix   *C )
 {
+   /* Exit if local number of rows is zero */
+   if (lastrow - firstrow <= 0)
+   {
+      return hypre_error_flag;
+   }
+
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
@@ -431,7 +439,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
                                   A, B, nrows_A, nnzrows_C, ncols_A, rownnz_C,
                                   memory_location_C, C_i, &C);
 
-      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker, NULL, NULL,
+      hypre_CSRMatrixAddSecondPass(ns, ne, marker, NULL, NULL,
                                    rownnz_C, alpha, beta, A, B, C);
 
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
@@ -449,7 +457,22 @@ hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
                     HYPRE_Complex    beta,
                     hypre_CSRMatrix *B)
 {
+   HYPRE_Int        nrows_A   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        ncols_A   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        nnzrows_A = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int        nnzrows_B = hypre_CSRMatrixNumRownnz(B);
+
    hypre_CSRMatrix *C = NULL;
+
+   /* Trivial case: input matrices are empty */
+   if (!nnzrows_A && !nnzrows_B)
+   {
+      C = hypre_CSRMatrixCreate(nrows_A, ncols_A, 0);
+      hypre_CSRMatrixNumRownnz(C) = 0;
+      hypre_CSRMatrixInitialize_v2(C, 0, hypre_CSRMatrixMemoryLocation(A));
+
+      return C;
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
@@ -1056,7 +1079,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    HYPRE_Int             num_nnzs_A = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_MemoryLocation  memory_location = hypre_CSRMatrixMemoryLocation(A);
 
-   HYPRE_Complex        *AT_data;
+   HYPRE_Complex        *AT_data = NULL;
    HYPRE_Int            *AT_j;
    HYPRE_Int             num_rows_AT;
    HYPRE_Int             num_cols_AT;
@@ -1303,15 +1326,16 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 /* RL: TODO add memory locations */
-HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
-                               HYPRE_BigInt      first_col_diag_B,
-                               HYPRE_BigInt      last_col_diag_B,
-                               HYPRE_Int         num_cols_offd_B,
-                               HYPRE_BigInt     *col_map_offd_B,
-                               HYPRE_Int        *num_cols_offd_C_ptr,
-                               HYPRE_BigInt    **col_map_offd_C_ptr,
-                               hypre_CSRMatrix **Bext_diag_ptr,
-                               hypre_CSRMatrix **Bext_offd_ptr)
+HYPRE_Int
+hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
+                     HYPRE_BigInt      first_col_diag_B,
+                     HYPRE_BigInt      last_col_diag_B,
+                     HYPRE_Int         num_cols_offd_B,
+                     HYPRE_BigInt     *col_map_offd_B,
+                     HYPRE_Int        *num_cols_offd_C_ptr,
+                     HYPRE_BigInt    **col_map_offd_C_ptr,
+                     hypre_CSRMatrix **Bext_diag_ptr,
+                     hypre_CSRMatrix **Bext_offd_ptr)
 {
    HYPRE_Complex   *Bs_ext_data = hypre_CSRMatrixData(Bs_ext);
    HYPRE_Int       *Bs_ext_i    = hypre_CSRMatrixI(Bs_ext);
@@ -1324,10 +1348,11 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    HYPRE_Complex   *B_ext_diag_data = NULL;
    HYPRE_Int       *B_ext_offd_i = NULL;
    HYPRE_Int       *B_ext_offd_j = NULL;
+   HYPRE_BigInt    *B_ext_offd_bigj = NULL;
    HYPRE_Complex   *B_ext_offd_data = NULL;
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
-   HYPRE_BigInt    *temp;
+   HYPRE_BigInt    *temp = NULL;
    HYPRE_Int        max_num_threads;
    HYPRE_Int        cnt = 0;
    hypre_CSRMatrix *Bext_diag = NULL;
@@ -1408,19 +1433,15 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
          B_ext_diag_i[num_rows_Bext] = B_ext_diag_size;
          B_ext_offd_i[num_rows_Bext] = B_ext_offd_size;
 
-         if (B_ext_diag_size)
-         {
-            B_ext_diag_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_diag_size, HYPRE_MEMORY_HOST);
-            B_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, B_ext_diag_size, HYPRE_MEMORY_HOST);
-         }
-         if (B_ext_offd_size)
-         {
-            B_ext_offd_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_offd_size, HYPRE_MEMORY_HOST);
-            B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size, HYPRE_MEMORY_HOST);
-         }
+         B_ext_diag_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_diag_size, HYPRE_MEMORY_HOST);
+         B_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, B_ext_diag_size, HYPRE_MEMORY_HOST);
+         B_ext_offd_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_offd_size, HYPRE_MEMORY_HOST);
+         B_ext_offd_bigj = hypre_CTAlloc(HYPRE_BigInt,  B_ext_offd_size, HYPRE_MEMORY_HOST);
+         B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size, HYPRE_MEMORY_HOST);
          if (B_ext_offd_size || num_cols_offd_B)
          {
-            temp = hypre_CTAlloc(HYPRE_BigInt, B_ext_offd_size + num_cols_offd_B, HYPRE_MEMORY_HOST);
+            temp = hypre_CTAlloc(HYPRE_BigInt, B_ext_offd_size + num_cols_offd_B,
+                                 HYPRE_MEMORY_HOST);
          }
       }
 
@@ -1437,12 +1458,12 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
             if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
             {
                temp[cnt_offd] = Bs_ext_j[j];
-               B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
+               B_ext_offd_bigj[cnt_offd] = Bs_ext_j[j];
                B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
             }
             else
             {
-               B_ext_diag_j[cnt_diag] = Bs_ext_j[j] - first_col_diag_B;
+               B_ext_diag_j[cnt_diag] = (HYPRE_Int) (Bs_ext_j[j] - first_col_diag_B);
                B_ext_diag_data[cnt_diag++] = Bs_ext_data[j];
             }
          }
@@ -1500,15 +1521,19 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       {
          for (j = B_ext_offd_i[i]; j < B_ext_offd_i[i + 1]; j++)
          {
-            B_ext_offd_j[j] = hypre_BigBinarySearch(col_map_offd_C, B_ext_offd_j[j], num_cols_offd_C);
+            B_ext_offd_j[j] = hypre_BigBinarySearch(col_map_offd_C,
+                                                    B_ext_offd_bigj[j],
+                                                    num_cols_offd_C);
          }
       }
    } /* end parallel region */
 
    hypre_TFree(my_diag_array, HYPRE_MEMORY_HOST);
    hypre_TFree(my_offd_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_ext_offd_bigj, HYPRE_MEMORY_HOST);
 
-   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B - first_col_diag_B + 1,
+   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext,
+                                     (HYPRE_Int) (last_col_diag_B - first_col_diag_B + 1),
                                      B_ext_diag_size);
    hypre_CSRMatrixMemoryLocation(Bext_diag) = HYPRE_MEMORY_HOST;
    Bext_offd = hypre_CSRMatrixCreate(num_rows_Bext, num_cols_offd_C, B_ext_offd_size);
@@ -1609,6 +1634,8 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *
+ * TODO: Add OpenMP support
  *--------------------------------------------------------------------------*/
 hypre_CSRMatrix *
 hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
@@ -1831,7 +1858,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
  *         2, square sum
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
                                   HYPRE_Int       *CF_i,
                                   HYPRE_Int       *CF_j,
@@ -1874,13 +1901,15 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
 
       row_sum[i] = row_sum_i;
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixComputeRowSum
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
                               HYPRE_Int       *CF_i,
                               HYPRE_Int       *CF_j,
@@ -1903,18 +1932,158 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixComputeRowSumHost(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonalHost
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
+ * Computes the column sums of a matrix.
+ * Assumes the input vector col_sum has size num_cols and equal to zeroes.
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
+hypre_CSRMatrixComputeColSumHost( hypre_CSRMatrix *A,
+                                  HYPRE_Complex   *col_sum,
+                                  HYPRE_Int        type,
+                                  HYPRE_Complex    scal)
+{
+   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int     *rownnz   = hypre_CSRMatrixRownnz(A);
+   HYPRE_Complex *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j      = hypre_CSRMatrixJ(A);
+
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel
+#endif
+   {
+      HYPRE_Int      tid = hypre_GetThreadNum();
+      HYPRE_Int      num_threads = hypre_NumActiveThreads();
+      HYPRE_Int      i, ii, j, col, ns, ne;
+      HYPRE_Complex *work;
+
+      /* Compute rows partitioning */
+      hypre_partition1D(num_rows, num_threads, tid, &ns, &ne);
+
+      /* Allocate work data */
+      work = (num_threads == 1) ?
+             col_sum : hypre_CTAlloc(HYPRE_Complex, num_cols, HYPRE_MEMORY_HOST);
+
+      switch (type)
+      {
+         case 0:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * A_data[j];
+               }
+            }
+            break;
+         }
+
+         case 1:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * hypre_cabs(A_data[j]);
+               }
+            }
+            break;
+         }
+
+         case 2:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * A_data[j] * A_data[j];
+               }
+            }
+            break;
+         }
+      }
+
+      /* Reduce results */
+      if (num_threads > 1)
+      {
+         for (i = 0; i < num_threads; i++)
+         {
+            if (i == tid)
+            {
+               for (j = 0; j < num_cols; j++)
+               {
+                  col_sum[j] += work[j];
+               }
+            }
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp barrier
+#endif
+         }
+
+         hypre_TFree(work, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A,
+                              HYPRE_Complex   *col_sum,
+                              HYPRE_Int        type,
+                              HYPRE_Complex    scal)
+
+{
+   /* Trivial case */
+   if (!hypre_CSRMatrixNumCols(A))
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CSRMatrixComputeColSumDevice(A, col_sum, type, scal);
+   }
+   else
+#endif
+   {
+      hypre_CSRMatrixComputeColSumHost(A, col_sum, type, scal);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
                                     HYPRE_Complex   *d,
                                     HYPRE_Int        type)
@@ -1925,10 +2094,11 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Int      i, j;
    HYPRE_Complex  d_i;
+   char           msg[HYPRE_MAX_MSG_LEN];
 
    for (i = 0; i < nrows; i++)
    {
-      d_i = 0.0;
+      d_i = (type < 10) ? 0.0 : d[i];
       for (j = A_i[i]; j < A_i[i + 1]; j++)
       {
          if (A_j[j] == i)
@@ -1941,38 +2111,63 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = hypre_cabs(A_data[j]);
             }
-            else if (type == 2)
+            else if (type == 10)
             {
-               d_i = 1.0 / (A_data[j]);
+               d_i += A_data[j];
             }
-            else if (type == 3)
+            else if (type == 11)
             {
-               d_i = 1.0 / (hypre_sqrt(A_data[j]));
+               d_i += hypre_cabs(A_data[j]);
             }
-            else if (type == 4)
+            else
             {
-               d_i = 1.0 / (hypre_sqrt(hypre_cabs(A_data[j])));
+               if (A_data[j] == 0.0)
+               {
+                  hypre_sprintf(msg, "Zero diagonal found at row %i!", i);
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+               }
+               else if (type == 2)
+               {
+                  d_i = 1.0 / A_data[j];
+               }
+               else if (type == 3)
+               {
+                  d_i = 1.0 / hypre_sqrt(A_data[j]);
+               }
+               else if (type == 4)
+               {
+                  d_i = 1.0 / hypre_sqrt(hypre_cabs(A_data[j]));
+               }
             }
             break;
          }
       }
       d[i] = d_i;
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonal
+ * Extracts values from the diagonal of a CSR matrix based on the specified type.
  *
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
+ * Parameters:
+ *   A    - Input CSR matrix.
+ *   d    - Array to store the extracted or computed values.
+ *   type - Specifies the operation to perform on the diagonal coefficients:
+ *     0: Extract the diagonal coefficients.
+ *     1: Extract the absolute values of the diagonal coefs..
+ *     2: Compute the inverse of the diagonal coefs. (1 / diag).
+ *     3: Compute the inverse square root of the diagonal coefs. (1 / sqrt(diag)).
+ *    10: Extract diagonal coefs. and adds them to pre-existing values in d
+ *    11: Extract the absolute values of diagonal coefs. and adds them to
+ *        pre-existing values in d.
  *--------------------------------------------------------------------------*/
 
-void
-hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
-                                HYPRE_Complex   *d,
-                                HYPRE_Int        type)
+HYPRE_Int
+hypre_CSRMatrixExtractDiagonal(hypre_CSRMatrix *A,
+                               HYPRE_Complex   *d,
+                               HYPRE_Int        type)
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
@@ -1986,11 +2181,11 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixScale
- *
  * Scales CSR matrix: A = scalar * A.
  *--------------------------------------------------------------------------*/
 
@@ -2012,6 +2207,9 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < k; i++)
       {
          data[i] *= scalar;
@@ -2189,10 +2387,107 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < nnz; i++)
       {
          hypre_CSRMatrixData(A)[i] = value;
       }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the Frobenius norm for each tag in a CSR matrix.
+ *
+ * Each row is assigned a tag (block identifier) via the tags array (local rows only).
+ * The result is stored in the output pointer tnorms_ptr (length num_tags * num_tags).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
+                               HYPRE_Int         num_tags,
+                               HYPRE_Int        *tags,
+                               HYPRE_Real       *tnorms)
+{
+   HYPRE_Int       *A_i         = hypre_CSRMatrixI(A);
+   HYPRE_Int       *A_j         = hypre_CSRMatrixJ(A);
+   HYPRE_Complex   *A_a         = hypre_CSRMatrixData(A);
+   HYPRE_Int        num_rows    = hypre_CSRMatrixNumRows(A);
+
+   HYPRE_Int        tnorms_size = num_tags * num_tags;
+   HYPRE_Int        i, j, itag, jtag;
+
+   /* Accumulate sums */
+   for (i = 0; i < num_rows; i++)
+   {
+      itag = tags[i];
+      hypre_assert(itag >= 0 && itag < num_tags);
+
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         jtag = tags[A_j[j]];
+         hypre_assert(jtag >= 0 && jtag < num_tags);
+         tnorms[itag * num_tags + jtag] += hypre_squared(A_a[j]);
+      }
+   }
+
+   /* Take square root for each block */
+   for (i = 0; i < tnorms_size; i++)
+   {
+      tnorms[i] = hypre_sqrt(tnorms[i]);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute tagged Frobenius norms of an input matrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix  *A,
+                           HYPRE_Int         num_tags,
+                           HYPRE_Int        *tags,
+                           HYPRE_Real      **tnorms_ptr)
+{
+   HYPRE_Int     tnorms_size = num_tags * num_tags;
+   HYPRE_Int     i;
+
+   /* Create tnorms array */
+   if (!*tnorms_ptr)
+   {
+      *tnorms_ptr = hypre_CTAlloc(HYPRE_Real, tnorms_size, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      /* Initialize tnorms array */
+      for (i = 0; i < tnorms_size; i++)
+      {
+         (*tnorms_ptr)[i] = 0.0;
+      }
+   }
+
+   /* Call regular Frobenius norm if no tags or only one tag */
+   if (num_tags <= 1 || !tags)
+   {
+      (*tnorms_ptr)[0] = hypre_CSRMatrixFnorm(A);
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CSRMatrixTaggedFnormDevice(A, num_tags, tags, *tnorms_ptr);
+   }
+   else
+#endif
+   {
+      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, *tnorms_ptr);
    }
 
    return hypre_error_flag;

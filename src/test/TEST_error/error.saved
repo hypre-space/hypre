@@ -40,19 +40,58 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 -----    ------------   ---------  ------------ 
     1    5.298880e+01    1.675653    1.675653e+00
     2    5.298880e+01    1.000000    1.675653e+00
-0: hypre error in file "par_amg_solve.c", line 339, error code = 256
-0: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-0: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-0: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-0: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-0: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-1: hypre error in file "par_amg_solve.c", line 339, error code = 256
-1: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-1: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-1: hypre error in file "pcg.c", line 709, error code = 256 - Subnormal gamma value in PCG
-1: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-1: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-1: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
-1: hypre error in file "pcg.c", line 784, error code = 256 - Reached max iterations 2 in PCG before convergence
+# Output file: error.out.11
+ Average Convergence Factor = 1.379821
+
+     Complexity:    grid = 1.555000
+                operator = 2.667344
+                   cycle = 5.332187
+
+# Output file: error.out.15
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    5.298880e+01    1.675653    1.675653e+00
+    2    5.298880e+01    1.000000    1.675653e+00
+# Output file: error.out.16
+ Average Convergence Factor = 1.379821
+
+     Complexity:    grid = 1.555000
+                operator = 2.667344
+                   cycle = 5.332187
+
+0: hypre error in file "par_amg.c", line 2024, error code = 20
+0: hypre error in file "par_amg_solve.c", line 342, error code = 256
+0: hypre error in file "par_amg_solve.c", line 342, error code = 256
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 1010, error code = 256 - Reached max iterations 2 in PCG before convergence
+0: hypre error in file "pcg.c", line 869, error code = 256 - Negative or zero gamma value in PCG
+0: hypre error in file "pcg.c", line 869, error code = 256 - Negative or zero gamma value in PCG
+0: hypre error in file "pcg.c", line 869, error code = 256 - Negative or zero gamma value in PCG
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors
+1: hypre error in file "par_relax.c", line 753, error code = 1 - Hybrid GS relaxation doesn't support multicomponent vectors

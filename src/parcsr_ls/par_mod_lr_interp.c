@@ -24,6 +24,8 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            max_elmts,
                                      hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation  memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -120,7 +122,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
 
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -328,10 +330,10 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
       for (i = startf; i < stopf; i++)
       {
          j = As_FF_diag_i[i];
-         if (D_w[i]) { beta = 1.0 / D_w[i]; }
+         if (D_w[i] != 0.0) { beta = 1.0 / D_w[i]; }
          else { beta = 1.0; }
          As_FF_diag_data[j] = beta * D_q[i];
-         if (D_q[i]) { gamma = -1.0 / D_q[i]; }
+         if (D_q[i] != 0.0) { gamma = -1.0 / D_q[i]; }
          else { gamma = 1.0; }
          for (j = As_FF_diag_i[i] + 1; j < As_FF_diag_i[i + 1]; j++)
          {
@@ -591,6 +593,8 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -700,7 +704,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
 
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -975,7 +979,10 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                   break;
                }
             }
-            As_FF_diag_data[j] /= value;
+            if (value != 0.0)
+            {
+               As_FF_diag_data[j] /= value;
+            }
          }
          for (j = As_FF_offd_i[i]; j < As_FF_offd_i[i + 1]; j++)
          {
@@ -992,7 +999,10 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                   break;
                }
             }
-            As_FF_offd_data[j] /= value;
+            if (value != 0.0)
+            {
+               As_FF_offd_data[j] /= value;
+            }
          }
          As_FF_diag_data[As_FF_diag_i[i]] = 1.0;
       }
@@ -1004,7 +1014,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
       for (i = startf; i < stopf; i++)
       {
          theta = (D_theta[i] + D_w[i]);
-         if (theta)
+         if (theta != 0.0)
          {
             theta = -1.0 / theta;
             for (j = As_FF_diag_i[i]; j < As_FF_diag_i[i + 1]; j++)
@@ -1259,6 +1269,8 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             max_elmts,
                                        hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -1361,7 +1373,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
 
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-   n_Cpts = num_cpts_global[1] - num_cpts_global[0];
+   n_Cpts = (HYPRE_Int) (num_cpts_global[1] - num_cpts_global[0]);
 
    hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
@@ -1483,7 +1495,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          }
          number = (HYPRE_Real)(As_FF_diag_i[i + 1] - As_FF_diag_i[i] - 1 + As_FF_offd_i[i + 1] -
                                As_FF_offd_i[i]);
-         if (number) { D_lambda[i] /= number; }
+         if (number != 0.0) { D_lambda[i] /= number; }
          for (j = As_FC_diag_i[i]; j < As_FC_diag_i[i + 1]; j++)
          {
             D_beta[i] += As_FC_diag_data[j];
@@ -1492,7 +1504,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          {
             D_beta[i] += As_FC_offd_data[j];
          }
-         if (D_lambda[i] + D_beta[i]) { D_tmp[i] = D_lambda[i] / (D_beta[i] + D_lambda[i]); }
+         if (D_lambda[i] + D_beta[i] != 0.0) { D_tmp[i] = D_lambda[i] / (D_beta[i] + D_lambda[i]); }
       }
 
 
@@ -1634,10 +1646,10 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
       for (i = startf; i < stopf; i++)
       {
          value = D_w[i] + D_tau[i];
-         if (value) { value = -1.0 / value; }
+         if (value != 0.0) { value = -1.0 / value; }
          theta = D_beta[i] + D_lambda[i];
          As_FF_diag_data[As_FF_diag_i[i]] = value * theta;
-         if (theta) { theta = 1.0 / theta; }
+         if (theta != 0.0) { theta = 1.0 / theta; }
          for (j = As_FF_diag_i[i] + 1; j < As_FF_diag_i[i + 1]; j++)
          {
             As_FF_diag_data[j] *= value;
@@ -1834,6 +1846,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_TFree(start_array, HYPRE_MEMORY_HOST);
    hypre_TFree(startf_array, HYPRE_MEMORY_HOST);
    hypre_TFree(buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDestroy(As_FF);
    hypre_ParCSRMatrixDestroy(As_FC);
    hypre_ParCSRMatrixDestroy(W);

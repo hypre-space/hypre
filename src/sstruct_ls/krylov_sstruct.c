@@ -184,6 +184,8 @@ hypre_SStructKrylovMatvec( void   *matvec_data,
                            HYPRE_Complex  beta,
                            void   *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    return ( hypre_SStructMatvec( alpha,
                                  (hypre_SStructMatrix *) A,
                                  (hypre_SStructVector *) x,
@@ -215,6 +217,32 @@ hypre_SStructKrylovInnerProd( void *x,
    return result;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructKrylovInnerProdTagged( void           *x,
+                                    void           *y,
+                                    HYPRE_Int      *num_tags_ptr,
+                                    HYPRE_Complex **iprod_ptr )
+{
+   HYPRE_Complex iprod;
+
+   hypre_SStructInnerProd( (hypre_SStructVector *) x,
+                           (hypre_SStructVector *) y,
+                           &iprod );
+
+   if (*iprod_ptr == NULL)
+   {
+      *iprod_ptr = hypre_CTAlloc(HYPRE_Complex, 1, HYPRE_MEMORY_HOST);
+   }
+
+   // TODO (VPM): Add support to multiple tags
+   *num_tags_ptr = 1;
+   *iprod_ptr[0] = iprod;
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -273,3 +301,12 @@ hypre_SStructKrylovCommInfo( void  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructKrylovPrintVector( void *x,
+                                const char *filename)
+{
+   return ( HYPRE_SStructVectorPrint( filename, (hypre_SStructVector *) x, 0) );
+}
