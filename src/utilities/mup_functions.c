@@ -311,6 +311,15 @@ HYPRE_VersionNumber( HYPRE_Int *major_ptr, HYPRE_Int *minor_ptr, HYPRE_Int *patc
 }
 
 
+/*--------------------------------------------------------------------------*/
+
+size_t
+hypre_GetSizeOfReal( void )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_GetSizeOfReal_pre( precision );
+}
+
 
 #endif
 

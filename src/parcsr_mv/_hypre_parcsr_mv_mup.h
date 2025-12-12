@@ -560,13 +560,6 @@ HYPRE_Int
 hypre_ParCSRMatrixBlockColSum_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, hypre_DenseBlockMatrix **B_ptr );
 
 hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_flt( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
-hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_dbl( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
-hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
-
-hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_v2_flt( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location );
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_v2_dbl( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location );
@@ -595,13 +588,6 @@ HYPRE_Int
 hypre_ParCSRMatrixComputeScalingTagged_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int type, HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags, HYPRE_Int *tags, hypre_ParVector **scaling_ptr );
 
 HYPRE_Int
-hypre_ParCSRMatrixCopy_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
-HYPRE_Int
-hypre_ParCSRMatrixCopy_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
-HYPRE_Int
-hypre_ParCSRMatrixCopy_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
-
-HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_flt( hypre_ParCSRMatrix *A );
 HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice_dbl( hypre_ParCSRMatrix *A );
@@ -621,13 +607,6 @@ HYPRE_Int
 hypre_ParCSRMatrixCopy_C_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
 HYPRE_Int
 hypre_ParCSRMatrixCopy_C_long_dbl( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker );
-
-hypre_ParCSRMatrix *
-hypre_ParCSRMatrixCreate_flt( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
-hypre_ParCSRMatrix *
-hypre_ParCSRMatrixCreate_dbl( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
-hypre_ParCSRMatrix *
-hypre_ParCSRMatrixCreate_long_dbl( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
 
 HYPRE_Int
 hypre_ParCSRMatrixCreateAssumedPartition_flt( hypre_ParCSRMatrix *matrix );
@@ -810,13 +789,6 @@ HYPRE_Int
 hypre_ParCSRMatrixInitialize_dbl( hypre_ParCSRMatrix *matrix );
 HYPRE_Int
 hypre_ParCSRMatrixInitialize_long_dbl( hypre_ParCSRMatrix *matrix );
-
-HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2_flt( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Complex
 hypre_ParCSRMatrixLocalSumElts_flt( hypre_ParCSRMatrix *A );
@@ -1540,6 +1512,42 @@ HYPRE_Generate2DSystem_long_dbl( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L
 HYPRE_ParCSR_System_Problem *
 HYPRE_Generate2DSystem( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_ParVector H_b1, HYPRE_ParVector H_b2, HYPRE_ParVector H_x1, HYPRE_ParVector H_x2, void *M_vals );
 
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_flt( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_dbl( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
+
+HYPRE_Int
+hypre_ParCSRMatrixCopy_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
+HYPRE_Int
+hypre_ParCSRMatrixCopy_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
+HYPRE_Int
+hypre_ParCSRMatrixCopy_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
+HYPRE_Int
+hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
+
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate_flt( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate_dbl( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate_long_dbl( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2_flt( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use ../config/gen_code.sh to generate) ***/
 
@@ -1556,6 +1564,18 @@ HYPRE_Destroy2DSystem_pre( HYPRE_Precision precision, HYPRE_ParCSR_System_Proble
 
 HYPRE_ParCSR_System_Problem *
 HYPRE_Generate2DSystem_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_ParVector H_b1, HYPRE_ParVector H_b2, HYPRE_ParVector H_x1, HYPRE_ParVector H_x2, void *M_vals );
+
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
+
+HYPRE_Int
+hypre_ParCSRMatrixCopy_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data );
+
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 
 
 #endif

@@ -1051,6 +1051,7 @@
 #undef hypre_BoomerAMGGetCumNumIterations
 #undef hypre_BoomerAMGGetCycleName
 #undef hypre_BoomerAMGGetCycleNumSweeps
+#undef hypre_BoomerAMGGetCycleOpCount
 #undef hypre_BoomerAMGGetCycleRelaxType
 #undef hypre_BoomerAMGGetCycleType
 #undef hypre_BoomerAMGGetDebugFlag
@@ -1170,6 +1171,7 @@
 #undef hypre_BoomerAMGSetCoordinates
 #undef hypre_BoomerAMGSetCumNnzAP
 #undef hypre_BoomerAMGSetCycleNumSweeps
+#undef hypre_BoomerAMGSetCycleOpCount
 #undef hypre_BoomerAMGSetCycleRelaxType
 #undef hypre_BoomerAMGSetCycleType
 #undef hypre_BoomerAMGSetDebugFlag
@@ -1266,11 +1268,13 @@
 #undef hypre_BoomerAMGSetPrintLevel
 #undef hypre_BoomerAMGSetRAP2
 #undef hypre_BoomerAMGSetRedundant
+#undef hypre_BoomerAMGSetRelResidualNorm
 #undef hypre_BoomerAMGSetRelaxOrder
 #undef hypre_BoomerAMGSetRelaxType
 #undef hypre_BoomerAMGSetRelaxWeight
 #undef hypre_BoomerAMGSetRelaxWt
 #undef hypre_BoomerAMGSetRestriction
+#undef hypre_BoomerAMGSetSCommPkgSwitch
 #undef hypre_BoomerAMGSetSabs
 #undef hypre_BoomerAMGSetSchwarzRlxWeight
 #undef hypre_BoomerAMGSetSchwarzUseNonSymm
@@ -1288,6 +1292,7 @@
 #undef hypre_BoomerAMGSetThreshold
 #undef hypre_BoomerAMGSetTol
 #undef hypre_BoomerAMGSetTruncFactor
+#undef hypre_BoomerAMGSetUserRelaxWeight
 #undef hypre_BoomerAMGSetVariant
 #undef hypre_BoomerAMGSetup
 #undef hypre_BoomerAMGSetupStats
@@ -1306,6 +1311,7 @@
 #undef hypre_CSRMatrixNormFro
 #undef hypre_CSRMatrixResNormFro
 #undef hypre_CSRMatrixTrace
+#undef hypre_Coarsen_Options
 #undef hypre_CreateC
 #undef hypre_CreateDinv
 #undef hypre_CreateLambda
@@ -1460,10 +1466,12 @@
 #undef hypre_ILUWriteSolverParams
 #undef hypre_IndepSetGreedy
 #undef hypre_IndepSetGreedyS
+#undef hypre_Interp_Options
 #undef hypre_IntersectTwoArrays
 #undef hypre_IntersectTwoBigArrays
 #undef hypre_LINPACKcgpthy
 #undef hypre_LINPACKcgtql1
+#undef hypre_Level_L1Norms
 #undef hypre_MGRAddVectorP
 #undef hypre_MGRAddVectorR
 #undef hypre_MGRApproximateInverse
@@ -1570,6 +1578,7 @@
 #undef hypre_MPSchwarzCFSolve
 #undef hypre_MPSchwarzFWSolve
 #undef hypre_MPSchwarzSolve
+#undef hypre_MPassInterp_Options
 #undef hypre_NSHCreate
 #undef hypre_NSHDestroy
 #undef hypre_NSHSetColVersion
@@ -1709,6 +1718,9 @@
 #undef hypre_SchwarzSetup
 #undef hypre_SchwarzSolve
 #undef hypre_SortedCopyParCSRData
+#undef hypre_StageOneInterp_Options
+#undef hypre_StageTwoInterp_Options
+#undef hypre_Strength_Options
 #undef hypre_alt_insert_new_nodes
 #undef hypre_amsconstructdiscretegradient
 #undef hypre_amscreate

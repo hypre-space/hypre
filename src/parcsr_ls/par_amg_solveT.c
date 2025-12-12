@@ -228,7 +228,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
 
 
-      hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+      hypre_BoomerAMGSetRelResidualNorm(amg_data, relative_resid);
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
 
       if (my_id == 0 && (amg_print_level > 1))

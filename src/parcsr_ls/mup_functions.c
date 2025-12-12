@@ -808,7 +808,7 @@ HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver, HYPRE_Int *type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver solver, void *cum_nnz_AP )
+HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver solver, hypre_double *cum_nnz_AP )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGGetCumNnzAP_pre( precision, solver, cum_nnz_AP );
@@ -1447,7 +1447,7 @@ HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver solver, hypre_long_double cum_nnz_AP )
+HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver solver, hypre_double cum_nnz_AP )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BoomerAMGSetCumNnzAP_pre( precision, solver, cum_nnz_AP );

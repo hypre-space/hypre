@@ -1600,16 +1600,16 @@ HYPRE_BoomerAMGGetConvergeType_pre( HYPRE_Precision precision, HYPRE_Solver solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cum_nnz_AP )
+HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_double *cum_nnz_AP )
 {
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_flt( solver, (hypre_float *)cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_flt( solver, cum_nnz_AP );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_dbl( solver, (hypre_double *)cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_dbl( solver, cum_nnz_AP );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGGetCumNnzAP_long_dbl( solver, (hypre_long_double *)cum_nnz_AP );
+         return HYPRE_BoomerAMGGetCumNnzAP_long_dbl( solver, cum_nnz_AP );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -2878,16 +2878,16 @@ HYPRE_BoomerAMGSetCpointsToKeep_pre( HYPRE_Precision precision, HYPRE_Solver sol
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double cum_nnz_AP )
+HYPRE_BoomerAMGSetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_double cum_nnz_AP )
 {
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_flt( solver, (hypre_float)cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_flt( solver, cum_nnz_AP );
       case HYPRE_REAL_DOUBLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_dbl( solver, (hypre_double)cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_dbl( solver, cum_nnz_AP );
       case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_BoomerAMGSetCumNnzAP_long_dbl( solver, (hypre_long_double)cum_nnz_AP );
+         return HYPRE_BoomerAMGSetCumNnzAP_long_dbl( solver, cum_nnz_AP );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

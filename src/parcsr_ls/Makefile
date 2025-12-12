@@ -96,6 +96,7 @@ FILES =\
  par_amgdd_solve.c\
  par_amgdd_fac_cycle.c\
  par_amgdd_helpers.c\
+ par_amg_setup_options.c\
  par_amg_solve.c\
  par_amg_solveT.c\
  par_fsai.c\
@@ -190,7 +191,12 @@ MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
  mup_pre.c\
- HYPRE_parcsr_ls_mp.c
+ HYPRE_parcsr_ls_mp.c\
+ par_cycle_mp.c\
+ par_mpamg_mp.c\
+ par_mpamg_setup_mp.c\
+ par_mpamg_solve_mp.c\
+ par_stats_mp.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

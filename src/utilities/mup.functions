@@ -31,3 +31,4 @@ HYPRE_SetSpTransUseVendor
 HYPRE_SetUseGpuRand
 HYPRE_Version
 HYPRE_VersionNumber
+hypre_GetSizeOfReal

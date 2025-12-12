@@ -74,6 +74,7 @@ HYPRE_DRIVERS =\
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
+ ijnew_mp.c\
  test_mp.c\
  test_mp_pcg.c\
  test_mp_pcg_3d.c\
@@ -193,6 +194,10 @@ struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ij_mp: ij_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+ijnew_mp: ijnew_mp.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

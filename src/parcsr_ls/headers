@@ -47,6 +47,7 @@ cat ams.h                 >> $INTERNAL_HEADER
 cat par_cheby.h           >> $INTERNAL_HEADER
 cat par_ilu.h             >> $INTERNAL_HEADER
 cat protos.h              >> $INTERNAL_HEADER
+cat protos_mp.h              >> $INTERNAL_HEADER
 
 #../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
 

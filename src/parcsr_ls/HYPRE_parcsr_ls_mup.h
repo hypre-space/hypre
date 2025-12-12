@@ -880,13 +880,13 @@ HYPRE_Int
 HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver, HYPRE_Int *type );
 
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP_flt( HYPRE_Solver solver, hypre_float *cum_nnz_AP );
+HYPRE_BoomerAMGGetCumNnzAP_flt( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNnzAP_dbl( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP_long_dbl( HYPRE_Solver solver, hypre_long_double *cum_nnz_AP );
+HYPRE_BoomerAMGGetCumNnzAP_long_dbl( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver solver, void *cum_nnz_AP );
+HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *cum_num_iterations );
@@ -1519,13 +1519,13 @@ HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index );
 
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP_flt( HYPRE_Solver solver, hypre_float cum_nnz_AP );
+HYPRE_BoomerAMGSetCumNnzAP_flt( HYPRE_Solver solver, hypre_double cum_nnz_AP );
 HYPRE_Int
 HYPRE_BoomerAMGSetCumNnzAP_dbl( HYPRE_Solver solver, hypre_double cum_nnz_AP );
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP_long_dbl( HYPRE_Solver solver, hypre_long_double cum_nnz_AP );
+HYPRE_BoomerAMGSetCumNnzAP_long_dbl( HYPRE_Solver solver, hypre_double cum_nnz_AP );
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver solver, hypre_long_double cum_nnz_AP );
+HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver solver, hypre_double cum_nnz_AP );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetCycleNumSweeps_flt( HYPRE_Solver solver, HYPRE_Int num_sweeps, HYPRE_Int k );
@@ -6150,7 +6150,7 @@ HYPRE_Int
 HYPRE_BoomerAMGGetConvergeType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *type );
 
 HYPRE_Int
-HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cum_nnz_AP );
+HYPRE_BoomerAMGGetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cum_num_iterations );
@@ -6363,7 +6363,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index );
 
 HYPRE_Int
-HYPRE_BoomerAMGSetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double cum_nnz_AP );
+HYPRE_BoomerAMGSetCumNnzAP_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_double cum_nnz_AP );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetCycleNumSweeps_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int num_sweeps, HYPRE_Int k );

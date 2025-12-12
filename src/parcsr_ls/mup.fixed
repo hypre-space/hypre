@@ -355,6 +355,7 @@ hypre_BoomerAMGGetCumNnzAP
 hypre_BoomerAMGGetCumNumIterations
 hypre_BoomerAMGGetCycleName
 hypre_BoomerAMGGetCycleNumSweeps
+hypre_BoomerAMGGetCycleOpCount
 hypre_BoomerAMGGetCycleRelaxType
 hypre_BoomerAMGGetCycleType
 hypre_BoomerAMGGetDebugFlag
@@ -474,6 +475,7 @@ hypre_BoomerAMGSetCoordDim
 hypre_BoomerAMGSetCoordinates
 hypre_BoomerAMGSetCumNnzAP
 hypre_BoomerAMGSetCycleNumSweeps
+hypre_BoomerAMGSetCycleOpCount
 hypre_BoomerAMGSetCycleRelaxType
 hypre_BoomerAMGSetCycleType
 hypre_BoomerAMGSetDebugFlag
@@ -570,11 +572,13 @@ hypre_BoomerAMGSetPrintFileName
 hypre_BoomerAMGSetPrintLevel
 hypre_BoomerAMGSetRAP2
 hypre_BoomerAMGSetRedundant
+hypre_BoomerAMGSetRelResidualNorm
 hypre_BoomerAMGSetRelaxOrder
 hypre_BoomerAMGSetRelaxType
 hypre_BoomerAMGSetRelaxWeight
 hypre_BoomerAMGSetRelaxWt
 hypre_BoomerAMGSetRestriction
+hypre_BoomerAMGSetSCommPkgSwitch
 hypre_BoomerAMGSetSabs
 hypre_BoomerAMGSetSchwarzRlxWeight
 hypre_BoomerAMGSetSchwarzUseNonSymm
@@ -592,6 +596,7 @@ hypre_BoomerAMGSetSym
 hypre_BoomerAMGSetThreshold
 hypre_BoomerAMGSetTol
 hypre_BoomerAMGSetTruncFactor
+hypre_BoomerAMGSetUserRelaxWeight
 hypre_BoomerAMGSetVariant
 hypre_BoomerAMGSetup
 hypre_BoomerAMGSetupStats
@@ -610,6 +615,7 @@ hypre_CSRMatrixExtractDenseRow
 hypre_CSRMatrixNormFro
 hypre_CSRMatrixResNormFro
 hypre_CSRMatrixTrace
+hypre_Coarsen_Options
 hypre_CreateC
 hypre_CreateDinv
 hypre_CreateLambda
@@ -764,10 +770,12 @@ hypre_ILUSortOffdColmap
 hypre_ILUWriteSolverParams
 hypre_IndepSetGreedy
 hypre_IndepSetGreedyS
+hypre_Interp_Options
 hypre_IntersectTwoArrays
 hypre_IntersectTwoBigArrays
 hypre_LINPACKcgpthy
 hypre_LINPACKcgtql1
+hypre_Level_L1Norms
 hypre_MGRAddVectorP
 hypre_MGRAddVectorR
 hypre_MGRApproximateInverse
@@ -874,6 +882,7 @@ hypre_MPSchwarzCFFWSolve
 hypre_MPSchwarzCFSolve
 hypre_MPSchwarzFWSolve
 hypre_MPSchwarzSolve
+hypre_MPassInterp_Options
 hypre_NSHCreate
 hypre_NSHDestroy
 hypre_NSHSetColVersion
@@ -1013,6 +1022,9 @@ hypre_SchwarzSetVariant
 hypre_SchwarzSetup
 hypre_SchwarzSolve
 hypre_SortedCopyParCSRData
+hypre_StageOneInterp_Options
+hypre_StageTwoInterp_Options
+hypre_Strength_Options
 hypre_alt_insert_new_nodes
 hypre_amsconstructdiscretegradient
 hypre_amscreate

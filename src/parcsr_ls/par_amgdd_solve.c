@@ -320,7 +320,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
             relative_resid = resid_nrm / resid_nrm_init;
          }
 
-         hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+         hypre_BoomerAMGSetRelResidualNorm(amg_data,relative_resid);
       }
 
       if (myid == 0 && amg_print_level > 1)

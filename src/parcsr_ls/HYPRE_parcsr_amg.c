@@ -2247,7 +2247,7 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver  solver,
-                            HYPRE_Real    cum_nnz_AP )
+                            hypre_double  cum_nnz_AP )
 {
    return ( hypre_BoomerAMGSetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }
@@ -2258,7 +2258,7 @@ HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
-                            HYPRE_Real   *cum_nnz_AP )
+                            hypre_double *cum_nnz_AP )
 {
    return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }

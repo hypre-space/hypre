@@ -608,6 +608,24 @@ HYPRE_VersionNumber_pre( HYPRE_Precision precision, HYPRE_Int *major_ptr, HYPRE_
 }
 
 
+/*--------------------------------------------------------------------------*/
+
+size_t
+hypre_GetSizeOfReal_pre( HYPRE_Precision precision )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_GetSizeOfReal_flt( );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_GetSizeOfReal_dbl( );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_GetSizeOfReal_long_dbl( );
+      default:
+         { size_t value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
 
 #endif
 

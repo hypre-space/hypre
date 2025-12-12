@@ -279,7 +279,7 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(S) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(S) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A);
 
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
@@ -371,7 +371,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix,
    {
       HYPRE_Real total_num_nonzeros;
       HYPRE_Real local_num_nonzeros;
-      local_num_nonzeros = (HYPRE_Real) ( hypre_CSRMatrixNumNonzeros(diag) +
+      local_num_nonzeros = (hypre_double) ( hypre_CSRMatrixNumNonzeros(diag) +
                                           hypre_CSRMatrixNumNonzeros(offd) );
 
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,

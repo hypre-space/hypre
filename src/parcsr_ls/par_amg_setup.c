@@ -241,7 +241,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    char            nvtx_name[1024];
 
-   HYPRE_Real cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
+   hypre_double cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("AMGsetup");

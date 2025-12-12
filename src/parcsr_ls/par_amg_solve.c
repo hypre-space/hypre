@@ -54,14 +54,14 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int           num_vectors, num_rows_fine;
    HYPRE_Real          alpha = 1.0;
    HYPRE_Real          beta = -1.0;
-   HYPRE_Real          cycle_op_count;
-   HYPRE_Real          total_coeffs;
-   HYPRE_Real          total_variables;
-   HYPRE_Real         *num_coeffs;
-   HYPRE_Real         *num_variables;
-   HYPRE_Real          cycle_cmplxty = 0.0;
-   HYPRE_Real          operat_cmplxty;
-   HYPRE_Real          grid_cmplxty;
+   hypre_double        cycle_op_count;
+   hypre_double        total_coeffs;
+   hypre_double        total_variables;
+   hypre_double       *num_coeffs;
+   hypre_double       *num_variables;
+   hypre_double        cycle_cmplxty = 0.0;
+   hypre_double        operat_cmplxty;
+   hypre_double        grid_cmplxty;
    HYPRE_Real          conv_factor = 0.0;
    HYPRE_Real          resid_nrm = 1.0;
    HYPRE_Real          resid_nrm_init = 0.0;
@@ -319,7 +319,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             relative_resid = resid_nrm / resid_nrm_init;
          }
 
-         hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+         hypre_BoomerAMGSetRelResidualNorm(amg_data,relative_resid);
       }
 
       ++cycle_count;
@@ -357,28 +357,28 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (amg_print_level > 1)
    {
-      num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
-      num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
+      num_coeffs       = hypre_CTAlloc(hypre_double, num_levels, HYPRE_MEMORY_HOST);
+      num_variables    = hypre_CTAlloc(hypre_double, num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
-      num_variables[0] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A);
+      num_variables[0] = (hypre_double) hypre_ParCSRMatrixGlobalNumRows(A);
 
       if (block_mode)
       {
          for (j = 1; j < num_levels; j++)
          {
-            num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
-            num_variables[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
+            num_coeffs[j]    = (hypre_double) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+            num_variables[j] = (hypre_double) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
          }
-         num_coeffs[0]    = (HYPRE_Real) hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
-         num_variables[0] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+         num_coeffs[0]    = (hypre_double) hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+         num_variables[0] = (hypre_double) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
 
       }
       else
       {
          for (j = 1; j < num_levels; j++)
          {
-            num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-            num_variables[j] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+            num_coeffs[j]    = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+            num_variables[j] = (hypre_double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
          }
       }
 

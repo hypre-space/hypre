@@ -2441,6 +2441,7 @@ char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+size_t hypre_GetSizeOfReal(void);
 
 /* handle.c */
 HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );

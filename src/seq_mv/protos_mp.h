@@ -27,4 +27,25 @@ HYPRE_Int
 hypre_SeqVectorConvert_mp ( hypre_Vector *v,
                             HYPRE_Precision new_precision);
 
+HYPRE_Int
+hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B);
+
+hypre_CSRMatrix*
+hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision );
+
+HYPRE_Int
+hypre_RealArrayCopyHost_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+
+HYPRE_Int
+hypre_RealArrayCopy_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocation location_x, HYPRE_Precision precision_y, void *y, HYPRE_MemoryLocation location_y, HYPRE_Int n);
+
+void *
+hypre_RealArrayClone_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocation location_x, HYPRE_Precision new_precision, HYPRE_MemoryLocation new_location, HYPRE_Int n);
+
+HYPRE_Int
+hypre_RealArrayAxpynHost_mp(HYPRE_Precision precision_x, hypre_long_double alpha, void *x, HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+
+HYPRE_Int
+hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision precision_y, void *y, HYPRE_MemoryLocation location, HYPRE_Int n, hypre_long_double alpha);
+
 #endif

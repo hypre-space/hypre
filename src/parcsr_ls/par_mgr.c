@@ -575,7 +575,7 @@ hypre_MGRCreateFrelaxVcycleData( void )
    hypre_ParAMGDataNumLevels(vdata) = 0;
    hypre_ParAMGDataMaxLevels(vdata) = 10;
    hypre_ParAMGDataNumFunctions(vdata) = 1;
-   hypre_ParAMGDataSCommPkgSwitch(vdata) = 1.0;
+   hypre_BoomerAMGSetSCommPkgSwitch(vdata,1.0);
    hypre_ParAMGDataRelaxOrder(vdata) = 1;
    hypre_ParAMGDataMaxCoarseSize(vdata) = 9;
    hypre_ParAMGDataMinCoarseSize(vdata) = 0;
