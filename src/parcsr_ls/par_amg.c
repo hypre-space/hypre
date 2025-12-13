@@ -1553,6 +1553,40 @@ hypre_BoomerAMGGetTruncFactor( void     *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGGetAggTruncFactor( void     *data,
+                               HYPRE_Real *  agg_trunc_factor )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *agg_trunc_factor = *(amg_data -> agg_trunc_factor);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetAggP12TruncFactor( void     *data,
+                               HYPRE_Real *  trunc_factor )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *trunc_factor = *(amg_data -> agg_P12_trunc_factor);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetPMaxElmts( void     *data,
                              HYPRE_Int    P_max_elmts )
 {

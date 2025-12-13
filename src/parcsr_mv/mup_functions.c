@@ -386,10 +386,109 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_Big
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixDestroy_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_ParCSRMatrixInitialize_v2_pre( precision, matrix, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvec( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixMatvec_pre( precision, alpha, A, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *b, hypre_ParVector *y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixMatvecOutOfPlace_pre( precision, alpha, A, x, beta, b, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixMatvecT_pre( precision, alpha, A, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorCopy( hypre_ParVector *x, hypre_ParVector *y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorCopy_pre( precision, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorCreate_pre( precision, comm, global_size, partitioning_in );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorDestroy( hypre_ParVector *vector )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorDestroy_pre( precision, vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorInitialize_v2_pre( precision, vector, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_ParVectorInnerProd( hypre_ParVector *x, hypre_ParVector *y )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorInnerProd_pre( precision, x, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector, HYPRE_Int local_size )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorSetLocalSize_pre( precision, vector, local_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorSetZeros_pre( precision, v );
 }
 
 

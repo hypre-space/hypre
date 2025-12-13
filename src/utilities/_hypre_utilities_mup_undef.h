@@ -46,6 +46,10 @@
 #undef HYPRE_Version
 #undef HYPRE_VersionNumber
 #undef hypre_GetSizeOfReal
+#undef hypre_IntArrayCreate
+#undef hypre_IntArrayDestroy
+#undef hypre_IntArrayInitialize
+#undef hypre_IntArraySetConstantValues
 #undef hypre_BeginTiming_fcn
 #undef hypre_BigBinarySearch
 #undef hypre_BigLowerBound
@@ -111,9 +115,6 @@
 #undef hypre_IntArrayCopy
 #undef hypre_IntArrayCount
 #undef hypre_IntArrayCountHost
-#undef hypre_IntArrayCreate
-#undef hypre_IntArrayDestroy
-#undef hypre_IntArrayInitialize
 #undef hypre_IntArrayInitialize_v2
 #undef hypre_IntArrayInverseMapping
 #undef hypre_IntArrayInverseMappingHost
@@ -123,7 +124,6 @@
 #undef hypre_IntArrayPrint
 #undef hypre_IntArrayRead
 #undef hypre_IntArraySeparateByValue
-#undef hypre_IntArraySetConstantValues
 #undef hypre_IntArraySetConstantValuesHost
 #undef hypre_IntArraySetInterleavedValues
 #undef hypre_IntArraySetInterleavedValuesHost

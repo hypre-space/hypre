@@ -255,7 +255,6 @@ hypre_BoomerAMGBuildRestrNeumannAIR
 hypre_BoomerAMGBuildRestrNeumannAIRHost
 hypre_BoomerAMGBuildStdInterp
 hypre_BoomerAMGCGRelaxWt
-hypre_BoomerAMGCoarseParms
 hypre_BoomerAMGCoarseParmsHost
 hypre_BoomerAMGCoarsen
 hypre_BoomerAMGCoarsenCGC
@@ -268,8 +267,6 @@ hypre_BoomerAMGCoarsenInterpVectors
 hypre_BoomerAMGCoarsenPMIS
 hypre_BoomerAMGCoarsenPMISHost
 hypre_BoomerAMGCoarsenRuge
-hypre_BoomerAMGCorrectCFMarker
-hypre_BoomerAMGCorrectCFMarker2
 hypre_BoomerAMGCorrectCFMarker2Host
 hypre_BoomerAMGCorrectCFMarkerHost
 hypre_BoomerAMGCreate
@@ -283,7 +280,6 @@ hypre_BoomerAMGCreateSHost
 hypre_BoomerAMGCreateSabs
 hypre_BoomerAMGCreateSabsHost
 hypre_BoomerAMGCreateScalarCF
-hypre_BoomerAMGCreateScalarCFS
 hypre_BoomerAMGCreateSmoothDirs
 hypre_BoomerAMGCreateSmoothVecs
 hypre_BoomerAMGCycle
@@ -374,7 +370,6 @@ hypre_BoomerAMGGetLogging
 hypre_BoomerAMGGetMaxCoarseSize
 hypre_BoomerAMGGetMaxIter
 hypre_BoomerAMGGetMaxLevels
-hypre_BoomerAMGGetMaxRowSum
 hypre_BoomerAMGGetMeasureType
 hypre_BoomerAMGGetMinCoarseSize
 hypre_BoomerAMGGetMinIter
@@ -401,10 +396,8 @@ hypre_BoomerAMGGetSimple
 hypre_BoomerAMGGetSmoothNumLevels
 hypre_BoomerAMGGetSmoothNumSweeps
 hypre_BoomerAMGGetSmoothType
-hypre_BoomerAMGGetStrongThreshold
 hypre_BoomerAMGGetStrongThresholdR
 hypre_BoomerAMGGetTol
-hypre_BoomerAMGGetTruncFactor
 hypre_BoomerAMGGetVariant
 hypre_BoomerAMGIndepHMIS
 hypre_BoomerAMGIndepHMISa
@@ -420,7 +413,6 @@ hypre_BoomerAMGJacobiInterp_1
 hypre_BoomerAMGNormalizeVecs
 hypre_BoomerAMGPrintGeneralInfo
 hypre_BoomerAMGRefineInterp
-hypre_BoomerAMGRelax
 hypre_BoomerAMGRelax0WeightedJacobi
 hypre_BoomerAMGRelax10TopoOrderedGaussSeidel
 hypre_BoomerAMGRelax11TwoStageGaussSeidel
@@ -440,7 +432,6 @@ hypre_BoomerAMGRelax8HybridL1SSOR
 hypre_BoomerAMGRelaxComputeL1Norms
 hypre_BoomerAMGRelaxHybridGaussSeidel_core
 hypre_BoomerAMGRelaxHybridSOR
-hypre_BoomerAMGRelaxIF
 hypre_BoomerAMGRelaxKaczmarz
 hypre_BoomerAMGRelaxT
 hypre_BoomerAMGRelaxTwoStageGaussSeidelHost
@@ -572,7 +563,6 @@ hypre_BoomerAMGSetPrintFileName
 hypre_BoomerAMGSetPrintLevel
 hypre_BoomerAMGSetRAP2
 hypre_BoomerAMGSetRedundant
-hypre_BoomerAMGSetRelResidualNorm
 hypre_BoomerAMGSetRelaxOrder
 hypre_BoomerAMGSetRelaxType
 hypre_BoomerAMGSetRelaxWeight
@@ -615,7 +605,6 @@ hypre_CSRMatrixExtractDenseRow
 hypre_CSRMatrixNormFro
 hypre_CSRMatrixResNormFro
 hypre_CSRMatrixTrace
-hypre_Coarsen_Options
 hypre_CreateC
 hypre_CreateDinv
 hypre_CreateLambda
@@ -665,7 +654,6 @@ hypre_FSAISetupOMPDyn
 hypre_FSAISolve
 hypre_FindKapGrad
 hypre_GaussElimSetup
-hypre_GaussElimSolve
 hypre_GenerateCoordinates
 hypre_GenerateMultiPi
 hypre_GenerateMultipassPi
@@ -770,7 +758,6 @@ hypre_ILUSortOffdColmap
 hypre_ILUWriteSolverParams
 hypre_IndepSetGreedy
 hypre_IndepSetGreedyS
-hypre_Interp_Options
 hypre_IntersectTwoArrays
 hypre_IntersectTwoBigArrays
 hypre_LINPACKcgpthy
@@ -882,7 +869,6 @@ hypre_MPSchwarzCFFWSolve
 hypre_MPSchwarzCFSolve
 hypre_MPSchwarzFWSolve
 hypre_MPSchwarzSolve
-hypre_MPassInterp_Options
 hypre_NSHCreate
 hypre_NSHDestroy
 hypre_NSHSetColVersion
@@ -1022,9 +1008,6 @@ hypre_SchwarzSetVariant
 hypre_SchwarzSetup
 hypre_SchwarzSolve
 hypre_SortedCopyParCSRData
-hypre_StageOneInterp_Options
-hypre_StageTwoInterp_Options
-hypre_Strength_Options
 hypre_alt_insert_new_nodes
 hypre_amsconstructdiscretegradient
 hypre_amscreate

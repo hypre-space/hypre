@@ -32,3 +32,7 @@ HYPRE_SetUseGpuRand
 HYPRE_Version
 HYPRE_VersionNumber
 hypre_GetSizeOfReal
+hypre_IntArrayCreate
+hypre_IntArrayDestroy
+hypre_IntArrayInitialize
+hypre_IntArraySetConstantValues

@@ -326,6 +326,8 @@ HYPRE_Int hypre_BoomerAMGSetMaxRowSum ( void *data, HYPRE_Real max_row_sum );
 HYPRE_Int hypre_BoomerAMGGetMaxRowSum ( void *data, HYPRE_Real *max_row_sum );
 HYPRE_Int hypre_BoomerAMGSetTruncFactor ( void *data, HYPRE_Real trunc_factor );
 HYPRE_Int hypre_BoomerAMGGetTruncFactor ( void *data, HYPRE_Real *trunc_factor );
+HYPRE_Int hypre_BoomerAMGGetAggTruncFactor ( void *data, HYPRE_Real *trunc_factor );
+HYPRE_Int hypre_BoomerAMGGetAggP12TruncFactor ( void *data, HYPRE_Real *trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetPMaxElmts ( void *data, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_BoomerAMGGetPMaxElmts ( void *data, HYPRE_Int *P_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetJacobiTruncThreshold ( void *data, HYPRE_Real jacobi_trunc_threshold );

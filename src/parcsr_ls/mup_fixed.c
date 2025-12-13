@@ -2009,14 +2009,6 @@ hypre_BoomerAMGCGRelaxWt( void *amg_vdata, HYPRE_Int level, HYPRE_Int num_cg_swe
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCoarseParms( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker, hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCoarseParms)( comm, local_num_variables, num_functions, dof_func, CF_marker, coarse_dof_func_ptr, coarse_pnts_global );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGCoarseParmsHost( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker, hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCoarseParmsHost)( comm, local_num_variables, num_functions, dof_func, CF_marker, coarse_dof_func_ptr, coarse_pnts_global );
@@ -2113,22 +2105,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker( hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCorrectCFMarker)( CF_marker, new_CF_marker );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGCorrectCFMarker2( hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCorrectCFMarker2)( CF_marker, new_CF_marker );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker2Host( hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCorrectCFMarker2Host)( CF_marker, new_CF_marker );
@@ -2220,14 +2196,6 @@ HYPRE_Int
 hypre_BoomerAMGCreateScalarCF( HYPRE_Int *CFN_marker, HYPRE_Int num_functions, HYPRE_Int num_nodes, hypre_IntArray **dof_func_ptr, hypre_IntArray **CF_marker_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCreateScalarCF)( CFN_marker, num_functions, num_nodes, dof_func_ptr, CF_marker_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix *SN, hypre_ParCSRMatrix *A, HYPRE_Int *CFN_marker, HYPRE_Int num_functions, HYPRE_Int nodal, HYPRE_Int keep_same_sign, hypre_IntArray **dof_func_ptr, hypre_IntArray **CF_marker_ptr, hypre_ParCSRMatrix **S_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGCreateScalarCFS)( SN, A, CFN_marker, num_functions, nodal, keep_same_sign, dof_func_ptr, CF_marker_ptr, S_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2865,14 +2833,6 @@ hypre_BoomerAMGGetMaxLevels( void *data, HYPRE_Int *max_levels )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGGetMaxRowSum( void *data, HYPRE_Real *max_row_sum )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetMaxRowSum)( data, max_row_sum );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGGetMeasureType( void *data, HYPRE_Int *measure_type )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetMeasureType)( data, measure_type );
@@ -3081,14 +3041,6 @@ hypre_BoomerAMGGetSmoothType( void *data, HYPRE_Int *smooth_type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGGetStrongThreshold( void *data, HYPRE_Real *strong_threshold )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetStrongThreshold)( data, strong_threshold );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGGetStrongThresholdR( void *data, HYPRE_Real *strong_threshold )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetStrongThresholdR)( data, strong_threshold );
@@ -3100,14 +3052,6 @@ HYPRE_Int
 hypre_BoomerAMGGetTol( void *data, HYPRE_Real *tol )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetTol)( data, tol );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGGetTruncFactor( void *data, HYPRE_Real *trunc_factor )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetTruncFactor)( data, trunc_factor );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3228,14 +3172,6 @@ HYPRE_Int
 hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_BigInt *num_cpts_global, HYPRE_Int *nf, HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int level )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGRefineInterp)( A, P, num_cpts_global, nf, dof_func, CF_marker, level );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_type, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGRelax)( A, f, cf_marker, relax_type, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3388,14 +3324,6 @@ HYPRE_Int
 hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int direction, HYPRE_Int symm, HYPRE_Int skip_diag, HYPRE_Int force_seq )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGRelaxHybridSOR)( A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp, direction, symm, skip_diag, force_seq );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_type, HYPRE_Int relax_order, HYPRE_Int cycle_type, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGRelaxIF)( A, f, cf_marker, relax_type, relax_order, cycle_type, relax_weight, omega, l1_norms, u, Vtemp, Ztemp );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -4433,14 +4361,6 @@ hypre_BoomerAMGSetRedundant( void *data, HYPRE_Int redundant )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetRelResidualNorm( void *data, HYPRE_Real rel_resid_norm )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetRelResidualNorm)( data, rel_resid_norm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGSetRelaxOrder( void *data, HYPRE_Int relax_order )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetRelaxOrder)( data, relax_order );
@@ -4476,6 +4396,14 @@ HYPRE_Int
 hypre_BoomerAMGSetRestriction( void *data, HYPRE_Int restr_par )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetRestriction)( data, restr_par );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetSCommPkgSwitch( void *data, HYPRE_Real S_commpkg_switch )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetSCommPkgSwitch)( data, S_commpkg_switch );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -4764,14 +4692,6 @@ HYPRE_Int
 hypre_CSRMatrixTrace( hypre_CSRMatrix *A, HYPRE_Real *trace_io )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTrace)( A, trace_io );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_Coarsen_Options( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int level, HYPRE_Int debug_flag, HYPRE_Int coarsen_type, HYPRE_Int measure_type, HYPRE_Int coarsen_cut_factor, HYPRE_Int agg_num_levels, HYPRE_Int num_paths, HYPRE_Int local_num_vars, hypre_IntArray *dof_func, HYPRE_BigInt *coarse_pnts_global, hypre_IntArray **CF2_marker_ptr, hypre_IntArray **CF_marker_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_Coarsen_Options)( S, A, level, debug_flag, coarsen_type, measure_type, coarsen_cut_factor, agg_num_levels, num_paths, local_num_vars, dof_func, coarse_pnts_global, CF2_marker_ptr, CF_marker_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -5148,14 +5068,6 @@ HYPRE_Int
 hypre_GaussElimSetup( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GaussElimSetup)( amg_data, level, solver_type );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_GaussElimSolve( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GaussElimSolve)( amg_data, level, solver_type );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -5977,14 +5889,6 @@ hypre_IndepSetGreedyS( HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int *c
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_Interp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global, HYPRE_Int *dof_func_data, HYPRE_Int interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int P_max_elmts, HYPRE_Real trunc_factor, HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_Interp_Options)( A, S, CF_marker, coarse_pnts_global, dof_func_data, interp_type, num_functions, debug_flag, P_max_elmts, trunc_factor, sep_weight, P_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_IntersectTwoArrays( HYPRE_Int *x, HYPRE_Real *x_data, HYPRE_Int x_length, HYPRE_Int *y, HYPRE_Int y_length, HYPRE_Int *z, HYPRE_Real *output_x_data, HYPRE_Int *intersect_length )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_IntersectTwoArrays)( x, x_data, x_length, y, y_length, z, output_x_data, intersect_length );
@@ -6740,14 +6644,6 @@ HYPRE_Int
 hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A, hypre_Vector *rhs_vector, hypre_CSRMatrix *domain_structure, hypre_ParVector *par_x, HYPRE_Real relax_wt, hypre_Vector *aux_vector, HYPRE_Int *pivots, HYPRE_Int use_nonsymm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPSchwarzSolve)( par_A, rhs_vector, domain_structure, par_x, relax_wt, aux_vector, pivots, use_nonsymm );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_MPassInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, hypre_IntArray *dof_func, HYPRE_BigInt *coarse_pnts_global, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int agg_P_max_elmts, HYPRE_Real agg_trunc_factor, HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPassInterp_Options)( A, S, CF_marker, dof_func, coarse_pnts_global, agg_interp_type, num_functions, debug_flag, agg_P_max_elmts, agg_trunc_factor, sep_weight, P_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -7828,30 +7724,6 @@ HYPRE_Int
 hypre_SortedCopyParCSRData( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SortedCopyParCSRData)( A, B );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StageOneInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int agg_P12_max_elmts, HYPRE_Real agg_P12_trunc_factor, hypre_ParCSRMatrix **P1_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StageOneInterp_Options)( A, S, CF_marker, coarse_pnts_global1, dof_func_data, agg_interp_type, num_functions, debug_flag, agg_P12_max_elmts, agg_P12_trunc_factor, P1_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StageTwoInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global, HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int sep_weight, HYPRE_Int agg_P_max_elmts, HYPRE_Int agg_P12_max_elmts, HYPRE_Real agg_trunc_factor, HYPRE_Real agg_P12_trunc_factor, hypre_ParCSRMatrix **P_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StageTwoInterp_Options)( A, P1, S, CF_marker, coarse_pnts_global, coarse_pnts_global1, dof_func_data, agg_interp_type, num_functions, debug_flag, sep_weight, agg_P_max_elmts, agg_P12_max_elmts, agg_trunc_factor, agg_P12_trunc_factor, P_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_Strength_Options( hypre_ParCSRMatrix *A, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int nodal, HYPRE_Int nodal_diag, HYPRE_Int useSabs, HYPRE_Int *dof_func_data, hypre_ParCSRMatrix **S_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_Strength_Options)( A, strong_threshold, max_row_sum, num_functions, nodal, nodal_diag, useSabs, dof_func_data, S_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

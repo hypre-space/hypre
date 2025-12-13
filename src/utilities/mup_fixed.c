@@ -536,30 +536,6 @@ hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value, HYPRE_Int *num_valu
 
 /*--------------------------------------------------------------------------*/
 
-hypre_IntArray*
-hypre_IntArrayCreate( HYPRE_Int size )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArrayCreate)( size );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_IntArrayDestroy( hypre_IntArray *array )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArrayDestroy)( array );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_IntArrayInitialize( hypre_IntArray *array )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArrayInitialize)( array );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location )
 {
@@ -620,14 +596,6 @@ HYPRE_Int
 hypre_IntArraySeparateByValue( HYPRE_Int num_values, HYPRE_Int *values, HYPRE_Int *sizes, hypre_IntArray *v, hypre_IntArrayArray **w_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArraySeparateByValue)( num_values, values, sizes, v, w_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArraySetConstantValues)( v, value );
 }
 
 /*--------------------------------------------------------------------------*/

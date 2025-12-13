@@ -713,14 +713,6 @@ hypre_ParCSRMatrixCreateFromParVector( hypre_ParVector *b, HYPRE_BigInt global_n
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixDestroy)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld, hypre_ParVector *par_rd )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixDiagScale)( par_A, par_ld, par_rd );
@@ -908,30 +900,6 @@ HYPRE_Int
 hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix *A )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixLocalTranspose)( A );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvec( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvec)( alpha, A, x, beta, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *b, hypre_ParVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvecOutOfPlace)( alpha, A, x, beta, b, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvecT( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvecT)( alpha, A, x, beta, y );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1273,33 +1241,9 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorCopy( hypre_ParVector *x, hypre_ParVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCopy)( x, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParVector *
-hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCreate)( comm, global_size, partitioning_in );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCreateAssumedPartition)( vector );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParVectorDestroy( hypre_ParVector *vector )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorDestroy)( vector );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1340,22 +1284,6 @@ HYPRE_Int
 hypre_ParVectorInitializeShell( hypre_ParVector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorInitializeShell)( vector );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorInitialize_v2)( vector, memory_location );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-hypre_ParVectorInnerProd( hypre_ParVector *x, hypre_ParVector *y )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorInnerProd)( x, y );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1537,14 +1465,6 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector, HYPRE_Int owns_data )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorSetLocalSize( hypre_ParVector *vector, HYPRE_Int local_size )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorSetLocalSize)( vector, local_size );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParVectorSetNumTags( hypre_ParVector *vector, HYPRE_Int num_tags )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorSetNumTags)( vector, num_tags );
@@ -1580,14 +1500,6 @@ HYPRE_Int
 hypre_ParVectorSetValuesTagged( hypre_ParVector *vector, HYPRE_Complex *values )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorSetValuesTagged)( vector, values );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParVectorSetZeros( hypre_ParVector *v )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorSetZeros)( v );
 }
 
 /*--------------------------------------------------------------------------*/

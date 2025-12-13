@@ -5801,6 +5801,177 @@ HYPRE_TempParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
 }
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGCoarseParms( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker, hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGCoarseParms_pre( precision, comm, local_num_variables, num_functions, dof_func, CF_marker, coarse_dof_func_ptr, coarse_pnts_global );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker( hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGCorrectCFMarker_pre( precision, CF_marker, new_CF_marker );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGCorrectCFMarker2( hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGCorrectCFMarker2_pre( precision, CF_marker, new_CF_marker );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix *SN, hypre_ParCSRMatrix *A, HYPRE_Int *CFN_marker, HYPRE_Int num_functions, HYPRE_Int nodal, HYPRE_Int keep_same_sign, hypre_IntArray **dof_func_ptr, hypre_IntArray **CF_marker_ptr, hypre_ParCSRMatrix **S_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGCreateScalarCFS_pre( precision, SN, A, CFN_marker, num_functions, nodal, keep_same_sign, dof_func_ptr, CF_marker_ptr, S_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetAggP12TruncFactor( void *data, void *trunc_factor )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGGetAggP12TruncFactor_pre( precision, data, trunc_factor );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetAggTruncFactor( void *data, void *trunc_factor )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGGetAggTruncFactor_pre( precision, data, trunc_factor );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetMaxRowSum( void *data, void *max_row_sum )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGGetMaxRowSum_pre( precision, data, max_row_sum );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetStrongThreshold( void *data, void *strong_threshold )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGGetStrongThreshold_pre( precision, data, strong_threshold );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetTruncFactor( void *data, void *trunc_factor )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGGetTruncFactor_pre( precision, data, trunc_factor );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_type, HYPRE_Int relax_points, hypre_long_double relax_weight, hypre_long_double omega, void *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGRelax_pre( precision, A, f, cf_marker, relax_type, relax_points, relax_weight, omega, l1_norms, u, Vtemp, Ztemp );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_type, HYPRE_Int relax_order, HYPRE_Int cycle_type, hypre_long_double relax_weight, hypre_long_double omega, void *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGRelaxIF_pre( precision, A, f, cf_marker, relax_type, relax_order, cycle_type, relax_weight, omega, l1_norms, u, Vtemp, Ztemp );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetRelResidualNorm( void *data, hypre_long_double rel_resid_norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGSetRelResidualNorm_pre( precision, data, rel_resid_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Coarsen_Options( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int level, HYPRE_Int debug_flag, HYPRE_Int coarsen_type, HYPRE_Int measure_type, HYPRE_Int coarsen_cut_factor, HYPRE_Int agg_num_levels, HYPRE_Int num_paths, HYPRE_Int local_num_vars, hypre_IntArray *dof_func, HYPRE_BigInt *coarse_pnts_global, hypre_IntArray **CF2_marker_ptr, hypre_IntArray **CF_marker_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_Coarsen_Options_pre( precision, S, A, level, debug_flag, coarsen_type, measure_type, coarsen_cut_factor, agg_num_levels, num_paths, local_num_vars, dof_func, coarse_pnts_global, CF2_marker_ptr, CF_marker_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GaussElimSolve( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_GaussElimSolve_pre( precision, amg_data, level, solver_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Interp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global, HYPRE_Int *dof_func_data, HYPRE_Int interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int P_max_elmts, hypre_long_double trunc_factor, HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_Interp_Options_pre( precision, A, S, CF_marker, coarse_pnts_global, dof_func_data, interp_type, num_functions, debug_flag, P_max_elmts, trunc_factor, sep_weight, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MPassInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, hypre_IntArray *dof_func, HYPRE_BigInt *coarse_pnts_global, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int agg_P_max_elmts, hypre_long_double agg_trunc_factor, HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_MPassInterp_Options_pre( precision, A, S, CF_marker, dof_func, coarse_pnts_global, agg_interp_type, num_functions, debug_flag, agg_P_max_elmts, agg_trunc_factor, sep_weight, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StageOneInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int agg_P12_max_elmts, hypre_long_double agg_P12_trunc_factor, hypre_ParCSRMatrix **P1_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_StageOneInterp_Options_pre( precision, A, S, CF_marker, coarse_pnts_global1, dof_func_data, agg_interp_type, num_functions, debug_flag, agg_P12_max_elmts, agg_P12_trunc_factor, P1_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StageTwoInterp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1, hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global, HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data, HYPRE_Int agg_interp_type, HYPRE_Int num_functions, HYPRE_Int debug_flag, HYPRE_Int sep_weight, HYPRE_Int agg_P_max_elmts, HYPRE_Int agg_P12_max_elmts, hypre_long_double agg_trunc_factor, hypre_long_double agg_P12_trunc_factor, hypre_ParCSRMatrix **P_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_StageTwoInterp_Options_pre( precision, A, P1, S, CF_marker, coarse_pnts_global, coarse_pnts_global1, dof_func_data, agg_interp_type, num_functions, debug_flag, sep_weight, agg_P_max_elmts, agg_P12_max_elmts, agg_trunc_factor, agg_P12_trunc_factor, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Strength_Options( hypre_ParCSRMatrix *A, hypre_long_double strong_threshold, hypre_long_double max_row_sum, HYPRE_Int num_functions, HYPRE_Int nodal, HYPRE_Int nodal_diag, HYPRE_Int useSabs, HYPRE_Int *dof_func_data, hypre_ParCSRMatrix **S_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_Strength_Options_pre( precision, A, strong_threshold, max_row_sum, num_functions, nodal, nodal_diag, useSabs, dof_func_data, S_ptr );
+}
+
 
 #endif
 

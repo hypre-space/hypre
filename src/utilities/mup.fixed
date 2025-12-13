@@ -63,9 +63,6 @@ hypre_IntArrayCloneDeep_v2
 hypre_IntArrayCopy
 hypre_IntArrayCount
 hypre_IntArrayCountHost
-hypre_IntArrayCreate
-hypre_IntArrayDestroy
-hypre_IntArrayInitialize
 hypre_IntArrayInitialize_v2
 hypre_IntArrayInverseMapping
 hypre_IntArrayInverseMappingHost
@@ -75,7 +72,6 @@ hypre_IntArrayNegate
 hypre_IntArrayPrint
 hypre_IntArrayRead
 hypre_IntArraySeparateByValue
-hypre_IntArraySetConstantValues
 hypre_IntArraySetConstantValuesHost
 hypre_IntArraySetInterleavedValues
 hypre_IntArraySetInterleavedValuesHost

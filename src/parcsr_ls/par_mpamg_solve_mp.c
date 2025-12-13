@@ -149,71 +149,21 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    {
       if ( amg_logging > 1 )
       {
-         if (level_precision == HYPRE_REAL_DOUBLE)
+         hypre_ParVectorCopy_pre(level_precision, F_array[0], Residual);
+         if (tol > 0)
          {
-            hypre_ParVectorCopy_dbl(F_array[0], Residual);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, Residual);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
+            hypre_ParCSRMatrixMatvec_pre(level_precision, alpha, A_array[0], U_array[0], beta, Residual);
          }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
-         {
-            hypre_ParVectorCopy_flt(F_array[0], Residual);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, Residual);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_flt( Residual, Residual ));
-         }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_ParVectorCopy_long_dbl(F_array[0], Residual);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_long_dbl((HYPRE_Real) alpha, A_array[0], U_array[0], (hypre_long_double) beta, Residual);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
-         }
-         else
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_pre( level_precision, Residual, Residual ));
       }
       else
       {
-         if (level_precision == HYPRE_REAL_DOUBLE)
+         hypre_ParVectorCopy_pre(level_precision, F_array[0], Vtemp_dbl);
+         if (tol > 0)
          {
-            hypre_ParVectorCopy_dbl(F_array[0], Vtemp_dbl);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, Vtemp_dbl);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_dbl( Vtemp_dbl, Vtemp_dbl ));
+            hypre_ParCSRMatrixMatvec_pre(level_precision, alpha, A_array[0], U_array[0], beta, Vtemp_dbl);
          }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
-         {
-            hypre_ParVectorCopy_flt(F_array[0], Vtemp_flt);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, Vtemp_flt);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_flt( Vtemp_flt, Vtemp_flt ));
-         }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_ParVectorCopy_long_dbl(F_array[0], Vtemp_long_dbl);
-            if (tol > 0)
-            {
-               hypre_ParCSRMatrixMatvec_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, Vtemp_long_dbl);
-            }
-            resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_long_dbl( Vtemp_long_dbl, Vtemp_long_dbl ));
-         }
-         else
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_pre( level_precision, Vtemp_dbl, Vtemp_dbl ));
       }
 
       /* Since it does not diminish performance, attempt to return an error flag
@@ -246,22 +196,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
       /* r0 */
       resid_nrm_init = resid_nrm;
 
-      if (level_precision == HYPRE_REAL_DOUBLE)
-      {
-         rhs_norm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_dbl(f, f));
-      }
-      else if (level_precision == HYPRE_REAL_SINGLE)
-      {
-         rhs_norm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_flt(f, f));
-      }
-      else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-      {
-         rhs_norm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_long_dbl(f, f));
-      }
-      else
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      rhs_norm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_pre(level_precision, f, f));
       
       if (rhs_norm)
       {
@@ -304,48 +239,15 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
       {
          old_resid = resid_nrm;
 
-         if (level_precision == HYPRE_REAL_DOUBLE)
+         if ( amg_logging > 1 )
          {
-            if ( amg_logging > 1 )
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
-            }
-            else
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, F_array[0], Vtemp_dbl);
-               resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl(Vtemp_dbl, Vtemp_dbl));
-            }
-         }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
-         {
-            if ( amg_logging > 1 )
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_flt( Residual, Residual ));
-            }
-            else
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, F_array[0], Vtemp_flt);
-               resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_flt(Vtemp_flt, Vtemp_flt));
-            }
-         }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-         {
-            if ( amg_logging > 1 )
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
-            }
-            else
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, F_array[0], Vtemp_long_dbl);
-               resid_nrm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_long_dbl(Vtemp_long_dbl, Vtemp_long_dbl));
-            }
+            hypre_ParCSRMatrixMatvecOutOfPlace_pre(level_precision, alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
+               resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_pre( level_precision, Residual, Residual ));
          }
          else
          {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            hypre_ParCSRMatrixMatvecOutOfPlace_pre(level_precision, alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp_dbl);
+            resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_pre(level_precision, Vtemp_dbl, Vtemp_dbl));
          }
 
          if (old_resid)
@@ -366,7 +268,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             relative_resid = resid_nrm;
          }
 
-         hypre_BoomerAMGSetRelResidualNorm(amg_data,relative_resid);
+         hypre_BoomerAMGSetRelResidualNorm_pre(level_precision, amg_data,relative_resid);
       }
 
       ++cycle_count;

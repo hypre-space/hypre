@@ -191,22 +191,7 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
       if (num_levels > 1)
       {
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
-         if (level_precision == HYPRE_REAL_DOUBLE)
-	 {
-            hypre_ParVectorSetLocalSize_dbl(Vtemp_dbl, local_size);
-	 }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
-	 {
-            hypre_ParVectorSetLocalSize_flt(Vtemp_flt, local_size);
-	 }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-	 {
-            hypre_ParVectorSetLocalSize_long_dbl(Vtemp_long_dbl, local_size);
-	 }
-	 else
-         {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_ParVectorSetLocalSize_pre(level_precision, Vtemp, local_size);
 
          cg_num_sweep = 1;
          num_sweep = num_grid_sweeps[cycle_param];
@@ -292,179 +277,62 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
          /*-----------------------------------------------
             Choose Smoother
           -----------------------------------------------*/
-         if (level_precision == HYPRE_REAL_DOUBLE)
-	 {
-            if (relax_type == 9   || relax_type == 19  ||
-                relax_type == 98  || relax_type == 99  ||
-                relax_type == 198 || relax_type == 199)
-            {
-               /* Gaussian elimination */
-               hypre_GaussElimSolve_dbl(amg_data, level, relax_type);
-            }
-            else if (relax_type == 18)
-            {
-               /* L1 - Jacobi*/
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_dbl(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_order,
-                                                           cycle_param,
-                                                           (hypre_double) relax_weight[level],
-                                                           (hypre_double) omega[level],
-                                                           l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_dbl,
-                                                           Ztemp_dbl);
-            }
-            else if (old_version)
-            {
-               Solve_err_flag = hypre_BoomerAMGRelax_dbl(A_array[level],
-                                                         Aux_F,
-                                                         CF_marker,
-                                                         relax_type,
-                                                         relax_points,
-                                                         (hypre_double) relax_weight[level],
-                                                         (hypre_double) omega[level],
-                                                         l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
-                                                         Aux_U,
-                                                         Vtemp_dbl,
-                                                         Ztemp_dbl);
-            }
-            else
-            {
-               /* smoother than can have CF ordering */
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_dbl(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_local,
-                                                           cycle_param,
-                                                           (hypre_double) relax_weight[level],
-                                                           (hypre_double) omega[level],
-                                                           l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_dbl,
-                                                           Ztemp_dbl);
-            }
-         }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
-	 {
-            if (relax_type == 9   || relax_type == 19  ||
-                relax_type == 98  || relax_type == 99  ||
-                relax_type == 198 || relax_type == 199)
-            {
-               /* Gaussian elimination */
-               hypre_GaussElimSolve_flt(amg_data, level, relax_type);
-            }
-            else if (relax_type == 18)
-            {
-               /* L1 - Jacobi*/
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_flt(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_order,
-                                                           cycle_param,
-                                                           (hypre_float) relax_weight[level],
-                                                           (hypre_float) omega[level],
-                                                           l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_flt,
-                                                           Ztemp_flt);
-            }
-            else if (old_version)
-            {
-               Solve_err_flag = hypre_BoomerAMGRelax_flt(A_array[level],
-                                                         Aux_F,
-                                                         CF_marker,
-                                                         relax_type,
-                                                         relax_points,
-                                                         (hypre_float) relax_weight[level],
-                                                         (hypre_float) omega[level],
-                                                         l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
-                                                         Aux_U,
-                                                         Vtemp_flt,
-                                                         Ztemp_flt);
-            }
-            else
-            {
-               /* smoother than can have CF ordering */
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_flt(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_local,
-                                                           cycle_param,
-                                                           (hypre_float) relax_weight[level],
-                                                           (hypre_float) omega[level],
-                                                           l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_flt,
-                                                           Ztemp_flt);
-            }
-         }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-	 {
-            if (relax_type == 9   || relax_type == 19  ||
-                relax_type == 98  || relax_type == 99  ||
-                relax_type == 198 || relax_type == 199)
-            {
-               /* Gaussian elimination */
-               hypre_GaussElimSolve_long_dbl(amg_data, level, relax_type);
-            }
-            else if (relax_type == 18)
-            {
-               /* L1 - Jacobi*/
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_long_dbl(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_order,
-                                                           cycle_param,
-                                                           (hypre_long_double) relax_weight[level],
-                                                           (hypre_long_double) omega[level],
-                                                           l1_norms_level ? (hypre_long_double *)hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_long_dbl,
-                                                           Ztemp_long_dbl);
-            }
-            else if (old_version)
-            {
-               Solve_err_flag = hypre_BoomerAMGRelax_long_dbl(A_array[level],
-                                                         Aux_F,
-                                                         CF_marker,
-                                                         relax_type,
-                                                         relax_points,
-                                                         (hypre_long_double) relax_weight[level],
-                                                         (hypre_long_double) omega[level],
-                                                         l1_norms_level ? (hypre_long_double *)hypre_VectorData(l1_norms_level) : NULL,
-                                                         Aux_U,
-                                                         Vtemp_long_dbl,
-                                                         Ztemp_long_dbl);
-            }
-            else
-            {
-               /* smoother than can have CF ordering */
-               Solve_err_flag = hypre_BoomerAMGRelaxIF_long_dbl(A_array[level],
-                                                           Aux_F,
-                                                           CF_marker,
-                                                           relax_type,
-                                                           relax_local,
-                                                           cycle_param,
-                                                           (hypre_long_double) relax_weight[level],
-                                                           (hypre_long_double) omega[level],
-                                                           l1_norms_level ? (hypre_long_double *) hypre_VectorData(l1_norms_level) : NULL,
-                                                           Aux_U,
-                                                           Vtemp_long_dbl,
-                                                           Ztemp_long_dbl);
-            }
-         }
-	 else
+         if (relax_type == 9   || relax_type == 19  ||
+             relax_type == 98  || relax_type == 99  ||
+             relax_type == 198 || relax_type == 199)
          {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            /* Gaussian elimination */
+            hypre_GaussElimSolve_pre(level_precision, amg_data, level, relax_type);
          }
-
+         else if (relax_type == 18)
+         {
+            /* L1 - Jacobi*/
+            Solve_err_flag = hypre_BoomerAMGRelaxIF_pre(level_precision,
+		       				        A_array[level],
+                                                        Aux_F,
+                                                        CF_marker,
+                                                        relax_type,
+                                                        relax_order,
+                                                        cycle_param,
+                                                        relax_weight[level],
+                                                        omega[level],
+                                                        l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
+                                                        Aux_U,
+                                                        Vtemp,
+                                                        Ztemp);
+         }
+         else if (old_version)
+         {
+            Solve_err_flag = hypre_BoomerAMGRelax_pre(level_precision,
+			                              A_array[level],
+                                                      Aux_F,
+                                                      CF_marker,
+                                                      relax_type,
+                                                      relax_points,
+                                                      relax_weight[level],
+                                                      omega[level],
+                                                      l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
+                                                      Aux_U,
+                                                      Vtemp,
+                                                      Ztemp);
+         }
+         else
+         {
+            /* smoother than can have CF ordering */
+            Solve_err_flag = hypre_BoomerAMGRelaxIF_pre(level_precision,
+			       			 	A_array[level],
+                                                        Aux_F,
+                                                        CF_marker,
+                                                        relax_type,
+                                                        relax_local,
+                                                        cycle_param,
+                                                        relax_weight[level],
+                                                        omega[level],
+                                                        l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
+                                                        Aux_U,
+                                                        Vtemp,
+                                                        Ztemp);
+         }
          if (Solve_err_flag != 0)
          {
             return (Solve_err_flag);
@@ -490,49 +358,15 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
          fine_grid = level;
          coarse_grid = level + 1;
 
-         if (precision_array[coarse_grid] == HYPRE_REAL_DOUBLE)
-	 {
-            hypre_ParVectorSetZeros_dbl(U_array[coarse_grid]);
-	 }
-	 else if (precision_array[coarse_grid] == HYPRE_REAL_SINGLE)
-	 {
-            hypre_ParVectorSetZeros_flt(U_array[coarse_grid]);
-	 }
-	 else if (precision_array[coarse_grid] == HYPRE_REAL_LONGDOUBLE)
-	 {
-            hypre_ParVectorSetZeros_long_dbl(U_array[coarse_grid]);
-	 }
-	 else
-         {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_ParVectorSetZeros_pre(precision_array[coarse_grid], U_array[coarse_grid]);
 
          // JSP: avoid unnecessary copy using out-of-place version of SpMV
          alpha = -1.0;
          beta = 1.0;
-         if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
-	 {
-	    hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double)alpha, A_array[fine_grid], 
-			                           U_array[fine_grid], (hypre_double) beta, 
-						   F_array[fine_grid], Vtemp_dbl);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_SINGLE)
-	 {
-	    hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float)alpha, A_array[fine_grid], 
-			                           U_array[fine_grid], (hypre_float) beta, 
-						   F_array[fine_grid], Vtemp_flt);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_LONGDOUBLE)
-	 {
-	    hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double)alpha, A_array[fine_grid], 
-			                           U_array[fine_grid], (hypre_long_double) beta, 
-						   F_array[fine_grid], Vtemp_long_dbl);
-	 }
-	 else
-         {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
-
+	 hypre_ParCSRMatrixMatvecOutOfPlace_pre(precision_array[fine_grid], 
+			                        alpha, A_array[fine_grid], 
+			                        U_array[fine_grid], beta, 
+						F_array[fine_grid], Vtemp);
          alpha = 1.0;
          beta = 0.0;
 
@@ -541,25 +375,9 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
 	    hypre_ParVectorConvert_mp(F_array[coarse_grid],precision_array[fine_grid]);
 	 }
 
-         if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
-	 {
-            hypre_ParCSRMatrixMatvecT_dbl((hypre_double) alpha, P_array[fine_grid], 
-			                   Vtemp_dbl, (hypre_double) beta, F_array[coarse_grid]);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_SINGLE)
-	 {
-            hypre_ParCSRMatrixMatvecT_flt((hypre_float) alpha, P_array[fine_grid], 
-			                   Vtemp_flt, (hypre_float) beta, F_array[coarse_grid]);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_LONGDOUBLE)
-	 {
-            hypre_ParCSRMatrixMatvecT_long_dbl((hypre_long_double) alpha, P_array[fine_grid], 
-			                   Vtemp_long_dbl, (hypre_long_double) beta, F_array[coarse_grid]);
-	 }
-	 else
-         {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_ParCSRMatrixMatvecT_pre(precision_array[fine_grid], alpha, 
+			               P_array[fine_grid], 
+			               Vtemp, beta, F_array[coarse_grid]);
 
 	 if (precision_array[fine_grid] != precision_array[coarse_grid])
 	 {
@@ -592,28 +410,10 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
 	    hypre_ParVectorConvert_mp(U_array[coarse_grid],precision_array[fine_grid]);
 	 }
 
-	 if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
-	 {
-            hypre_ParCSRMatrixMatvec_dbl((hypre_double)alpha, P_array[fine_grid],
-                                         U_array[coarse_grid],
-                                         (hypre_double) beta, U_array[fine_grid]);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_SINGLE)
-	 {
-            hypre_ParCSRMatrixMatvec_flt((hypre_float)alpha, P_array[fine_grid],
-                                         U_array[coarse_grid],
-                                         (hypre_float) beta, U_array[fine_grid]);
-	 }
-	 else if (precision_array[fine_grid] == HYPRE_REAL_LONGDOUBLE)
-	 {
-            hypre_ParCSRMatrixMatvec_long_dbl((hypre_long_double)alpha, P_array[fine_grid],
-                                         U_array[coarse_grid],
-                                         (hypre_long_double) beta, U_array[fine_grid]);
-	 }
-	 else
-         {
-            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_ParCSRMatrixMatvec_pre(precision_array[fine_grid], alpha, 
+			              P_array[fine_grid],
+                                      U_array[coarse_grid],
+                                      beta, U_array[fine_grid]);
 
 	 if (precision_array[fine_grid] != precision_array[coarse_grid])
 	 {

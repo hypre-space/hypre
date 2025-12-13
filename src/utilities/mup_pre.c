@@ -626,6 +626,78 @@ hypre_GetSizeOfReal_pre( HYPRE_Precision precision )
    }
 }
 
+/*--------------------------------------------------------------------------*/
+
+hypre_IntArray*
+hypre_IntArrayCreate_pre( HYPRE_Precision precision, HYPRE_Int size )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_IntArrayCreate_flt( size );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_IntArrayCreate_dbl( size );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_IntArrayCreate_long_dbl( size );
+      default:
+         { hypre_IntArray* value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayDestroy_pre( HYPRE_Precision precision, hypre_IntArray *array )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_IntArrayDestroy_flt( array );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_IntArrayDestroy_dbl( array );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_IntArrayDestroy_long_dbl( array );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayInitialize_pre( HYPRE_Precision precision, hypre_IntArray *array )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_IntArrayInitialize_flt( array );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_IntArrayInitialize_dbl( array );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_IntArrayInitialize_long_dbl( array );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetConstantValues_pre( HYPRE_Precision precision, hypre_IntArray *v, HYPRE_Int value )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_IntArraySetConstantValues_flt( v, value );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_IntArraySetConstantValues_dbl( v, value );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_IntArraySetConstantValues_long_dbl( v, value );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
 
 #endif
 

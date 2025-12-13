@@ -694,6 +694,25 @@
 #undef HYPRE_SchwarzSetup
 #undef HYPRE_SchwarzSolve
 #undef HYPRE_TempParCSRSetupInterpreter
+#undef hypre_BoomerAMGCoarseParms
+#undef hypre_BoomerAMGCorrectCFMarker
+#undef hypre_BoomerAMGCorrectCFMarker2
+#undef hypre_BoomerAMGCreateScalarCFS
+#undef hypre_BoomerAMGGetAggP12TruncFactor
+#undef hypre_BoomerAMGGetAggTruncFactor
+#undef hypre_BoomerAMGGetMaxRowSum
+#undef hypre_BoomerAMGGetStrongThreshold
+#undef hypre_BoomerAMGGetTruncFactor
+#undef hypre_BoomerAMGRelax
+#undef hypre_BoomerAMGRelaxIF
+#undef hypre_BoomerAMGSetRelResidualNorm
+#undef hypre_Coarsen_Options
+#undef hypre_GaussElimSolve
+#undef hypre_Interp_Options
+#undef hypre_MPassInterp_Options
+#undef hypre_StageOneInterp_Options
+#undef hypre_StageTwoInterp_Options
+#undef hypre_Strength_Options
 #undef GenerateDifConv
 #undef GenerateLaplacian
 #undef GenerateLaplacian27pt
@@ -951,7 +970,6 @@
 #undef hypre_BoomerAMGBuildRestrNeumannAIRHost
 #undef hypre_BoomerAMGBuildStdInterp
 #undef hypre_BoomerAMGCGRelaxWt
-#undef hypre_BoomerAMGCoarseParms
 #undef hypre_BoomerAMGCoarseParmsHost
 #undef hypre_BoomerAMGCoarsen
 #undef hypre_BoomerAMGCoarsenCGC
@@ -964,8 +982,6 @@
 #undef hypre_BoomerAMGCoarsenPMIS
 #undef hypre_BoomerAMGCoarsenPMISHost
 #undef hypre_BoomerAMGCoarsenRuge
-#undef hypre_BoomerAMGCorrectCFMarker
-#undef hypre_BoomerAMGCorrectCFMarker2
 #undef hypre_BoomerAMGCorrectCFMarker2Host
 #undef hypre_BoomerAMGCorrectCFMarkerHost
 #undef hypre_BoomerAMGCreate
@@ -979,7 +995,6 @@
 #undef hypre_BoomerAMGCreateSabs
 #undef hypre_BoomerAMGCreateSabsHost
 #undef hypre_BoomerAMGCreateScalarCF
-#undef hypre_BoomerAMGCreateScalarCFS
 #undef hypre_BoomerAMGCreateSmoothDirs
 #undef hypre_BoomerAMGCreateSmoothVecs
 #undef hypre_BoomerAMGCycle
@@ -1070,7 +1085,6 @@
 #undef hypre_BoomerAMGGetMaxCoarseSize
 #undef hypre_BoomerAMGGetMaxIter
 #undef hypre_BoomerAMGGetMaxLevels
-#undef hypre_BoomerAMGGetMaxRowSum
 #undef hypre_BoomerAMGGetMeasureType
 #undef hypre_BoomerAMGGetMinCoarseSize
 #undef hypre_BoomerAMGGetMinIter
@@ -1097,10 +1111,8 @@
 #undef hypre_BoomerAMGGetSmoothNumLevels
 #undef hypre_BoomerAMGGetSmoothNumSweeps
 #undef hypre_BoomerAMGGetSmoothType
-#undef hypre_BoomerAMGGetStrongThreshold
 #undef hypre_BoomerAMGGetStrongThresholdR
 #undef hypre_BoomerAMGGetTol
-#undef hypre_BoomerAMGGetTruncFactor
 #undef hypre_BoomerAMGGetVariant
 #undef hypre_BoomerAMGIndepHMIS
 #undef hypre_BoomerAMGIndepHMISa
@@ -1116,7 +1128,6 @@
 #undef hypre_BoomerAMGNormalizeVecs
 #undef hypre_BoomerAMGPrintGeneralInfo
 #undef hypre_BoomerAMGRefineInterp
-#undef hypre_BoomerAMGRelax
 #undef hypre_BoomerAMGRelax0WeightedJacobi
 #undef hypre_BoomerAMGRelax10TopoOrderedGaussSeidel
 #undef hypre_BoomerAMGRelax11TwoStageGaussSeidel
@@ -1136,7 +1147,6 @@
 #undef hypre_BoomerAMGRelaxComputeL1Norms
 #undef hypre_BoomerAMGRelaxHybridGaussSeidel_core
 #undef hypre_BoomerAMGRelaxHybridSOR
-#undef hypre_BoomerAMGRelaxIF
 #undef hypre_BoomerAMGRelaxKaczmarz
 #undef hypre_BoomerAMGRelaxT
 #undef hypre_BoomerAMGRelaxTwoStageGaussSeidelHost
@@ -1268,7 +1278,6 @@
 #undef hypre_BoomerAMGSetPrintLevel
 #undef hypre_BoomerAMGSetRAP2
 #undef hypre_BoomerAMGSetRedundant
-#undef hypre_BoomerAMGSetRelResidualNorm
 #undef hypre_BoomerAMGSetRelaxOrder
 #undef hypre_BoomerAMGSetRelaxType
 #undef hypre_BoomerAMGSetRelaxWeight
@@ -1311,7 +1320,6 @@
 #undef hypre_CSRMatrixNormFro
 #undef hypre_CSRMatrixResNormFro
 #undef hypre_CSRMatrixTrace
-#undef hypre_Coarsen_Options
 #undef hypre_CreateC
 #undef hypre_CreateDinv
 #undef hypre_CreateLambda
@@ -1361,7 +1369,6 @@
 #undef hypre_FSAISolve
 #undef hypre_FindKapGrad
 #undef hypre_GaussElimSetup
-#undef hypre_GaussElimSolve
 #undef hypre_GenerateCoordinates
 #undef hypre_GenerateMultiPi
 #undef hypre_GenerateMultipassPi
@@ -1466,7 +1473,6 @@
 #undef hypre_ILUWriteSolverParams
 #undef hypre_IndepSetGreedy
 #undef hypre_IndepSetGreedyS
-#undef hypre_Interp_Options
 #undef hypre_IntersectTwoArrays
 #undef hypre_IntersectTwoBigArrays
 #undef hypre_LINPACKcgpthy
@@ -1578,7 +1584,6 @@
 #undef hypre_MPSchwarzCFSolve
 #undef hypre_MPSchwarzFWSolve
 #undef hypre_MPSchwarzSolve
-#undef hypre_MPassInterp_Options
 #undef hypre_NSHCreate
 #undef hypre_NSHDestroy
 #undef hypre_NSHSetColVersion
@@ -1718,9 +1723,6 @@
 #undef hypre_SchwarzSetup
 #undef hypre_SchwarzSolve
 #undef hypre_SortedCopyParCSRData
-#undef hypre_StageOneInterp_Options
-#undef hypre_StageTwoInterp_Options
-#undef hypre_Strength_Options
 #undef hypre_alt_insert_new_nodes
 #undef hypre_amsconstructdiscretegradient
 #undef hypre_amscreate

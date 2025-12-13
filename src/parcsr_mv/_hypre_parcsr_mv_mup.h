@@ -630,13 +630,6 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatrixCreateFromParVector_long_dbl( hypre_ParVector *b, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
 
 HYPRE_Int
-hypre_ParCSRMatrixDestroy_flt( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixDestroy_dbl( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixDestroy_long_dbl( hypre_ParCSRMatrix *matrix );
-
-HYPRE_Int
 hypre_ParCSRMatrixDiagScale_flt( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld, hypre_ParVector *par_rd );
 HYPRE_Int
 hypre_ParCSRMatrixDiagScale_dbl( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld, hypre_ParVector *par_rd );
@@ -803,27 +796,6 @@ HYPRE_Int
 hypre_ParCSRMatrixLocalTranspose_dbl( hypre_ParCSRMatrix *A );
 HYPRE_Int
 hypre_ParCSRMatrixLocalTranspose_long_dbl( hypre_ParCSRMatrix *A );
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvec_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvec_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvec_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvecOutOfPlace_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvecOutOfPlace_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *b, hypre_ParVector *y );
-
-HYPRE_Int
-hypre_ParCSRMatrixMatvecT_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvecT_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParCSRMatrixMatvecT_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
 
 HYPRE_Int
 hypre_ParCSRMatrixMatvec_FF_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
@@ -1120,32 +1092,11 @@ hypre_ParVector *
 hypre_ParVectorCloneShallow_long_dbl( hypre_ParVector *x );
 
 HYPRE_Int
-hypre_ParVectorCopy_flt( hypre_ParVector *x, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParVectorCopy_dbl( hypre_ParVector *x, hypre_ParVector *y );
-HYPRE_Int
-hypre_ParVectorCopy_long_dbl( hypre_ParVector *x, hypre_ParVector *y );
-
-hypre_ParVector *
-hypre_ParVectorCreate_flt( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
-hypre_ParVector *
-hypre_ParVectorCreate_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
-hypre_ParVector *
-hypre_ParVectorCreate_long_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
-
-HYPRE_Int
 hypre_ParVectorCreateAssumedPartition_flt( hypre_ParVector *vector );
 HYPRE_Int
 hypre_ParVectorCreateAssumedPartition_dbl( hypre_ParVector *vector );
 HYPRE_Int
 hypre_ParVectorCreateAssumedPartition_long_dbl( hypre_ParVector *vector );
-
-HYPRE_Int
-hypre_ParVectorDestroy_flt( hypre_ParVector *vector );
-HYPRE_Int
-hypre_ParVectorDestroy_dbl( hypre_ParVector *vector );
-HYPRE_Int
-hypre_ParVectorDestroy_long_dbl( hypre_ParVector *vector );
 
 HYPRE_Int
 hypre_ParVectorGetValues_flt( hypre_ParVector *vector, HYPRE_Int num_values, HYPRE_BigInt *indices, hypre_float *values );
@@ -1181,20 +1132,6 @@ HYPRE_Int
 hypre_ParVectorInitializeShell_dbl( hypre_ParVector *vector );
 HYPRE_Int
 hypre_ParVectorInitializeShell_long_dbl( hypre_ParVector *vector );
-
-HYPRE_Int
-hypre_ParVectorInitialize_v2_flt( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ParVectorInitialize_v2_dbl( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_ParVectorInitialize_v2_long_dbl( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
-
-HYPRE_Real
-hypre_ParVectorInnerProd_flt( hypre_ParVector *x, hypre_ParVector *y );
-HYPRE_Real
-hypre_ParVectorInnerProd_dbl( hypre_ParVector *x, hypre_ParVector *y );
-HYPRE_Real
-hypre_ParVectorInnerProd_long_dbl( hypre_ParVector *x, hypre_ParVector *y );
 
 HYPRE_Int
 hypre_ParVectorInnerProdTagged_flt( hypre_ParVector *x, hypre_ParVector *y, HYPRE_Int *num_tags_ptr, hypre_float **iprod_ptr );
@@ -1351,13 +1288,6 @@ HYPRE_Int
 hypre_ParVectorSetDataOwner_long_dbl( hypre_ParVector *vector, HYPRE_Int owns_data );
 
 HYPRE_Int
-hypre_ParVectorSetLocalSize_flt( hypre_ParVector *vector, HYPRE_Int local_size );
-HYPRE_Int
-hypre_ParVectorSetLocalSize_dbl( hypre_ParVector *vector, HYPRE_Int local_size );
-HYPRE_Int
-hypre_ParVectorSetLocalSize_long_dbl( hypre_ParVector *vector, HYPRE_Int local_size );
-
-HYPRE_Int
 hypre_ParVectorSetNumTags_flt( hypre_ParVector *vector, HYPRE_Int num_tags );
 HYPRE_Int
 hypre_ParVectorSetNumTags_dbl( hypre_ParVector *vector, HYPRE_Int num_tags );
@@ -1391,13 +1321,6 @@ HYPRE_Int
 hypre_ParVectorSetValuesTagged_dbl( hypre_ParVector *vector, hypre_double *values );
 HYPRE_Int
 hypre_ParVectorSetValuesTagged_long_dbl( hypre_ParVector *vector, hypre_long_double *values );
-
-HYPRE_Int
-hypre_ParVectorSetZeros_flt( hypre_ParVector *v );
-HYPRE_Int
-hypre_ParVectorSetZeros_dbl( hypre_ParVector *v );
-HYPRE_Int
-hypre_ParVectorSetZeros_long_dbl( hypre_ParVector *v );
 
 HYPRE_Int
 hypre_ParVectorStridedCopy_flt( hypre_ParVector *x, HYPRE_Int istride, HYPRE_Int ostride, HYPRE_Int size, hypre_float *data );
@@ -1540,6 +1463,15 @@ hypre_ParCSRMatrix *
 hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
 
 HYPRE_Int
+hypre_ParCSRMatrixDestroy_flt( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixDestroy_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixDestroy_long_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix );
+
+HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2_flt( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
@@ -1547,6 +1479,96 @@ HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
 HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvec_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvec_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvec_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvec( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *b, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorCopy_flt( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParVectorCopy_dbl( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParVectorCopy_long_dbl( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int
+hypre_ParVectorCopy( hypre_ParVector *x, hypre_ParVector *y );
+
+hypre_ParVector *
+hypre_ParVectorCreate_flt( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
+hypre_ParVector *
+hypre_ParVectorCreate_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
+hypre_ParVector *
+hypre_ParVectorCreate_long_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
+hypre_ParVector *
+hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
+
+HYPRE_Int
+hypre_ParVectorDestroy_flt( hypre_ParVector *vector );
+HYPRE_Int
+hypre_ParVectorDestroy_dbl( hypre_ParVector *vector );
+HYPRE_Int
+hypre_ParVectorDestroy_long_dbl( hypre_ParVector *vector );
+HYPRE_Int
+hypre_ParVectorDestroy( hypre_ParVector *vector );
+
+HYPRE_Int
+hypre_ParVectorInitialize_v2_flt( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParVectorInitialize_v2_dbl( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParVectorInitialize_v2_long_dbl( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Real
+hypre_ParVectorInnerProd_flt( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Real
+hypre_ParVectorInnerProd_dbl( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Real
+hypre_ParVectorInnerProd_long_dbl( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Real
+hypre_ParVectorInnerProd( hypre_ParVector *x, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize_flt( hypre_ParVector *vector, HYPRE_Int local_size );
+HYPRE_Int
+hypre_ParVectorSetLocalSize_dbl( hypre_ParVector *vector, HYPRE_Int local_size );
+HYPRE_Int
+hypre_ParVectorSetLocalSize_long_dbl( hypre_ParVector *vector, HYPRE_Int local_size );
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector, HYPRE_Int local_size );
+
+HYPRE_Int
+hypre_ParVectorSetZeros_flt( hypre_ParVector *v );
+HYPRE_Int
+hypre_ParVectorSetZeros_dbl( hypre_ParVector *v );
+HYPRE_Int
+hypre_ParVectorSetZeros_long_dbl( hypre_ParVector *v );
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v );
 
 
 /*** DO NOT EDIT THIS FILE DIRECTLY (use ../config/gen_code.sh to generate) ***/
@@ -1575,7 +1597,40 @@ hypre_ParCSRMatrix *
 hypre_ParCSRMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
 
 HYPRE_Int
+hypre_ParCSRMatrixDestroy_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix );
+
+HYPRE_Int
 hypre_ParCSRMatrixInitialize_v2_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvec_pre( HYPRE_Precision precision, hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace_pre( HYPRE_Precision precision, hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *b, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT_pre( HYPRE_Precision precision, hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorCopy_pre( HYPRE_Precision precision, hypre_ParVector *x, hypre_ParVector *y );
+
+hypre_ParVector *
+hypre_ParVectorCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in );
+
+HYPRE_Int
+hypre_ParVectorDestroy_pre( HYPRE_Precision precision, hypre_ParVector *vector );
+
+HYPRE_Int
+hypre_ParVectorInitialize_v2_pre( HYPRE_Precision precision, hypre_ParVector *vector, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Real
+hypre_ParVectorInnerProd_pre( HYPRE_Precision precision, hypre_ParVector *x, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize_pre( HYPRE_Precision precision, hypre_ParVector *vector, HYPRE_Int local_size );
+
+HYPRE_Int
+hypre_ParVectorSetZeros_pre( HYPRE_Precision precision, hypre_ParVector *v );
 
 
 #endif

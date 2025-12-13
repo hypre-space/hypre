@@ -320,6 +320,42 @@ hypre_GetSizeOfReal( void )
    return hypre_GetSizeOfReal_pre( precision );
 }
 
+/*--------------------------------------------------------------------------*/
+
+hypre_IntArray*
+hypre_IntArrayCreate( HYPRE_Int size )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_IntArrayCreate_pre( precision, size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayDestroy( hypre_IntArray *array )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_IntArrayDestroy_pre( precision, array );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayInitialize( hypre_IntArray *array )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_IntArrayInitialize_pre( precision, array );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_IntArraySetConstantValues_pre( precision, v, value );
+}
+
 
 #endif
 
