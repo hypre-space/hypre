@@ -180,24 +180,32 @@ $(
 # Create prototype information files - first create a temporary file from the
 # internal C header and an internal C++ header (if it exists) that is assumed to
 # have the same file name prefix as the internal C header
-ITMP=${intp}_tmp.h
-cp ${INTH} ${ITMP}
-if [ -f "${intp}.hpp" ]
-then
-   cat ${intp}.hpp >> ${ITMP}
-fi
+
+#ITMP=${intp}_tmp.h
+#cp ${INTH} ${ITMP}
+#if [ -f "${intp}.hpp" ]
+#then
+#   cat ${intp}.hpp >> ${ITMP}
+#fi
+######
+INTHPP=${intp}.hpp
 for c in "" $gpu
 do
    for i in fixed functions methods
    do
       tag=${i}${c}
       $scriptdir/gen_proto_info.sh mup.${tag} ${EXTH} > ${OUTP}.${tag}.ext.proto
-      $scriptdir/gen_proto_info.sh mup.${tag} ${ITMP} > ${OUTP}.${tag}.int.proto
+      $scriptdir/gen_proto_info.sh mup.${tag} ${INTH} > ${OUTP}.${tag}.int.proto
    done
    cat ${OUTP}.functions${c}.ext.proto ${OUTP}.methods${c}.ext.proto > ${OUTP}.pre${c}.ext.proto
    cat ${OUTP}.functions${c}.int.proto ${OUTP}.methods${c}.int.proto > ${OUTP}.pre${c}.int.proto
 done
-rm -f ${ITMP}
+#rm -f ${ITMP}
+
+# Special case for .hpp functions. These are only for GPU and are assumed to be strictly multiprecision 
+# functions. Hence only the fixed precision code and protos are generated.
+tagpp=fixed${gpu}
+$scriptdir/gen_proto_info.sh mup.${tagpp} ${INTHPP} > ${OUTP}.${tagpp}.intpp.proto
 
 # Create C implementation files and header files
 for c in "" $gpu
@@ -209,6 +217,10 @@ do
       $scriptdir/gen_code_awk.sh ${OUTP}.${tag}.int.proto ${OUTP}_${tag}_int ${i}
    done
 done
+
+# implementation for .hpp functions.
+$scriptdir/gen_code_awk.sh ${OUTP}.${tagpp}.intpp.proto ${OUTP}_${tagpp}_intpp fixed
+cat ${OUTP}_${tagpp}_intpp.c >> ${OUTP}_${tagpp}_int.c
 
 ############################################################################
 # Finalize code
@@ -368,14 +380,15 @@ then
 #ifndef hypre_${intname}_MUP_HEADER_CXX
 #define hypre_${intname}_MUP_HEADER_CXX
 
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if defined (HYPRE_MIXED_PRECISION)
-#if defined(HYPRE_USING_GPU)
-
 @
+#===== Declarations with C linkage 
    for i in fixed functions pre
    do
       tag=${i}${gpu}
@@ -383,11 +396,30 @@ extern "C" {
       cat ${OUTP}_${tag}_int.h >> $FOUT
    done
    cat >> $FOUT <<@
-#endif
-#endif
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+@
+#===== Decalations with C++ linkage
+   for i in fixed
+   do
+      tag=${i}${gpu}
+      echo "/* ${tag} */"      >> $FOUT
+      cat ${OUTP}_${tag}_intpp.h >> $FOUT
+   done
+   cat >> $FOUT <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 #endif
 
 #endif
@@ -406,8 +438,10 @@ do
       tag=${i}${c}
       rm -f ${OUTP}.${tag}.ext.proto
       rm -f ${OUTP}.${tag}.int.proto
+      rm -f ${OUTP}.${tag}.intpp.proto
       rm -f ${OUTP}_${tag}_ext.[ch]
       rm -f ${OUTP}_${tag}_int.[ch]
+      rm -f ${OUTP}_${tag}_intpp.[ch]
    done
 done
 

@@ -155,14 +155,6 @@ hypreDevice_DiagScaleVector2( HYPRE_Int num_vectors, HYPRE_Int num_rows, HYPRE_C
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_GenScatterAdd( HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_GenScatterAdd)( x, ny, map, y, work );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypreDevice_GetRowNnz( HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_GetRowNnz)( nrows, d_row_indices, d_diag_ia, d_offd_ia, d_rownnz );
@@ -282,54 +274,6 @@ hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_
 
 /*--------------------------------------------------------------------------*/
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataComputeStream)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceData*
-hypre_DeviceDataCreate( )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCreate)( );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceRandGenerator
-hypre_DeviceDataCurandGenerator( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCurandGenerator)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCusparseHandle)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-void
-hypre_DeviceDataDestroy( hypre_DeviceData* data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataDestroy)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceStream
-hypre_DeviceDataStream( hypre_DeviceData *data, HYPRE_Int i )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataStream)( data, i );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_DeviceMemoryGetUsage( HYPRE_Real *mem )
 {
@@ -342,22 +286,6 @@ HYPRE_Int
 hypre_ForceSyncComputeStream( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ForceSyncComputeStream)( );
-}
-
-/*--------------------------------------------------------------------------*/
-
-dim3
-hypre_GetDefaultDeviceBlockDimension( )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceBlockDimension)( );
-}
-
-/*--------------------------------------------------------------------------*/
-
-dim3
-hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceGridDimension)( n, granularity, bDim );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -462,6 +390,79 @@ HYPRE_Int
 hypre_SyncDevice( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SyncDevice)( );
+}
+
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_GenScatterAdd( HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_GenScatterAdd)( x, ny, map, y, work );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_DeviceStream
+hypre_DeviceDataComputeStream( hypre_DeviceData *data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataComputeStream)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_DeviceData*
+hypre_DeviceDataCreate( )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCreate)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator( hypre_DeviceData *data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCurandGenerator)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle( hypre_DeviceData *data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCusparseHandle)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void
+hypre_DeviceDataDestroy( hypre_DeviceData* data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataDestroy)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_DeviceStream
+hypre_DeviceDataStream( hypre_DeviceData *data, HYPRE_Int i )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataStream)( data, i );
+}
+
+/*--------------------------------------------------------------------------*/
+
+dim3
+hypre_GetDefaultDeviceBlockDimension( )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceBlockDimension)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+dim3
+hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceGridDimension)( n, granularity, bDim );
 }
 
 /*--------------------------------------------------------------------------*/

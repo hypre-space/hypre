@@ -1650,50 +1650,6 @@ hypreDevice_ComplexAxpyzn( HYPRE_Int       n,
    return hypreDevice_Axpyzn(n, d_x, d_y, d_z, a, b);
 }
 
-/*--------------------------------------------------------------------
- * Mixed-precision hypreGPUKernel_Axpyzn_mp
- * Lifts or drops x and y to precision of z.
- *--------------------------------------------------------------------*/
-
-template<typename T1, typename T2, typename T3>
-__global__ void
-hypreGPUKernel_Axpyzn_mp( hypre_DeviceItem &item,
-                          HYPRE_Int         n,
-                          T1                *x,
-                          T2                *y,
-                          T3                *z,
-                          T1         a,
-                          T2         b )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < n)
-   {
-      z[i] = static_cast<T3>(a * x[i]) + static_cast<T3>(b * y[i]);
-   }
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_Axpyzn_mp
- *--------------------------------------------------------------------*/
-
-template<typename T1, typename T2, typename T3>
-HYPRE_Int
-hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
-{
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_Axpyzn_mp, gDim, bDim, n, d_x, d_y, d_z, a, b );
-
-   return hypre_error_flag;
-}
-
 #if defined(HYPRE_USING_CURAND)
 
 /*--------------------------------------------------------------------

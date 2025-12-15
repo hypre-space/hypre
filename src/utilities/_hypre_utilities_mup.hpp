@@ -11,12 +11,12 @@
 #ifndef hypre_UTILITIES_MUP_HEADER_CXX
 #define hypre_UTILITIES_MUP_HEADER_CXX
 
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#if defined (HYPRE_MIXED_PRECISION)
-#if defined(HYPRE_USING_GPU)
 
 /* fixed_gpu */
 
@@ -140,13 +140,6 @@ HYPRE_Int
 hypreDevice_DiagScaleVector2_long_dbl( HYPRE_Int num_vectors, HYPRE_Int num_rows, hypre_long_double *diag, hypre_long_double *x, hypre_long_double beta, hypre_long_double *y, hypre_long_double *z, HYPRE_Int computeY );
 
 HYPRE_Int
-hypreDevice_GenScatterAdd_flt( hypre_float *x, HYPRE_Int ny, HYPRE_Int *map, hypre_float *y, char *work );
-HYPRE_Int
-hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_double *y, char *work );
-HYPRE_Int
-hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
-
-HYPRE_Int
 hypreDevice_GetRowNnz_flt( HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz );
 HYPRE_Int
 hypreDevice_GetRowNnz_dbl( HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz );
@@ -250,48 +243,6 @@ HYPRE_Int
 hypre_CurandUniformSingle_dbl( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );
 HYPRE_Int
 hypre_CurandUniformSingle_long_dbl( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );
-
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
-
-hypre_DeviceData*
-hypre_DeviceDataCreate_flt( );
-hypre_DeviceData*
-hypre_DeviceDataCreate_dbl( );
-hypre_DeviceData*
-hypre_DeviceDataCreate_long_dbl( );
-
-hypre_DeviceRandGenerator
-hypre_DeviceDataCurandGenerator_flt( hypre_DeviceData *data );
-hypre_DeviceRandGenerator
-hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
-hypre_DeviceRandGenerator
-hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
-
-void
-hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );
-void
-hypre_DeviceDataDestroy_dbl( hypre_DeviceData* data );
-void
-hypre_DeviceDataDestroy_long_dbl( hypre_DeviceData* data );
-
-hypre_DeviceStream
-hypre_DeviceDataStream_flt( hypre_DeviceData *data, HYPRE_Int i );
-hypre_DeviceStream
-hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
-hypre_DeviceStream
-hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
 
 HYPRE_Int
 hypre_DeviceMemoryGetUsage_flt( hypre_float *mem );
@@ -398,17 +349,69 @@ hypre_SyncDevice_dbl( );
 HYPRE_Int
 hypre_SyncDevice_long_dbl( );
 
-
 /* functions_gpu */
 
 /* pre_gpu */
 
-#endif
-#endif
 
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+/* fixed_gpu */
+
+HYPRE_Int
+hypreDevice_GenScatterAdd_flt( hypre_float *x, HYPRE_Int ny, HYPRE_Int *map, hypre_float *y, char *work );
+HYPRE_Int
+hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_double *y, char *work );
+HYPRE_Int
+hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
+
+hypre_DeviceStream
+hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
+hypre_DeviceStream
+hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
+hypre_DeviceStream
+hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
+
+hypre_DeviceData*
+hypre_DeviceDataCreate_flt( );
+hypre_DeviceData*
+hypre_DeviceDataCreate_dbl( );
+hypre_DeviceData*
+hypre_DeviceDataCreate_long_dbl( );
+
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator_flt( hypre_DeviceData *data );
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
+
+hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
+hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
+hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
+
+void
+hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );
+void
+hypre_DeviceDataDestroy_dbl( hypre_DeviceData* data );
+void
+hypre_DeviceDataDestroy_long_dbl( hypre_DeviceData* data );
+
+hypre_DeviceStream
+hypre_DeviceDataStream_flt( hypre_DeviceData *data, HYPRE_Int i );
+hypre_DeviceStream
+hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
+hypre_DeviceStream
+hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
 
 dim3
 hypre_GetDefaultDeviceBlockDimension_flt( );
@@ -444,5 +447,14 @@ dim3
 hypre_dim3_dbl( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
 dim3
 hypre_dim3_long_dbl( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+#endif
+
 #endif
 
