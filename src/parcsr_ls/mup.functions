@@ -680,6 +680,7 @@ HYPRE_SchwarzSetVariant
 HYPRE_SchwarzSetup
 HYPRE_SchwarzSolve
 HYPRE_TempParCSRSetupInterpreter
+hypre_BoomerAMGBuildCoarseOperatorKT
 hypre_BoomerAMGCoarseParms
 hypre_BoomerAMGCorrectCFMarker
 hypre_BoomerAMGCorrectCFMarker2
@@ -693,8 +694,10 @@ hypre_BoomerAMGRelax
 hypre_BoomerAMGRelaxIF
 hypre_BoomerAMGSetRelResidualNorm
 hypre_Coarsen_Options
+hypre_GaussElimSetup
 hypre_GaussElimSolve
 hypre_Interp_Options
+hypre_Level_L1Norms
 hypre_MPassInterp_Options
 hypre_StageOneInterp_Options
 hypre_StageTwoInterp_Options

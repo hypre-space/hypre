@@ -26,7 +26,6 @@ hypre_GetAssumedPartitionRowRange
 hypre_LocateAssumedPartition
 hypre_MatTCommPkgCreate
 hypre_MatTCommPkgCreate_core
-hypre_MatvecCommPkgCreate
 hypre_MatvecCommPkgDestroy
 hypre_MergeDiagAndOffd
 hypre_MergeDiagAndOffdHost
@@ -132,7 +131,6 @@ hypre_ParCSRMatrixReorder
 hypre_ParCSRMatrixRestoreRow
 hypre_ParCSRMatrixScale
 hypre_ParCSRMatrixSetConstantValues
-hypre_ParCSRMatrixSetDNumNonzeros
 hypre_ParCSRMatrixSetDataOwner
 hypre_ParCSRMatrixSetNumNonzeros
 hypre_ParCSRMatrixSetNumNonzeros_core
@@ -155,12 +153,10 @@ hypre_ParCSRTMatMatKT
 hypre_ParCSRTMatMatKTHost
 hypre_ParMatMinus_F
 hypre_ParMatScaleDiagInv_F
-hypre_ParMatmul
 hypre_ParMatmul_FC
 hypre_ParMatmul_RowSizes
 hypre_ParMatmul_RowSizes_Marked
 hypre_ParMultiVectorCreate
-hypre_ParTMatmul
 hypre_ParVectorAxpy
 hypre_ParVectorAxpyz
 hypre_ParVectorCloneDeep_v2

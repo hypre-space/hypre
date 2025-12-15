@@ -358,6 +358,15 @@ HYPRE_Generate2DSystem( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_MatvecCommPkgCreate_pre( precision, A );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data )
 {
@@ -426,6 +435,33 @@ hypre_ParCSRMatrixMatvecT( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_ParCSRMatrixMatvecT_pre( precision, alpha, A, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixSetDNumNonzeros_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParCSRMatrix *
+hypre_ParMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParMatmul_pre( precision, A, B );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParCSRMatrix *
+hypre_ParTMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParTMatmul_pre( precision, A, B );
 }
 
 /*--------------------------------------------------------------------------*/

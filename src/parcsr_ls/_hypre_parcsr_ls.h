@@ -324,11 +324,6 @@ typedef struct
    hypre_ParVector *Ztemp_dbl;
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
-   hypre_double     strong_threshold_dbl;
-   hypre_double     max_row_sum_dbl;
-   hypre_double     trunc_factor_dbl;
-   hypre_double     agg_trunc_factor_dbl;
-   hypre_double     agg_P12_trunc_factor_dbl;
 #endif
 
 } hypre_ParAMGData;
@@ -611,11 +606,6 @@ typedef struct
 #define hypre_ParAMGDataZtempDBL(amg_data) ((amg_data)->Ztemp_dbl)
 #define hypre_ParAMGDataZtempFLT(amg_data) ((amg_data)->Ztemp_flt)
 #define hypre_ParAMGDataZtempLONGDBL(amg_data) ((amg_data)->Ztemp_long_dbl)
-#define hypre_ParAMGDataStrongThresholdDBL(amg_data) ((amg_data)->strong_threshold_dbl)
-#define hypre_ParAMGDataMaxRowSumDBL(amg_data) ((amg_data)->max_row_sum_dbl)
-#define hypre_ParAMGDataTruncFactorDBL(amg_data) ((amg_data)->trunc_factor_dbl)
-#define hypre_ParAMGDataAggTruncFactorDBL(amg_data) ((amg_data)->agg_trunc_factor_dbl)
-#define hypre_ParAMGDataAggP12TruncFactorDBL(amg_data) ((amg_data)->agg_P12_trunc_factor_dbl)
 #endif
 
 #endif
@@ -2077,10 +2067,8 @@ HYPRE_Int hypre_BoomerAMGSetSimple ( void *data, HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data, HYPRE_Int *simple );
 HYPRE_Int hypre_BoomerAMGSetAddLastLvl ( void *data, HYPRE_Int add_last_lvl );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol );
-HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol,
-                                                  HYPRE_Int level );
-HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data, HYPRE_Int nongalerk_num_tol,
-                                           HYPRE_Real *nongalerk_tol );
+HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol, HYPRE_Int level );
+HYPRE_Int hypre_BoomerAMGSetNonGalerkTol( void *data, HYPRE_Int nongalerk_num_tol, HYPRE_Real *nongalerk_tol);
 HYPRE_Int hypre_BoomerAMGSetRAP2 ( void *data, HYPRE_Int rap2 );
 HYPRE_Int hypre_BoomerAMGSetModuleRAP2 ( void *data, HYPRE_Int mod_rap2 );
 HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data, HYPRE_Int keepTranspose );

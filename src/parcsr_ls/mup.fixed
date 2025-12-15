@@ -214,7 +214,6 @@ hypre_BlockTridiagSolve
 hypre_BoomerAMGAdditiveCycle
 hypre_BoomerAMGBlockSolve
 hypre_BoomerAMGBuildCoarseOperator
-hypre_BoomerAMGBuildCoarseOperatorKT
 hypre_BoomerAMGBuildDirInterp
 hypre_BoomerAMGBuildDirInterpHost
 hypre_BoomerAMGBuildExtInterp
@@ -653,7 +652,6 @@ hypre_FSAISetupNative
 hypre_FSAISetupOMPDyn
 hypre_FSAISolve
 hypre_FindKapGrad
-hypre_GaussElimSetup
 hypre_GenerateCoordinates
 hypre_GenerateMultiPi
 hypre_GenerateMultipassPi
@@ -762,7 +760,6 @@ hypre_IntersectTwoArrays
 hypre_IntersectTwoBigArrays
 hypre_LINPACKcgpthy
 hypre_LINPACKcgtql1
-hypre_Level_L1Norms
 hypre_MGRAddVectorP
 hypre_MGRAddVectorR
 hypre_MGRApproximateInverse

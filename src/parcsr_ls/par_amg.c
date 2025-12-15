@@ -550,8 +550,12 @@ hypre_BoomerAMGCreate( void )
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
-   hypre_ParAMGDataStrongThresholdDBL(amg_data) = 0.25;
-   hypre_ParAMGDataMaxRowSumDBL(amg_data) = 1.0;
+   hypre_ParAMGDataVtempDBL(amg_data) = NULL;
+   hypre_ParAMGDataVtempFLT(amg_data) = NULL;
+   hypre_ParAMGDataVtempLONGDBL(amg_data) = NULL;
+   hypre_ParAMGDataZtempDBL(amg_data) = NULL;
+   hypre_ParAMGDataZtempFLT(amg_data) = NULL;
+   hypre_ParAMGDataZtempLONGDBL(amg_data) = NULL;
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -623,7 +627,7 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree((amg_data -> ilu_iter_setup_tolerance), HYPRE_MEMORY_HOST);
       hypre_TFree((amg_data -> fsai_threshold), HYPRE_MEMORY_HOST);
       hypre_TFree((amg_data -> fsai_kap_tolerance), HYPRE_MEMORY_HOST);
-      hypre_TFree((amg_data -> nongalerk_tol), HYPRE_MEMORY_HOST);
+      hypre_TFree((amg_data -> nongalerkin_tol), HYPRE_MEMORY_HOST);
       hypre_TFree((amg_data -> cheby_fraction), HYPRE_MEMORY_HOST);
       hypre_TFree((amg_data -> rel_resid_norm), HYPRE_MEMORY_HOST);
       hypre_TFree((amg_data -> interp_vectors_abs_q_trunc), HYPRE_MEMORY_HOST);

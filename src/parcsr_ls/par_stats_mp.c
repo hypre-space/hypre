@@ -404,7 +404,7 @@ hypre_MPAMGSetupStats_mp( void               *amg_vdata,
 
       precision = precision_array[level];
 
-      hypre_ParCSRMatrixSetDNumNonzeros(A_array[level]);
+      hypre_ParCSRMatrixSetDNumNonzeros_pre(precision, A_array[level]);
 
       global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
       num_coeffs[level] = global_nonzeros;

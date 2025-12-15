@@ -502,10 +502,8 @@ HYPRE_Int hypre_BoomerAMGSetSimple ( void *data, HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data, HYPRE_Int *simple );
 HYPRE_Int hypre_BoomerAMGSetAddLastLvl ( void *data, HYPRE_Int add_last_lvl );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol );
-HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol,
-                                                  HYPRE_Int level );
-HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data, HYPRE_Int nongalerk_num_tol,
-                                           HYPRE_Real *nongalerk_tol );
+HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data, HYPRE_Real nongalerkin_tol, HYPRE_Int level );
+HYPRE_Int hypre_BoomerAMGSetNonGalerkTol( void *data, HYPRE_Int nongalerk_num_tol, HYPRE_Real *nongalerk_tol);
 HYPRE_Int hypre_BoomerAMGSetRAP2 ( void *data, HYPRE_Int rap2 );
 HYPRE_Int hypre_BoomerAMGSetModuleRAP2 ( void *data, HYPRE_Int mod_rap2 );
 HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data, HYPRE_Int keepTranspose );

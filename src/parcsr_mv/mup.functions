@@ -20,6 +20,7 @@ HYPRE_ParCSRMatrixMatvecT
 HYPRE_ParCSRMatrixPrint
 HYPRE_ParCSRMatrixRead
 HYPRE_ParCSRMatrixRestoreRow
+HYPRE_ParCSRMatrixSetDNumNonzeros
 HYPRE_ParMultiVectorCreate
 HYPRE_ParVectorAxpy
 HYPRE_ParVectorCloneShallow
@@ -39,6 +40,7 @@ HYPRE_ParVectorScale
 HYPRE_ParVectorSetConstantValues
 HYPRE_ParVectorSetRandomValues
 HYPRE_VectorToParVector
+hypre_MatvecCommPkgCreate
 hypre_ParCSRMatrixClone
 hypre_ParCSRMatrixCopy
 hypre_ParCSRMatrixCreate
@@ -47,6 +49,9 @@ hypre_ParCSRMatrixInitialize_v2
 hypre_ParCSRMatrixMatvec
 hypre_ParCSRMatrixMatvecOutOfPlace
 hypre_ParCSRMatrixMatvecT
+hypre_ParCSRMatrixSetDNumNonzeros
+hypre_ParMatmul
+hypre_ParTMatmul
 hypre_ParVectorCopy
 hypre_ParVectorCreate
 hypre_ParVectorDestroy

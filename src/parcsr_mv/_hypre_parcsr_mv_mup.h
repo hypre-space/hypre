@@ -217,13 +217,6 @@ void
 hypre_MatTCommPkgCreate_core_long_dbl( MPI_Comm comm, HYPRE_BigInt *col_map_offd, HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_rows_diag, HYPRE_Int num_cols_diag, HYPRE_Int num_cols_offd, HYPRE_BigInt *row_starts, HYPRE_BigInt firstColDiag, HYPRE_BigInt *colMapOffd, HYPRE_Int *mat_i_diag, HYPRE_Int *mat_j_diag, HYPRE_Int *mat_i_offd, HYPRE_Int *mat_j_offd, HYPRE_Int data, HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs, HYPRE_Int **p_recv_vec_starts, HYPRE_Int *p_num_sends, HYPRE_Int **p_send_procs, HYPRE_Int **p_send_map_starts, HYPRE_Int **p_send_map_elmts );
 
 HYPRE_Int
-hypre_MatvecCommPkgCreate_flt( hypre_ParCSRMatrix *A );
-HYPRE_Int
-hypre_MatvecCommPkgCreate_dbl( hypre_ParCSRMatrix *A );
-HYPRE_Int
-hypre_MatvecCommPkgCreate_long_dbl( hypre_ParCSRMatrix *A );
-
-HYPRE_Int
 hypre_MatvecCommPkgDestroy_flt( hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int
 hypre_MatvecCommPkgDestroy_dbl( hypre_ParCSRCommPkg *comm_pkg );
@@ -896,13 +889,6 @@ HYPRE_Int
 hypre_ParCSRMatrixSetConstantValues_long_dbl( hypre_ParCSRMatrix *A, hypre_long_double value );
 
 HYPRE_Int
-hypre_ParCSRMatrixSetDNumNonzeros_flt( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixSetDNumNonzeros_dbl( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixSetDNumNonzeros_long_dbl( hypre_ParCSRMatrix *matrix );
-
-HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner_flt( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data );
 HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner_dbl( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data );
@@ -1022,13 +1008,6 @@ HYPRE_Int
 hypre_ParMatScaleDiagInv_F_long_dbl( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, hypre_long_double weight, HYPRE_Int *CF_marker );
 
 hypre_ParCSRMatrix *
-hypre_ParMatmul_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
-hypre_ParCSRMatrix *
-hypre_ParMatmul_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
-hypre_ParCSRMatrix *
-hypre_ParMatmul_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
-
-hypre_ParCSRMatrix *
 hypre_ParMatmul_FC_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
 hypre_ParCSRMatrix *
 hypre_ParMatmul_FC_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
@@ -1055,13 +1034,6 @@ hypre_ParVector *
 hypre_ParMultiVectorCreate_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning, HYPRE_Int num_vectors );
 hypre_ParVector *
 hypre_ParMultiVectorCreate_long_dbl( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning, HYPRE_Int num_vectors );
-
-hypre_ParCSRMatrix *
-hypre_ParTMatmul_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
-hypre_ParCSRMatrix *
-hypre_ParTMatmul_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
-hypre_ParCSRMatrix *
-hypre_ParTMatmul_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 
 HYPRE_Int
 hypre_ParVectorAxpy_flt( hypre_float alpha, hypre_ParVector *x, hypre_ParVector *y );
@@ -1435,6 +1407,15 @@ HYPRE_Generate2DSystem_long_dbl( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L
 HYPRE_ParCSR_System_Problem *
 HYPRE_Generate2DSystem( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_ParVector H_b1, HYPRE_ParVector H_b2, HYPRE_ParVector H_x1, HYPRE_ParVector H_x2, void *M_vals );
 
+HYPRE_Int
+hypre_MatvecCommPkgCreate_flt( hypre_ParCSRMatrix *A );
+HYPRE_Int
+hypre_MatvecCommPkgCreate_dbl( hypre_ParCSRMatrix *A );
+HYPRE_Int
+hypre_MatvecCommPkgCreate_long_dbl( hypre_ParCSRMatrix *A );
+HYPRE_Int
+hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A );
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_flt( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
 hypre_ParCSRMatrix*
@@ -1506,6 +1487,33 @@ HYPRE_Int
 hypre_ParCSRMatrixMatvecT_long_dbl( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
 HYPRE_Int
 hypre_ParCSRMatrixMatvecT( hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros_flt( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros_long_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix );
+
+hypre_ParCSRMatrix *
+hypre_ParMatmul_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParMatmul_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParMatmul_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+
+hypre_ParCSRMatrix *
+hypre_ParTMatmul_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParTMatmul_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParTMatmul_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+hypre_ParCSRMatrix *
+hypre_ParTMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 
 HYPRE_Int
 hypre_ParVectorCopy_flt( hypre_ParVector *x, hypre_ParVector *y );
@@ -1587,6 +1595,9 @@ HYPRE_Destroy2DSystem_pre( HYPRE_Precision precision, HYPRE_ParCSR_System_Proble
 HYPRE_ParCSR_System_Problem *
 HYPRE_Generate2DSystem_pre( HYPRE_Precision precision, HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_ParVector H_b1, HYPRE_ParVector H_b2, HYPRE_ParVector H_x1, HYPRE_ParVector H_x2, void *M_vals );
 
+HYPRE_Int
+hypre_MatvecCommPkgCreate_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A );
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
 
@@ -1610,6 +1621,15 @@ hypre_ParCSRMatrixMatvecOutOfPlace_pre( HYPRE_Precision precision, hypre_long_do
 
 HYPRE_Int
 hypre_ParCSRMatrixMatvecT_pre( HYPRE_Precision precision, hypre_long_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_long_double beta, hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParCSRMatrixSetDNumNonzeros_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix );
+
+hypre_ParCSRMatrix *
+hypre_ParMatmul_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
+
+hypre_ParCSRMatrix *
+hypre_ParTMatmul_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 
 HYPRE_Int
 hypre_ParVectorCopy_pre( HYPRE_Precision precision, hypre_ParVector *x, hypre_ParVector *y );

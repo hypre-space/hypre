@@ -34,6 +34,7 @@
 #undef HYPRE_ParCSRMatrixPrint
 #undef HYPRE_ParCSRMatrixRead
 #undef HYPRE_ParCSRMatrixRestoreRow
+#undef HYPRE_ParCSRMatrixSetDNumNonzeros
 #undef HYPRE_ParMultiVectorCreate
 #undef HYPRE_ParVectorAxpy
 #undef HYPRE_ParVectorCloneShallow
@@ -53,6 +54,7 @@
 #undef HYPRE_ParVectorSetConstantValues
 #undef HYPRE_ParVectorSetRandomValues
 #undef HYPRE_VectorToParVector
+#undef hypre_MatvecCommPkgCreate
 #undef hypre_ParCSRMatrixClone
 #undef hypre_ParCSRMatrixCopy
 #undef hypre_ParCSRMatrixCreate
@@ -61,6 +63,9 @@
 #undef hypre_ParCSRMatrixMatvec
 #undef hypre_ParCSRMatrixMatvecOutOfPlace
 #undef hypre_ParCSRMatrixMatvecT
+#undef hypre_ParCSRMatrixSetDNumNonzeros
+#undef hypre_ParMatmul
+#undef hypre_ParTMatmul
 #undef hypre_ParVectorCopy
 #undef hypre_ParVectorCreate
 #undef hypre_ParVectorDestroy
@@ -96,7 +101,6 @@
 #undef hypre_LocateAssumedPartition
 #undef hypre_MatTCommPkgCreate
 #undef hypre_MatTCommPkgCreate_core
-#undef hypre_MatvecCommPkgCreate
 #undef hypre_MatvecCommPkgDestroy
 #undef hypre_MergeDiagAndOffd
 #undef hypre_MergeDiagAndOffdHost
@@ -202,7 +206,6 @@
 #undef hypre_ParCSRMatrixRestoreRow
 #undef hypre_ParCSRMatrixScale
 #undef hypre_ParCSRMatrixSetConstantValues
-#undef hypre_ParCSRMatrixSetDNumNonzeros
 #undef hypre_ParCSRMatrixSetDataOwner
 #undef hypre_ParCSRMatrixSetNumNonzeros
 #undef hypre_ParCSRMatrixSetNumNonzeros_core
@@ -225,12 +228,10 @@
 #undef hypre_ParCSRTMatMatKTHost
 #undef hypre_ParMatMinus_F
 #undef hypre_ParMatScaleDiagInv_F
-#undef hypre_ParMatmul
 #undef hypre_ParMatmul_FC
 #undef hypre_ParMatmul_RowSizes
 #undef hypre_ParMatmul_RowSizes_Marked
 #undef hypre_ParMultiVectorCreate
-#undef hypre_ParTMatmul
 #undef hypre_ParVectorAxpy
 #undef hypre_ParVectorAxpyz
 #undef hypre_ParVectorCloneDeep_v2

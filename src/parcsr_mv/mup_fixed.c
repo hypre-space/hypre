@@ -241,14 +241,6 @@ hypre_MatTCommPkgCreate_core( MPI_Comm comm, HYPRE_BigInt *col_map_offd, HYPRE_B
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MatvecCommPkgCreate( hypre_ParCSRMatrix *A )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MatvecCommPkgCreate)( A );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MatvecCommPkgDestroy)( comm_pkg );
@@ -1017,14 +1009,6 @@ hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A, HYPRE_Complex value 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSetDNumNonzeros)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSetDataOwner)( matrix, owns_data );
@@ -1161,14 +1145,6 @@ hypre_ParMatScaleDiagInv_F( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *A, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
-hypre_ParMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParMatmul)( A, B );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParCSRMatrix *
 hypre_ParMatmul_FC( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParMatmul_FC)( A, P, CF_marker, dof_func, dof_func_offd );
@@ -1196,14 +1172,6 @@ hypre_ParVector *
 hypre_ParMultiVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning, HYPRE_Int num_vectors )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParMultiVectorCreate)( comm, global_size, partitioning, num_vectors );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParCSRMatrix *
-hypre_ParTMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParTMatmul)( A, B );
 }
 
 /*--------------------------------------------------------------------------*/

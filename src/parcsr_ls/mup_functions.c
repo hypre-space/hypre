@@ -5804,6 +5804,15 @@ HYPRE_TempParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix *RT, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose, hypre_ParCSRMatrix **RAP_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_BoomerAMGBuildCoarseOperatorKT_pre( precision, RT, A, P, keepTranspose, RAP_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoomerAMGCoarseParms( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker, hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -5921,6 +5930,15 @@ hypre_Coarsen_Options( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int l
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_GaussElimSetup( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_GaussElimSetup_pre( precision, amg_data, level, solver_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_GaussElimSolve( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -5934,6 +5952,15 @@ hypre_Interp_Options( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_IntArr
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_Interp_Options_pre( precision, A, S, CF_marker, coarse_pnts_global, dof_func_data, interp_type, num_functions, debug_flag, P_max_elmts, trunc_factor, sep_weight, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Level_L1Norms( hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker, HYPRE_Int *grid_relax_type, HYPRE_Int level, HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_Level_L1Norms_pre( precision, A, CF_marker, grid_relax_type, level, num_levels, relax_order, l1_norm_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

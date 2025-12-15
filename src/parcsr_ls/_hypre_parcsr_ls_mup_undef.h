@@ -694,6 +694,7 @@
 #undef HYPRE_SchwarzSetup
 #undef HYPRE_SchwarzSolve
 #undef HYPRE_TempParCSRSetupInterpreter
+#undef hypre_BoomerAMGBuildCoarseOperatorKT
 #undef hypre_BoomerAMGCoarseParms
 #undef hypre_BoomerAMGCorrectCFMarker
 #undef hypre_BoomerAMGCorrectCFMarker2
@@ -707,8 +708,10 @@
 #undef hypre_BoomerAMGRelaxIF
 #undef hypre_BoomerAMGSetRelResidualNorm
 #undef hypre_Coarsen_Options
+#undef hypre_GaussElimSetup
 #undef hypre_GaussElimSolve
 #undef hypre_Interp_Options
+#undef hypre_Level_L1Norms
 #undef hypre_MPassInterp_Options
 #undef hypre_StageOneInterp_Options
 #undef hypre_StageTwoInterp_Options
@@ -929,7 +932,6 @@
 #undef hypre_BoomerAMGAdditiveCycle
 #undef hypre_BoomerAMGBlockSolve
 #undef hypre_BoomerAMGBuildCoarseOperator
-#undef hypre_BoomerAMGBuildCoarseOperatorKT
 #undef hypre_BoomerAMGBuildDirInterp
 #undef hypre_BoomerAMGBuildDirInterpHost
 #undef hypre_BoomerAMGBuildExtInterp
@@ -1368,7 +1370,6 @@
 #undef hypre_FSAISetupOMPDyn
 #undef hypre_FSAISolve
 #undef hypre_FindKapGrad
-#undef hypre_GaussElimSetup
 #undef hypre_GenerateCoordinates
 #undef hypre_GenerateMultiPi
 #undef hypre_GenerateMultipassPi
@@ -1477,7 +1478,6 @@
 #undef hypre_IntersectTwoBigArrays
 #undef hypre_LINPACKcgpthy
 #undef hypre_LINPACKcgtql1
-#undef hypre_Level_L1Norms
 #undef hypre_MGRAddVectorP
 #undef hypre_MGRAddVectorR
 #undef hypre_MGRApproximateInverse

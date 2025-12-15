@@ -142,10 +142,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_double    cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
    HYPRE_Real strong_threshold;
-   HYPRE_Real  max_row_sum;
-   HYPRE_Real trunc_factor;
-   HYPRE_Real agg_trunc_factor, agg_P12_trunc_factor;
-
+   HYPRE_Real max_row_sum;
+   HYPRE_Real trunc_factor, agg_trunc_factor, agg_P12_trunc_factor;
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
@@ -268,8 +266,6 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
    useSabs = hypre_ParAMGDataSabs(amg_data);
-   strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
-   max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
    agg_trunc_factor = hypre_ParAMGDataAggTruncFactor(amg_data);
    agg_P12_trunc_factor = hypre_ParAMGDataAggP12TruncFactor(amg_data);
@@ -421,10 +417,12 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       }
       else /* max_levels > 1 */
       {
+	 hypre_BoomerAMGGetStrongThreshold_pre(level_precision, amg_data, &strong_threshold);
+	 hypre_BoomerAMGGetMaxRowSum_pre(level_precision, amg_data, &max_row_sum);
 	 hypre_Strength_Options_pre(level_precision, A_array[level], strong_threshold, 
-			             max_row_sum,
-	          	             num_functions, nodal, nodal_diag, 
-			  	     useSabs, dof_func_data, &S);
+			            max_row_sum,
+	          	            num_functions, nodal, nodal_diag, 
+			  	    useSabs, dof_func_data, &S);
 	 if (nodal) 
          {
             SN = S;
@@ -652,115 +650,35 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             if (grid_relax_points) { grid_relax_points[3][0] = 0; }
          }
 
-	 if (level_precision == HYPRE_REAL_DOUBLE)
+         hypre_ParCSRMatrixDestroy_pre(level_precision, S);
+         hypre_ParCSRMatrixDestroy_pre(level_precision, P);
+         if (level > 0)
          {
-            hypre_ParCSRMatrixDestroy_dbl(S);
-            hypre_ParCSRMatrixDestroy_dbl(P);
-            if (level > 0)
-            {
-            /* note special case treatment of CF_marker is necessary
-             * to do CF relaxation correctly when num_levels = 1 */
-               hypre_IntArrayDestroy_dbl(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_dbl(F_array[level]);
-               hypre_ParVectorDestroy_dbl(U_array[level]);
-            }
-            if (level + 1 < max_levels)
-            {
-               hypre_IntArrayDestroy_dbl(dof_func_array[level + 1]);
-               dof_func_array[level + 1] = NULL;
-            }
+         /* note special case treatment of CF_marker is necessary
+          * to do CF relaxation correctly when num_levels = 1 */
+            hypre_IntArrayDestroy_pre(level_precision, CF_marker_array[level]);
+            CF_marker_array[level] = NULL;
+            hypre_ParVectorDestroy_pre(level_precision, F_array[level]);
+            hypre_ParVectorDestroy_pre(level_precision, U_array[level]);
          }
-	 else if (level_precision == HYPRE_REAL_SINGLE)
+         if (level + 1 < max_levels)
          {
-            hypre_ParCSRMatrixDestroy_flt(S);
-            hypre_ParCSRMatrixDestroy_flt(P);
-            if (level > 0)
-            {
-            /* note special case treatment of CF_marker is necessary
-             * to do CF relaxation correctly when num_levels = 1 */
-               hypre_IntArrayDestroy_flt(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_flt(F_array[level]);
-               hypre_ParVectorDestroy_flt(U_array[level]);
-            }
-            if (level + 1 < max_levels)
-            {
-               hypre_IntArrayDestroy_flt(dof_func_array[level + 1]);
-               dof_func_array[level + 1] = NULL;
-            }
+            hypre_IntArrayDestroy_pre(level_precision, dof_func_array[level + 1]);
+            dof_func_array[level + 1] = NULL;
          }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_ParCSRMatrixDestroy_long_dbl(S);
-            hypre_ParCSRMatrixDestroy_long_dbl(P);
-            if (level > 0)
-            {
-            /* note special case treatment of CF_marker is necessary
-             * to do CF relaxation correctly when num_levels = 1 */
-               hypre_IntArrayDestroy_long_dbl(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_long_dbl(F_array[level]);
-               hypre_ParVectorDestroy_long_dbl(U_array[level]);
-            }
-            if (level + 1 < max_levels)
-            {
-               hypre_IntArrayDestroy_long_dbl(dof_func_array[level + 1]);
-               dof_func_array[level + 1] = NULL;
-            }
-         }
-         else 
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
-
-         break;
       }
       if (level < agg_num_levels && coarse_size < min_coarse_size)
       {
-	 if (level_precision == HYPRE_REAL_DOUBLE)
+         hypre_ParCSRMatrixDestroy_pre(level_precision, S);
+         hypre_ParCSRMatrixDestroy_pre(level_precision, P);
+         if (level > 0)
          {
-            hypre_ParCSRMatrixDestroy_dbl(S);
-            hypre_ParCSRMatrixDestroy_dbl(P);
-            if (level > 0)
-            {
-               hypre_IntArrayDestroy_dbl(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_dbl(F_array[level]);
-               hypre_ParVectorDestroy_dbl(U_array[level]);
-            }
-            hypre_IntArrayDestroy_dbl(dof_func_array[level + 1]);
-	 }
-	 if (level_precision == HYPRE_REAL_DOUBLE)
-         {
-            hypre_ParCSRMatrixDestroy_flt(S);
-            hypre_ParCSRMatrixDestroy_flt(P);
-            if (level > 0)
-            {
-               hypre_IntArrayDestroy_flt(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_flt(F_array[level]);
-               hypre_ParVectorDestroy_flt(U_array[level]);
-            }
-            hypre_IntArrayDestroy_flt(dof_func_array[level + 1]);
-	 }
-	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_ParCSRMatrixDestroy_long_dbl(S);
-            hypre_ParCSRMatrixDestroy_long_dbl(P);
-            if (level > 0)
-            {
-               hypre_IntArrayDestroy_long_dbl(CF_marker_array[level]);
-               CF_marker_array[level] = NULL;
-               hypre_ParVectorDestroy_long_dbl(F_array[level]);
-               hypre_ParVectorDestroy_long_dbl(U_array[level]);
-            }
-            hypre_IntArrayDestroy_long_dbl(dof_func_array[level + 1]);
-	 }
-         else 
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+            hypre_IntArrayDestroy_pre(level_precision, CF_marker_array[level]);
+            CF_marker_array[level] = NULL;
+            hypre_ParVectorDestroy_pre(level_precision, F_array[level]);
+            hypre_ParVectorDestroy_pre(level_precision, U_array[level]);
          }
+         hypre_IntArrayDestroy_pre(level_precision, dof_func_array[level + 1]);
          dof_func_array[level + 1] = NULL;
          coarse_size = fine_size;
 
@@ -780,105 +698,34 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
       hypre_ParCSRMatrixPrecision(P) = level_precision;
 
-      if (level_precision == HYPRE_REAL_DOUBLE)
-      {
-         hypre_ParCSRMatrixDestroy_dbl(S);
+      hypre_ParCSRMatrixDestroy_pre(level_precision, S);
 
-         P_array[level] = P;
+      P_array[level] = P;
 
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
 
-         if (rap2)
-         {
-            hypre_ParCSRMatrix *Q = NULL;
-	    Q = hypre_ParMatmul_dbl(A_array[level], P_array[level]);
-            A_H = hypre_ParTMatmul_dbl(P_array[level], Q);
-            if (num_procs > 1)
-            {
-               hypre_MatvecCommPkgCreate_dbl(A_H);
-            }
-            /* Delete AP */
-            hypre_ParCSRMatrixDestroy_dbl(Q);
-         }
-         else
-         {
-            hypre_BoomerAMGBuildCoarseOperatorKT_dbl(P_array[level], A_array[level],
-                                              P_array[level], keepTranspose, &A_H);
-         }
-         if (num_procs > 1 && hypre_ParCSRMatrixCommPkg(A_H) == NULL)
-         {
-            hypre_MatvecCommPkgCreate_dbl(A_H);
-         }
-      }
-      else if (level_precision == HYPRE_REAL_SINGLE)
+      if (rap2)
       {
-         hypre_ParCSRMatrixDestroy_flt(S);
-
-         P_array[level] = P;
-
-      /*-------------------------------------------------------------
-       * Build coarse-grid operator, A_array[level+1] by R*A*P
-       *--------------------------------------------------------------*/
-
-         if (rap2)
+         hypre_ParCSRMatrix *Q = NULL;
+         Q = hypre_ParMatmul_pre(level_precision, A_array[level], P_array[level]);
+         A_H = hypre_ParTMatmul_pre(level_precision, P_array[level], Q);
+         if (num_procs > 1)
          {
-            hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul_flt(A_array[level], P_array[level]);
-            A_H = hypre_ParTMatmul_flt(P_array[level], Q);
-            if (num_procs > 1)
-            {
-               hypre_MatvecCommPkgCreate_flt(A_H);
-            }
-            /* Delete AP */
-            hypre_ParCSRMatrixDestroy_flt(Q);
+            hypre_MatvecCommPkgCreate_pre(level_precision, A_H);
          }
-         else
-         {
-            hypre_BoomerAMGBuildCoarseOperatorKT_flt(P_array[level], A_array[level],
-                                              P_array[level], keepTranspose, &A_H);
-         }
-         if (num_procs > 1 && hypre_ParCSRMatrixCommPkg(A_H) == NULL)
-         {
-            hypre_MatvecCommPkgCreate_flt(A_H);
-         }
+         /* Delete AP */
+         hypre_ParCSRMatrixDestroy_pre(level_precision, Q);
       }
-      else if (level_precision == HYPRE_REAL_LONGDOUBLE)
+      else
       {
-         hypre_ParCSRMatrixDestroy_long_dbl(S);
-
-         P_array[level] = P;
-
-      /*-------------------------------------------------------------
-       * Build coarse-grid operator, A_array[level+1] by R*A*P
-       *--------------------------------------------------------------*/
-
-         if (rap2)
-         {
-            hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul_long_dbl(A_array[level], P_array[level]);
-            A_H = hypre_ParTMatmul_long_dbl(P_array[level], Q);
-            if (num_procs > 1)
-            {
-               hypre_MatvecCommPkgCreate_long_dbl(A_H);
-            }
-            /* Delete AP */
-            hypre_ParCSRMatrixDestroy_long_dbl(Q);
-         }
-         else
-         {
-            hypre_BoomerAMGBuildCoarseOperatorKT_long_dbl(P_array[level], A_array[level],
-                                              P_array[level], keepTranspose, &A_H);
-         }
-         if (num_procs > 1 && hypre_ParCSRMatrixCommPkg(A_H) == NULL)
-         {
-            hypre_MatvecCommPkgCreate_long_dbl(A_H);
-         }
+         hypre_BoomerAMGBuildCoarseOperatorKT_pre(level_precision, P_array[level], A_array[level],
+                                                  P_array[level], keepTranspose, &A_H);
       }
-      else 
+      if (num_procs > 1 && hypre_ParCSRMatrixCommPkg(A_H) == NULL)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+         hypre_MatvecCommPkgCreate_pre(level_precision, A_H);
       }
 
       ++level;
@@ -913,22 +760,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       /* Gaussian elimination on the coarsest level */
       if (coarse_size <= coarse_threshold)
       {
-         if (precision_array[level] == HYPRE_REAL_DOUBLE)
-         {
-            hypre_GaussElimSetup_dbl(amg_data, level, grid_relax_type[3]);
-         }
-	 else if (precision_array[level] == HYPRE_REAL_SINGLE)
-         {
-            hypre_GaussElimSetup_flt(amg_data, level, grid_relax_type[3]);
-         }
-	 else if (precision_array[level] == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_GaussElimSetup_long_dbl(amg_data, level, grid_relax_type[3]);
-         }
-         else 
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_GaussElimSetup_pre(precision_array[level], amg_data, level, grid_relax_type[3]);
       }
       else
       {
@@ -938,58 +770,19 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    if (level > 0)
    {
-      if (precision_array[level] == HYPRE_REAL_DOUBLE)
-      {
-         F_array[level] =
-         hypre_ParVectorCreate_dbl(hypre_ParCSRMatrixComm(A_array[level]),
-                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_dbl(F_array[level], memory_location);
+      F_array[level] =
+      hypre_ParVectorCreate_pre(level_precision, hypre_ParCSRMatrixComm(A_array[level]),
+                                hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
+                                hypre_ParCSRMatrixRowStarts(A_array[level]));
+      hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
+      hypre_ParVectorInitialize_v2_pre(level_precision, F_array[level], memory_location);
 
-         U_array[level] =
-         hypre_ParVectorCreate_dbl(hypre_ParCSRMatrixComm(A_array[level]),
-                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_dbl(U_array[level], memory_location);
-      }
-      else if (precision_array[level] == HYPRE_REAL_SINGLE)
-      {
-         F_array[level] =
-         hypre_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A_array[level]),
-                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_flt(F_array[level], memory_location);
-
-         U_array[level] =
-         hypre_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A_array[level]),
-                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_flt(U_array[level], memory_location);
-      }
-      else if (precision_array[level] == HYPRE_REAL_LONGDOUBLE)
-      {
-         F_array[level] =
-         hypre_ParVectorCreate_long_dbl(hypre_ParCSRMatrixComm(A_array[level]),
-                                        hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                        hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_long_dbl(F_array[level], memory_location);
-
-         U_array[level] =
-         hypre_ParVectorCreate_long_dbl(hypre_ParCSRMatrixComm(A_array[level]),
-                                        hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
-                                        hypre_ParCSRMatrixRowStarts(A_array[level]));
-         hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
-         hypre_ParVectorInitialize_v2_long_dbl(U_array[level], memory_location);
-      }
-      else 
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      U_array[level] =
+      hypre_ParVectorCreate_pre(level_precision, hypre_ParCSRMatrixComm(A_array[level]),
+                                hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
+                                hypre_ParCSRMatrixRowStarts(A_array[level]));
+      hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
+      hypre_ParVectorInitialize_v2_pre(level_precision, U_array[level], memory_location);
    }
 
    /*-----------------------------------------------------------------------
@@ -1020,28 +813,9 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    for (j = 0; j < num_levels; j++)
    {
       hypre_Vector *l1_norms_tmp = NULL;
-      if (precision_array[j] == HYPRE_REAL_DOUBLE)
-      {
-         hypre_Level_L1Norms_dbl(A_array[j], CF_marker_array[j], 
-		                 grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
-         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_DOUBLE;
-      }
-      else if (precision_array[j] == HYPRE_REAL_SINGLE)
-      {
-         hypre_Level_L1Norms_flt(A_array[j], CF_marker_array[j], 
-		                 grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
-         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_SINGLE;
-      }
-      else if (precision_array[j] == HYPRE_REAL_LONGDOUBLE)
-      {
-         hypre_Level_L1Norms_long_dbl(A_array[j], CF_marker_array[j], 
-		                      grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
-         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_LONGDOUBLE;
-      }
-      else 
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      hypre_Level_L1Norms_pre(precision_array[j], A_array[j], CF_marker_array[j], 
+	                      grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
+      hypre_VectorPrecision(l1_norms_tmp) = precision_array[j];
       l1_norms[j] = l1_norms_tmp;
       l1_norms_tmp = NULL;
    } /* end of levels loop */
@@ -1049,31 +823,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    if (amg_logging > 1)
    {
-      if (precision_array[0] == HYPRE_REAL_DOUBLE)
-      {
-         Residual_array = hypre_ParVectorCreate_dbl(hypre_ParCSRMatrixComm(A_array[0]),
-                                                    hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                                    hypre_ParCSRMatrixRowStarts(A_array[0]) );
-         hypre_ParVectorInitialize_v2_dbl(Residual_array, memory_location);
-      }
-      else if (precision_array[0] == HYPRE_REAL_SINGLE)
-      {
-         Residual_array = hypre_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A_array[0]),
-                                                    hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                                    hypre_ParCSRMatrixRowStarts(A_array[0]) );
-         hypre_ParVectorInitialize_v2_flt(Residual_array, memory_location);
-      }
-      else if (precision_array[0] == HYPRE_REAL_LONGDOUBLE)
-      {
-         Residual_array = hypre_ParVectorCreate_long_dbl(hypre_ParCSRMatrixComm(A_array[0]),
-                                                         hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                                                         hypre_ParCSRMatrixRowStarts(A_array[0]) );
-         hypre_ParVectorInitialize_v2_long_dbl(Residual_array, memory_location);
-      }
-      else 
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      Residual_array = hypre_ParVectorCreate_pre(precision_array[0], hypre_ParCSRMatrixComm(A_array[0]),
+                                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                                 hypre_ParCSRMatrixRowStarts(A_array[0]) );
+      hypre_ParVectorInitialize_v2_pre(precision_array[0], Residual_array, memory_location);
       hypre_ParAMGDataResidual(amg_data) = Residual_array;
    }
    else
@@ -1086,22 +839,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       cum_nnz_AP = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
       for (j = 0; j < num_levels - 1; j++)
       {
-         if (precision_array[j] == HYPRE_REAL_DOUBLE)
-         {
-            hypre_ParCSRMatrixSetDNumNonzeros_dbl(P_array[j]);
-         }
-	 else if (precision_array[j] == HYPRE_REAL_SINGLE)
-         {
-            hypre_ParCSRMatrixSetDNumNonzeros_flt(P_array[j]);
-         }
-	 else if (precision_array[j] == HYPRE_REAL_LONGDOUBLE)
-         {
-            hypre_ParCSRMatrixSetDNumNonzeros_long_dbl(P_array[j]);
-         }
-         else 
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         hypre_ParCSRMatrixSetDNumNonzeros_pre(precision_array[j], P_array[j]);
          cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
          cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
       }

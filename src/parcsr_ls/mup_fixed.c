@@ -1729,14 +1729,6 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix *RT, hypre_ParCSRMatrix *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix *RT, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keepTranspose, hypre_ParCSRMatrix **RAP_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGBuildCoarseOperatorKT)( RT, A, P, keepTranspose, RAP_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int interp_type, hypre_ParCSRMatrix **P_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGBuildDirInterp)( A, CF_marker, S, num_cpts_global, num_functions, dof_func, debug_flag, trunc_factor, max_elmts, interp_type, P_ptr );
@@ -5065,14 +5057,6 @@ hypre_FindKapGrad( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient, HYPR
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_GaussElimSetup( hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int solver_type )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GaussElimSetup)( amg_data, level, solver_type );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_GenerateMultiPi( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *P, HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, hypre_ParCSRMatrix **Pi_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GenerateMultiPi)( A, S, P, c_pts_starts, pass_order, pass_marker, pass_marker_offd, num_points, color, num_functions, dof_func, dof_func_offd, Pi_ptr );
@@ -5916,14 +5900,6 @@ HYPRE_Int
 hypre_LINPACKcgtql1( HYPRE_Int *n, HYPRE_Real *d, HYPRE_Real *e, HYPRE_Int *ierr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_LINPACKcgtql1)( n, d, e, ierr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_Level_L1Norms( hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker, HYPRE_Int *grid_relax_type, HYPRE_Int level, HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_Level_L1Norms)( A, CF_marker, grid_relax_type, level, num_levels, relax_order, l1_norm_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
