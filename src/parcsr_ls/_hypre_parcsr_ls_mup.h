@@ -2196,11 +2196,11 @@ hypre_BoomerAMGDD_PackResidualBuffer_dbl( hypre_AMGDDCompGrid **compGrid, hypre_
 HYPRE_Complex*
 hypre_BoomerAMGDD_PackResidualBuffer_long_dbl( hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
 
-HYPRE_Int*
+HYPRE_BigInt*
 hypre_BoomerAMGDD_PackSendBuffer_flt( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
-HYPRE_Int*
+HYPRE_BigInt*
 hypre_BoomerAMGDD_PackSendBuffer_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
-HYPRE_Int*
+HYPRE_BigInt*
 hypre_BoomerAMGDD_PackSendBuffer_long_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
 
 HYPRE_Int
@@ -2225,11 +2225,11 @@ HYPRE_Int
 hypre_BoomerAMGDD_SetupNearestProcessorNeighbors_long_dbl( hypre_ParCSRMatrix *A, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int *padding, HYPRE_Int num_ghost_layers );
 
 HYPRE_Int
-hypre_BoomerAMGDD_UnpackRecvBuffer_flt( hypre_ParAMGDDData *amgdd_data, HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
+hypre_BoomerAMGDD_UnpackRecvBuffer_flt( hypre_ParAMGDDData *amgdd_data, HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
 HYPRE_Int
-hypre_BoomerAMGDD_UnpackRecvBuffer_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
+hypre_BoomerAMGDD_UnpackRecvBuffer_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
 HYPRE_Int
-hypre_BoomerAMGDD_UnpackRecvBuffer_long_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
+hypre_BoomerAMGDD_UnpackRecvBuffer_long_dbl( hypre_ParAMGDDData *amgdd_data, HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
 
 HYPRE_Int
 hypre_BoomerAMGDD_UnpackResidualBuffer_flt( hypre_float *buffer, hypre_AMGDDCompGrid **compGrid, hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int current_level, HYPRE_Int proc );
@@ -4555,6 +4555,13 @@ hypre_ILUGetLocalPerm_dbl( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr, HYPRE_In
 HYPRE_Int
 hypre_ILUGetLocalPerm_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr, HYPRE_Int *nLU, HYPRE_Int reordering_type );
 
+const char*
+hypre_ILUGetName_flt( void *ilu_vdata );
+const char*
+hypre_ILUGetName_dbl( void *ilu_vdata );
+const char*
+hypre_ILUGetName_long_dbl( void *ilu_vdata );
+
 HYPRE_Int
 hypre_ILUGetNumIterations_flt( void *ilu_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
@@ -5319,11 +5326,11 @@ HYPRE_Int
 hypre_MGRCoarsen_long_dbl( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int final_coarse_size, HYPRE_Int *final_coarse_indexes, HYPRE_Int debug_flag, hypre_IntArray **CF_marker, HYPRE_Int last_level );
 
 HYPRE_Int
-hypre_MGRColLumpedRestrict_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_flt( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int
-hypre_MGRColLumpedRestrict_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_dbl( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int
-hypre_MGRColLumpedRestrict_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
+hypre_MGRColLumpedRestrict_long_dbl( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr );
 
 void *
 hypre_MGRCreate_flt( void );
@@ -5380,6 +5387,34 @@ HYPRE_Int
 hypre_MGRDestroyGSElimData_dbl( void *mgr_vdata );
 HYPRE_Int
 hypre_MGRDestroyGSElimData_long_dbl( void *mgr_vdata );
+
+void *
+hypre_MGRDirectSolverCreate_flt( void );
+void *
+hypre_MGRDirectSolverCreate_dbl( void );
+void *
+hypre_MGRDirectSolverCreate_long_dbl( void );
+
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_flt( void *solver );
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_dbl( void *solver );
+HYPRE_Int
+hypre_MGRDirectSolverDestroy_long_dbl( void *solver );
+
+HYPRE_Int
+hypre_MGRDirectSolverSetup_flt( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSetup_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSetup_long_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+
+HYPRE_Int
+hypre_MGRDirectSolverSolve_flt( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSolve_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRDirectSolverSolve_long_dbl( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
 
 HYPRE_Int
 hypre_MGRFrelaxVcycle_flt( void *mgr_vdata, hypre_ParVector *f, hypre_ParVector *u );

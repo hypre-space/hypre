@@ -2568,7 +2568,7 @@ hypre_BoomerAMGDD_PackResidualBuffer( hypre_AMGDDCompGrid **compGrid, hypre_AMGD
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int*
+HYPRE_BigInt*
 hypre_BoomerAMGDD_PackSendBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc, HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGDD_PackSendBuffer)( amgdd_data, proc, current_level, padding, send_flag_buffer_size );
@@ -2601,7 +2601,7 @@ hypre_BoomerAMGDD_SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_A
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGDD_UnpackRecvBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number )
+hypre_BoomerAMGDD_UnpackRecvBuffer( hypre_ParAMGDDData *amgdd_data, HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGDD_UnpackRecvBuffer)( amgdd_data, recv_buffer, A_tmp_info, recv_map_send_buffer_size, nodes_added_on_level, current_level, buffer_number );
 }
@@ -5264,6 +5264,14 @@ hypre_ILUGetLocalPerm( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr, HYPRE_Int *n
 
 /*--------------------------------------------------------------------------*/
 
+const char*
+hypre_ILUGetName( void *ilu_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUGetName)( ilu_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ILUGetNumIterations( void *ilu_vdata, HYPRE_Int *num_iterations )
 {
@@ -6137,9 +6145,9 @@ hypre_MGRCoarsen( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int final_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr )
+hypre_MGRColLumpedRestrict( HYPRE_Int colsum_type, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRColLumpedRestrict)( A, A_FF, A_CF, CF_marker, Wr_ptr, R_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRColLumpedRestrict)( colsum_type, A, A_FF, A_CF, CF_marker, Wr_ptr, R_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -6204,6 +6212,38 @@ HYPRE_Int
 hypre_MGRDestroyGSElimData( void *mgr_vdata )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRDestroyGSElimData)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+void *
+hypre_MGRDirectSolverCreate( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRDirectSolverCreate)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRDirectSolverDestroy( void *solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRDirectSolverDestroy)( solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRDirectSolverSetup)( solver, A, f, u );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRDirectSolverSolve)( solver, A, f, u );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -157,7 +157,6 @@ hypre_ReAlloc
 hypre_ReAlloc_v2
 hypre_RestoreLogLevel
 hypre_SeedRand
-hypre_SetCubMemPoolSize
 hypre_SetDevice
 hypre_SetFinalized
 hypre_SetGaussSeidelMethod

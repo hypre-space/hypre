@@ -8,7 +8,7 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(__linux__) && defined(HYPRE_DEBUG) && !defined(HYPRE_LONG_DOUBLE)
+#if defined(__linux__) && defined(HYPRE_USING_FPE_TRAP) && !defined(HYPRE_LONG_DOUBLE)
 #ifndef __USE_GNU
 #define __USE_GNU
 #endif
@@ -415,7 +415,7 @@ HYPRE_Initialize(void)
    hypre_MagmaInitialize();
 #endif
 
-#if defined(__linux__) && defined(HYPRE_DEBUG) && !defined(HYPRE_LONG_DOUBLE)
+#if defined(__linux__) && defined(HYPRE_USING_FPE_TRAP) && !defined(HYPRE_LONG_DOUBLE)
    feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
 #endif
 

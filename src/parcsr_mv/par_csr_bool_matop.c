@@ -487,8 +487,8 @@ hypre_ParCSRBooleanMatrixExtractBExt
    HYPRE_Int *offd_i = hypre_CSRBooleanMatrix_Get_I(offd);
    HYPRE_Int *offd_j = hypre_CSRBooleanMatrix_Get_J(offd);
 
-   HYPRE_Int num_cols_B, num_nonzeros;
-   HYPRE_Int num_rows_B_ext;
+   HYPRE_BigInt num_cols_B;
+   HYPRE_Int num_rows_B_ext, num_nonzeros;
 
    hypre_CSRBooleanMatrix *B_ext;
    HYPRE_Int *B_ext_i;
@@ -512,7 +512,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
      diag_data, offd_data
    );
 
-   B_ext = hypre_CSRBooleanMatrixCreate(num_rows_B_ext, num_cols_B, num_nonzeros);
+   B_ext = hypre_CSRBooleanMatrixCreate(num_rows_B_ext, (HYPRE_Int) num_cols_B, num_nonzeros);
    hypre_CSRBooleanMatrix_Get_I(B_ext) = B_ext_i;
    hypre_CSRBooleanMatrix_Get_BigJ(B_ext) = B_ext_j;
 
@@ -586,7 +586,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
      diag_data, offd_data
    );
 
-   A_ext = hypre_CSRBooleanMatrixCreate(num_rows_A_ext, num_cols_A, num_nonzeros);
+   A_ext = hypre_CSRBooleanMatrixCreate(num_rows_A_ext, (HYPRE_Int) num_cols_A, num_nonzeros);
    hypre_CSRBooleanMatrix_Get_I(A_ext) = A_ext_i;
    hypre_CSRBooleanMatrix_Get_BigJ(A_ext) = A_ext_j;
 

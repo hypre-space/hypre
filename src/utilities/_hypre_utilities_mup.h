@@ -1119,13 +1119,6 @@ void
 hypre_SeedRand_long_dbl( HYPRE_Int seed );
 
 HYPRE_Int
-hypre_SetCubMemPoolSize_flt( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
-HYPRE_Int
-hypre_SetCubMemPoolSize_dbl( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
-HYPRE_Int
-hypre_SetCubMemPoolSize_long_dbl( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
-
-HYPRE_Int
 hypre_SetDevice_flt( hypre_int device_id, hypre_Handle *hypre_handle_ );
 HYPRE_Int
 hypre_SetDevice_dbl( hypre_int device_id, hypre_Handle *hypre_handle_ );

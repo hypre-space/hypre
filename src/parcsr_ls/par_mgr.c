@@ -350,13 +350,18 @@ hypre_MGRDestroy( void *data )
    {
       for (i = 1; i < (num_coarse_levels); i++)
       {
-         if ((mgr_data -> aff_solver)[i])
+         if ((mgr_data -> Frelax_type)[i] == 29)
+         {
+            hypre_MGRDirectSolverDestroy((mgr_data -> aff_solver)[i]);
+         }
+         else if ((mgr_data -> aff_solver)[i])
          {
             aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
             hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
          }
       }
-      if (mgr_data -> fsolver_mode == 2)
+      /* TODO (VPM): remove fsolver_mode */
+      if ((mgr_data -> fsolver_mode == 2) && (mgr_data -> aff_solver)[0])
       {
          hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
       }
@@ -4030,20 +4035,16 @@ hypre_MGRDataPrint(void *mgr_vdata)
    return hypre_error_flag;
 }
 
-/***************************************************************************
- ***************************************************************************/
-
-#ifdef HYPRE_USING_DSUPERLU
-
 /*--------------------------------------------------------------------------
  * hypre_MGRDirectSolverCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_MGRDirectSolverCreate()
+hypre_MGRDirectSolverCreate(void)
 {
-   //   hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
-   //   return (void *) dslu_data;
+   /* TODO (VPM): implement direct solver creation and options setup, e.g., print_level */
+   // hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
+   // return (void *) dslu_data;
    return NULL;
 }
 
@@ -4060,7 +4061,13 @@ hypre_MGRDirectSolverSetup( void                *solver,
    HYPRE_UNUSED_VAR(f);
    HYPRE_UNUSED_VAR(u);
 
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistSetup(solver, A, 0);
+#else
+   HYPRE_UNUSED_VAR(solver);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -4075,7 +4082,15 @@ hypre_MGRDirectSolverSolve( void                *solver,
 {
    HYPRE_UNUSED_VAR(A);
 
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistSolve(solver, f, u);
+#else
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -4085,6 +4100,11 @@ hypre_MGRDirectSolverSolve( void                *solver,
 HYPRE_Int
 hypre_MGRDirectSolverDestroy( void *solver )
 {
+#if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistDestroy(solver);
-}
+#else
+   HYPRE_UNUSED_VAR(solver);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
+   return hypre_error_flag;
 #endif
+}

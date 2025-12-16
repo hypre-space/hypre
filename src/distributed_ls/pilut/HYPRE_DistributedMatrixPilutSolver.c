@@ -356,13 +356,13 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
    HYPRE_DistributedMatrixGetDims(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &m, &n);
 
-   DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = m;
+  DataDistTypeNrows( hypre_DistributedMatrixPilutSolverDataDist( solver ) ) = (HYPRE_Int) m;
 
    HYPRE_DistributedMatrixGetLocalRange(
       hypre_DistributedMatrixPilutSolverMatrix(solver), &start, &end, &col0, &coln);
 
    DataDistTypeLnrows(hypre_DistributedMatrixPilutSolverDataDist( solver )) =
-      end - start + 1;
+      (HYPRE_Int)(end - start) + 1;
 
    /* Set up DataDist entry in distributed_solver */
    /* This requires that each processor know which rows are owned by each proc */
@@ -373,7 +373,7 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
    hypre_MPI_Allgather( &start, 1, HYPRE_MPI_INT, rowdist, 1, HYPRE_MPI_INT,
       hypre_DistributedMatrixPilutSolverComm(solver) );
 
-   rowdist[ nprocs ] = n;
+  rowdist[ nprocs ] = (HYPRE_Int) n;
 
 #ifdef HYPRE_TIMING
    {

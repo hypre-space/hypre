@@ -20,7 +20,6 @@ HYPRE_MemoryPrintUsage
 HYPRE_PrintDeviceInfo
 HYPRE_PrintErrorMessages
 HYPRE_SetExecutionPolicy
-HYPRE_SetGPUMemoryPoolSize
 HYPRE_SetGpuAwareMPI
 HYPRE_SetLogLevel
 HYPRE_SetMemoryLocation

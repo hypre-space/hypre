@@ -749,8 +749,8 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    HYPRE_BigInt *B_int_j;
    HYPRE_Complex *B_int_data = NULL;
 
-   HYPRE_Int num_cols_B, num_nonzeros;
-   HYPRE_Int num_rows_B_ext;
+   HYPRE_BigInt num_cols_B;
+   HYPRE_Int num_rows_B_ext, num_nonzeros;
    HYPRE_Int num_procs, my_id;
 
    hypre_CSRBlockMatrix *B_ext;
@@ -873,12 +873,12 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
-   B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext, num_cols_B,
-                                      num_nonzeros);
+   B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext,
+                                      (HYPRE_Int) num_cols_B, num_nonzeros);
    B_ext_j = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST);
    if (data)
    {
-      B_ext_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros * bnnz, HYPRE_MEMORY_HOST);
+      B_ext_data = hypre_CTAlloc(HYPRE_Complex, num_nonzeros * bnnz, HYPRE_MEMORY_HOST);
    }
 
    for (i = 0; i < num_recvs; i++)

@@ -412,24 +412,6 @@ HYPRE_SetExecutionPolicy_pre( HYPRE_Precision precision, HYPRE_ExecutionPolicy e
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SetGPUMemoryPoolSize_pre( HYPRE_Precision precision, HYPRE_Int bin_growth, HYPRE_Int min_bin, HYPRE_Int max_bin, size_t max_cached_bytes )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return HYPRE_SetGPUMemoryPoolSize_flt( bin_growth, min_bin, max_bin, max_cached_bytes );
-      case HYPRE_REAL_DOUBLE:
-         return HYPRE_SetGPUMemoryPoolSize_dbl( bin_growth, min_bin, max_bin, max_cached_bytes );
-      case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_SetGPUMemoryPoolSize_long_dbl( bin_growth, min_bin, max_bin, max_cached_bytes );
-      default:
-         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_SetGpuAwareMPI_pre( HYPRE_Precision precision, HYPRE_Int use_gpu_aware_mpi )
 {
    switch (precision)
