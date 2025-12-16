@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv/seq_mv.h"
+#include "seq_mv/_hypre_seq_mv.h"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
