@@ -520,6 +520,7 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorSumEltsDevice)( vector );
 }
 
+
 #endif
 
 #endif

@@ -88,6 +88,7 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values, 
    return HYPRE_CURRENTPRECISION_FUNC(hypre_IJVectorUpdateValuesDevice)( vector, num_values, indices, values, action );
 }
 
+
 #endif
 
 #endif

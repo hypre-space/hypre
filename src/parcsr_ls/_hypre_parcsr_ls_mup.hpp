@@ -423,6 +423,24 @@ hypre_ParILUSchurGMRESMatvecJacIterDevice_long_dbl( void *matvec_data, hypre_lon
 
 /* pre_gpu */
 
+
+#endif
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
+/* fixed_gpu */
+
+
 #endif
 #endif
 

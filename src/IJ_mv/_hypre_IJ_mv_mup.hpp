@@ -87,6 +87,24 @@ hypre_IJVectorUpdateValuesDevice_long_dbl( hypre_IJVector *vector, HYPRE_Int num
 
 /* pre_gpu */
 
+
+#endif
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
+/* fixed_gpu */
+
+
 #endif
 #endif
 

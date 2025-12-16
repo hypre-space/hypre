@@ -465,6 +465,24 @@ hypre_SeqVectorSumEltsDevice_long_dbl( hypre_Vector *vector );
 
 /* pre_gpu */
 
+
+#endif
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C++" {
+#endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
+/* fixed_gpu */
+
+
 #endif
 #endif
 

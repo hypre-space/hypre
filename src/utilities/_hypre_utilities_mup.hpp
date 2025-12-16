@@ -11,12 +11,12 @@
 #ifndef hypre_UTILITIES_MUP_HEADER_CXX
 #define hypre_UTILITIES_MUP_HEADER_CXX
 
-#if defined (HYPRE_MIXED_PRECISION)
-#if defined(HYPRE_USING_GPU)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
 
 /* fixed_gpu */
 
@@ -354,6 +354,9 @@ hypre_SyncDevice_long_dbl( );
 /* pre_gpu */
 
 
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif
@@ -361,6 +364,9 @@ hypre_SyncDevice_long_dbl( );
 #ifdef __cplusplus
 extern "C++" {
 #endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
 
 /* fixed_gpu */
 
@@ -449,11 +455,11 @@ dim3
 hypre_dim3_long_dbl( HYPRE_Int x, HYPRE_Int y, HYPRE_Int z );
 
 
-#ifdef __cplusplus
-}
+#endif
 #endif
 
-#endif
+#ifdef __cplusplus
+}
 #endif
 
 #endif

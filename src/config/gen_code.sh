@@ -177,18 +177,10 @@ $(
 # Create temporary files and initial code
 ############################################################################
 
-# Create prototype information files - first create a temporary file from the
-# internal C header and an internal C++ header (if it exists) that is assumed to
-# have the same file name prefix as the internal C header
+# Create prototype information files. We treat C header files and C++ 
+# header files separately to correctly define C/ C++ linkage. C++ header 
+# file contains functions requiring C++ linkage. 
 
-#ITMP=${intp}_tmp.h
-#cp ${INTH} ${ITMP}
-#if [ -f "${intp}.hpp" ]
-#then
-#   cat ${intp}.hpp >> ${ITMP}
-#fi
-######
-INTHPP=${intp}.hpp
 for c in "" $gpu
 do
    for i in fixed functions methods
@@ -200,12 +192,6 @@ do
    cat ${OUTP}.functions${c}.ext.proto ${OUTP}.methods${c}.ext.proto > ${OUTP}.pre${c}.ext.proto
    cat ${OUTP}.functions${c}.int.proto ${OUTP}.methods${c}.int.proto > ${OUTP}.pre${c}.int.proto
 done
-#rm -f ${ITMP}
-
-# Special case for .hpp functions. These are only for GPU and are assumed to be strictly multiprecision 
-# functions. Hence only the fixed precision code and protos are generated.
-tagpp=fixed${gpu}
-$scriptdir/gen_proto_info.sh mup.${tagpp} ${INTHPP} > ${OUTP}.${tagpp}.intpp.proto
 
 # Create C implementation files and header files
 for c in "" $gpu
@@ -218,9 +204,21 @@ do
    done
 done
 
-# implementation for .hpp functions.
-$scriptdir/gen_code_awk.sh ${OUTP}.${tagpp}.intpp.proto ${OUTP}_${tagpp}_intpp fixed
-cat ${OUTP}_${tagpp}_intpp.c >> ${OUTP}_${tagpp}_int.c
+# Special case for .hpp functions:
+# These are only for GPU and are assumed to be strictly multiprecision 
+# functions. Hence only the fixed precision code and protos are generated. 
+INTHPP=""
+if [ -f "${intp}.hpp" ]
+then
+   INTHPP=${intp}.hpp
+   # generate prototype info file
+   tagpp=fixed${gpu}
+   $scriptdir/gen_proto_info.sh mup.${tagpp} ${INTHPP} > ${OUTP}.${tagpp}.intpp.proto
+
+   # implementation for .hpp functions.
+   $scriptdir/gen_code_awk.sh ${OUTP}.${tagpp}.intpp.proto ${OUTP}_${tagpp}_intpp fixed
+   cat ${OUTP}_${tagpp}_intpp.c >> ${OUTP}_${tagpp}_int.c
+fi
 
 ############################################################################
 # Finalize code
@@ -380,12 +378,12 @@ then
 #ifndef hypre_${intname}_MUP_HEADER_CXX
 #define hypre_${intname}_MUP_HEADER_CXX
 
-#if defined (HYPRE_MIXED_PRECISION)
-#if defined(HYPRE_USING_GPU)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
 
 @
 #===== Declarations with C linkage 
@@ -397,6 +395,9 @@ extern "C" {
    done
    cat >> $FOUT <<@
 
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif
@@ -405,21 +406,27 @@ extern "C" {
 extern "C++" {
 #endif
 
+#if defined (HYPRE_MIXED_PRECISION)
+#if defined(HYPRE_USING_GPU)
+
 @
 #===== Decalations with C++ linkage
-   for i in fixed
-   do
-      tag=${i}${gpu}
-      echo "/* ${tag} */"      >> $FOUT
-      cat ${OUTP}_${tag}_intpp.h >> $FOUT
-   done
+   if [ -n "$INTHPP" ]
+   then
+      for i in fixed
+      do
+         tag=${i}${gpu}
+         echo "/* ${tag} */"      >> $FOUT
+         cat ${OUTP}_${tag}_intpp.h >> $FOUT
+      done
+   fi   
    cat >> $FOUT <<@
+
+#endif
+#endif
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif
 #endif
 
 #endif

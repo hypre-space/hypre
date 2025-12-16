@@ -304,6 +304,7 @@ hypre_ParcsrGetExternalRowsDeviceWait( void *vrequest )
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParcsrGetExternalRowsDeviceWait)( vrequest );
 }
 
+
 #endif
 
 #endif

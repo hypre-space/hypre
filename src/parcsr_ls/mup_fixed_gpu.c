@@ -472,6 +472,7 @@ hypre_ParILUSchurGMRESMatvecJacIterDevice( void *matvec_data, HYPRE_Complex alph
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParILUSchurGMRESMatvecJacIterDevice)( matvec_data, alpha, ilu_vdata, x, beta, y );
 }
 
+
 #endif
 
 #endif

@@ -92,6 +92,13 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   HYPRE_Initialize();
+   /* default memory location */
+   HYPRE_SetMemoryLocation(HYPRE_MEMORY_HOST);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(HYPRE_EXEC_HOST);
+   
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
    n = 20;
@@ -428,6 +435,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorDestroy_dbl(ijhres);
    HYPRE_IJVectorDestroy_dbl(ijxtmp);
 
+   HYPRE_Finalize();
    /* Finalize MPI*/
    MPI_Finalize();
 
