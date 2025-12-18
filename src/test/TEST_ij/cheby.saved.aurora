@@ -1,6 +1,6 @@
 # Output file: cheby.out.1
 Iterations = 16
-Final Relative Residual Norm = 1.817325e-09
+Final Relative Residual Norm = 1.587762e-09
 
 # Output file: cheby.out.2
 Iterations = 23
@@ -8,27 +8,27 @@ Final Relative Residual Norm = 8.691352e-09
 
 # Output file: cheby.out.3
 Iterations = 12
-Final Relative Residual Norm = 2.541561e-09
+Final Relative Residual Norm = 2.026737e-09
 
 # Output file: cheby.out.4
 Iterations = 10
-Final Relative Residual Norm = 5.150918e-09
+Final Relative Residual Norm = 3.497410e-09
 
 # Output file: cheby.out.5
 Iterations = 18
-Final Relative Residual Norm = 1.987618e-09
+Final Relative Residual Norm = 1.821442e-09
 
 # Output file: cheby.out.6
 Iterations = 16
-Final Relative Residual Norm = 1.817325e-09
+Final Relative Residual Norm = 1.587762e-09
 
 # Output file: cheby.out.7
 Iterations = 14
-Final Relative Residual Norm = 6.698216e-09
+Final Relative Residual Norm = 5.325093e-09
 
 # Output file: cheby.out.8
 Iterations = 15
-Final Relative Residual Norm = 8.051131e-09
+Final Relative Residual Norm = 4.789404e-09
 
 # Output file: cheby.out.9
 Iterations = 16
@@ -36,11 +36,11 @@ Final Relative Residual Norm = 2.538994e-09
 
 # Output file: cheby.out.10
 GMRES Iterations = 39
-Final GMRES Relative Residual Norm = 9.332621e-09
+Final GMRES Relative Residual Norm = 7.731282e-09
 
 # Output file: cheby.out.101
 Iterations = 16
-Final Relative Residual Norm = 1.943406e-09
+Final Relative Residual Norm = 1.461604e-09
 
 # Output file: cheby.out.102
 Iterations = 23
@@ -48,32 +48,33 @@ Final Relative Residual Norm = 8.691352e-09
 
 # Output file: cheby.out.103
 Iterations = 12
-Final Relative Residual Norm = 2.673164e-09
+Final Relative Residual Norm = 1.726028e-09
 
 # Output file: cheby.out.104
 Iterations = 10
-Final Relative Residual Norm = 5.333454e-09
+Final Relative Residual Norm = 2.567205e-09
 
 # Output file: cheby.out.105
-Iterations = 18
-Final Relative Residual Norm = 2.148239e-09
+Iterations = 17
+Final Relative Residual Norm = 9.732803e-09
 
 # Output file: cheby.out.106
 Iterations = 16
-Final Relative Residual Norm = 1.943406e-09
+Final Relative Residual Norm = 1.461604e-09
 
 # Output file: cheby.out.107
 Iterations = 14
-Final Relative Residual Norm = 7.140553e-09
+Final Relative Residual Norm = 4.568431e-09
 
 # Output file: cheby.out.108
 Iterations = 15
-Final Relative Residual Norm = 5.312956e-09
+Final Relative Residual Norm = 2.978012e-09
 
 # Output file: cheby.out.109
 Iterations = 16
 Final Relative Residual Norm = 2.538994e-09
 
 # Output file: cheby.out.110
-GMRES Iterations = 40
-Final GMRES Relative Residual Norm = 8.419259e-09
+GMRES Iterations = 39
+Final GMRES Relative Residual Norm = 6.870794e-09
+
