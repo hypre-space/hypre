@@ -163,7 +163,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                    (size_t) global_size * sizeof(HYPRE_Real),
                    HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL(for_each,
-                        thrust::make_counting_iterator(0),
+                        thrust::make_counting_iterator((HYPRE_BigInt)0),
                         thrust::make_counting_iterator(global_num_rows),
                         hypreFunctor_DenseMatrixIdentity(global_num_rows, A_work));
 
