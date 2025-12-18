@@ -99,7 +99,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    HYPRE_Int       measure_type;
    HYPRE_BigInt    fine_size;
    HYPRE_Int       offset;
-   hypre_double    size;
+   HYPRE_Real      size;
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
@@ -159,25 +159,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    relax_order = hypre_ParAMGDataRelaxOrder(amg_data);
    level_precision = precision_array[0];
 
-   if (level_precision == HYPRE_REAL_DOUBLE)
-   {
-      hypre_ParCSRMatrixSetNumNonzeros_dbl(A);
-      hypre_ParCSRMatrixSetDNumNonzeros_dbl(A);
-   }
-   else if (level_precision == HYPRE_REAL_SINGLE)
-   {
-      hypre_ParCSRMatrixSetNumNonzeros_flt(A);
-      hypre_ParCSRMatrixSetDNumNonzeros_flt(A);
-   }
-   else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-   {
-      hypre_ParCSRMatrixSetNumNonzeros_long_dbl(A);
-      hypre_ParCSRMatrixSetDNumNonzeros_long_dbl(A);
-   }
-   else 
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-   }
+   hypre_ParCSRMatrixSetNumNonzeros_pre(level_precision, A);
+   hypre_ParCSRMatrixSetDNumNonzeros_pre(level_precision, A);
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    S = NULL;
@@ -230,25 +213,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    if (num_functions > 1 && dof_func == NULL)
    {
-      if (level_precision == HYPRE_REAL_DOUBLE)
-      {
-         dof_func = hypre_IntArrayCreate_dbl(local_size);
-         hypre_IntArrayInitialize_v2_dbl(dof_func, memory_location);
-      }
-      else if (level_precision == HYPRE_REAL_SINGLE)
-      {
-         dof_func = hypre_IntArrayCreate_flt(local_size);
-         hypre_IntArrayInitialize_v2_flt(dof_func, memory_location);
-      }
-      else if (level_precision == HYPRE_REAL_LONGDOUBLE)
-      {
-         dof_func = hypre_IntArrayCreate_long_dbl(local_size);
-         hypre_IntArrayInitialize_v2_long_dbl(dof_func, memory_location);
-      }
-      else 
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      dof_func = hypre_IntArrayCreate_pre(level_precision, local_size);
+      hypre_IntArrayInitialize_v2_pre( level_precision, dof_func, memory_location);
       offset = (HYPRE_Int) ( hypre_ParCSRMatrixRowStarts(A)[0] % ((HYPRE_BigInt) num_functions) );
 
       for (i = 0; i < local_size; i++)
@@ -738,7 +704,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       } 
       A_array[level] = A_H;
 
-      size = ((hypre_double) fine_size ) * .75;
+      size = ((HYPRE_Real) fine_size ) * .75;
       if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
       {
          coarsen_type = 0;

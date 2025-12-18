@@ -35,4 +35,5 @@ hypre_GetSizeOfReal
 hypre_IntArrayCreate
 hypre_IntArrayDestroy
 hypre_IntArrayInitialize
+hypre_IntArrayInitialize_v2
 hypre_IntArraySetConstantValues

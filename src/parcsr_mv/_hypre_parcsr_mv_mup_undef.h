@@ -64,6 +64,7 @@
 #undef hypre_ParCSRMatrixMatvecOutOfPlace
 #undef hypre_ParCSRMatrixMatvecT
 #undef hypre_ParCSRMatrixSetDNumNonzeros
+#undef hypre_ParCSRMatrixSetNumNonzeros
 #undef hypre_ParMatmul
 #undef hypre_ParTMatmul
 #undef hypre_ParVectorCopy
@@ -207,7 +208,6 @@
 #undef hypre_ParCSRMatrixScale
 #undef hypre_ParCSRMatrixSetConstantValues
 #undef hypre_ParCSRMatrixSetDataOwner
-#undef hypre_ParCSRMatrixSetNumNonzeros
 #undef hypre_ParCSRMatrixSetNumNonzeros_core
 #undef hypre_ParCSRMatrixSetNumRownnz
 #undef hypre_ParCSRMatrixSetPatternOnly

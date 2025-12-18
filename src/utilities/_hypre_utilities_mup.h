@@ -476,13 +476,6 @@ HYPRE_Int
 hypre_IntArrayCountHost_long_dbl( hypre_IntArray *v, HYPRE_Int value, HYPRE_Int *num_values_ptr );
 
 HYPRE_Int
-hypre_IntArrayInitialize_v2_flt( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_IntArrayInitialize_v2_dbl( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_IntArrayInitialize_v2_long_dbl( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
-
-HYPRE_Int
 hypre_IntArrayInverseMapping_flt( hypre_IntArray *v, hypre_IntArray **w_ptr );
 HYPRE_Int
 hypre_IntArrayInverseMapping_dbl( hypre_IntArray *v, hypre_IntArray **w_ptr );
@@ -1867,6 +1860,15 @@ HYPRE_Int
 hypre_IntArrayInitialize( hypre_IntArray *array );
 
 HYPRE_Int
+hypre_IntArrayInitialize_v2_flt( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_IntArrayInitialize_v2_dbl( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_IntArrayInitialize_v2_long_dbl( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
 hypre_IntArraySetConstantValues_flt( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int
 hypre_IntArraySetConstantValues_dbl( hypre_IntArray *v, HYPRE_Int value );
@@ -1897,6 +1899,9 @@ hypre_IntArrayDestroy_pre( HYPRE_Precision precision, hypre_IntArray *array );
 
 HYPRE_Int
 hypre_IntArrayInitialize_pre( HYPRE_Precision precision, hypre_IntArray *array );
+
+HYPRE_Int
+hypre_IntArrayInitialize_v2_pre( HYPRE_Precision precision, hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
 hypre_IntArraySetConstantValues_pre( HYPRE_Precision precision, hypre_IntArray *v, HYPRE_Int value );

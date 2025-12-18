@@ -896,13 +896,6 @@ HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data );
 
 HYPRE_Int
-hypre_ParCSRMatrixSetNumNonzeros_flt( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixSetNumNonzeros_dbl( hypre_ParCSRMatrix *matrix );
-HYPRE_Int
-hypre_ParCSRMatrixSetNumNonzeros_long_dbl( hypre_ParCSRMatrix *matrix );
-
-HYPRE_Int
 hypre_ParCSRMatrixSetNumRownnz_flt( hypre_ParCSRMatrix *matrix );
 HYPRE_Int
 hypre_ParCSRMatrixSetNumRownnz_dbl( hypre_ParCSRMatrix *matrix );
@@ -1497,6 +1490,15 @@ hypre_ParCSRMatrixSetDNumNonzeros_long_dbl( hypre_ParCSRMatrix *matrix );
 HYPRE_Int
 hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix );
 
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros_flt( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros_long_dbl( hypre_ParCSRMatrix *matrix );
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix );
+
 hypre_ParCSRMatrix *
 hypre_ParMatmul_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 hypre_ParCSRMatrix *
@@ -1624,6 +1626,9 @@ hypre_ParCSRMatrixMatvecT_pre( HYPRE_Precision precision, hypre_long_double alph
 
 HYPRE_Int
 hypre_ParCSRMatrixSetDNumNonzeros_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix );
+
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix );
 
 hypre_ParCSRMatrix *
 hypre_ParMatmul_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );

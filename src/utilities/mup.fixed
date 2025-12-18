@@ -63,7 +63,6 @@ hypre_IntArrayCloneDeep_v2
 hypre_IntArrayCopy
 hypre_IntArrayCount
 hypre_IntArrayCountHost
-hypre_IntArrayInitialize_v2
 hypre_IntArrayInverseMapping
 hypre_IntArrayInverseMappingHost
 hypre_IntArrayMergeOrdered

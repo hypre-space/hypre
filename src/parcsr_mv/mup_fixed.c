@@ -1017,14 +1017,6 @@ hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSetNumNonzeros)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSetNumRownnz)( matrix );

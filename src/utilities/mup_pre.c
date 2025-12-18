@@ -683,6 +683,24 @@ hypre_IntArrayInitialize_pre( HYPRE_Precision precision, hypre_IntArray *array )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_IntArrayInitialize_v2_pre( HYPRE_Precision precision, hypre_IntArray *array, HYPRE_MemoryLocation memory_location )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_IntArrayInitialize_v2_flt( array, memory_location );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_IntArrayInitialize_v2_dbl( array, memory_location );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_IntArrayInitialize_v2_long_dbl( array, memory_location );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_IntArraySetConstantValues_pre( HYPRE_Precision precision, hypre_IntArray *v, HYPRE_Int value )
 {
    switch (precision)

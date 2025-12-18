@@ -49,6 +49,7 @@
 #undef hypre_IntArrayCreate
 #undef hypre_IntArrayDestroy
 #undef hypre_IntArrayInitialize
+#undef hypre_IntArrayInitialize_v2
 #undef hypre_IntArraySetConstantValues
 #undef hypre_BeginTiming_fcn
 #undef hypre_BigBinarySearch
@@ -115,7 +116,6 @@
 #undef hypre_IntArrayCopy
 #undef hypre_IntArrayCount
 #undef hypre_IntArrayCountHost
-#undef hypre_IntArrayInitialize_v2
 #undef hypre_IntArrayInverseMapping
 #undef hypre_IntArrayInverseMappingHost
 #undef hypre_IntArrayMergeOrdered

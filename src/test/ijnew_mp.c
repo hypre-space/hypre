@@ -27,19 +27,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-//#include "hypre_utilities_mup.h"
-//#include "HYPRE_seq_mv.h"
-//#include "HYPRE_seq_mv_mup.h"
-//#include "HYPRE_parcsr_mv_mp.h"
-//#include "HYPRE_parcsr_mv_mup.h"
-//#include "hypre_parcsr_mv_mup.h"
-
-//#include "hypre_IJ_mv_mup.h"
-//#include "HYPRE_parcsr_ls_mp.h"
-//#include "HYPRE_parcsr_ls_mup.h"
-//#include "hypre_parcsr_ls_mup.h"
-//#include "hypre_krylov_mup.h"
-//#include "hypre_utilities_mp.h"
 
 #include <time.h>
 
@@ -47,15 +34,11 @@
 
 HYPRE_Int BuildParLaplacian_mp( HYPRE_Int argc, char *argv[], HYPRE_Int arg_index,
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
-HYPRE_Int BuildParSysLaplacian_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParDifConv_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParLaplacian9pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParLaplacian27pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                   HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
-HYPRE_Int BuildParLaplacian125pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
 HYPRE_Int BuildParRotate7pt_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr );
@@ -63,68 +46,66 @@ HYPRE_Int BuildParVarDifConv_mp (HYPRE_Int argc, char *argv [], HYPRE_Int arg_in
                    HYPRE_ParCSRMatrix *A_flt_ptr, HYPRE_ParCSRMatrix *A_dbl_ptr,
                    HYPRE_ParVector *rhs_flt_ptr, HYPRE_ParVector *rhs_dbl_ptr );
 
-int main (int argc, char *argv[])
+hypre_int 
+main (hypre_int argc, char *argv[])
 {
-   int arg_index;
-   int myid, num_procs;
-   int ilower, iupper;
-   int jlower, jupper;
-   int solver_id = 0;
-   double one = 1.0;
-   double zero = 0.;
-   int num_iterations;
-   double dfinal_res_norm;
-   float  final_res_norm;
-   int	  time_index;   
-   float  wall_time;   
-   double max_row_sum = 1.0;
-   int build_matrix_type = 2;
-   int build_rhs_type = 2;
-   int build_matrix_arg_index;
-   int build_rhs_arg_index;
-   int mg_max_iter = 100;
-   int max_iter = 1000;
-   int coarsen_type = 10;
-   int interp_type = 6;
-   int P_max_elmts = 4;
-   double trunc_factor = 0.0;
-   double strong_threshold = 0.25;
-   int relax_type = 8;
-   int relax_up = 14;
-   int relax_down = 13;
-   int relax_coarse = 9;
-   int num_sweeps = 1;
-   int ns_down = -1;
-   int ns_up = -1;
-   int ns_coarse = -1;
-   int max_levels = 25;
-   int debug_flag = 0;
-   int agg_num_levels = 0;
-   int num_paths = 1;
-   int agg_interp_type = 4;
-   int agg_P_max_elmts = 0;
-   double agg_trunc_factor = 0;
-   int agg_P12_max_elmts = 0;
-   double agg_P12_trunc_factor = 0;
-   int smooth_type = 6;
-   int smooth_num_levels = 0;
-   int smooth_num_sweeps = 1;
-   double tol = 1.e-8;
-   int ioutdat = 0;
-   int poutdat = 0;
-   int flex = 1;
-   int num_functions = 1;
-   int nodal = 0;
-   int nodal_diag = 0;
-   int keep_same_sign = 0;
-   int cycle_type = 1;
-   int relax_order = 0;
-   double relax_wt = 1.0;
-   double outer_wt = 1.0;
-   int k_dim = 10;
-   int two_norm = 0;
-   int all = 0;
-   int precision = 0;
+   HYPRE_Int arg_index;
+   HYPRE_Int print_usage;
+   HYPRE_Int myid, num_procs;
+   HYPRE_Int ilower, iupper;
+   HYPRE_Int jlower, jupper;
+   HYPRE_Int solver_id = 0;
+   HYPRE_Real one = 1.0;
+   HYPRE_Real zero = 0.;
+   HYPRE_Int num_iterations;
+   HYPRE_Real dfinal_res_norm;
+   HYPRE_Real  final_res_norm;
+   HYPRE_Int	  time_index;   
+   HYPRE_Real  wall_time;   
+   HYPRE_Real max_row_sum = 1.0;
+   HYPRE_Int build_matrix_type = 2;
+   HYPRE_Int build_rhs_type = 2;
+   HYPRE_Int build_matrix_arg_index;
+   HYPRE_Int build_rhs_arg_index;
+   HYPRE_Int mg_max_iter = 100;
+   HYPRE_Int max_iter = 1000;
+   HYPRE_Int coarsen_type = 10;
+   HYPRE_Int interp_type = 6;
+   HYPRE_Int P_max_elmts = 4;
+   HYPRE_Real trunc_factor = 0.0;
+   HYPRE_Real strong_threshold = 0.25;
+   HYPRE_Int relax_type = 8;
+   HYPRE_Int relax_up = 14;
+   HYPRE_Int relax_down = 13;
+   HYPRE_Int relax_coarse = 9;
+   HYPRE_Int num_sweeps = 1;
+   HYPRE_Int ns_down = -1;
+   HYPRE_Int ns_up = -1;
+   HYPRE_Int ns_coarse = -1;
+   HYPRE_Int max_levels = 25;
+   HYPRE_Int debug_flag = 0;
+   HYPRE_Int agg_num_levels = 0;
+   HYPRE_Int num_paths = 1;
+   HYPRE_Int agg_interp_type = 4;
+   HYPRE_Int agg_P_max_elmts = 0;
+   HYPRE_Real agg_trunc_factor = 0;
+   HYPRE_Int agg_P12_max_elmts = 0;
+   HYPRE_Real agg_P12_trunc_factor = 0;
+   HYPRE_Int smooth_type = 6;
+   HYPRE_Int smooth_num_levels = 0;
+   HYPRE_Int smooth_num_sweeps = 1;
+   HYPRE_Real tol = 1.e-8;
+   HYPRE_Int ioutdat = 2;
+   HYPRE_Int poutdat = 1;
+   HYPRE_Int flex = 1;
+   HYPRE_Int cycle_type = 1;
+   HYPRE_Int relax_order = 0;
+   HYPRE_Real relax_wt = 1.0;
+   HYPRE_Real outer_wt = 1.0;
+   HYPRE_Int k_dim = 10;
+   HYPRE_Int two_norm = 0;
+   HYPRE_Int all = 0;
+   HYPRE_Int precision = 0;
 
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
        for the solver (A, parcsr_A) and the preconditioner (B, A_dbl). I have included two suggestions 
@@ -167,10 +148,15 @@ int main (int argc, char *argv[])
    /*--------------------------
     * Parse command line
     *--------------------------*/
-   arg_index = 0;
-   while (arg_index < argc)
+   print_usage = 0;
+   arg_index = 1;
+   while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-solver") == 0 )
+      if ( strcmp(argv[arg_index], "-help") == 0 )
+      {
+         print_usage = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);         
@@ -209,12 +195,6 @@ int main (int argc, char *argv[])
       {
          arg_index++;
          build_matrix_type      = 8;
-         build_matrix_arg_index = arg_index;
-      }
-     else if ( strcmp(argv[arg_index], "-125pt") == 0 )
-      {
-         arg_index++;
-         build_matrix_type      = 5;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhsisone") == 0 )
@@ -305,11 +285,6 @@ int main (int argc, char *argv[])
          arg_index++;
          debug_flag = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-nf") == 0 )
-      {
-         arg_index++;
-         num_functions = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
       {
          arg_index++;
@@ -380,21 +355,6 @@ int main (int argc, char *argv[])
          arg_index++;
          mg_max_iter = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-nodal") == 0 )
-      {
-         arg_index++;
-         nodal  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-nodal_diag") == 0 )
-      {
-         arg_index++;
-         nodal_diag  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-mu") == 0 )
-      {
-         arg_index++;
-         cycle_type  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-iout") == 0 )
       {
          arg_index++;
@@ -445,7 +405,109 @@ int main (int argc, char *argv[])
       }
    }
 
-   if (build_matrix_type == 2)
+      if ( print_usage )
+   {
+      if ( myid == 0 )
+      {
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -laplacian             : build 5pt 2D laplacian problem (default) \n");
+         hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
+         hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
+         hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
+         hypre_printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
+         hypre_printf("  -vardifconv [<opts>]   : build variable conv.-diffusion problem\n");
+         hypre_printf("  -rotate [<opts>]       : build 7pt rotated laplacian problem\n");
+         hypre_printf("    -n <nx> <ny> <nz>    : total problem size \n");
+         hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
+         hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
+         hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
+         hypre_printf("\n");
+         hypre_printf("  -rhsrand               : rhs is random vector\n");
+         hypre_printf("  -rhsisone              : rhs is vector with unit coefficients (default)\n");
+         hypre_printf("  -xisone                : solution of all ones\n");
+         hypre_printf("  -rhszero               : rhs is zero vector\n");
+         hypre_printf("\n");
+         hypre_printf("\n");
+         hypre_printf("  -solver <ID>           : solver ID\n");
+         hypre_printf("       10=MPAMG            11=MPAMG-PCG        \n");
+         hypre_printf("       13=MPAMG-GMRES      15=MPAMG-BiCGSTAB  \n");
+         hypre_printf("\n");
+         hypre_printf("  -prec_array  <n> <p0> <p1> ... <pn>: set level precisions \n");
+	 hypre_printf("        0 = double precision \n");
+	 hypre_printf("        1 = single precision \n");
+	 hypre_printf("        2 = long double precision \n");
+	 hypre_printf("        Note that <p0> should be 0 always \n");
+	 hypre_printf("        precisions at all levels greater than n will be set to <pn> \n");
+	 hypre_printf("        e.g., -prec_array 2 0 1 will set coarse level to double precision \n");
+	 hypre_printf("        and all other levels to single precision \n");
+         hypre_printf("\n");
+         hypre_printf("\n");
+         hypre_printf("  -cljp                 : CLJP coarsening \n");
+         hypre_printf("  -pmis                 : PMIS coarsening \n");
+         hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
+         hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
+         hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
+         hypre_printf("  -ruge3                : third pass on boundary\n");
+         hypre_printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
+         hypre_printf("\n");
+         hypre_printf("  -interptype  <val>    : set interpolation type\n");
+         hypre_printf("       0=Classical modified interpolation  \n");
+         hypre_printf("       4=multipass interpolation  \n");
+         hypre_printf("       6=extended classical modified interpolation (default) \n");
+         hypre_printf("       8=standard interpolation  \n");
+         hypre_printf("\n");
+
+         /* RL */
+         hypre_printf("  -rlx  <val>            : relaxation type\n");
+         hypre_printf("       0=Weighted Jacobi  \n");
+         hypre_printf("       3=Hybrid Gauss-Seidel  \n");
+         hypre_printf("       4=Hybrid backward Gauss-Seidel  \n");
+         hypre_printf("       6=Hybrid symmetric Gauss-Seidel  \n");
+         hypre_printf("       8= symmetric L1-Gauss-Seidel  \n");
+         hypre_printf("       13= forward L1-Gauss-Seidel  \n");
+         hypre_printf("       14= backward L1-Gauss-Seidel  \n");
+         hypre_printf("       18=L1-Jacobi \n");
+         hypre_printf("       9=Gauss elimination (use for coarsest grid only)  \n");
+         hypre_printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
+         hypre_printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
+         hypre_printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
+         hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
+         hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
+         hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
+         /* RL restore these */
+         hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+         hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
+         hypre_printf("\n");
+         hypre_printf("  -th   <val>            : set AMG strength threshold  \n");
+         hypre_printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
+         hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
+         hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
+
+         hypre_printf("  -w   <val>             : set Jacobi relax weight = val\n");
+         hypre_printf("  -k   <val>             : dimension Krylov space for GMRES\n");
+         hypre_printf("  -mxl  <val>            : maximum number of levels (MPAMG)\n");
+         hypre_printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+         hypre_printf("  -max_iter  <val>       : set max iterations for Krylov solvers\n");
+         hypre_printf("  -mg_max_iter  <val>    : set max iterations for mg solvers\n");
+         hypre_printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
+         hypre_printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
+         hypre_printf("\n");
+         hypre_printf("  -iout <val>            : set output flag solver \n");
+         hypre_printf("       0 = no output\n");
+         hypre_printf("\n");
+         hypre_printf("  -pout <val>            : set output flag preconditioner\n");
+         hypre_printf("       0 = no output\n");
+         hypre_printf("\n");
+         hypre_printf("  -print                 : print out the system\n");
+         hypre_printf("\n");
+      }
+
+      goto final;
+   }
+
+      if (build_matrix_type == 2)
    {
       BuildParLaplacian_mp(argc, argv, build_matrix_arg_index, &A_flt, &A_dbl);
    }
@@ -456,10 +518,6 @@ int main (int argc, char *argv[])
    else if (build_matrix_type == 4)
    {
       BuildParLaplacian27pt_mp(argc, argv, build_matrix_arg_index, &A_flt, &A_dbl);
-   }
-   else if (build_matrix_type == 5)
-   {
-      BuildParLaplacian125pt_mp(argc, argv, build_matrix_arg_index, &A_flt, &A_dbl);
    }
    else if (build_matrix_type == 6)
    {
@@ -480,7 +538,6 @@ int main (int argc, char *argv[])
 
    if (build_rhs_type == 2)
    {
-      double one = 1.0;
       if (myid == 0)
       {
          hypre_printf("  RHS vector has unit coefficients\n");
@@ -493,13 +550,13 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorInitialize_flt(ij_b_flt);
       HYPRE_IJVectorAssemble_flt(ij_b_flt);
       HYPRE_IJVectorGetObject_flt( ij_b_flt, (void **) &b_flt );
-      HYPRE_ParVectorSetConstantValues_flt(b_flt, (float)one);
+      HYPRE_ParVectorSetConstantValues_flt(b_flt, (hypre_float) one);
       HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &ij_b_dbl);
       HYPRE_IJVectorSetObjectType_dbl(ij_b_dbl, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(ij_b_dbl);
       HYPRE_IJVectorAssemble_dbl(ij_b_dbl);
       HYPRE_IJVectorGetObject_dbl( ij_b_dbl, (void **) &b_dbl );
-      HYPRE_ParVectorSetConstantValues_dbl(b_dbl, one);
+      HYPRE_ParVectorSetConstantValues_dbl(b_dbl, (hypre_double) one);
       /* X0 */
       HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &ij_x_flt);
       HYPRE_IJVectorSetObjectType_flt(ij_x_flt, HYPRE_PARCSR);
@@ -514,7 +571,7 @@ int main (int argc, char *argv[])
    }
    else if (build_rhs_type == 3)
    {
-      double one = 1.0;
+      HYPRE_Real one = 1.0;
       if (myid == 0)
       {
          hypre_printf("  RHS vector has random coefficients\n");
@@ -560,13 +617,13 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorInitialize_flt(ij_b_flt);
       HYPRE_IJVectorAssemble_flt(ij_b_flt);
       HYPRE_IJVectorGetObject_flt( ij_b_flt, (void **) &b_flt );
-      HYPRE_ParVectorSetConstantValues_flt(b_flt, (float)zero);
+      HYPRE_ParVectorSetConstantValues_flt(b_flt, (hypre_float) zero);
       HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &ij_b_dbl);
       HYPRE_IJVectorSetObjectType_dbl(ij_b_dbl, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(ij_b_dbl);
       HYPRE_IJVectorAssemble_dbl(ij_b_dbl);
       HYPRE_IJVectorGetObject_dbl( ij_b_dbl, (void **) &b_dbl );
-      HYPRE_ParVectorSetConstantValues_dbl(b_dbl, zero);
+      HYPRE_ParVectorSetConstantValues_dbl(b_dbl, (hypre_double) zero);
       /* X0 */
       HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &ij_x_flt);
       HYPRE_IJVectorSetObjectType_flt(ij_x_flt, HYPRE_PARCSR);
@@ -644,7 +701,6 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
       HYPRE_BoomerAMGSetMaxRowSum_pre(precision0, amg_solver, max_row_sum);
       HYPRE_BoomerAMGSetDebugFlag_pre(precision0, amg_solver, debug_flag);
-      HYPRE_BoomerAMGSetNumFunctions_pre(precision0, amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels_pre(precision0, amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType_pre(precision0, amg_solver, agg_interp_type);
       HYPRE_BoomerAMGSetAggTruncFactor_pre(precision0, amg_solver, agg_trunc_factor);
@@ -652,9 +708,6 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetAggPMaxElmts_pre(precision0, amg_solver, agg_P_max_elmts);
       HYPRE_BoomerAMGSetAggP12MaxElmts_pre(precision0, amg_solver, agg_P12_max_elmts);
       HYPRE_BoomerAMGSetNumPaths_pre(precision0, amg_solver, num_paths);
-      HYPRE_BoomerAMGSetNodal_pre(precision0, amg_solver, nodal);
-      HYPRE_BoomerAMGSetNodalDiag_pre(precision0, amg_solver, nodal_diag);
-      HYPRE_BoomerAMGSetKeepSameSign_pre(precision0, amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps_pre(precision0, amg_solver, ns_coarse, 3);
       if (ns_down > -1)
       {
@@ -715,8 +768,16 @@ int main (int argc, char *argv[])
    else if (solver_id == 11)
    {
       /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+      if (build_rhs_type < 4)  
+      {
+	 HYPRE_ParVectorSetConstantValues_dbl(x_dbl, (hypre_double) zero);
+	 HYPRE_ParVectorSetConstantValues_flt(x_flt, (hypre_float) zero);
+      }
+      else  
+      {
+	 HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+	 HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
+      }
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
@@ -769,7 +830,6 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum_pre(precision0, amg_solver, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag_pre(precision0, amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_pre(precision0, amg_solver, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels_pre(precision0, amg_solver, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType_pre(precision0, amg_solver, agg_interp_type);
          HYPRE_BoomerAMGSetAggTruncFactor_pre(precision0, amg_solver, agg_trunc_factor);
@@ -777,9 +837,6 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetAggPMaxElmts_pre(precision0, amg_solver, agg_P_max_elmts);
          HYPRE_BoomerAMGSetAggP12MaxElmts_pre(precision0, amg_solver, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths_pre(precision0, amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_pre(precision0, amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_pre(precision0, amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_pre(precision0, amg_solver, keep_same_sign);
          if (ns_coarse > -1)
          {
             HYPRE_BoomerAMGSetCycleNumSweeps_pre(precision0, amg_solver, ns_coarse, 3);
@@ -863,8 +920,16 @@ int main (int argc, char *argv[])
    else if (solver_id == 13)  //GMRES
    {
       /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+      if (build_rhs_type < 4)  
+      {
+	 HYPRE_ParVectorSetConstantValues_dbl(x_dbl, (hypre_double) zero);
+	 HYPRE_ParVectorSetConstantValues_flt(x_flt, (hypre_float) zero);
+      }
+      else  
+      {
+	 HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+	 HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
+      }
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
@@ -915,7 +980,6 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum_pre(precision0, amg_solver, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag_pre(precision0, amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_pre(precision0, amg_solver, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels_pre(precision0, amg_solver, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType_pre(precision0, amg_solver, agg_interp_type);
          HYPRE_BoomerAMGSetAggTruncFactor_pre(precision0, amg_solver, agg_trunc_factor);
@@ -923,9 +987,6 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetAggPMaxElmts_pre(precision0, amg_solver, agg_P_max_elmts);
          HYPRE_BoomerAMGSetAggP12MaxElmts_pre(precision0, amg_solver, agg_P12_max_elmts);
          HYPRE_BoomerAMGSetNumPaths_pre(precision0, amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_pre(precision0, amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_pre(precision0, amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_pre(precision0, amg_solver, keep_same_sign);
          if (ns_coarse > -1)
          {
             HYPRE_BoomerAMGSetCycleNumSweeps_pre(precision0, amg_solver, ns_coarse, 3);
@@ -1007,8 +1068,16 @@ int main (int argc, char *argv[])
    else if (solver_id == 15)
    {
       /* reset solution vector */
-      if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
-      else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+      if (build_rhs_type < 4)  
+      {
+	 HYPRE_ParVectorSetConstantValues_dbl(x_dbl, (hypre_double) zero);
+	 HYPRE_ParVectorSetConstantValues_flt(x_flt, (hypre_float) zero);
+      }
+      else  
+      {
+	 HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
+	 HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
+      }
 
       HYPRE_Solver amg_solver;
       HYPRE_Solver pcg_solver;
@@ -1055,13 +1124,9 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetRelaxOrder_pre(precision0, amg_solver, relax_order);
          HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
          HYPRE_BoomerAMGSetDebugFlag_pre(precision0, amg_solver, debug_flag);
-         HYPRE_BoomerAMGSetNumFunctions_pre(precision0, amg_solver, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels_pre(precision0, amg_solver, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType_pre(precision0, amg_solver, agg_interp_type);
          HYPRE_BoomerAMGSetNumPaths_pre(precision0, amg_solver, num_paths);
-         HYPRE_BoomerAMGSetNodal_pre(precision0, amg_solver, nodal);
-         HYPRE_BoomerAMGSetNodalDiag_pre(precision0, amg_solver, nodal_diag);
-         HYPRE_BoomerAMGSetKeepSameSign_pre(precision0, amg_solver, keep_same_sign);
          HYPRE_BoomerAMGSetTol_pre(precision0, amg_solver, zero); 
          HYPRE_BoomerAMGSetMaxRowSum_pre(precision0, amg_solver, max_row_sum);
          HYPRE_BoomerAMGSetStrongThreshold_pre(precision0, amg_solver, strong_threshold);
@@ -1162,6 +1227,7 @@ int main (int argc, char *argv[])
 
    /* Finalize MPI*/
    MPI_Finalize();
+final:
 
    return(0);
 }
@@ -1187,11 +1253,8 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
 
    HYPRE_Int       num_procs, myid;
    HYPRE_Int       p, q, r;
-   HYPRE_Int       num_fun = 1;
    double         *values_dbl;
    float          *values_flt;
-   double         *mtrx_dbl;
-   float          *mtrx_flt;
 
    HYPRE_Int       sys_opt = 0;
    HYPRE_Int       i;
@@ -1247,16 +1310,6 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
          cy = (HYPRE_Real)atof(argv[arg_index++]);
          cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-sysL") == 0 )
-      {
-         arg_index++;
-         num_fun = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-sysL_opt") == 0 )
-      {
-         arg_index++;
-         sys_opt = atoi(argv[arg_index++]);
-      }
       else
       {
          arg_index++;
@@ -1279,7 +1332,6 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
 
    if (myid == 0)
    {
-      hypre_printf("  Laplacian:   num_fun = %d\n", num_fun);
       hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
       hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
@@ -1326,183 +1378,10 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
       values_flt[0] += 2.0 * (float)cz;
    }
 
-   if (num_fun == 1)
-   {
-      A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian_dbl(MPI_COMM_WORLD,
+   A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian_dbl(MPI_COMM_WORLD,
                                                  nx, ny, nz, P, Q, R, p, q, r, values_dbl);
-      A_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian_flt(MPI_COMM_WORLD,
+   A_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian_flt(MPI_COMM_WORLD,
                                                  nx, ny, nz, P, Q, R, p, q, r, values_flt);
-   }
-   else
-   {
-      mtrx_dbl = (double*) calloc(num_fun * num_fun, sizeof(double));
-      mtrx_flt = (float*) calloc(num_fun * num_fun, sizeof(float));
-
-      if (num_fun == 2)
-      {
-         if (sys_opt == 1) /* identity  */
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 0.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 1.0;
-         }
-         else if (sys_opt == 2)
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 0.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 20.0;
-         }
-         else if (sys_opt == 3) /* similar to barry's talk - ex1 */
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 2.0;
-            mtrx_dbl[2] = 2.0;
-            mtrx_dbl[3] = 1.0;
-         }
-         else if (sys_opt == 4) /* can use with vcoef to get barry's ex*/
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 1.0;
-            mtrx_dbl[2] = 1.0;
-            mtrx_dbl[3] = 1.0;
-         }
-         else if (sys_opt == 5) /* barry's talk - ex1 */
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 1.1;
-            mtrx_dbl[2] = 1.1;
-            mtrx_dbl[3] = 1.0;
-         }
-         else if (sys_opt == 6) /*  */
-         {
-            mtrx_dbl[0] = 1.1;
-            mtrx_dbl[1] = 1.0;
-            mtrx_dbl[2] = 1.0;
-            mtrx_dbl[3] = 1.1;
-         }
-
-         else /* == 0 */
-         {
-            mtrx_dbl[0] = 2;
-            mtrx_dbl[1] = 1;
-            mtrx_dbl[2] = 1;
-            mtrx_dbl[3] = 2;
-         }
-      }
-      else if (num_fun == 3)
-      {
-         if (sys_opt == 1)
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 0.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 0.0;
-            mtrx_dbl[4] = 1.0;
-            mtrx_dbl[5] = 0.0;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 0.0;
-            mtrx_dbl[8] = 1.0;
-         }
-         else if (sys_opt == 2)
-         {
-            mtrx_dbl[0] = 1.0;
-            mtrx_dbl[1] = 0.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 0.0;
-            mtrx_dbl[4] = 20.0;
-            mtrx_dbl[5] = 0.0;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 0.0;
-            mtrx_dbl[8] = .01;
-         }
-         else if (sys_opt == 3)
-         {
-            mtrx_dbl[0] = 1.01;
-            mtrx_dbl[1] = 1;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 1;
-            mtrx_dbl[4] = 2;
-            mtrx_dbl[5] = 1;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 1;
-            mtrx_dbl[8] = 1.01;
-         }
-         else if (sys_opt == 4) /* barry ex4 */
-         {
-            mtrx_dbl[0] = 3;
-            mtrx_dbl[1] = 1;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 1;
-            mtrx_dbl[4] = 4;
-            mtrx_dbl[5] = 2;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 2;
-            mtrx_dbl[8] = .25;
-         }
-         else if (sys_opt == 5)
-         {
-            mtrx_dbl[0] = 2.0;
-            mtrx_dbl[1] = 1.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 1.0;
-            mtrx_dbl[4] = 200.0;
-            mtrx_dbl[5] = 0.01;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 0.01;
-            mtrx_dbl[8] = 0.02;
-         }
-         else /* == 0 */
-         {
-            mtrx_dbl[0] = 2.0;
-            mtrx_dbl[1] = 1.0;
-            mtrx_dbl[2] = 0.0;
-            mtrx_dbl[3] = 1.0;
-            mtrx_dbl[4] = 2.0;
-            mtrx_dbl[5] = 1.0;
-            mtrx_dbl[6] = 0.0;
-            mtrx_dbl[7] = 1.0;
-            mtrx_dbl[8] = 2.0;
-         }
-
-      }
-      else if (num_fun == 4)
-      {
-         mtrx_dbl[0] = 1.01;
-         mtrx_dbl[1] = 1;
-         mtrx_dbl[2] = 0.0;
-         mtrx_dbl[3] = 0.0;
-         mtrx_dbl[4] = 1;
-         mtrx_dbl[5] = 2;
-         mtrx_dbl[6] = 1;
-         mtrx_dbl[7] = 0.0;
-         mtrx_dbl[8] = 0.0;
-         mtrx_dbl[9] = 1;
-         mtrx_dbl[10] = 1.01;
-         mtrx_dbl[11] = 0.0;
-         mtrx_dbl[12] = 2;
-         mtrx_dbl[13] = 1;
-         mtrx_dbl[14] = 0.0;
-         mtrx_dbl[15] = 1;
-      }
-
-      for (i=0; i<num_fun*num_fun; i++)
-      {
-         mtrx_flt[i] = (float)mtrx_dbl[i];
-      }
-
-      A_dbl = (HYPRE_ParCSRMatrix) GenerateSysLaplacian_dbl(MPI_COMM_WORLD,
-                                                       nx, ny, nz, P, Q,
-                                                       R, p, q, r, num_fun, mtrx_dbl, values_dbl);
-      A_flt = (HYPRE_ParCSRMatrix) GenerateSysLaplacian_flt(MPI_COMM_WORLD,
-                                                       nx, ny, nz, P, Q,
-                                                       R, p, q, r, num_fun, mtrx_flt, values_flt);
-
-      free(mtrx_dbl);
-      free(mtrx_flt);
-   }
-
    free(values_dbl);
    free(values_flt);
 
@@ -2096,146 +1975,6 @@ BuildParLaplacian27pt_mp( HYPRE_Int            argc,
    A_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_dbl(MPI_COMM_WORLD,
                                                   nx, ny, nz, P, Q, R, p, q, r, values_dbl);
 
-   free(values_dbl);
-
-   *A_dbl_ptr = A_dbl;
-   *A_flt_ptr = A_flt;
-
-   return (0);
-}
-
-/*----------------------------------------------------------------------
- * Build 125-point laplacian in 3D (27-pt squared)
- * Parameters given in command line.
- *----------------------------------------------------------------------*/
-
-HYPRE_Int
-BuildParLaplacian125pt_mp( HYPRE_Int            argc,
-                           char                *argv[],
-                           HYPRE_Int            arg_index,
-                           HYPRE_ParCSRMatrix  *A_flt_ptr,
-                           HYPRE_ParCSRMatrix  *A_dbl_ptr     )
-{
-   HYPRE_BigInt              nx, ny, nz;
-   HYPRE_Int                 P, Q, R;
-
-   HYPRE_ParCSRMatrix        A_flt, B_flt;
-   HYPRE_ParCSRMatrix        A_dbl, B_dbl;
-
-   HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 p, q, r;
-   float                    *values_flt;
-   double                   *values_dbl;
-
-   /*-----------------------------------------------------------
-    * Initialize some stuff
-    *-----------------------------------------------------------*/
-
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-
-   /*-----------------------------------------------------------
-    * Set defaults
-    *-----------------------------------------------------------*/
-
-   nx = 10;
-   ny = 10;
-   nz = 10;
-
-   P  = 1;
-   Q  = num_procs;
-   R  = 1;
-
-   /*-----------------------------------------------------------
-    * Parse command line
-    *-----------------------------------------------------------*/
-   arg_index = 0;
-   while (arg_index < argc)
-   {
-      if ( strcmp(argv[arg_index], "-n") == 0 )
-      {
-         arg_index++;
-         nx = atoi(argv[arg_index++]);
-         ny = atoi(argv[arg_index++]);
-         nz = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-P") == 0 )
-      {
-         arg_index++;
-         P  = atoi(argv[arg_index++]);
-         Q  = atoi(argv[arg_index++]);
-         R  = atoi(argv[arg_index++]);
-      }
-      else
-      {
-         arg_index++;
-      }
-   }
-
-   /*-----------------------------------------------------------
-    * Check a few things
-    *-----------------------------------------------------------*/
-
-   if ((P * Q * R) != num_procs)
-   {
-      hypre_printf("Error: Invalid number of processors or processor topology \n");
-      exit(1);
-   }
-
-   /*-----------------------------------------------------------
-    * Print driver parameters
-    *-----------------------------------------------------------*/
-
-   if (myid == 0)
-   {
-      hypre_printf("  Laplacian_125pt:\n");
-      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
-      hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
-   }
-
-   /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
-
-   /* compute p,q,r from P,Q,R and myid */
-   p = myid % P;
-   q = (( myid - p) / P) % Q;
-   r = ( myid - p - P * q) / ( P * Q );
-
-   /*-----------------------------------------------------------
-    * Generate the matrix
-    *-----------------------------------------------------------*/
-
-   values_flt = (float*) calloc(2, sizeof(float));
-   values_dbl = (double*) calloc(2, sizeof(double));
-
-   values_flt[0] = 26.0;
-   values_dbl[0] = 26.0;
-   if (nx == 1 || ny == 1 || nz == 1)
-   {
-      values_flt[0] = 8.0;
-      values_dbl[0] = 8.0;
-   }
-   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
-   {
-      values_flt[0] = 2.0;
-      values_dbl[0] = 2.0;
-   }
-   values_flt[1] = -1.;
-   values_dbl[1] = -1.;
-
-   B_flt = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_flt(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_flt);
-   A_flt = (HYPRE_ParCSRMatrix) hypre_ParCSRMatMat_flt(B_flt, B_flt);
-
-   HYPRE_ParCSRMatrixDestroy_flt(B_flt);
-   free(values_flt);
-
-   B_dbl = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt_dbl(MPI_COMM_WORLD,
-                                                  nx, ny, nz, P, Q, R, p, q, r, values_dbl);
-   A_dbl = (HYPRE_ParCSRMatrix) hypre_ParCSRMatMat_dbl(B_dbl, B_dbl);
-
-   HYPRE_ParCSRMatrixDestroy_dbl(B_dbl);
    free(values_dbl);
 
    *A_dbl_ptr = A_dbl;

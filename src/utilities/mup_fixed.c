@@ -537,14 +537,6 @@ hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value, HYPRE_Int *num_valu
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArrayInitialize_v2)( array, memory_location );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_IntArrayInverseMapping)( v, w_ptr );

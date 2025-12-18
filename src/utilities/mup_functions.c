@@ -350,6 +350,15 @@ hypre_IntArrayInitialize( hypre_IntArray *array )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_IntArrayInitialize_v2_pre( precision, array, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

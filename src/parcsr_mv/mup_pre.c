@@ -880,6 +880,24 @@ hypre_ParCSRMatrixSetDNumNonzeros_pre( HYPRE_Precision precision, hypre_ParCSRMa
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *matrix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_ParCSRMatrixSetNumNonzeros_flt( matrix );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_ParCSRMatrixSetNumNonzeros_dbl( matrix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_ParCSRMatrixSetNumNonzeros_long_dbl( matrix );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix *
 hypre_ParMatmul_pre( HYPRE_Precision precision, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
 {

@@ -448,6 +448,15 @@ hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixSetNumNonzeros_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix *
 hypre_ParMatmul( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B )
 {

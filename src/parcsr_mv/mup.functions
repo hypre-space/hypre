@@ -50,6 +50,7 @@ hypre_ParCSRMatrixMatvec
 hypre_ParCSRMatrixMatvecOutOfPlace
 hypre_ParCSRMatrixMatvecT
 hypre_ParCSRMatrixSetDNumNonzeros
+hypre_ParCSRMatrixSetNumNonzeros
 hypre_ParMatmul
 hypre_ParTMatmul
 hypre_ParVectorCopy
