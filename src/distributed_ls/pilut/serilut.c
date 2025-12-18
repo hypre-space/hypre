@@ -164,7 +164,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
         jr[col_ind[j]] = lastjr;
-        jw[lastjr] = col_ind[j];
+        jw[lastjr] = (HYPRE_Int) col_ind[j];
         w[lastjr] = values[j];
         lastjr++;
       }
@@ -266,7 +266,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
       if (col_ind[j] != i+firstrow) { /* Off-diagonal element */
         jr[col_ind[j]] = lastjr;
-        jw[lastjr] = col_ind[j];
+        jw[lastjr] = (HYPRE_Int) col_ind[j];
         w[lastjr] = values[j];
         lastjr++;
       }
