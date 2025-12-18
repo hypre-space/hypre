@@ -486,6 +486,9 @@ main (hypre_int argc, char *argv[])
          hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
 
          hypre_printf("  -w   <val>             : set Jacobi relax weight = val\n");
+         hypre_printf("  -flex <val>            : use flexible CG  \n");
+         hypre_printf("       1 = on (default in driver)\n");
+         hypre_printf("       0 = off\n");
          hypre_printf("  -k   <val>             : dimension Krylov space for GMRES\n");
          hypre_printf("  -mxl  <val>            : maximum number of levels (MPAMG)\n");
          hypre_printf("  -tol  <val>            : set solver convergence tolerance = val\n");
