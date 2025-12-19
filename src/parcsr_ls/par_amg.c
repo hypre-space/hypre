@@ -556,6 +556,11 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataZtempDBL(amg_data) = NULL;
    hypre_ParAMGDataZtempFLT(amg_data) = NULL;
    hypre_ParAMGDataZtempLONGDBL(amg_data) = NULL;
+   hypre_ParAMGDataStrongThresholdLDBL(amg_data) = 0.25;
+   hypre_ParAMGDataMaxRowSumLDBL(amg_data) = 1.0;
+   hypre_ParAMGDataTruncFactorLDBL(amg_data) = 0.0;
+   hypre_ParAMGDataAggTruncFactorLDBL(amg_data) = 0.0;
+   hypre_ParAMGDataAggP12TruncFactorLDBL(amg_data) = 0.0;
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;

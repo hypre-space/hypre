@@ -144,6 +144,27 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    HYPRE_Real strong_threshold;
    HYPRE_Real max_row_sum;
    HYPRE_Real trunc_factor, agg_trunc_factor, agg_P12_trunc_factor;
+   
+   /*  Setting these parameters to hypre_long_doubles and calling the corresponding
+    *  long double variables will generate a correct preconditioner using 
+    *  single precision on the finest level, but I still don't know how to get 
+    *  the solve phase right. */
+    
+   /*hypre_long_double strong_threshold, max_row_sum;
+   hypre_long_double trunc_factor, agg_trunc_factor, agg_P12_trunc_factor;
+
+   strong_threshold = hypre_ParAMGDataStrongThresholdLDBL(amg_data);
+   max_row_sum = hypre_ParAMGDataMaxRowSumLDBL(amg_data);
+   trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   agg_trunc_factor = hypre_ParAMGDataAggTruncFactor(amg_data);
+   agg_P12_trunc_factor = hypre_ParAMGDataAggP12TruncFactor(amg_data); */
+
+   strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
+   trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   agg_trunc_factor = hypre_ParAMGDataAggTruncFactor(amg_data);
+   agg_P12_trunc_factor = hypre_ParAMGDataAggP12TruncFactor(amg_data);
+
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
@@ -232,9 +253,6 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
    useSabs = hypre_ParAMGDataSabs(amg_data);
-   trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
-   agg_trunc_factor = hypre_ParAMGDataAggTruncFactor(amg_data);
-   agg_P12_trunc_factor = hypre_ParAMGDataAggP12TruncFactor(amg_data);
 
    P_max_elmts = hypre_ParAMGDataPMaxElmts(amg_data);
    agg_P_max_elmts = hypre_ParAMGDataAggPMaxElmts(amg_data);
@@ -383,8 +401,6 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       }
       else /* max_levels > 1 */
       {
-	 hypre_BoomerAMGGetStrongThreshold_pre(level_precision, amg_data, &strong_threshold);
-	 hypre_BoomerAMGGetMaxRowSum_pre(level_precision, amg_data, &max_row_sum);
 	 hypre_Strength_Options_pre(level_precision, A_array[level], strong_threshold, 
 			            max_row_sum,
 	          	            num_functions, nodal, nodal_diag, 

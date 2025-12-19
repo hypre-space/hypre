@@ -88,7 +88,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    F_array          = hypre_ParAMGDataFArray(amg_data);
    U_array          = hypre_ParAMGDataUArray(amg_data);
 
-   tol              = (hypre_double) hypre_ParAMGDataTol(amg_data);
+   tol              = hypre_ParAMGDataTol(amg_data);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
    num_vectors      = hypre_ParVectorNumVectors(f);
@@ -197,7 +197,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
       /* r0 */
       resid_nrm_init = resid_nrm;
 
-      rhs_norm = (HYPRE_Real) hypre_sqrt(hypre_ParVectorInnerProd_pre(level_precision, f, f));
+      rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd_pre(level_precision, f, f));
       
       if (rhs_norm)
       {

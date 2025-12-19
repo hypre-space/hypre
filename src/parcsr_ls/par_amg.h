@@ -302,6 +302,11 @@ typedef struct
    hypre_ParVector *Ztemp_dbl;
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
+   hypre_long_double strong_threshold_ldbl;
+   hypre_long_double max_row_sum_ldbl;
+   hypre_long_double trunc_factor_ldbl;
+   hypre_long_double agg_trunc_factor_ldbl;
+   hypre_long_double agg_P12_trunc_factor_ldbl;
 #endif
 
 } hypre_ParAMGData;
@@ -584,6 +589,11 @@ typedef struct
 #define hypre_ParAMGDataZtempDBL(amg_data) ((amg_data)->Ztemp_dbl)
 #define hypre_ParAMGDataZtempFLT(amg_data) ((amg_data)->Ztemp_flt)
 #define hypre_ParAMGDataZtempLONGDBL(amg_data) ((amg_data)->Ztemp_long_dbl)
+#define hypre_ParAMGDataStrongThresholdLDBL(amg_data) ((amg_data)->strong_threshold_ldbl)
+#define hypre_ParAMGDataMaxRowSumLDBL(amg_data) ((amg_data)->max_row_sum_ldbl)
+#define hypre_ParAMGDataTruncFactorLDBL(amg_data) ((amg_data)->trunc_factor_ldbl)
+#define hypre_ParAMGDataAggTruncFactorLDBL(amg_data) ((amg_data)->agg_trunc_factor_ldbl)
+#define hypre_ParAMGDataAggP12TruncFactorLDBL(amg_data) ((amg_data)->agg_P12_trunc_factor_ldbl)
 #endif
 
 #endif

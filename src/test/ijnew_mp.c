@@ -74,10 +74,10 @@ main (hypre_int argc, char *argv[])
    HYPRE_Int P_max_elmts = 4;
    HYPRE_Real trunc_factor = 0.0;
    HYPRE_Real strong_threshold = 0.25;
-   HYPRE_Int relax_type = 8;
-   HYPRE_Int relax_up = 14;
-   HYPRE_Int relax_down = 13;
-   HYPRE_Int relax_coarse = 9;
+   HYPRE_Int relax_type = -1;
+   HYPRE_Int relax_up = -1;
+   HYPRE_Int relax_down = -1;
+   HYPRE_Int relax_coarse = -1;
    HYPRE_Int num_sweeps = 1;
    HYPRE_Int ns_down = -1;
    HYPRE_Int ns_up = -1;
@@ -260,6 +260,26 @@ main (hypre_int argc, char *argv[])
          arg_index++;
          coarsen_type      = 6;
       }
+      else if ( strcmp(argv[arg_index], "-th") == 0 )
+      {
+         arg_index++;
+         strong_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-tr") == 0 )
+      {
+         arg_index++;
+         trunc_factor  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
+      {
+         arg_index++;
+         P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rlx") == 0 )
+      {
+         arg_index++;
+         relax_type = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-rlx_coarse") == 0 )
       {
          arg_index++;
@@ -275,6 +295,17 @@ main (hypre_int argc, char *argv[])
          arg_index++;
          relax_up = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-w") == 0 )
+      {
+         arg_index++;
+         relax_wt = (HYPRE_Real)atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ow") == 0 )
+      {
+         arg_index++;
+         outer_wt = (HYPRE_Real)atof(argv[arg_index++]);
+      }
+
       else if ( strcmp(argv[arg_index], "-mxl") == 0 )
       {
          arg_index++;
@@ -681,11 +712,8 @@ main (hypre_int argc, char *argv[])
       HYPRE_BoomerAMGSetStrongThreshold_pre(precision0, amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor_pre(precision0, amg_solver, trunc_factor);
       HYPRE_BoomerAMGSetPMaxElmts_pre(precision0, amg_solver, P_max_elmts);
-      /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel_pre(precision0, amg_solver, poutdat);
-      //HYPRE_MPAMGSetCycleType_mp(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps_pre(precision0, amg_solver, num_sweeps);
-      if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_pre(precision0, amg_solver, relax_type); }
       if (relax_down > -1)
       {
          HYPRE_BoomerAMGSetCycleRelaxType_pre(precision0, amg_solver, relax_down, 1);
@@ -698,6 +726,7 @@ main (hypre_int argc, char *argv[])
       {
          HYPRE_BoomerAMGSetCycleRelaxType_pre(precision0, amg_solver, relax_coarse, 3);
       }
+      if (relax_type > -1) { HYPRE_BoomerAMGSetRelaxType_pre(precision0, amg_solver, relax_type); }
       HYPRE_BoomerAMGSetRelaxOrder_pre(precision0, amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt_pre(precision0, amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt_pre(precision0, amg_solver, outer_wt);
@@ -827,7 +856,6 @@ main (hypre_int argc, char *argv[])
          {
             HYPRE_BoomerAMGSetCycleRelaxType_pre(precision0, amg_solver, relax_coarse, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder_pre(precision0, amg_solver, relax_order);
          HYPRE_BoomerAMGSetRelaxWt_pre(precision0, amg_solver, relax_wt);
          HYPRE_BoomerAMGSetOuterWt_pre(precision0, amg_solver, outer_wt);
          HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
@@ -977,8 +1005,7 @@ main (hypre_int argc, char *argv[])
          {
             HYPRE_BoomerAMGSetCycleRelaxType_pre(precision0, amg_solver, relax_coarse, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder_pre(precision0, amg_solver, relax_order);
-         HYPRE_BoomerAMGSetRelaxWt_pre(precision0, amg_solver, relax_wt);
+	 HYPRE_BoomerAMGSetRelaxWt_pre(precision0, amg_solver, relax_wt);
          HYPRE_BoomerAMGSetOuterWt_pre(precision0, amg_solver, outer_wt);
          HYPRE_BoomerAMGSetMaxLevels_pre(precision0, amg_solver, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum_pre(precision0, amg_solver, max_row_sum);
