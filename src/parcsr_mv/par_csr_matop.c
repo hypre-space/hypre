@@ -2130,6 +2130,7 @@ hypre_ParCSRMatrixTransposeHost( hypre_ParCSRMatrix  *A,
    local_num_cols_AT = (HYPRE_Int)(col_starts_AT[1] - first_col_diag_AT);
 
    AT = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(AT) = 1;
    hypre_ParCSRMatrixComm(AT) = comm;
    hypre_ParCSRMatrixDiag(AT) = AT_diag;
    hypre_ParCSRMatrixOffd(AT) = AT_offd;
@@ -4021,6 +4022,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    local_num_cols = (HYPRE_Int)(col_starts_B[1] - first_col_diag);
 
    C = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(C) = 1;
    hypre_ParCSRMatrixComm(C) = comm;
    hypre_ParCSRMatrixGlobalNumRows(C) = ncols_A;
    hypre_ParCSRMatrixGlobalNumCols(C) = ncols_B;
@@ -4165,7 +4167,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return hypre_ParCSRMatrixRef(C);
+   return C;
 }
 
 /*--------------------------------------------------------------------------

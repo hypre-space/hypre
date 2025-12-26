@@ -824,6 +824,7 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    }
 
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(matrix) = 1;
 
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
@@ -2870,6 +2871,7 @@ hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    C = hypre_CTAlloc( hypre_ParCSRMatrix,  1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(C) = 1;
    hypre_ParCSRMatrixComm( C ) = hypre_ParCSRMatrixComm( A );
    hypre_ParCSRMatrixGlobalNumRows( C ) = hypre_ParCSRMatrixGlobalNumRows( A );
    hypre_ParCSRMatrixGlobalNumCols( C ) = hypre_ParCSRMatrixGlobalNumCols( A );
