@@ -4165,7 +4165,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return C;
+   return hypre_ParCSRMatrixRef(C);
 }
 
 /*--------------------------------------------------------------------------

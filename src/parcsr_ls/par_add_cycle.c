@@ -1003,7 +1003,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       hypre_ParAMGDataAtilde(amg_data) = Atilde;
    }
 
-   hypre_ParAMGDataLambda(amg_data) = Lambda;
+   hypre_ParAMGDataLambda(amg_data) = hypre_ParCSRMatrixRef(Lambda);
    hypre_ParAMGDataRtilde(amg_data) = Rtilde;
    hypre_ParAMGDataXtilde(amg_data) = Xtilde;
 
