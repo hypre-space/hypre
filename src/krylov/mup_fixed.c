@@ -33,9 +33,9 @@ hypre_BiCGSTABDestroy( void *bicgstab_vdata )
 /*--------------------------------------------------------------------------*/
 
 hypre_BiCGSTABFunctions *
-hypre_BiCGSTABFunctionsCreate( hypre_KrylovPtrToCreateVector CreateVector, hypre_KrylovPtrToDestroyVector DestroyVector, hypre_KrylovPtrToMatvecCreate MatvecCreate, hypre_KrylovPtrToMatvec Matvec, hypre_KrylovPtrToMatvecDestroy MatvecDestroy, hypre_KrylovPtrToInnerProd InnerProd, hypre_KrylovPtrToCopyVector CopyVector, hypre_KrylovPtrToClearVector ClearVector, hypre_KrylovPtrToScaleVector ScaleVector, hypre_KrylovPtrToAxpy Axpy, hypre_KrylovPtrToCommInfo CommInfo, hypre_KrylovPtrToPrecond Precond, hypre_KrylovPtrToPrecondSetup PrecondSetup )
+hypre_BiCGSTABFunctionsCreate( hypre_KrylovPtrToCreateVector CreateVector, hypre_KrylovPtrToDestroyVector DestroyVector, hypre_KrylovPtrToMatvecCreate MatvecCreate, hypre_KrylovPtrToMatvec Matvec, hypre_KrylovPtrToMatvecDestroy MatvecDestroy, hypre_KrylovPtrToInnerProd InnerProd, hypre_KrylovPtrToCopyVector CopyVector, hypre_KrylovPtrToClearVector ClearVector, hypre_KrylovPtrToScaleVector ScaleVector, hypre_KrylovPtrToAxpy Axpy, hypre_KrylovPtrToCommInfo CommInfo, hypre_KrylovPtrToPrecondSetup PrecondSetup, hypre_KrylovPtrToPrecond Precond )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BiCGSTABFunctionsCreate)( CreateVector, DestroyVector, MatvecCreate, Matvec, MatvecDestroy, InnerProd, CopyVector, ClearVector, ScaleVector, Axpy, CommInfo, Precond, PrecondSetup );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BiCGSTABFunctionsCreate)( CreateVector, DestroyVector, MatvecCreate, Matvec, MatvecDestroy, InnerProd, CopyVector, ClearVector, ScaleVector, Axpy, CommInfo, PrecondSetup, Precond );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -857,9 +857,9 @@ hypre_GMRESDestroy( void *gmres_vdata )
 /*--------------------------------------------------------------------------*/
 
 hypre_GMRESFunctions *
-hypre_GMRESFunctionsCreate( hypre_KrylovPtrToCAlloc CAlloc, hypre_KrylovPtrToFree Free, hypre_KrylovPtrToCommInfo CommInfo, hypre_KrylovPtrToCreateVector CreateVector, hypre_KrylovPtrToCreateVectorArray CreateVectorArray, hypre_KrylovPtrToDestroyVector DestroyVector, hypre_KrylovPtrToMatvecCreate MatvecCreate, hypre_KrylovPtrToMatvec Matvec, hypre_KrylovPtrToMatvecDestroy MatvecDestroy, hypre_KrylovPtrToInnerProdTagged InnerProd, hypre_KrylovPtrToCopyVector CopyVector, hypre_KrylovPtrToClearVector ClearVector, hypre_KrylovPtrToScaleVector ScaleVector, hypre_KrylovPtrToAxpy Axpy, hypre_KrylovPtrToPrecond Precond, hypre_KrylovPtrToPrecondSetup PrecondSetup )
+hypre_GMRESFunctionsCreate( hypre_KrylovPtrToCAlloc CAlloc, hypre_KrylovPtrToFree Free, hypre_KrylovPtrToCommInfo CommInfo, hypre_KrylovPtrToCreateVector CreateVector, hypre_KrylovPtrToCreateVectorArray CreateVectorArray, hypre_KrylovPtrToDestroyVector DestroyVector, hypre_KrylovPtrToMatvecCreate MatvecCreate, hypre_KrylovPtrToMatvec Matvec, hypre_KrylovPtrToMatvecDestroy MatvecDestroy, hypre_KrylovPtrToInnerProdTagged InnerProd, hypre_KrylovPtrToCopyVector CopyVector, hypre_KrylovPtrToClearVector ClearVector, hypre_KrylovPtrToScaleVector ScaleVector, hypre_KrylovPtrToAxpy Axpy, hypre_KrylovPtrToPrecondSetup PrecondSetup, hypre_KrylovPtrToPrecond Precond )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_GMRESFunctionsCreate)( CAlloc, Free, CommInfo, CreateVector, CreateVectorArray, DestroyVector, MatvecCreate, Matvec, MatvecDestroy, InnerProd, CopyVector, ClearVector, ScaleVector, Axpy, Precond, PrecondSetup );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GMRESFunctionsCreate)( CAlloc, Free, CommInfo, CreateVector, CreateVectorArray, DestroyVector, MatvecCreate, Matvec, MatvecDestroy, InnerProd, CopyVector, ClearVector, ScaleVector, Axpy, PrecondSetup, Precond );
 }
 
 /*--------------------------------------------------------------------------*/
