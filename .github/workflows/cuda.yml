@@ -31,32 +31,36 @@ jobs:
   # Build with different CUDA versions
   cuda-version-matrix:
     name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }})
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
     strategy:
       fail-fast: false
       matrix:
         include:
-          # CUDA 11.x versions
+          # CUDA 11.x versions - requires Ubuntu 22.04
           - cuda: "11.8.0"
             build_type: Debug
             gcc: 11
             cuda_arch: "70;80"
+            os: ubuntu-22.04
           # CUDA 12.x versions
           - cuda: "12.4.1"
             build_type: Debug
             gcc: 12
             cuda_arch: "80;90"
+            os: ubuntu-22.04
           - cuda: "12.6.3"
             build_type: Debug
             gcc: 13
             cuda_arch: "80;90"
+            os: ubuntu-24.04
           # CUDA 13.x versions
           - cuda: "13.1.0"
             build_type: Debug
             gcc: 14
             cuda_arch: "80;90;100"
+            os: ubuntu-24.04
 
     steps:
       - name: Checkout sources
@@ -81,8 +85,6 @@ jobs:
         with:
           cuda: ${{ matrix.cuda }}
           method: network
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas-dev", "cusparse", "cusparse-dev", "curand", "curand-dev", "cusolver", "cusolver-dev", "thrust"]'
-          non-cuda-sub-packages: '["libcusparse-dev", "libcublas-dev", "libcurand-dev", "libcusolver-dev"]'
 
       - name: Verify CUDA installation
         run: |
@@ -132,7 +134,6 @@ jobs:
         with:
           cuda: "12.4.1"
           method: network
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas-dev", "cusparse", "cusparse-dev", "curand", "curand-dev", "cusolver", "cusolver-dev", "thrust"]'
 
       - name: Configure HYPRE with CUDA (Shared Library)
         run: |
@@ -176,7 +177,6 @@ jobs:
         with:
           cuda: "12.4.1"
           method: network
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas-dev", "cusparse", "cusparse-dev", "curand", "curand-dev", "cusolver", "cusolver-dev", "thrust"]'
 
       - name: Configure HYPRE with CUDA Mixed Precision
         run: |
@@ -218,7 +218,6 @@ jobs:
         with:
           cuda: "12.4.1"
           method: network
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas-dev", "cusparse", "cusparse-dev", "curand", "curand-dev", "cusolver", "cusolver-dev", "thrust"]'
 
       - name: Configure HYPRE with CUDA Single Precision
         run: |
