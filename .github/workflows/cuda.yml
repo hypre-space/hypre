@@ -30,7 +30,7 @@ jobs:
 
   # Build with different CUDA versions
   cuda-version-matrix:
-    name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }})
+    name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }}) - Arch ${{ matrix.cuda_arch }}
     runs-on: ubuntu-22.04
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
@@ -42,13 +42,21 @@ jobs:
           - cuda: "11.8.0"
             build_type: Debug
             gcc: 11
+            cuda_arch: "70;80"
           # CUDA 12.x versions
           - cuda: "12.4.1"
             build_type: Debug
             gcc: 12
+            cuda_arch: "80;90"
           - cuda: "12.6.3"
             build_type: Debug
             gcc: 13
+            cuda_arch: "80;90"
+          # CUDA 13.x versions
+          - cuda: "13.1.0"
+            build_type: Debug
+            gcc: 13
+            cuda_arch: "80;90;100"
 
     steps:
       - name: Checkout sources
@@ -94,7 +102,7 @@ jobs:
             -DHYPRE_ENABLE_CUSOLVER=ON \
             -DHYPRE_BUILD_UMPIRE=ON \
             -DHYPRE_BUILD_TESTS=ON \
-            -DCMAKE_CUDA_ARCHITECTURES="70;80" \
+            -DCMAKE_CUDA_ARCHITECTURES="${{ matrix.cuda_arch }}" \
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++
 
@@ -136,6 +144,7 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_BUILD_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
@@ -179,6 +188,7 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_BUILD_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
@@ -221,6 +231,7 @@ jobs:
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
             -DHYPRE_BUILD_TESTS=ON \
+            -DHYPRE_BUILD_UMPIRE=OFF \            
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
       - name: Build HYPRE
