@@ -510,23 +510,23 @@ struct _extrows_dh {
     Factor_dh F;           /* not owned! */
 
     hypre_MPI_Status status[MAX_MPI_TASKS];
-    hypre_MPI_Request req1[MAX_MPI_TASKS]; 
+    hypre_MPI_Request req1[MAX_MPI_TASKS];
     hypre_MPI_Request req2[MAX_MPI_TASKS];
-    hypre_MPI_Request req3[MAX_MPI_TASKS]; 
+    hypre_MPI_Request req3[MAX_MPI_TASKS];
     hypre_MPI_Request req4[MAX_MPI_TASKS];
     hypre_MPI_Request cval_req[MAX_MPI_TASKS];
     hypre_MPI_Request fill_req[MAX_MPI_TASKS];
     hypre_MPI_Request aval_req[MAX_MPI_TASKS];
 
     /*------------------------------------------------------------------------
-     *  data structures for receiving, storing, and accessing external rows 
+     *  data structures for receiving, storing, and accessing external rows
      *  from lower-ordered nabors
      *------------------------------------------------------------------------*/
     /* for reception of row counts, row numbers, and row lengths: */
     HYPRE_Int rcv_row_counts[MAX_MPI_TASKS]; /* P_i will send rcv_row_counts[i] rows */
     HYPRE_Int rcv_nz_counts[MAX_MPI_TASKS];  /* P_i's rows contain rcv_nz_counts[i] nonzeros */
     HYPRE_Int *rcv_row_lengths[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
-    HYPRE_Int *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
+    HYPRE_BigInt *rcv_row_numbers[MAX_MPI_TASKS];  /* rcv_row_lengths[i][] lists the length of each row */
 
     /* for reception of the actual rows: */
     HYPRE_Int      *cvalExt;
@@ -541,7 +541,7 @@ struct _extrows_dh {
      *--------------------------------------------------------------------------*/
     /* for sending row counts, numbers, and lengths: */
     HYPRE_Int *my_row_counts;     /* my_row_counts[i] = nzcount in upper tri portion o */
-    HYPRE_Int *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
+    HYPRE_BigInt *my_row_numbers;    /* my_row_numbers[i] = global row number of local ro */
 
     /* for sending the actual rows: */
     HYPRE_Int     nzSend;      /* total entries in upper tri portions of bdry rows */
@@ -567,10 +567,10 @@ struct _extrows_dh {
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */
-  HYPRE_Int m, n;    
+  HYPRE_Int m, n;
 
   HYPRE_Int id;          /* this subdomain's id after reordering */
-  HYPRE_Int beg_row;     /* global number of 1st locally owned row */
+  HYPRE_BigInt beg_row;     /* global number of 1st locally owned row */
   HYPRE_Int first_bdry;  /* local number of first boundary row */
   HYPRE_Int bdry_count;  /* m - first_boundary */
 
@@ -580,7 +580,7 @@ struct _factor_dh {
   bool blockJacobi;
 
   /* sparse row-oriented storage for locally owned submatrix */
-  HYPRE_Int *rp;       
+  HYPRE_Int *rp;
   HYPRE_Int *cval;
   REAL_DH *aval;
   HYPRE_Int *fill;
@@ -597,7 +597,7 @@ struct _factor_dh {
                                work vector when solving Ux=y for x.
                             */
   HYPRE_Real   *sendbufLo, *sendbufHi;
-  HYPRE_Int          *sendindLo, *sendindHi;
+  HYPRE_BigInt      *sendindLo, *sendindHi;
   HYPRE_Int          sendlenLo, sendlenHi;
   bool         solveIsSetup;
   Numbering_dh numbSolve;
@@ -605,7 +605,7 @@ struct _factor_dh {
   hypre_MPI_Request  recv_reqLo[MAX_MPI_TASKS], recv_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  send_reqLo[MAX_MPI_TASKS], send_reqHi[MAX_MPI_TASKS]; /* used for persistent comms */
   hypre_MPI_Request  requests[MAX_MPI_TASKS];
-  hypre_MPI_Status   status[MAX_MPI_TASKS];  
+  hypre_MPI_Status   status[MAX_MPI_TASKS];
 
   bool debug;
 };
@@ -1734,7 +1734,7 @@ extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval
 
 /* "row" refers to global row number */
 
-extern void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal);
+extern void EuclidGetDimensions(void *A, HYPRE_BigInt *beg_row, HYPRE_Int *rowsLocal, HYPRE_BigInt *rowsGlobal);
 extern void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 extern void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
@@ -1745,7 +1745,6 @@ extern void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
 
 
 #endif
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1811,7 +1810,7 @@ extern void ilut_seq(Euclid_dh ctx);
  *             Mat_dhSolve, and is in src/Mat_dh.c
  *
  * Users should only need to call functions with names of the form
- * Euclid_dhXXX (public functions). 
+ * Euclid_dhXXX (public functions).
  *
  * Some of the functions whose names are of the form XXX_private_XXX,
  * as could easily be static functions; similarly, the enums and
@@ -1874,32 +1873,32 @@ enum{ SOLVE_START_T,
 #define STATS_BINS 10
 enum{ NZA_STATS,       /* cumulative nonzeros for all systems solved */
       NZF_STATS,       /* cumulative nonzeros for all systems solved */
-      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */ 
+      NZA_USED_STATS,  /* cumulative nonzeros NOT dropped by sparseA */
       NZA_RATIO_STATS  /* NZA_USED_STATS/NZA_STATS, over all processors */
     };
 
 
-/* primary data structure: this is monstrously long; but it works. 
+/* primary data structure: this is monstrously long; but it works.
    Users must ensure the following fields are initialized prior
    to calling Euclid_dhSetup(): m, n, beg_row, A
 */
 struct _mpi_interface_dh {
   bool isSetup;
 
-  HYPRE_Real rho_init;  
-  HYPRE_Real rho_final;  
-    /* Memory allocation for factor; will initially allocate space for 
+  HYPRE_Real rho_init;
+  HYPRE_Real rho_final;
+    /* Memory allocation for factor; will initially allocate space for
        rho_init*nzA nonzeros; rho_final is computed after factorization,
        and is the minimum that rho_init whoulc have been to avoid
        memory reallocation; rho_final is a maximum across all processors.
     */
 
   HYPRE_Int m;         /* local rows in matrix */
-  HYPRE_Int n;         /* global rows in matrix */
+  HYPRE_BigInt n;         /* global rows in matrix */
   HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
-  SubdomainGraph_dh sg; 
+  SubdomainGraph_dh sg;
 
   REAL_DH *scale;      /* row scaling vector */
   bool    isScaled;    /* set at runtime, turns scaling on or off */
@@ -1940,10 +1939,10 @@ struct _mpi_interface_dh {
   bool timingsWereReduced;
   bool   printStats; /* if true, on 2nd and subsequent calls to Setup,
                         calls Euclid_dhPrintStatsShorter().  Intent is to
-                        print out stats for each setup phase when 
+                        print out stats for each setup phase when
                         using Euclid, e.g, for nonlinear solves.
                      */
-}; 
+};
 
 #endif /*  #ifndef EUCLID_MPI_INTERFACE_DH */
 /******************************************************************************

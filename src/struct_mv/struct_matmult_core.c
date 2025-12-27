@@ -138,95 +138,95 @@ typedef HYPRE_Complex *hypre_1Cptr;
    tptrs_##m##_2 = tptrs[(k + m)][2]
 
 /* For 4 variable types (cprod and tptrs[k][0], tptrs[k][1], tptrs[k][2]) */
-#define HYPRE_SMMLOAD_4VARS_UP_TO(k, n, ...) \
-   HYPRE_SMMLOAD_4VARS_IMPL_##n(k, __VA_ARGS__)
+#define HYPRE_SMMLOAD_4VARS_UP_TO(k, n) \
+   HYPRE_SMMLOAD_4VARS_IMPL_##n(k)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_1(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_1(k) \
    HYPRE_SMMLOAD_4VARS(k, 0)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_2(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_2(k) \
    HYPRE_SMMLOAD_4VARS(k, 0); \
    HYPRE_SMMLOAD_4VARS(k, 1)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_3(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_3(k) \
    HYPRE_SMMLOAD_4VARS_IMPL_2(k); \
    HYPRE_SMMLOAD_4VARS(k, 2)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_4(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_4(k) \
    HYPRE_SMMLOAD_4VARS_IMPL_3(k); \
    HYPRE_SMMLOAD_4VARS(k, 3)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_5(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_5(k) \
    HYPRE_SMMLOAD_4VARS_IMPL_4(k); \
    HYPRE_SMMLOAD_4VARS(k, 4)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_6(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_6(k) \
    HYPRE_SMMLOAD_4VARS_IMPL_5(k); \
    HYPRE_SMMLOAD_4VARS(k, 5)
 
-#define HYPRE_SMMLOAD_4VARS_IMPL_7(k, ...) \
+#define HYPRE_SMMLOAD_4VARS_IMPL_7(k) \
    HYPRE_SMMLOAD_4VARS_IMPL_6(k); \
    HYPRE_SMMLOAD_4VARS(k, 6)
 
 /* For 3 variable types (cprod and tptrs[k][0], tptrs[k][1]) */
-#define HYPRE_SMMLOAD_3VARS_UP_TO(k, n, ...) \
-   HYPRE_SMMLOAD_3VARS_IMPL_##n(k, __VA_ARGS__)
+#define HYPRE_SMMLOAD_3VARS_UP_TO(k, n) \
+   HYPRE_SMMLOAD_3VARS_IMPL_##n(k)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_1(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_1(k) \
    HYPRE_SMMLOAD_3VARS(k, 0)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_2(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_2(k) \
    HYPRE_SMMLOAD_3VARS(k, 0); \
    HYPRE_SMMLOAD_3VARS(k, 1)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_3(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_3(k) \
    HYPRE_SMMLOAD_3VARS_IMPL_2(k); \
    HYPRE_SMMLOAD_3VARS(k, 2)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_4(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_4(k) \
    HYPRE_SMMLOAD_3VARS_IMPL_3(k); \
    HYPRE_SMMLOAD_3VARS(k, 3)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_5(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_5(k) \
    HYPRE_SMMLOAD_3VARS_IMPL_4(k); \
    HYPRE_SMMLOAD_3VARS(k, 4)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_6(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_6(k) \
    HYPRE_SMMLOAD_3VARS_IMPL_5(k); \
    HYPRE_SMMLOAD_3VARS(k, 5)
 
-#define HYPRE_SMMLOAD_3VARS_IMPL_7(k, ...) \
+#define HYPRE_SMMLOAD_3VARS_IMPL_7(k) \
    HYPRE_SMMLOAD_3VARS_IMPL_6(k); \
    HYPRE_SMMLOAD_3VARS(k, 6)
 
 /* For 2 variable types (cprod and tptrs[k][0]) */
-#define HYPRE_SMMLOAD_2VARS_UP_TO(k, n, ...) \
-   HYPRE_SMMLOAD_2VARS_IMPL_##n(k, __VA_ARGS__)
+#define HYPRE_SMMLOAD_2VARS_UP_TO(k, n) \
+   HYPRE_SMMLOAD_2VARS_IMPL_##n(k)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_1(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_1(k) \
    HYPRE_SMMLOAD_2VARS(k, 0)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_2(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_2(k) \
    HYPRE_SMMLOAD_2VARS(k, 0); \
    HYPRE_SMMLOAD_2VARS(k, 1)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_3(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_3(k) \
    HYPRE_SMMLOAD_2VARS_IMPL_2(k); \
    HYPRE_SMMLOAD_2VARS(k, 2)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_4(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_4(k) \
    HYPRE_SMMLOAD_2VARS_IMPL_3(k); \
    HYPRE_SMMLOAD_2VARS(k, 3)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_5(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_5(k) \
    HYPRE_SMMLOAD_2VARS_IMPL_4(k); \
    HYPRE_SMMLOAD_2VARS(k, 4)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_6(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_6(k) \
    HYPRE_SMMLOAD_2VARS_IMPL_5(k); \
    HYPRE_SMMLOAD_2VARS(k, 5)
 
-#define HYPRE_SMMLOAD_2VARS_IMPL_7(k, ...) \
+#define HYPRE_SMMLOAD_2VARS_IMPL_7(k) \
    HYPRE_SMMLOAD_2VARS_IMPL_6(k); \
    HYPRE_SMMLOAD_2VARS(k, 6)
 

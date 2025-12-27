@@ -227,6 +227,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--with-print-errors``
      - ``-DHYPRE_ENABLE_PRINT_ERRORS=ON``
+   * - | Floating-point exception trap
+       | (default is off)
+     - ``--enable-fpe-trap``
+     - ``-DHYPRE_ENABLE_FPE_TRAP=ON``
    * - | Shared Library
        | (default is off)
      - ``--enable-shared``

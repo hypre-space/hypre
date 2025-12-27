@@ -49,8 +49,8 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int           ****send_flag;
    HYPRE_Int           ****recv_map;
    HYPRE_Int           ****recv_red_marker;
-   HYPRE_Int             **send_buffer               = NULL;
-   HYPRE_Int             **recv_buffer               = NULL;
+   HYPRE_BigInt          **send_buffer               = NULL;
+   HYPRE_BigInt          **recv_buffer               = NULL;
    HYPRE_Int             **send_flag_buffer          = NULL;
    HYPRE_Int             **recv_map_send_buffer      = NULL;
    HYPRE_Int              *send_flag_buffer_size     = NULL;
@@ -178,7 +178,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
       //////////// Communicate buffer sizes ////////////
       if (num_recv_procs)
       {
-         recv_buffer = hypre_CTAlloc(HYPRE_Int*, num_recv_procs, HYPRE_MEMORY_HOST);
+         recv_buffer = hypre_CTAlloc(HYPRE_BigInt*, num_recv_procs, HYPRE_MEMORY_HOST);
          recv_buffer_size[level] = hypre_CTAlloc(HYPRE_Int, num_recv_procs, HYPRE_MEMORY_HOST);
 
          recv_map[level] = hypre_CTAlloc(HYPRE_Int**, num_recv_procs, HYPRE_MEMORY_HOST);
@@ -198,7 +198,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
 
       if (num_send_procs)
       {
-         send_buffer = hypre_CTAlloc(HYPRE_Int*, num_send_procs, HYPRE_MEMORY_HOST);
+         send_buffer = hypre_CTAlloc(HYPRE_BigInt*, num_send_procs, HYPRE_MEMORY_HOST);
          send_buffer_size[level] = hypre_CTAlloc(HYPRE_Int, num_send_procs, HYPRE_MEMORY_HOST);
          send_flag_buffer = hypre_CTAlloc(HYPRE_Int*, num_send_procs, HYPRE_MEMORY_HOST);
          send_flag_buffer_size = hypre_CTAlloc(HYPRE_Int, num_send_procs, HYPRE_MEMORY_HOST);
@@ -225,14 +225,14 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
       //////////// Communicate buffers ////////////
       for (i = 0; i < num_recv_procs; i++)
       {
-         recv_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size[level][i], HYPRE_MEMORY_HOST);
-         hypre_MPI_Irecv(recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_INT,
+         recv_buffer[i] = hypre_CTAlloc(HYPRE_BigInt, recv_buffer_size[level][i], HYPRE_MEMORY_HOST);
+         hypre_MPI_Irecv(recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_BIG_INT,
                          hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
       }
 
       for (i = 0; i < num_send_procs; i++)
       {
-         hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_INT,
+         hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_BIG_INT,
                          hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
       }
 
