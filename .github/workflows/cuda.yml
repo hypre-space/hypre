@@ -100,7 +100,7 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
-            -DHYPRE_BUILD_UMPIRE=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
             -DCMAKE_CUDA_ARCHITECTURES="${{ matrix.cuda_arch }}" \
             -DCMAKE_C_COMPILER=gcc \
@@ -144,14 +144,14 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
-            -DHYPRE_BUILD_UMPIRE=OFF \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
       - name: Build HYPRE
         run: cmake --build build --parallel $(nproc)
 
-  
+
 
   # Test with mixed integer type
   cuda-mixedint:
@@ -188,7 +188,7 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
-            -DHYPRE_BUILD_UMPIRE=OFF \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
@@ -230,8 +230,8 @@ jobs:
             -DHYPRE_ENABLE_CUBLAS=ON \
             -DHYPRE_ENABLE_CURAND=ON \
             -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
             -DHYPRE_BUILD_TESTS=ON \
-            -DHYPRE_BUILD_UMPIRE=OFF \            
             -DCMAKE_CUDA_ARCHITECTURES="70;80"
 
       - name: Build HYPRE
@@ -264,4 +264,3 @@ jobs:
             exit 1
           fi
           echo "All CUDA CI jobs passed successfully!"
-
