@@ -30,8 +30,8 @@ jobs:
 
   # Build with different CUDA versions
   cuda-version-matrix:
-    name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }}) - Arch ${{ matrix.cuda_arch }}
-    runs-on: ubuntu-22.04
+    name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }})
+    runs-on: ubuntu-24.04
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
     strategy:
@@ -55,7 +55,7 @@ jobs:
           # CUDA 13.x versions
           - cuda: "13.1.0"
             build_type: Debug
-            gcc: 13
+            gcc: 14
             cuda_arch: "80;90;100"
 
     steps:
@@ -112,7 +112,7 @@ jobs:
   # Test with shared library build
   cuda-shared-library:
     name: CUDA Shared Library
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
 
@@ -156,7 +156,7 @@ jobs:
   # Test with mixed integer type
   cuda-mixedint:
     name: CUDA Mixed Integer Type
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
 
@@ -198,7 +198,7 @@ jobs:
   # Test with single precision
   cuda-single-precision:
     name: CUDA Single Precision
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
 
