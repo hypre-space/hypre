@@ -283,7 +283,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n, beg_row;
   HYPRE_Real t1;
 
   /*-------------------------------------------------------
@@ -292,7 +293,7 @@ void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    * (for sequential, beg_row=0 and m == n
    *-------------------------------------------------------*/
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
-  s->m = n;
+  s->m = (HYPRE_Int) n;
 
   /*-------------------------------------------------------
    * allocate storage for all data structures
@@ -464,7 +465,8 @@ void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m
 void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row;
+  HYPRE_Int m;
+  HYPRE_BigInt n, beg_row;
   bool symmetric;
   HYPRE_Real t1;
 
@@ -479,7 +481,6 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    *-------------------------------------------------------*/
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
   s->m = m;
-
 
   /*-------------------------------------------------------
    * allocate storage for all data structures
@@ -498,8 +499,8 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
     hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
     hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
-    s->beg_row[myid_dh] = beg_row;
-    s->beg_rowP[myid_dh] = beg_row;
+    s->beg_row[myid_dh] = (HYPRE_Int) beg_row;
+    s->beg_rowP[myid_dh] = (HYPRE_Int) beg_row;
     s->row_count[myid_dh] = m;
   }
 

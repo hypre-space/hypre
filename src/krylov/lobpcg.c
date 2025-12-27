@@ -106,8 +106,8 @@ lobpcg_MultiVectorByMatrix(
 {
    mv_MultiVectorByMatrix( x,
                            utilities_FortranMatrixGlobalHeight( r ),
-                           utilities_FortranMatrixHeight( r ),
-                           utilities_FortranMatrixWidth( r ),
+                           (HYPRE_Int) utilities_FortranMatrixHeight( r ),
+                           (HYPRE_Int) utilities_FortranMatrixWidth( r ),
                            utilities_FortranMatrixValues( r ),
                            y );
 }
@@ -1178,8 +1178,8 @@ lobpcg_MultiVectorByMultiVector(
 {
    mv_MultiVectorByMultiVector( x, y,
                                 utilities_FortranMatrixGlobalHeight( xy ),
-                                utilities_FortranMatrixHeight( xy ),
-                                utilities_FortranMatrixWidth( xy ),
+                                (HYPRE_Int) utilities_FortranMatrixHeight( xy ),
+                                (HYPRE_Int) utilities_FortranMatrixWidth( xy ),
                                 utilities_FortranMatrixValues( xy ) );
 }
 

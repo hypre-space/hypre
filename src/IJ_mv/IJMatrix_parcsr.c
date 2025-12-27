@@ -1877,7 +1877,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    HYPRE_Int ex_num_contacts = 0, num_rows = 0;
    HYPRE_BigInt range_start, range_end;
    HYPRE_Int num_elements;
-   HYPRE_Int storage;
+   HYPRE_BigInt storage;
    HYPRE_Int indx;
    HYPRE_BigInt row;
    HYPRE_Int num_ranges, row_index = 0;
@@ -1896,7 +1896,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    HYPRE_Int *recv_starts = NULL;
    HYPRE_BigInt *response_buf = NULL;
    HYPRE_Int *response_buf_starts = NULL;
-   HYPRE_Int *num_rows_per_proc = NULL, *num_elements_total = NULL;
+   HYPRE_Int *num_rows_per_proc = NULL;
+   HYPRE_BigInt *num_elements_total = NULL;
    HYPRE_Int *argsort_contact_procs = NULL;
 
    HYPRE_Int  obj_size_bytes, complex_size;
@@ -2137,16 +2138,15 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    /* first find out how many rows and elements we need to send per proc - so we
       can do storage */
 
-   ex_contact_procs = hypre_CTAlloc(HYPRE_Int,  num_real_procs, HYPRE_MEMORY_HOST);
-   num_rows_per_proc = hypre_CTAlloc(HYPRE_Int,  num_real_procs, HYPRE_MEMORY_HOST);
-   num_elements_total  =  hypre_CTAlloc(HYPRE_Int,  num_real_procs, HYPRE_MEMORY_HOST);
+   ex_contact_procs   = hypre_CTAlloc(HYPRE_Int, num_real_procs, HYPRE_MEMORY_HOST);
+   num_rows_per_proc  = hypre_CTAlloc(HYPRE_Int, num_real_procs, HYPRE_MEMORY_HOST);
+   num_elements_total = hypre_CTAlloc(HYPRE_BigInt, num_real_procs, HYPRE_MEMORY_HOST);
 
    counter = 0;
-
    if (num_real_procs > 0 )
    {
-      ex_contact_procs[0] = real_proc_id[0];
-      num_rows_per_proc[0] = 1;
+      ex_contact_procs[0]   = real_proc_id[0];
+      num_rows_per_proc[0]  = 1;
       num_elements_total[0] = row_list_num_elements[orig_order[0]];
 
       /* loop through real procs - these are sorted (row_list is sorted also)*/
@@ -2184,13 +2184,13 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
    /* first calculate total storage and make vec_starts arrays */
    storage = 0;
-   ex_contact_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_real_procs + 1, HYPRE_MEMORY_HOST);
+   ex_contact_vec_starts = hypre_CTAlloc(HYPRE_Int, num_real_procs + 1, HYPRE_MEMORY_HOST);
    ex_contact_vec_starts[0] = -1;
 
    for (i = 0; i < num_real_procs; i++)
    {
-      storage += 1 + 2 * num_rows_per_proc[i] + 2 * num_elements_total[i];
-      ex_contact_vec_starts[i + 1] = -storage - 1; /* need negative for next loop */
+      storage += 1 + 2 * (num_rows_per_proc[i] + num_elements_total[i]);
+      ex_contact_vec_starts[i + 1] = (HYPRE_Int) - storage - 1; /* need negative for next loop */
    }
 
    hypre_TFree(num_elements_total, HYPRE_MEMORY_HOST);
@@ -2216,10 +2216,12 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    for (i = 0; i < num_rows; i++)
    {
       proc_id = us_real_proc_id[i];
+
       /* can't use row list[i] - you loose the negative signs that differentiate
          add/set values */
       row = off_proc_i[i * 2];
-      num_elements = row_list_num_elements[i];
+      num_elements = (HYPRE_Int) row_list_num_elements[i];
+
       /* find position of this processor */
       indx = hypre_BinarySearch(ex_contact_procs, proc_id, num_real_procs);
       in_i = ex_contact_vec_starts[indx];
@@ -2313,7 +2315,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    send_proc_obj.vec_starts =
       hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST);
    send_proc_obj.vec_starts[0] = 0;
-   send_proc_obj.element_storage_length = storage + 20;
+   send_proc_obj.element_storage_length = (HYPRE_Int) storage + 20;
    send_proc_obj.v_elements =
       hypre_TAlloc(char, obj_size_bytes * send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
 
@@ -2345,17 +2347,16 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    {
       argsort_contact_procs[i] = i;
    }
+
    /* This sort's the id array, but the original indices are stored in
     * argsort_contact_procs */
-   hypre_qsort2i( send_proc_obj.id, argsort_contact_procs, 0, num_recvs - 1 );
+   hypre_qsort2i(send_proc_obj.id, argsort_contact_procs, 0, num_recvs - 1);
 
    /* alias */
    recv_data_ptr = send_proc_obj.v_elements;
-   recv_starts = send_proc_obj.vec_starts;
-
+   recv_starts   = send_proc_obj.vec_starts;
    for (i = 0; i < num_recvs; i++)
    {
-
       /* Find the current processor in order, and reset recv_data_ptr to that processor's message */
       original_proc_indx = argsort_contact_procs[i];
       /*current_proc = send_proc_obj.id[i];*/
@@ -2363,20 +2364,22 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
       recv_data_ptr = (void *) ((char *) send_proc_obj.v_elements + indx * obj_size_bytes);
 
       /* get the number of rows for this recv */
-      hypre_TMemcpy( &num_rows, recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&num_rows, recv_data_ptr, HYPRE_Int, 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
       indx++;
-
 
       for (j = 0; j < num_rows; j++) /* for each row: unpack info */
       {
          /* row # */
-         hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&row, recv_data_ptr, HYPRE_BigInt, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
          /* num elements for this row */
-         hypre_TMemcpy( &num_elements,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&num_elements, recv_data_ptr, HYPRE_Int, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
@@ -2390,12 +2393,14 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
          {
             if (big_int_data_size < num_elements)
             {
-               big_int_data = hypre_TReAlloc(big_int_data,  HYPRE_BigInt,  num_elements + 10, HYPRE_MEMORY_HOST);
+               big_int_data = hypre_TReAlloc(big_int_data, HYPRE_BigInt,
+                                             num_elements + 10, HYPRE_MEMORY_HOST);
             }
             for (k = 0; k < num_elements; k++)
             {
-               hypre_TMemcpy( &big_int_data[k],  recv_data_ptr, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST,
-                              HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(&big_int_data[k],
+                             recv_data_ptr, HYPRE_BigInt, 1,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
             }
             col_ptr = big_int_data;
@@ -2404,20 +2409,22 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
          /* col data */
          if (complex_size == obj_size_bytes)
          {
-            col_data_ptr = (HYPRE_Complex *) recv_data_ptr;
+            col_data_ptr  = (HYPRE_Complex *) recv_data_ptr;
             recv_data_ptr = (void *) ((char *)recv_data_ptr + num_elements * obj_size_bytes);
          }
          else /* copy data */
          {
             if (complex_data_size < num_elements)
             {
-               complex_data =
-                  hypre_TReAlloc(complex_data,  HYPRE_Complex,  num_elements + 10, HYPRE_MEMORY_HOST);
+               complex_data = hypre_TReAlloc(complex_data,
+                                             HYPRE_Complex, num_elements + 10,
+                                             HYPRE_MEMORY_HOST);
             }
             for (k = 0; k < num_elements; k++)
             {
-               hypre_TMemcpy( &complex_data[k],  recv_data_ptr, HYPRE_Complex, 1, HYPRE_MEMORY_HOST,
-                              HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(&complex_data[k],
+                             recv_data_ptr, HYPRE_Complex, 1,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
             }
             col_data_ptr = complex_data;
@@ -2426,7 +2433,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
          if (memory_location == HYPRE_MEMORY_HOST)
          {
-            hypre_IJMatrixAddToValuesParCSR(matrix, 1, &num_elements, &row, &row_index, col_ptr, col_data_ptr);
+            hypre_IJMatrixAddToValuesParCSR(matrix, 1, &num_elements, &row,
+                                            &row_index, col_ptr, col_data_ptr);
          }
          else
          {
