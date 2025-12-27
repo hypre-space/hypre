@@ -8,6 +8,10 @@ on:
     types: [opened, reopened, synchronize, labeled, unlabeled]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   require-label:
     name: Require Run CI label
@@ -57,3 +61,201 @@ jobs:
       - name: Run check target
         run: cmake --build build --target check
 
+  # Build with different CUDA versions
+  cuda-version-matrix:
+    name: CUDA ${{ matrix.cuda }} (${{ matrix.build_type }})
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    container:
+      image: ${{ matrix.docker_image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # CUDA 11.x versions
+          - cuda: "11.8.0"
+            build_type: Debug
+            cuda_arch: "70;80"
+            docker_image: nvidia/cuda:11.8.0-devel-ubuntu22.04
+          # CUDA 12.x versions
+          - cuda: "12.4.1"
+            build_type: Debug
+            cuda_arch: "80;90"
+            docker_image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+          - cuda: "12.6.3"
+            build_type: Debug
+            cuda_arch: "80;90"
+            docker_image: nvidia/cuda:12.6.3-devel-ubuntu24.04
+          # CUDA 13.x versions
+          - cuda: "13.1.0"
+            build_type: Debug
+            cuda_arch: "80;90;100"
+            docker_image: nvidia/cuda:13.1.0-devel-ubuntu24.04
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y mpich libmpich-dev cmake build-essential
+
+      - name: Verify CUDA installation
+        run: |
+          echo "CUDA version:"
+          nvcc --version
+          echo "CUDA path: $CUDA_PATH"
+          which nvcc
+
+      - name: Configure HYPRE with CUDA
+        run: |
+          cmake -S src -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DHYPRE_ENABLE_CUDA=ON \
+            -DHYPRE_ENABLE_CUSPARSE=ON \
+            -DHYPRE_ENABLE_CUBLAS=ON \
+            -DHYPRE_ENABLE_CURAND=ON \
+            -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
+            -DHYPRE_BUILD_TESTS=ON \
+            -DCMAKE_CUDA_ARCHITECTURES="${{ matrix.cuda_arch }}"
+
+      - name: Build HYPRE
+        run: cmake --build build --parallel $(nproc)
+
+  # Test with shared library build
+  cuda-shared-library:
+    name: CUDA Shared Library
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y mpich libmpich-dev cmake build-essential
+
+      - name: Configure HYPRE with CUDA (Shared Library)
+        run: |
+          cmake -S src -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_SHARED_LIBS=ON \
+            -DHYPRE_ENABLE_CUDA=ON \
+            -DHYPRE_ENABLE_CUSPARSE=ON \
+            -DHYPRE_ENABLE_CUBLAS=ON \
+            -DHYPRE_ENABLE_CURAND=ON \
+            -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
+            -DHYPRE_BUILD_TESTS=ON \
+            -DCMAKE_CUDA_ARCHITECTURES="70;80"
+
+      - name: Build HYPRE
+        run: cmake --build build --parallel $(nproc)
+
+  # Test with mixed integer type
+  cuda-mixedint:
+    name: CUDA Mixed Integer Type
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y mpich libmpich-dev cmake build-essential
+
+      - name: Configure HYPRE with CUDA Mixed Integer Type
+        run: |
+          cmake -S src -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DHYPRE_ENABLE_CUDA=ON \
+            -DHYPRE_ENABLE_MIXEDINT=ON \
+            -DHYPRE_ENABLE_CUSPARSE=ON \
+            -DHYPRE_ENABLE_CUBLAS=ON \
+            -DHYPRE_ENABLE_CURAND=ON \
+            -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
+            -DHYPRE_BUILD_TESTS=ON \
+            -DCMAKE_CUDA_ARCHITECTURES="70;80"
+
+      - name: Build HYPRE
+        run: cmake --build build --parallel $(nproc)
+
+  # Test with single precision
+  cuda-single-precision:
+    name: CUDA Single Precision
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y mpich libmpich-dev cmake build-essential
+
+      - name: Configure HYPRE with CUDA Single Precision
+        run: |
+          cmake -S src -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DHYPRE_ENABLE_CUDA=ON \
+            -DHYPRE_ENABLE_SINGLE=ON \
+            -DHYPRE_ENABLE_CUSPARSE=ON \
+            -DHYPRE_ENABLE_CUBLAS=ON \
+            -DHYPRE_ENABLE_CURAND=ON \
+            -DHYPRE_ENABLE_CUSOLVER=ON \
+            -DHYPRE_ENABLE_UMPIRE=OFF \
+            -DHYPRE_BUILD_TESTS=ON \
+            -DCMAKE_CUDA_ARCHITECTURES="70;80"
+
+      - name: Build HYPRE
+        run: cmake --build build --parallel $(nproc)
+
+  # Summary job to track overall success
+  ci-complete:
+    name: CI Complete
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-check
+      - cuda-version-matrix
+      - cuda-shared-library
+      - cuda-mixedint
+      - cuda-single-precision
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          echo "Build & Check: ${{ needs.build-and-check.result }}"
+          echo "CUDA Version Matrix: ${{ needs.cuda-version-matrix.result }}"
+          echo "CUDA Shared Library: ${{ needs.cuda-shared-library.result }}"
+          echo "CUDA Mixed Integer Type: ${{ needs.cuda-mixedint.result }}"
+          echo "CUDA Single Precision: ${{ needs.cuda-single-precision.result }}"
+
+          if [[ "${{ needs.build-and-check.result }}" != "success" ]] || \
+             [[ "${{ needs.cuda-version-matrix.result }}" != "success" ]] || \
+             [[ "${{ needs.cuda-shared-library.result }}" != "success" ]] || \
+             [[ "${{ needs.cuda-mixedint.result }}" != "success" ]] || \
+             [[ "${{ needs.cuda-single-precision.result }}" != "success" ]]; then
+            echo "::error::One or more CI jobs failed"
+            exit 1
+          fi
+          echo "All CI jobs passed successfully!"
