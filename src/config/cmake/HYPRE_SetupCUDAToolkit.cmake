@@ -56,6 +56,19 @@ if(NOT CUDAToolkit_FOUND)
   find_package(CUDAToolkit REQUIRED)
 else()
   message(STATUS "Found CUDA toolkit")
+  if(NOT DEFINED CMAKE_CUDA_COMPILER)
+    if(WIN32)
+      set(NVCC_NAME "nvcc.exe")
+    else()
+      set(NVCC_NAME "nvcc")
+    endif()
+
+    find_program(CMAKE_CUDA_COMPILER
+      NAMES ${NVCC_NAME}
+      HINTS ${CUDAToolkit_BIN_DIR} ${CUDAToolkit_ROOT}/bin
+      DOC "CUDA compiler"
+    )
+  endif()
 endif()
 
 # Common CUDA language and compiler configuration (applies to both branches above)
