@@ -181,8 +181,6 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
    /* Matrix data */
    hypre_CSRMatrix     *diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix     *offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int           *diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int           *diag_j = hypre_CSRMatrixJ(diag);
    HYPRE_Int           *offd_i = hypre_CSRMatrixI(offd);
    HYPRE_Int           *offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_BigInt        *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
