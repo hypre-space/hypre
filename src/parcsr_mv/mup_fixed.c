@@ -1048,6 +1048,14 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm comm, const char *filename, HYPRE_Int *base_i
 
 /*--------------------------------------------------------------------------*/
 
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixRef( hypre_ParCSRMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRef)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixReorder( hypre_ParCSRMatrix *A )
 {

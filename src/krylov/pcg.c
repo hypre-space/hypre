@@ -29,23 +29,21 @@
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_PCGFunctions * pcg_functions;
@@ -214,21 +212,20 @@ hypre_PCGSetup( void *pcg_vdata,
    HYPRE_Real          rtol                 = (pcg_data -> rtol);
    HYPRE_Int           two_norm             = (pcg_data -> two_norm);
    HYPRE_Int           flex                 = (pcg_data -> flex);
-   HYPRE_Int         (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
    void               *precond_data         = (pcg_data -> precond_data);
-   void        *precond_Mat          = (pcg_data -> precond_Mat);
+   void               *precond_Mat          = (pcg_data -> precond_Mat);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (pcg_functions -> precond_setup);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Setup");
 
-   //set preconditioning matrix
-   if ((pcg_data -> precond_Mat)  == NULL)
-   {
-      (pcg_data -> precond_Mat)  = A;
-      precond_Mat = (pcg_data -> precond_Mat) ;
-   }
-
    (pcg_data -> A) = A;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    /*--------------------------------------------------
     * The arguments for CreateVector are important to
@@ -362,14 +359,13 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *r_old        = (pcg_data -> r_old);
    void           *v            = (pcg_data -> v);
    void           *matvec_data  = (pcg_data -> matvec_data);
-   HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
-   // preconditioning matrix
-   void            *precond_Mat  = (pcg_data -> precond_Mat) ;
+   void           *precond_Mat  = (pcg_data -> precond_Mat) ;  // preconditioning matrix
    HYPRE_Int       print_level  = (pcg_data -> print_level);
    HYPRE_Int       logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
    HYPRE_Real     *rel_norms    = (pcg_data -> rel_norms);
+   hypre_KrylovPtrToPrecond precond = (pcg_functions -> precond);
 
    HYPRE_Real      alpha, beta;
    HYPRE_Real      delta = 0.0;
@@ -394,6 +390,12 @@ hypre_PCGSolve( void *pcg_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Solve");
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (pcg_data -> converged) = 0;
 
@@ -1397,8 +1399,8 @@ hypre_PCGGetPrecond( void         *pcg_vdata,
 
 HYPRE_Int
 hypre_PCGSetPrecond( void  *pcg_vdata,
-                     HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                     HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                     hypre_KrylovPtrToPrecond precond,
+                     hypre_KrylovPtrToPrecondSetup precond_setup,
                      void  *precond_data )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
@@ -1419,7 +1421,7 @@ HYPRE_Int
 hypre_PCGSetPrecondMatrix( void  *pcg_vdata,  void  *precond_matrix )
 {
    hypre_PCGData  *pcg_data     =  (hypre_PCGData *)pcg_vdata;
-   (pcg_data -> precond_Mat)  = precond_matrix;
+   (pcg_data -> precond_Mat) = precond_matrix;
    return hypre_error_flag;
 }
 
@@ -1449,10 +1451,8 @@ hypre_PCGSetPreconditioner(void *pcg_vdata,
 
    (pcg_data -> precond_data)       = precond_data;
 
-   (pcg_functions -> precond)       = (HYPRE_Int (*)(void*, void*, void*,
-                                                     void*)) hypre_SolverSolve(base);
-   (pcg_functions -> precond_setup) = (HYPRE_Int (*)(void*, void*, void*,
-                                                     void*)) hypre_SolverSetup(base);
+   (pcg_functions -> precond)       = (hypre_KrylovPtrToPrecond) hypre_SolverSolve(base);
+   (pcg_functions -> precond_setup) = (hypre_KrylovPtrToPrecondSetup) hypre_SolverSetup(base);
 
    return hypre_error_flag;
 }

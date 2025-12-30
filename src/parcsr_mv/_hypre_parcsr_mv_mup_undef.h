@@ -191,6 +191,7 @@
 #undef hypre_ParCSRMatrixRAPKTHost
 #undef hypre_ParCSRMatrixRead
 #undef hypre_ParCSRMatrixReadIJ
+#undef hypre_ParCSRMatrixRef
 #undef hypre_ParCSRMatrixReorder
 #undef hypre_ParCSRMatrixRestoreRow
 #undef hypre_ParCSRMatrixScale
