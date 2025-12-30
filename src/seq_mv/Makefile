@@ -83,6 +83,11 @@ MP_FILES = \
  mup_functions.c\
  mup_pre.c\
  seq_mv_mp.c
+ 
+MP_CUFILES=\
+ mup_fixed_gpu.c\
+ mup_functions_gpu.c\
+ mup_pre_gpu.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
@@ -97,9 +102,10 @@ CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
+MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
 
 endif
 
