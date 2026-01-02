@@ -1027,10 +1027,11 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
             else if (Frelax_type[level] == 29)
             {
-               hypre_MGRDirectSolverSolve((mgr_data -> aff_solver)[level],
-                                          A_ff_array[level],
-                                          F_fine_array[coarse_grid],
-                                          U_fine_array[coarse_grid]);
+               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
+               hypre_SolverSolve(aff_base)((mgr_data -> aff_solver)[level],
+                                           (HYPRE_Matrix) A_ff_array[level],
+                                           (HYPRE_Vector) F_fine_array[coarse_grid],
+                                           (HYPRE_Vector) U_fine_array[coarse_grid]);
             }
             else
             {

@@ -270,7 +270,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    hypre_ParCSRMatrix        *A_coarsest      = hypre_ParMGRDataRAP(mgr_data);
    HYPRE_Int                  num_levels_mgr  = hypre_ParMGRDataNumCoarseLevels(mgr_data);
    HYPRE_Solver               coarse_solver   = hypre_ParMGRDataCoarseGridSolver(mgr_data);
-   HYPRE_Solver             **A_FF_solver     = hypre_ParMGRDataAFFsolver(mgr_data);
+   HYPRE_Solver              *A_FF_solver     = hypre_ParMGRDataAFFsolver(mgr_data);
    HYPRE_Int                 *Frelax_type     = hypre_ParMGRDataFRelaxType(mgr_data);
    HYPRE_Int                  block_size      = hypre_ParMGRDataBlockSize(mgr_data);
    HYPRE_Int                 *block_num_Cpts  = hypre_ParMGRDataBlockNumCoarseIndexes(mgr_data);

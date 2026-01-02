@@ -350,14 +350,17 @@ hypre_MGRDestroy( void *data )
    {
       for (i = 1; i < (num_coarse_levels); i++)
       {
-         if ((mgr_data -> Frelax_type)[i] == 29)
+         if ((mgr_data -> aff_solver)[i])
          {
-            hypre_MGRDirectSolverDestroy((mgr_data -> aff_solver)[i]);
-         }
-         else if ((mgr_data -> aff_solver)[i])
-         {
-            aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
-            hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+            if ((mgr_data -> Frelax_type)[i] == 29)
+            {
+               hypre_MGRDirectSolverDestroy((mgr_data -> aff_solver)[i]);
+            }
+            else
+            {
+               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
+               hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+            }
          }
       }
       /* TODO (VPM): remove fsolver_mode */
@@ -2351,27 +2354,27 @@ hypre_MGRBlockRelaxSetup( hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetFSolver( void  *mgr_vdata,
+hypre_MGRSetFSolver( void       *mgr_vdata,
                      HYPRE_Int  (*fine_grid_solver_solve)(void*, void*, void*, void*),
                      HYPRE_Int  (*fine_grid_solver_setup)(void*, void*, void*, void*),
                      void       *fsolver )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int         max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver    **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Solver     *aff_solver = (mgr_data -> aff_solver);
 
    if (aff_solver == NULL)
    {
-      aff_solver = hypre_CTAlloc(HYPRE_Solver*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      aff_solver = hypre_CTAlloc(HYPRE_Solver, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
 
    /* only allow to set F-solver for the first level */
-   aff_solver[0] = (HYPRE_Solver *) fsolver;
+   aff_solver[0] = (HYPRE_Solver) fsolver;
 
    (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
    (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
-   (mgr_data -> aff_solver) = aff_solver;
-   (mgr_data -> fsolver_mode) = 0;
+   (mgr_data -> aff_solver)             = aff_solver;
+   (mgr_data -> fsolver_mode)           = 0;
 
    return hypre_error_flag;
 }
@@ -2390,7 +2393,7 @@ hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int         max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver    **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Solver     *aff_solver = (mgr_data -> aff_solver);
 
    /* Check if the requested level makes sense */
    if (level < 0 || level >= max_num_coarse_levels)
@@ -2402,18 +2405,21 @@ hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
    /* Allocate aff_solver if needed */
    if (!aff_solver)
    {
-      (mgr_data -> aff_solver) = aff_solver = hypre_CTAlloc(HYPRE_Solver*,
+      (mgr_data -> aff_solver) = aff_solver = hypre_CTAlloc(HYPRE_Solver,
                                                             max_num_coarse_levels,
                                                             HYPRE_MEMORY_HOST);
    }
 
-   aff_solver[level] = (HYPRE_Solver *) fsolver;
+   aff_solver[level] = (HYPRE_Solver) fsolver;
    (mgr_data -> fsolver_mode) = 1;
 
    return hypre_error_flag;
 }
 
-/* set coarse grid solver */
+/*--------------------------------------------------------------------------
+ * Set coarsest level solver in MGR
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetCoarseSolver( void        *mgr_vdata,
                           HYPRE_Int  (*coarse_grid_solver_solve)(void*, void*, void*, void*),
@@ -2425,17 +2431,20 @@ hypre_MGRSetCoarseSolver( void        *mgr_vdata,
    (mgr_data -> coarse_grid_solver_solve) = coarse_grid_solver_solve;
    (mgr_data -> coarse_grid_solver_setup) = coarse_grid_solver_setup;
    (mgr_data -> coarse_grid_solver)       = (HYPRE_Solver) coarse_grid_solver;
-
    (mgr_data -> use_default_cgrid_solver) = 0;
 
    return hypre_error_flag;
 }
 
-/* Set the maximum number of coarse levels.
- * maxcoarselevs = 1 yields the default 2-grid scheme.
-*/
+/*--------------------------------------------------------------------------
+ * Set the maximum number of coarse levels.
+ *
+ * Note: maxcoarselevs = 1 yields the default 2-grid scheme.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxcoarselevs )
+hypre_MGRSetMaxCoarseLevels( void      *mgr_vdata,
+                             HYPRE_Int  maxcoarselevs )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> max_num_coarse_levels) = maxcoarselevs;
@@ -2443,7 +2452,10 @@ hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxcoarselevs )
    return hypre_error_flag;
 }
 
-/* Set the system block size */
+/*--------------------------------------------------------------------------
+ * Set the system block size
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize )
 {
@@ -2453,23 +2465,31 @@ hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize )
    return hypre_error_flag;
 }
 
-/* Set the relaxation type for the fine levels of the reduction.
+/*--------------------------------------------------------------------------
+ * Set the relaxation type for the fine levels of the reduction.
+ *
  * Currently supports the following flavors of relaxation types
  * as described in the documentation:
  * relax_types 0 - 8, 13, 14, 18, 19, 98.
  * See par_relax.c and par_relax_more.c for more details.
- * */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type )
+hypre_MGRSetRelaxType( void      *mgr_vdata,
+                       HYPRE_Int  relax_type )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> relax_type) = relax_type;
    return hypre_error_flag;
 }
 
-/* Set the number of relaxation sweeps */
+/*--------------------------------------------------------------------------
+ * Set the number of relaxation sweeps
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
+hypre_MGRSetNumRelaxSweeps( void      *mgr_vdata,
+                            HYPRE_Int  nsweeps )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2486,8 +2506,13 @@ hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * Set the number of relaxation sweeps for each MGR level
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelNumRelaxSweeps( void *mgr_vdata, HYPRE_Int *level_nsweeps )
+hypre_MGRSetLevelNumRelaxSweeps( void      *mgr_vdata,
+                                 HYPRE_Int *level_nsweeps )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2515,10 +2540,13 @@ hypre_MGRSetLevelNumRelaxSweeps( void *mgr_vdata, HYPRE_Int *level_nsweeps )
    return hypre_error_flag;
 }
 
-/* Set the order of the global smoothing step at each level
- * 1=Down cycle/ Pre-smoothing (default)
- * 2=Up cycle/ Post-smoothing
- */
+/*--------------------------------------------------------------------------
+ * Set the order of the global smoothing step at each level
+ *
+ * 1 = Down cycle/ Pre-smoothing (default)
+ * 2 = Up cycle/ Post-smoothing
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
 {
@@ -2527,7 +2555,10 @@ hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
    return hypre_error_flag;
 }
 
-/* Set the F-relaxation strategy: 0=single level, 1=multi level */
+/*--------------------------------------------------------------------------
+ * Set the F-relaxation strategy: 0=single level, 1=multi level
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
 {
@@ -2545,7 +2576,7 @@ hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
 }
 
 /* Set the F-relaxation strategy: 0=single level, 1=multi level */
-/* This will be removed later. Use SetLevelFrelaxType */
+/* TODO: This will be removed later. Use SetLevelFrelaxType */
 HYPRE_Int
 hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
 {
@@ -2573,12 +2604,16 @@ hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
    return hypre_error_flag;
 }
 
-/* Set the F-relaxation type:
- * 0: Jacobi
- * 1: Vcycle smoother
- * 2: AMG
+/*--------------------------------------------------------------------------
+ * Set the F-relaxation type:
+ *
+ *  - 0: Jacobi
+ *  - 1: Vcycle smoother
+ *  - 2: AMG
+ *
  * Otherwise: use standard BoomerAMGRelax options
-*/
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type )
 {
@@ -2606,9 +2641,16 @@ hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type )
    return hypre_error_flag;
 }
 
-/* Coarse grid method: 0=Galerkin RAP, 1=non-Galerkin with dropping */
+/*--------------------------------------------------------------------------
+ * Coarse grid method:
+ *
+ *  - 0: Galerkin RAP
+ *  - 1: non-Galerkin with dropping
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method )
+hypre_MGRSetCoarseGridMethod( void      *mgr_vdata,
+                              HYPRE_Int *cg_method )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2640,7 +2682,8 @@ hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts )
+hypre_MGRSetNonGalerkinMaxElmts( void      *mgr_vdata,
+                                 HYPRE_Int  max_elmts )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
@@ -2668,7 +2711,8 @@ hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts )
+hypre_MGRSetLevelNonGalerkinMaxElmts( void      *mgr_vdata,
+                                      HYPRE_Int *max_elmts )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
@@ -2691,9 +2735,13 @@ hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts )
    return hypre_error_flag;
 }
 
-/* Set the F-relaxation number of functions for each level */
+/*--------------------------------------------------------------------------
+ * Set the F-relaxation number of functions for each level
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
+hypre_MGRSetLevelFRelaxNumFunctions( void      *mgr_vdata,
+                                     HYPRE_Int *num_functions )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2721,11 +2769,13 @@ hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )
    return hypre_error_flag;
 }
 
-/* Set the type of the restriction type
- * for computing restriction operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the restriction operator type for each MGR level (expects an array).
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrict_type)
+hypre_MGRSetLevelRestrictType( void      *mgr_vdata,
+                               HYPRE_Int *restrict_type )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2751,11 +2801,13 @@ hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrict_type)
    return hypre_error_flag;
 }
 
-/* Set the type of the restriction type
- * for computing restriction operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the restriction operator type for all MGR levels
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrict_type)
+hypre_MGRSetRestrictType( void      *mgr_vdata,
+                          HYPRE_Int  restrict_type)
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2774,22 +2826,26 @@ hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrict_type)
    return hypre_error_flag;
 }
 
-/* Set the number of Jacobi interpolation iterations
- * for computing interpolation operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the number of Jacobi iterations for computing interpolation operator.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
+hypre_MGRSetNumRestrictSweeps( void      *mgr_vdata,
+                               HYPRE_Int  nsweeps )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> num_restrict_sweeps) = nsweeps;
    return hypre_error_flag;
 }
 
-/* Set the type of the interpolation
- * for computing interpolation operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the interpolation operator type for all MGR levels
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType)
+hypre_MGRSetInterpType( void      *mgr_vdata,
+                        HYPRE_Int  interpType)
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2808,11 +2864,13 @@ hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType)
    return hypre_error_flag;
 }
 
-/* Set the type of the interpolation
- * for computing interpolation operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the interpolation operator type for each MGR level (expects an array)
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType)
+hypre_MGRSetLevelInterpType( void      *mgr_vdata,
+                             HYPRE_Int *interpType)
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -2838,20 +2896,23 @@ hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType)
    return hypre_error_flag;
 }
 
-/* Set the number of Jacobi interpolation iterations
- * for computing interpolation operator
-*/
+/*--------------------------------------------------------------------------
+ * Set the number of Jacobi iterations for computing the interpolation operator
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
+hypre_MGRSetNumInterpSweeps( void      *mgr_vdata,
+                             HYPRE_Int  nsweeps )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> num_interp_sweeps) = nsweeps;
    return hypre_error_flag;
 }
 
-/* Set the threshold to truncate the coarse grid at each
- * level of reduction
-*/
+/*--------------------------------------------------------------------------
+ * Set the threshold to truncate the coarse grid at each MGR level
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold)
 {
@@ -4039,13 +4100,15 @@ hypre_MGRDataPrint(void *mgr_vdata)
  * hypre_MGRDirectSolverCreate
  *--------------------------------------------------------------------------*/
 
-void *
+void*
 hypre_MGRDirectSolverCreate(void)
 {
-   /* TODO (VPM): implement direct solver creation and options setup, e.g., print_level */
-   // hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
-   // return (void *) dslu_data;
+#if defined(HYPRE_USING_DSUPERLU)
+   return hypre_SLUDistCreate();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
    return NULL;
+#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -4058,13 +4121,13 @@ hypre_MGRDirectSolverSetup( void                *solver,
                             hypre_ParVector     *f,
                             hypre_ParVector     *u )
 {
-   HYPRE_UNUSED_VAR(f);
-   HYPRE_UNUSED_VAR(u);
-
 #if defined(HYPRE_USING_DSUPERLU)
-   return hypre_SLUDistSetup(solver, A, 0);
+   return hypre_SLUDistSetup(solver, A, f, u);
 #else
    HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
    return hypre_error_flag;
 #endif
@@ -4080,12 +4143,11 @@ hypre_MGRDirectSolverSolve( void                *solver,
                             hypre_ParVector     *f,
                             hypre_ParVector     *u )
 {
-   HYPRE_UNUSED_VAR(A);
-
 #if defined(HYPRE_USING_DSUPERLU)
-   return hypre_SLUDistSolve(solver, f, u);
+   return hypre_SLUDistSolve(solver, A, f, u);
 #else
    HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(A);
    HYPRE_UNUSED_VAR(f);
    HYPRE_UNUSED_VAR(u);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SuperLU_Dist support not enabled!");
@@ -4098,7 +4160,7 @@ hypre_MGRDirectSolverSolve( void                *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRDirectSolverDestroy( void *solver )
+hypre_MGRDirectSolverDestroy(void *solver)
 {
 #if defined(HYPRE_USING_DSUPERLU)
    return hypre_SLUDistDestroy(solver);
