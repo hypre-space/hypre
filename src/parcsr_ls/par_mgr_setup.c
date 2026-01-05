@@ -1326,15 +1326,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             aff_solver[lev] = (HYPRE_Solver) hypre_BoomerAMGCreate();
             hypre_BoomerAMGSetMaxIter(aff_solver[lev], (mgr_data -> num_relax_sweeps)[lev]);
             hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
-            //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
-#if defined(HYPRE_USING_GPU)
-            hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
-            hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
-            hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
-#else
+#if !defined(HYPRE_USING_GPU)
             hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
 #endif
-            hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
 
             /* Call setup function */
             aff_base = (hypre_Solver*) aff_solver[lev];
@@ -1351,11 +1345,11 @@ hypre_MGRSetup( void               *mgr_vdata,
             A_ff_array[lev] = A_FF;
 
             /* Create direct solver */
-            aff_solver[lev] = hypre_MGRDirectSolverCreate();
+            aff_solver[lev] = (HYPRE_Solver) hypre_MGRDirectSolverCreate();
 
             /* Call setup function through base solver interface */
             aff_base = (hypre_Solver*) aff_solver[lev];
-            hypre_SolverSetup(aff_base)(aff_solver[lev],
+            hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
                                         (HYPRE_Matrix) A_ff_array[lev],
                                         (HYPRE_Vector) F_fine_array[lev + 1],
                                         (HYPRE_Vector) U_fine_array[lev + 1]);

@@ -104,7 +104,7 @@ co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
 ./renametest.sh basic $output_dir/basic--enable-maxdim=4
 
-co="--enable-complex --enable-maxdim=4 --enable-debug"
+co="--enable-complex --enable-maxdim=4 --enable-debug --with-extra-CFLAGS='-Wno-incompatible-pointer-types'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basic.dir/make.???
