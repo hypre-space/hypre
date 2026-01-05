@@ -1392,8 +1392,10 @@ HYPRE_Int hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker, HYPRE_In
 /* dsuperlu.c */
 void *hypre_SLUDistCreate( void );
 HYPRE_Int hypre_SLUDistSetPrintLevel( void *solver, HYPRE_Int print_level );
-HYPRE_Int hypre_SLUDistSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x );
-HYPRE_Int hypre_SLUDistSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
 HYPRE_Int hypre_SLUDistDestroy( void *solver );
 #endif
 
