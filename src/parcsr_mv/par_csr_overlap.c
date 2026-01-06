@@ -32,11 +32,9 @@ hypre_OverlapDataCreate(void)
    hypre_OverlapDataNumExtendedRows(overlap_data)    = 0;
    hypre_OverlapDataNumOverlapRows(overlap_data)     = 0;
    hypre_OverlapDataExtendedRowIndices(overlap_data) = NULL;
-   hypre_OverlapDataGlobalToExtended(overlap_data)   = NULL;
-   hypre_OverlapDataExtendedToGlobal(overlap_data)   = NULL;
    hypre_OverlapDataRowIsOwned(overlap_data)         = NULL;
    hypre_OverlapDataOverlapCommPkg(overlap_data)     = NULL;
-   hypre_OverlapDataExternalRows(overlap_data)       = NULL;
+   hypre_OverlapDataExternalMatrix(overlap_data)     = NULL;
    hypre_OverlapDataExternalRowMap(overlap_data)     = NULL;
 
    return overlap_data;
@@ -52,8 +50,6 @@ hypre_OverlapDataDestroy(hypre_OverlapData *overlap_data)
    if (overlap_data)
    {
       hypre_TFree(hypre_OverlapDataExtendedRowIndices(overlap_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_OverlapDataGlobalToExtended(overlap_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_OverlapDataExtendedToGlobal(overlap_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_OverlapDataRowIsOwned(overlap_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_OverlapDataExternalRowMap(overlap_data), HYPRE_MEMORY_HOST);
 
@@ -62,9 +58,9 @@ hypre_OverlapDataDestroy(hypre_OverlapData *overlap_data)
          hypre_MatvecCommPkgDestroy(hypre_OverlapDataOverlapCommPkg(overlap_data));
       }
 
-      if (hypre_OverlapDataExternalRows(overlap_data))
+      if (hypre_OverlapDataExternalMatrix(overlap_data))
       {
-         hypre_CSRMatrixDestroy(hypre_OverlapDataExternalRows(overlap_data));
+         hypre_CSRMatrixDestroy(hypre_OverlapDataExternalMatrix(overlap_data));
       }
 
       hypre_TFree(overlap_data, HYPRE_MEMORY_HOST);
@@ -476,7 +472,8 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * Fetch the actual row data for overlap rows from neighboring processors.
+ * Fetch the actual CSR matrix including data for overlap rows from
+ * neighboring processors.
  *
  * Arguments:
  *   A            - Input ParCSR matrix
@@ -484,8 +481,8 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixGetOverlapRows(hypre_ParCSRMatrix *A,
-                                 hypre_OverlapData  *overlap_data)
+hypre_ParCSRMatrixGetExternalMatrix(hypre_ParCSRMatrix *A,
+                                    hypre_OverlapData  *overlap_data)
 {
    HYPRE_Int            num_external;
    HYPRE_BigInt        *ext_indices;
@@ -507,16 +504,16 @@ hypre_ParCSRMatrixGetOverlapRows(hypre_ParCSRMatrix *A,
       return hypre_error_flag;
    }
 
-   /* Destroy existing external rows if any */
-   if (hypre_OverlapDataExternalRows(overlap_data))
+   /* Destroy existing external matrix if any */
+   if (hypre_OverlapDataExternalMatrix(overlap_data))
    {
-      hypre_CSRMatrixDestroy(hypre_OverlapDataExternalRows(overlap_data));
-      hypre_OverlapDataExternalRows(overlap_data) = NULL;
+      hypre_CSRMatrixDestroy(hypre_OverlapDataExternalMatrix(overlap_data));
+      hypre_OverlapDataExternalMatrix(overlap_data) = NULL;
    }
 
-   /* Fetch external rows (with data) */
+   /* Fetch external matrix (with data) */
    hypre_ParcsrGetExternalRowsInit(A, num_external, ext_indices, comm_pkg, 1, &request);
-   hypre_OverlapDataExternalRows(overlap_data) = hypre_ParcsrGetExternalRowsWait(request);
+   hypre_OverlapDataExternalMatrix(overlap_data) = hypre_ParcsrGetExternalRowsWait(request);
 
    return hypre_error_flag;
 }
@@ -536,33 +533,33 @@ hypre_ParCSRMatrixGetOverlapRows(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixExtractLocalOverlap(hypre_ParCSRMatrix  *A,
-                                      hypre_OverlapData   *overlap_data,
-                                      hypre_CSRMatrix    **A_local_ptr,
-                                      HYPRE_BigInt       **col_map_ptr,
-                                      HYPRE_Int           *num_cols_local_ptr)
+hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
+                                       hypre_OverlapData   *overlap_data,
+                                       hypre_CSRMatrix    **A_local_ptr,
+                                       HYPRE_BigInt       **col_map_ptr,
+                                       HYPRE_Int           *num_cols_local_ptr)
 {
-   hypre_CSRMatrix     *diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix     *offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int           *diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int           *diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Complex       *diag_data = hypre_CSRMatrixData(diag);
-   HYPRE_Int           *offd_i = hypre_CSRMatrixI(offd);
-   HYPRE_Int           *offd_j = hypre_CSRMatrixJ(offd);
-   HYPRE_Complex       *offd_data = hypre_CSRMatrixData(offd);
-   HYPRE_BigInt        *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_BigInt         first_row = hypre_ParCSRMatrixFirstRowIndex(A);
-   HYPRE_BigInt         first_col = hypre_ParCSRMatrixFirstColDiag(A);
+   hypre_CSRMatrix     *diag          = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix     *offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int           *diag_i        = hypre_CSRMatrixI(diag);
+   HYPRE_Int           *diag_j        = hypre_CSRMatrixJ(diag);
+   HYPRE_Complex       *diag_data     = hypre_CSRMatrixData(diag);
+   HYPRE_Int           *offd_i        = hypre_CSRMatrixI(offd);
+   HYPRE_Int           *offd_j        = hypre_CSRMatrixJ(offd);
+   HYPRE_Complex       *offd_data     = hypre_CSRMatrixData(offd);
+   HYPRE_BigInt        *col_map_offd  = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_BigInt         first_row     = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_BigInt         first_col     = hypre_ParCSRMatrixFirstColDiag(A);
 
-   hypre_CSRMatrix     *ext_rows = hypre_OverlapDataExternalRows(overlap_data);
-   HYPRE_Int           *ext_i = NULL;
-   HYPRE_BigInt        *ext_j = NULL;
-   HYPRE_Complex       *ext_data = NULL;
-   HYPRE_Int            num_ext_rows = 0;
+   hypre_CSRMatrix     *A_ext         = hypre_OverlapDataExternalMatrix(overlap_data);
+   HYPRE_Int           *ext_i         = NULL;
+   HYPRE_BigInt        *ext_j         = NULL;
+   HYPRE_Complex       *ext_data      = NULL;
+   HYPRE_Int            num_ext_rows  = 0;
 
    HYPRE_BigInt        *extended_rows = hypre_OverlapDataExtendedRowIndices(overlap_data);
-   HYPRE_Int            num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
-   HYPRE_Int           *row_is_owned = hypre_OverlapDataRowIsOwned(overlap_data);
+   HYPRE_Int            num_extended  = hypre_OverlapDataNumExtendedRows(overlap_data);
+   HYPRE_Int           *row_is_owned  = hypre_OverlapDataRowIsOwned(overlap_data);
 
    hypre_CSRMatrix     *A_local;
    HYPRE_Int           *A_local_i;
@@ -585,12 +582,12 @@ hypre_ParCSRMatrixExtractLocalOverlap(hypre_ParCSRMatrix  *A,
    }
 
    /* Get external rows data */
-   if (ext_rows)
+   if (A_ext)
    {
-      ext_i = hypre_CSRMatrixI(ext_rows);
-      ext_j = hypre_CSRMatrixBigJ(ext_rows);
-      ext_data = hypre_CSRMatrixData(ext_rows);
-      num_ext_rows = hypre_CSRMatrixNumRows(ext_rows);
+      ext_i = hypre_CSRMatrixI(A_ext);
+      ext_j = hypre_CSRMatrixBigJ(A_ext);
+      ext_data = hypre_CSRMatrixData(A_ext);
+      num_ext_rows = hypre_CSRMatrixNumRows(A_ext);
    }
 
    /* First pass: count nonzeros (only those with columns in extended domain) */
@@ -630,7 +627,7 @@ hypre_ParCSRMatrixExtractLocalOverlap(hypre_ParCSRMatrix  *A,
       else
       {
          /* External row */
-         if (ext_rows && ext_row_counter < num_ext_rows)
+         if (A_ext && ext_row_counter < num_ext_rows)
          {
             for (jj = ext_i[ext_row_counter]; jj < ext_i[ext_row_counter + 1]; jj++)
             {
@@ -699,7 +696,7 @@ hypre_ParCSRMatrixExtractLocalOverlap(hypre_ParCSRMatrix  *A,
       else
       {
          /* External row */
-         if (ext_rows && ext_row_counter < num_ext_rows)
+         if (A_ext && ext_row_counter < num_ext_rows)
          {
             for (jj = ext_i[ext_row_counter]; jj < ext_i[ext_row_counter + 1]; jj++)
             {

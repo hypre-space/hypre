@@ -271,11 +271,11 @@ Test1_Grid1D_Part1D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
@@ -429,11 +429,11 @@ Test2_Grid1D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
@@ -619,11 +619,11 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix - with overlap=8, all processors should have the full 8x8 matrix */
    {
@@ -773,11 +773,11 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
@@ -940,11 +940,11 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
@@ -1151,11 +1151,11 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
@@ -1396,11 +1396,11 @@ Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
    }
    hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
 
-   /* Get overlap rows */
-   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+   /* Get overlap (external) matrix */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
 
    /* Extract local overlap matrix */
-   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
 
    /* Create expected matrix and compare */
    {
