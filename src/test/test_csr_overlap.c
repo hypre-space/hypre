@@ -787,7 +787,8 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
       /* With overlap=2 on a 4x4 grid, both processors get the full 16x16 matrix */
       /* 2D 5-point stencil structure for 4x4 grid (row-major ordering) */
       HYPRE_Int I_expected[17] = {0, 3, 7, 11, 16, 20, 25, 28, 32, 36, 39, 44, 48, 53, 57, 61, 64};
-      HYPRE_Int J_expected[64] = {
+      HYPRE_Int J_expected[64] =
+      {
          0, 1, 2,                     /* row 0 */
          1, 0, 3, 8,                  /* row 1 */
          2, 0, 3, 4,                  /* row 2 */
@@ -805,7 +806,8 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
          14, 7, 12, 15,               /* row 14 */
          15, 13, 14                   /* row 15 */
       };
-      HYPRE_Real data_expected[64] = {
+      HYPRE_Real data_expected[64] =
+      {
          4.0, -1.0, -1.0,             /* row 0 */
          4.0, -1.0, -1.0, -1.0,       /* row 1 */
          4.0, -1.0, -1.0, -1.0,       /* row 2 */
@@ -965,7 +967,8 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
             {
                HYPRE_Int I_expected[9] = {0, 3, 7, 11, 16, 19, 22, 25, 28};
                HYPRE_Int J_expected[28] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 6, 1, 2, 3, 5, 7, 1, 4, 5, 3, 4, 5, 2, 6, 7, 3, 6, 7};
-               HYPRE_Real data_expected[28] = {
+               HYPRE_Real data_expected[28] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
@@ -980,7 +983,8 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
             {
                HYPRE_Int I_expected[9] = {0, 3, 6, 10, 13, 18, 22, 25, 28};
                HYPRE_Int J_expected[28] = {0, 1, 2, 0, 1, 4, 0, 2, 3, 4, 2, 3, 5, 1, 2, 4, 5, 6, 3, 4, 5, 7, 4, 6, 7, 5, 6, 7};
-               HYPRE_Real data_expected[28] = {
+               HYPRE_Real data_expected[28] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, 4.0,
                   -1.0, -1.0, -1.0, 4.0,
@@ -995,7 +999,8 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
             {
                HYPRE_Int I_expected[9] = {0, 3, 6, 10, 15, 18, 22, 25, 28};
                HYPRE_Int J_expected[28] = {0, 1, 2, 0, 1, 3, 0, 2, 3, 4, 1, 2, 3, 5, 6, 2, 4, 5, 3, 4, 5, 7, 3, 6, 7, 5, 6, 7};
-               HYPRE_Real data_expected[28] = {
+               HYPRE_Real data_expected[28] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, 4.0,
                   -1.0, -1.0, -1.0, -1.0,
@@ -1010,7 +1015,8 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
             {
                HYPRE_Int I_expected[9] = {0, 3, 6, 9, 12, 17, 21, 25, 28};
                HYPRE_Int J_expected[28] = {0, 1, 4, 0, 1, 5, 2, 3, 4, 2, 3, 6, 0, 2, 4, 5, 6, 1, 4, 5, 7, 3, 4, 6, 7, 5, 6, 7};
-               HYPRE_Real data_expected[28] = {
+               HYPRE_Real data_expected[28] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, 4.0, -1.0,
                   -1.0, -1.0, 4.0, -1.0,
@@ -1025,7 +1031,7 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
          else
          {
             hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 8 x 8)\n",
-                        test_my_id, num_rows_local, num_cols_local_actual);
+                         test_my_id, num_rows_local, num_cols_local_actual);
             error = 1;
             A_expected = NULL;
          }
@@ -1173,8 +1179,10 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
                HYPRE_Int I_expected[14] = {0, 3, 7, 11, 16, 20, 23, 28, 31, 35, 40, 43, 46, 49};
                HYPRE_Int J_expected[49] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 8, 1, 2, 3, 6, 9, 1, 4,
                                            5, 6, 4, 5, 7, 3, 4, 6, 7, 12, 5, 6, 7, 2, 8, 9, 10, 3,
-                                           8, 9, 11, 12, 8, 10, 11, 9, 10, 11, 6, 9, 12};
-               HYPRE_Real data_expected[49] = {
+                                           8, 9, 11, 12, 8, 10, 11, 9, 10, 11, 6, 9, 12
+                                          };
+               HYPRE_Real data_expected[49] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
@@ -1196,8 +1204,10 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
                HYPRE_Int I_expected[14] = {0, 3, 7, 10, 15, 19, 22, 27, 31, 34, 39, 43, 46, 49};
                HYPRE_Int J_expected[49] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 1, 2, 3, 6, 8, 1, 4,
                                            5, 6, 4, 5, 7, 3, 4, 6, 7, 9, 5, 6, 7, 10, 3, 8, 9,
-                                           6, 8, 9, 10, 11, 7, 9, 10, 12, 9, 11, 12, 10, 11, 12};
-               HYPRE_Real data_expected[49] = {
+                                           6, 8, 9, 10, 11, 7, 9, 10, 12, 9, 11, 12, 10, 11, 12
+                                          };
+               HYPRE_Real data_expected[49] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, -1.0,
@@ -1219,8 +1229,10 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
                HYPRE_Int I_expected[14] = {0, 3, 6, 10, 15, 18, 22, 27, 30, 34, 39, 42, 46, 49};
                HYPRE_Int J_expected[49] = {0, 1, 2, 0, 1, 3, 0, 2, 3, 5, 1, 2, 3, 4, 6, 3, 4,
                                            9, 2, 5, 6, 7, 3, 5, 6, 8, 9, 5, 7, 8, 6, 7, 8, 11,
-                                           4, 6, 9, 10, 11, 9, 10, 12, 8, 9, 11, 12, 10, 11, 12};
-               HYPRE_Real data_expected[49] = {
+                                           4, 6, 9, 10, 11, 9, 10, 12, 8, 9, 11, 12, 10, 11, 12
+                                          };
+               HYPRE_Real data_expected[49] =
+               {
                   4.0, -1.0, -1.0, -1.0,
                   4.0, -1.0, -1.0, 4.0,
                   -1.0, -1.0, -1.0, -1.0,
@@ -1242,8 +1254,10 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
                HYPRE_Int I_expected[14] = {0, 3, 6, 9, 14, 18, 21, 26, 29, 33, 38, 42, 46, 49};
                HYPRE_Int J_expected[49] = {0, 3, 6, 1, 2, 3, 1, 2, 4, 0, 1, 3, 4, 9, 2, 3, 4,
                                            10, 5, 6, 7, 0, 5, 6, 8, 9, 5, 7, 8, 6, 7, 8, 11, 3,
-                                           6, 9, 10, 11, 4, 9, 10, 12, 8, 9, 11, 12, 10, 11, 12};
-               HYPRE_Real data_expected[49] = {
+                                           6, 9, 10, 11, 4, 9, 10, 12, 8, 9, 11, 12, 10, 11, 12
+                                          };
+               HYPRE_Real data_expected[49] =
+               {
                   4.0, -1.0, -1.0, 4.0,
                   -1.0, -1.0, -1.0, 4.0,
                   -1.0, -1.0, -1.0, 4.0,
@@ -1264,7 +1278,7 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
          else
          {
             hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 13 x 13)\n",
-                        test_my_id, num_rows_local, num_cols_local_actual);
+                         test_my_id, num_rows_local, num_cols_local_actual);
             error = 1;
             A_expected = NULL;
          }
@@ -1277,6 +1291,259 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
                char filename_computed[256];
                hypre_sprintf(filename_expected, "test6_expected_ij.out.%05d", test_my_id);
                hypre_sprintf(filename_computed, "test6_computed_ij.out.%05d", test_my_id);
+               hypre_CSRMatrixPrintIJ(A_expected, 0, 0, filename_expected);
+               hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename_computed);
+            }
+            if (CompareCSRMatrices(A_expected, A_local, CHECK_TOLERANCE) != 0)
+            {
+               hypre_printf("Proc %d: Extracted matrix does not match expected matrix\n", test_my_id);
+               error = 1;
+            }
+            hypre_CSRMatrixDestroy(A_expected);
+         }
+      }
+   }
+
+   /* Cleanup */
+   if (A_local)
+   {
+      hypre_CSRMatrixDestroy(A_local);
+   }
+   if (col_map)
+   {
+      hypre_TFree(col_map, HYPRE_MEMORY_HOST);
+   }
+   if (overlap_data)
+   {
+      hypre_OverlapDataDestroy(overlap_data);
+   }
+   if (A)
+   {
+      hypre_ParCSRMatrixDestroy(A);
+   }
+
+   if (test_comm != MPI_COMM_NULL)
+   {
+      PRINT_TEST_RESULT(test_my_id, error);
+      hypre_MPI_Comm_free(&test_comm);
+   }
+
+   /* Synchronize all processes before returning */
+   hypre_MPI_Barrier(comm);
+
+   return error;
+}
+
+/*--------------------------------------------------------------------------
+ * Unit test: 2D grid with 2D partitioning, overlap=3
+ * Test case: 4x4 2D grid on 2x2 processor grid (4 processors)
+ * Tests overlap extraction for 2D problem with 2D processor layout and overlap=3
+ *--------------------------------------------------------------------------*/
+static HYPRE_Int
+Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
+{
+   hypre_ParCSRMatrix *A;
+   hypre_OverlapData *overlap_data;
+   hypre_CSRMatrix *A_local;
+   HYPRE_BigInt *col_map;
+   HYPRE_Int num_cols_local;
+   HYPRE_Int error = 0;
+   HYPRE_Int overlap_order = 3;
+   HYPRE_Int test_my_id, my_id, num_procs;
+   MPI_Comm test_comm = MPI_COMM_NULL;
+   HYPRE_Int participate = 0;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /* Create subcommunicator with first 4 processors */
+   if (num_procs >= 4)
+   {
+      participate = (my_id < 4) ? 1 : hypre_MPI_UNDEFINED;
+      hypre_MPI_Comm_split(comm, participate, my_id, &test_comm);
+   }
+   else
+   {
+      if (my_id == 0)
+      {
+         hypre_printf("Test7_Grid2D_Part2D_Overlap3: Skipping (requires at least 4 processors)\n");
+      }
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   /* Only participating processes run the test */
+   if (test_comm == MPI_COMM_NULL)
+   {
+      /* Non-participating processes must still synchronize */
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   hypre_MPI_Comm_rank(test_comm, &test_my_id);
+   if (test_my_id == 0)
+   {
+      hypre_printf("Test7_Grid2D_Part2D_Overlap3 (4 procs): ");
+   }
+
+   /* Create 4x4 2D Laplacian with 2x2 processor partitioning */
+   A = Create2DLaplacian2DPart(test_comm, 4, 4, 2, 2, test_my_id);
+
+   /* Compute overlap */
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+   hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
+
+   /* Get overlap rows */
+   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+
+   /* Extract local overlap matrix */
+   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+
+   /* Create expected matrix and compare */
+   {
+      hypre_CSRMatrix *A_expected = NULL;
+
+      if (!A_local)
+      {
+         hypre_printf("Proc %d: Failed to extract local overlap matrix\n", test_my_id);
+         error = 1;
+      }
+      else
+      {
+         HYPRE_Int num_rows_local = hypre_CSRMatrixNumRows(A_local);
+         HYPRE_Int num_cols_local_actual = hypre_CSRMatrixNumCols(A_local);
+
+         /* Hard-coded expected matrices from test7_expected_csr.out files (15x15 matrices) */
+         if (num_rows_local == 15 && num_cols_local_actual == 15)
+         {
+            if (test_my_id == 0)
+            {
+               HYPRE_Int I_expected[16] = {0, 3, 7, 11, 16, 20, 23, 28, 32, 36, 41, 44, 48, 53, 56, 59};
+               HYPRE_Int J_expected[59] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 8, 1, 2, 3, 6, 9, 1, 4, 5, 6, 4, 5,
+                                           7, 3, 4, 6, 7, 12, 5, 6, 7, 13, 2, 8, 9, 10, 3, 8, 9, 11, 12, 8, 10,
+                                           11, 9, 10, 11, 14, 6, 9, 12, 13, 14, 7, 12, 13, 11, 12, 14
+                                          };
+               HYPRE_Real data_expected[59] =
+               {
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, -1.0, 4.0,
+                  -1.0, -1.0, 4.0
+               };
+               A_expected = CreateCSRMatrixFromData(15, 15, 59, I_expected, J_expected, data_expected);
+            }
+            else if (test_my_id == 1)
+            {
+               HYPRE_Int I_expected[16] = {0, 3, 7, 11, 16, 20, 23, 28, 32, 35, 40, 43, 48, 52, 56, 59};
+               HYPRE_Int J_expected[59] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 8, 1, 2, 3, 6, 9, 1, 4, 5, 6, 4, 5,
+                                           7, 3, 4, 6, 7, 11, 5, 6, 7, 12, 2, 8, 9, 3, 8, 9, 10, 11, 9, 10, 13,
+                                           6, 9, 11, 12, 13, 7, 11, 12, 14, 10, 11, 13, 14, 12, 13, 14
+                                          };
+               HYPRE_Real data_expected[59] =
+               {
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0
+               };
+               A_expected = CreateCSRMatrixFromData(15, 15, 59, I_expected, J_expected, data_expected);
+            }
+            else if (test_my_id == 2)
+            {
+               HYPRE_Int I_expected[16] = {0, 3, 7, 11, 16, 19, 24, 27, 31, 36, 39, 43, 48, 52, 56, 59};
+               HYPRE_Int J_expected[59] = {0, 1, 2, 0, 1, 3, 4, 0, 2, 3, 7, 1, 2, 3, 5, 8, 1, 4, 5, 3, 4, 5,
+                                           6, 11, 5, 6, 12, 2, 7, 8, 9, 3, 7, 8, 10, 11, 7, 9, 10, 8, 9, 10,
+                                           13, 5, 8, 11, 12, 13, 6, 11, 12, 14, 10, 11, 13, 14, 12, 13, 14
+                                          };
+               HYPRE_Real data_expected[59] =
+               {
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0
+               };
+               A_expected = CreateCSRMatrixFromData(15, 15, 59, I_expected, J_expected, data_expected);
+            }
+            else if (test_my_id == 3)
+            {
+               HYPRE_Int I_expected[16] = {0, 3, 6, 11, 15, 18, 23, 27, 31, 36, 39, 43, 48, 52, 56, 59};
+               HYPRE_Int J_expected[59] = {0, 2, 3, 1, 2, 7, 0, 1, 2, 5, 8, 0, 3, 4, 5, 3, 4, 6, 2, 3, 5,
+                                           6, 11, 4, 5, 6, 12, 1, 7, 8, 9, 2, 7, 8, 10, 11, 7, 9, 10, 8, 9,
+                                           10, 13, 5, 8, 11, 12, 13, 6, 11, 12, 14, 10, 11, 13, 14, 12, 13, 14
+                                          };
+               HYPRE_Real data_expected[59] =
+               {
+                  4.0, -1.0, -1.0, 4.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  4.0, -1.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, 4.0, -1.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0, -1.0,
+                  -1.0, -1.0, 4.0
+               };
+               A_expected = CreateCSRMatrixFromData(15, 15, 59, I_expected, J_expected, data_expected);
+            }
+         }
+         else
+         {
+            hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 15 x 15)\n",
+                         test_my_id, num_rows_local, num_cols_local_actual);
+            error = 1;
+            A_expected = NULL;
+         }
+
+         if (A_expected)
+         {
+            if (print_matrices)
+            {
+               char filename_expected[256];
+               char filename_computed[256];
+               hypre_sprintf(filename_expected, "test7_expected_ij.out.%05d", test_my_id);
+               hypre_sprintf(filename_computed, "test7_computed_ij.out.%05d", test_my_id);
                hypre_CSRMatrixPrintIJ(A_expected, 0, 0, filename_expected);
                hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename_computed);
             }
@@ -1420,6 +1687,7 @@ main(int argc, char *argv[])
       error += Test4_Grid2D_Part1D_Overlap2(comm, print_matrices);
       error += Test5_Grid2D_Part2D_Overlap1(comm, print_matrices);
       error += Test6_Grid2D_Part2D_Overlap2(comm, print_matrices);
+      error += Test7_Grid2D_Part2D_Overlap3(comm, print_matrices);
 
       if (my_id == 0)
       {
