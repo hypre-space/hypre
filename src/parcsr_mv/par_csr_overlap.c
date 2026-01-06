@@ -319,109 +319,85 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
 
       if (level > 0)
       {
-         /* Check if any process has external rows to fetch */
-         HYPRE_Int global_has_external = 0;
-         hypre_MPI_Allreduce(&num_external, &global_has_external, 1, HYPRE_MPI_INT,
-                             hypre_MPI_MAX, comm);
+         hypre_ParCSRCommPkg *ext_comm_pkg = NULL;
+         hypre_CSRMatrix     *A_ext = NULL;
+         void                *request = NULL;
 
-         /* All processes must participate in communication */
-         if (global_has_external > 0)
+         /* Build comm pkg for external indices (works with num_external = 0) */
+         hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
+                                       hypre_ParCSRMatrixRowStarts(A),
+                                       hypre_ParCSRMatrixAssumedPartition(A),
+                                       num_external, external_indices, &ext_comm_pkg);
+
+         /* Fetch graph of external connections A_ext (pattern only, no data needed) */
+         /* All processes must call this, even with num_external = 0 */
+         hypre_ParcsrGetExternalRowsInit(A, num_external, external_indices,
+                                         ext_comm_pkg, 0, &request);
+         A_ext = hypre_ParcsrGetExternalRowsWait(request);
+
+         /* Find neighbors of external rows (only if this process received rows) */
+         if (A_ext)
          {
-            hypre_ParCSRCommPkg *ext_comm_pkg = NULL;
-            hypre_CSRMatrix     *A_ext = NULL;
-            void                *request = NULL;
+            HYPRE_Int     *ext_i = hypre_CSRMatrixI(A_ext);
+            HYPRE_BigInt  *ext_j = hypre_CSRMatrixBigJ(A_ext);
+            HYPRE_Int      ext_num_rows = hypre_CSRMatrixNumRows(A_ext);
 
-            /* Build comm pkg for external indices (works with num_external = 0) */
-            hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
-                                          hypre_ParCSRMatrixRowStarts(A),
-                                          hypre_ParCSRMatrixAssumedPartition(A),
-                                          num_external, external_indices, &ext_comm_pkg);
-
-            /* Fetch graph of external connections A_ext (pattern only, no data needed) */
-            /* All processes must call this, even with num_external = 0 */
-            hypre_ParcsrGetExternalRowsInit(A, num_external, external_indices,
-                                            ext_comm_pkg, 0, &request);
-            A_ext = hypre_ParcsrGetExternalRowsWait(request);
-
-            /* Find neighbors of external rows (only if this process received rows) */
-            if (A_ext)
+            for (i = 0; i < ext_num_rows; i++)
             {
-               HYPRE_Int     *ext_i = hypre_CSRMatrixI(A_ext);
-               HYPRE_BigInt  *ext_j = hypre_CSRMatrixBigJ(A_ext);
-               HYPRE_Int      ext_num_rows = hypre_CSRMatrixNumRows(A_ext);
-
-               for (i = 0; i < ext_num_rows; i++)
+               for (jj = ext_i[i]; jj < ext_i[i + 1]; jj++)
                {
-                  for (jj = ext_i[i]; jj < ext_i[i + 1]; jj++)
+                  HYPRE_BigInt neighbor = ext_j[jj];
+
+                  /* Check if already in current set or potential */
+                  if (!hypre_BigIntArrayContains(current_set, current_size, neighbor))
                   {
-                     HYPRE_BigInt neighbor = ext_j[jj];
-
-                     /* Check if already in current set or potential */
-                     if (!hypre_BigIntArrayContains(current_set, current_size, neighbor))
+                     HYPRE_Int found = 0;
+                     for (j = 0; j < num_potential; j++)
                      {
-                        HYPRE_Int found = 0;
-                        for (j = 0; j < num_potential; j++)
+                        if (potential_external[j] == neighbor)
                         {
-                           if (potential_external[j] == neighbor)
-                           {
-                              found = 1;
-                              break;
-                           }
+                           found = 1;
+                           break;
                         }
+                     }
 
-                        if (!found)
+                     if (!found)
+                     {
+                        if (num_potential >= potential_alloc)
                         {
-                           if (num_potential >= potential_alloc)
-                           {
-                              potential_alloc = hypre_max(2 * potential_alloc, num_potential + 100);
-                              potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
-                                                                  potential_alloc, HYPRE_MEMORY_HOST);
-                           }
-                           potential_external[num_potential++] = neighbor;
+                           potential_alloc = hypre_max(2 * potential_alloc, num_potential + 100);
+                           potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
+                                                               potential_alloc, HYPRE_MEMORY_HOST);
                         }
+                        potential_external[num_potential++] = neighbor;
                      }
                   }
                }
-
-               hypre_CSRMatrixDestroy(A_ext);
             }
 
-            if (ext_comm_pkg)
-            {
-               hypre_MatvecCommPkgDestroy(ext_comm_pkg);
-            }
-
-            /* Re-sort after adding more */
-            if (num_potential > 1)
-            {
-               hypre_BigQsort0(potential_external, 0, num_potential - 1);
-
-               /* Remove duplicates */
-               HYPRE_Int unique_count = 1;
-               for (i = 1; i < num_potential; i++)
-               {
-                  if (potential_external[i] != potential_external[unique_count - 1])
-                  {
-                     potential_external[unique_count++] = potential_external[i];
-                  }
-               }
-               num_potential = unique_count;
-            }
+            hypre_CSRMatrixDestroy(A_ext);
          }
-      }
 
-      /* Check globally if any process found new external rows.
-       * All processes must agree to continue or stop to avoid deadlock. */
-      {
-         HYPRE_Int global_has_potential = 0;
-         hypre_MPI_Allreduce(&num_potential, &global_has_potential, 1, HYPRE_MPI_INT,
-                             hypre_MPI_MAX, comm);
-
-         if (global_has_potential == 0)
+         if (ext_comm_pkg)
          {
-            /* No process has new rows to add - we can all stop */
-            hypre_TFree(potential_external, HYPRE_MEMORY_HOST);
-            break;
+            hypre_MatvecCommPkgDestroy(ext_comm_pkg);
+         }
+
+         /* Re-sort after adding more */
+         if (num_potential > 1)
+         {
+            hypre_BigQsort0(potential_external, 0, num_potential - 1);
+
+            /* Remove duplicates */
+            HYPRE_Int unique_count = 1;
+            for (i = 1; i < num_potential; i++)
+            {
+               if (potential_external[i] != potential_external[unique_count - 1])
+               {
+                  potential_external[unique_count++] = potential_external[i];
+               }
+            }
+            num_potential = unique_count;
          }
       }
 
