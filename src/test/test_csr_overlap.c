@@ -139,9 +139,9 @@ CreateCSRMatrixFromData(HYPRE_Int num_rows, HYPRE_Int num_cols, HYPRE_Int nnz,
 static hypre_ParCSRMatrix*
 Create1DLaplacian(MPI_Comm comm, HYPRE_Int n, HYPRE_Int num_procs, HYPRE_Int my_id)
 {
-   HYPRE_Real *values;
-   HYPRE_Int p, q, r;
-   HYPRE_Int P = num_procs, Q = 1, R = 1;
+   HYPRE_Real values[4];
+   HYPRE_Int  p, q, r;
+   HYPRE_Int  P = num_procs, Q = 1, R = 1;
 
    /* Compute processor coordinates for 1D partitioning */
    p = my_id % P;
@@ -149,13 +149,37 @@ Create1DLaplacian(MPI_Comm comm, HYPRE_Int n, HYPRE_Int num_procs, HYPRE_Int my_
    r = (my_id - p - P * q) / (P * Q);
 
    /* Set up 1D stencil values (tridiagonal) */
-   values = hypre_CTAlloc(HYPRE_Real, 4, HYPRE_MEMORY_HOST);
    values[0] = 2.0;  /* diagonal */
    values[1] = -1.0; /* x-direction */
    values[2] = 0.0;  /* y-direction (not used) */
    values[3] = 0.0;  /* z-direction (not used) */
 
    return GenerateLaplacian(comm, n, 1, 1, P, Q, R, p, q, r, values);
+}
+
+/*--------------------------------------------------------------------------
+ * Create a 2D Laplacian matrix using GenerateLaplacian
+ * Global size: nx x ny, partitioned across num_procs processors (1D partitioning)
+ *--------------------------------------------------------------------------*/
+static hypre_ParCSRMatrix*
+Create2DLaplacian(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int num_procs, HYPRE_Int my_id)
+{
+   HYPRE_Real values[4];
+   HYPRE_Int  p, q, r;
+   HYPRE_Int  P = num_procs, Q = 1, R = 1;
+
+   /* Compute processor coordinates for 1D partitioning */
+   p = my_id % P;
+   q = ((my_id - p) / P) % Q;
+   r = (my_id - p - P * q) / (P * Q);
+
+   /* Set up 2D 5-point stencil values */
+   values[0] = 4.0;  /* diagonal */
+   values[1] = -1.0; /* x-direction */
+   values[2] = -1.0; /* y-direction */
+   values[3] = 0.0;  /* z-direction (not used) */
+
+   return GenerateLaplacian(comm, nx, ny, 1, P, Q, R, p, q, r, values);
 }
 
 /*--------------------------------------------------------------------------
@@ -718,6 +742,183 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
 }
 
 /*--------------------------------------------------------------------------
+ * Unit test: 2D grid with 1D partitioning, overlap=2
+ * Test case: 4x4 2D grid on 2 processors
+ * Tests overlap extraction for 2D problem with 1D processor layout
+ *--------------------------------------------------------------------------*/
+static HYPRE_Int
+Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
+{
+   hypre_ParCSRMatrix *A;
+   hypre_OverlapData *overlap_data;
+   hypre_CSRMatrix *A_local;
+   HYPRE_BigInt *col_map;
+   HYPRE_Int num_cols_local;
+   HYPRE_Int error = 0;
+   HYPRE_Int overlap_order = 2;
+   HYPRE_Int my_id, num_procs;
+   MPI_Comm test_comm = MPI_COMM_NULL;
+   HYPRE_Int participate = 0;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /* Create subcommunicator with first 2 processors */
+   if (num_procs >= 2)
+   {
+      participate = (my_id < 2) ? 1 : hypre_MPI_UNDEFINED;
+      hypre_MPI_Comm_split(comm, participate, my_id, &test_comm);
+   }
+   else
+   {
+      if (my_id == 0)
+      {
+         hypre_printf("Test4_Grid2D_Part1D_Overlap2: Skipping (requires at least 2 processors)\n");
+      }
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   /* Only participating processes run the test */
+   if (test_comm == MPI_COMM_NULL)
+   {
+      /* Non-participating processes must still synchronize */
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   {
+      HYPRE_Int test_my_id;
+      hypre_MPI_Comm_rank(test_comm, &test_my_id);
+      if (test_my_id == 0)
+      {
+         hypre_printf("Test4_Grid2D_Part1D_Overlap2 (2 procs): ");
+      }
+   }
+
+   /* Create 4x4 2D Laplacian with 1D partitioning */
+   {
+      HYPRE_Int test_my_id;
+      hypre_MPI_Comm_rank(test_comm, &test_my_id);
+      A = Create2DLaplacian(test_comm, 4, 4, 2, test_my_id);
+   }
+
+   /* Compute overlap */
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+   hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
+
+   /* Get overlap rows */
+   hypre_ParCSRMatrixGetOverlapRows(A, overlap_data);
+
+   /* Extract local overlap matrix */
+   hypre_ParCSRMatrixExtractLocalOverlap(A, overlap_data, &A_local, &col_map, &num_cols_local);
+
+   /* Create expected matrix and compare */
+   {
+      hypre_CSRMatrix *A_expected = NULL;
+      HYPRE_Int num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
+      HYPRE_Int test_my_id;
+      hypre_MPI_Comm_rank(test_comm, &test_my_id);
+
+      /* With overlap=2 on a 4x4 grid, both processors get the full 16x16 matrix */
+      /* 2D 5-point stencil structure for 4x4 grid (row-major ordering) */
+      HYPRE_Int I_expected[17] = {0, 3, 7, 11, 16, 20, 25, 28, 32, 36, 39, 44, 48, 53, 57, 61, 64};
+      HYPRE_Int J_expected[64] = {
+         0, 1, 2,                     /* row 0 */
+         1, 0, 3, 8,                  /* row 1 */
+         2, 0, 3, 4,                  /* row 2 */
+         3, 1, 2, 5, 10,              /* row 3 */
+         4, 2, 5, 6,                  /* row 4 */
+         5, 3, 4, 7, 12,              /* row 5 */
+         6, 4, 7,                     /* row 6 */
+         7, 5, 6, 14,                 /* row 7 */
+         8, 1, 9, 10,                 /* row 8 */
+         9, 8, 11,                    /* row 9 */
+         10, 3, 8, 11, 12,            /* row 10 */
+         11, 9, 10, 13,               /* row 11 */
+         12, 5, 10, 13, 14,           /* row 12 */
+         13, 11, 12, 15,              /* row 13 */
+         14, 7, 12, 15,               /* row 14 */
+         15, 13, 14                   /* row 15 */
+      };
+      HYPRE_Real data_expected[64] = {
+         4.0, -1.0, -1.0,             /* row 0 */
+         4.0, -1.0, -1.0, -1.0,       /* row 1 */
+         4.0, -1.0, -1.0, -1.0,       /* row 2 */
+         4.0, -1.0, -1.0, -1.0, -1.0, /* row 3 */
+         4.0, -1.0, -1.0, -1.0,       /* row 4 */
+         4.0, -1.0, -1.0, -1.0, -1.0, /* row 5 */
+         4.0, -1.0, -1.0,             /* row 6 */
+         4.0, -1.0, -1.0, -1.0,       /* row 7 */
+         4.0, -1.0, -1.0, -1.0,       /* row 8 */
+         4.0, -1.0, -1.0,             /* row 9 */
+         4.0, -1.0, -1.0, -1.0, -1.0, /* row 10 */
+         4.0, -1.0, -1.0, -1.0,       /* row 11 */
+         4.0, -1.0, -1.0, -1.0, -1.0, /* row 12 */
+         4.0, -1.0, -1.0, -1.0,       /* row 13 */
+         4.0, -1.0, -1.0, -1.0,       /* row 14 */
+         4.0, -1.0, -1.0              /* row 15 */
+      };
+
+      A_expected = CreateCSRMatrixFromData(16, 16, 64, I_expected, J_expected, data_expected);
+
+      if (A_expected)
+      {
+         HYPRE_Real tol = 1e-10;
+         if (print_matrices)
+         {
+            char filename_expected[256];
+            char filename_computed[256];
+            hypre_sprintf(filename_expected, "test4_expected_ij.out.%05d", test_my_id);
+            hypre_sprintf(filename_computed, "test4_computed_ij.out.%05d", test_my_id);
+            hypre_CSRMatrixPrintIJ(A_expected, 0, 0, filename_expected);
+            hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename_computed);
+         }
+         if (CompareCSRMatrices(A_expected, A_local, tol) != 0)
+         {
+            hypre_printf("Proc %d: Extracted matrix does not match expected matrix\n", test_my_id);
+            error = 1;
+         }
+         hypre_CSRMatrixDestroy(A_expected);
+      }
+   }
+
+   /* Cleanup */
+   if (A_local)
+   {
+      hypre_CSRMatrixDestroy(A_local);
+   }
+   if (col_map)
+   {
+      hypre_TFree(col_map, HYPRE_MEMORY_HOST);
+   }
+   if (overlap_data)
+   {
+      hypre_OverlapDataDestroy(overlap_data);
+   }
+   if (A)
+   {
+      hypre_ParCSRMatrixDestroy(A);
+   }
+
+   if (test_comm != MPI_COMM_NULL)
+   {
+      HYPRE_Int test_my_id;
+      hypre_MPI_Comm_rank(test_comm, &test_my_id);
+      PRINT_TEST_RESULT(test_my_id, error);
+      hypre_MPI_Comm_free(&test_comm);
+   }
+
+   /* Synchronize all processes before returning */
+   hypre_MPI_Barrier(comm);
+
+   return error;
+}
+
+/*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
 int
@@ -814,6 +1015,7 @@ main(int argc, char *argv[])
       error += Test1_Grid1D_Part1D_Overlap1(comm, print_matrices);
       error += Test2_Grid1D_Part1D_Overlap2(comm, print_matrices);
       error += Test3_Grid1D_Part1D_Overlap8(comm, print_matrices);
+      error += Test4_Grid2D_Part1D_Overlap2(comm, print_matrices);
 
       if (my_id == 0)
       {
