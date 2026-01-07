@@ -10,7 +10,7 @@
  *
  * This test file contains:
  * 1. Unit tests for overlap extraction with small hard-coded matrices
- * 2. TODO - Benchmarking with generated laplacian matrices
+ * 2. Benchmarking with generated laplacian matrices
  *--------------------------------------------------------------------------*/
 
 #include <stdlib.h>
@@ -2200,6 +2200,162 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
    return error;
 }
 
+ *--------------------------------------------------------------------------
+ * Benchmark: Generate laplacian and test overlap extraction
+ *--------------------------------------------------------------------------*/
+static HYPRE_Int
+BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+                 HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz,
+                 HYPRE_Int overlap_order, HYPRE_Int print_matrices)
+{
+   HYPRE_Int my_id, num_procs;
+   HYPRE_ParCSRMatrix A;
+   hypre_OverlapData *overlap_data;
+   hypre_CSRMatrix *A_local;
+   HYPRE_BigInt *col_map;
+   HYPRE_Int num_cols_local;
+   HYPRE_Real time_start, time_end, time_overlap, time_extract;
+   HYPRE_Int num_extended, num_local, num_overlap;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   if (my_id == 0)
+   {
+      hypre_printf("\nBenchmark: Overlap extraction\n");
+      hypre_printf("  Problem size: %d x %d x %d\n", nx, ny, nz);
+      hypre_printf("  Processor grid: %d x %d x %d\n", Px, Py, Pz);
+      hypre_printf("  Overlap order: %d\n", overlap_order);
+   }
+
+   /* Generate laplacian using GenerateLaplacian */
+   {
+      HYPRE_Real *values;
+      HYPRE_Int p, q, r;
+
+      /* Compute processor coordinates */
+      p = my_id % Px;
+      q = ((my_id - p) / Px) % Py;
+      r = (my_id - p - Px * q) / (Px * Py);
+
+      /* Set up 7-point stencil values */
+      values = hypre_CTAlloc(HYPRE_Real, 4, HYPRE_MEMORY_HOST);
+      if (nx > 1)
+      {
+         values[0] += 2.0;
+         values[1] = -1.0;
+      }
+      if (ny > 1)
+      {
+         values[0] += 2.0;
+         values[2] = -1.0;
+      }
+      if (nz > 1)
+      {
+         values[0] += 2.0;
+         values[3] = -1.0;
+      }
+
+      A = GenerateLaplacian(comm, nx, ny, nz, Px, Py, Pz, p, q, r, values);
+
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+   }
+
+   /* Print global matrix if requested */
+   if (print_matrices)
+   {
+      char filename[256];
+      hypre_sprintf(filename, "benchmark_global_matrix_ij.out");
+      hypre_ParCSRMatrixPrintIJ(A, 0, 0, filename);
+      if (my_id == 0)
+      {
+         hypre_printf("  Printed global matrix to %s.<proc_id>\n", filename);
+      }
+   }
+
+   /* Benchmark overlap computation */
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+
+   time_start = hypre_MPI_Wtime();
+   hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
+   hypre_MPI_Barrier(comm);
+   time_end = hypre_MPI_Wtime();
+   time_overlap = time_end - time_start;
+
+   /* Benchmark overlap row fetching */
+   time_start = hypre_MPI_Wtime();
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
+   hypre_MPI_Barrier(comm);
+   time_end = hypre_MPI_Wtime();
+   time_overlap += (time_end - time_start);
+
+   /* Benchmark local matrix extraction */
+   time_start = hypre_MPI_Wtime();
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
+   hypre_MPI_Barrier(comm);
+   time_end = hypre_MPI_Wtime();
+   time_extract = time_end - time_start;
+
+   /* Print overlapped matrices if requested */
+   if (print_matrices)
+   {
+      char filename[256];
+      hypre_sprintf(filename, "benchmark_overlap_matrix_ij.out.%05d", my_id);
+      hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename);
+   }
+
+   /* Gather statistics */
+   num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
+   num_local = hypre_OverlapDataNumLocalRows(overlap_data);
+   num_overlap = hypre_OverlapDataNumOverlapRows(overlap_data);
+
+   if (my_id == 0)
+   {
+      hypre_printf("  Overlap computation time: %e seconds\n", time_overlap);
+      hypre_printf("  Extraction time: %e seconds\n", time_extract);
+      hypre_printf("  Total time: %e seconds\n", time_overlap + time_extract);
+   }
+
+   /* Print per-processor stats */
+   {
+      HYPRE_Int i;
+      HYPRE_Int *local_nnz = hypre_TAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      HYPRE_Int *local_extended = hypre_TAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      HYPRE_Int *local_overlap = hypre_TAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+      HYPRE_Int nnz_local = hypre_CSRMatrixNumNonzeros(A_local);
+
+      hypre_MPI_Gather(&nnz_local, 1, HYPRE_MPI_INT, local_nnz, 1, HYPRE_MPI_INT, 0, comm);
+      hypre_MPI_Gather(&num_extended, 1, HYPRE_MPI_INT, local_extended, 1, HYPRE_MPI_INT, 0, comm);
+      hypre_MPI_Gather(&num_overlap, 1, HYPRE_MPI_INT, local_overlap, 1, HYPRE_MPI_INT, 0, comm);
+
+      if (my_id == 0)
+      {
+         hypre_printf("\n  Per-processor statistics:\n");
+         hypre_printf("  Proc  Extended Rows  Overlap Rows  Local NNZ\n");
+         for (i = 0; i < num_procs; i++)
+         {
+            hypre_printf("  %3d      %8d      %8d    %10d\n",
+                        i, local_extended[i], local_overlap[i], local_nnz[i]);
+         }
+      }
+
+      hypre_TFree(local_nnz, HYPRE_MEMORY_HOST);
+      hypre_TFree(local_extended, HYPRE_MEMORY_HOST);
+      hypre_TFree(local_overlap, HYPRE_MEMORY_HOST);
+   }
+
+   /* Cleanup */
+   hypre_CSRMatrixDestroy(A_local);
+   hypre_TFree(col_map, HYPRE_MEMORY_HOST);
+   hypre_OverlapDataDestroy(overlap_data);
+   HYPRE_ParCSRMatrixDestroy(A);
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
@@ -2210,8 +2366,8 @@ main(int argc, char *argv[])
    HYPRE_Int my_id, num_procs;
    HYPRE_Int error = 0;
    HYPRE_Int test_mode = 1;  /* 1=unit tests, 0=benchmark */
-   HYPRE_Int nx = 20, ny = 20, nz = 20;
-   HYPRE_Int Px = 2, Py = 2, Pz = 2;
+   HYPRE_Int nx, ny, nz;
+   HYPRE_Int Px, Py, Pz;
    HYPRE_Int overlap_order = 1;
    HYPRE_Int print_matrices = 0;
    HYPRE_Int i;
@@ -2226,6 +2382,8 @@ main(int argc, char *argv[])
 
    /* Parse command line */
    i = 1;
+   nx = num_procs * 64; ny = 64; nz = 64;
+   Px = num_procs; Py = 1; Pz = 1;
    while (i < argc)
    {
       if (strcmp(argv[i], "-benchmark") == 0)
@@ -2302,6 +2460,7 @@ main(int argc, char *argv[])
       error += Test6_Grid2D_Part2D_Overlap2(comm, print_matrices);
       error += Test7_Grid2D_Part2D_Overlap3(comm, print_matrices);
       error += Test8_Grid3D_Part3D_Overlap1(comm, print_matrices);
+      error += Test9_Grid3D_Part3D_Overlap6(comm, print_matrices);
 
       if (my_id == 0)
       {
@@ -2318,7 +2477,15 @@ main(int argc, char *argv[])
    }
    else
    {
-      /* TODO: benchmark mode */
+      /* Run Warmup */
+      if (my_id == 0)
+      {
+         hypre_printf("\nWarmup phase...");
+      }
+      BenchmarkOverlap(comm, 10 * num_procs, 10, 10, num_procs, 1, 1, 0, 0);
+
+      /* Run Benchmark */
+      BenchmarkOverlap(comm, nx, ny, nz, Px, Py, Pz, overlap_order, print_matrices);
    }
 
    HYPRE_Finalize();
