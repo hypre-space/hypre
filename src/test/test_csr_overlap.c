@@ -2200,7 +2200,7 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
    return error;
 }
 
- *--------------------------------------------------------------------------
+/*--------------------------------------------------------------------------
  * Benchmark: Generate laplacian and test overlap extraction
  *--------------------------------------------------------------------------*/
 static HYPRE_Int
