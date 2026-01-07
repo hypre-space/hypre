@@ -2007,6 +2007,200 @@ Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
 }
 
 /*--------------------------------------------------------------------------
+ * Unit test: 3D grid with 3D partitioning, overlap=6 (full domain coverage)
+ * Test case: 3x3x3 3D grid on 2x2x2 processor grid (8 processors)
+ * Tests overlap extraction for 3D problem with 3D processor layout and overlap=6
+ * With overlap=6, all processors should have the full global matrix (27x27)
+ *--------------------------------------------------------------------------*/
+static HYPRE_Int
+Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
+{
+   hypre_ParCSRMatrix *A;
+   hypre_OverlapData *overlap_data;
+   hypre_CSRMatrix *A_local;
+   HYPRE_BigInt *col_map;
+   HYPRE_Int num_cols_local;
+   HYPRE_Int error = 0;
+   HYPRE_Int overlap_order = 6;
+   HYPRE_Int test_my_id, my_id, num_procs;
+   MPI_Comm test_comm = MPI_COMM_NULL;
+   HYPRE_Int participate = 0;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /* Create subcommunicator with first 8 processors */
+   if (num_procs >= 8)
+   {
+      participate = (my_id < 8) ? 1 : hypre_MPI_UNDEFINED;
+      hypre_MPI_Comm_split(comm, participate, my_id, &test_comm);
+   }
+   else
+   {
+      if (my_id == 0)
+      {
+         hypre_printf("Test9_Grid3D_Part3D_Overlap6: Skipping (requires at least 8 processors)\n");
+      }
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   /* Only participating processes run the test */
+   if (test_comm == MPI_COMM_NULL)
+   {
+      /* Non-participating processes must still synchronize */
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   hypre_MPI_Comm_rank(test_comm, &test_my_id);
+   if (test_my_id == 0)
+   {
+      hypre_printf("Test9_Grid3D_Part3D_Overlap6 (8 procs): ");
+   }
+
+   /* Create 3x3x3 3D Laplacian with 2x2x2 processor partitioning */
+   A = Create3DLaplacian3DPart(test_comm, 3, 3, 3, 2, 2, 2, test_my_id);
+
+   /* Compute overlap */
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+   hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
+
+   /* Get overlap rows */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
+
+   /* Extract local overlap matrix */
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
+
+   /* Create expected matrix and compare */
+   {
+      hypre_CSRMatrix *A_expected = NULL;
+
+      if (!A_local)
+      {
+         hypre_printf("Proc %d: Failed to extract local overlap matrix\n", test_my_id);
+         error = 1;
+      }
+      else
+      {
+         HYPRE_Int num_rows_local = hypre_CSRMatrixNumRows(A_local);
+         HYPRE_Int num_cols_local_actual = hypre_CSRMatrixNumCols(A_local);
+
+         /* All processors should have the same 27x27 matrix (full domain coverage) */
+         if (num_rows_local == 27 && num_cols_local_actual == 27)
+         {
+            /* Same expected matrix for all 8 processors */
+            HYPRE_Int I_expected[28] = {0, 4, 9, 14, 20, 25, 31, 37, 44, 48, 53, 58, 64, 68, 73,
+                                        78, 84, 88, 93, 97, 102, 107, 113, 117, 122, 126, 131, 135};
+            HYPRE_Int J_expected[135] = {0, 1, 2, 4, 0, 1, 3, 5, 8, 0, 2, 3, 6, 12, 1, 2, 3, 7, 9, 13,
+                                         0, 4, 5, 6, 18, 1, 4, 5, 7, 10, 19, 2, 4, 6, 7, 14, 20, 3, 5,
+                                         6, 7, 11, 15, 21, 1, 8, 9, 10, 3, 8, 9, 11, 16, 5, 8, 10, 11,
+                                         22, 7, 9, 10, 11, 17, 23, 2, 12, 13, 14, 3, 12, 13, 15, 16, 6,
+                                         12, 14, 15, 24, 7, 13, 14, 15, 17, 25, 9, 13, 16, 17, 11, 15,
+                                         16, 17, 26, 4, 18, 19, 20, 5, 18, 19, 21, 22, 6, 18, 20, 21, 24,
+                                         7, 19, 20, 21, 23, 25, 10, 19, 22, 23, 11, 21, 22, 23, 26, 14,
+                                         20, 24, 25, 15, 21, 24, 25, 26, 17, 23, 25, 26};
+            HYPRE_Real data_expected[135] = {
+               6.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, -1.0,
+               6.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, -1.0, -1.0,
+               6.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, -1.0, -1.0,
+               6.0, -1.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0, -1.0,
+               -1.0, -1.0, -1.0, 6.0,
+               -1.0, -1.0, -1.0, -1.0,
+               6.0, -1.0, -1.0, -1.0,
+               6.0, -1.0, -1.0, -1.0,
+               -1.0, 6.0, -1.0, -1.0,
+               -1.0, -1.0, 6.0
+            };
+            A_expected = CreateCSRMatrixFromData(27, 27, 135, I_expected, J_expected, data_expected);
+         }
+         else
+         {
+            hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 27 x 27)\n",
+                        test_my_id, num_rows_local, num_cols_local_actual);
+            error = 1;
+            A_expected = NULL;
+         }
+
+         if (A_expected)
+         {
+            if (print_matrices)
+            {
+               char filename_expected[256];
+               char filename_computed[256];
+               hypre_sprintf(filename_expected, "test9_expected_ij.out.%05d", test_my_id);
+               hypre_sprintf(filename_computed, "test9_computed_ij.out.%05d", test_my_id);
+               hypre_CSRMatrixPrintIJ(A_expected, 0, 0, filename_expected);
+               hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename_computed);
+            }
+            if (CompareCSRMatrices(A_expected, A_local, CHECK_TOLERANCE) != 0)
+            {
+               hypre_printf("Proc %d: Extracted matrix does not match expected matrix\n", test_my_id);
+               error = 1;
+            }
+            hypre_CSRMatrixDestroy(A_expected);
+         }
+      }
+   }
+
+   /* Cleanup */
+   if (A_local)
+   {
+      hypre_CSRMatrixDestroy(A_local);
+   }
+   if (col_map)
+   {
+      hypre_TFree(col_map, HYPRE_MEMORY_HOST);
+   }
+   if (overlap_data)
+   {
+      hypre_OverlapDataDestroy(overlap_data);
+   }
+   if (A)
+   {
+      hypre_ParCSRMatrixDestroy(A);
+   }
+
+   if (test_comm != MPI_COMM_NULL)
+   {
+      PRINT_TEST_RESULT(test_my_id, error);
+      hypre_MPI_Comm_free(&test_comm);
+   }
+
+   /* Synchronize all processes before returning */
+   hypre_MPI_Barrier(comm);
+
+   return error;
+}
+
+/*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
 int
