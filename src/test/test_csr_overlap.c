@@ -211,6 +211,32 @@ Create2DLaplacian2DPart(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny,
 }
 
 /*--------------------------------------------------------------------------
+ * Create a 3D Laplacian matrix using GenerateLaplacian with 3D partitioning
+ * Global size: nx x ny x nz, partitioned across Px x Py x Pz processors
+ *--------------------------------------------------------------------------*/
+static hypre_ParCSRMatrix*
+Create3DLaplacian3DPart(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+                        HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz, HYPRE_Int my_id)
+{
+   HYPRE_Real values[4];
+   HYPRE_Int p, q, r;
+   HYPRE_Int P = Px, Q = Py, R = Pz;
+
+   /* Compute processor coordinates for 3D partitioning */
+   p = my_id % P;
+   q = ((my_id - p) / P) % Q;
+   r = (my_id - p - P * q) / (P * Q);
+
+   /* Set up 3D 7-point stencil values */
+   values[0] = 6.0;  /* diagonal */
+   values[1] = -1.0; /* x-direction */
+   values[2] = -1.0; /* y-direction */
+   values[3] = -1.0; /* z-direction */
+
+   return GenerateLaplacian(comm, nx, ny, nz, P, Q, R, p, q, r, values);
+}
+
+/*--------------------------------------------------------------------------
  * Unit test: 1D grid with 1D partitioning, overlap=1
  * Test case: 4x4 matrix on 2 processors
  *--------------------------------------------------------------------------*/
@@ -1588,6 +1614,399 @@ Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
 }
 
 /*--------------------------------------------------------------------------
+ * Unit test: 3D grid with 3D partitioning, overlap=1
+ * Test case: 3x3x3 3D grid on 2x2x2 processor grid (8 processors)
+ * Tests overlap extraction for 3D problem with 3D processor layout and overlap=1
+ *--------------------------------------------------------------------------*/
+static HYPRE_Int
+Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
+{
+   hypre_ParCSRMatrix *A;
+   hypre_OverlapData *overlap_data;
+   hypre_CSRMatrix *A_local;
+   HYPRE_BigInt *col_map;
+   HYPRE_Int num_cols_local;
+   HYPRE_Int error = 0;
+   HYPRE_Int overlap_order = 1;
+   HYPRE_Int test_my_id, my_id, num_procs;
+   MPI_Comm test_comm = MPI_COMM_NULL;
+   HYPRE_Int participate = 0;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /* Create subcommunicator with first 8 processors */
+   if (num_procs >= 8)
+   {
+      participate = (my_id < 8) ? 1 : hypre_MPI_UNDEFINED;
+      hypre_MPI_Comm_split(comm, participate, my_id, &test_comm);
+   }
+   else
+   {
+      if (my_id == 0)
+      {
+         hypre_printf("Test8_Grid3D_Part3D_Overlap1: Skipping (requires at least 8 processors)\n");
+      }
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   /* Only participating processes run the test */
+   if (test_comm == MPI_COMM_NULL)
+   {
+      /* Non-participating processes must still synchronize */
+      hypre_MPI_Barrier(comm);
+      return 0;
+   }
+
+   hypre_MPI_Comm_rank(test_comm, &test_my_id);
+   if (test_my_id == 0)
+   {
+      hypre_printf("Test8_Grid3D_Part3D_Overlap1 (8 procs): ");
+   }
+
+   /* Create 3x3x3 3D Laplacian with 2x2x2 processor partitioning */
+   A = Create3DLaplacian3DPart(test_comm, 3, 3, 3, 2, 2, 2, test_my_id);
+
+   /* Compute overlap */
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+   hypre_ParCSRMatrixComputeOverlap(A, overlap_order, &overlap_data);
+
+   /* Get overlap rows */
+   hypre_ParCSRMatrixGetExternalMatrix(A, overlap_data);
+
+   /* Extract local overlap matrix */
+   hypre_ParCSRMatrixCreateExtendedMatrix(A, overlap_data, &A_local, &col_map, &num_cols_local);
+
+   /* Create expected matrix and compare */
+   {
+      hypre_CSRMatrix *A_expected = NULL;
+      HYPRE_Int test_my_id;
+      hypre_MPI_Comm_rank(test_comm, &test_my_id);
+
+      if (!A_local)
+      {
+         hypre_printf("Proc %d: Failed to extract local overlap matrix\n", test_my_id);
+         error = 1;
+      }
+      else
+      {
+         HYPRE_Int num_rows_local = hypre_CSRMatrixNumRows(A_local);
+         HYPRE_Int num_cols_local_actual = hypre_CSRMatrixNumCols(A_local);
+
+         /* Hard-coded expected matrices from test8_expected_csr.out files */
+         if (test_my_id == 0)
+         {
+            /* 20x20, nnz=92 */
+            if (num_rows_local == 20 && num_cols_local_actual == 20)
+            {
+               HYPRE_Int I_expected[21] = {0, 4, 9, 14, 20, 25, 31, 37, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92};
+               HYPRE_Int J_expected[92] = {0, 1, 2, 4, 0, 1, 3, 5, 8, 0, 2, 3, 6, 12, 1, 2, 3, 7, 9, 13,
+                                           0, 4, 5, 6, 16, 1, 4, 5, 7, 10, 17, 2, 4, 6, 7, 14, 18, 3, 5,
+                                           6, 7, 11, 15, 19, 1, 8, 9, 10, 3, 8, 9, 11, 5, 8, 10, 11, 7, 9,
+                                           10, 11, 2, 12, 13, 14, 3, 12, 13, 15, 6, 12, 14, 15, 7, 13, 14,
+                                           15, 4, 16, 17, 18, 5, 16, 17, 19, 6, 16, 18, 19, 7, 17, 18, 19
+                                          };
+               HYPRE_Real data_expected[92] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(20, 20, 92, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 20 x 20)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 1)
+         {
+            /* 12x12, nnz=48 */
+            if (num_rows_local == 12 && num_cols_local_actual == 12)
+            {
+               HYPRE_Int I_expected[13] = {0, 4, 8, 12, 16, 20, 25, 30, 36, 39, 42, 45, 48};
+               HYPRE_Int J_expected[48] = {0, 1, 2, 4, 0, 1, 3, 5, 0, 2, 3, 6, 1, 2, 3, 7, 0, 4, 5, 6,
+                                           1, 4, 5, 7, 8, 2, 4, 6, 7, 10, 3, 5, 6, 7, 9, 11, 5, 8, 9,
+                                           7, 8, 9, 6, 10, 11, 7, 10, 11
+                                          };
+               HYPRE_Real data_expected[48] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(12, 12, 48, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 12 x 12)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 2)
+         {
+            /* 12x12, nnz=48 */
+            if (num_rows_local == 12 && num_cols_local_actual == 12)
+            {
+               HYPRE_Int I_expected[13] = {0, 4, 8, 12, 16, 20, 25, 30, 36, 39, 42, 45, 48};
+               HYPRE_Int J_expected[48] = {0, 1, 2, 4, 0, 1, 3, 5, 0, 2, 3, 6, 1, 2, 3, 7,
+                                           0, 4, 5, 6, 1, 4, 5, 7, 8, 2, 4, 6, 7, 10, 3, 5,
+                                           6, 7, 9, 11, 5, 8, 9, 7, 8, 9, 6, 10, 11, 7, 10, 11
+                                          };
+               HYPRE_Real data_expected[48] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(12, 12, 48, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 12 x 12)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 3)
+         {
+            /* 7x7, nnz=23 */
+            if (num_rows_local == 7 && num_cols_local_actual == 7)
+            {
+               HYPRE_Int I_expected[8] = {0, 3, 6, 9, 12, 16, 21, 23};
+               HYPRE_Int J_expected[23] = {0, 1, 4, 0, 1, 5, 2, 3, 4, 2, 3, 5, 0, 2, 4, 5, 1, 3, 4, 5, 6, 5, 6};
+               HYPRE_Real data_expected[23] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  6.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(7, 7, 23, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 7 x 7)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 4)
+         {
+            /* 12x12, nnz=48 */
+            if (num_rows_local == 12 && num_cols_local_actual == 12)
+            {
+               HYPRE_Int I_expected[13] = {0, 4, 8, 12, 16, 20, 25, 30, 36, 39, 42, 45, 48};
+               HYPRE_Int J_expected[48] = {0, 1, 2, 4, 0, 1, 3, 5, 0, 2, 3, 6, 1, 2, 3, 7,
+                                           0, 4, 5, 6, 1, 4, 5, 7, 8, 2, 4, 6, 7, 10, 3, 5,
+                                           6, 7, 9, 11, 5, 8, 9, 7, 8, 9, 6, 10, 11, 7, 10, 11
+                                          };
+               HYPRE_Real data_expected[48] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, -1.0,
+                  -1.0, 6.0, -1.0, 6.0,
+                  -1.0, -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(12, 12, 48, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 12 x 12)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 5)
+         {
+            /* 7x7, nnz=23 */
+            if (num_rows_local == 7 && num_cols_local_actual == 7)
+            {
+               HYPRE_Int I_expected[8] = {0, 3, 6, 9, 12, 16, 21, 23};
+               HYPRE_Int J_expected[23] = {0, 1, 4, 0, 1, 5, 2, 3, 4, 2, 3, 5,
+                                           0, 2, 4, 5, 1, 3, 4, 5, 6, 5, 6
+                                          };
+               HYPRE_Real data_expected[23] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  6.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(7, 7, 23, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 7 x 7)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 6)
+         {
+            /* 7x7, nnz=23 */
+            if (num_rows_local == 7 && num_cols_local_actual == 7)
+            {
+               HYPRE_Int I_expected[8] = {0, 3, 6, 9, 12, 16, 21, 23};
+               HYPRE_Int J_expected[23] = {0, 1, 4, 0, 1, 5, 2, 3, 4, 2, 3, 5,
+                                           0, 2, 4, 5, 1, 3, 4, 5, 6, 5, 6
+                                          };
+               HYPRE_Real data_expected[23] =
+               {
+                  6.0, -1.0, -1.0, -1.0,
+                  6.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, 6.0, -1.0,
+                  -1.0, -1.0, -1.0, 6.0,
+                  -1.0, -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(7, 7, 23, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 7 x 7)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else if (test_my_id == 7)
+         {
+            /* 4x4, nnz=10 */
+            if (num_rows_local == 4 && num_cols_local_actual == 4)
+            {
+               HYPRE_Int I_expected[5] = {0, 2, 4, 6, 10};
+               HYPRE_Int J_expected[10] = {0, 3, 1, 3, 2, 3, 0, 1, 2, 3};
+               HYPRE_Real data_expected[10] =
+               {
+                  6.0, -1.0, 6.0, -1.0,
+                  6.0, -1.0, -1.0, -1.0,
+                  -1.0, 6.0
+               };
+               A_expected = CreateCSRMatrixFromData(4, 4, 10, I_expected, J_expected, data_expected);
+            }
+            else
+            {
+               hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 4 x 4)\n",
+                            test_my_id, num_rows_local, num_cols_local_actual);
+               error = 1;
+            }
+         }
+         else
+         {
+            hypre_printf("Proc %d: Unexpected processor ID (expected 0-7)\n", test_my_id);
+            error = 1;
+            A_expected = NULL;
+         }
+
+         if (A_expected)
+         {
+            if (print_matrices)
+            {
+               char filename_expected[256];
+               char filename_computed[256];
+               hypre_sprintf(filename_expected, "test8_expected_ij.out.%05d", test_my_id);
+               hypre_sprintf(filename_computed, "test8_computed_ij.out.%05d", test_my_id);
+               hypre_CSRMatrixPrintIJ(A_expected, 0, 0, filename_expected);
+               hypre_CSRMatrixPrintIJ(A_local, 0, 0, filename_computed);
+            }
+            if (CompareCSRMatrices(A_expected, A_local, CHECK_TOLERANCE) != 0)
+            {
+               hypre_printf("Proc %d: Extracted matrix does not match expected matrix\n", test_my_id);
+               error = 1;
+            }
+            hypre_CSRMatrixDestroy(A_expected);
+         }
+      }
+   }
+
+   /* Cleanup */
+   if (A_local)
+   {
+      hypre_CSRMatrixDestroy(A_local);
+   }
+   if (col_map)
+   {
+      hypre_TFree(col_map, HYPRE_MEMORY_HOST);
+   }
+   if (overlap_data)
+   {
+      hypre_OverlapDataDestroy(overlap_data);
+   }
+   if (A)
+   {
+      hypre_ParCSRMatrixDestroy(A);
+   }
+
+   if (test_comm != MPI_COMM_NULL)
+   {
+      PRINT_TEST_RESULT(test_my_id, error);
+      hypre_MPI_Comm_free(&test_comm);
+   }
+
+   /* Synchronize all processes before returning */
+   hypre_MPI_Barrier(comm);
+
+   return error;
+}
+
+/*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
 int
@@ -1688,6 +2107,7 @@ main(int argc, char *argv[])
       error += Test5_Grid2D_Part2D_Overlap1(comm, print_matrices);
       error += Test6_Grid2D_Part2D_Overlap2(comm, print_matrices);
       error += Test7_Grid2D_Part2D_Overlap3(comm, print_matrices);
+      error += Test8_Grid3D_Part3D_Overlap1(comm, print_matrices);
 
       if (my_id == 0)
       {
