@@ -923,6 +923,13 @@ hypre_ParCSRMatrixReadIJ_dbl( MPI_Comm comm, const char *filename, HYPRE_Int *ba
 HYPRE_Int
 hypre_ParCSRMatrixReadIJ_long_dbl( MPI_Comm comm, const char *filename, HYPRE_Int *base_i_ptr, HYPRE_Int *base_j_ptr, hypre_ParCSRMatrix **matrix_ptr );
 
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixRef_flt( hypre_ParCSRMatrix *matrix );
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixRef_dbl( hypre_ParCSRMatrix *matrix );
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixRef_long_dbl( hypre_ParCSRMatrix *matrix );
+
 HYPRE_Int
 hypre_ParCSRMatrixReorder_flt( hypre_ParCSRMatrix *A );
 HYPRE_Int

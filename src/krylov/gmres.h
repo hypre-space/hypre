@@ -143,8 +143,8 @@ hypre_GMRESFunctionsCreate(
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,
    hypre_KrylovPtrToAxpy               Axpy,
-   hypre_KrylovPtrToPrecond            Precond,
-   hypre_KrylovPtrToPrecondSetup       PrecondSetup
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 );
 
 /**
