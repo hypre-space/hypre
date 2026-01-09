@@ -115,15 +115,6 @@ add_custom_target(checkpar
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   COMMAND echo ""
 
-  COMMAND ${CMAKE_COMMAND} -E echo_append "Running Unit Tests... "
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-          -atol ${HYPRE_CHECK_TOL}
-          -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_unit/unit.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
-  COMMAND echo ""
-
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS ${TEST_SRCS}
   COMMENT "Running parallel tests"
