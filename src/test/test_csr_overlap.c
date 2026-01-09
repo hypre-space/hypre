@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <mpi.h>
 
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
@@ -44,18 +43,18 @@
    HYPRE_BigInt *col_map; HYPRE_Int num_cols_local, error = 0, test_my_id, my_id, num_procs; \
    MPI_Comm test_comm = MPI_COMM_NULL;
 
-#define TEST_SETUP(test_name, min_procs) \
+#define TEST_SETUP(min_procs) \
    hypre_MPI_Comm_rank(comm, &my_id); hypre_MPI_Comm_size(comm, &num_procs); \
    if (num_procs >= min_procs) { \
       HYPRE_Int part = (my_id < min_procs) ? 1 : hypre_MPI_UNDEFINED; \
       hypre_MPI_Comm_split(comm, part, my_id, &test_comm); \
    } else { \
-      if (my_id == 0) hypre_printf("%s: Skipping (requires at least %d processors)\n", test_name, min_procs); \
+      if (my_id == 0) hypre_printf("%s: Skipping (requires at least %d processors)\n", __func__, min_procs); \
       hypre_MPI_Barrier(comm); return 0; \
    } \
-   if (test_comm == MPI_COMM_NULL) { hypre_MPI_Barrier(comm); return 0; } \
+   if (test_comm == hypre_MPI_COMM_NULL) { hypre_MPI_Barrier(comm); return 0; } \
    hypre_MPI_Comm_rank(test_comm, &test_my_id); \
-   if (test_my_id == 0) hypre_printf("%s (%d procs): ", test_name, min_procs);
+   if (test_my_id == 0) hypre_printf("%s (%d procs): ", __func__, min_procs);
 
 #define TEST_OVERLAP(overlap_order) \
    if (!hypre_ParCSRMatrixCommPkg(A)) hypre_MatvecCommPkgCreate(A); \
@@ -69,7 +68,7 @@
    if (col_map) hypre_TFree(col_map, HYPRE_MEMORY_HOST); \
    if (overlap_data) hypre_OverlapDataDestroy(overlap_data); \
    if (A) hypre_ParCSRMatrixDestroy(A); \
-   if (test_comm != MPI_COMM_NULL) { PRINT_TEST_RESULT(test_my_id, error, test_comm); hypre_MPI_Comm_free(&test_comm); } \
+   if (test_comm != hypre_MPI_COMM_NULL) { PRINT_TEST_RESULT(test_my_id, error, test_comm); hypre_MPI_Comm_free(&test_comm); } \
    hypre_MPI_Barrier(comm); return error;
 
 #define TEST_PRINT_MATRICES(tag) \
@@ -175,7 +174,7 @@ static HYPRE_Int
 Test1_Grid1D_Part1D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test1_Grid1D_Part1D_Overlap1", 2)
+   TEST_SETUP(2)
    A = Create1DLaplacian(test_comm, 4, 2, test_my_id);
    TEST_OVERLAP(1)
 
@@ -195,7 +194,7 @@ static HYPRE_Int
 Test2_Grid1D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test2_Grid1D_Part1D_Overlap2", 3)
+   TEST_SETUP(3)
    A = Create1DLaplacian(test_comm, 6, 3, test_my_id);
    TEST_OVERLAP(2)
 
@@ -231,7 +230,7 @@ static HYPRE_Int
 Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test3_Grid1D_Part1D_Overlap8", 4)
+   TEST_SETUP(4)
    A = Create1DLaplacian(test_comm, 8, 4, test_my_id);
    TEST_OVERLAP(8)
 
@@ -251,7 +250,7 @@ static HYPRE_Int
 Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test4_Grid2D_Part1D_Overlap2", 2)
+   TEST_SETUP(2)
    A = Create2DLaplacian(test_comm, 4, 4, 2, test_my_id);
    TEST_OVERLAP(2)
 
@@ -270,7 +269,7 @@ static HYPRE_Int
 Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test5_Grid2D_Part2D_Overlap1", 4)
+   TEST_SETUP(4)
    A = Create2DLaplacian2DPart(test_comm, 4, 4, 2, 2, test_my_id);
    TEST_OVERLAP(1)
 
@@ -313,7 +312,7 @@ static HYPRE_Int
 Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test6_Grid2D_Part2D_Overlap2", 4)
+   TEST_SETUP(4)
    A = Create2DLaplacian2DPart(test_comm, 4, 4, 2, 2, test_my_id);
    TEST_OVERLAP(2)
 
@@ -358,7 +357,7 @@ static HYPRE_Int
 Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test7_Grid2D_Part2D_Overlap3", 4)
+   TEST_SETUP(4)
    A = Create2DLaplacian2DPart(test_comm, 4, 4, 2, 2, test_my_id);
    TEST_OVERLAP(3)
 
@@ -414,7 +413,7 @@ static HYPRE_Int
 Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test8_Grid3D_Part3D_Overlap1", 8)
+   TEST_SETUP(8)
    A = Create3DLaplacian3DPart(test_comm, 3, 3, 3, 2, 2, 2, test_my_id);
    TEST_OVERLAP(1)
    if (!A_local) { hypre_printf("Proc %d: Failed to extract local overlap matrix\n", test_my_id); error = 1; }
@@ -501,7 +500,7 @@ static HYPRE_Int
 Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
 {
    TEST_VARS()
-   TEST_SETUP("Test9_Grid3D_Part3D_Overlap6", 8)
+   TEST_SETUP(8)
    A = Create3DLaplacian3DPart(test_comm, 3, 3, 3, 2, 2, 2, test_my_id);
    TEST_OVERLAP(6)
    if (!A_local) { hypre_printf("Proc %d: Failed to extract local overlap matrix\n", test_my_id); error = 1; }
@@ -538,7 +537,7 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
    HYPRE_BigInt *col_map;
    HYPRE_Int num_cols_local;
    HYPRE_Real time_start, time_end, time_overlap, time_extract;
-   HYPRE_Int num_extended, num_local, num_overlap;
+   HYPRE_Int num_extended, num_overlap;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -632,8 +631,7 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
 
    /* Gather statistics */
    num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
-   num_local = hypre_OverlapDataNumLocalRows(overlap_data);
-   num_overlap = hypre_OverlapDataNumOverlapRows(overlap_data);
+   num_overlap  = hypre_OverlapDataNumOverlapRows(overlap_data);
 
    if (my_id == 0)
    {
@@ -905,8 +903,8 @@ BenchmarkMatMat(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
 /*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
-int
-main(int argc, char *argv[])
+hypre_int
+main(hypre_int argc, char *argv[])
 {
    MPI_Comm comm;
    HYPRE_Int my_id, num_procs;
