@@ -49,7 +49,7 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix    *S_diag   = S ? hypre_ParCSRMatrixDiag(S) : A_diag;
    HYPRE_Int          *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int          *S_diag_j = hypre_CSRMatrixJ(S_diag);
-   HYPRE_Int           skip_diag = S ? 0 : 1;
+   HYPRE_Int           S_equals_A = (S == NULL);  /* Flag indicating S is the same as A */
    /* off-diag part of S */
    hypre_CSRMatrix    *S_offd   = S ? hypre_ParCSRMatrixOffd(S) : A_offd;
    HYPRE_Int          *S_offd_i = hypre_CSRMatrixI(S_offd);
@@ -304,16 +304,24 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
             {
                d_count_FF++;
             }
-            for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
+            /* When S==A, skip diagonal in S loop if it exists (since handled above) */
             {
-               jj = S_diag_j[j];
-               if (CF_marker[jj] > 0)
+               HYPRE_Int s_start = S_diag_i[i];
+               if (S_equals_A && s_start < S_diag_i[i + 1] && S_diag_j[s_start] == i)
                {
-                  d_count_FC++;
+                  s_start++;
                }
-               else
+               for (j = s_start; j < S_diag_i[i + 1]; j++)
                {
-                  d_count_FF++;
+                  jj = S_diag_j[j];
+                  if (CF_marker[jj] > 0)
+                  {
+                     d_count_FC++;
+                  }
+                  else
+                  {
+                     d_count_FF++;
+                  }
                }
             }
             A_FF_diag_i[row] = d_count_FF;
@@ -392,20 +400,33 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
                A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
                A_FF_diag_data[d_count_FF++] = A_diag_data[jA];
             }
-            for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
+            /* When S==A, skip diagonal in S loop if it exists (since handled above) */
             {
-               jA = A_diag_i[i] + 1;
-               jS = S_diag_j[j];
-               while (A_diag_j[jA] != jS) { jA++; }
-               if (CF_marker[S_diag_j[j]] > 0)
+               HYPRE_Int s_start = S_diag_i[i];
+               if (S_equals_A && s_start < S_diag_i[i + 1] && S_diag_j[s_start] == i)
                {
-                  A_FC_diag_j[d_count_FC] = fine_to_coarse[A_diag_j[jA]];
-                  A_FC_diag_data[d_count_FC++] = A_diag_data[jA++];
+                  s_start++;
                }
-               else
+               for (j = s_start; j < S_diag_i[i + 1]; j++)
                {
-                  A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
-                  A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
+                  /* Start search after diagonal if it exists, otherwise from the first entry */
+                  jA = A_diag_i[i];
+                  if (jA < A_diag_i[i + 1] && A_diag_j[jA] == i)
+                  {
+                     jA++;  /* Skip diagonal */
+                  }
+                  jS = S_diag_j[j];
+                  while (A_diag_j[jA] != jS) { jA++; }
+                  if (CF_marker[S_diag_j[j]] > 0)
+                  {
+                     A_FC_diag_j[d_count_FC] = fine_to_coarse[A_diag_j[jA]];
+                     A_FC_diag_data[d_count_FC++] = A_diag_data[jA++];
+                  }
+                  else
+                  {
+                     A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
+                     A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
+                  }
                }
             }
             A_FF_diag_i[row] = d_count_FF;
