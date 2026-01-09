@@ -441,7 +441,10 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
 
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDevice();
+   if (hypre_GetExecPolicy1(hypre_StructMatrixMemoryLocation(smatrix)) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SyncDevice();
+   }
 #endif
 
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
