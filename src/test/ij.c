@@ -609,8 +609,10 @@ main( hypre_int argc,
       return 0;
    }
 
+#if !defined(HYPRE_USING_UMPIRE_HOST)
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
+#endif
 
    HYPRE_Initialize();
 
@@ -619,10 +621,12 @@ main( hypre_int argc,
       HYPRE_DeviceInitialize();
    }
 
+#if !defined(HYPRE_USING_UMPIRE_HOST)
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", comm);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+#endif
 
    /* default execution policy and memory space */
 #if defined(HYPRE_TEST_USING_HOST)

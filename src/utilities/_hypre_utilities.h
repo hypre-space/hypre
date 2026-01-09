@@ -111,6 +111,7 @@ extern "C++"
 #include "umpire/config.hpp"
 #if UMPIRE_VERSION_MAJOR >= 2022
 #include "umpire/interface/c_fortran/umpire.h"
+//#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool_untracked
 #define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool
 #else
 #include "umpire/interface/umpire.h"
@@ -126,51 +127,53 @@ typedef void (*GPUMfreeFunc)(void *);
 
 typedef struct
 {
-   HYPRE_Int              log_level;
-   HYPRE_Int              log_level_saved;
-   HYPRE_Int              hypre_error;
-   HYPRE_MemoryLocation   memory_location;
-   HYPRE_ExecutionPolicy  default_exec_policy;
+   HYPRE_Int               log_level;
+   HYPRE_Int               log_level_saved;
+   HYPRE_Int               hypre_error;
+   HYPRE_MemoryLocation    memory_location;
+   HYPRE_ExecutionPolicy   default_exec_policy;
 
    /* the device buffers needed to do MPI communication for struct comm */
-   HYPRE_Complex         *struct_comm_recv_buffer;
-   HYPRE_Complex         *struct_comm_send_buffer;
-   HYPRE_Int              struct_comm_recv_buffer_size;
-   HYPRE_Int              struct_comm_send_buffer_size;
+   HYPRE_Complex          *struct_comm_recv_buffer;
+   HYPRE_Complex          *struct_comm_send_buffer;
+   HYPRE_Int               struct_comm_recv_buffer_size;
+   HYPRE_Int               struct_comm_send_buffer_size;
 
    /* GPU MPI */
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int              use_gpu_aware_mpi;
+   HYPRE_Int               use_gpu_aware_mpi;
 #endif
 
 #if defined(HYPRE_USING_GPU)
-   hypre_DeviceData      *device_data;
-   HYPRE_Int              device_gs_method; /* device G-S options */
+   hypre_DeviceData       *device_data;
+   HYPRE_Int               device_gs_method; /* device G-S options */
 #endif
 
    /* user malloc/free function pointers */
-   GPUMallocFunc          user_device_malloc;
-   GPUMfreeFunc           user_device_free;
+   GPUMallocFunc           user_device_malloc;
+   GPUMfreeFunc            user_device_free;
 
 #if defined(HYPRE_USING_UMPIRE)
-   char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
-   char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
-   char                   umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
-   char                   umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
-   size_t                 umpire_device_pool_size;
-   size_t                 umpire_um_pool_size;
-   size_t                 umpire_host_pool_size;
-   size_t                 umpire_pinned_pool_size;
-   size_t                 umpire_block_size;
-   HYPRE_Int              own_umpire_device_pool;
-   HYPRE_Int              own_umpire_um_pool;
-   HYPRE_Int              own_umpire_host_pool;
-   HYPRE_Int              own_umpire_pinned_pool;
-   umpire_resourcemanager umpire_rm;
+   char                    umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                    umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                    umpire_host_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   char                    umpire_pinned_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
+   size_t                  umpire_device_pool_size;
+   size_t                  umpire_um_pool_size;
+   size_t                  umpire_host_pool_size;
+   size_t                  umpire_pinned_pool_size;
+   size_t                  umpire_block_size;
+   HYPRE_Int               own_umpire_device_pool;
+   HYPRE_Int               own_umpire_um_pool;
+   HYPRE_Int               own_umpire_host_pool;
+   HYPRE_Int               own_umpire_pinned_pool;
+   umpire_resourcemanager  umpire_rm;
+   umpire_allocator        umpire_host_pool_allocator;
+   HYPRE_Int               has_umpire_host_pool_allocator;
 #endif
 
 #if defined(HYPRE_USING_MAGMA)
-   magma_queue_t          magma_queue;
+   magma_queue_t           magma_queue;
 #endif
 } hypre_Handle;
 
@@ -237,6 +240,8 @@ typedef struct
 #define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+#define hypre_HandleUmpireHostPoolAllocator(hypre_handle)        ((hypre_handle) -> umpire_host_pool_allocator)
+#define hypre_HandleHasUmpireHostPoolAllocator(hypre_handle)     ((hypre_handle) -> has_umpire_host_pool_allocator)
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 

@@ -1647,15 +1647,20 @@ HYPRE_Int
 hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
 {
    hypre_Handle *handle = hypre_handle();
-   const char *resource_name = "HOST";
+   const char *resource_name = "HOST::NOTRACK";
+   //const char *resource_name = "HOST";
    const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
-   umpire_allocator pooled_allocator;
+   umpire_allocator *pooled_allocator_ptr = &hypre_HandleUmpireHostPoolAllocator(handle);
 
    if ( umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name) )
    {
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
+      if (!hypre_HandleHasUmpireHostPoolAllocator(handle))
+      {
+         umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, pooled_allocator_ptr);
+         hypre_HandleHasUmpireHostPoolAllocator(handle) = 1;
+      }
    }
    else
    {
@@ -1663,11 +1668,12 @@ hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpireHostPoolSize(handle),
-                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+                                                       hypre_HandleUmpireBlockSize(handle), pooled_allocator_ptr);
       hypre_HandleOwnUmpireHostPool(handle) = 1;
+      hypre_HandleHasUmpireHostPoolAllocator(handle) = 1;
    }
 
-   *ptr = umpire_allocator_allocate(&pooled_allocator, nbytes);
+   *ptr = umpire_allocator_allocate(pooled_allocator_ptr, nbytes);
 
    return hypre_error_flag;
 }
@@ -1681,14 +1687,17 @@ hypre_umpire_host_pooled_free(void *ptr)
 {
    hypre_Handle *handle = hypre_handle();
    const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
-   umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
 
    hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
 
-   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
-   umpire_allocator_deallocate(&pooled_allocator, ptr);
+   if (!hypre_HandleHasUmpireHostPoolAllocator(handle))
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &hypre_HandleUmpireHostPoolAllocator(handle));
+      hypre_HandleHasUmpireHostPoolAllocator(handle) = 1;
+   }
+   umpire_allocator_deallocate(&hypre_HandleUmpireHostPoolAllocator(handle), ptr);
 
    return hypre_error_flag;
 }
@@ -1702,14 +1711,18 @@ hypre_umpire_host_pooled_realloc(void *ptr, size_t size)
 {
    hypre_Handle *handle = hypre_handle();
    const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
-   umpire_allocator pooled_allocator;
 
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(handle);
 
    hypre_assert(umpire_resourcemanager_is_allocator_name(rm_ptr, pool_name));
 
-   umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &pooled_allocator);
-   ptr = umpire_resourcemanager_reallocate_with_allocator(rm_ptr, ptr, size, pooled_allocator);
+   if (!hypre_HandleHasUmpireHostPoolAllocator(handle))
+   {
+      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &hypre_HandleUmpireHostPoolAllocator(handle));
+      hypre_HandleHasUmpireHostPoolAllocator(handle) = 1;
+   }
+   ptr = umpire_resourcemanager_reallocate_with_allocator(
+      rm_ptr, ptr, size, hypre_HandleUmpireHostPoolAllocator(handle));
 
    return ptr;
 }
@@ -1926,6 +1939,9 @@ hypre_UmpireInit(hypre_Handle *hypre_handle_)
    hypre_HandleOwnUmpireHostPool(hypre_handle_)   = 0;
    hypre_HandleOwnUmpirePinnedPool(hypre_handle_) = 0;
 
+   /* Cached allocator handle not yet initialized */
+   hypre_HandleHasUmpireHostPoolAllocator(hypre_handle_) = 0;
+
    return hypre_error_flag;
 }
 
@@ -1939,12 +1955,25 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
    umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(hypre_handle_);
    umpire_allocator allocator;
 
+   /* Print summary for everything, without per-allocation records */
+   umpire_print_allocator_statistics(NULL, false);
+
 #if defined(HYPRE_USING_UMPIRE_HOST)
    if (hypre_HandleOwnUmpireHostPool(hypre_handle_))
    {
       const char *pool_name = hypre_HandleUmpireHostPoolName(hypre_handle_);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      umpire_allocator_release(&allocator);
+      if (hypre_HandleHasUmpireHostPoolAllocator(hypre_handle_))
+      {
+         umpire_allocator_release(&hypre_HandleUmpireHostPoolAllocator(hypre_handle_));
+         umpire_allocator_delete(&hypre_HandleUmpireHostPoolAllocator(hypre_handle_));
+         hypre_HandleHasUmpireHostPoolAllocator(hypre_handle_) = 0;
+      }
+      else
+      {
+         umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
+         umpire_allocator_release(&allocator);
+         umpire_allocator_delete(&allocator);
+      }
    }
 #endif
 
@@ -2003,9 +2032,18 @@ hypre_UmpireMemoryGetUsage(HYPRE_Real *memory)
    if (hypre_HandleOwnUmpireHostPool(handle))
    {
       const char *pool_name = hypre_HandleUmpireHostPoolName(handle);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      memoryB[0] = umpire_allocator_get_current_size(&allocator);
-      memoryB[1] = umpire_allocator_get_high_watermark(&allocator);
+      if (hypre_HandleHasUmpireHostPoolAllocator(handle))
+      {
+         memoryB[0] = umpire_allocator_get_current_size(&hypre_HandleUmpireHostPoolAllocator(handle));
+         memoryB[1] = umpire_allocator_get_high_watermark(&hypre_HandleUmpireHostPoolAllocator(handle));
+      }
+      else
+      {
+         umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
+         memoryB[0] = umpire_allocator_get_current_size(&allocator);
+         memoryB[1] = umpire_allocator_get_high_watermark(&allocator);
+         umpire_allocator_delete(&allocator);
+      }
    }
 #endif
 
