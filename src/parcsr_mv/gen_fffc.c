@@ -299,7 +299,11 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
          if (CF_marker[i] < 0)
          {
             row++;
-            d_count_FF++; /* account for diagonal element */
+            /* account for diagonal element if it exists */
+            if (A_diag_i[i] < A_diag_i[i + 1] && A_diag_j[A_diag_i[i]] == i)
+            {
+               d_count_FF++;
+            }
             for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
@@ -381,9 +385,13 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
          {
             HYPRE_Int jS, jA;
             row++;
+            /* copy diagonal element if it exists */
             jA = A_diag_i[i];
-            A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
-            A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
+            if (jA < A_diag_i[i + 1] && A_diag_j[jA] == i)
+            {
+               A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
+               A_FF_diag_data[d_count_FF++] = A_diag_data[jA];
+            }
             for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
             {
                jA = A_diag_i[i] + 1;
