@@ -415,7 +415,7 @@ HYPRE_Initialize(void)
    hypre_MagmaInitialize();
 #endif
 
-#if defined(__linux__) && defined(HYPRE_USING_FPE_TRAP) && !defined(HYPRE_LONG_DOUBLE) && !defined(HYPRE_USING_SYCL)
+#if defined(__linux__) && defined(HYPRE_USING_FPE_TRAP) && !defined(HYPRE_LONG_DOUBLE)
    feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
 #endif
 
