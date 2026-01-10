@@ -12,12 +12,12 @@ case $1 in
       cat <<EOF
 
    **** Only run this script on Aurora nodes                      ****
-   **** Successful regressions with default software env          ****
-   **** as of 1/8/2026                                            ****
+   **** Successful regressions as of 1/9/2026 with oneAPI 2025.3. ****
    **** Test with:                                                ****
-   ****     export SYCL_CACHE_PERSISTENT=1                        ****
-   ****     export SYCL_CACHE_THRESHOLD=0                         ****
-   **** WM: todo - do I still need custom oneDPL?                 ****
+   **** module use /soft/compilers/oneapi/2025.3.0/modulefiles    ****
+   **** module load oneapi/public/2025.3.0                        ****
+   **** export SYCL_CACHE_PERSISTENT=1                            ****
+   **** export SYCL_CACHE_THRESHOLD=0                             ****
 
    $0 [-h|-help] {src_dir}
 

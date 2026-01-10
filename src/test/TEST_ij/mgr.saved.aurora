@@ -4,7 +4,7 @@ Final Relative Residual Norm = 1.613351e-09
 
 # Output file: mgr.out.201
 MGR Iterations = 9
-Final Relative Residual Norm = 2.410069e-09
+Final Relative Residual Norm = 2.410068e-09
 
 # Output file: mgr.out.202
 MGR Iterations = 9
@@ -12,7 +12,7 @@ Final Relative Residual Norm = 1.613351e-09
 
 # Output file: mgr.out.203
 MGR Iterations = 9
-Final Relative Residual Norm = 2.410069e-09
+Final Relative Residual Norm = 2.410068e-09
 
 # Output file: mgr.out.204
 MGR Iterations = 75
@@ -32,7 +32,7 @@ Final Relative Residual Norm = 5.974190e-09
 
 # Output file: mgr.out.208
 MGR Iterations = 48
-Final Relative Residual Norm = 9.704666e-09
+Final Relative Residual Norm = 9.704665e-09
 
 # Output file: mgr.out.209
 MGR Iterations = 47
