@@ -189,6 +189,8 @@ jobs:
 
       - name: Check headers
         working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
         run: |
           SRC_DIR="${{ github.workspace }}/src"
           ./test.sh check-headers.sh "$SRC_DIR"
