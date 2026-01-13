@@ -76,7 +76,8 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 
    size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
    num_vectors = hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector));
-   array_data = hypre_CTAlloc(HYPRE_Complex, (n * size * num_vectors), memory_location);
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   array_data = hypre_CTAlloc(HYPRE_Complex, ((size_t)n * (size_t)size * (size_t)num_vectors), memory_location);
    new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
