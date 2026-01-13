@@ -315,7 +315,8 @@ hypre_SeqVectorInitialize_v2( hypre_Vector         *vector,
    if (!hypre_VectorData(vector))
    {
       /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, (size_t)num_vectors * (size_t)size, memory_location);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, (size_t)num_vectors * (size_t)size,
+                                               memory_location);
    }
 
    return hypre_error_flag;

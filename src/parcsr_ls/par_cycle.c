@@ -367,7 +367,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_GpuProfilingPopRange();
       }
 #ifdef HYPRE_USING_DSUPERLU
-      else if (cycle_param == 3 && hypre_ParAMGDataCoarseSolver(amg_data) != NULL)
+      else if (cycle_param == 3 && hypre_ParAMGDataDSLUSolver(amg_data) != NULL)
       {
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          hypre_GpuProfilingPushRange("Coarse solve");
