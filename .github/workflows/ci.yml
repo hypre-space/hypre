@@ -100,15 +100,6 @@ jobs:
             git diff --name-only -- '*.c' '*.h' '*.hpp'
             exit 1
           fi
-
-          # Check if any header files were generated/modified
-          if ! git diff --exit-code -- '*_hypre*.h'; then
-            echo "::warning::Generated header files were modified."
-            echo "::warning::These may need to be committed if they are expected changes."
-            echo "::warning::Modified header files:"
-            git diff --name-only -- '*_hypre*.h'
-          fi
-
           echo "Code formatting check passed"
 
       - name: Check mixed-precision code
