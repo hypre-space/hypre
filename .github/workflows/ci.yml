@@ -71,8 +71,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libopenmpi-dev openmpi-bin astyle autoconf automake libtool build-essential
 
-      - name: Verify astyle version
+      - name: Check code formatting
+        working-directory: src
         run: |
+          # Configure git to recognize the workspace
+          git config --global --add safe.directory ${{ github.workspace }}
+
+          # Check astyle version
           ASTYLE_VERSION="Artistic Style Version 3.1"
           INSTALLED_VERSION=$(astyle --version)
           if [ "$INSTALLED_VERSION" != "$ASTYLE_VERSION" ]; then
@@ -81,12 +86,6 @@ jobs:
           else
             echo "astyle version: $INSTALLED_VERSION"
           fi
-
-      - name: Check code formatting
-        working-directory: src
-        run: |
-          # Configure git to recognize the workspace
-          git config --global --add safe.directory ${{ github.workspace }}
 
           # Run astyle-apply.sh to check and apply formatting
           # This will modify files in place if formatting is needed
@@ -126,6 +125,7 @@ jobs:
             exit 1
           fi
           echo "Mixed-precision code check passed"
+          ./mup_clean
 
       - name: Check license headers
         working-directory: AUTOTEST
