@@ -95,20 +95,20 @@ jobs:
           # Check if any source files were modified (formatting changes)
           if ! git diff --exit-code -- '*.c' '*.h' '*.cc' '*.cpp' '*.cxx' '*.C' '*.hpp' '*.hxx' '*.H'; then
             echo "::error::Code formatting check failed. Some source files need formatting."
-            echo "::error::Modified files:"
-            git diff --name-only -- '*.c' '*.h' '*.cc' '*.cpp' '*.cxx' '*.C' '*.hpp' '*.hxx' '*.H'
-            echo ""
             echo "::error::Run './config/astyle-apply.sh .' from the src directory to fix formatting issues."
             echo "::error::Then commit the formatted files."
+            echo "::error::Modified files:"
+            git diff --name-only -- '*.c' '*.h' '*.cc' '*.cpp' '*.cxx' '*.C' '*.hpp' '*.hxx' '*.H'
             exit 1
           fi
 
           # Check if any header files were generated/modified
           if ! git diff --exit-code -- '*_hypre*.h'; then
             echo "::warning::Generated header files were modified."
+            echo "::warning::These may need to be committed if they are expected changes."
             echo "::warning::Modified header files:"
             git diff --name-only -- '*_hypre*.h'
-            echo "::warning::These may need to be committed if they are expected changes."
+
           fi
 
           echo "Code formatting check passed"
@@ -126,3 +126,87 @@ jobs:
             exit 1
           fi
           echo "Mixed-precision code check passed"
+
+      - name: Check license headers
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-license.sh "$SRC_DIR/.."
+          if [ -s check-license.err ]; then
+            echo "::error::License header check failed"
+            cat check-license.err
+            exit 1
+          fi
+          echo "License header check passed"
+
+      - name: Check integer usage
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-int.sh "$SRC_DIR"
+          if [ -s check-int.err ]; then
+            echo "::error::Integer usage check failed"
+            cat check-int.err
+            exit 1
+          fi
+          echo "Integer usage check passed"
+
+      - name: Check double usage
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-double.sh "$SRC_DIR"
+          if [ -s check-double.err ]; then
+            echo "::error::Double usage check failed"
+            cat check-double.err
+            exit 1
+          fi
+          echo "Double usage check passed"
+
+      - name: Check MPI usage
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-mpi.sh "$SRC_DIR"
+          if [ -s check-mpi.err ]; then
+            echo "::error::MPI usage check failed"
+            cat check-mpi.err
+            exit 1
+          fi
+          echo "MPI usage check passed"
+
+      - name: Check memory usage
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-mem.sh "$SRC_DIR"
+          if [ -s check-mem.err ]; then
+            echo "::error::Memory usage check failed"
+            cat check-mem.err
+            exit 1
+          fi
+          echo "Memory usage check passed"
+
+      - name: Check headers
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-headers.sh "$SRC_DIR"
+          if [ -s check-headers.err ]; then
+            echo "::error::Headers check failed"
+            cat check-headers.err
+            exit 1
+          fi
+          echo "Headers check passed"
+
+      - name: Check case-insensitive filenames
+        working-directory: AUTOTEST
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-case.sh "$SRC_DIR/.."
+          if [ -s check-case.err ]; then
+            echo "::error::Case-insensitive filename check failed"
+            cat check-case.err
+            exit 1
+          fi
+          echo "Case-insensitive filename check passed"
