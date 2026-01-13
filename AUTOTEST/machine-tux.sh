@@ -61,7 +61,7 @@ mv -f check-case.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
+ro="-unit -ams -ij -sstruct -sstructmat -struct -structmat -lobpcg"
 eo=""
 
 co=""
