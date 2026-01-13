@@ -375,7 +375,7 @@ HYPRE_DeviceInitialize(void)
       {
          hypre_HandleDeviceUVM(handle) = 1;
       }
-  }
+   }
 
 #endif
 

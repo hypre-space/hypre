@@ -1264,7 +1264,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
             {
-               if (Frelax_type[lev] == 2 && aff_solver[lev] && ((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
+               if (Frelax_type[lev] == 2 && aff_solver[lev] &&
+                   ((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
                {
                   if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                   {
