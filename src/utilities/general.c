@@ -363,18 +363,20 @@ HYPRE_DeviceInitialize(void)
    hypre_CudaCompileFlagCheck();
 #endif
 
-#if defined(HYPRE_USING_DEVICE_POOL)
-   /* Keep this check here at the end of HYPRE_Initialize()
-    * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
-    * otherwise users are not able to set all the parameters
-    */
-   if ( hypre_HandleCubDevAllocator(handle) ||
-        hypre_HandleCubUvmAllocator(handle) )
+   /* Check if OS supports UVM */
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_UNIFIED_MEMORY)
    {
-      char msg[256];
-      hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
-      hypre_error_w_msg(-1, msg);
+      struct cudaDeviceProp deviceProp;
+
+      HYPRE_CUDA_CALL( cudaGetDevice(&device_id) );
+      HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, device_id) );
+
+      if (deviceProp.managedMemory == 1 && deviceProp.concurrentManagedAccess == 1)
+      {
+         hypre_HandleDeviceUVM(handle) = 1;
+      }
    }
+
 #endif
 
 #endif /* if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */

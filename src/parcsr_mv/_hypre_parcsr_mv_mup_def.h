@@ -199,6 +199,7 @@
 #define hypre_ParCSRMatrixRAPKTHost HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixRAPKTHost )
 #define hypre_ParCSRMatrixRead HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixRead )
 #define hypre_ParCSRMatrixReadIJ HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixReadIJ )
+#define hypre_ParCSRMatrixRef HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixRef )
 #define hypre_ParCSRMatrixReorder HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixReorder )
 #define hypre_ParCSRMatrixRestoreRow HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixRestoreRow )
 #define hypre_ParCSRMatrixScale HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixScale )

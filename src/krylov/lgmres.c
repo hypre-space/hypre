@@ -20,24 +20,22 @@
 
 hypre_LGMRESFunctions *
 hypre_LGMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToCreateVectorArray  CreateVectorArray,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_LGMRESFunctions * lgmres_functions;
@@ -227,7 +225,7 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    HYPRE_Int            k_dim            = (lgmres_data -> k_dim);
    HYPRE_Int            max_iter         = (lgmres_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (lgmres_functions->precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (lgmres_functions->precond_setup);
    void          *precond_data     = (lgmres_data -> precond_data);
 
    HYPRE_Int            rel_change       = (lgmres_data -> rel_change);
@@ -356,7 +354,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    HYPRE_Real      tmp_norm, r_norm_last;
    /*---*/
 
-   HYPRE_Int              (*precond)(void*, void*, void*, void*)   = (lgmres_functions -> precond);
+   hypre_KrylovPtrToPrecond precond      = (lgmres_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(lgmres_data -> precond_data);
 
    HYPRE_Int             print_level    = (lgmres_data -> print_level);
@@ -1174,8 +1172,8 @@ hypre_LGMRESGetStopCrit( void   *lgmres_vdata,
 
 HYPRE_Int
 hypre_LGMRESSetPrecond( void  *lgmres_vdata,
-                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                        hypre_KrylovPtrToPrecond precond,
+                        hypre_KrylovPtrToPrecondSetup precond_setup,
                         void  *precond_data )
 {
    hypre_LGMRESData *lgmres_data = (hypre_LGMRESData *)lgmres_vdata;
