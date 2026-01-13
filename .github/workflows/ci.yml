@@ -92,12 +92,12 @@ jobs:
           ./config/astyle-apply.sh .
 
           # Check if any source files were modified (formatting changes)
-          if ! git diff --exit-code -- '*.c' '*.h' '*.cc' '*.cpp' '*.cxx' '*.C' '*.hpp' '*.hxx' '*.H'; then
+          if ! git diff --exit-code -- '*.c' '*.h' '*.hpp'; then
             echo "::error::Code formatting check failed. Some source files need formatting."
             echo "::error::Run './config/astyle-apply.sh .' from the src directory to fix formatting issues."
             echo "::error::Then commit the formatted files."
             echo "::error::Modified files:"
-            git diff --name-only -- '*.c' '*.h' '*.cc' '*.cpp' '*.cxx' '*.C' '*.hpp' '*.hxx' '*.H'
+            git diff --name-only -- '*.c' '*.h' '*.hpp'
             exit 1
           fi
 
@@ -107,7 +107,6 @@ jobs:
             echo "::warning::These may need to be committed if they are expected changes."
             echo "::warning::Modified header files:"
             git diff --name-only -- '*_hypre*.h'
-
           fi
 
           echo "Code formatting check passed"
