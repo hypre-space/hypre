@@ -518,7 +518,7 @@ do
          ;;
       -valgrind)
          shift
-         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all"
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=full --track-origins=yes --show-reachable=yes"
          ;;
       -cudamemcheck)
          shift

@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 /* Disable OpenMP support in this source file due to issues with box loop reduction */
+#include "_hypre_onedpl.hpp"
 #include "HYPRE_config.h"
 #if defined (HYPRE_USING_OPENMP)
 #define OMP0
@@ -100,7 +101,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
    /* Set up unstructured interpolation component */
    if (interp_type >= 0)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          /* Get nonzero rows of A_u (that is, all rows with nonzeros in diag or offd) */
@@ -114,6 +115,17 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
          }
          max_num_rownnz = hypre_CSRMatrixNumRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_uo);
          nonzero_rows   = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL(std::merge,
+                           hypre_CSRMatrixRownnz(A_ud),
+                           hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
+                           hypre_CSRMatrixRownnz(A_uo),
+                           hypre_CSRMatrixRownnz(A_uo) + hypre_CSRMatrixNumRownnz(A_uo),
+                           nonzero_rows);
+         nonzero_rows_end = HYPRE_ONEDPL_CALL(std::unique,
+                                              nonzero_rows,
+                                              nonzero_rows + max_num_rownnz);
+#else
          HYPRE_THRUST_CALL(merge,
                            hypre_CSRMatrixRownnz(A_ud),
                            hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
@@ -123,6 +135,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
          nonzero_rows_end = HYPRE_THRUST_CALL(unique,
                                               nonzero_rows,
                                               nonzero_rows + max_num_rownnz);
+#endif // defined(HYPRE_USING_SYCL)
       }
 #endif
 
@@ -190,12 +203,21 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   }
                   hypre_BoxLoop1End(ii);
 
-#if defined(HYPRE_USING_SYCL)
-                  /* WM: todo - sycl */
-#else
                   /* Get the nonzero rows for this box */
                   box_nnzrows     = hypre_TAlloc(HYPRE_Int, vol,
                                                  HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+                  box_nnzrows_end = HYPRE_ONEDPL_CALL(std::copy_if,
+                                                      nonzero_rows,
+                                                      nonzero_rows_end,
+                                                      box_nnzrows,
+                                                      in_range<HYPRE_Int>(offset, offset + vol));
+                  HYPRE_ONEDPL_CALL(std::transform,
+                                    box_nnzrows,
+                                    box_nnzrows_end,
+                                    box_nnzrows,
+                  [const_val = offset] (const auto & x) {return x - const_val;} );
+#else
                   box_nnzrows_end = HYPRE_THRUST_CALL(copy_if,
                                                       nonzero_rows,
                                                       nonzero_rows_end,
@@ -207,6 +229,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                                     thrust::make_constant_iterator(offset),
                                     box_nnzrows,
                                     thrust::minus<HYPRE_Int>());
+#endif // defined(HYPRE_USING_SYCL)
                   num_indices = box_nnzrows_end - box_nnzrows;
 
                   for (j = 0; j < ndim; j++)
@@ -218,11 +241,18 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   /* Gather indices at non-zero rows of A_u */
                   for (j = 0; j < ndim; j++)
                   {
+#if defined(HYPRE_USING_SYCL)
+                     hypreSycl_gather(box_nnzrows,
+                                      box_nnzrows_end,
+                                      all_indices[j],
+                                      indices[j]);
+#else
                      HYPRE_THRUST_CALL(gather,
                                        box_nnzrows,
                                        box_nnzrows_end,
                                        all_indices[j],
                                        indices[j]);
+#endif // defined(HYPRE_USING_SYCL)
                   }
 
                   /* Free memory */
@@ -232,7 +262,6 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   }
                   hypre_TFree(box_nnzrows, HYPRE_MEMORY_DEVICE);
 
-#endif // defined(HYPRE_USING_SYCL)
                }
                else
 #endif // defined(HYPRE_USING_GPU)

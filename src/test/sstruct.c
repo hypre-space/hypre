@@ -446,7 +446,7 @@ ReadData( MPI_Comm      comm,
       s = 0;
       while (sdata_line != NULL)
       {
-         sdata_size += strlen(sdata_line) + 1;
+         sdata_size += (HYPRE_Int) (strlen(sdata_line) + 1);
 
          /* allocate more space, if necessary */
          if ((sdata_size + maxline) > s)
@@ -2163,7 +2163,7 @@ SetCosineVector(HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * hypre_cos((i + j + k) / 10.0);
+            values[count] = scale * hypre_cos((HYPRE_Real)(i + j + k) / 10.0);
             count++;
          }
       }
@@ -2713,7 +2713,11 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int                spgemm_use_vendor   = 1;
+#else
    HYPRE_Int                spgemm_use_vendor   = 0;
+#endif
    HYPRE_Int                spmv_use_vendor     = 0;
    HYPRE_Int                gpu_aware_mpi       = 0;
 #endif
@@ -4276,7 +4280,7 @@ main( hypre_int argc,
                      pdata = data.pdata[part];
                      for (var = 0; var < pdata.nvars; var++)
                      {
-                        scale = (part + 1.0) * (var + 1.0);
+                        scale = ((HYPRE_Real) part + 1.0) * ((HYPRE_Real) var + 1.0);
                         for (box = 0; box < pdata.nboxes; box++)
                         {
                            /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],

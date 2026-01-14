@@ -1745,8 +1745,8 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
    HYPRE_Int *offd_j = hypre_CSRMatrixJ(offd);
    HYPRE_Real *offd_data = hypre_CSRMatrixData(offd);
 
-   HYPRE_Int num_cols_B, num_nonzeros;
-   HYPRE_Int num_rows_B_ext;
+   HYPRE_BigInt num_cols_B;
+   HYPRE_Int num_rows_B_ext, num_nonzeros;
 
    hypre_CSRMatrix *B_ext;
 
@@ -1789,7 +1789,7 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
      skip_fine, skip_same_sign
    );
 
-   B_ext = hypre_CSRMatrixCreate(num_rows_B_ext, num_cols_B, num_nonzeros);
+   B_ext = hypre_CSRMatrixCreate(num_rows_B_ext, (HYPRE_Int) num_cols_B, num_nonzeros);
    hypre_CSRMatrixMemoryLocation(B_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(B_ext) = B_ext_i;
    hypre_CSRMatrixBigJ(B_ext) = B_ext_j;
@@ -2130,6 +2130,7 @@ hypre_ParCSRMatrixTransposeHost( hypre_ParCSRMatrix  *A,
    local_num_cols_AT = (HYPRE_Int)(col_starts_AT[1] - first_col_diag_AT);
 
    AT = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(AT) = 1;
    hypre_ParCSRMatrixComm(AT) = comm;
    hypre_ParCSRMatrixDiag(AT) = AT_diag;
    hypre_ParCSRMatrixOffd(AT) = AT_offd;
@@ -4021,6 +4022,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    local_num_cols = (HYPRE_Int)(col_starts_B[1] - first_col_diag);
 
    C = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(C) = 1;
    hypre_ParCSRMatrixComm(C) = comm;
    hypre_ParCSRMatrixGlobalNumRows(C) = ncols_A;
    hypre_ParCSRMatrixGlobalNumCols(C) = ncols_B;
@@ -5087,7 +5089,9 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    }
 
    /* create A_ext */
-   A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
+   A_ext = hypre_CSRMatrixCreate(num_rows_recv,
+                                 (HYPRE_Int) hypre_ParCSRMatrixGlobalNumCols(A),
+                                 num_nnz_recv);
    hypre_CSRMatrixMemoryLocation(A_ext) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI   (A_ext) = recv_i;
    hypre_CSRMatrixBigJ(A_ext) = recv_j;

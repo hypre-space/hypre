@@ -1389,10 +1389,14 @@ HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix *A, HYPR
 HYPRE_Int hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker, HYPRE_Int size );
 
 #ifdef HYPRE_USING_DSUPERLU
-/* superlu.c */
-HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level);
-HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x);
-HYPRE_Int hypre_SLUDistDestroy( void* solver);
+/* dsuperlu.c */
+void *hypre_SLUDistCreate( void );
+HYPRE_Int hypre_SLUDistSetPrintLevel( void *solver, HYPRE_Int print_level );
+HYPRE_Int hypre_SLUDistSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistDestroy( void *solver );
 #endif
 
 /* par_mgr.c */
@@ -1525,14 +1529,13 @@ HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetLevelPMaxElmts( void *mgr_vdata, HYPRE_Int *P_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRDataPrint(void *mgr_vdata);
-#ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
 HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
-#endif
+
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
@@ -1583,7 +1586,8 @@ HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMa
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                            HYPRE_Int blk_dim, hypre_ParCSRMatrix **Wr_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
-HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+HYPRE_Int hypre_MGRColLumpedRestrict(HYPRE_Int colsum_type,
+                                     hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                      hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr);
 
@@ -1626,6 +1630,7 @@ HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
 HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );
+const char* hypre_ILUGetName( void *ilu_vdata );
 HYPRE_Int hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil );
 HYPRE_Int hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax );
 HYPRE_Int hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold );
@@ -2096,10 +2101,10 @@ HYPRE_Int hypre_BoomerAMGDD_MarkCoarse ( HYPRE_Int *list, HYPRE_Int *marker,
                                          HYPRE_Int num_owned, HYPRE_Int total_num_nodes, HYPRE_Int num_owned_coarse, HYPRE_Int list_size,
                                          HYPRE_Int dist, HYPRE_Int use_sort, HYPRE_Int *nodes_to_add );
 HYPRE_Int hypre_BoomerAMGDD_UnpackRecvBuffer ( hypre_ParAMGDDData *amgdd_data,
-                                               HYPRE_Int *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size,
+                                               HYPRE_BigInt *recv_buffer, HYPRE_Int **A_tmp_info, HYPRE_Int *recv_map_send_buffer_size,
                                                HYPRE_Int *nodes_added_on_level, HYPRE_Int current_level, HYPRE_Int buffer_number );
-HYPRE_Int* hypre_BoomerAMGDD_PackSendBuffer ( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
-                                              HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
+HYPRE_BigInt* hypre_BoomerAMGDD_PackSendBuffer ( hypre_ParAMGDDData *amgdd_data, HYPRE_Int proc,
+                                                 HYPRE_Int current_level, HYPRE_Int *padding, HYPRE_Int *send_flag_buffer_size );
 HYPRE_Int hypre_BoomerAMGDD_PackRecvMapSendBuffer ( HYPRE_Int *recv_map_send_buffer,
                                                     HYPRE_Int **recv_red_marker, HYPRE_Int *num_recv_nodes, HYPRE_Int *recv_buffer_size,
                                                     HYPRE_Int current_level, HYPRE_Int num_levels );

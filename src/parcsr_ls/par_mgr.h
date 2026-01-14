@@ -47,7 +47,7 @@ typedef struct
 
    hypre_ParVector     **F_fine_array;
    hypre_ParVector     **U_fine_array;
-   HYPRE_Solver        **aff_solver;
+   HYPRE_Solver         *aff_solver;
    HYPRE_Int           (*fine_grid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int           (*fine_grid_solver_solve)(void*, void*, void*, void*);
 
@@ -241,7 +241,7 @@ typedef struct
 #define hypre_ParMGRDataFRelaxType(data)            ((data) -> Frelax_type)
 #define hypre_ParMGRDataFRelaxTypeI(data, i)        ((data) -> Frelax_type[i])
 #define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver)
-#define hypre_ParMGRDataAFFsolverI(data)            ((data) -> aff_solver[i])
+#define hypre_ParMGRDataAFFsolverI(data, i)         ((data) -> aff_solver[i])
 
 #define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> coarse_grid_method)
 #define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> coarse_grid_method[i])

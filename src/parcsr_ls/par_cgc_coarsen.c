@@ -926,7 +926,8 @@ hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
 {
    HYPRE_UNUSED_VAR(coarsen_type);
 
-   HYPRE_Int i,/* ii,ip,*/ j, jj, m, n, p;
+   HYPRE_Int i,/* ii,ip,*/ j, m, n, p;
+   HYPRE_BigInt jj;
    HYPRE_Int mpisize, mpirank;
 
    MPI_Comm comm = hypre_ParCSRMatrixComm(S);
@@ -991,8 +992,8 @@ hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
       }
       for (i = 0; i < num_sends; i++)
       {
-         int_buf_data[2 * i] = pointrange_start;
-         int_buf_data[2 * i + 1] = pointrange_end;
+         int_buf_data[2 * i] = (HYPRE_Int) pointrange_start;
+         int_buf_data[2 * i + 1] = (HYPRE_Int) pointrange_end;
          int_buf_data2[2 * i] = vertexrange_start;
          int_buf_data2[2 * i + 1] = vertexrange_end;
          hypre_MPI_Isend (int_buf_data + 2 * i, 2, HYPRE_MPI_INT, send_procs[i], tag_pointrange, comm,

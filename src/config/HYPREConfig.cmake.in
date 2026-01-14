@@ -6,16 +6,106 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+# Temporarily clear CMAKE_FIND_PACKAGE_NAME to avoid warning when FindPkgConfig
+# calls find_package_handle_standard_args internally
+set(_old_find_package_name_top "${CMAKE_FIND_PACKAGE_NAME}")
+unset(CMAKE_FIND_PACKAGE_NAME)
+include(FindPkgConfig)
+if(DEFINED _old_find_package_name_top)
+  set(CMAKE_FIND_PACKAGE_NAME "${_old_find_package_name_top}")
+else()
+  unset(CMAKE_FIND_PACKAGE_NAME)
+endif()
 
 function(find_hypre_dependency name)
   string(TOUPPER ${name} UPPER_NAME)
   if(HYPRE_ENABLE_${UPPER_NAME})
-    find_dependency(${name} REQUIRED HINTS ${HYPRE_DEPENDENCY_DIRS})
+    # 1) Try CMake package config non-fatally
+    find_package(${name} CONFIG QUIET HINTS ${HYPRE_DEPENDENCY_DIRS})
     if(${name}_FOUND)
-      message(STATUS "Found ${UPPER_NAME}: ${${name}_DIR}")
-    else()
-      message(FATAL_ERROR "${UPPER_NAME} not found.")
+      message(STATUS "Found ${UPPER_NAME} (CMake package).")
+      return()
     endif()
+
+    # 2) Fallback to pkg-config
+    # Note: FindPkgConfig is already included at the top level
+    set(_pc_name "${name}")
+    if("${UPPER_NAME}" STREQUAL "DSUPERLU")
+      set(_pc_name "superlu_dist")
+    endif()
+    if(DEFINED TPL_${UPPER_NAME}_PKGCONFIG_NAME)
+      set(_pc_name "${TPL_${UPPER_NAME}_PKGCONFIG_NAME}")
+    endif()
+
+    if(PKG_CONFIG_FOUND)
+      # Seed PKG_CONFIG_PATH from HYPRE_DEPENDENCY_DIRS
+      set(_old_pc_path "$ENV{PKG_CONFIG_PATH}")
+      set(_pc_hints)
+      foreach(_d IN LISTS HYPRE_DEPENDENCY_DIRS)
+        if(EXISTS "${_d}/pkgconfig")
+          list(APPEND _pc_hints "${_d}/pkgconfig")
+        endif()
+        get_filename_component(_parent "${_d}" DIRECTORY)
+        if(EXISTS "${_parent}/lib/pkgconfig")
+          list(APPEND _pc_hints "${_parent}/lib/pkgconfig")
+        endif()
+        if(EXISTS "${_parent}/lib64/pkgconfig")
+          list(APPEND _pc_hints "${_parent}/lib64/pkgconfig")
+        endif()
+        if(EXISTS "${_parent}/share/pkgconfig")
+          list(APPEND _pc_hints "${_parent}/share/pkgconfig")
+        endif()
+      endforeach()
+      list(REMOVE_DUPLICATES _pc_hints)
+      if(_pc_hints)
+        if(_old_pc_path)
+          set(ENV{PKG_CONFIG_PATH} "${_pc_hints}:$ENV{PKG_CONFIG_PATH}")
+        else()
+          set(ENV{PKG_CONFIG_PATH} "${_pc_hints}")
+        endif()
+      endif()
+
+      # Temporarily clear CMAKE_FIND_PACKAGE_NAME to avoid warning when pkg_check_modules
+      # calls find_package_handle_standard_args internally
+      set(_old_find_package_name "${CMAKE_FIND_PACKAGE_NAME}")
+      unset(CMAKE_FIND_PACKAGE_NAME)
+      pkg_check_modules(PC_${UPPER_NAME} QUIET ${_pc_name})
+      if(DEFINED _old_find_package_name)
+        set(CMAKE_FIND_PACKAGE_NAME "${_old_find_package_name}")
+      else()
+        unset(CMAKE_FIND_PACKAGE_NAME)
+      endif()
+
+      # Restore PKG_CONFIG_PATH
+      set(ENV{PKG_CONFIG_PATH} "${_old_pc_path}")
+
+      if(PC_${UPPER_NAME}_FOUND)
+        message(STATUS "Found ${UPPER_NAME} via pkg-config: ${_pc_name}")
+        # Ensure an imported target exists matching the link interface recorded at install time
+        if(NOT TARGET PkgConfig::PC_${UPPER_NAME})
+          add_library(PkgConfig::PC_${UPPER_NAME} INTERFACE IMPORTED)
+          # Prefer link flags if provided; otherwise use libraries
+          set(_pc_ll "${PC_${UPPER_NAME}_LDFLAGS}")
+          if(NOT _pc_ll AND PC_${UPPER_NAME}_LINK_LIBRARIES)
+            set(_pc_ll "${PC_${UPPER_NAME}_LINK_LIBRARIES}")
+          endif()
+          if(PC_${UPPER_NAME}_INCLUDE_DIRS)
+            set_target_properties(PkgConfig::PC_${UPPER_NAME}
+              PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${PC_${UPPER_NAME}_INCLUDE_DIRS}")
+          endif()
+          if(_pc_ll)
+            # It is OK if these contain full paths or -l/-L flags
+            set_target_properties(PkgConfig::PC_${UPPER_NAME}
+              PROPERTIES
+                INTERFACE_LINK_LIBRARIES "${_pc_ll}")
+          endif()
+        endif()
+        return()
+      endif()
+    endif()
+
+    message(FATAL_ERROR "${UPPER_NAME} not found (no CMake package or pkg-config entry).")
   endif()
 endfunction()
 
@@ -57,6 +147,7 @@ set(HYPRE_ENABLE_ROCSOLVER @HYPRE_ENABLE_ROCSOLVER@)
 set(HYPRE_ENABLE_ONEMKLSPARSE @HYPRE_ENABLE_ONEMKLSPARSE@)
 set(HYPRE_ENABLE_ONEMKLBLAS @HYPRE_ENABLE_ONEMKLBLAS@)
 set(HYPRE_ENABLE_ONEMKLRAND @HYPRE_ENABLE_ONEMKLRAND@)
+set(HYPRE_ENABLE_FPE_TRAP @HYPRE_ENABLE_FPE_TRAP@)
 set(HYPRE_BUILD_EXAMPLES @HYPRE_BUILD_EXAMPLES@)
 set(HYPRE_BUILD_TESTS @HYPRE_BUILD_TESTS@)
 set(HYPRE_ENABLE_DSUPERLU @HYPRE_ENABLE_DSUPERLU@)
@@ -81,6 +172,24 @@ endif()
 
 if(NOT HYPRE_ENABLE_HYPRE_LAPACK)
   find_dependency(LAPACK)
+endif()
+
+# Synthesize BLAS::BLAS if module only provided BLAS_LIBRARIES
+if(NOT HYPRE_ENABLE_HYPRE_BLAS)
+  if(NOT TARGET BLAS::BLAS AND DEFINED BLAS_LIBRARIES AND BLAS_LIBRARIES)
+    add_library(BLAS::BLAS INTERFACE IMPORTED)
+    set_target_properties(BLAS::BLAS PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}")
+  endif()
+endif()
+
+# Synthesize LAPACK::LAPACK if module only provided LAPACK_LIBRARIES
+if(NOT HYPRE_ENABLE_HYPRE_LAPACK)
+  if(NOT TARGET LAPACK::LAPACK AND DEFINED LAPACK_LIBRARIES AND LAPACK_LIBRARIES)
+    add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+    set_target_properties(LAPACK::LAPACK PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
+  endif()
 endif()
 
 if(HYPRE_ENABLE_MPI)
@@ -217,6 +326,39 @@ if(HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
       endif()
     else()
       message(FATAL_ERROR "GPU Toolkit not found.")
+    endif()
+  endif()
+endif()
+
+# Ensure BLAS::BLAS exists in consumer scope (some platforms/modules only set variables)
+if(NOT TARGET BLAS::BLAS)
+  # Try to find a proper imported target first
+  find_package(BLAS QUIET)
+  if(NOT TARGET BLAS::BLAS)
+    add_library(BLAS::BLAS INTERFACE IMPORTED)
+    if(DEFINED BLAS_LIBRARIES AND BLAS_LIBRARIES)
+      # Use detected library list
+      set_target_properties(BLAS::BLAS PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}")
+    else()
+      # Last resort: assume a plain 'blas' link is available
+      set_target_properties(BLAS::BLAS PROPERTIES
+        INTERFACE_LINK_LIBRARIES "blas")
+    endif()
+  endif()
+endif()
+
+# Ensure LAPACK::LAPACK exists in consumer scope
+if(NOT TARGET LAPACK::LAPACK)
+  find_package(LAPACK QUIET)
+  if(NOT TARGET LAPACK::LAPACK)
+    add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+    if(DEFINED LAPACK_LIBRARIES AND LAPACK_LIBRARIES)
+      set_target_properties(LAPACK::LAPACK PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${LAPACK_LIBRARIES}")
+    else()
+      set_target_properties(LAPACK::LAPACK PROPERTIES
+        INTERFACE_LINK_LIBRARIES "lapack")
     endif()
   endif()
 endif()

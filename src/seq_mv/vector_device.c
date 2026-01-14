@@ -29,7 +29,8 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
    HYPRE_Complex *vector_data = hypre_VectorData(v);
    HYPRE_Int      num_vectors = hypre_VectorNumVectors(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
-   HYPRE_Int      total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t         total_size  = (size_t)size * (size_t)num_vectors;
 
    //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
@@ -90,7 +91,8 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
    HYPRE_Complex *y_data      = hypre_VectorData(y);
    HYPRE_Int      num_vectors = hypre_VectorNumVectors(y);
    HYPRE_Int      size        = hypre_VectorSize(y);
-   HYPRE_Int      total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t         total_size  = (size_t)size * (size_t)num_vectors;
 
    hypre_GpuProfilingPushRange("SeqVectorScale");
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
@@ -138,7 +140,8 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
    HYPRE_Complex *y_data      = hypre_VectorData(y);
    HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
    HYPRE_Int      size        = hypre_VectorSize(x);
-   HYPRE_Int      total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t         total_size  = (size_t)size * (size_t)num_vectors;
 
 #if defined(HYPRE_USING_GPU)
 
@@ -186,7 +189,8 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
 
    HYPRE_Int       num_vectors = hypre_VectorNumVectors(x);
    HYPRE_Int       size        = hypre_VectorSize(x);
-   HYPRE_Int       total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t          total_size  = (size_t)size * (size_t)num_vectors;
 
 #if defined(HYPRE_USING_GPU)
    hypreDevice_ComplexAxpyzn(total_size, x_data, y_data, z_data, alpha, beta);
@@ -291,7 +295,8 @@ hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
    HYPRE_Complex *y_data      = hypre_VectorData(y);
    HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
    HYPRE_Int      size        = hypre_VectorSize(x);
-   HYPRE_Int      total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t         total_size  = (size_t)size * (size_t)num_vectors;
 
    HYPRE_Real     result = 0.0;
 
@@ -346,7 +351,8 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
    HYPRE_Complex  *data        = hypre_VectorData(vector);
    HYPRE_Int       num_vectors = hypre_VectorNumVectors(vector);
    HYPRE_Int       size        = hypre_VectorSize(vector);
-   HYPRE_Int       total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t          total_size  = (size_t)size * (size_t)num_vectors;
    HYPRE_Complex   sum = 0.0;
 
 #if defined(HYPRE_USING_GPU)
@@ -415,7 +421,8 @@ hypre_SeqVectorPrefetch( hypre_Vector        *x,
    HYPRE_Complex  *x_data      = hypre_VectorData(x);
    HYPRE_Int       num_vectors = hypre_VectorNumVectors(x);
    HYPRE_Int       size        = hypre_VectorSize(x);
-   HYPRE_Int       total_size  = size * num_vectors;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t          total_size  = (size_t)size * (size_t)num_vectors;
 
    if (total_size == 0)
    {

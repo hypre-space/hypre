@@ -6,43 +6,79 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include <math.h>
 
 #ifdef HYPRE_USING_DSUPERLU
 #include "dsuperlu.h"
 
-#include <math.h>
-#include "superlu_ddefs.h"
-/*
-#ifndef hypre_DSLU_DATA_HEADER
-#define hypre_DSLU_DATA_HEADER
+/*--------------------------------------------------------------------------
+ * hypre_SLUDistCreate
+ *--------------------------------------------------------------------------*/
 
-typedef struct
+void *
+hypre_SLUDistCreate(void)
 {
-   HYPRE_BigInt global_num_rows;
-   SuperMatrix A_dslu;
-   HYPRE_Real *berr;
-   dLUstruct_t dslu_data_LU;
-   SuperLUStat_t dslu_data_stat;
-   superlu_dist_options_t dslu_options;
-   gridinfo_t dslu_data_grid;
-   dScalePermstruct_t dslu_ScalePermstruct;
-   dSOLVEstruct_t dslu_solve;
-}
-hypre_DSLUData;
+   hypre_DSLUData *dslu_data;
+   hypre_Solver   *base;
 
-#endif
-*/
+   dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
+   base      = (hypre_Solver *) dslu_data;
+
+   /* Initialize base solver function pointers first */
+   hypre_SolverSetup(base)   = NULL;
+   hypre_SolverSolve(base)   = NULL;
+   hypre_SolverDestroy(base) = NULL;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_SLUDistSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_SLUDistSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_SLUDistDestroy;
+
+   /* Initialize all fields */
+   hypre_DSLUDataGlobalNumRows(dslu_data) = 0;
+   hypre_DSLUDataA(dslu_data) = NULL;
+   hypre_DSLUDataBerr(dslu_data) = NULL;
+   hypre_DSLUDataLU(dslu_data) = NULL;
+   hypre_DSLUDataStat(dslu_data) = NULL;
+   hypre_DSLUDataOptions(dslu_data) = NULL;
+   hypre_DSLUDataGrid(dslu_data) = NULL;
+   hypre_DSLUDataScalePermstruct(dslu_data) = NULL;
+   hypre_DSLUDataSolve(dslu_data) = NULL;
+   hypre_DSLUDataPrintLevel(dslu_data) = 0;
+
+   return (void*) dslu_data;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SLUDistSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SLUDistSetPrintLevel(void      *solver,
+                           HYPRE_Int  print_level)
+{
+   hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
+
+   if (dslu_data)
+   {
+      hypre_DSLUDataPrintLevel(dslu_data) = print_level;
+   }
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_SLUDistSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SLUDistSetup(HYPRE_Solver       *solver,
+hypre_SLUDistSetup(void               *solver,
                    hypre_ParCSRMatrix *A,
-                   HYPRE_Int           print_level)
+                   hypre_ParVector    *b,
+                   hypre_ParVector    *x)
 {
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    /* Par Data Structure variables */
    HYPRE_BigInt       global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    MPI_Comm           comm            = hypre_ParCSRMatrixComm(A);
@@ -50,7 +86,7 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
 
    HYPRE_Int          pcols = 1;
    HYPRE_Int          prows = 1;
-   hypre_DSLUData    *dslu_data = NULL;
+   hypre_DSLUData    *dslu_data = (hypre_DSLUData *) solver;
    HYPRE_Int          nrhs = 0;
 
    HYPRE_Int          num_rows;
@@ -65,11 +101,6 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* destroy solver if already setup */
-   //   if (solver != NULL) { hypre_SLUDistDestroy(solver); }
-   /* allocate memory for new solver */
-   dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
 
    /* Merge diag and offd into one matrix (global ids) */
    A_local = hypre_MergeDiagAndOffd(A);
@@ -126,8 +157,9 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    }
 
    /* Now convert hypre matrix to a SuperMatrix */
+   hypre_DSLUDataA(dslu_data) = hypre_CTAlloc(SuperMatrix, 1, HYPRE_MEMORY_HOST);
    dCreate_CompRowLoc_Matrix_dist(
-      &(dslu_data->A_dslu),
+      hypre_DSLUDataA(dslu_data),
       (int_t) global_num_rows,
       (int_t) global_num_rows,
       (int_t) hypre_CSRMatrixNumNonzeros(A_local),
@@ -154,6 +186,14 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    }
    hypre_CSRMatrixDestroy(A_local);
 
+   /* Allocate SuperLU structures */
+   hypre_DSLUDataGrid(dslu_data) = hypre_CTAlloc(gridinfo_t, 1, HYPRE_MEMORY_HOST);
+   hypre_DSLUDataOptions(dslu_data) = hypre_CTAlloc(superlu_dist_options_t, 1, HYPRE_MEMORY_HOST);
+   hypre_DSLUDataScalePermstruct(dslu_data) = hypre_CTAlloc(dScalePermstruct_t, 1, HYPRE_MEMORY_HOST);
+   hypre_DSLUDataLU(dslu_data) = hypre_CTAlloc(dLUstruct_t, 1, HYPRE_MEMORY_HOST);
+   hypre_DSLUDataStat(dslu_data) = hypre_CTAlloc(SuperLUStat_t, 1, HYPRE_MEMORY_HOST);
+   hypre_DSLUDataSolve(dslu_data) = hypre_CTAlloc(dSOLVEstruct_t, 1, HYPRE_MEMORY_HOST);
+
    /* Create process grid */
    while (prows * pcols <= num_procs) { ++prows; }
    --prows;
@@ -165,35 +205,42 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    }
    //hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
-   superlu_gridinit(comm, prows, pcols, &(dslu_data->dslu_data_grid));
+   superlu_gridinit(comm, prows, pcols, hypre_DSLUDataGrid(dslu_data));
 
-   set_default_options_dist(&(dslu_data->dslu_options));
+   set_default_options_dist(hypre_DSLUDataOptions(dslu_data));
 
-   dslu_data->dslu_options.Fact = DOFACT;
-   if (print_level == 0 || print_level == 2) { dslu_data->dslu_options.PrintStat = NO; }
-   /*dslu_data->dslu_options.IterRefine = SLU_DOUBLE;
-   dslu_data->dslu_options.ColPerm = MMD_AT_PLUS_A;
-   dslu_data->dslu_options.DiagPivotThresh = 1.0;
-   dslu_data->dslu_options.ReplaceTinyPivot = NO; */
+   hypre_DSLUDataOptions(dslu_data)->Fact = DOFACT;
+   if (hypre_DSLUDataPrintLevel(dslu_data) == 0 || hypre_DSLUDataPrintLevel(dslu_data) == 2)
+   {
+      hypre_DSLUDataOptions(dslu_data)->PrintStat = NO;
+   }
+   /*hypre_DSLUDataOptions(dslu_data)->IterRefine = SLU_DOUBLE;
+   hypre_DSLUDataOptions(dslu_data)->ColPerm = MMD_AT_PLUS_A;
+   hypre_DSLUDataOptions(dslu_data)->DiagPivotThresh = 1.0;
+   hypre_DSLUDataOptions(dslu_data)->ReplaceTinyPivot = NO; */
 
-   dScalePermstructInit(global_num_rows, global_num_rows, &(dslu_data->dslu_ScalePermstruct));
+   dScalePermstructInit(global_num_rows, global_num_rows, hypre_DSLUDataScalePermstruct(dslu_data));
 
-   dLUstructInit(global_num_rows, &(dslu_data->dslu_data_LU));
+   dLUstructInit(global_num_rows, hypre_DSLUDataLU(dslu_data));
 
-   PStatInit(&(dslu_data->dslu_data_stat));
+   PStatInit(hypre_DSLUDataStat(dslu_data));
 
-   dslu_data->global_num_rows = global_num_rows;
+   hypre_DSLUDataGlobalNumRows(dslu_data) = global_num_rows;
 
-   dslu_data->berr = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_HOST);
-   dslu_data->berr[0] = 0.0;
+   hypre_DSLUDataBerr(dslu_data) = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_HOST);
 
-   pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
-           &(dslu_data->dslu_ScalePermstruct), NULL, num_rows, nrhs,
-           &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU),
-           &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &slu_info);
+   pdgssvx(hypre_DSLUDataOptions(dslu_data),
+           hypre_DSLUDataA(dslu_data),
+           hypre_DSLUDataScalePermstruct(dslu_data),
+           NULL, num_rows, nrhs,
+           hypre_DSLUDataGrid(dslu_data),
+           hypre_DSLUDataLU(dslu_data),
+           hypre_DSLUDataSolve(dslu_data),
+           hypre_DSLUDataBerr(dslu_data),
+           hypre_DSLUDataStat(dslu_data),
+           &slu_info);
 
-   dslu_data->dslu_options.Fact = FACTORED;
-   *solver = (HYPRE_Solver) dslu_data;
+   hypre_DSLUDataOptions(dslu_data)->Fact = FACTORED;
 
    return hypre_error_flag;
 }
@@ -203,10 +250,13 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SLUDistSolve(void            *solver,
-                   hypre_ParVector *b,
-                   hypre_ParVector *x)
+hypre_SLUDistSolve(void               *solver,
+                   hypre_ParCSRMatrix *A,
+                   hypre_ParVector    *b,
+                   hypre_ParVector    *x)
 {
+   HYPRE_UNUSED_VAR(A);
+
    hypre_DSLUData  *dslu_data = (hypre_DSLUData *) solver;
    HYPRE_Real      *x_data;
    HYPRE_Int        size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
@@ -246,17 +296,17 @@ hypre_SLUDistSolve(void            *solver,
       slu_data = (hypre_double*) x_data;
    }
 
-   pdgssvx(&(dslu_data->dslu_options),
-           &(dslu_data->A_dslu),
-           &(dslu_data->dslu_ScalePermstruct),
+   pdgssvx(hypre_DSLUDataOptions(dslu_data),
+           hypre_DSLUDataA(dslu_data),
+           hypre_DSLUDataScalePermstruct(dslu_data),
            slu_data,
            (int_t) size,
            (int_t) nrhs,
-           &(dslu_data->dslu_data_grid),
-           &(dslu_data->dslu_data_LU),
-           &(dslu_data->dslu_solve),
-           dslu_data->berr,
-           &(dslu_data->dslu_data_stat),
+           hypre_DSLUDataGrid(dslu_data),
+           hypre_DSLUDataLU(dslu_data),
+           hypre_DSLUDataSolve(dslu_data),
+           hypre_DSLUDataBerr(dslu_data),
+           hypre_DSLUDataStat(dslu_data),
            &slu_info);
 
    /* Free memory */
@@ -281,24 +331,49 @@ hypre_SLUDistSolve(void            *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SLUDistDestroy(void* solver)
+hypre_SLUDistDestroy(void *solver)
 {
    hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
 
-   PStatFree(&(dslu_data->dslu_data_stat));
-   Destroy_CompRowLoc_Matrix_dist(&(dslu_data->A_dslu));
-   dScalePermstructFree(&(dslu_data->dslu_ScalePermstruct));
-   dDestroy_LU(dslu_data->global_num_rows,
-               &(dslu_data->dslu_data_grid),
-               &(dslu_data->dslu_data_LU));
-   dLUstructFree(&(dslu_data->dslu_data_LU));
-   if (dslu_data->dslu_options.SolveInitialized)
+   if (dslu_data)
    {
-      dSolveFinalize(&(dslu_data->dslu_options), &(dslu_data->dslu_solve));
+      if (hypre_DSLUDataStat(dslu_data))
+      {
+         PStatFree(hypre_DSLUDataStat(dslu_data));
+      }
+      if (hypre_DSLUDataA(dslu_data))
+      {
+         Destroy_CompRowLoc_Matrix_dist(hypre_DSLUDataA(dslu_data));
+      }
+      if (hypre_DSLUDataScalePermstruct(dslu_data))
+      {
+         dScalePermstructFree(hypre_DSLUDataScalePermstruct(dslu_data));
+      }
+      if (hypre_DSLUDataLU(dslu_data) && hypre_DSLUDataGrid(dslu_data))
+      {
+         dDestroy_LU(hypre_DSLUDataGlobalNumRows(dslu_data),
+                     hypre_DSLUDataGrid(dslu_data),
+                     hypre_DSLUDataLU(dslu_data));
+         dLUstructFree(hypre_DSLUDataLU(dslu_data));
+      }
+      if (hypre_DSLUDataOptions(dslu_data) && hypre_DSLUDataOptions(dslu_data)->SolveInitialized)
+      {
+         dSolveFinalize(hypre_DSLUDataOptions(dslu_data), hypre_DSLUDataSolve(dslu_data));
+      }
+      if (hypre_DSLUDataGrid(dslu_data))
+      {
+         superlu_gridexit(hypre_DSLUDataGrid(dslu_data));
+      }
+      hypre_TFree(hypre_DSLUDataA(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataGrid(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataOptions(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataScalePermstruct(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataLU(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataStat(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataSolve(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_DSLUDataBerr(dslu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
    }
-   superlu_gridexit(&(dslu_data->dslu_data_grid));
-   hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST);
-   hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

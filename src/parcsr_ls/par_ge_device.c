@@ -27,12 +27,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 {
    /* Input data */
    hypre_ParCSRMatrix  *par_A           = hypre_ParAMGDataAArray(amg_data)[level];
-   HYPRE_Int            global_num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_A);
+   HYPRE_BigInt         global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_A);
    HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(par_A);
    HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
-   HYPRE_Int            global_size     = global_num_rows * global_num_rows;
+   HYPRE_BigInt         global_size     = hypre_squared(global_num_rows);
 
    /* Local variables */
    HYPRE_Int            buffer_size     = 0;
@@ -43,12 +43,6 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    /* Sanity checks */
    if (!num_rows || !global_size)
    {
-      return hypre_error_flag;
-   }
-
-   if (global_size < 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected overflow!");
       return hypre_error_flag;
    }
 
@@ -169,7 +163,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                    (size_t) global_size * sizeof(HYPRE_Real),
                    HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL(for_each,
-                        thrust::make_counting_iterator(0),
+                        thrust::make_counting_iterator((HYPRE_BigInt) 0),
                         thrust::make_counting_iterator(global_num_rows),
                         hypreFunctor_DenseMatrixIdentity(global_num_rows, A_work));
 
