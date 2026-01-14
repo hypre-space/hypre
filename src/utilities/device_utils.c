@@ -3044,6 +3044,7 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   hypre_MPI_Barrier(comm);
 #endif
 
 #else
