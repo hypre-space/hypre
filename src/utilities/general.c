@@ -49,20 +49,8 @@ hypre_HandleCreate(void)
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
-#endif
-
-#if defined(HYPRE_USING_GPU)
-   hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
-   /* Gauss-Seidel: SpTrSV */
-   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
-#endif
-
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_USING_GPU_AWARE_MPI)
-   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
 #else
-   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
-#endif
+   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
 #endif
 
    return hypre_handle_;
@@ -316,6 +304,15 @@ HYPRE_DeviceInitialize(void)
    hypre_GetDeviceLastError();
 #endif
 
+   hypre_HandleDeviceData(handle)     = hypre_DeviceDataCreate();
+   hypre_HandleDeviceGSMethod(handle) = 1; /* Gauss-Seidel SpTrSV - CPU: 0; Cusparse: 1 */
+
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
+   hypre_HandleUseGpuAwareMPI(handle) = 1;
+#else
+   hypre_HandleUseGpuAwareMPI(handle) = 0;
+#endif
+
    /* Notice: the cudaStream created is specific to the device
     * that was in effect when you created the stream.
     * So, we should first set the device and create the streams
@@ -442,6 +439,8 @@ HYPRE_Finalize(void)
       return hypre_error_flag;
    }
 
+   HYPRE_Int exec_device = hypre_HandleDefaultExecPolicy(_hypre_handle) == HYPRE_EXEC_DEVICE;
+
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
 #endif
@@ -452,14 +451,20 @@ HYPRE_Finalize(void)
 
 #if defined(HYPRE_USING_SYCL)
    /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
-   hypre_GetDeviceLastError();
+   if (exec_device)
+   {
+      hypre_GetDeviceLastError();
+   }
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   hypre_GetDeviceLastError();
+   if (exec_device)
+   {
+      hypre_GetDeviceLastError();
+   }
 #endif
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
