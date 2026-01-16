@@ -46,6 +46,8 @@ hypre_HandleCreate(void)
    hypre_HandleLogLevel(hypre_handle_)       = 0;
    hypre_HandleLogLevelSaved(hypre_handle_)  = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
+   hypre_HandleDeviceData(hypre_handle_)     = hypre_DeviceDataCreate();
+   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* SpTrSV - CPU: 0; Vendor: 1 */
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
@@ -303,9 +305,6 @@ HYPRE_DeviceInitialize(void)
    /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
 #endif
-
-   hypre_HandleDeviceData(handle)     = hypre_DeviceDataCreate();
-   hypre_HandleDeviceGSMethod(handle) = 1; /* Gauss-Seidel SpTrSV - CPU: 0; Cusparse: 1 */
 
 #if defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(handle) = 1;
