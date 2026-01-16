@@ -493,16 +493,23 @@ HYPRE_PrintDeviceInfo(void)
 
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
+   {
+      hypre_printf("Running on \"%s\", Comp. Capability: %d.%d, Total VRAM: %.2f GiB, ",
+                   deviceProp.name, deviceProp.major, deviceProp.minor,
+                   ((HYPRE_Real) deviceProp.totalGlobalMem) / (HYPRE_Real) (1 << 30));
+   }
 
 #elif defined(HYPRE_USING_HIP)
    hipDeviceProp_t deviceProp;
 
    HYPRE_HIP_CALL( hipGetDevice(&dev) );
    HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
+   {
+      const char *gfx_name = deviceProp.gcnArchName[0] ? deviceProp.gcnArchName : "unknown";
+      hypre_printf("Running on \"%s\", %s, Total VRAM: %.2f GiB, ",
+                   deviceProp.name, gfx_name,
+                   ((HYPRE_Real) deviceProp.totalGlobalMem) / (HYPRE_Real) (1 << 30));
+   }
 
 #elif defined(HYPRE_USING_SYCL)
    auto device = *hypre_HandleDevice(hypre_handle());
@@ -521,8 +528,8 @@ HYPRE_PrintDeviceInfo(void)
 #if defined(HYPRE_USING_GPU)
    hypre_int max_size = 0, max_size_optin = 0;
    hypre_GetDeviceMaxShmemSize(dev, &max_size, &max_size_optin);
-   hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
-                max_size, max_size_optin);
+   hypre_printf("MaxShmem: %d KiB, MaxShmemOptin: %d KiB\n",
+                max_size / 1024, max_size_optin / 1024);
 #endif
 
    return hypre_error_flag;

@@ -656,6 +656,7 @@ main( hypre_int argc,
        (default_exec_policy == HYPRE_EXEC_DEVICE || exec2_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
+      HYPRE_PrintDeviceInfo();
    }
 
    hypre_EndTiming(time_index);
