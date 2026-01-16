@@ -611,6 +611,7 @@ main( hypre_int argc,
       }
 
       HYPRE_Initialize();
+      HYPRE_SetExecutionPolicy(default_exec_policy);
 
       /* Check if the library is in initialized state */
       if (HYPRE_Initialized() && !HYPRE_Finalized())
@@ -627,6 +628,7 @@ main( hypre_int argc,
       }
 
       HYPRE_Initialize();
+      HYPRE_SetExecutionPolicy(default_exec_policy);
 
       /* Check if the library is in initialized state */
       if (HYPRE_Initialized() && !HYPRE_Finalized())
@@ -651,6 +653,10 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_Initialize();
+
+   /* We set the execution policy early so that hypre_EndTiming
+      knows whether to call hypre_DeviceSync or not. */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
 
    if (!lazy_device_init &&
        (default_exec_policy == HYPRE_EXEC_DEVICE || exec2_policy == HYPRE_EXEC_DEVICE))
