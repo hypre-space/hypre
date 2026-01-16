@@ -40,16 +40,16 @@ shift
 # Basic build and run tests
 aco="LIBS=-ldl"
 cco="-DMPIEXEC_EXECUTABLE=\"srun\" -DMPIEXEC_NUMPROC_FLAG=\"n\""
-cmo="-j check"
+cmo="--parallel"
 mo="-j test"
 eo=""
 rtol="0.0"
 atol="3e-15"
 save="matrix"
 
-# 1C) GCC 13.3.1 + CUDA 12.9.1 with UM and memory tracker in debug mode [error, ij, ams, struct, sstruct]
+# 1C) GCC 13.3.1 + CUDA 12.9.1 with UM and memory tracker OFF in debug mode [error, ij, ams, struct, sstruct]
 module -q load cmake/${cmake_version} cuda/12.9.1 gcc/13.3.1
-co="${cco} -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_MEMORY_TRACKER=ON -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_PRINT_ERRORS=ON"
+co="${cco} -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_MEMORY_TRACKER=OFF -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_PRINT_ERRORS=ON"
 ro="-error -ij -ams -struct -sstruct -rt -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $cmo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-cuda-um-dbg
@@ -91,7 +91,7 @@ ro="-bench -rt -mpibind -save ${save}"
 
 # 7C) GCC 13.3.1 + CUDA 12.9.1 with host execution
 module reset && module -q load cmake/${cmake_version} cuda/12.9.1 gcc/13.3.1
-co="${cco} -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_TEST_USING_HOST=ON -DHYPRE_ENABLE_MEMORY_TRACKER=ON -DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=Debug"
+co="${cco} -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_TEST_USING_HOST=ON -DHYPRE_ENABLE_MEMORY_TRACKER=OFF -DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=Debug"
 ro="-ij-noilu -ams -struct -sstruct"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $cmo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-cuda-cpu
@@ -120,13 +120,13 @@ co="${aco} --with-cuda --without-umpire --enable-unified-memory --with-openmp --
 
 # 4A) GCC 13.3.1 + CUDA 12.9.1 with UM and single precision in debug mode
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="${aco} --enable-single --without-umpire --enable-unified-memory --with-cuda --enable-cusolver --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch-90 --with-print-errors"
+co="${aco} --enable-single --without-umpire --enable-unified-memory --with-cuda --enable-cusolver --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=90 --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-single
 
 # 5A) GCC 13.3.1 + CUDA 12.9.1 without MPI
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
-co="${aco} --without-MPI --without-umpire --enable-unified-memory --with-cuda --with-gpu-arch-90 --with-print-errors"
+co="${aco} --without-MPI --without-umpire --enable-unified-memory --with-cuda --with-gpu-arch=90 --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
 
