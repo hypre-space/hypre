@@ -7001,7 +7001,7 @@ hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix      *A,
          hypre_DenseBlockMatrixMigrate(B, HYPRE_MEMORY_DEVICE);
       }
       else
-   }
+      }
 #endif
    {
       hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);

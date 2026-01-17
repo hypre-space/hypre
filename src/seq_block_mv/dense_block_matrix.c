@@ -246,16 +246,16 @@ hypre_DenseBlockMatrixTranspose( hypre_DenseBlockMatrix  *A,
 {
    hypre_DenseBlockMatrix  *B = *B_ptr;
 
-  /* Create and initialize output if needed */
-  if (!B)
-  {
-     B = hypre_DenseBlockMatrixCreate(hypre_DenseBlockMatrixRowMajor(A),
-                                      hypre_DenseBlockMatrixNumCols(A),
-                                      hypre_DenseBlockMatrixNumRows(A),
-                                      hypre_DenseBlockMatrixNumColsBlock(A),
-                                      hypre_DenseBlockMatrixNumRowsBlock(A));
-     hypre_DenseBlockMatrixInitializeOn(B, hypre_DenseBlockMatrixMemoryLocation(A));
-  }
+   /* Create and initialize output if needed */
+   if (!B)
+   {
+      B = hypre_DenseBlockMatrixCreate(hypre_DenseBlockMatrixRowMajor(A),
+                                       hypre_DenseBlockMatrixNumCols(A),
+                                       hypre_DenseBlockMatrixNumRows(A),
+                                       hypre_DenseBlockMatrixNumColsBlock(A),
+                                       hypre_DenseBlockMatrixNumRowsBlock(A));
+      hypre_DenseBlockMatrixInitializeOn(B, hypre_DenseBlockMatrixMemoryLocation(A));
+   }
    else
    {
       /* Reuse provided storage: zero out coefficients */
@@ -281,8 +281,8 @@ hypre_DenseBlockMatrixTranspose( hypre_DenseBlockMatrix  *A,
       const HYPRE_Int num_blocks       = hypre_DenseBlockMatrixNumBlocks(A);
       const HYPRE_Int a_rows_blk       = hypre_DenseBlockMatrixNumRowsBlock(A);
       const HYPRE_Int a_cols_blk       = hypre_DenseBlockMatrixNumColsBlock(A);
-      const HYPRE_Int b_rows_blk       = hypre_DenseBlockMatrixNumRowsBlock(B); /* should equal a_cols_blk */
-      const HYPRE_Int b_cols_blk       = hypre_DenseBlockMatrixNumColsBlock(B); /* should equal a_rows_blk */
+      const HYPRE_Int b_rows_blk       = hypre_DenseBlockMatrixNumRowsBlock(B);
+      const HYPRE_Int b_cols_blk       = hypre_DenseBlockMatrixNumColsBlock(B);
       const HYPRE_Int a_nnz_blk        = hypre_DenseBlockMatrixNumNonzerosBlock(A);
       const HYPRE_Int b_nnz_blk        = hypre_DenseBlockMatrixNumNonzerosBlock(B);
 

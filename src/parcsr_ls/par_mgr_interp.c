@@ -2723,8 +2723,8 @@ hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
 
    HYPRE_Int                row_major = 0;
    HYPRE_Int                block_dim_C =
-     hypre_ParCSRMatrixNumRows(A) * block_dim/
-     hypre_ParCSRMatrixNumRows(A_FF) - block_dim;
+      hypre_ParCSRMatrixNumRows(A) * block_dim /
+      hypre_ParCSRMatrixNumRows(A_FF) - block_dim;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -2736,9 +2736,9 @@ hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
    }
 
 #if 0
-  /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
-  hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
-  hypre_ParCSRMatrixBlockRowSum(A_FC, row_major, block_dim, block_dim_C, 1, &b_FC);
+   /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
+   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
+   hypre_ParCSRMatrixBlockRowSum(A_FC, row_major, block_dim, block_dim_C, 1, &b_FC);
 
    /* Invert block-diagonal approximation of A_FF (in place) */
 #if defined (HYPRE_USING_GPU)
@@ -2778,32 +2778,32 @@ hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
    /* Free memory */
    hypre_DenseBlockMatrixDestroy(r_FC);
 #else
-  hypre_ParCSRMatrix      *A_FF_inv = NULL;
+   hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
-  /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
-  hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
+   /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
+   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
 
-  /* Invert block-diagonal approximation of A_FF (in place) */
-  hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                           hypre_DenseBlockMatrixNumRows(b_FF),
-                           hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   /* Invert block-diagonal approximation of A_FF (in place) */
+   hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                            hypre_DenseBlockMatrixNumRows(b_FF),
+                            hypre_DenseBlockMatrixNumRowsBlock(b_FF));
 
    /* Convert to ParCSR */
    A_FF_inv = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_FF),
-                                                     hypre_ParCSRMatrixGlobalNumRows(A_FF),
-                                                     hypre_ParCSRMatrixGlobalNumCols(A_FF),
-                                                     hypre_ParCSRMatrixRowStarts(A_FF),
-                                                     hypre_ParCSRMatrixColStarts(A_FF),
-                                                     b_FF);
+                                                           hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                                           hypre_ParCSRMatrixGlobalNumCols(A_FF),
+                                                           hypre_ParCSRMatrixRowStarts(A_FF),
+                                                           hypre_ParCSRMatrixColStarts(A_FF),
+                                                           b_FF);
 
-  /* Multiply by A_FC */
-  Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
+   /* Multiply by A_FC */
+   Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
 
-  /* Apply minus sign */
-  hypre_ParCSRMatrixScale(Wp, -1.0);
+   /* Apply minus sign */
+   hypre_ParCSRMatrixScale(Wp, -1.0);
 
-  /* Free memory */
-  hypre_DenseBlockMatrixDestroy(b_FF);
+   /* Free memory */
+   hypre_DenseBlockMatrixDestroy(b_FF);
 #endif
 
    /* Build P = [Wp I] */
