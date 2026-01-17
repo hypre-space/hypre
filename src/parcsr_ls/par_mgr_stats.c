@@ -62,6 +62,9 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
       case 16:
          return hypre_ILUGetName((void*) hypre_ParMGRDataLevelSmootherI(mgr_data, level));
 
+      case 20:
+         return "User AMG";
+
       default:
          return "Unknown";
    }
@@ -178,8 +181,11 @@ hypre_MGRGetProlongationName(hypre_ParMGRData  *mgr_data,
       case 12:
          return "Blk-Diag Inv";
 
+      case 13:
+         return "Blk-RowSum";
+
       default:
-         return "Classical";
+         return "Unknown";
    }
 }
 
@@ -215,7 +221,7 @@ hypre_MGRGetRestrictionName(hypre_ParMGRData  *mgr_data,
          return "Blk-ColLumped";
 
       default:
-         return "Classical";
+         return "Unknown";
    }
 }
 
@@ -330,6 +336,13 @@ hypre_MGRSetupStats(void *mgr_vdata)
       coarse_amg_solver = (hypre_ParAMGData *) coarse_solver;
       num_sublevels_amg[coarsest_mgr_level] = hypre_ParAMGDataNumLevels(coarse_amg_solver);
    }
+   else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+            (HYPRE_PtrToParSolverFcn) hypre_ILUSetup ||
+            (HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+            (HYPRE_PtrToParSolverFcn) HYPRE_ILUSetup)
+   {
+      num_sublevels_amg[coarsest_mgr_level] = 0;
+   }
 #ifdef HYPRE_USING_DSUPERLU
    else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
             (HYPRE_PtrToParSolverFcn) hypre_MGRDirectSolverSetup ||
@@ -343,7 +356,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    else
    {
       hypre_TFree(num_sublevels_amg, HYPRE_MEMORY_HOST);
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown coarsest level solver for MGR!\n");
+      //hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown coarsest level solver for MGR!\n");
       return hypre_error_flag;
    }
    num_levels_total = num_levels_mgr + num_sublevels_amg[coarsest_mgr_level];
