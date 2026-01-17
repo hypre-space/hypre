@@ -20,25 +20,22 @@
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
-                                   HYPRE_Complex **iprod_ptr ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToCreateVectorArray  CreateVectorArray,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_GMRESFunctions * gmres_functions;
@@ -195,18 +192,17 @@ hypre_GMRESSetup( void *gmres_vdata,
    void                 *precond_Mat     = (gmres_data -> precond_Mat);
    HYPRE_Int             rel_change      = (gmres_data -> rel_change);
 
-   HYPRE_Int (*precond_setup)(void*, void*, void*, void*) = (gmres_functions->precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (gmres_functions->precond_setup);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   //set preconditioning matrix
-   if ((gmres_data -> precond_Mat)  == NULL)
-   {
-      (gmres_data -> precond_Mat)  = A;
-      precond_Mat = (gmres_data -> precond_Mat) ;
-   }
-
    (gmres_data -> A) = A;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    /*--------------------------------------------------
     * The arguments for NewVector are important to
@@ -314,7 +310,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *w_3                = (gmres_data -> w_3);
    void                **p                  = (gmres_data -> p);
 
-   HYPRE_Int           (*precond)(void*, void*, void*, void*) = (gmres_functions -> precond);
+   hypre_KrylovPtrToPrecond precond = (gmres_functions -> precond);
    void                 *precond_data = (gmres_data -> precond_data);
    // preconditioning matrix
    void          *precond_Mat = (gmres_data -> precond_Mat) ;
@@ -350,6 +346,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Real            real_r_norm_old, real_r_norm_new;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -1454,8 +1456,8 @@ hypre_GMRESGetStopCrit( void      *gmres_vdata,
 
 HYPRE_Int
 hypre_GMRESSetPrecond( void  *gmres_vdata,
-                       HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                       HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                       hypre_KrylovPtrToPrecond precond,
+                       hypre_KrylovPtrToPrecondSetup precond_setup,
                        void  *precond_data )
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;

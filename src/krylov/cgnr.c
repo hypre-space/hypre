@@ -20,24 +20,21 @@
 
 hypre_CGNRFunctions *
 hypre_CGNRFunctionsCreate(
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecT)       ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*PrecondT)      ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecT            MatvecT,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond,
+   hypre_KrylovPtrToPrecondT           PrecondT
 )
 {
    hypre_CGNRFunctions * cgnr_functions;
@@ -144,7 +141,7 @@ hypre_CGNRSetup(void *cgnr_vdata,
    hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
 
    HYPRE_Int            max_iter         = (cgnr_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (cgnr_functions -> precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (cgnr_functions -> precond_setup);
    void          *precond_data     = (cgnr_data -> precond_data);
    HYPRE_Int            ierr = 0;
 
@@ -203,8 +200,8 @@ hypre_CGNRSolve(void *cgnr_vdata,
    void           *r            = (cgnr_data -> r);
    void           *t            = (cgnr_data -> t);
    void           *matvec_data  = (cgnr_data -> matvec_data);
-   HYPRE_Int           (*precond)(void*, void*, void*, void*)   = (cgnr_functions -> precond);
-   HYPRE_Int           (*precondT)(void*, void*, void*, void*)  = (cgnr_functions -> precondT);
+   hypre_KrylovPtrToPrecond  precond  = (cgnr_functions -> precond);
+   hypre_KrylovPtrToPrecondT precondT = (cgnr_functions -> precondT);
    void           *precond_data = (cgnr_data -> precond_data);
    HYPRE_Int             logging      = (cgnr_data -> logging);
    HYPRE_Real     *norms        = (cgnr_data -> norms);
@@ -523,9 +520,9 @@ hypre_CGNRSetStopCrit( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetPrecond(void  *cgnr_vdata,
-                     HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                     HYPRE_Int  (*precondT)(void*, void*, void*, void*),
-                     HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                     hypre_KrylovPtrToPrecond precond,
+                     hypre_KrylovPtrToPrecondT precondT,
+                     hypre_KrylovPtrToPrecondSetup precond_setup,
                      void  *precond_data )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;

@@ -2713,7 +2713,11 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int                spgemm_use_vendor   = 1;
+#else
    HYPRE_Int                spgemm_use_vendor   = 0;
+#endif
    HYPRE_Int                spmv_use_vendor     = 0;
    HYPRE_Int                gpu_aware_mpi       = 0;
 #endif

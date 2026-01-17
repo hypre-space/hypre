@@ -117,25 +117,41 @@ using hypre_DeviceItem = void*;
 // Macro for device memory prefetching (CUDART 13.0+)
 #define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
    do { \
-      cudaMemLocation loc = {cudaMemLocationTypeDevice, hypre_HandleDevice(hypre_handle())}; \
-      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+      if (hypre_HandleDeviceUVM(hypre_handle())) \
+      { \
+         cudaMemLocation loc = {cudaMemLocationTypeDevice, hypre_HandleDevice(hypre_handle())}; \
+         HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+      } \
    } while (0)
 
 // Macro for host memory prefetching (CUDART 13.0+)
 #define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
    do { \
-      cudaMemLocation loc = {cudaMemLocationTypeHost, cudaCpuDeviceId}; \
-      HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+      if (hypre_HandleDeviceUVM(hypre_handle())) \
+      { \
+         cudaMemLocation loc = {cudaMemLocationTypeHost, cudaCpuDeviceId}; \
+         HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, loc, 0, stream)); \
+      } \
    } while (0)
 
 #else
 // Macro for device memory prefetching (< CUDART 13.0)
 #define HYPRE_MEM_PREFETCH_DEVICE(ptr, size, stream) \
-   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()), stream))
+   do { \
+      if (hypre_HandleDeviceUVM(hypre_handle())) \
+      { \
+         HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()), stream)); \
+      } \
+   } while (0)
 
 // Macro for host memory prefetching (< CUDART 13.0)
 #define HYPRE_MEM_PREFETCH_HOST(ptr, size, stream) \
-   HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId, stream))
+   do { \
+      if (hypre_HandleDeviceUVM(hypre_handle())) \
+      { \
+         HYPRE_CUDA_CALL(cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId, stream)); \
+      } \
+   } while (0)
 #endif
 
 #endif /* defined(HYPRE_USING_CUDA) */
@@ -768,6 +784,7 @@ struct hypre_DeviceData
    HYPRE_Int                         device_max_work_group_size;
 #else
    HYPRE_Int                         device;
+   HYPRE_Int                         device_uvm;
 #endif
    hypre_int                         device_max_shmem_per_block[3];
    /* by default, hypre puts GPU computations in this stream
@@ -797,6 +814,7 @@ struct hypre_DeviceData
 };
 
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
+#define hypre_DeviceDataDeviceUVM(data)                      ((data) -> device_uvm)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
 #define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
 #define hypre_DeviceDataDeviceMaxShmemPerBlockInited(data)  (((data) -> device_max_shmem_per_block)[2])

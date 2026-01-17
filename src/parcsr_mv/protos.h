@@ -412,6 +412,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm, HYPRE_BigInt globa
                                                HYPRE_Int num_cols_offd,
                                                HYPRE_Int num_nonzeros_diag,
                                                HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixRef( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix,
                                            HYPRE_MemoryLocation memory_location );
