@@ -550,7 +550,12 @@ main( hypre_int argc,
    /* Should we test library initialization? */
    for (arg_index = 1; arg_index < argc; arg_index ++)
    {
-      if (strcmp(argv[arg_index], "-test_init") == 0)
+      if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
+      }
+      else if (strcmp(argv[arg_index], "-test_init") == 0)
       {
          test_init = 1;
       }
@@ -662,7 +667,11 @@ main( hypre_int argc,
        (default_exec_policy == HYPRE_EXEC_DEVICE || exec2_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
-      HYPRE_PrintDeviceInfo();
+      if (log_level > 0)
+      {
+         HYPRE_PrintDeviceInfo();
+         hypre_MPI_Barrier(comm);
+      }
    }
 
    hypre_EndTiming(time_index);
@@ -720,12 +729,7 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-ll") == 0 )
-      {
-         arg_index++;
-         log_level = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -2;

@@ -43,13 +43,12 @@ hypre_HandleCreate(void)
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
-   hypre_HandleLogLevel(hypre_handle_)       = 0;
-   hypre_HandleLogLevelSaved(hypre_handle_)  = 0;
-   hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
-   hypre_HandleDeviceData(hypre_handle_)     = hypre_DeviceDataCreate();
-   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* SpTrSV - CPU: 0; Vendor: 1 */
+   hypre_HandleLogLevel(hypre_handle_)          = 0;
+   hypre_HandleLogLevelSaved(hypre_handle_)     = 0;
+   hypre_HandleMemoryLocation(hypre_handle_)    = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleDeviceData(hypre_handle_)        = hypre_DeviceDataCreate();
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
 #else
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
@@ -304,12 +303,6 @@ HYPRE_DeviceInitialize(void)
 #if !defined(HYPRE_USING_SYCL)
    /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
-#endif
-
-#if defined(HYPRE_USING_GPU_AWARE_MPI)
-   hypre_HandleUseGpuAwareMPI(handle) = 1;
-#else
-   hypre_HandleUseGpuAwareMPI(handle) = 0;
 #endif
 
    /* Notice: the cudaStream created is specific to the device

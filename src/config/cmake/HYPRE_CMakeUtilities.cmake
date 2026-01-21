@@ -811,7 +811,7 @@ function(maybe_build_umpire)
   set(_umpire_tag "${HYPRE_UMPIRE_VERSION}")
   if(_umpire_tag STREQUAL "latest")
     # Default to a recent release if auto-detection is not desired here
-    set(_umpire_tag "v2025.09.0")
+    set(_umpire_tag "v2025.12.0")
   endif()
 
   # Configure Umpire build options according to hypre needs (one canonical block)

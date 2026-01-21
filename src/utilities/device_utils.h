@@ -786,6 +786,8 @@ struct hypre_DeviceData
    HYPRE_Int                         device;
    HYPRE_Int                         device_uvm;
 #endif
+   HYPRE_Int                         use_gpu_aware_mpi;
+   HYPRE_Int                         gs_method; /* device G-S options */
    hypre_int                         device_max_shmem_per_block[3];
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
@@ -816,6 +818,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceUVM(data)                      ((data) -> device_uvm)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
+#define hypre_DeviceDataUseGpuAwareMPI(data)                 ((data) -> use_gpu_aware_mpi)
+#define hypre_DeviceDataGSMethod(data)                       ((data) -> gs_method)
 #define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
 #define hypre_DeviceDataDeviceMaxShmemPerBlockInited(data)  (((data) -> device_max_shmem_per_block)[2])
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
