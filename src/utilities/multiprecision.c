@@ -11,7 +11,13 @@
 
 /* Global variable for default runtime precision */
 /* No guard is needed since this file is only compiled once */
-HYPRE_Precision hypre__global_precision = HYPRE_REAL_DOUBLE;
+#if defined(HYPRE_SINGLE)
+   HYPRE_Precision hypre__global_precision = HYPRE_REAL_SINGLE;
+#elif defined(HYPRE_LONG_DOUBLE)
+   HYPRE_Precision hypre__global_precision = HYPRE_REAL_LONGDOUBLE;
+#else //HYPRE_DOUBLE
+   HYPRE_Precision hypre__global_precision = HYPRE_REAL_DOUBLE;
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
