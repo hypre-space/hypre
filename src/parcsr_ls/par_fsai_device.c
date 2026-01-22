@@ -19,12 +19,12 @@
 #define HYPRE_THRUST_ZIP3(A, B, C) thrust::make_zip_iterator(thrust::make_tuple(A, B, C))
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_BatchedGaussJordanSolve
+ * hypre_GPUKernelBatchedGaussJordanSolve
  *--------------------------------------------------------------------------*/
 
 __global__ void
 __launch_bounds__(1024, 1)
-hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
+hypre_GPUKernelBatchedGaussJordanSolve( hypre_DeviceItem  &item,
                                         HYPRE_Int          batch_num_items,
                                         HYPRE_Int          batch_dim,
                                         HYPRE_Complex     *mat_data,
@@ -129,7 +129,7 @@ hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAIExtractSubSystems
+ * hypre_GPUKernelFSAIExtractSubSystems
  *
  * Output:
  *   1) mat_data: dense matrix coefficients.
@@ -141,7 +141,7 @@ hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
+hypre_GPUKernelFSAIExtractSubSystems( hypre_DeviceItem &item,
                                       HYPRE_Int         num_rows,
                                       HYPRE_Int        *A_i,
                                       HYPRE_Int        *A_j,
@@ -278,14 +278,14 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAIScaling
+ * hypre_GPUKernelFSAIScaling
  *
  * TODO: unroll inner loop
  *       Use fma?
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
+hypre_GPUKernelFSAIScaling( hypre_DeviceItem &item,
                             HYPRE_Int         num_rows,
                             HYPRE_Int         batch_dim,
                             HYPRE_Complex    *sol_data,
@@ -320,7 +320,7 @@ hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAIGatherEntries
+ * hypre_GPUKernelFSAIGatherEntries
  *
  * Output:
  *   1) G_j: column indices of G_diag
@@ -331,7 +331,7 @@ hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
+hypre_GPUKernelFSAIGatherEntries( hypre_DeviceItem &item,
                                   HYPRE_Int         num_rows,
                                   HYPRE_Int         batch_dim,
                                   HYPRE_Complex    *sol_data,
@@ -376,14 +376,14 @@ hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAITruncateCandidateOrdered
+ * hypre_GPUKernelFSAITruncateCandidateOrdered
  *
  * Truncates the candidate pattern matrix (K). This function extracts
  * lower triangular portion of the matrix up to the largest
  * "max_nonzeros_row" coefficients in absolute value.
  *
  * Assumptions:
- *    1) columns are ordered with descreasing absolute coef. values
+ *    1) columns are ordered with decreasing absolute coef. values
  *    2) max_nonzeros_row < warp_size.
  *
  * TODO:
@@ -392,7 +392,7 @@ hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
+hypre_GPUKernelFSAITruncateCandidateOrdered( hypre_DeviceItem &item,
                                              HYPRE_Int         max_nonzeros_row,
                                              HYPRE_Int         num_rows,
                                              HYPRE_Int        *K_i,
@@ -500,7 +500,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAITruncateCandidateUnordered
+ * hypre_GPUKernelFSAITruncateCandidateUnordered
  *
  * Truncates the candidate pattern matrix (K). This function extracts
  * lower triangular portion of the matrix up to the largest
@@ -514,7 +514,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
+hypre_GPUKernelFSAITruncateCandidateUnordered( hypre_DeviceItem &item,
                                                HYPRE_Int         max_nonzeros_row,
                                                HYPRE_Int         num_rows,
                                                HYPRE_Int        *K_i,
@@ -711,7 +711,7 @@ hypre_BatchedGaussJordanSolveDevice( HYPRE_Int       batch_num_items,
    HYPRE_Int  shared_mem_size = (sizeof(HYPRE_Complex) * ((batch_dim + 1) * batch_dim + 2) +
                                  sizeof(HYPRE_Int) * 2);
 
-   HYPRE_GPU_LAUNCH2(hypreGPUKernel_BatchedGaussJordanSolve, gDim, bDim, shared_mem_size,
+   HYPRE_GPU_LAUNCH2(hypre_GPUKernelBatchedGaussJordanSolve, gDim, bDim, shared_mem_size,
                      batch_num_items, batch_dim, mat_data, rhs_data, sol_data);
 
    return hypre_error_flag;
@@ -745,7 +745,7 @@ hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIExtractSubSystems, gDim, bDim, num_rows,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelFSAIExtractSubSystems, gDim, bDim, num_rows,
                      A_i, A_j, A_a, P_i, P_e, P_j, batch_dim, mat_data, rhs_data, G_r );
 
    return hypre_error_flag;
@@ -772,7 +772,7 @@ hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIScaling, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelFSAIScaling, gDim, bDim,
                      num_rows, batch_dim, sol_data, rhs_data, scaling, info );
 
    return hypre_error_flag;
@@ -803,7 +803,7 @@ hypre_FSAIGatherEntriesDevice( HYPRE_Int       num_rows,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIGatherEntries, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelFSAIGatherEntries, gDim, bDim,
                      num_rows, batch_dim, sol_data, scaling, K_i, K_e, K_j, G_i, G_j, G_a );
 
    return hypre_error_flag;
@@ -846,7 +846,7 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
 
    hypre_GpuProfilingPushRange("TruncCand");
-   HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnordered, gDim, bDim,
+   HYPRE_GPU_LAUNCH(hypre_GPUKernelFSAITruncateCandidateUnordered, gDim, bDim,
                     max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
    hypre_GpuProfilingPopRange();
 

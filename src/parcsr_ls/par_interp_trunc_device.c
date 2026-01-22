@@ -15,17 +15,17 @@
 
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
-hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
-                                         HYPRE_Int   nrows,
-                                         HYPRE_Real  trunc_factor,
-                                         HYPRE_Int  *P_diag_i,
-                                         HYPRE_Int  *P_diag_j,
-                                         HYPRE_Real *P_diag_a,
-                                         HYPRE_Int  *P_offd_i,
-                                         HYPRE_Int  *P_offd_j,
-                                         HYPRE_Real *P_offd_a,
-                                         HYPRE_Int  *P_diag_i_new,
-                                         HYPRE_Int  *P_offd_i_new )
+hypre_GPUKernelInterpTruncationPass0v1( hypre_DeviceItem &item,
+                                        HYPRE_Int   nrows,
+                                        HYPRE_Real  trunc_factor,
+                                        HYPRE_Int  *P_diag_i,
+                                        HYPRE_Int  *P_diag_j,
+                                        HYPRE_Real *P_diag_a,
+                                        HYPRE_Int  *P_offd_i,
+                                        HYPRE_Int  *P_offd_j,
+                                        HYPRE_Real *P_offd_a,
+                                        HYPRE_Int  *P_diag_i_new,
+                                        HYPRE_Int  *P_offd_i_new )
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
 
@@ -179,21 +179,21 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
 
 /* TODO: using 1 thread per row, which can be suboptimal */
 __global__ void
-hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
+hypre_GPUKernelInterpTruncationPass1v1( hypre_DeviceItem &item,
 #if defined(HYPRE_USING_SYCL)
-                                         char *shmem_ptr,
+                                        char *shmem_ptr,
 #endif
-                                         HYPRE_Int   nrows,
-                                         HYPRE_Real  trunc_factor,
-                                         HYPRE_Int   max_elmts,
-                                         HYPRE_Int  *P_diag_i,
-                                         HYPRE_Int  *P_diag_j,
-                                         HYPRE_Real *P_diag_a,
-                                         HYPRE_Int  *P_offd_i,
-                                         HYPRE_Int  *P_offd_j,
-                                         HYPRE_Real *P_offd_a,
-                                         HYPRE_Int  *P_diag_i_new,
-                                         HYPRE_Int  *P_offd_i_new )
+                                        HYPRE_Int   nrows,
+                                        HYPRE_Real  trunc_factor,
+                                        HYPRE_Int   max_elmts,
+                                        HYPRE_Int  *P_diag_i,
+                                        HYPRE_Int  *P_diag_j,
+                                        HYPRE_Real *P_diag_a,
+                                        HYPRE_Int  *P_offd_i,
+                                        HYPRE_Int  *P_offd_j,
+                                        HYPRE_Real *P_offd_a,
+                                        HYPRE_Int  *P_diag_i_new,
+                                        HYPRE_Int  *P_offd_i_new )
 {
    const HYPRE_Int row = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -343,20 +343,20 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 
 /* using 1 warp per row */
 __global__ void
-hypreGPUKernel_InterpTruncationPass2_v1( hypre_DeviceItem &item,
-                                         HYPRE_Int   nrows,
-                                         HYPRE_Int  *P_diag_i,
-                                         HYPRE_Int  *P_diag_j,
-                                         HYPRE_Real *P_diag_a,
-                                         HYPRE_Int  *P_offd_i,
-                                         HYPRE_Int  *P_offd_j,
-                                         HYPRE_Real *P_offd_a,
-                                         HYPRE_Int  *P_diag_i_new,
-                                         HYPRE_Int  *P_diag_j_new,
-                                         HYPRE_Real *P_diag_a_new,
-                                         HYPRE_Int  *P_offd_i_new,
-                                         HYPRE_Int  *P_offd_j_new,
-                                         HYPRE_Real *P_offd_a_new )
+hypre_GPUKernelInterpTruncationPass2v1( hypre_DeviceItem &item,
+                                        HYPRE_Int   nrows,
+                                        HYPRE_Int  *P_diag_i,
+                                        HYPRE_Int  *P_diag_j,
+                                        HYPRE_Real *P_diag_a,
+                                        HYPRE_Int  *P_offd_i,
+                                        HYPRE_Int  *P_offd_j,
+                                        HYPRE_Real *P_offd_a,
+                                        HYPRE_Int  *P_diag_i_new,
+                                        HYPRE_Int  *P_diag_j_new,
+                                        HYPRE_Real *P_diag_a_new,
+                                        HYPRE_Int  *P_offd_i_new,
+                                        HYPRE_Int  *P_offd_j_new,
+                                        HYPRE_Real *P_offd_a_new )
 {
    HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -428,7 +428,7 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_InterpTruncationPass0_v1,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelInterpTruncationPass0v1,
                         gDim, bDim,
                         nrows, trunc_factor,
                         P_diag_i, P_diag_j, P_diag_a,
@@ -444,7 +444,7 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
 #else
       size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
 #endif
-      HYPRE_GPU_LAUNCH2( hypreGPUKernel_InterpTruncationPass1_v1,
+      HYPRE_GPU_LAUNCH2( hypre_GPUKernelInterpTruncationPass1v1,
                          gDim, bDim, shmem_bytes,
                          nrows, trunc_factor, max_elmts,
                          P_diag_i, P_diag_j, P_diag_a,
@@ -475,7 +475,7 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_InterpTruncationPass2_v1,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelInterpTruncationPass2v1,
                      gDim, bDim,
                      nrows,
                      P_diag_i, P_diag_j, P_diag_a,
@@ -501,13 +501,13 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
 }
 
 __global__ void
-hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
-                                    HYPRE_Int   nrows,
-                                    HYPRE_Real  trunc_factor,
-                                    HYPRE_Int   max_elmts,
-                                    HYPRE_Int  *P_i,
-                                    HYPRE_Int  *P_j,
-                                    HYPRE_Real *P_a)
+hypre_GPUKernelInterpTruncationv2( hypre_DeviceItem &item,
+                                   HYPRE_Int   nrows,
+                                   HYPRE_Real  trunc_factor,
+                                   HYPRE_Int   max_elmts,
+                                   HYPRE_Int  *P_i,
+                                   HYPRE_Int  *P_j,
+                                   HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
@@ -645,7 +645,7 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_InterpTruncation_v2, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelInterpTruncationv2, gDim, bDim,
                      nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
 
    /* build new P_diag and P_offd */

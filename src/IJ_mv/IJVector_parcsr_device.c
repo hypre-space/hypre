@@ -246,14 +246,14 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_IJVectorAssemblePar
+ * hypre_GPUKernelIJVectorAssemblePar
  *
  * y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
+hypre_GPUKernelIJVectorAssemblePar( hypre_DeviceItem &item,
                                     HYPRE_Int         n,
                                     HYPRE_Complex    *x,
                                     HYPRE_BigInt     *map,
@@ -561,7 +561,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJVectorAssemblePar, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelIJVectorAssemblePar, gDim, bDim,
                         new_nnz, new_data, new_i,
                         vec_start, new_sora,
                         data );
@@ -578,7 +578,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 }
 
 __global__ void
-hypreCUDAKernel_IJVectorUpdateValues( hypre_DeviceItem    &item,
+hypre_GPUKernelIJVectorUpdateValues( hypre_DeviceItem    &item,
                                       HYPRE_Int            n,
                                       const HYPRE_Complex *x,
                                       const HYPRE_BigInt  *indices,
@@ -647,7 +647,7 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
 
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorUpdateValues,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIJVectorUpdateValues,
                      gDim, bDim,
                      num_values, values, indices,
                      vec_start, vec_stop, action,

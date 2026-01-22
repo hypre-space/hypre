@@ -19,7 +19,7 @@
 #include "csr_spmv_device.h"
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatvecShuffleGT8
+ * hypre_GPUKernelCSRMatvecShuffleGT8
  *
  * Templated SpMV device kernel based of warp-shuffle reduction.
  * Uses groups of K threads per row.
@@ -34,7 +34,7 @@
 
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
-hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
+hypre_GPUKernelCSRMatvecShuffleGT8(hypre_DeviceItem &item,
                                    HYPRE_Int         num_rows,
                                    HYPRE_Int         num_vectors,
                                    HYPRE_Int        *row_id,
@@ -134,7 +134,7 @@ hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatvecShuffle
+ * hypre_GPUKernelCSRMatvecShuffle
  *
  * Templated SpMV device kernel based of warp-shuffle reduction.
  * Uses groups of K threads per row
@@ -149,7 +149,7 @@ hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
 //__launch_bounds__(512, 1)
-hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
+hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
                                 HYPRE_Int         num_rows,
                                 HYPRE_Int         num_vectors,
                                 HYPRE_Int        *row_id,
@@ -320,39 +320,39 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
    switch (num_vectors)
    {
       case unroll_depth[1]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[1]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[1]);
          break;
 
       case unroll_depth[2]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[2]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[2]);
          break;
 
       case unroll_depth[3]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[3]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[3]);
          break;
 
       case unroll_depth[4]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[4]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[4]);
          break;
 
       case unroll_depth[5]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[5]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[5]);
          break;
 
       case unroll_depth[6]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[6]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[6]);
          break;
 
       case unroll_depth[7]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[7]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[7]);
          break;
 
       case unroll_depth[8]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[8]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[8]);
          break;
 
       default:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffleGT8, unroll_depth[8]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffleGT8, unroll_depth[8]);
          break;
    }
 

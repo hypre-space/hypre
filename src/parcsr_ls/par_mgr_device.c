@@ -347,7 +347,7 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixExtractBlockDiag
+ * hypre_GPUKernelCSRMatrixExtractBlockDiag
  *
  * Fills vector diag with the block diagonals from the input matrix.
  * This function uses column-major storage for diag.
@@ -361,7 +361,7 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
+hypre_GPUKernelCSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
                                           HYPRE_Int          blk_size,
                                           HYPRE_Int          num_rows,
                                           HYPRE_Int         *A_i,
@@ -427,7 +427,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixExtractBlockDiagMarked
+ * hypre_GPUKernelCSRMatrixExtractBlockDiagMarked
  *
  * Fills vector diag with the block diagonals from the input matrix.
  * This function uses column-major storage for diag.
@@ -441,7 +441,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
+hypre_GPUKernelCSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Int          blk_size,
                                                 HYPRE_Int          num_rows,
                                                 HYPRE_Int          marker_val,
@@ -505,7 +505,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ComplexMatrixBatchedTranspose
+ * hypre_GPUKernelComplexMatrixBatchedTranspose
  *
  * Transposes a group of dense matrices. Assigns one warp per block (batch).
  * Naive implementation.
@@ -517,7 +517,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
+hypre_GPUKernelComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
                                               HYPRE_Int          num_blocks,
                                               HYPRE_Int          block_size,
                                               HYPRE_Complex     *A_data,
@@ -676,14 +676,14 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
       if (CF_marker)
       {
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiagMarked, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelCSRMatrixExtractBlockDiagMarked, gDim, bDim,
                            blk_size, num_rows, point_type, CF_marker, blk_row_indices,
                            A_diag_i, A_diag_j, A_diag_data,
                            B_diag_i, B_diag_j, B_diag_data );
       }
       else
       {
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiag, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelCSRMatrixExtractBlockDiag, gDim, bDim,
                            blk_size, num_rows,
                            A_diag_i, A_diag_j, A_diag_data,
                            B_diag_i, B_diag_j, B_diag_data );
@@ -865,7 +865,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
          hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
                        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelComplexMatrixBatchedTranspose, gDim, bDim,
                            num_blocks, blk_size, tmpdiag, B_diag_data );
       }
 

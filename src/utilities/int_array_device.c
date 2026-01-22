@@ -13,11 +13,11 @@
 #if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_IntArrayInverseMapping
+ * hypre_GPUKernelIntArrayInverseMapping
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
+hypre_GPUKernelIntArrayInverseMapping( hypre_DeviceItem  &item,
                                        HYPRE_Int          size,
                                        HYPRE_Int         *v_data,
                                        HYPRE_Int         *w_data )
@@ -78,7 +78,7 @@ hypre_IntArrayInverseMappingDevice( hypre_IntArray  *v,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
    hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)

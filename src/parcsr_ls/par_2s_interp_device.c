@@ -14,30 +14,283 @@
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
-                                                     bool has_offd,
-                                                     HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
-                                                     HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
-
-__global__ void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
-                                                 HYPRE_Int *AFF_diag_i,
-                                                 HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                 HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
-                                                 HYPRE_Real *rsW );
-
+__global__ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+                                                   bool has_offd,
+                                                   HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
+                                                   HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
-                                                  HYPRE_Int *AFF_diag_i,
-                                                  HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
-                                                  HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
+__global__ void hypre_GPUKernelComputeDlamDtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+                                                HYPRE_Int *AFF_diag_i,
+                                                HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
+                                                HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
-__global__ void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
-                                                   HYPRE_Int *AFF_diag_i,
-                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                   HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
-                                                   HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
+//-----------------------------------------------------------------------
+__global__
+void hypre_GPUKernelMMInterpScaleAFF( hypre_DeviceItem    &item,
+                                      HYPRE_Int      AFF_nrows,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_a,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Int     *AFF_offd_j,
+                                      HYPRE_Complex *AFF_offd_a,
+                                      HYPRE_Complex *beta_diag,
+                                      HYPRE_Complex *beta_offd,
+                                      HYPRE_Int     *F2_to_F,
+                                      HYPRE_Real    *rsW )
+{
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row >= AFF_nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int ib_diag = 0, ie_diag;
+   HYPRE_Int rowF = 0;
+
+   if (lane == 0)
+   {
+      rowF = read_only_load(&F2_to_F[row]);
+   }
+   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
+
+   if (lane < 2)
+   {
+      ib_diag = read_only_load(AFF_diag_i + row + lane);
+   }
+   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
+   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
+
+   HYPRE_Complex rl = 0.0;
+
+   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_diag)
+      {
+         HYPRE_Int j = read_only_load(&AFF_diag_j[i]);
+
+         if (j == rowF)
+         {
+            /* diagonal */
+            AFF_diag_a[i] = 1.0;
+         }
+         else
+         {
+            /* off-diagonal */
+            HYPRE_Complex beta = read_only_load(&beta_diag[j]);
+            HYPRE_Complex val = AFF_diag_a[i];
+
+            if (beta == 0.0)
+            {
+               rl += val;
+               AFF_diag_a[i] = 0.0;
+            }
+            else
+            {
+               AFF_diag_a[i] = val / beta;
+            }
+         }
+      }
+   }
+
+   HYPRE_Int ib_offd = 0, ie_offd;
+
+   if (lane < 2)
+   {
+      ib_offd = read_only_load(AFF_offd_i + row + lane);
+   }
+   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
+   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
+
+   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_offd)
+      {
+         HYPRE_Int j = read_only_load(&AFF_offd_j[i]);
+         HYPRE_Complex beta = read_only_load(&beta_offd[j]);
+         HYPRE_Complex val = AFF_offd_a[i];
+
+         if (beta == 0.0)
+         {
+            rl += val;
+            AFF_offd_a[i] = 0.0;
+         }
+         else
+         {
+            AFF_offd_a[i] = val / beta;
+         }
+      }
+   }
+
+   rl = warp_reduce_sum(item, rl);
+
+   if (lane == 0)
+   {
+      rl += read_only_load(&rsW[row]);
+      rl = rl == 0.0 ? 0.0 : -1.0 / rl;
+   }
+
+   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
+
+   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_diag)
+      {
+         AFF_diag_a[i] *= rl;
+      }
+   }
+
+   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_offd)
+      {
+         AFF_offd_a[i] *= rl;
+      }
+   }
+}
+
+//-----------------------------------------------------------------------
+__global__
+void hypre_GPUKernelMMPEInterpScaleAFF( hypre_DeviceItem    &item,
+                                        HYPRE_Int      AFF_nrows,
+                                        HYPRE_Int     *AFF_diag_i,
+                                        HYPRE_Int     *AFF_diag_j,
+                                        HYPRE_Complex *AFF_diag_a,
+                                        HYPRE_Int     *AFF_offd_i,
+                                        HYPRE_Int     *AFF_offd_j,
+                                        HYPRE_Complex *AFF_offd_a,
+                                        HYPRE_Complex *tmp_diag,
+                                        HYPRE_Complex *tmp_offd,
+                                        HYPRE_Complex *lam_diag,
+                                        HYPRE_Complex *lam_offd,
+                                        HYPRE_Int     *F2_to_F,
+                                        HYPRE_Real    *rsW )
+{
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row >= AFF_nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int ib_diag = 0, ie_diag;
+   HYPRE_Int rowF = 0;
+
+   if (lane == 0)
+   {
+      rowF = read_only_load(&F2_to_F[row]);
+   }
+   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
+
+   if (lane < 2)
+   {
+      ib_diag = read_only_load(AFF_diag_i + row + lane);
+   }
+   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
+   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
+
+   HYPRE_Complex rl = 0.0;
+
+   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_diag)
+      {
+         HYPRE_Int j = read_only_load(&AFF_diag_j[i]);
+
+         if (j == rowF)
+         {
+            /* diagonal */
+            AFF_diag_a[i] = 1.0;
+         }
+         else
+         {
+            /* off-diagonal */
+            HYPRE_Complex lam = read_only_load(&lam_diag[j]);
+            HYPRE_Complex val = AFF_diag_a[i];
+
+            if (lam == 0.0)
+            {
+               rl += val;
+               AFF_diag_a[i] = 0.0;
+            }
+            else
+            {
+               rl += val * read_only_load(&tmp_diag[j]);
+               AFF_diag_a[i] = val / lam;
+            }
+         }
+      }
+   }
+
+   HYPRE_Int ib_offd = 0, ie_offd;
+
+   if (lane < 2)
+   {
+      ib_offd = read_only_load(AFF_offd_i + row + lane);
+   }
+   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
+   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
+
+   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_offd)
+      {
+         HYPRE_Int j = read_only_load(&AFF_offd_j[i]);
+         HYPRE_Complex lam = read_only_load(&lam_offd[j]);
+         HYPRE_Complex val = AFF_offd_a[i];
+
+         if (lam == 0.0)
+         {
+            rl += val;
+            AFF_offd_a[i] = 0.0;
+         }
+         else
+         {
+            rl += val * read_only_load(&tmp_offd[j]);
+            AFF_offd_a[i] = val / lam;
+         }
+      }
+   }
+
+   rl = warp_reduce_sum(item, rl);
+
+   if (lane == 0)
+   {
+      rl += read_only_load(&rsW[row]);
+      rl = rl == 0.0 ? 0.0 : -1.0 / rl;
+   }
+
+   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
+
+   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_diag)
+      {
+         AFF_diag_a[i] *= rl;
+      }
+   }
+
+   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
+        i += HYPRE_WARP_SIZE)
+   {
+      if (i < ie_offd)
+      {
+         AFF_offd_a[i] *= rl;
+      }
+   }
+}
 
 /*--------------------------------------------------------------------------------------*/
 HYPRE_Int
@@ -127,7 +380,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelComputeWeakRowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -210,7 +463,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelMMInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
                      As_F2F_diag_i,
@@ -386,7 +639,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *As_FF_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF));
    HYPRE_Int *As_FF_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF));
    HYPRE_Complex *As_FF_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF));
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_dlam_dtmp,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelComputeDlamDtmp,
                      gDim, bDim,
                      AFC_nr_local,
                      As_FF_diag_i,
@@ -477,7 +730,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelComputeWeakRowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -559,7 +812,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMPEInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelMMPEInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
                      As_F2F_diag_i,
@@ -678,272 +931,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    *P_ptr = P;
 
    return hypre_error_flag;
-}
-
-//-----------------------------------------------------------------------
-__global__
-void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
-                                      HYPRE_Int      AFF_nrows,
-                                      HYPRE_Int     *AFF_diag_i,
-                                      HYPRE_Int     *AFF_diag_j,
-                                      HYPRE_Complex *AFF_diag_a,
-                                      HYPRE_Int     *AFF_offd_i,
-                                      HYPRE_Int     *AFF_offd_j,
-                                      HYPRE_Complex *AFF_offd_a,
-                                      HYPRE_Complex *beta_diag,
-                                      HYPRE_Complex *beta_offd,
-                                      HYPRE_Int     *F2_to_F,
-                                      HYPRE_Real    *rsW )
-{
-   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row >= AFF_nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int ib_diag = 0, ie_diag;
-   HYPRE_Int rowF = 0;
-
-   if (lane == 0)
-   {
-      rowF = read_only_load(&F2_to_F[row]);
-   }
-   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
-
-   if (lane < 2)
-   {
-      ib_diag = read_only_load(AFF_diag_i + row + lane);
-   }
-   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
-   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
-
-   HYPRE_Complex rl = 0.0;
-
-   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_diag)
-      {
-         HYPRE_Int j = read_only_load(&AFF_diag_j[i]);
-
-         if (j == rowF)
-         {
-            /* diagonal */
-            AFF_diag_a[i] = 1.0;
-         }
-         else
-         {
-            /* off-diagonal */
-            HYPRE_Complex beta = read_only_load(&beta_diag[j]);
-            HYPRE_Complex val = AFF_diag_a[i];
-
-            if (beta == 0.0)
-            {
-               rl += val;
-               AFF_diag_a[i] = 0.0;
-            }
-            else
-            {
-               AFF_diag_a[i] = val / beta;
-            }
-         }
-      }
-   }
-
-   HYPRE_Int ib_offd = 0, ie_offd;
-
-   if (lane < 2)
-   {
-      ib_offd = read_only_load(AFF_offd_i + row + lane);
-   }
-   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
-   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
-
-   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_offd)
-      {
-         HYPRE_Int j = read_only_load(&AFF_offd_j[i]);
-         HYPRE_Complex beta = read_only_load(&beta_offd[j]);
-         HYPRE_Complex val = AFF_offd_a[i];
-
-         if (beta == 0.0)
-         {
-            rl += val;
-            AFF_offd_a[i] = 0.0;
-         }
-         else
-         {
-            AFF_offd_a[i] = val / beta;
-         }
-      }
-   }
-
-   rl = warp_reduce_sum(item, rl);
-
-   if (lane == 0)
-   {
-      rl += read_only_load(&rsW[row]);
-      rl = rl == 0.0 ? 0.0 : -1.0 / rl;
-   }
-
-   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
-
-   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_diag)
-      {
-         AFF_diag_a[i] *= rl;
-      }
-   }
-
-   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_offd)
-      {
-         AFF_offd_a[i] *= rl;
-      }
-   }
-}
-
-//-----------------------------------------------------------------------
-__global__
-void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
-                                        HYPRE_Int      AFF_nrows,
-                                        HYPRE_Int     *AFF_diag_i,
-                                        HYPRE_Int     *AFF_diag_j,
-                                        HYPRE_Complex *AFF_diag_a,
-                                        HYPRE_Int     *AFF_offd_i,
-                                        HYPRE_Int     *AFF_offd_j,
-                                        HYPRE_Complex *AFF_offd_a,
-                                        HYPRE_Complex *tmp_diag,
-                                        HYPRE_Complex *tmp_offd,
-                                        HYPRE_Complex *lam_diag,
-                                        HYPRE_Complex *lam_offd,
-                                        HYPRE_Int     *F2_to_F,
-                                        HYPRE_Real    *rsW )
-{
-   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row >= AFF_nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int ib_diag = 0, ie_diag;
-   HYPRE_Int rowF = 0;
-
-   if (lane == 0)
-   {
-      rowF = read_only_load(&F2_to_F[row]);
-   }
-   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
-
-   if (lane < 2)
-   {
-      ib_diag = read_only_load(AFF_diag_i + row + lane);
-   }
-   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
-   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
-
-   HYPRE_Complex rl = 0.0;
-
-   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_diag)
-      {
-         HYPRE_Int j = read_only_load(&AFF_diag_j[i]);
-
-         if (j == rowF)
-         {
-            /* diagonal */
-            AFF_diag_a[i] = 1.0;
-         }
-         else
-         {
-            /* off-diagonal */
-            HYPRE_Complex lam = read_only_load(&lam_diag[j]);
-            HYPRE_Complex val = AFF_diag_a[i];
-
-            if (lam == 0.0)
-            {
-               rl += val;
-               AFF_diag_a[i] = 0.0;
-            }
-            else
-            {
-               rl += val * read_only_load(&tmp_diag[j]);
-               AFF_diag_a[i] = val / lam;
-            }
-         }
-      }
-   }
-
-   HYPRE_Int ib_offd = 0, ie_offd;
-
-   if (lane < 2)
-   {
-      ib_offd = read_only_load(AFF_offd_i + row + lane);
-   }
-   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
-   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
-
-   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_offd)
-      {
-         HYPRE_Int j = read_only_load(&AFF_offd_j[i]);
-         HYPRE_Complex lam = read_only_load(&lam_offd[j]);
-         HYPRE_Complex val = AFF_offd_a[i];
-
-         if (lam == 0.0)
-         {
-            rl += val;
-            AFF_offd_a[i] = 0.0;
-         }
-         else
-         {
-            rl += val * read_only_load(&tmp_offd[j]);
-            AFF_offd_a[i] = val / lam;
-         }
-      }
-   }
-
-   rl = warp_reduce_sum(item, rl);
-
-   if (lane == 0)
-   {
-      rl += read_only_load(&rsW[row]);
-      rl = rl == 0.0 ? 0.0 : -1.0 / rl;
-   }
-
-   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
-
-   for (HYPRE_Int i = ib_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_diag);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_diag)
-      {
-         AFF_diag_a[i] *= rl;
-      }
-   }
-
-   for (HYPRE_Int i = ib_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie_offd);
-        i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie_offd)
-      {
-         AFF_offd_a[i] *= rl;
-      }
-   }
 }
 
 #endif /* #if defined(HYPRE_USING_GPU) */

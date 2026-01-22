@@ -12,11 +12,11 @@
 #if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ParCSRMatrixBlkFilterCount
+ * hypre_GPUKernelParCSRMatrixBlkFilterCount
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_ParCSRMatrixBlkFilterCount(hypre_DeviceItem  &item,
+hypre_GPUKernelParCSRMatrixBlkFilterCount(hypre_DeviceItem  &item,
                                           HYPRE_Int          num_rows,
                                           HYPRE_Int          block_size,
                                           HYPRE_Int         *A_diag_i,
@@ -90,11 +90,11 @@ hypreGPUKernel_ParCSRMatrixBlkFilterCount(hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ParCSRMatrixBlkFilterFill
+ * hypre_GPUKernelParCSRMatrixBlkFilterFill
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
+hypre_GPUKernelParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
                                          HYPRE_Int         num_rows,
                                          HYPRE_Int         block_size,
                                          HYPRE_Int        *A_diag_i,
@@ -251,7 +251,7 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
    B_offd_i = hypre_CSRMatrixI(B_offd);
 
    /* First pass: count nonzeros */
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ParCSRMatrixBlkFilterCount, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelParCSRMatrixBlkFilterCount, gDim, bDim,
                      num_rows, block_size,
                      A_diag_i, A_diag_j,
                      A_offd_i, A_offd_j,
@@ -274,7 +274,7 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
    B_offd_a  = hypre_TAlloc(HYPRE_Complex, B_offd_nnz, memory_location);
 
    /* Second pass: fill B */
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ParCSRMatrixBlkFilterFill, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelParCSRMatrixBlkFilterFill, gDim, bDim,
                      num_rows, block_size,
                      A_diag_i, A_diag_j, A_diag_a,
                      A_offd_i, A_offd_j, A_offd_a,

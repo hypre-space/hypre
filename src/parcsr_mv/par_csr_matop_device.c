@@ -15,7 +15,7 @@
 /* return B = [Adiag, Aoffd] */
 #if 1
 __global__ void
-hypreGPUKernel_ConcatDiagAndOffd( hypre_DeviceItem &item,
+hypre_GPUKernelConcatDiagAndOffd( hypre_DeviceItem &item,
                                   HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
                                   HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                   HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
@@ -105,7 +105,7 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    HYPRE_Int *d_ib = hypre_CSRMatrixI(B);
    HYPRE_Int *d_jb = hypre_CSRMatrixJ(B);
    HYPRE_Complex *d_ab = hypre_CSRMatrixData(B);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelConcatDiagAndOffd,
                      gDim, bDim,
                      nrows,
                      diag_ncol,
@@ -233,7 +233,7 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    HYPRE_Int *d_ib = hypre_CSRMatrixI(B);
    HYPRE_Int *d_jb = hypre_CSRMatrixJ(B);
    HYPRE_Complex *d_ab = hypre_CSRMatrixData(B);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelConcatDiagAndOffd,
                      gDim, bDim,
                      nrows,
                      diag_ncol,
@@ -286,7 +286,7 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    d_ib = hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A);
    d_jb = hypre_CSRMatrixJ(B);
    d_ab = hypre_CSRMatrixData(B);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelConcatDiagAndOffd,
                      gDim, bDim,
                      nrows,
                      diag_ncol,

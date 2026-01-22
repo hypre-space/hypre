@@ -23,7 +23,7 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreGPUKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
+hypre_GPUKernelCSRMaxEigEstimate(hypre_DeviceItem    &item,
                                  HYPRE_Int      nrows,
                                  HYPRE_Int     *diag_ia,
                                  HYPRE_Int     *diag_ja,
@@ -141,7 +141,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
-   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMaxEigEstimate,
+   HYPRE_GPU_LAUNCH(hypre_GPUKernelCSRMaxEigEstimate,
                     gDim,
                     bDim,
                     A_num_rows,

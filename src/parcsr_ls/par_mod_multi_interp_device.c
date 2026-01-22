@@ -104,67 +104,923 @@ struct globalC_functor
 };
 #endif
 
-void hypre_modmp_init_fine_to_coarse( HYPRE_Int n_fine, HYPRE_Int *pass_marker, HYPRE_Int color,
-                                      HYPRE_Int *fine_to_coarse );
+void
+hypre_ModmpInitFineToCoarseDevice( HYPRE_Int  n_fine,
+                                   HYPRE_Int *pass_marker,
+                                   HYPRE_Int  color,
+                                   HYPRE_Int *fine_to_coarse )
+{
+   // n_fine == pass_marker.size()
+   // Host code this is replacing:
+   // n_cpts = 0;
+   // for (HYPRE_Int i=0; i < n_fine; i++)
+   //  {
+   //    if (pass_marker[i] == color)
+   //      fine_to_coarse[i] = n_cpts++;
+   //    else
+   //      fine_to_coarse[i] = -1;
+   //  }
 
-void hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_offd,
-                                                       HYPRE_Int color, HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd,
-                                                       HYPRE_Int ** fine_to_coarse_offd );
+   if (n_fine == 0)
+   {
+      return;
+   }
 
-__global__ void hypreGPUKernel_cfmarker_masked_rowsum( hypre_DeviceItem &item, HYPRE_Int nrows,
-                                                       HYPRE_Int *A_diag_i,
-                                                       HYPRE_Int *A_diag_j, HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
-                                                       HYPRE_Complex *A_offd_data, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
-                                                       HYPRE_Complex *row_sums );
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(pass_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      fine_to_coarse,
+                      HYPRE_Int(0) );
 
-__global__ void hypreGPUKernel_generate_Pdiag_i_Poffd_i( hypre_DeviceItem &item,
-                                                         HYPRE_Int num_points,
-                                                         HYPRE_Int color,
-                                                         HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int *S_diag_i,
-                                                         HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *P_diag_i,
-                                                         HYPRE_Int *P_offd_i );
+   hypreSycl_transform_if( fine_to_coarse,
+                           fine_to_coarse + n_fine,
+                           pass_marker,
+                           fine_to_coarse,
+   [] (const auto & x) {return -1;},
+   [color = color] (const auto & x) {return x != color;} );
+#else
+   HYPRE_THRUST_CALL( exclusive_scan,
+                      thrust::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
+                      thrust::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
+                      fine_to_coarse,
+                      HYPRE_Int(0) );
 
-__global__ void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item,
-                                                         HYPRE_Int num_points,
-                                                         HYPRE_Int color,
-                                                         HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
-                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i,
-                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_data,
-                                                         HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i,
-                                                         HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *P_offd_j, HYPRE_Complex *P_offd_data,
-                                                         HYPRE_Complex *row_sums );
+   HYPRE_THRUST_CALL( replace_if,
+                      fine_to_coarse,
+                      fine_to_coarse + n_fine,
+                      pass_marker,
+                      HYPRE_THRUST_NOT(equal<HYPRE_Int>(color)),
+                      -1 );
+#endif
+}
 
-__global__ void hypreGPUKernel_insert_remaining_weights( hypre_DeviceItem &item, HYPRE_Int start,
-                                                         HYPRE_Int stop,
-                                                         HYPRE_Int *pass_order, HYPRE_Int *Pi_diag_i, HYPRE_Int *Pi_diag_j, HYPRE_Real *Pi_diag_data,
-                                                         HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *Pi_offd_i,
-                                                         HYPRE_Int *Pi_offd_j, HYPRE_Real *Pi_offd_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j,
-                                                         HYPRE_Real *P_offd_data );
+void
+hypre_ModmpComputeNumColsOffdFineToCoarseDevice( HYPRE_Int  *pass_marker_offd,
+                                                 HYPRE_Int   color,
+                                                 HYPRE_Int   num_cols_offd_A,
+                                                 HYPRE_Int  &num_cols_offd,
+                                                 HYPRE_Int **fine_to_coarse_offd_ptr )
+{
+   // We allocate with a "+1" because the host version of this code incremented the counter
+   // even on the last match, so we create an extra entry the exclusive_scan will reflect this
+   // and we can read off the last entry and only do 1 kernel call and 1 memcpy
+   // RL: this trick requires pass_marker_offd has 1 more space allocated too
+   HYPRE_Int *fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
 
-__global__ void hypreGPUKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem &item,
-                                                         HYPRE_Int num_points,
-                                                         HYPRE_Int color,
-                                                         HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
-                                                         HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
-                                                         HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
-                                                         HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *Q_diag_i, HYPRE_Int *Q_offd_i,
-                                                         HYPRE_Int *Q_diag_j, HYPRE_Complex *Q_diag_data, HYPRE_Int *Q_offd_j, HYPRE_Complex *Q_offd_data,
-                                                         HYPRE_Complex *w_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(pass_marker_offd,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      fine_to_coarse_offd,
+                      HYPRE_Int(0) );
+#else
+   HYPRE_THRUST_CALL( exclusive_scan,
+                      thrust::make_transform_iterator(pass_marker_offd,                       equal<HYPRE_Int>(color)),
+                      thrust::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1, equal<HYPRE_Int>(color)),
+                      fine_to_coarse_offd,
+                      HYPRE_Int(0) );
+#endif
 
-__global__ void hypreGPUKernel_mutli_pi_rowsum( hypre_DeviceItem &item, HYPRE_Int num_points,
-                                                HYPRE_Int *pass_order,
-                                                HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_data, HYPRE_Int *Pi_diag_i, HYPRE_Complex *Pi_diag_data,
-                                                HYPRE_Int *Pi_offd_i, HYPRE_Complex *Pi_offd_data, HYPRE_Complex *w_row_sum );
+   hypre_TMemcpy( &num_cols_offd, fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1,
+                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-__global__ void hypreGPUKernel_pass_order_count( hypre_DeviceItem &item, HYPRE_Int num_points,
-                                                 HYPRE_Int color,
-                                                 HYPRE_Int *points_left, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int *S_diag_i,
-                                                 HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *diag_shifts );
+   *fine_to_coarse_offd_ptr = fine_to_coarse_offd;
+}
 
-__global__ void hypreGPUKernel_populate_big_P_offd_j( hypre_DeviceItem &item, HYPRE_Int start,
-                                                      HYPRE_Int stop,
-                                                      HYPRE_Int *pass_order, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_BigInt *col_map_offd_Pi,
-                                                      HYPRE_BigInt *big_P_offd_j );
+__global__
+void hypre_GPUKernelCfmarkerMaskedRowsum( hypre_DeviceItem    &item,
+                                            HYPRE_Int      nrows,
+                                            HYPRE_Int     *A_diag_i,
+                                            HYPRE_Int     *A_diag_j,
+                                            HYPRE_Complex *A_diag_data,
+                                            HYPRE_Int     *A_offd_i,
+                                            HYPRE_Int     *A_offd_j,
+                                            HYPRE_Complex *A_offd_data,
+                                            HYPRE_Int     *CF_marker,
+                                            HYPRE_Int     *dof_func,
+                                            HYPRE_Int     *dof_func_offd,
+                                            HYPRE_Complex *row_sums )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= nrows || read_only_load(&CF_marker[row_i]) >= 0)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+   HYPRE_Int func_i = dof_func ? read_only_load(&dof_func[row_i]) : 0;
+
+   // A_diag part
+   if (lane < 2)
+   {
+      p = read_only_load(A_diag_i + row_i + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Complex row_sum_i = 0.0;
+
+   // exclude diagonal: do not assume it is the first entry
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int col = read_only_load(&A_diag_j[j]);
+
+      if (row_i != col)
+      {
+         HYPRE_Int func_j = dof_func ? read_only_load(&dof_func[col]) : 0;
+
+         if (func_i == func_j)
+         {
+            HYPRE_Complex value = read_only_load(&A_diag_data[j]);
+            row_sum_i += value;
+         }
+      }
+   }
+
+   // A_offd part
+   if (lane < 2)
+   {
+      p = read_only_load(A_offd_i + row_i + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int func_j = 0;
+      if (dof_func_offd)
+      {
+         HYPRE_Int col = read_only_load(&A_offd_j[j]);
+         func_j = read_only_load(&dof_func_offd[col]);
+      }
+
+      if (func_i == func_j)
+      {
+         HYPRE_Complex value = read_only_load(&A_offd_data[j]);
+         row_sum_i += value;
+      }
+   }
+
+   row_sum_i = warp_reduce_sum(item, row_sum_i);
+
+   if (lane == 0)
+   {
+      row_sums[row_i] = row_sum_i;
+   }
+}
+
+__global__
+void hypre_GPUKernelMutliPiRowsum( hypre_DeviceItem    &item,
+                                     HYPRE_Int      num_points,
+                                     HYPRE_Int     *pass_order,
+                                     HYPRE_Int     *A_diag_i,
+                                     HYPRE_Complex *A_diag_data,
+                                     HYPRE_Int     *Pi_diag_i,
+                                     HYPRE_Complex *Pi_diag_data,
+                                     HYPRE_Int     *Pi_offd_i,
+                                     HYPRE_Complex *Pi_offd_data,
+                                     HYPRE_Complex *w_row_sum )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
+   HYPRE_Real row_sum_C = 0.0;
+
+   // Pi_diag
+   if (lane < 2)
+   {
+      p_diag = read_only_load(Pi_diag_i + row_i + lane);
+   }
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
+
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
+   {
+      row_sum_C += read_only_load(&Pi_diag_data[j]);
+   }
+
+   // Pi_offd
+   if (lane < 2)
+   {
+      p_offd = read_only_load(Pi_offd_i + row_i + lane);
+   }
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
+
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
+   {
+      row_sum_C += read_only_load(&Pi_offd_data[j]);
+   }
+
+   row_sum_C = warp_reduce_sum(item, row_sum_C);
+
+   if ( lane == 0 )
+   {
+      const HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
+      const HYPRE_Int j1 = read_only_load(&A_diag_i[i1]);
+      //XXX RL: rely on diagonal is the first of row [FIX?]
+      const HYPRE_Real diagonal = read_only_load(&A_diag_data[j1]);
+      const HYPRE_Real value = row_sum_C * diagonal;
+      row_sum_C += read_only_load(&w_row_sum[row_i]);
+
+      if ( value != 0.0 )
+      {
+         row_sum_C /= value;
+      }
+   }
+
+   row_sum_C = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, row_sum_C, 0);
+
+   // Pi_diag
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
+   {
+      Pi_diag_data[j] *= -row_sum_C;
+   }
+
+   // Pi_offd
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
+   {
+      Pi_offd_data[j] *= -row_sum_C;
+   }
+}
+
+__global__
+void hypre_GPUKernelGeneratePdiagiPoffdi( hypre_DeviceItem &item,
+                                              HYPRE_Int  num_points,
+                                              HYPRE_Int  color,
+                                              HYPRE_Int *pass_order,
+                                              HYPRE_Int *pass_marker,
+                                              HYPRE_Int *pass_marker_offd,
+                                              HYPRE_Int *S_diag_i,
+                                              HYPRE_Int *S_diag_j,
+                                              HYPRE_Int *S_offd_i,
+                                              HYPRE_Int *S_offd_j,
+                                              HYPRE_Int *P_diag_i,
+                                              HYPRE_Int *P_offd_i )
+{
+   /*
+    nnz_diag = 0;
+    nnz_offd = 0;
+    for (i=0; i < num_points; i++)
+    {
+      i1 = pass_order[i];
+      for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+      {
+         j1 = S_diag_j[j];
+         if (pass_marker[j1] == color)
+         {
+             P_diag_i[i]++;
+             nnz_diag++;
+         }
+      }
+      for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+      {
+         j1 = S_offd_j[j];
+         if (pass_marker_offd[j1] == color)
+         {
+             P_offd_i[i]++;
+             nnz_offd++;
+         }
+      }
+    }
+   */
+
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+   HYPRE_Int diag_increment = 0;
+   HYPRE_Int offd_increment = 0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p = read_only_load(S_diag_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      const HYPRE_Int j1 = read_only_load(&S_diag_j[j]);
+      const HYPRE_Int marker = read_only_load(&pass_marker[j1]);
+
+      diag_increment += marker == color;
+   }
+
+   diag_increment = warp_reduce_sum(item, diag_increment);
+
+   // Increment P_diag_i, but then we need to also do a block reduction
+   // on diag_increment to log the total nnz_diag for the block
+   // Then after the kernel, we'll accumulate nnz_diag for each block
+   if (lane == 0)
+   {
+      P_diag_i[row_i] = diag_increment;
+   }
+
+   // S_offd
+   if (lane < 2)
+   {
+      p = read_only_load(S_offd_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      const HYPRE_Int j1 = read_only_load(&S_offd_j[j]);
+      const HYPRE_Int marker = read_only_load(&pass_marker_offd[j1]);
+
+      offd_increment += marker == color;
+   }
+
+   offd_increment = warp_reduce_sum(item, offd_increment);
+
+   // Increment P_offd_i, but then we need to also do a block reduction
+   // on offd_increment to log the total nnz_offd for the block
+   // Then after the kernel, we'll accumulate nnz_offd for each block
+   if (lane == 0)
+   {
+      P_offd_i[row_i] = offd_increment;
+   }
+}
+
+__global__
+void hypre_GPUKernelGeneratePdiagjPoffdj( hypre_DeviceItem    &item,
+                                              HYPRE_Int      num_points,
+                                              HYPRE_Int      color,
+                                              HYPRE_Int     *pass_order,
+                                              HYPRE_Int     *pass_marker,
+                                              HYPRE_Int     *pass_marker_offd,
+                                              HYPRE_Int     *fine_to_coarse,
+                                              HYPRE_Int     *fine_to_coarse_offd,
+                                              HYPRE_Int     *A_diag_i,
+                                              HYPRE_Complex *A_diag_data,
+                                              HYPRE_Int     *A_offd_i,
+                                              HYPRE_Complex *A_offd_data,
+                                              HYPRE_Int     *Soc_diag_j,
+                                              HYPRE_Int     *Soc_offd_j,
+                                              HYPRE_Int     *P_diag_i,
+                                              HYPRE_Int     *P_offd_i,
+                                              HYPRE_Int     *P_diag_j,
+                                              HYPRE_Complex *P_diag_data,
+                                              HYPRE_Int     *P_offd_j,
+                                              HYPRE_Complex *P_offd_data,
+                                              HYPRE_Complex *row_sums )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0, q_diag_P;
+   HYPRE_Int k;
+   HYPRE_Complex row_sum_C = 0.0, diagonal = 0.0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p_diag_A = read_only_load(A_diag_i + i1 + lane);
+      p_diag_P = read_only_load(P_diag_i + row_i + lane);
+   }
+   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
+   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+
+   k = p_diag_P;
+   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
+        j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int equal = 0;
+      HYPRE_Int sum = 0;
+      HYPRE_Int j1 = -1;
+
+      if ( j < q_diag_A )
+      {
+         j1 = read_only_load(&Soc_diag_j[j]);
+         equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
+      }
+
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
+
+      if (equal)
+      {
+         P_diag_j[k + pos] = read_only_load(&fine_to_coarse[j1]);
+         HYPRE_Complex val = read_only_load(&A_diag_data[j]);
+         P_diag_data[k + pos] = val;
+         row_sum_C += val;
+      }
+
+      if (j1 == -2)
+      {
+         diagonal = read_only_load(&A_diag_data[j]);
+      }
+
+      k += sum;
+   }
+
+   hypre_device_assert(k == q_diag_P);
+
+   // S_offd
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0, q_offd_P;
+
+   if (lane < 2)
+   {
+      p_offd_A = read_only_load(A_offd_i + i1 + lane);
+      p_offd_P = read_only_load(P_offd_i + row_i + lane);
+   }
+   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
+   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+
+   k = p_offd_P;
+   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
+        j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int equal = 0;
+      HYPRE_Int sum = 0;
+      HYPRE_Int j1 = -1;
+
+      if ( j < q_offd_A )
+      {
+         j1 = read_only_load(&Soc_offd_j[j]);
+         equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
+      }
+
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
+
+      if (equal)
+      {
+         P_offd_j[k + pos] = read_only_load(&fine_to_coarse_offd[j1]);
+         HYPRE_Complex val = read_only_load(&A_offd_data[j]);
+         P_offd_data[k + pos] = val;
+         row_sum_C += val;
+      }
+
+      k += sum;
+   }
+
+   hypre_device_assert(k == q_offd_P);
+
+   row_sum_C = warp_reduce_sum(item, row_sum_C);
+   diagonal = warp_reduce_sum(item, diagonal);
+   HYPRE_Complex value = row_sum_C * diagonal;
+   HYPRE_Complex row_sum_i = 0.0;
+
+   if (lane == 0)
+   {
+      row_sum_i = read_only_load(&row_sums[i1]);
+
+      if (value)
+      {
+         row_sum_i /= value;
+         row_sums[i1] = row_sum_i;
+      }
+   }
+
+   row_sum_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, row_sum_i, 0);
+
+   for (HYPRE_Int j = p_diag_P + lane; j < q_diag_P; j += HYPRE_WARP_SIZE)
+   {
+      P_diag_data[j] = -P_diag_data[j] * row_sum_i;
+   }
+
+   for (HYPRE_Int j = p_offd_P + lane; j < q_offd_P; j += HYPRE_WARP_SIZE)
+   {
+      P_offd_data[j] = -P_offd_data[j] * row_sum_i;
+   }
+}
+
+__global__
+void hypre_GPUKernelInsertRemainingWeights( hypre_DeviceItem &item,
+                                              HYPRE_Int   start,
+                                              HYPRE_Int   stop,
+                                              HYPRE_Int  *pass_order,
+                                              HYPRE_Int  *Pi_diag_i,
+                                              HYPRE_Int  *Pi_diag_j,
+                                              HYPRE_Real *Pi_diag_data,
+                                              HYPRE_Int  *P_diag_i,
+                                              HYPRE_Int  *P_diag_j,
+                                              HYPRE_Real *P_diag_data,
+                                              HYPRE_Int  *Pi_offd_i,
+                                              HYPRE_Int  *Pi_offd_j,
+                                              HYPRE_Real *Pi_offd_data,
+                                              HYPRE_Int  *P_offd_i,
+                                              HYPRE_Int  *P_offd_j,
+                                              HYPRE_Real *P_offd_data )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= stop - start)
+   {
+      return;
+   }
+
+   HYPRE_Int i1 = read_only_load(&pass_order[row_i + start]);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+   HYPRE_Int i2;
+
+   // P_diag
+   if (lane < 2)
+   {
+      p = read_only_load(P_diag_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   i2 = read_only_load(&Pi_diag_i[row_i]) - p;
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      P_diag_j[j] = Pi_diag_j[j + i2];
+      P_diag_data[j] = Pi_diag_data[j + i2];
+   }
+
+   // P_offd
+   if (lane < 2)
+   {
+      p = read_only_load(P_offd_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   i2 = read_only_load(&Pi_offd_i[row_i]) - p;
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      P_offd_j[j] = Pi_offd_j[j + i2];
+      P_offd_data[j] = Pi_offd_data[j + i2];
+   }
+}
+
+
+__global__
+void hypre_GPUKernelGenerateQdiagjQoffdj( hypre_DeviceItem    &item,
+                                              HYPRE_Int      num_points,
+                                              HYPRE_Int      color,
+                                              HYPRE_Int     *pass_order,
+                                              HYPRE_Int     *pass_marker,
+                                              HYPRE_Int     *pass_marker_offd,
+                                              HYPRE_Int     *fine_to_coarse,
+                                              HYPRE_Int     *fine_to_coarse_offd,
+                                              HYPRE_Int     *A_diag_i,
+                                              HYPRE_Int     *A_diag_j,
+                                              HYPRE_Complex *A_diag_data,
+                                              HYPRE_Int     *A_offd_i,
+                                              HYPRE_Int     *A_offd_j,
+                                              HYPRE_Complex *A_offd_data,
+                                              HYPRE_Int     *Soc_diag_j,
+                                              HYPRE_Int     *Soc_offd_j,
+                                              HYPRE_Int     *Q_diag_i,
+                                              HYPRE_Int     *Q_offd_i,
+                                              HYPRE_Int     *Q_diag_j,
+                                              HYPRE_Complex *Q_diag_data,
+                                              HYPRE_Int     *Q_offd_j,
+                                              HYPRE_Complex *Q_offd_data,
+                                              HYPRE_Complex *w_row_sum,
+                                              HYPRE_Int      num_functions,
+                                              HYPRE_Int     *dof_func,
+                                              HYPRE_Int     *dof_func_offd )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0;
+#ifdef HYPRE_DEBUG
+   HYPRE_Int q_diag_P;
+#endif
+   HYPRE_Int k;
+   HYPRE_Complex w_row_sum_i = 0.0;
+   HYPRE_Int dof_func_i1 = -1;
+
+   if (num_functions > 1)
+   {
+      if (lane == 0)
+      {
+         dof_func_i1 = read_only_load(&dof_func[i1]);
+      }
+      dof_func_i1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_i1, 0);
+   }
+
+   // S_diag
+#ifdef HYPRE_DEBUG
+   if (lane < 2)
+   {
+      p_diag_A = read_only_load(A_diag_i + i1 + lane);
+      p_diag_P = read_only_load(Q_diag_i + row_i + lane);
+   }
+   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
+   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+#else
+   if (lane < 2)
+   {
+      p_diag_A = read_only_load(A_diag_i + i1 + lane);
+   }
+   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   if (lane == 0)
+   {
+      p_diag_P = read_only_load(Q_diag_i + row_i);
+   }
+   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+#endif
+
+   k = p_diag_P;
+   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
+        j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int equal = 0;
+      HYPRE_Int sum = 0;
+      HYPRE_Int j1 = -1;
+
+      if ( j < q_diag_A )
+      {
+         j1 = read_only_load(&Soc_diag_j[j]);
+         equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
+      }
+
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
+
+      if (equal)
+      {
+         Q_diag_j[k + pos] = read_only_load(&fine_to_coarse[j1]);
+         Q_diag_data[k + pos] = read_only_load(&A_diag_data[j]);
+      }
+      else if (j < q_diag_A && j1 != -2)
+      {
+         if (num_functions > 1)
+         {
+            const HYPRE_Int col = read_only_load(&A_diag_j[j]);
+            if ( dof_func_i1 == read_only_load(&dof_func[col]) )
+            {
+               w_row_sum_i += read_only_load(&A_diag_data[j]);
+            }
+         }
+         else
+         {
+            w_row_sum_i += read_only_load(&A_diag_data[j]);
+         }
+      }
+
+      k += sum;
+   }
+
+#ifdef HYPRE_DEBUG
+   hypre_device_assert(k == q_diag_P);
+#endif
+
+   // S_offd
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0;
+#ifdef HYPRE_DEBUG
+   HYPRE_Int q_offd_P;
+#endif
+
+#ifdef HYPRE_DEBUG
+   if (lane < 2)
+   {
+      p_offd_A = read_only_load(A_offd_i + i1 + lane);
+      p_offd_P = read_only_load(Q_offd_i + row_i + lane);
+   }
+   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
+   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+#else
+   if (lane < 2)
+   {
+      p_offd_A = read_only_load(A_offd_i + i1 + lane);
+   }
+   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   if (lane == 0)
+   {
+      p_offd_P = read_only_load(Q_offd_i + row_i);
+   }
+   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+#endif
+
+   k = p_offd_P;
+   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
+        j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int equal = 0;
+      HYPRE_Int sum = 0;
+      HYPRE_Int j1 = -1;
+
+      if ( j < q_offd_A )
+      {
+         j1 = read_only_load(&Soc_offd_j[j]);
+         equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
+      }
+
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
+
+      if (equal)
+      {
+         Q_offd_j[k + pos] = read_only_load(&fine_to_coarse_offd[j1]);
+         Q_offd_data[k + pos] = read_only_load(&A_offd_data[j]);
+      }
+      else if (j < q_offd_A)
+      {
+         if (num_functions > 1)
+         {
+            const HYPRE_Int col = read_only_load(&A_offd_j[j]);
+            if ( dof_func_i1 == read_only_load(&dof_func_offd[col]) )
+            {
+               w_row_sum_i += read_only_load(&A_offd_data[j]);
+            }
+         }
+         else
+         {
+            w_row_sum_i += read_only_load(&A_offd_data[j]);
+         }
+      }
+
+      k += sum;
+   }
+
+#ifdef HYPRE_DEBUG
+   hypre_device_assert(k == q_offd_P);
+#endif
+
+   w_row_sum_i = warp_reduce_sum(item, w_row_sum_i);
+
+   if (lane == 0)
+   {
+      w_row_sum[row_i] = w_row_sum_i;
+   }
+}
+
+__global__
+void hypre_GPUKernelPassOrderCount( hypre_DeviceItem &item,
+                                      HYPRE_Int  num_points,
+                                      HYPRE_Int  color,
+                                      HYPRE_Int *points_left,
+                                      HYPRE_Int *pass_marker,
+                                      HYPRE_Int *pass_marker_offd,
+                                      HYPRE_Int *S_diag_i,
+                                      HYPRE_Int *S_diag_j,
+                                      HYPRE_Int *S_offd_i,
+                                      HYPRE_Int *S_offd_j,
+                                      HYPRE_Int *diag_shifts )
+{
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row_i >= num_points)
+   {
+      return;
+   }
+
+   HYPRE_Int i1 = read_only_load(&points_left[row_i]);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+   hypre_int brk = 0;
+
+   // S_diag
+   if (lane < 2)
+   {
+      p = read_only_load(S_diag_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if (j < q)
+      {
+         HYPRE_Int j1 = read_only_load(&S_diag_j[j]);
+         if ( read_only_load(&pass_marker[j1]) == color )
+         {
+            brk = 1;
+         }
+      }
+
+      brk = warp_any_sync(item, HYPRE_WARP_FULL_MASK, brk);
+
+      if (brk)
+      {
+         break;
+      }
+   }
+
+   if (brk)
+   {
+      // Only one thread can increment because of the break
+      // so we just need to increment by 1
+      if (lane == 0)
+      {
+         diag_shifts[row_i] = 1;
+      }
+
+      return;
+   }
+
+   // S_offd
+   if (lane < 2)
+   {
+      p = read_only_load(S_offd_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      if (j < q)
+      {
+         HYPRE_Int j1 = read_only_load(&S_offd_j[j]);
+         if ( read_only_load(&pass_marker_offd[j1]) == color )
+         {
+            brk = 1;
+         }
+      }
+
+      brk = warp_any_sync(item, HYPRE_WARP_FULL_MASK, brk);
+
+      if (brk)
+      {
+         break;
+      }
+   }
+
+   // Only one thread can increment because of the break
+   // so we just need to increment by 1
+   if (lane == 0)
+   {
+      diag_shifts[row_i] = (brk != 0);
+   }
+}
+
+__global__
+void hypre_GPUKernelPopulateBigPoffdj( hypre_DeviceItem   &item,
+                                           HYPRE_Int     start,
+                                           HYPRE_Int     stop,
+                                           HYPRE_Int    *pass_order,
+                                           HYPRE_Int    *P_offd_i,
+                                           HYPRE_Int    *P_offd_j,
+                                           HYPRE_BigInt *col_map_offd_Pi,
+                                           HYPRE_BigInt *big_P_offd_j )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item) + start;
+
+   if (i >= stop)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int i1 = read_only_load(&pass_order[i]);
+   HYPRE_Int p = 0;
+   HYPRE_Int q = 0;
+
+   if (lane < 2)
+   {
+      p = read_only_load(P_offd_i + i1 + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Int col = read_only_load(&P_offd_j[j]);
+      big_P_offd_j[j] = read_only_load(&col_map_offd_Pi[col]);
+   }
+}
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGBuildModMultipass
@@ -432,7 +1288,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       }
 #endif
 
-      /* allocate one more see comments in hypre_modmp_compute_num_cols_offd_fine_to_coarse */
+      /* allocate one more see comments in hypre_ModmpComputeNumColsOffdFineToCoarseDevice */
       pass_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
 
       /* create a handle to start communication. 11: for integer */
@@ -466,7 +1322,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          dim3 gDim = hypre_GetDefaultDeviceGridDimension(remaining, "warp", bDim);
 
          /* output diag_shifts is 0/1 indicating if points_left_dev[i] is picked in this pass */
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_pass_order_count,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelPassOrderCount,
                            gDim, bDim,
                            remaining,
                            current_pass,
@@ -625,7 +1481,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_cfmarker_masked_rowsum, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelCfmarkerMaskedRowsum, gDim, bDim,
                         n_fine, A_diag_i, A_diag_j, A_diag_data,
                         A_offd_i, A_offd_j, A_offd_data,
                         CF_marker,
@@ -805,7 +1661,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       pass_starts_p1 = pass_starts[p + 1];
       pass_starts_p2 = pass_starts[p + 2];
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_insert_remaining_weights, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelInsertRemainingWeights, gDim, bDim,
                         pass_starts_p1, pass_starts_p2, pass_order,
                         Pi_diag_i, Pi_diag_j, Pi_diag_data,
                         P_diag_i, P_diag_j, P_diag_data,
@@ -867,7 +1723,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
          pass_starts_p1 = pass_starts[p + 1];
          pass_starts_p2 = pass_starts[p + 2];
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_populate_big_P_offd_j, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelPopulateBigPoffdj, gDim, bDim,
                            pass_starts_p1,
                            pass_starts_p2,
                            pass_order,
@@ -977,6 +1833,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_GenerateMultipassPiDevice
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                                  hypre_ParCSRMatrix  *S,
@@ -1046,7 +1906,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
+   hypre_ModmpInitFineToCoarseDevice(n_fine, pass_marker, color, fine_to_coarse);
 
    if (num_procs > 1)
    {
@@ -1111,8 +1971,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommHandleDestroy(comm_handle);
 
       // This will allocate fine_to_coarse_offd
-      hypre_modmp_compute_num_cols_offd_fine_to_coarse( pass_marker_offd, color, num_cols_offd_A,
-                                                        num_cols_offd_P, &fine_to_coarse_offd );
+      hypre_ModmpComputeNumColsOffdFineToCoarseDevice( pass_marker_offd, color, num_cols_offd_A,
+                                                       num_cols_offd_P, &fine_to_coarse_offd );
 
       //FIXME: Clean this up when we don't need the host pointer anymore
       col_map_offd_P     = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
@@ -1151,7 +2011,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelGeneratePdiagiPoffdi, gDim, bDim,
                         num_points, color, pass_order, pass_marker, pass_marker_offd,
                         S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                         P_diag_i, P_offd_i );
@@ -1192,7 +2052,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_generate_Pdiag_j_Poffd_j, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelGeneratePdiagjPoffdj, gDim, bDim,
                         num_points,
                         color,
                         pass_order,
@@ -1249,6 +2109,10 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_GenerateMultiPiDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
@@ -1334,7 +2198,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   hypre_modmp_init_fine_to_coarse(n_fine, pass_marker, color, fine_to_coarse);
+   hypre_ModmpInitFineToCoarseDevice(n_fine, pass_marker, color, fine_to_coarse);
 
    if (num_procs > 1)
    {
@@ -1399,8 +2263,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommHandleDestroy(comm_handle);
 
       // This will allocate fine_to_coarse_offd_dev
-      hypre_modmp_compute_num_cols_offd_fine_to_coarse( pass_marker_offd, color, num_cols_offd_A,
-                                                        num_cols_offd_Q, &fine_to_coarse_offd );
+      hypre_ModmpComputeNumColsOffdFineToCoarseDevice( pass_marker_offd, color, num_cols_offd_A,
+                                                       num_cols_offd_Q, &fine_to_coarse_offd );
 
       //FIXME: PB: It seems we need the host value too?!?!
       col_map_offd_Q     = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_HOST);
@@ -1439,7 +2303,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelGeneratePdiagiPoffdi, gDim, bDim,
                         num_points, color, pass_order, pass_marker, pass_marker_offd,
                         S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                         Q_diag_i, Q_offd_i );
@@ -1481,7 +2345,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_generate_Qdiag_j_Qoffd_j, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelGenerateQdiagjQoffdj, gDim, bDim,
                         num_points,
                         color,
                         pass_order,
@@ -1552,7 +2416,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_mutli_pi_rowsum, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelMutliPiRowsum, gDim, bDim,
                         num_points, pass_order, A_diag_i, A_diag_data,
                         Pi_diag_i, Pi_diag_data, Pi_offd_i, Pi_offd_data,
                         w_row_sum );
@@ -1565,923 +2429,6 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    *Pi_ptr = Pi;
 
    return hypre_error_flag;
-}
-
-void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
-                                      HYPRE_Int *pass_marker,
-                                      HYPRE_Int  color,
-                                      HYPRE_Int *fine_to_coarse )
-{
-   // n_fine == pass_marker.size()
-   // Host code this is replacing:
-   // n_cpts = 0;
-   // for (HYPRE_Int i=0; i < n_fine; i++)
-   //  {
-   //    if (pass_marker[i] == color)
-   //      fine_to_coarse[i] = n_cpts++;
-   //    else
-   //      fine_to_coarse[i] = -1;
-   //  }
-
-   if (n_fine == 0)
-   {
-      return;
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker,
-                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
-                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine,
-                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
-                      fine_to_coarse,
-                      HYPRE_Int(0) );
-
-   hypreSycl_transform_if( fine_to_coarse,
-                           fine_to_coarse + n_fine,
-                           pass_marker,
-                           fine_to_coarse,
-   [] (const auto & x) {return -1;},
-   [color = color] (const auto & x) {return x != color;} );
-#else
-   HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
-                      thrust::make_transform_iterator(pass_marker + n_fine, equal<HYPRE_Int>(color)),
-                      fine_to_coarse,
-                      HYPRE_Int(0) );
-
-   HYPRE_THRUST_CALL( replace_if,
-                      fine_to_coarse,
-                      fine_to_coarse + n_fine,
-                      pass_marker,
-                      HYPRE_THRUST_NOT(equal<HYPRE_Int>(color)),
-                      -1 );
-#endif
-}
-
-void
-hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
-                                                  HYPRE_Int   color,
-                                                  HYPRE_Int   num_cols_offd_A,
-                                                  HYPRE_Int  &num_cols_offd,
-                                                  HYPRE_Int **fine_to_coarse_offd_ptr )
-{
-   // We allocate with a "+1" because the host version of this code incremented the counter
-   // even on the last match, so we create an extra entry the exclusive_scan will reflect this
-   // and we can read off the last entry and only do 1 kernel call and 1 memcpy
-   // RL: this trick requires pass_marker_offd has 1 more space allocated too
-   HYPRE_Int *fine_to_coarse_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker_offd,
-                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
-                      oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1,
-                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
-                      fine_to_coarse_offd,
-                      HYPRE_Int(0) );
-#else
-   HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(pass_marker_offd,                       equal<HYPRE_Int>(color)),
-                      thrust::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1, equal<HYPRE_Int>(color)),
-                      fine_to_coarse_offd,
-                      HYPRE_Int(0) );
-#endif
-
-   hypre_TMemcpy( &num_cols_offd, fine_to_coarse_offd + num_cols_offd_A, HYPRE_Int, 1,
-                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   *fine_to_coarse_offd_ptr = fine_to_coarse_offd;
-}
-
-__global__
-void hypreGPUKernel_cfmarker_masked_rowsum( hypre_DeviceItem    &item,
-                                            HYPRE_Int      nrows,
-                                            HYPRE_Int     *A_diag_i,
-                                            HYPRE_Int     *A_diag_j,
-                                            HYPRE_Complex *A_diag_data,
-                                            HYPRE_Int     *A_offd_i,
-                                            HYPRE_Int     *A_offd_j,
-                                            HYPRE_Complex *A_offd_data,
-                                            HYPRE_Int     *CF_marker,
-                                            HYPRE_Int     *dof_func,
-                                            HYPRE_Int     *dof_func_offd,
-                                            HYPRE_Complex *row_sums )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= nrows || read_only_load(&CF_marker[row_i]) >= 0)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-   HYPRE_Int func_i = dof_func ? read_only_load(&dof_func[row_i]) : 0;
-
-   // A_diag part
-   if (lane < 2)
-   {
-      p = read_only_load(A_diag_i + row_i + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   HYPRE_Complex row_sum_i = 0.0;
-
-   // exclude diagonal: do not assume it is the first entry
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int col = read_only_load(&A_diag_j[j]);
-
-      if (row_i != col)
-      {
-         HYPRE_Int func_j = dof_func ? read_only_load(&dof_func[col]) : 0;
-
-         if (func_i == func_j)
-         {
-            HYPRE_Complex value = read_only_load(&A_diag_data[j]);
-            row_sum_i += value;
-         }
-      }
-   }
-
-   // A_offd part
-   if (lane < 2)
-   {
-      p = read_only_load(A_offd_i + row_i + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int func_j = 0;
-      if (dof_func_offd)
-      {
-         HYPRE_Int col = read_only_load(&A_offd_j[j]);
-         func_j = read_only_load(&dof_func_offd[col]);
-      }
-
-      if (func_i == func_j)
-      {
-         HYPRE_Complex value = read_only_load(&A_offd_data[j]);
-         row_sum_i += value;
-      }
-   }
-
-   row_sum_i = warp_reduce_sum(item, row_sum_i);
-
-   if (lane == 0)
-   {
-      row_sums[row_i] = row_sum_i;
-   }
-}
-
-__global__
-void hypreGPUKernel_mutli_pi_rowsum( hypre_DeviceItem    &item,
-                                     HYPRE_Int      num_points,
-                                     HYPRE_Int     *pass_order,
-                                     HYPRE_Int     *A_diag_i,
-                                     HYPRE_Complex *A_diag_data,
-                                     HYPRE_Int     *Pi_diag_i,
-                                     HYPRE_Complex *Pi_diag_data,
-                                     HYPRE_Int     *Pi_offd_i,
-                                     HYPRE_Complex *Pi_offd_data,
-                                     HYPRE_Complex *w_row_sum )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= num_points)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
-   HYPRE_Real row_sum_C = 0.0;
-
-   // Pi_diag
-   if (lane < 2)
-   {
-      p_diag = read_only_load(Pi_diag_i + row_i + lane);
-   }
-   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
-
-   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
-   {
-      row_sum_C += read_only_load(&Pi_diag_data[j]);
-   }
-
-   // Pi_offd
-   if (lane < 2)
-   {
-      p_offd = read_only_load(Pi_offd_i + row_i + lane);
-   }
-   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
-
-   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
-   {
-      row_sum_C += read_only_load(&Pi_offd_data[j]);
-   }
-
-   row_sum_C = warp_reduce_sum(item, row_sum_C);
-
-   if ( lane == 0 )
-   {
-      const HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-      const HYPRE_Int j1 = read_only_load(&A_diag_i[i1]);
-      //XXX RL: rely on diagonal is the first of row [FIX?]
-      const HYPRE_Real diagonal = read_only_load(&A_diag_data[j1]);
-      const HYPRE_Real value = row_sum_C * diagonal;
-      row_sum_C += read_only_load(&w_row_sum[row_i]);
-
-      if ( value != 0.0 )
-      {
-         row_sum_C /= value;
-      }
-   }
-
-   row_sum_C = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, row_sum_C, 0);
-
-   // Pi_diag
-   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
-   {
-      Pi_diag_data[j] *= -row_sum_C;
-   }
-
-   // Pi_offd
-   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
-   {
-      Pi_offd_data[j] *= -row_sum_C;
-   }
-}
-
-__global__
-void hypreGPUKernel_generate_Pdiag_i_Poffd_i( hypre_DeviceItem &item,
-                                              HYPRE_Int  num_points,
-                                              HYPRE_Int  color,
-                                              HYPRE_Int *pass_order,
-                                              HYPRE_Int *pass_marker,
-                                              HYPRE_Int *pass_marker_offd,
-                                              HYPRE_Int *S_diag_i,
-                                              HYPRE_Int *S_diag_j,
-                                              HYPRE_Int *S_offd_i,
-                                              HYPRE_Int *S_offd_j,
-                                              HYPRE_Int *P_diag_i,
-                                              HYPRE_Int *P_offd_i )
-{
-   /*
-    nnz_diag = 0;
-    nnz_offd = 0;
-    for (i=0; i < num_points; i++)
-    {
-      i1 = pass_order[i];
-      for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
-      {
-         j1 = S_diag_j[j];
-         if (pass_marker[j1] == color)
-         {
-             P_diag_i[i]++;
-             nnz_diag++;
-         }
-      }
-      for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
-      {
-         j1 = S_offd_j[j];
-         if (pass_marker_offd[j1] == color)
-         {
-             P_offd_i[i]++;
-             nnz_offd++;
-         }
-      }
-    }
-   */
-
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= num_points)
-   {
-      return;
-   }
-
-   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-   HYPRE_Int diag_increment = 0;
-   HYPRE_Int offd_increment = 0;
-
-   // S_diag
-   if (lane < 2)
-   {
-      p = read_only_load(S_diag_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int j1 = read_only_load(&S_diag_j[j]);
-      const HYPRE_Int marker = read_only_load(&pass_marker[j1]);
-
-      diag_increment += marker == color;
-   }
-
-   diag_increment = warp_reduce_sum(item, diag_increment);
-
-   // Increment P_diag_i, but then we need to also do a block reduction
-   // on diag_increment to log the total nnz_diag for the block
-   // Then after the kernel, we'll accumulate nnz_diag for each block
-   if (lane == 0)
-   {
-      P_diag_i[row_i] = diag_increment;
-   }
-
-   // S_offd
-   if (lane < 2)
-   {
-      p = read_only_load(S_offd_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int j1 = read_only_load(&S_offd_j[j]);
-      const HYPRE_Int marker = read_only_load(&pass_marker_offd[j1]);
-
-      offd_increment += marker == color;
-   }
-
-   offd_increment = warp_reduce_sum(item, offd_increment);
-
-   // Increment P_offd_i, but then we need to also do a block reduction
-   // on offd_increment to log the total nnz_offd for the block
-   // Then after the kernel, we'll accumulate nnz_offd for each block
-   if (lane == 0)
-   {
-      P_offd_i[row_i] = offd_increment;
-   }
-}
-
-__global__
-void hypreGPUKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
-                                              HYPRE_Int      num_points,
-                                              HYPRE_Int      color,
-                                              HYPRE_Int     *pass_order,
-                                              HYPRE_Int     *pass_marker,
-                                              HYPRE_Int     *pass_marker_offd,
-                                              HYPRE_Int     *fine_to_coarse,
-                                              HYPRE_Int     *fine_to_coarse_offd,
-                                              HYPRE_Int     *A_diag_i,
-                                              HYPRE_Complex *A_diag_data,
-                                              HYPRE_Int     *A_offd_i,
-                                              HYPRE_Complex *A_offd_data,
-                                              HYPRE_Int     *Soc_diag_j,
-                                              HYPRE_Int     *Soc_offd_j,
-                                              HYPRE_Int     *P_diag_i,
-                                              HYPRE_Int     *P_offd_i,
-                                              HYPRE_Int     *P_diag_j,
-                                              HYPRE_Complex *P_diag_data,
-                                              HYPRE_Int     *P_offd_j,
-                                              HYPRE_Complex *P_offd_data,
-                                              HYPRE_Complex *row_sums )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= num_points)
-   {
-      return;
-   }
-
-   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0, q_diag_P;
-   HYPRE_Int k;
-   HYPRE_Complex row_sum_C = 0.0, diagonal = 0.0;
-
-   // S_diag
-   if (lane < 2)
-   {
-      p_diag_A = read_only_load(A_diag_i + i1 + lane);
-      p_diag_P = read_only_load(P_diag_i + row_i + lane);
-   }
-   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
-   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
-   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
-   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
-
-   k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
-        j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int equal = 0;
-      HYPRE_Int sum = 0;
-      HYPRE_Int j1 = -1;
-
-      if ( j < q_diag_A )
-      {
-         j1 = read_only_load(&Soc_diag_j[j]);
-         equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
-      }
-
-      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
-
-      if (equal)
-      {
-         P_diag_j[k + pos] = read_only_load(&fine_to_coarse[j1]);
-         HYPRE_Complex val = read_only_load(&A_diag_data[j]);
-         P_diag_data[k + pos] = val;
-         row_sum_C += val;
-      }
-
-      if (j1 == -2)
-      {
-         diagonal = read_only_load(&A_diag_data[j]);
-      }
-
-      k += sum;
-   }
-
-   hypre_device_assert(k == q_diag_P);
-
-   // S_offd
-   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0, q_offd_P;
-
-   if (lane < 2)
-   {
-      p_offd_A = read_only_load(A_offd_i + i1 + lane);
-      p_offd_P = read_only_load(P_offd_i + row_i + lane);
-   }
-   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
-   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
-   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
-   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
-
-   k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
-        j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int equal = 0;
-      HYPRE_Int sum = 0;
-      HYPRE_Int j1 = -1;
-
-      if ( j < q_offd_A )
-      {
-         j1 = read_only_load(&Soc_offd_j[j]);
-         equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
-      }
-
-      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
-
-      if (equal)
-      {
-         P_offd_j[k + pos] = read_only_load(&fine_to_coarse_offd[j1]);
-         HYPRE_Complex val = read_only_load(&A_offd_data[j]);
-         P_offd_data[k + pos] = val;
-         row_sum_C += val;
-      }
-
-      k += sum;
-   }
-
-   hypre_device_assert(k == q_offd_P);
-
-   row_sum_C = warp_reduce_sum(item, row_sum_C);
-   diagonal = warp_reduce_sum(item, diagonal);
-   HYPRE_Complex value = row_sum_C * diagonal;
-   HYPRE_Complex row_sum_i = 0.0;
-
-   if (lane == 0)
-   {
-      row_sum_i = read_only_load(&row_sums[i1]);
-
-      if (value)
-      {
-         row_sum_i /= value;
-         row_sums[i1] = row_sum_i;
-      }
-   }
-
-   row_sum_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, row_sum_i, 0);
-
-   for (HYPRE_Int j = p_diag_P + lane; j < q_diag_P; j += HYPRE_WARP_SIZE)
-   {
-      P_diag_data[j] = -P_diag_data[j] * row_sum_i;
-   }
-
-   for (HYPRE_Int j = p_offd_P + lane; j < q_offd_P; j += HYPRE_WARP_SIZE)
-   {
-      P_offd_data[j] = -P_offd_data[j] * row_sum_i;
-   }
-}
-
-__global__
-void hypreGPUKernel_insert_remaining_weights( hypre_DeviceItem &item,
-                                              HYPRE_Int   start,
-                                              HYPRE_Int   stop,
-                                              HYPRE_Int  *pass_order,
-                                              HYPRE_Int  *Pi_diag_i,
-                                              HYPRE_Int  *Pi_diag_j,
-                                              HYPRE_Real *Pi_diag_data,
-                                              HYPRE_Int  *P_diag_i,
-                                              HYPRE_Int  *P_diag_j,
-                                              HYPRE_Real *P_diag_data,
-                                              HYPRE_Int  *Pi_offd_i,
-                                              HYPRE_Int  *Pi_offd_j,
-                                              HYPRE_Real *Pi_offd_data,
-                                              HYPRE_Int  *P_offd_i,
-                                              HYPRE_Int  *P_offd_j,
-                                              HYPRE_Real *P_offd_data )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= stop - start)
-   {
-      return;
-   }
-
-   HYPRE_Int i1 = read_only_load(&pass_order[row_i + start]);
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-   HYPRE_Int i2;
-
-   // P_diag
-   if (lane < 2)
-   {
-      p = read_only_load(P_diag_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   i2 = read_only_load(&Pi_diag_i[row_i]) - p;
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      P_diag_j[j] = Pi_diag_j[j + i2];
-      P_diag_data[j] = Pi_diag_data[j + i2];
-   }
-
-   // P_offd
-   if (lane < 2)
-   {
-      p = read_only_load(P_offd_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   i2 = read_only_load(&Pi_offd_i[row_i]) - p;
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      P_offd_j[j] = Pi_offd_j[j + i2];
-      P_offd_data[j] = Pi_offd_data[j + i2];
-   }
-}
-
-
-__global__
-void hypreGPUKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem    &item,
-                                              HYPRE_Int      num_points,
-                                              HYPRE_Int      color,
-                                              HYPRE_Int     *pass_order,
-                                              HYPRE_Int     *pass_marker,
-                                              HYPRE_Int     *pass_marker_offd,
-                                              HYPRE_Int     *fine_to_coarse,
-                                              HYPRE_Int     *fine_to_coarse_offd,
-                                              HYPRE_Int     *A_diag_i,
-                                              HYPRE_Int     *A_diag_j,
-                                              HYPRE_Complex *A_diag_data,
-                                              HYPRE_Int     *A_offd_i,
-                                              HYPRE_Int     *A_offd_j,
-                                              HYPRE_Complex *A_offd_data,
-                                              HYPRE_Int     *Soc_diag_j,
-                                              HYPRE_Int     *Soc_offd_j,
-                                              HYPRE_Int     *Q_diag_i,
-                                              HYPRE_Int     *Q_offd_i,
-                                              HYPRE_Int     *Q_diag_j,
-                                              HYPRE_Complex *Q_diag_data,
-                                              HYPRE_Int     *Q_offd_j,
-                                              HYPRE_Complex *Q_offd_data,
-                                              HYPRE_Complex *w_row_sum,
-                                              HYPRE_Int      num_functions,
-                                              HYPRE_Int     *dof_func,
-                                              HYPRE_Int     *dof_func_offd )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= num_points)
-   {
-      return;
-   }
-
-   HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0;
-#ifdef HYPRE_DEBUG
-   HYPRE_Int q_diag_P;
-#endif
-   HYPRE_Int k;
-   HYPRE_Complex w_row_sum_i = 0.0;
-   HYPRE_Int dof_func_i1 = -1;
-
-   if (num_functions > 1)
-   {
-      if (lane == 0)
-      {
-         dof_func_i1 = read_only_load(&dof_func[i1]);
-      }
-      dof_func_i1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_i1, 0);
-   }
-
-   // S_diag
-#ifdef HYPRE_DEBUG
-   if (lane < 2)
-   {
-      p_diag_A = read_only_load(A_diag_i + i1 + lane);
-      p_diag_P = read_only_load(Q_diag_i + row_i + lane);
-   }
-   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
-   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
-   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
-   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
-#else
-   if (lane < 2)
-   {
-      p_diag_A = read_only_load(A_diag_i + i1 + lane);
-   }
-   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
-   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
-   if (lane == 0)
-   {
-      p_diag_P = read_only_load(Q_diag_i + row_i);
-   }
-   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
-#endif
-
-   k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
-        j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int equal = 0;
-      HYPRE_Int sum = 0;
-      HYPRE_Int j1 = -1;
-
-      if ( j < q_diag_A )
-      {
-         j1 = read_only_load(&Soc_diag_j[j]);
-         equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
-      }
-
-      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
-
-      if (equal)
-      {
-         Q_diag_j[k + pos] = read_only_load(&fine_to_coarse[j1]);
-         Q_diag_data[k + pos] = read_only_load(&A_diag_data[j]);
-      }
-      else if (j < q_diag_A && j1 != -2)
-      {
-         if (num_functions > 1)
-         {
-            const HYPRE_Int col = read_only_load(&A_diag_j[j]);
-            if ( dof_func_i1 == read_only_load(&dof_func[col]) )
-            {
-               w_row_sum_i += read_only_load(&A_diag_data[j]);
-            }
-         }
-         else
-         {
-            w_row_sum_i += read_only_load(&A_diag_data[j]);
-         }
-      }
-
-      k += sum;
-   }
-
-#ifdef HYPRE_DEBUG
-   hypre_device_assert(k == q_diag_P);
-#endif
-
-   // S_offd
-   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0;
-#ifdef HYPRE_DEBUG
-   HYPRE_Int q_offd_P;
-#endif
-
-#ifdef HYPRE_DEBUG
-   if (lane < 2)
-   {
-      p_offd_A = read_only_load(A_offd_i + i1 + lane);
-      p_offd_P = read_only_load(Q_offd_i + row_i + lane);
-   }
-   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
-   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
-   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
-   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
-#else
-   if (lane < 2)
-   {
-      p_offd_A = read_only_load(A_offd_i + i1 + lane);
-   }
-   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
-   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
-   if (lane == 0)
-   {
-      p_offd_P = read_only_load(Q_offd_i + row_i);
-   }
-   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
-#endif
-
-   k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
-        j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int equal = 0;
-      HYPRE_Int sum = 0;
-      HYPRE_Int j1 = -1;
-
-      if ( j < q_offd_A )
-      {
-         j1 = read_only_load(&Soc_offd_j[j]);
-         equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
-      }
-
-      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
-
-      if (equal)
-      {
-         Q_offd_j[k + pos] = read_only_load(&fine_to_coarse_offd[j1]);
-         Q_offd_data[k + pos] = read_only_load(&A_offd_data[j]);
-      }
-      else if (j < q_offd_A)
-      {
-         if (num_functions > 1)
-         {
-            const HYPRE_Int col = read_only_load(&A_offd_j[j]);
-            if ( dof_func_i1 == read_only_load(&dof_func_offd[col]) )
-            {
-               w_row_sum_i += read_only_load(&A_offd_data[j]);
-            }
-         }
-         else
-         {
-            w_row_sum_i += read_only_load(&A_offd_data[j]);
-         }
-      }
-
-      k += sum;
-   }
-
-#ifdef HYPRE_DEBUG
-   hypre_device_assert(k == q_offd_P);
-#endif
-
-   w_row_sum_i = warp_reduce_sum(item, w_row_sum_i);
-
-   if (lane == 0)
-   {
-      w_row_sum[row_i] = w_row_sum_i;
-   }
-}
-
-__global__
-void hypreGPUKernel_pass_order_count( hypre_DeviceItem &item,
-                                      HYPRE_Int  num_points,
-                                      HYPRE_Int  color,
-                                      HYPRE_Int *points_left,
-                                      HYPRE_Int *pass_marker,
-                                      HYPRE_Int *pass_marker_offd,
-                                      HYPRE_Int *S_diag_i,
-                                      HYPRE_Int *S_diag_j,
-                                      HYPRE_Int *S_offd_i,
-                                      HYPRE_Int *S_offd_j,
-                                      HYPRE_Int *diag_shifts )
-{
-   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row_i >= num_points)
-   {
-      return;
-   }
-
-   HYPRE_Int i1 = read_only_load(&points_left[row_i]);
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-   hypre_int brk = 0;
-
-   // S_diag
-   if (lane < 2)
-   {
-      p = read_only_load(S_diag_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
-      {
-         HYPRE_Int j1 = read_only_load(&S_diag_j[j]);
-         if ( read_only_load(&pass_marker[j1]) == color )
-         {
-            brk = 1;
-         }
-      }
-
-      brk = warp_any_sync(item, HYPRE_WARP_FULL_MASK, brk);
-
-      if (brk)
-      {
-         break;
-      }
-   }
-
-   if (brk)
-   {
-      // Only one thread can increment because of the break
-      // so we just need to increment by 1
-      if (lane == 0)
-      {
-         diag_shifts[row_i] = 1;
-      }
-
-      return;
-   }
-
-   // S_offd
-   if (lane < 2)
-   {
-      p = read_only_load(S_offd_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      if (j < q)
-      {
-         HYPRE_Int j1 = read_only_load(&S_offd_j[j]);
-         if ( read_only_load(&pass_marker_offd[j1]) == color )
-         {
-            brk = 1;
-         }
-      }
-
-      brk = warp_any_sync(item, HYPRE_WARP_FULL_MASK, brk);
-
-      if (brk)
-      {
-         break;
-      }
-   }
-
-   // Only one thread can increment because of the break
-   // so we just need to increment by 1
-   if (lane == 0)
-   {
-      diag_shifts[row_i] = (brk != 0);
-   }
-}
-
-__global__
-void hypreGPUKernel_populate_big_P_offd_j( hypre_DeviceItem   &item,
-                                           HYPRE_Int     start,
-                                           HYPRE_Int     stop,
-                                           HYPRE_Int    *pass_order,
-                                           HYPRE_Int    *P_offd_i,
-                                           HYPRE_Int    *P_offd_j,
-                                           HYPRE_BigInt *col_map_offd_Pi,
-                                           HYPRE_BigInt *big_P_offd_j )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item) + start;
-
-   if (i >= stop)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int i1 = read_only_load(&pass_order[i]);
-   HYPRE_Int p = 0;
-   HYPRE_Int q = 0;
-
-   if (lane < 2)
-   {
-      p = read_only_load(P_offd_i + i1 + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-   {
-      HYPRE_Int col = read_only_load(&P_offd_j[j]);
-      big_P_offd_j[j] = read_only_load(&col_map_offd_Pi[col]);
-   }
 }
 
 #endif // defined(HYPRE_USING_GPU)

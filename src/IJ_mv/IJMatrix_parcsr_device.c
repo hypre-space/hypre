@@ -18,9 +18,9 @@
 #if defined(HYPRE_USING_GPU)
 
 __global__ void
-hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
-                                   HYPRE_Int *row_ptr,
-                                   HYPRE_Int *row_len, HYPRE_Int *mark)
+hypre_GPUKernelIJMatrixValuesDev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
+                                  HYPRE_Int *row_ptr,
+                                  HYPRE_Int *row_len, HYPRE_Int *mark)
 {
    HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -229,7 +229,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* mark unwanted elements as -1 */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelIJMatrixValuesDev1, gDim, bDim, len1, indicator,
                         (HYPRE_Int *) row_indexes, ncols, indicator );
 
 #if defined(HYPRE_USING_SYCL)
@@ -353,12 +353,6 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
    HYPRE_BigInt  *J = hypre_TAlloc(HYPRE_BigInt,  size, HYPRE_MEMORY_DEVICE);
    char          *X = hypre_TAlloc(char,          size, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
-
-   /*
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(N0, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
-   */
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
