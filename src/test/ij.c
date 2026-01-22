@@ -322,7 +322,7 @@ main( hypre_int argc,
    HYPRE_Int  cheby_scale = 1;
    HYPRE_Real cheby_fraction = .3;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 11000
    /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
    HYPRE_Int  spmv_use_vendor = 0;
@@ -340,6 +340,7 @@ main( hypre_int argc,
    HYPRE_Int  spgemm_rowest_mtd = 3;
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
+   HYPRE_Int  gpu_aware_mpi = 0;
 #endif
    HYPRE_Int      nmv = 100;
 
@@ -529,7 +530,16 @@ main( hypre_int argc,
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
 
-   HYPRE_Int gpu_aware_mpi = 0;
+   /* default execution policy and memory space */
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
+#endif
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -540,7 +550,12 @@ main( hypre_int argc,
    /* Should we test library initialization? */
    for (arg_index = 1; arg_index < argc; arg_index ++)
    {
-      if (strcmp(argv[arg_index], "-test_init") == 0)
+      if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
+      }
+      else if (strcmp(argv[arg_index], "-test_init") == 0)
       {
          test_init = 1;
       }
@@ -552,13 +567,41 @@ main( hypre_int argc,
       {
          device_id = atoi(argv[++arg_index]);
       }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_host") == 0 )
+      {
+         exec2_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_device") == 0 )
+      {
+         exec2_policy = HYPRE_EXEC_DEVICE;
+      }
    }
 
    /*-----------------------------------------------------------------
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device_id(device_id, myid, num_procs, comm);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE ||
+       exec2_policy == HYPRE_EXEC_DEVICE )
+   {
+      hypre_bind_device_id(device_id, myid, num_procs, comm);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -573,6 +616,7 @@ main( hypre_int argc,
       }
 
       HYPRE_Initialize();
+      HYPRE_SetExecutionPolicy(default_exec_policy);
 
       /* Check if the library is in initialized state */
       if (HYPRE_Initialized() && !HYPRE_Finalized())
@@ -589,6 +633,7 @@ main( hypre_int argc,
       }
 
       HYPRE_Initialize();
+      HYPRE_SetExecutionPolicy(default_exec_policy);
 
       /* Check if the library is in initialized state */
       if (HYPRE_Initialized() && !HYPRE_Finalized())
@@ -614,54 +659,25 @@ main( hypre_int argc,
 
    HYPRE_Initialize();
 
-   if (!lazy_device_init)
+   /* We set the execution policy early so that hypre_EndTiming
+      knows whether to call hypre_DeviceSync or not. */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
+   if (!lazy_device_init &&
+       (default_exec_policy == HYPRE_EXEC_DEVICE || exec2_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
+      if (log_level > 0)
+      {
+         HYPRE_PrintDeviceInfo();
+         hypre_MPI_Barrier(comm);
+      }
    }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", comm);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-   /* default execution policy and memory space */
-#if defined(HYPRE_TEST_USING_HOST)
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
-   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_HOST;
-#else
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
-   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
-#endif
-
-   for (arg_index = 1; arg_index < argc; arg_index ++)
-   {
-      if ( strcmp(argv[arg_index], "-memory_host") == 0 )
-      {
-         memory_location = HYPRE_MEMORY_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
-      {
-         memory_location = HYPRE_MEMORY_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         default_exec_policy = HYPRE_EXEC_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-exec2_host") == 0 )
-      {
-         exec2_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec2_device") == 0 )
-      {
-         exec2_policy = HYPRE_EXEC_DEVICE;
-      }
-   }
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
@@ -713,12 +729,7 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-ll") == 0 )
-      {
-         arg_index++;
-         log_level = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -2;
@@ -1577,7 +1588,12 @@ main( hypre_int argc,
          fsai_kap_tolerance = (HYPRE_Real)atof(argv[arg_index++]);
       }
       /* end FSAI options */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
@@ -1673,11 +1689,6 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
-      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
-      {
-         arg_index++;
-         gpu_aware_mpi = atoi(argv[arg_index++]);
-      }
       else
       {
          arg_index++;
@@ -2831,7 +2842,7 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    ierr = HYPRE_SetSpMVUseVendor(spmv_use_vendor); hypre_assert(ierr == 0);
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
@@ -2842,9 +2853,8 @@ main( hypre_int argc,
    if (spgemm_rowest_mult > 0.0) { ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0); }
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
-#endif
-
    HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
+#endif
 
    /*-----------------------------------------------------------
     * Set up matrix
@@ -9724,7 +9734,7 @@ final:
 #endif
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    hypre_ResetDevice();
 #endif
 

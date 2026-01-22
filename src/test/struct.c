@@ -241,22 +241,48 @@ main( hypre_int argc,
       {
          device_id = atoi(argv[++arg_index]);
       }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
    }
 
-   hypre_bind_device_id(device_id, myid, num_procs, comm);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(device_id, myid, num_procs, comm);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
 
-   if (!lazy_device_init)
+   if (!lazy_device_init && (default_exec_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
    }
 
 #if defined(HYPRE_USING_KOKKOS)
-   Kokkos::initialize (argc, argv);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      Kokkos::initialize (argc, argv);
+   }
 #endif
 
    /*-----------------------------------------------------------
@@ -632,26 +658,6 @@ main( hypre_int argc,
          /* lobpcg: print level */
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_DEVICE;
       }
 #if defined(HYPRE_USING_MEMORY_TRACKER)
       else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
@@ -3029,7 +3035,10 @@ main( hypre_int argc,
    }
 
 #if defined(HYPRE_USING_KOKKOS)
-   Kokkos::finalize();
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      Kokkos::finalize();
+   }
 #endif
 
    /* Finalize Hypre */

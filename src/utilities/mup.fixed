@@ -35,6 +35,7 @@ hypre_Finalized
 hypre_Free
 hypre_GetDevice
 hypre_GetDeviceCount
+hypre_GetDeviceGSMethod
 hypre_GetDeviceLastError
 hypre_GetDeviceMaxShmemSize
 hypre_GetExecPolicy1
@@ -170,8 +171,6 @@ hypre_SetSpGemmUseVendor
 hypre_SetSpMVUseVendor
 hypre_SetSpTransUseVendor
 hypre_SetUseGpuRand
-hypre_SetUserDeviceMalloc
-hypre_SetUserDeviceMfree
 hypre_UniqueIntArrayND
 hypre_UnorderedBigIntMapCreate
 hypre_UnorderedBigIntMapDestroy

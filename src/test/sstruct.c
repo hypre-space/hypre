@@ -2712,7 +2712,7 @@ main( hypre_int argc,
    char                     mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int                spgemm_use_vendor   = 1;
 #else
@@ -2755,16 +2755,39 @@ main( hypre_int argc,
       {
          device_id = atoi(argv[++arg_index]);
       }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
    }
 
-   hypre_bind_device_id(device_id, myid, num_procs, comm);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(device_id, myid, num_procs, comm);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
 
-   if (!lazy_device_init)
+   if (!lazy_device_init && (default_exec_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
    }
@@ -2898,27 +2921,7 @@ main( hypre_int argc,
          arg_index++;
          log_level = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_DEVICE;
-      }
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
@@ -2967,7 +2970,7 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
    HYPRE_SetSpMVUseVendor(spmv_use_vendor);
    HYPRE_SetGpuAwareMPI(gpu_aware_mpi);

@@ -82,6 +82,7 @@
 #undef hypre_Free
 #undef hypre_GetDevice
 #undef hypre_GetDeviceCount
+#undef hypre_GetDeviceGSMethod
 #undef hypre_GetDeviceLastError
 #undef hypre_GetDeviceMaxShmemSize
 #undef hypre_GetExecPolicy1
@@ -217,8 +218,6 @@
 #undef hypre_SetSpMVUseVendor
 #undef hypre_SetSpTransUseVendor
 #undef hypre_SetUseGpuRand
-#undef hypre_SetUserDeviceMalloc
-#undef hypre_SetUserDeviceMfree
 #undef hypre_UniqueIntArrayND
 #undef hypre_UnorderedBigIntMapCreate
 #undef hypre_UnorderedBigIntMapDestroy

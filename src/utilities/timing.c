@@ -284,8 +284,7 @@ hypre_EndTiming_fcn( HYPRE_Int time_index )
    if (hypre_TimingState(time_index) == 0)
    {
 #if defined(HYPRE_USING_GPU)
-      hypre_Handle *hypre_handle_ = hypre_handle();
-      if (hypre_HandleDefaultExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
+      if (hypre_HandleDefaultExecPolicy(hypre_handle()) == HYPRE_EXEC_DEVICE)
       {
          hypre_SyncDevice();
       }
