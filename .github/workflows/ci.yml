@@ -121,6 +121,29 @@ jobs:
           echo "Mixed-precision code check passed"
           ./mup_clean
 
+  headers-check:
+    name: Check Headers
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Check headers
+        working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-headers.sh "$SRC_DIR"
+          if [ -s check-headers.err ]; then
+            echo "::error::Headers check failed"
+            cat check-headers.err
+            exit 1
+          fi
+          echo "Headers check passed"
+
   code-checks:
     name: Code Checks (${{ matrix.check }})
     runs-on: ubuntu-latest
@@ -135,7 +158,6 @@ jobs:
           - double
           - mpi
           - memory
-          - headers
           - case
     steps:
       - name: Checkout sources
@@ -192,15 +214,6 @@ jobs:
                 exit 1
               fi
               echo "Memory usage check passed"
-              ;;
-            headers)
-              ./test.sh check-headers.sh "$SRC_DIR"
-              if [ -s check-headers.err ]; then
-                echo "::error::Headers check failed"
-                cat check-headers.err
-                exit 1
-              fi
-              echo "Headers check passed"
               ;;
             case)
               ./test.sh check-case.sh "$SRC_DIR/.."
