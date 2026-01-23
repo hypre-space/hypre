@@ -2362,8 +2362,8 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
 /*--------------------------------------------------------------------------
  * Main function
  *--------------------------------------------------------------------------*/
-int
-main(int argc, char *argv[])
+hypre_int
+main(hypre_int argc, char *argv[])
 {
    MPI_Comm comm;
    HYPRE_Int my_id, num_procs;
