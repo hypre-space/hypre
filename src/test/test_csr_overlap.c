@@ -251,7 +251,7 @@ Test1_Grid1D_Part1D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 1;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -274,7 +274,7 @@ Test1_Grid1D_Part1D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must wait for test to complete */
       hypre_MPI_Barrier(comm);
@@ -383,7 +383,7 @@ Test1_Grid1D_Part1D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -410,7 +410,7 @@ Test2_Grid1D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 2;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -432,7 +432,7 @@ Test2_Grid1D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -572,7 +572,7 @@ Test2_Grid1D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -600,7 +600,7 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 8;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -622,7 +622,7 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -725,7 +725,7 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -753,7 +753,7 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 2;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -776,7 +776,7 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -892,7 +892,7 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -920,7 +920,7 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 1;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -943,7 +943,7 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -1101,7 +1101,7 @@ Test5_Grid2D_Part2D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -1129,7 +1129,7 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 2;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1152,7 +1152,7 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -1348,7 +1348,7 @@ Test6_Grid2D_Part2D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -1376,7 +1376,7 @@ Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 3;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1399,7 +1399,7 @@ Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -1601,7 +1601,7 @@ Test7_Grid2D_Part2D_Overlap3(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -1629,7 +1629,7 @@ Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 1;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1652,7 +1652,7 @@ Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -1994,7 +1994,7 @@ Test8_Grid3D_Part3D_Overlap1(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
@@ -2023,7 +2023,7 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int error = 0;
    HYPRE_Int overlap_order = 6;
    HYPRE_Int test_my_id, my_id, num_procs;
-   MPI_Comm test_comm = MPI_COMM_NULL;
+   MPI_Comm test_comm = hypre_MPI_COMM_NULL;
    HYPRE_Int participate = 0;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -2046,7 +2046,7 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
    }
 
    /* Only participating processes run the test */
-   if (test_comm == MPI_COMM_NULL)
+   if (test_comm == hypre_MPI_COMM_NULL)
    {
       /* Non-participating processes must still synchronize */
       hypre_MPI_Barrier(comm);
@@ -2191,7 +2191,7 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
       hypre_ParCSRMatrixDestroy(A);
    }
 
-   if (test_comm != MPI_COMM_NULL)
+   if (test_comm != hypre_MPI_COMM_NULL)
    {
       PRINT_TEST_RESULT(test_my_id, error);
       hypre_MPI_Comm_free(&test_comm);
