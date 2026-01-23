@@ -50,7 +50,7 @@ dnl *********************************************************************
 m4_define([M4_HYPRE_NAME],    [hypre])
 m4_define([M4_HYPRE_VERSION], [3.1.0])
 m4_define([M4_HYPRE_NUMBER],  [30100])
-m4_define([M4_HYPRE_DATE],    [2026/01/26])
+m4_define([M4_HYPRE_DATE],    [2026/01/23])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])

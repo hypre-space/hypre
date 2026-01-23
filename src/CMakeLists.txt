@@ -24,7 +24,7 @@ endif()
 # The version number.
 set(HYPRE_VERSION 3.1.0)
 set(HYPRE_NUMBER  30100)
-set(HYPRE_DATE    2026/01/26)
+set(HYPRE_DATE    2026/01/23)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
