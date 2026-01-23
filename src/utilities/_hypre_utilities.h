@@ -119,10 +119,12 @@ extern "C++"
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif /* defined(HYPRE_USING_UMPIRE) */
 
+#if defined(HYPRE_USING_GPU)
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 typedef void (*GPUMallocFunc)(void **, size_t);
 typedef void (*GPUMfreeFunc)(void *);
+#endif
 
 typedef struct
 {
@@ -138,19 +140,13 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* GPU MPI */
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int              use_gpu_aware_mpi;
-#endif
-
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   HYPRE_Int              device_gs_method; /* device G-S options */
-#endif
 
    /* user malloc/free function pointers */
    GPUMallocFunc          user_device_malloc;
    GPUMfreeFunc           user_device_free;
+#endif
 
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -186,9 +182,8 @@ typedef struct
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
-#define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
-#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
-
+#define hypre_HandleDeviceGSMethod(hypre_handle)                 hypre_DeviceDataGSMethod(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 hypre_DeviceDataUseGpuAwareMPI(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_DeviceDataCusparseHandle(hypre_HandleDeviceData(hypre_handle))
@@ -2458,10 +2453,13 @@ HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
-HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
-HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+HYPRE_Int hypre_GetDeviceGSMethod( void );
 HYPRE_Int hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
-HYPRE_Int hypre_GetGpuAwareMPI(void);
+HYPRE_Int hypre_GetGpuAwareMPI( void );
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_SetUserDeviceMalloc( GPUMallocFunc func );
+HYPRE_Int hypre_SetUserDeviceMfree( GPUMfreeFunc func );
+#endif
 
 /* int_array.c */
 hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );

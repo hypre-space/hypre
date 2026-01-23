@@ -280,6 +280,13 @@ HYPRE_Int
 hypre_GetDeviceCount_long_dbl( hypre_int *device_count );
 
 HYPRE_Int
+hypre_GetDeviceGSMethod_flt( void );
+HYPRE_Int
+hypre_GetDeviceGSMethod_dbl( void );
+HYPRE_Int
+hypre_GetDeviceGSMethod_long_dbl( void );
+
+HYPRE_Int
 hypre_GetDeviceLastError_flt( void );
 HYPRE_Int
 hypre_GetDeviceLastError_dbl( void );
@@ -1209,20 +1216,6 @@ HYPRE_Int
 hypre_SetUseGpuRand_dbl( HYPRE_Int use_gpurand );
 HYPRE_Int
 hypre_SetUseGpuRand_long_dbl( HYPRE_Int use_gpurand );
-
-HYPRE_Int
-hypre_SetUserDeviceMalloc_flt( GPUMallocFunc func );
-HYPRE_Int
-hypre_SetUserDeviceMalloc_dbl( GPUMallocFunc func );
-HYPRE_Int
-hypre_SetUserDeviceMalloc_long_dbl( GPUMallocFunc func );
-
-HYPRE_Int
-hypre_SetUserDeviceMfree_flt( GPUMfreeFunc func );
-HYPRE_Int
-hypre_SetUserDeviceMfree_dbl( GPUMfreeFunc func );
-HYPRE_Int
-hypre_SetUserDeviceMfree_long_dbl( GPUMfreeFunc func );
 
 HYPRE_Int
 hypre_UniqueIntArrayND_flt( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
