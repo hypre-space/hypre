@@ -808,7 +808,6 @@ Test4_Grid2D_Part1D_Overlap2(MPI_Comm comm, HYPRE_Int print_matrices)
    /* Create expected matrix and compare */
    {
       hypre_CSRMatrix *A_expected = NULL;
-      HYPRE_Int num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
 
       /* With overlap=2 on a 4x4 grid, both processors get the full 16x16 matrix */
       /* 2D 5-point stencil structure for 4x4 grid (row-major ordering) */
@@ -2218,7 +2217,7 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
    HYPRE_BigInt *col_map;
    HYPRE_Int num_cols_local;
    HYPRE_Real time_start, time_end, time_overlap, time_extract;
-   HYPRE_Int num_extended, num_local, num_overlap;
+   HYPRE_Int num_extended, num_overlap;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -2312,7 +2311,6 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
 
    /* Gather statistics */
    num_extended = hypre_OverlapDataNumExtendedRows(overlap_data);
-   num_local = hypre_OverlapDataNumLocalRows(overlap_data);
    num_overlap = hypre_OverlapDataNumOverlapRows(overlap_data);
 
    if (my_id == 0)
