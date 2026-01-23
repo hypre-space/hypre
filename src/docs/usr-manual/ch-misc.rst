@@ -899,7 +899,6 @@ errors. To only clear a specific error code, the user can call
 ``--with-print-errors`` or ``-DHYPRE_ENABLE_PRINT_ERRORS=ON``, additional error
 information will be printed to the standard error during execution.
 
-
 Bug Reporting and General Support
 ==============================================================================
 

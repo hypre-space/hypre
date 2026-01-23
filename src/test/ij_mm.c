@@ -977,6 +977,7 @@ main( hypre_int argc,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
    if (zero_mem_cost)
    {
 #ifdef HYPRE_USING_CUDA
@@ -988,7 +989,9 @@ main( hypre_int argc,
       hypre_SetUserDeviceMalloc(gpu_alloc);
       hypre_SetUserDeviceMfree(gpu_free);
    }
-
+#else
+   (void) zero_mem_cost;
+#endif
 
    /*-----------------------------------------------------------
     * Print usage info

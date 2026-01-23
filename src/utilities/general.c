@@ -43,26 +43,15 @@ hypre_HandleCreate(void)
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
-   hypre_HandleLogLevel(hypre_handle_)       = 0;
-   hypre_HandleLogLevelSaved(hypre_handle_)  = 0;
-   hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
+   hypre_HandleLogLevel(hypre_handle_)          = 0;
+   hypre_HandleLogLevelSaved(hypre_handle_)     = 0;
+   hypre_HandleMemoryLocation(hypre_handle_)    = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleDeviceData(hypre_handle_)        = hypre_DeviceDataCreate();
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
-#endif
-
-#if defined(HYPRE_USING_GPU)
-   hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
-   /* Gauss-Seidel: SpTrSV */
-   hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
-#endif
-
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_USING_GPU_AWARE_MPI)
-   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
 #else
-   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
-#endif
+   hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_HOST;
 #endif
 
    return hypre_handle_;
@@ -442,6 +431,8 @@ HYPRE_Finalize(void)
       return hypre_error_flag;
    }
 
+   HYPRE_Int exec_device = hypre_HandleDefaultExecPolicy(_hypre_handle) == HYPRE_EXEC_DEVICE;
+
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
 #endif
@@ -452,14 +443,20 @@ HYPRE_Finalize(void)
 
 #if defined(HYPRE_USING_SYCL)
    /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
-   hypre_GetDeviceLastError();
+   if (exec_device)
+   {
+      hypre_GetDeviceLastError();
+   }
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   hypre_GetDeviceLastError();
+   if (exec_device)
+   {
+      hypre_GetDeviceLastError();
+   }
 #endif
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
@@ -488,16 +485,23 @@ HYPRE_PrintDeviceInfo(void)
 
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
+   {
+      hypre_printf("Running on \"%s\", Comp. Capability: %d.%d, Total VRAM: %.2f GiB, ",
+                   deviceProp.name, deviceProp.major, deviceProp.minor,
+                   ((HYPRE_Real) deviceProp.totalGlobalMem) / (HYPRE_Real) (1 << 30));
+   }
 
 #elif defined(HYPRE_USING_HIP)
    hipDeviceProp_t deviceProp;
 
    HYPRE_HIP_CALL( hipGetDevice(&dev) );
    HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
+   {
+      const char *gfx_name = deviceProp.gcnArchName[0] ? deviceProp.gcnArchName : "unknown";
+      hypre_printf("Running on \"%s\", %s, Total VRAM: %.2f GiB, ",
+                   deviceProp.name, gfx_name,
+                   ((HYPRE_Real) deviceProp.totalGlobalMem) / (HYPRE_Real) (1 << 30));
+   }
 
 #elif defined(HYPRE_USING_SYCL)
    auto device = *hypre_HandleDevice(hypre_handle());
@@ -516,8 +520,8 @@ HYPRE_PrintDeviceInfo(void)
 #if defined(HYPRE_USING_GPU)
    hypre_int max_size = 0, max_size_optin = 0;
    hypre_GetDeviceMaxShmemSize(dev, &max_size, &max_size_optin);
-   hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
-                max_size, max_size_optin);
+   hypre_printf("MaxShmem: %d KiB, MaxShmemOptin: %d KiB\n",
+                max_size / 1024, max_size_optin / 1024);
 #endif
 
    return hypre_error_flag;

@@ -31,5 +31,5 @@ shift
 
 cd $top_dir
 
-find -type f | sort -f | uniq -i -d >&2
+find . -type f | sort -f | uniq -i -d >&2
 
