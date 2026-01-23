@@ -130,6 +130,11 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v6
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ make autoconf automake libtool build-essential
+
       - name: Check headers
         working-directory: AUTOTEST
         env:
