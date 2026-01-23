@@ -2094,7 +2094,8 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
          {
             /* Same expected matrix for all 8 processors */
             HYPRE_Int I_expected[28] = {0, 4, 9, 14, 20, 25, 31, 37, 44, 48, 53, 58, 64, 68, 73,
-                                        78, 84, 88, 93, 97, 102, 107, 113, 117, 122, 126, 131, 135};
+                                        78, 84, 88, 93, 97, 102, 107, 113, 117, 122, 126, 131, 135
+                                       };
             HYPRE_Int J_expected[135] = {0, 1, 2, 4, 0, 1, 3, 5, 8, 0, 2, 3, 6, 12, 1, 2, 3, 7, 9, 13,
                                          0, 4, 5, 6, 18, 1, 4, 5, 7, 10, 19, 2, 4, 6, 7, 14, 20, 3, 5,
                                          6, 7, 11, 15, 21, 1, 8, 9, 10, 3, 8, 9, 11, 16, 5, 8, 10, 11,
@@ -2102,8 +2103,10 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
                                          12, 14, 15, 24, 7, 13, 14, 15, 17, 25, 9, 13, 16, 17, 11, 15,
                                          16, 17, 26, 4, 18, 19, 20, 5, 18, 19, 21, 22, 6, 18, 20, 21, 24,
                                          7, 19, 20, 21, 23, 25, 10, 19, 22, 23, 11, 21, 22, 23, 26, 14,
-                                         20, 24, 25, 15, 21, 24, 25, 26, 17, 23, 25, 26};
-            HYPRE_Real data_expected[135] = {
+                                         20, 24, 25, 15, 21, 24, 25, 26, 17, 23, 25, 26
+                                        };
+            HYPRE_Real data_expected[135] =
+            {
                6.0, -1.0, -1.0, -1.0,
                -1.0, 6.0, -1.0, -1.0,
                -1.0, -1.0, 6.0, -1.0,
@@ -2144,7 +2147,7 @@ Test9_Grid3D_Part3D_Overlap6(MPI_Comm comm, HYPRE_Int print_matrices)
          else
          {
             hypre_printf("Proc %d: Unexpected matrix dimensions: %d x %d (expected 27 x 27)\n",
-                        test_my_id, num_rows_local, num_cols_local_actual);
+                         test_my_id, num_rows_local, num_cols_local_actual);
             error = 1;
             A_expected = NULL;
          }
@@ -2338,7 +2341,7 @@ BenchmarkOverlap(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
          for (i = 0; i < num_procs; i++)
          {
             hypre_printf("  %3d      %8d      %8d    %10d\n",
-                        i, local_extended[i], local_overlap[i], local_nnz[i]);
+                         i, local_extended[i], local_overlap[i], local_nnz[i]);
          }
       }
 
