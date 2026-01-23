@@ -1027,7 +1027,7 @@ hypre_MPI_Comm_split( hypre_MPI_Comm  comm,
                       HYPRE_Int       m,
                       hypre_MPI_Comm *comms )
 {
-   hypre_assert(n >= 0);
+   hypre_assert(n >= 0 || hypre_MPI_UNDEFINED);
    hypre_assert(m >= 0);
 
    return (HYPRE_Int) MPI_Comm_split(comm, (hypre_int)n, (hypre_int)m, comms);
