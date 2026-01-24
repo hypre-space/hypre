@@ -6991,15 +6991,15 @@ hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix      *A,
    hypre_DenseBlockMatrixInitializeOn(B, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
-      if (exec == HYPRE_EXEC_DEVICE)
-      {
-         hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-         hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);
-         hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-         hypre_DenseBlockMatrixMigrate(B, HYPRE_MEMORY_DEVICE);
-      }
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+      hypre_DenseBlockMatrixMigrate(B, HYPRE_MEMORY_DEVICE);
+   }
+   else
 #endif
    {
       hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);
