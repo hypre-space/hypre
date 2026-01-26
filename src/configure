@@ -11517,6 +11517,8 @@ printf "%s\n" "#define HYPRE_LINUX 1" >>confdefs.h
 
 ac_config_files="$ac_config_files config/Makefile.config"
 
+ac_config_files="$ac_config_files config/HYPRE.pc"
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -12204,6 +12206,7 @@ do
   case $ac_config_target in
     "HYPRE_config.h") CONFIG_HEADERS="$CONFIG_HEADERS HYPRE_config.h:config/HYPRE_config.h.in" ;;
     "config/Makefile.config") CONFIG_FILES="$CONFIG_FILES config/Makefile.config" ;;
+    "config/HYPRE.pc") CONFIG_FILES="$CONFIG_FILES config/HYPRE.pc" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
