@@ -93,7 +93,13 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Configure (Debug)
-        run: cmake -S src -B build ${{ runner.os == 'Windows' && '-G Ninja' || '' }} -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
+        run: >
+          cmake -S src -B build
+          ${{ runner.os == 'Windows' && '-G Ninja' || '' }}
+          -DHYPRE_BUILD_TESTS=ON
+          -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }}
+          -DCMAKE_BUILD_TYPE=Debug
+          ${{ runner.os == 'Windows' && matrix.mpi == 'msmpi' && '-DMPI_ROOT="C:/Program Files/Microsoft MPI"' || '' }}
 
       - name: Build
         run: cmake --build build --parallel
