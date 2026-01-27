@@ -25,31 +25,107 @@ jobs:
         shell: bash
 
   build-and-check:
-    name: Build & Check (${{ matrix.os }})
+    name: Build & Check (${{ matrix.os }}-${{ matrix.mpi }})
     runs-on: ${{ matrix.os }}
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            mpi: openmpi
+          - os: macos-latest
+            mpi: openmpi
+          - os: windows-latest
+            mpi: msmpi
+          - os: windows-latest
+            mpi: off
 
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
-          if [[ "${RUNNER_OS}" == "Linux" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libopenmpi-dev openmpi-bin
-          else
-            brew update
-            brew install open-mpi
-          fi
+          sudo apt-get update
+          sudo apt-get install -y libopenmpi-dev openmpi-bin
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          brew update
+          brew install open-mpi
+
+      - name: Install dependencies (Windows, MS-MPI)
+        if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
+        shell: powershell
+        run: |
+          # Download MS-MPI runtime and SDK from Microsoft's GitHub releases
+          # Disable progress bar for faster downloads on CI
+          $ProgressPreference = 'SilentlyContinue'
+          $msmpiVersion = "10.1.1"
+          $baseUrl = "https://github.com/microsoft/Microsoft-MPI/releases/download/v$msmpiVersion"
+
+          Write-Host "Downloading MS-MPI runtime..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisetup.exe" -OutFile msmpisetup.exe -UseBasicParsing
+
+          Write-Host "Downloading MS-MPI SDK..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisdk.msi" -OutFile msmpisdk.msi -UseBasicParsing
+
+          Write-Host "Installing MS-MPI runtime..."
+          Start-Process -FilePath .\msmpisetup.exe -ArgumentList "-unattend" -Wait
+
+          Write-Host "Installing MS-MPI SDK..."
+          Start-Process -FilePath msiexec.exe -ArgumentList "/i msmpisdk.msi /quiet /qn /l*v sdk_install.log" -Wait
+          if (Test-Path sdk_install.log) {
+            Write-Host "SDK install log (last 50 lines):"
+            Get-Content sdk_install.log -Tail 50
+          }
+          
+          # SDK installs to a different location - check both
+          $sdkRoot = "C:\Program Files (x86)\Microsoft SDKs\MPI"
+          if (Test-Path "$sdkRoot\Include\mpi.h") {
+            Write-Host "SDK found at: $sdkRoot"
+            # Copy SDK files to runtime location for CMake to find
+            $destRoot = "C:\Program Files\Microsoft MPI"
+            New-Item -ItemType Directory -Path "$destRoot\Include" -Force | Out-Null
+            New-Item -ItemType Directory -Path "$destRoot\Lib\x64" -Force | Out-Null
+            Copy-Item -Path "$sdkRoot\Include\*" -Destination "$destRoot\Include\" -Recurse -Force
+            Copy-Item -Path "$sdkRoot\Lib\x64\*" -Destination "$destRoot\Lib\x64\" -Recurse -Force
+          } else {
+            Write-Host "ERROR: SDK Include not found at expected location"
+            Write-Host "Checking alternative locations..."
+            Get-ChildItem "C:\Program Files (x86)\Microsoft SDKs" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          }
+
+          # Verify installation
+          $msmpiRoot = "C:\Program Files\Microsoft MPI"
+          Write-Host "Verifying MS-MPI installation..."
+          Get-ChildItem "$msmpiRoot" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          Write-Host "mpi.h exists: $(Test-Path "$msmpiRoot\Include\mpi.h")"
+          Write-Host "msmpi.lib exists: $(Test-Path "$msmpiRoot\Lib\x64\msmpi.lib")"
+          
+          # Set environment variables for CMake to find MPI
+          Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
+          Add-Content $env:GITHUB_ENV "MSMPI_INC=$msmpiRoot\Include"
+          Add-Content $env:GITHUB_ENV "MSMPI_LIB64=$msmpiRoot\Lib\x64"
+          Add-Content $env:GITHUB_PATH "$msmpiRoot\Bin"
+
+      - name: Setup MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Configure (Debug)
-        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+        run: >
+          cmake -S src -B build
+          ${{ runner.os == 'Windows' && '-G Ninja' || '' }}
+          -DHYPRE_BUILD_TESTS=ON
+          -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }}
+          -DCMAKE_BUILD_TYPE=Debug
+          ${{ runner.os == 'Windows' && matrix.mpi == 'msmpi' && '-DMPI_GUESS_LIBRARY_NAME=MSMPI -DMPI_C_LIB_NAMES=msmpi -DMPI_msmpi_LIBRARY="C:/Program Files/Microsoft MPI/Lib/x64/msmpi.lib" -DMPI_C_HEADER_DIR="C:/Program Files/Microsoft MPI/Include"' || '' }}
 
       - name: Build
         run: cmake --build build --parallel
