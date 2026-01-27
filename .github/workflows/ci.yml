@@ -25,37 +25,74 @@ jobs:
         shell: bash
 
   build-and-check:
-    name: Build & Check (${{ matrix.os }})
+    name: Build & Check (${{ matrix.os }}-${{ matrix.mpi }})
     runs-on: ${{ matrix.os }}
     needs: [require-label]
     if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            mpi: openmpi
+          - os: macos-latest
+            mpi: openmpi
+          - os: windows-latest
+            mpi: msmpi
+          - os: windows-latest
+            mpi: off
 
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
-          if [[ "${RUNNER_OS}" == "Linux" ]]; then
-            sudo apt-get update
-            sudo apt-get install -y libopenmpi-dev openmpi-bin
-          else
-            brew update
-            brew install open-mpi
-          fi
+          sudo apt-get update
+          sudo apt-get install -y libopenmpi-dev openmpi-bin
 
-      - name: Configure (Debug)
-        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          brew update
+          brew install open-mpi
 
-      - name: Build
+      - name: Install dependencies (Windows, MS-MPI)
+        if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
+        shell: powershell
+        run: |
+          choco install -y msmpi msmpisdk
+          $msmpiRoot = "C:\Program Files\Microsoft MPI"
+          Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
+          Add-Content $env:GITHUB_ENV "MSMPI_INC=$msmpiRoot\Include"
+          Add-Content $env:GITHUB_ENV "MSMPI_LIB64=$msmpiRoot\Lib\x64"
+          Add-Content $env:GITHUB_ENV "PATH=$msmpiRoot\Bin;$env:PATH"
+
+      - name: Configure (Debug, non-Windows)
+        if: runner.os != 'Windows'
+        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Configure (Debug, Windows)
+        if: runner.os == 'Windows'
+        run: cmake -S src -B build -G "Visual Studio 17 2022" -A x64 -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build (non-Windows)
+        if: runner.os != 'Windows'
         run: cmake --build build --parallel
 
-      - name: Run check target
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config Debug --parallel
+
+      - name: Run check target (non-Windows)
+        if: runner.os != 'Windows'
         run: cmake --build build --target check
+
+      - name: Run check target (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --target check --config Debug
 
   code-checks:
     name: Code Checks
