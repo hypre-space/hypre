@@ -223,35 +223,43 @@ function(find_and_add_rocm_library LIB_NAME)
     find_package(${LIB_NAME} REQUIRED)
     if(TARGET roc::${LIB_NAME})
       message(STATUS "Found target: roc::${LIB_NAME}")
-      # Append the library variable that hypre expects (except for rocThrust which is header-only).
-      # rocThrust is header-only and should be linked as a target.
-      if(NOT ${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
-        list(APPEND ROCM_LIBS ${${LIB_NAME}_LIBRARY})
-      else()
-        # Do NOT link rocThrust target into Hypre: some external rocThrust packages export HIP-only
-        # link flags (e.g., --hip-link/--offload-arch) that would propagate to downstream pure-C++
-        # targets and break their link steps. We only need rocThrust's include dirs.
+
+      # Append the library variable that hypre expects.
+      # Do NOT link rocThrust/rocPRIM targets into Hypre: some external packages export HIP-only
+      # link flags (e.g., --hip-link/--offload-arch) that would propagate to downstream pure-C++
+      # targets and break their link steps. We only need theirinclude dirs.
+      if (${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
         get_target_property(ROCTHRUST_INCLUDE_DIRS roc::rocthrust INTERFACE_INCLUDE_DIRECTORIES)
         if(ROCTHRUST_INCLUDE_DIRS)
           target_include_directories(${PROJECT_NAME} PUBLIC ${ROCTHRUST_INCLUDE_DIRS})
           message(STATUS "Using rocThrust include dirs: ${ROCTHRUST_INCLUDE_DIRS}")
         else()
-          message(WARNING "roc::${LIB_NAME} has no INTERFACE_INCLUDE_DIRECTORIES; relying on ${HIP_PATH}/include for rocThrust headers")
+          message(WARNING "roc::rocthrust has no INTERFACE_INCLUDE_DIRECTORIES; relying on ${HIP_PATH}/include for rocThrust headers")
         endif()
+      elseif (${LIB_NAME_UPPER} STREQUAL ROCPRIM)
+        get_target_property(ROCTHRUST_INCLUDE_DIRS roc::rocprim INTERFACE_INCLUDE_DIRECTORIES)
+        if(ROCPRIM_INCLUDE_DIRS)
+          target_include_directories(${PROJECT_NAME} PUBLIC ${ROCPRIM_INCLUDE_DIRS})
+          message(STATUS "Using rocPRIM include dirs: ${ROCPRIM_INCLUDE_DIRS}")
+        else()
+          message(WARNING "roc::rocprim has no INTERFACE_INCLUDE_DIRECTORIES; relying on ${HIP_PATH}/include for rocPRIM headers")
+        endif()
+      else()
+        list(APPEND ROCM_LIBS ${${LIB_NAME}_LIBRARY})
       endif()
     else()
-      #message(WARNING "roc::${LIB_NAME} target not found. Attempting manual linking.")
+      message(WARNING "roc::${LIB_NAME} target not found. Attempting manual linking.")
       find_library(${LIB_NAME}_LIBRARY ${LIB_NAME} HINTS ${HIP_PATH}/lib ${HIP_PATH}/lib64)
       if(${LIB_NAME}_LIBRARY)
         message(STATUS "Found ${LIB_NAME} library: ${${LIB_NAME}_LIBRARY}")
-        if(NOT ${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
+        if(NOT ${LIB_NAME_UPPER} STREQUAL ROCTHRUST AND NOT ${LIB_NAME_UPPER} STREQUAL ROCPRIM)
           add_library(roc::${LIB_NAME} UNKNOWN IMPORTED)
           set_target_properties(roc::${LIB_NAME} PROPERTIES
             IMPORTED_LOCATION "${${LIB_NAME}_LIBRARY}"
             INTERFACE_INCLUDE_DIRECTORIES "${HIP_PATH}/include")
           list(APPEND ROCM_LIBS roc::${LIB_NAME})
         else()
-          # rocThrust is header-only; if the package didn't provide a target, fall back
+          # rocThrust/rocPRIM are header-only; if the package didn't provide a target, fall back
           # to the HIP include directory already added below.
           message(WARNING "roc::${LIB_NAME} target not found; relying on ${HIP_PATH}/include for rocThrust headers")
         endif()
@@ -269,6 +277,7 @@ find_and_add_rocm_library(rocsparse)
 find_and_add_rocm_library(rocrand)
 find_and_add_rocm_library(rocsolver)
 find_and_add_rocm_library(rocthrust)
+find_and_add_rocm_library(rocprim)
 
 if(HYPRE_ENABLE_GPU_PROFILING)
   set(HYPRE_USING_ROCTX ON CACHE BOOL "" FORCE)
