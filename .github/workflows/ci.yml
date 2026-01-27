@@ -64,14 +64,16 @@ jobs:
         shell: powershell
         run: |
           # Download MS-MPI runtime and SDK from Microsoft's GitHub releases
+          # Disable progress bar for faster downloads on CI
+          $ProgressPreference = 'SilentlyContinue'
           $msmpiVersion = "10.1.1"
           $baseUrl = "https://github.com/microsoft/Microsoft-MPI/releases/download/v$msmpiVersion"
 
           Write-Host "Downloading MS-MPI runtime..."
-          Invoke-WebRequest -Uri "$baseUrl/msmpisetup.exe" -OutFile msmpisetup.exe
+          Invoke-WebRequest -Uri "$baseUrl/msmpisetup.exe" -OutFile msmpisetup.exe -UseBasicParsing
 
           Write-Host "Downloading MS-MPI SDK..."
-          Invoke-WebRequest -Uri "$baseUrl/msmpisdk.msi" -OutFile msmpisdk.msi
+          Invoke-WebRequest -Uri "$baseUrl/msmpisdk.msi" -OutFile msmpisdk.msi -UseBasicParsing
 
           Write-Host "Installing MS-MPI runtime..."
           Start-Process -FilePath .\msmpisetup.exe -ArgumentList "-unattend" -Wait
@@ -86,29 +88,18 @@ jobs:
           Add-Content $env:GITHUB_ENV "MSMPI_LIB64=$msmpiRoot\Lib\x64"
           Add-Content $env:GITHUB_PATH "$msmpiRoot\Bin"
 
-      - name: Configure (Debug, non-Windows)
-        if: runner.os != 'Windows'
-        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
-
-      - name: Configure (Debug, Windows)
+      - name: Setup MSVC (Windows)
         if: runner.os == 'Windows'
-        run: cmake -S src -B build -G "Visual Studio 17 2022" -A x64 -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
+        uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Build (non-Windows)
-        if: runner.os != 'Windows'
+      - name: Configure (Debug)
+        run: cmake -S src -B build ${{ runner.os == 'Windows' && '-G Ninja' || '' }} -DHYPRE_BUILD_TESTS=ON -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }} -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
         run: cmake --build build --parallel
 
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: cmake --build build --config Debug --parallel
-
-      - name: Run check target (non-Windows)
-        if: runner.os != 'Windows'
+      - name: Run check target
         run: cmake --build build --target check
-
-      - name: Run check target (Windows)
-        if: runner.os == 'Windows'
-        run: cmake --build build --target check --config Debug
 
   code-checks:
     name: Code Checks
