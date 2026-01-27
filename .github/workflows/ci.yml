@@ -79,12 +79,32 @@ jobs:
           Start-Process -FilePath .\msmpisetup.exe -ArgumentList "-unattend" -Wait
 
           Write-Host "Installing MS-MPI SDK..."
-          Start-Process -FilePath msiexec.exe -ArgumentList "/i msmpisdk.msi /quiet /qn" -Wait
+          Start-Process -FilePath msiexec.exe -ArgumentList "/i msmpisdk.msi /quiet /qn /l*v sdk_install.log" -Wait
+          if (Test-Path sdk_install.log) {
+            Write-Host "SDK install log (last 50 lines):"
+            Get-Content sdk_install.log -Tail 50
+          }
+          
+          # SDK installs to a different location - check both
+          $sdkRoot = "C:\Program Files (x86)\Microsoft SDKs\MPI"
+          if (Test-Path "$sdkRoot\Include\mpi.h") {
+            Write-Host "SDK found at: $sdkRoot"
+            # Copy SDK files to runtime location for CMake to find
+            Copy-Item -Path "$sdkRoot\Include\*" -Destination "C:\Program Files\Microsoft MPI\Include" -Recurse -Force
+            New-Item -ItemType Directory -Path "C:\Program Files\Microsoft MPI\Lib\x64" -Force | Out-Null
+            Copy-Item -Path "$sdkRoot\Lib\x64\*" -Destination "C:\Program Files\Microsoft MPI\Lib\x64" -Recurse -Force
+          } else {
+            Write-Host "ERROR: SDK Include not found at expected location"
+            Write-Host "Checking alternative locations..."
+            Get-ChildItem "C:\Program Files (x86)\Microsoft SDKs" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          }
 
           # Verify installation
           $msmpiRoot = "C:\Program Files\Microsoft MPI"
           Write-Host "Verifying MS-MPI installation..."
-          Get-ChildItem "$msmpiRoot" -Recurse | Select-Object FullName
+          Get-ChildItem "$msmpiRoot" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          Write-Host "mpi.h exists: $(Test-Path "$msmpiRoot\Include\mpi.h")"
+          Write-Host "msmpi.lib exists: $(Test-Path "$msmpiRoot\Lib\x64\msmpi.lib")"
           
           # Set environment variables for CMake to find MPI
           Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
