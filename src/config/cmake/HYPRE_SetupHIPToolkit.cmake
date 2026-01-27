@@ -222,9 +222,13 @@ function(find_and_add_rocm_library LIB_NAME)
     set(HYPRE_USING_${LIB_NAME_UPPER} ON CACHE INTERNAL "")
     find_package(${LIB_NAME} REQUIRED)
     if(TARGET roc::${LIB_NAME})
-      message(STATUS "Found target: ${${LIB_NAME}_LIBRARY}")
+      message(STATUS "Found target: roc::${LIB_NAME}")
+      # Append the library variable that hypre expects (except for rocThrust which is header-only).
+      # rocThrust is header-only and should be linked as a target.
       if(NOT ${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
         list(APPEND ROCM_LIBS ${${LIB_NAME}_LIBRARY})
+      else()
+        list(APPEND ROCM_LIBS roc::${LIB_NAME})
       endif()
     else()
       #message(WARNING "roc::${LIB_NAME} target not found. Attempting manual linking.")
@@ -238,8 +242,9 @@ function(find_and_add_rocm_library LIB_NAME)
             INTERFACE_INCLUDE_DIRECTORIES "${HIP_PATH}/include")
           list(APPEND ROCM_LIBS roc::${LIB_NAME})
         else()
-          set_target_properties(roc::${LIB_NAME} PROPERTIES
-            INTERFACE_INCLUDE_DIRECTORIES "${HIP_PATH}/include")
+          # rocThrust is header-only; if the package didn't provide a target, fall back
+          # to the HIP include directory already added below.
+          message(WARNING "roc::${LIB_NAME} target not found; relying on ${HIP_PATH}/include for rocThrust headers")
         endif()
       else()
         message(FATAL_ERROR "Could not find ${LIB_NAME} library. Please check your ROCm installation.")
