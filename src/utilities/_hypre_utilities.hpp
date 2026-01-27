@@ -451,6 +451,8 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
 #elif defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
 #endif
 
 using namespace thrust::placeholders;

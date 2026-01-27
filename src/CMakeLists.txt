@@ -185,6 +185,7 @@ set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCPRIM              "Use rocPRIM" ON)
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
