@@ -63,12 +63,28 @@ jobs:
         if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
         shell: powershell
         run: |
-          choco install -y msmpi msmpisdk
+          # Download MS-MPI runtime and SDK from Microsoft's GitHub releases
+          $msmpiVersion = "10.1.1"
+          $baseUrl = "https://github.com/microsoft/Microsoft-MPI/releases/download/v$msmpiVersion"
+
+          Write-Host "Downloading MS-MPI runtime..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisetup.exe" -OutFile msmpisetup.exe
+
+          Write-Host "Downloading MS-MPI SDK..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisdk.msi" -OutFile msmpisdk.msi
+
+          Write-Host "Installing MS-MPI runtime..."
+          Start-Process -FilePath .\msmpisetup.exe -ArgumentList "-unattend" -Wait
+
+          Write-Host "Installing MS-MPI SDK..."
+          Start-Process -FilePath msiexec.exe -ArgumentList "/i msmpisdk.msi /quiet /qn" -Wait
+
+          # Set environment variables for CMake to find MPI
           $msmpiRoot = "C:\Program Files\Microsoft MPI"
           Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
           Add-Content $env:GITHUB_ENV "MSMPI_INC=$msmpiRoot\Include"
           Add-Content $env:GITHUB_ENV "MSMPI_LIB64=$msmpiRoot\Lib\x64"
-          Add-Content $env:GITHUB_ENV "PATH=$msmpiRoot\Bin;$env:PATH"
+          Add-Content $env:GITHUB_PATH "$msmpiRoot\Bin"
 
       - name: Configure (Debug, non-Windows)
         if: runner.os != 'Windows'
