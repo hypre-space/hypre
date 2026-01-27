@@ -228,7 +228,16 @@ function(find_and_add_rocm_library LIB_NAME)
       if(NOT ${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
         list(APPEND ROCM_LIBS ${${LIB_NAME}_LIBRARY})
       else()
-        list(APPEND ROCM_LIBS roc::${LIB_NAME})
+        # Do NOT link rocThrust target into Hypre: some external rocThrust packages export HIP-only
+        # link flags (e.g., --hip-link/--offload-arch) that would propagate to downstream pure-C++
+        # targets and break their link steps. We only need rocThrust's include dirs.
+        get_target_property(ROCTHRUST_INCLUDE_DIRS roc::rocthrust INTERFACE_INCLUDE_DIRECTORIES)
+        if(ROCTHRUST_INCLUDE_DIRS)
+          target_include_directories(${PROJECT_NAME} PUBLIC ${ROCTHRUST_INCLUDE_DIRS})
+          message(STATUS "Using rocThrust include dirs: ${ROCTHRUST_INCLUDE_DIRS}")
+        else()
+          message(WARNING "roc::${LIB_NAME} has no INTERFACE_INCLUDE_DIRECTORIES; relying on ${HIP_PATH}/include for rocThrust headers")
+        endif()
       endif()
     else()
       #message(WARNING "roc::${LIB_NAME} target not found. Attempting manual linking.")
