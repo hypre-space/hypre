@@ -90,9 +90,11 @@ jobs:
           if (Test-Path "$sdkRoot\Include\mpi.h") {
             Write-Host "SDK found at: $sdkRoot"
             # Copy SDK files to runtime location for CMake to find
-            Copy-Item -Path "$sdkRoot\Include\*" -Destination "C:\Program Files\Microsoft MPI\Include" -Recurse -Force
-            New-Item -ItemType Directory -Path "C:\Program Files\Microsoft MPI\Lib\x64" -Force | Out-Null
-            Copy-Item -Path "$sdkRoot\Lib\x64\*" -Destination "C:\Program Files\Microsoft MPI\Lib\x64" -Recurse -Force
+            $destRoot = "C:\Program Files\Microsoft MPI"
+            New-Item -ItemType Directory -Path "$destRoot\Include" -Force | Out-Null
+            New-Item -ItemType Directory -Path "$destRoot\Lib\x64" -Force | Out-Null
+            Copy-Item -Path "$sdkRoot\Include\*" -Destination "$destRoot\Include\" -Recurse -Force
+            Copy-Item -Path "$sdkRoot\Lib\x64\*" -Destination "$destRoot\Lib\x64\" -Recurse -Force
           } else {
             Write-Host "ERROR: SDK Include not found at expected location"
             Write-Host "Checking alternative locations..."
