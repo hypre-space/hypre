@@ -4974,8 +4974,11 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    {
       /* j: row index to send */
       j = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i);
+      hypre_assert(j >= 0);
       send_i[i] = A_diag_i[j + 1] - A_diag_i[j] + A_offd_i[j + 1] - A_offd_i[j];
+      hypre_assert(send_i[i] >= 0);
       num_nnz_send += send_i[i];
+      hypre_assert(num_nnz_send >= 0);
    }
 
    /* send this array out: note the shift in recv_i by one (async) */
