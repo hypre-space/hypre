@@ -295,6 +295,33 @@ HYPRE_SetUseGpuRand( HYPRE_Int use_curand )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SolverDestroy( HYPRE_Solver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SolverDestroy_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SolverSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SolverSetup_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SolverSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SolverSolve_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_Version( char **version_ptr )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
