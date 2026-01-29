@@ -23,41 +23,6 @@
 #include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
-#if 0
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PCGSetupWrapper(HYPRE_Matrix A,
-                      HYPRE_Vector b,
-                      HYPRE_Vector x,
-                      HYPRE_Solver solver)
-{
-   return hypre_PCGSetup((void*) solver, (void*) A, (void*) b, (void*) x);
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PCGSolveWrapper(HYPRE_Matrix A,
-                      HYPRE_Vector b,
-                      HYPRE_Vector x,
-                      HYPRE_Solver solver)
-{
-   return hypre_PCGSolve((void*) solver, (void*) A, (void*) b, (void*) x);
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PCGDestroyWrapper(HYPRE_Solver solver)
-{
-   return hypre_PCGDestroy((void*) solver);
-}
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate
  *--------------------------------------------------------------------------*/
