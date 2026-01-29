@@ -1252,13 +1252,19 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParCSRMatrixDestroy(Wp); Wp = NULL;
       }
 
+      if ((!A_FF) && aff_solver && aff_solver[lev])
+      {
+         hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
+      }
+
       /* User-prescribed F-solver */
-      if (Frelax_type[lev] == 2  ||
-          Frelax_type[lev] == 29 ||
-          Frelax_type[lev] == 32 ||
-          Frelax_type[lev] == 9  ||
-          Frelax_type[lev] == 99 ||
-          Frelax_type[lev] == 199)
+      if ((Frelax_type[lev] == 2  ||
+           Frelax_type[lev] == 29 ||
+           Frelax_type[lev] == 32 ||
+           Frelax_type[lev] == 9  ||
+           Frelax_type[lev] == 99 ||
+           Frelax_type[lev] == 199) ||
+          (aff_solver && aff_solver[lev]))
       {
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
@@ -1310,6 +1316,24 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
+
+            if (!F_fine_array[lev + 1])
+            {
+               F_fine_array[lev + 1] =
+                  hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                        hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                        hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+               hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+            }
+
+            if (!U_fine_array[lev + 1])
+            {
+               U_fine_array[lev + 1] =
+                  hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                        hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                        hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+               hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+            }
 
             /* Call setup function */
             aff_base = (hypre_Solver*) aff_solver[lev];

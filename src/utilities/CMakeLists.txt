@@ -29,6 +29,7 @@ endif()
 
 # Regular sources
 set(REGULAR_SRCS
+  base_solver.c
   F90_HYPRE_error.c
   F90_HYPRE_general.c
   HYPRE_handle.c

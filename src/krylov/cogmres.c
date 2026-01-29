@@ -77,11 +77,20 @@ void *
 hypre_COGMRESCreate( hypre_COGMRESFunctions *cogmres_functions )
 {
    hypre_COGMRESData *cogmres_data;
+   hypre_Solver      *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    cogmres_data = hypre_CTAllocF(hypre_COGMRESData, 1, cogmres_functions, HYPRE_MEMORY_HOST);
    cogmres_data->functions = cogmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) cogmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_COGMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_COGMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_COGMRESDestroy;
 
    /* set defaults */
    (cogmres_data -> k_dim)          = 5;
