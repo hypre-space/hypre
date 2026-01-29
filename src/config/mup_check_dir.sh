@@ -44,6 +44,8 @@ diff -wc mup_check.old mup_check.new                   > mup_check.err
 SZ=`ls -l mup_check.err | awk '{print $5}'`
 if [ "$SZ" != 0 ]; then
     echo -ne "${RED}UPDATE${NC} - see $(pwd)/mup_check.err\n"
+    exit 1
 else
     echo -ne "${GREEN}OK${NC}\n"
+    exit 0
 fi
