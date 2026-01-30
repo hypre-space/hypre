@@ -44,8 +44,13 @@ make -s -j
 echo -e "********************"
 echo -e "*  FUNCTION CHECK  *"
 echo -e "********************\n"
+exit_code=0
 for i in $DIRS
 do
     echo -ne "Checking $i ... "
     (cd $i; $scriptpath/config/mup_check_dir.sh)
+    if [ $? -ne 0 ]; then
+        exit_code=1
+    fi
 done
+exit $exit_code

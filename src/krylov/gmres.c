@@ -71,11 +71,20 @@ void *
 hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
 {
    hypre_GMRESData *gmres_data;
+   hypre_Solver    *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    gmres_data = hypre_CTAllocF(hypre_GMRESData, 1, gmres_functions, HYPRE_MEMORY_HOST);
    gmres_data->functions = gmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) gmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_GMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_GMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_GMRESDestroy;
 
    /* set defaults */
    (gmres_data -> k_dim)          = 5;
