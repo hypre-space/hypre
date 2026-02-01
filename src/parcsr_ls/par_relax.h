@@ -8,6 +8,82 @@
 #ifndef HYPRE_PAR_RELAX_HEADER
 #define HYPRE_PAR_RELAX_HEADER
 
+/* Non-Scale version: inner loop kernel with diagonal skip */
+static inline void
+hypre_HybridGaussSeidelNSskip_core( const HYPRE_Int     *A_diag_i,
+                                    const HYPRE_Int     *A_diag_j,
+                                    const HYPRE_Complex *A_diag_data,
+                                    const HYPRE_Int     *A_offd_i,
+                                    const HYPRE_Int     *A_offd_j,
+                                    const HYPRE_Complex *A_offd_data,
+                                    const HYPRE_Complex *f_data,
+                                    const HYPRE_Complex *norms,
+                                    HYPRE_Complex       *u_data,
+                                    const HYPRE_Complex *v_ext_data,
+                                    HYPRE_Int            i )
+{
+   const HYPRE_Int diag_start = A_diag_i[i] + 1;
+   const HYPRE_Int diag_end   = A_diag_i[i + 1];
+   const HYPRE_Int offd_start = A_offd_i[i];
+   const HYPRE_Int offd_end   = A_offd_i[i + 1];
+
+   HYPRE_Complex   res = f_data[i];
+   HYPRE_Int       jj;
+
+   /* Diagonal block contribution */
+   for (jj = diag_start; jj < diag_end; jj++)
+   {
+      res -= A_diag_data[jj] * u_data[A_diag_j[jj]];
+   }
+
+   /* Off-diagonal block contribution */
+   for (jj = offd_start; jj < offd_end; jj++)
+   {
+      res -= A_offd_data[jj] * v_ext_data[A_offd_j[jj]];
+   }
+
+   /* Update solution */
+   u_data[i] = res / norms[i];
+}
+
+/* Non-Scale version: inner loop kernel without diagonal skip */
+static inline void
+hypre_HybridGaussSeidelNS_core( const HYPRE_Int     *A_diag_i,
+                                const HYPRE_Int     *A_diag_j,
+                                const HYPRE_Complex *A_diag_data,
+                                const HYPRE_Int     *A_offd_i,
+                                const HYPRE_Int     *A_offd_j,
+                                const HYPRE_Complex *A_offd_data,
+                                const HYPRE_Complex *f_data,
+                                const HYPRE_Complex *norms,
+                                HYPRE_Complex       *u_data,
+                                const HYPRE_Complex *v_ext_data,
+                                HYPRE_Int            i )
+{
+   const HYPRE_Int diag_start = A_diag_i[i];
+   const HYPRE_Int diag_end   = A_diag_i[i + 1];
+   const HYPRE_Int offd_start = A_offd_i[i];
+   const HYPRE_Int offd_end   = A_offd_i[i + 1];
+
+   HYPRE_Complex   res = f_data[i];
+   HYPRE_Int       jj;
+
+   /* Diagonal block contribution */
+   for (jj = diag_start; jj < diag_end; jj++)
+   {
+      res -= A_diag_data[jj] * u_data[A_diag_j[jj]];
+   }
+
+   /* Off-diagonal block contribution */
+   for (jj = offd_start; jj < offd_end; jj++)
+   {
+      res -= A_offd_data[jj] * v_ext_data[A_offd_j[jj]];
+   }
+
+   /* Update solution */
+   u_data[i] += res / norms[i];
+}
+
 /* Non-Scale version */
 static inline void
 hypre_HybridGaussSeidelNS( HYPRE_Int     *A_diag_i,
@@ -31,76 +107,151 @@ hypre_HybridGaussSeidelNS( HYPRE_Int     *A_diag_i,
    HYPRE_UNUSED_VAR(v_tmp_data);
 
    HYPRE_Int i;
-   const HYPRE_Complex zero = 0.0;
 
    /*-----------------------------------------------------------
     * Relax only C or F points as determined by relax_points.
     * If i is of the right type ( C or F or All) and diagonal is
     * nonzero, relax point i; otherwise, skip it.
+    *
+    * Split into 4 code paths to eliminate inner-loop branches:
+    * (l1_norms vs diagonal) x (Skip_diag vs not)
     *-----------------------------------------------------------*/
+
    if (l1_norms)
    {
-      for (i = ibegin; i != iend; i += iorder)
+      if (Skip_diag)
       {
-         if ( (relax_points == 0 || cf_marker[i] == relax_points) && l1_norms[i] != zero )
+         /* l1_norms provided, Skip_diag = 1 (Jacobi-style update) */
+         if (relax_points == 0)
          {
-            HYPRE_Int jj;
-            HYPRE_Complex res = f_data[i];
-
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
+            for (i = ibegin; i != iend; i += iorder)
             {
-               const HYPRE_Int ii = A_diag_j[jj];
-               res -= A_diag_data[jj] * u_data[ii];
-            }
-
-            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
-            {
-               const HYPRE_Int ii = A_offd_j[jj];
-               res -= A_offd_data[jj] * v_ext_data[ii];
-            }
-
-            if (Skip_diag)
-            {
-               u_data[i] = res / l1_norms[i];
-            }
-            else
-            {
-               u_data[i] += res / l1_norms[i];
+               /* TODO: remove this check */
+#if 0               
+               if (l1_norms[i] != 0.0)
+#endif
+               {
+                  hypre_HybridGaussSeidelNSskip_core(A_diag_i, A_diag_j, A_diag_data,
+                                                     A_offd_i, A_offd_j, A_offd_data,
+                                                     f_data, l1_norms, u_data, v_ext_data, i);
+               }
             }
          }
-      } /* for ( i = ...) */
+         else
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+               if (cf_marker[i] == relax_points && l1_norms[i] != 0.0)
+               {
+                  hypre_HybridGaussSeidelNSskip_core(A_diag_i, A_diag_j, A_diag_data,
+                                                     A_offd_i, A_offd_j, A_offd_data,
+                                                     f_data, l1_norms, u_data, v_ext_data, i);
+               }
+            }
+         }
+      }
+      else
+      {
+         /* l1_norms provided, Skip_diag = 0 (GS-style update) */
+         if (relax_points == 0)
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+#if 0                
+               if (l1_norms[i] != 0.0)
+#endif
+               {
+                  hypre_HybridGaussSeidelNS_core(A_diag_i, A_diag_j, A_diag_data,
+                                                 A_offd_i, A_offd_j, A_offd_data,
+                                                 f_data, l1_norms, u_data, v_ext_data, i);
+               }
+            }
+         }
+         else
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+               if (cf_marker[i] == relax_points && l1_norms[i] != 0.0)
+               {
+                  hypre_HybridGaussSeidelNS_core(A_diag_i, A_diag_j, A_diag_data,
+                                                 A_offd_i, A_offd_j, A_offd_data,
+                                                 f_data, l1_norms, u_data, v_ext_data, i);
+               }
+            }
+         }
+      }
    }
    else
    {
-      for (i = ibegin; i != iend; i += iorder)
+      /* Use diagonal entry as norm */
+      if (Skip_diag)
       {
-         if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_diag_data[A_diag_i[i]] != zero )
+         /* No l1_norms, Skip_diag = 1 (Jacobi-style update) */
+         if (relax_points == 0)
          {
-            HYPRE_Int jj;
-            HYPRE_Complex res = f_data[i];
-
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
+            for (i = ibegin; i != iend; i += iorder)
             {
-               const HYPRE_Int ii = A_diag_j[jj];
-               res -= A_diag_data[jj] * u_data[ii];
-            }
-
-            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
-            {
-               const HYPRE_Int ii = A_offd_j[jj];
-               res -= A_offd_data[jj] * v_ext_data[ii];
-            }
-
-            if (Skip_diag)
-            {
-               u_data[i] = res / A_diag_data[A_diag_i[i]];
-            }
-            else
-            {
-               u_data[i] += res / A_diag_data[A_diag_i[i]];
+               /* TODO: remove this check maybe? */
+#if 0               
+               const HYPRE_Complex diag_val = A_diag_data[A_diag_i[i]];
+               if (diag_val != 0.0)
+#endif
+               {
+                  hypre_HybridGaussSeidelNSskip_core(A_diag_i, A_diag_j, A_diag_data,
+                                                     A_offd_i, A_offd_j, A_offd_data,
+                                                     f_data, A_diag_data, u_data, v_ext_data, i);
+               }
             }
          }
-      } /* for ( i = ...) */
+         else
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+               /* TODO: remove this check maybe? */
+               const HYPRE_Complex diag_val = A_diag_data[A_diag_i[i]];
+               if (cf_marker[i] == relax_points && diag_val != 0.0)
+               {
+                  hypre_HybridGaussSeidelNSskip_core(A_diag_i, A_diag_j, A_diag_data,
+                                                     A_offd_i, A_offd_j, A_offd_data,
+                                                     f_data, A_diag_data, u_data, v_ext_data, i);
+               }
+            }
+         }
+      }
+      else
+      {
+         /* No l1_norms, Skip_diag = 0 (GS-style update) */
+         if (relax_points == 0)
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+               /* TODO: remove this check maybe? */
+#if 0               
+               const HYPRE_Complex diag_val = A_diag_data[A_diag_i[i]];
+               if (diag_val != 0.0)
+#endif
+               {
+                  hypre_HybridGaussSeidelNS_core(A_diag_i, A_diag_j, A_diag_data,
+                                                 A_offd_i, A_offd_j, A_offd_data,
+                                                 f_data, A_diag_data, u_data, v_ext_data, i);
+               }
+            }
+         }
+         else
+         {
+            for (i = ibegin; i != iend; i += iorder)
+            {
+               /* TODO: remove this check maybe? */
+               const HYPRE_Complex diag_val = A_diag_data[A_diag_i[i]];
+               if (cf_marker[i] == relax_points && diag_val != 0.0)
+               {
+                  hypre_HybridGaussSeidelNS_core(A_diag_i, A_diag_j, A_diag_data,
+                                                 A_offd_i, A_offd_j, A_offd_data,
+                                                 f_data, A_diag_data, u_data, v_ext_data, i);
+               }
+            }
+         }
+      }
    }
 }
 
