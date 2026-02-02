@@ -2810,15 +2810,11 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
                                    hypre_ParCSRMatrix **P_ptr)
 {
    hypre_DenseBlockMatrix  *b_FF = NULL;
-   hypre_DenseBlockMatrix  *b_FC = NULL;
-   hypre_DenseBlockMatrix  *r_FC = NULL;
    hypre_ParCSRMatrix      *Wp   = NULL;
    hypre_ParCSRMatrix      *P    = NULL;
+   hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
    HYPRE_Int                row_major = 0;
-   HYPRE_Int                block_dim_C =
-      hypre_ParCSRMatrixNumRows(A) * block_dim /
-      hypre_ParCSRMatrixNumRows(A_FF) - block_dim;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -2828,8 +2824,6 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid output pointer(s) for row-lumped prolongation");
       return hypre_error_flag;
    }
-
-   hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
    /* Direct block row-sum approximations (use_abs controls absolute-value sums) */
    hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);

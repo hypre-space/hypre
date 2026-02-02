@@ -559,6 +559,13 @@ hypre_ParCSRMatrixBlockColSum_dbl( hypre_ParCSRMatrix *A, HYPRE_Int row_major, H
 HYPRE_Int
 hypre_ParCSRMatrixBlockColSum_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, hypre_DenseBlockMatrix **B_ptr );
 
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum_flt( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, HYPRE_Int use_abs, hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum_dbl( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, HYPRE_Int use_abs, hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, HYPRE_Int use_abs, hypre_DenseBlockMatrix **B_ptr );
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_flt( hypre_ParCSRMatrix *A, HYPRE_Int copy_data );
 hypre_ParCSRMatrix*
@@ -992,6 +999,13 @@ HYPRE_Int
 hypre_ParCSRMatrixSetPatternOnly_dbl( hypre_ParCSRMatrix *matrix, HYPRE_Int pattern_only );
 HYPRE_Int
 hypre_ParCSRMatrixSetPatternOnly_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_Int pattern_only );
+
+HYPRE_Int
+hypre_ParCSRMatrixSortColMapOffd_flt( hypre_ParCSRMatrix *A );
+HYPRE_Int
+hypre_ParCSRMatrixSortColMapOffd_dbl( hypre_ParCSRMatrix *A );
+HYPRE_Int
+hypre_ParCSRMatrixSortColMapOffd_long_dbl( hypre_ParCSRMatrix *A );
 
 HYPRE_Int
 hypre_ParCSRMatrixStatsArrayCompute_flt( HYPRE_Int num_matrices, hypre_ParCSRMatrix **matrices, hypre_MatrixStatsArray *stats_array );
