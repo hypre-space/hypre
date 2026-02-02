@@ -184,6 +184,9 @@ hypre_MGRGetProlongationName(hypre_ParMGRData  *mgr_data,
       case 13:
          return "Blk-RowSum";
 
+      case 14:
+         return "Blk-RowSumAbs";
+
       default:
          return "Unknown";
    }
