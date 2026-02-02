@@ -4561,6 +4561,8 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver,
  *    - 4    : pAIR distance 1
  *    - 5    : pAIR distance 2
  *    - 12   : Block Jacobi
+ *    - 13   : block row-sum (lumped) with regular sums
+ *    - 14   : block row-sum (lumped) with absolute-value sums
  *    - 13   : CPR-like restriction operator
  *    - 14   : (Block) Column-lumped restriction
  *    - 15   : partial Column-lumped restriction

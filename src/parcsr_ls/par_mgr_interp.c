@@ -133,8 +133,13 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 13)
    {
-      /* Block row-sum (lumped) prolongation */
-      hypre_MGRBlockRowLumpedProlong(A, A_FF, A_FC, CF_marker, blk_size, &Wp, &P);
+      /* Block row-sum (lumped) prolongation with regular sums */
+      hypre_MGRBuildBlockRowLumpedInterp(A, A_FF, A_FC, CF_marker, blk_size, 0, &Wp, &P);
+   }
+   else if (interp_type == 14)
+   {
+      /* Block row-sum (lumped) prolongation with absolute sums */
+      hypre_MGRBuildBlockRowLumpedInterp(A, A_FF, A_FC, CF_marker, blk_size, 1, &Wp, &P);
    }
    else
    {
@@ -2698,20 +2703,22 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRBlockRowLumpedProlong
+ * hypre_MGRBuildBlockRowLumpedInterp
  *
  * Build MGR's prolongation using block row-sum (lumped) approximation:
  *   Wp ≈ - inv(blkrowsum(A_FF)) * blkrowsum(A_FC) and then P = [Wp I].
+ *   If use_abs != 0, blkrowsum uses absolute values.
  *
  * TODO (VPM): Remove transpose calls (VPM)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
+hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
                                hypre_ParCSRMatrix  *A_FF,
                                hypre_ParCSRMatrix  *A_FC,
                                hypre_IntArray      *CF_marker,
                                HYPRE_Int            block_dim,
+                               HYPRE_Int            use_abs,
                                hypre_ParCSRMatrix **Wp_ptr,
                                hypre_ParCSRMatrix **P_ptr)
 {
@@ -2736,9 +2743,9 @@ hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
    }
 
 #if 0
-   /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
-   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
-   hypre_ParCSRMatrixBlockRowSum(A_FC, row_major, block_dim, block_dim_C, 1, &b_FC);
+   /* Direct block row-sum approximations (use_abs controls absolute-value sums) */
+   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
+   hypre_ParCSRMatrixBlockRowSum(A_FC, row_major, block_dim, block_dim_C, use_abs, &b_FC);
 
    /* Invert block-diagonal approximation of A_FF (in place) */
 #if defined (HYPRE_USING_GPU)
@@ -2780,8 +2787,8 @@ hypre_MGRBlockRowLumpedProlong(hypre_ParCSRMatrix  *A,
 #else
    hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
-   /* Direct block row-sum approximations (regular sums; change last arg to 0 for regular sum) */
-   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, 1, &b_FF);
+   /* Direct block row-sum approximations (use_abs controls absolute-value sums) */
+   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
 
    /* Invert block-diagonal approximation of A_FF (in place) */
    hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
