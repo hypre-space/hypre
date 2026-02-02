@@ -2801,13 +2801,13 @@ hypre_MGRBuildRowLumpedInterp(hypre_ParCSRMatrix  *A,
 
 HYPRE_Int
 hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
-                               hypre_ParCSRMatrix  *A_FF,
-                               hypre_ParCSRMatrix  *A_FC,
-                               hypre_IntArray      *CF_marker,
-                               HYPRE_Int            block_dim,
-                               HYPRE_Int            use_abs,
-                               hypre_ParCSRMatrix **Wp_ptr,
-                               hypre_ParCSRMatrix **P_ptr)
+                                   hypre_ParCSRMatrix  *A_FF,
+                                   hypre_ParCSRMatrix  *A_FC,
+                                   hypre_IntArray      *CF_marker,
+                                   HYPRE_Int            block_dim,
+                                   HYPRE_Int            use_abs,
+                                   hypre_ParCSRMatrix **Wp_ptr,
+                                   hypre_ParCSRMatrix **P_ptr)
 {
    hypre_DenseBlockMatrix  *b_FF = NULL;
    hypre_DenseBlockMatrix  *b_FC = NULL;
