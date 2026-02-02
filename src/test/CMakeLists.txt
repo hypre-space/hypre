@@ -23,6 +23,7 @@ set(TEST_SRCS
   ams_driver.c
   struct_migrate.c
   ij_assembly.c
+  test_csr_overlap.c
 )
 
 # Collect targets derived from source file names
