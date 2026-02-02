@@ -497,6 +497,14 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixMemoryLocation(A_FF_diag) = memory_location_P;
    hypre_CSRMatrixMemoryLocation(A_FF_offd) = memory_location_P;
 
+   /* Make sure col_map_offd is sorted (required by commpkg routines) */
+   hypre_ParCSRMatrixSortColMapOffd(A_FF);
+   hypre_ParCSRMatrixSortColMapOffd(A_FC);
+
+   /* Create communication packages */
+   hypre_MatvecCommPkgCreate(A_FF);
+   hypre_MatvecCommPkgCreate(A_FC);
+
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_fine, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert, HYPRE_MEMORY_HOST);

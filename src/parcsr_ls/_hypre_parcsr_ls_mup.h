@@ -5250,6 +5250,13 @@ HYPRE_Int
 hypre_MGRBuildBlockJacobiWp_long_dbl( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, HYPRE_Int blk_size, hypre_ParCSRMatrix **Wp_ptr );
 
 HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int blk_dim, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int blk_dim, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int blk_dim, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
+
+HYPRE_Int
 hypre_MGRBuildCoarseOperator_flt( void *mgr_data, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr, HYPRE_Int level );
 HYPRE_Int
 hypre_MGRBuildCoarseOperator_dbl( void *mgr_data, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr, HYPRE_Int level );
@@ -5311,6 +5318,13 @@ HYPRE_Int
 hypre_MGRBuildRestrict_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global, hypre_double trunc_factor, HYPRE_Int max_elmts, hypre_double strong_threshold, hypre_double max_row_sum, HYPRE_Int blk_size, HYPRE_Int method, hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr, hypre_ParCSRMatrix **RT_ptr );
 HYPRE_Int
 hypre_MGRBuildRestrict_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global, hypre_long_double trunc_factor, HYPRE_Int max_elmts, hypre_long_double strong_threshold, hypre_long_double max_row_sum, HYPRE_Int blk_size, HYPRE_Int method, hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr, hypre_ParCSRMatrix **RT_ptr );
+
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
 
 HYPRE_Int
 hypre_MGRCoarseParms_flt( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );

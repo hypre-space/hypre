@@ -134,6 +134,8 @@
 #undef hypre_ParCSRMatrixBlkFilterHost
 #undef hypre_ParCSRMatrixBlockColSum
 #undef hypre_ParCSRMatrixBlockColSumHost
+#undef hypre_ParCSRMatrixBlockRowSum
+#undef hypre_ParCSRMatrixBlockRowSumHost
 #undef hypre_ParCSRMatrixClone
 #undef hypre_ParCSRMatrixClone_v2
 #undef hypre_ParCSRMatrixColSum
@@ -202,6 +204,8 @@
 #undef hypre_ParCSRMatrixSetNumNonzeros_core
 #undef hypre_ParCSRMatrixSetNumRownnz
 #undef hypre_ParCSRMatrixSetPatternOnly
+#undef hypre_ParCSRMatrixSortColMapOffd
+#undef hypre_ParCSRMatrixSortColMapOffdHost
 #undef hypre_ParCSRMatrixStatsArrayCompute
 #undef hypre_ParCSRMatrixStatsComputePassOneLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalHost

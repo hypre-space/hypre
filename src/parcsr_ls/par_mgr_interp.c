@@ -131,6 +131,30 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
       hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, blk_size, &Wp);
       hypre_MGRBuildBlockJacobiP(A, A_FF, A_FC, Wp, blk_size, CF_marker_data, &P);
    }
+   else if (interp_type == 13)
+   {
+      /* Block row-sum (lumped) prolongation with regular sums */
+      if (blk_size > 1)
+      {
+         hypre_MGRBuildBlockRowLumpedInterp(A, A_FF, A_FC, CF_marker, blk_size, 0, &Wp, &P);
+      }
+      else
+      {
+         hypre_MGRBuildRowLumpedInterp(A, A_FF, A_FC, CF_marker, 0, &Wp, &P);
+      }
+   }
+   else if (interp_type == 14)
+   {
+      /* Block row-sum (lumped) prolongation with absolute sums */
+      if (blk_size > 1)
+      {
+         hypre_MGRBuildBlockRowLumpedInterp(A, A_FF, A_FC, CF_marker, blk_size, 1, &Wp, &P);
+      }
+      else
+      {
+         hypre_MGRBuildRowLumpedInterp(A, A_FF, A_FC, CF_marker, 1, &Wp, &P);
+      }
+   }
    else
    {
       /* Classical modified interpolation */
@@ -2689,5 +2713,152 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildRowLumpedInterp
+ *
+ * Specialized row-lumped interpolation for block size 1:
+ *   Wp ≈ - inv(rowsum(A_FF)) * A_FC and then P = [Wp I].
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp(hypre_ParCSRMatrix  *A,
+                              hypre_ParCSRMatrix  *A_FF,
+                              hypre_ParCSRMatrix  *A_FC,
+                              hypre_IntArray      *CF_marker,
+                              HYPRE_Int            use_abs,
+                              hypre_ParCSRMatrix **Wp_ptr,
+                              hypre_ParCSRMatrix **P_ptr)
+{
+   hypre_ParVector         *row_sum     = NULL;
+   hypre_ParVector         *row_sum_inv = NULL;
+   hypre_ParCSRMatrix      *Wp          = NULL;
+   hypre_ParCSRMatrix      *P           = NULL;
+   hypre_CSRMatrix         *A_FF_diag   = hypre_ParCSRMatrixDiag(A_FF);
+   hypre_CSRMatrix         *A_FF_offd   = hypre_ParCSRMatrixOffd(A_FF);
+   HYPRE_Int                sum_type    = use_abs ? 1 : 0;
+   HYPRE_MemoryLocation     mem_AFF     = hypre_ParCSRMatrixMemoryLocation(A_FF);
+   HYPRE_MemoryLocation     mem_AFC     = hypre_ParCSRMatrixMemoryLocation(A_FC);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Sanity check */
+   if (!Wp_ptr || !P_ptr)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid output pointer(s) for row-lumped interpolation");
+      return hypre_error_flag;
+   }
+
+   /* Compute row sums of A_FF */
+   row_sum = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                   hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                   hypre_ParCSRMatrixRowStarts(A_FF));
+   hypre_ParVectorInitialize_v2(row_sum, mem_AFF);
+
+   HYPRE_Complex *row_sum_data = hypre_VectorData(hypre_ParVectorLocalVector(row_sum));
+   hypre_CSRMatrixComputeRowSum(A_FF_diag, NULL, NULL, row_sum_data, sum_type, 1.0, "set");
+   if (hypre_CSRMatrixNumCols(A_FF_offd) > 0)
+   {
+      hypre_CSRMatrixComputeRowSum(A_FF_offd, NULL, NULL, row_sum_data, sum_type, 1.0, "add");
+   }
+
+   /* Invert the row sums */
+   hypre_ParVectorPointwiseInverse(row_sum, &row_sum_inv);
+   if (mem_AFF != mem_AFC)
+   {
+      hypre_ParVectorMigrate(row_sum_inv, mem_AFC);
+   }
+   hypre_ParVectorScale(-1.0, row_sum_inv);
+
+   /* Scale A_FC by the inverse row sums */
+   Wp = hypre_ParCSRMatrixClone_v2(A_FC, 1, mem_AFC);
+   hypre_ParCSRMatrixDiagScale(Wp, row_sum_inv, NULL);
+
+   /* Build P = [Wp I] */
+   hypre_MGRBuildPFromWp(A, Wp, hypre_IntArrayData(CF_marker), &P);
+
+   /* Output */
+   *Wp_ptr = Wp;
+   *P_ptr  = P;
+
+   /* Free memory */
+   hypre_ParVectorDestroy(row_sum);
+   hypre_ParVectorDestroy(row_sum_inv);
+
+   HYPRE_ANNOTATE_FUNC_END;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildBlockRowLumpedInterp
+ *
+ * Build MGR's prolongation using block row-sum (lumped) approximation:
+ *   Wp ≈ - inv(blkrowsum(A_FF)) * (A_FC) and then P = [Wp I].
+ *   If use_abs != 0, blkrowsum uses absolute values.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
+                                   hypre_ParCSRMatrix  *A_FF,
+                                   hypre_ParCSRMatrix  *A_FC,
+                                   hypre_IntArray      *CF_marker,
+                                   HYPRE_Int            block_dim,
+                                   HYPRE_Int            use_abs,
+                                   hypre_ParCSRMatrix **Wp_ptr,
+                                   hypre_ParCSRMatrix **P_ptr)
+{
+   hypre_DenseBlockMatrix  *b_FF = NULL;
+   hypre_ParCSRMatrix      *Wp   = NULL;
+   hypre_ParCSRMatrix      *P    = NULL;
+   hypre_ParCSRMatrix      *A_FF_inv = NULL;
+
+   HYPRE_Int                row_major = 0;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Sanity check */
+   if (!Wp_ptr || !P_ptr)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid output pointer(s) for row-lumped prolongation");
+      return hypre_error_flag;
+   }
+
+   /* Direct block row-sum approximations (use_abs controls absolute-value sums) */
+   hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
+
+   /* Invert block-diagonal approximation of A_FF (in place) */
+   hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                            hypre_DenseBlockMatrixNumRows(b_FF),
+                            hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+
+   /* Convert to ParCSR */
+   A_FF_inv = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_FF),
+                                                           hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                                           hypre_ParCSRMatrixGlobalNumCols(A_FF),
+                                                           hypre_ParCSRMatrixRowStarts(A_FF),
+                                                           hypre_ParCSRMatrixColStarts(A_FF),
+                                                           b_FF);
+
+   /* Multiply by A_FC */
+   Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
+
+   /* Apply minus sign */
+   hypre_ParCSRMatrixScale(Wp, -1.0);
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(A_FF_inv);
+   A_FF_inv = NULL;
+   hypre_DenseBlockMatrixDestroy(b_FF);
+
+   /* Build P = [Wp I] */
+   hypre_MGRBuildPFromWp(A, Wp, hypre_IntArrayData(CF_marker), &P);
+
+   /* Output */
+   *Wp_ptr = Wp;
+   *P_ptr  = P;
+
+   HYPRE_ANNOTATE_FUNC_END;
    return hypre_error_flag;
 }

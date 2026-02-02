@@ -78,12 +78,20 @@ void *
 hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 {
    hypre_PCGData *pcg_data;
+   hypre_Solver  *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    pcg_data = hypre_CTAllocF(hypre_PCGData, 1, pcg_functions, HYPRE_MEMORY_HOST);
-
    pcg_data -> functions = pcg_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) pcg_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_PCGSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_PCGSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_PCGDestroy;
 
    /* set defaults */
    (pcg_data -> tol)          = 1.0e-06;

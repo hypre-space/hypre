@@ -1253,13 +1253,32 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       /* User-prescribed F-solver */
-      if (Frelax_type[lev] == 2  ||
-          Frelax_type[lev] == 29 ||
-          Frelax_type[lev] == 32 ||
-          Frelax_type[lev] == 9  ||
-          Frelax_type[lev] == 99 ||
-          Frelax_type[lev] == 199)
+      if ((Frelax_type[lev] == 2  ||
+           Frelax_type[lev] == 29 ||
+           Frelax_type[lev] == 32 ||
+           Frelax_type[lev] == 9  ||
+           Frelax_type[lev] == 99 ||
+           Frelax_type[lev] == 199) ||
+          (aff_solver && aff_solver[lev]))
       {
+         if (!F_fine_array[lev + 1])
+         {
+            F_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                     hypre_ParCSRMatrixRowStarts(A_FF));
+            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         }
+
+         if (!U_fine_array[lev + 1])
+         {
+            U_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                     hypre_ParCSRMatrixRowStarts(A_FF));
+            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         }
+
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
             if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
@@ -1382,25 +1401,6 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during F-relaxation setup!");
             return hypre_error_flag;
-         }
-
-         /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
-         if (!F_fine_array[lev + 1])
-         {
-            F_fine_array[lev + 1] =
-               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
-         }
-
-         if (!U_fine_array[lev + 1])
-         {
-            U_fine_array[lev + 1] =
-               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
          }
       }
 
