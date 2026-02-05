@@ -74,11 +74,20 @@ void *
 hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions )
 {
    hypre_FlexGMRESData *fgmres_data;
+   hypre_Solver        *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    fgmres_data = hypre_CTAllocF(hypre_FlexGMRESData, 1, fgmres_functions, HYPRE_MEMORY_HOST);
    fgmres_data->functions = fgmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) fgmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_FlexGMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_FlexGMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_FlexGMRESDestroy;
 
    /* set defaults */
    (fgmres_data -> k_dim)          = 20;

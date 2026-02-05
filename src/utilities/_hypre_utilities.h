@@ -459,8 +459,8 @@ typedef uint64_t               hypre_uint64;
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef HYPRE_BASE_HEADER
-#define HYPRE_BASE_HEADER
+#ifndef HYPRE_BASE_SOLVER_HEADER
+#define HYPRE_BASE_SOLVER_HEADER
 
 /******************************************************************************
  *
@@ -484,7 +484,7 @@ typedef struct
 #define hypre_SolverSolve(data)       ((data) -> solve)
 #define hypre_SolverDestroy(data)     ((data) -> destroy)
 
-#endif /* HYPRE_BASE_HEADER */
+#endif /* HYPRE_BASE_SOLVER_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

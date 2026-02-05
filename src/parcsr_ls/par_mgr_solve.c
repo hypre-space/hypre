@@ -986,12 +986,14 @@ hypre_MGRCycle( void              *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
+
          else if (Frelax_type[level] == 2  ||
                   Frelax_type[level] == 29 ||
                   Frelax_type[level] == 32 ||
                   Frelax_type[level] == 9  ||
                   Frelax_type[level] == 99 ||
-                  Frelax_type[level] == 199)
+                  Frelax_type[level] == 199 ||
+                  ((mgr_data -> aff_solver) && (mgr_data -> aff_solver)[level]))
          {
             /* We need to compute the residual first to ensure that
                F-relaxation is reducing the global residual */
@@ -1016,16 +1018,8 @@ hypre_MGRCycle( void              *mgr_vdata,
             /* Set initial guess to zeros */
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
-            if (Frelax_type[level] == 2 || Frelax_type[level] == 32)
-            {
-               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
-
-               hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
-                                           (HYPRE_Matrix) A_ff_array[level],
-                                           (HYPRE_Vector) F_fine_array[coarse_grid],
-                                           (HYPRE_Vector) U_fine_array[coarse_grid]);
-            }
-            else if (Frelax_type[level] == 29)
+            if (Frelax_type[level] == 2 || Frelax_type[level] == 29 || Frelax_type[level] == 32 ||
+                ((mgr_data -> aff_solver) && (mgr_data -> aff_solver)[level]))
             {
                aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
                hypre_SolverSolve(aff_base)((mgr_data -> aff_solver)[level],

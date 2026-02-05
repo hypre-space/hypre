@@ -43,6 +43,9 @@
 #undef HYPRE_SetSpMVUseVendor
 #undef HYPRE_SetSpTransUseVendor
 #undef HYPRE_SetUseGpuRand
+#undef HYPRE_SolverDestroy
+#undef HYPRE_SolverSetup
+#undef HYPRE_SolverSolve
 #undef HYPRE_Version
 #undef HYPRE_VersionNumber
 #undef hypre_BeginTiming_fcn
