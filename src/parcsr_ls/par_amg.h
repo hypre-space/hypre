@@ -288,8 +288,8 @@ typedef struct
 
 #ifdef HYPRE_USING_DSUPERLU
    /* Parameters and data for SuperLU_Dist */
-   HYPRE_Int dslu_threshold;
-   HYPRE_Solver dslu_solver;
+   HYPRE_Int      dslu_threshold;
+   void          *dslu_solver;
 #endif
 
 } hypre_ParAMGData;
