@@ -304,6 +304,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *       NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/* unified device stream */
+#if defined(HYPRE_USING_CUDA)
+typedef cudaStream_t hypre_DeviceStream;
+#elif defined(HYPRE_USING_HIP)
+typedef hipStream_t hypre_DeviceStream;
+#elif defined(HYPRE_USING_SYCL)
+typedef sycl::queue* hypre_DeviceStream;
+#endif
+
 #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(); hypre_GetDeviceLastError(); }
 #else
@@ -735,32 +744,45 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device info data structures
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/* unified dense solver handle */
 #if defined(HYPRE_USING_CUSOLVER)
 typedef cusolverDnHandle_t vendorSolverHandle_t;
 #elif defined(HYPRE_USING_ROCSOLVER)
 typedef rocblas_handle     vendorSolverHandle_t;
+#else
+typedef void *     vendorSolverHandle_t;
+#endif
+
+/* unified rand generator */
+#if defined(HYPRE_USING_CURAND)
+typedef curandGenerator_t hypre_DeviceRandGenerator;
+#elif defined(HYPRE_USING_ROCRAND)
+typedef rocrand_generator hypre_DeviceRandGenerator;
+#else
+typedef void * hypre_DeviceRandGenerator;
+#endif
+
+/* unified sparse LA library */
+#if defined(HYPRE_USING_CUSPARSE)
+typedef cusparseHandle_t hypre_DeviceSparseLibHandle;
+#elif defined(HYPRE_USING_ROCSPARSE)
+typedef rocsparse_handle hypre_DeviceSparseLibHandle;
+#else
+typedef void * hypre_DeviceSparseLibHandle;
 #endif
 
 struct hypre_DeviceData
 {
-#if defined(HYPRE_USING_CURAND)
-   curandGenerator_t                 curand_generator;
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-   rocrand_generator                 curand_generator;
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+   hypre_DeviceRandGenerator         curand_generator;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
    cublasHandle_t                    cublas_handle;
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
-   cusparseHandle_t                  cusparse_handle;
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_handle                  cusparse_handle;
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+   hypre_DeviceSparseLibHandle       cusparse_handle;
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
@@ -769,13 +791,7 @@ struct hypre_DeviceData
 
    /* TODO (VPM): Change to HYPRE_USING_GPU_STREAMS*/
 #if defined(HYPRE_USING_CUDA_STREAMS)
-#if defined(HYPRE_USING_CUDA)
-   cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];
-#elif defined(HYPRE_USING_HIP)
-   hipStream_t                       streams[HYPRE_MAX_NUM_STREAMS];
-#elif defined(HYPRE_USING_SYCL)
-   sycl::queue*                      streams[HYPRE_MAX_NUM_STREAMS] = {NULL};
-#endif
+   hypre_DeviceStream                streams[HYPRE_MAX_NUM_STREAMS] = {0};
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -843,41 +859,20 @@ struct hypre_DeviceData
 hypre_DeviceData*     hypre_DeviceDataCreate();
 void                  hypre_DeviceDataDestroy(hypre_DeviceData* data);
 
-#if defined(HYPRE_USING_CURAND)
-curandGenerator_t     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-rocrand_generator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
+hypre_DeviceRandGenerator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
-cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
+hypre_DeviceSparseLibHandle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
 vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
-/* TODO (VPM): Create a deviceStream_t to encapsulate all stream types below */
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#elif defined(HYPRE_USING_HIP)
-hipStream_t           hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-hipStream_t           hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#endif
+hypre_DeviceStream          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+hypre_DeviceStream          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 
 /* Data structure and accessor routines for Sparse Triangular Matrices */
 struct hypre_CsrsvData
@@ -2261,6 +2256,8 @@ template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
+template<typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
@@ -2273,4 +2270,4 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+#endif /* #ifndef HYPRE_DEVICE_UTILS_H */

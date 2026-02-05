@@ -113,5 +113,20 @@ struct hypreFunctor_NonzeroAboveTol
    }
 };
 
+/*--------------------------------------------------------------------------
+ * hypreFunctor_ElementCast
+ *
+ * Functor for performing casting data between datatypes
+ *--------------------------------------------------------------------------*/
+
+template <typename T, typename T2>
+struct hypreFunctor_ElementCast
+{
+   __host__ __device__ T2 operator()(T a)
+   {
+      return static_cast<T2>(a);
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */

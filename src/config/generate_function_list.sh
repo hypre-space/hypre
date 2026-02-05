@@ -13,4 +13,6 @@
 shopt -s nullglob
 
 # Use awk to avoid issues with spacing
-nm -P *.o *.obj | awk '$2 == "T" {print $1}' | sed -e 's/^_//' -e 's/_$//'
+# Demangle any c++ name mangling and filter _device_stub_ prefixes.
+nm -P *.o *.obj | awk '$2 == "T" {print $1}' | c++filt | sed -e 's/(.*$//' -e 's/^__device_stub__//' -e 's/^_//' -e 's/_$//'
+
