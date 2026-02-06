@@ -143,9 +143,9 @@ hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
    HYPRE_MemoryLocation memory_diag = diag ?
-     hypre_CSRMatrixMemoryLocation(diag) : HYPRE_MEMORY_UNDEFINED;
+                                      hypre_CSRMatrixMemoryLocation(diag) : HYPRE_MEMORY_UNDEFINED;
    HYPRE_MemoryLocation memory_offd = offd ?
-     hypre_CSRMatrixMemoryLocation(offd) : HYPRE_MEMORY_UNDEFINED;
+                                      hypre_CSRMatrixMemoryLocation(offd) : HYPRE_MEMORY_UNDEFINED;
 
    if (diag && offd)
    {
