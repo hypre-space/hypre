@@ -3152,7 +3152,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             (coarse_size > (HYPRE_BigInt)coarse_threshold) &&
             (level != max_levels - 1))
    {
-      HYPRE_Solver dslu_solver = hypre_SLUDistCreate();
+      void *dslu_solver = hypre_SLUDistCreate();
       hypre_SLUDistSetPrintLevel(dslu_solver, amg_print_level);
       hypre_SLUDistSetup(dslu_solver, A_array[level], NULL, NULL);
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
