@@ -7,6 +7,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
+#include <assert.h>
 
 #if defined(HYPRE_USING_GPU)
 
@@ -94,6 +95,12 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    HYPRE_Real              *parD                = NULL;
    HYPRE_Int               *uend                = NULL;
 
+   /* level-set datastructures */
+   HYPRE_Int              *low_set_sizes        = NULL;
+   HYPRE_Int              *low_set_offsets      = NULL;
+   HYPRE_Int              *upp_set_sizes        = NULL;
+   HYPRE_Int              *upp_set_offsets      = NULL;
+
    /* Local variables */
    HYPRE_BigInt            *send_buf            = NULL;
    hypre_ParCSRCommPkg     *comm_pkg;
@@ -121,6 +128,28 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       return hypre_error_flag;
    }
 #endif
+
+   // If we are using the new ILU0 level-set based implementation
+   if (ilu_type == 60)
+   {
+      // We need to create a partitioning of the rows in level sets based on matrix structure
+      // Not assuming symmetric structure we partition once for lower and one for upper solves
+
+      // Right now I guess the matrix resides on the device, but coloring is faster on the CPU
+      // So first we copy it down to the host, and then we traverse it serially.
+      hypre_CSRMatrixMigrate(A_diag, HYPRE_MEMORY_HOST); // can this function be used like this?
+      if (A_diag)
+      {
+         HYPRE_Int     nnz  = hypre_CSRMatrixNumNonzeros(A_diag);
+         HYPRE_Int    *rowi = hypre_CSRMatrixI(A_diag);
+         HYPRE_Int    *colj = hypre_CSRMatrixJ(A_diag);
+         HYPRE_Real   *vals = hypre_CSRMatrixData(A_diag);
+         assert(false);
+      }
+      else{
+         assert(false);
+      }
+   }
 
    /* Build the inverse permutation arrays */
    if (perm_data && qperm_data)
