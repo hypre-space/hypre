@@ -227,7 +227,7 @@ function(find_and_add_rocm_library LIB_NAME)
       # Append the library variable that hypre expects.
       # Do NOT link rocThrust/rocPRIM targets into Hypre: some external packages export HIP-only
       # link flags (e.g., --hip-link/--offload-arch) that would propagate to downstream pure-C++
-      # targets and break their link steps. We only need theirinclude dirs.
+      # targets and break their link steps. We only need their include dirs.
       if (${LIB_NAME_UPPER} STREQUAL ROCTHRUST)
         get_target_property(ROCTHRUST_INCLUDE_DIRS roc::rocthrust INTERFACE_INCLUDE_DIRECTORIES)
         if(ROCTHRUST_INCLUDE_DIRS)
