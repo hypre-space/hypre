@@ -286,6 +286,20 @@ hypre_NumbersQuery_dbl( hypre_NumbersNode *node, const HYPRE_Int n );
 HYPRE_Int
 hypre_NumbersQuery_long_dbl( hypre_NumbersNode *node, const HYPRE_Int n );
 
+hypre_OverlapData*
+hypre_OverlapDataCreate_flt( void );
+hypre_OverlapData*
+hypre_OverlapDataCreate_dbl( void );
+hypre_OverlapData*
+hypre_OverlapDataCreate_long_dbl( void );
+
+HYPRE_Int
+hypre_OverlapDataDestroy_flt( hypre_OverlapData *overlap_data );
+HYPRE_Int
+hypre_OverlapDataDestroy_dbl( hypre_OverlapData *overlap_data );
+HYPRE_Int
+hypre_OverlapDataDestroy_long_dbl( hypre_OverlapData *overlap_data );
+
 void
 hypre_ParAat_RowSizes_flt( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int *B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_BigInt *A_col_map_offd, HYPRE_Int *A_ext_i, HYPRE_BigInt *A_ext_j, HYPRE_BigInt *A_ext_row_map, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int num_rows_A_ext, HYPRE_BigInt first_col_diag_A, HYPRE_BigInt first_row_index_A );
 void
@@ -595,6 +609,13 @@ HYPRE_Int
 hypre_ParCSRMatrixCompressOffdMap_long_dbl( hypre_ParCSRMatrix *A );
 
 HYPRE_Int
+hypre_ParCSRMatrixComputeOverlap_flt( hypre_ParCSRMatrix *A, HYPRE_Int overlap_order, hypre_OverlapData **overlap_data_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixComputeOverlap_dbl( hypre_ParCSRMatrix *A, HYPRE_Int overlap_order, hypre_OverlapData **overlap_data_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixComputeOverlap_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int overlap_order, hypre_OverlapData **overlap_data_ptr );
+
+HYPRE_Int
 hypre_ParCSRMatrixComputeScalingTagged_flt( hypre_ParCSRMatrix *A, HYPRE_Int type, HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags, HYPRE_Int *tags, hypre_ParVector **scaling_ptr );
 HYPRE_Int
 hypre_ParCSRMatrixComputeScalingTagged_dbl( hypre_ParCSRMatrix *A, HYPRE_Int type, HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags, HYPRE_Int *tags, hypre_ParVector **scaling_ptr );
@@ -642,6 +663,13 @@ HYPRE_Int
 hypre_ParCSRMatrixCreateAssumedPartition_dbl( hypre_ParCSRMatrix *matrix );
 HYPRE_Int
 hypre_ParCSRMatrixCreateAssumedPartition_long_dbl( hypre_ParCSRMatrix *matrix );
+
+HYPRE_Int
+hypre_ParCSRMatrixCreateExtendedMatrix_flt( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data, hypre_CSRMatrix **A_local_ptr, HYPRE_BigInt **col_map_ptr, HYPRE_Int *num_cols_local_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixCreateExtendedMatrix_dbl( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data, hypre_CSRMatrix **A_local_ptr, HYPRE_BigInt **col_map_ptr, HYPRE_Int *num_cols_local_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixCreateExtendedMatrix_long_dbl( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data, hypre_CSRMatrix **A_local_ptr, HYPRE_BigInt **col_map_ptr, HYPRE_Int *num_cols_local_ptr );
 
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixCreateFromDenseBlockMatrix_flt( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts, hypre_DenseBlockMatrix *B );
@@ -789,6 +817,13 @@ HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCHost_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr, hypre_ParCSRMatrix **A_FF_ptr );
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCHost_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr, hypre_ParCSRMatrix **A_FF_ptr );
+
+HYPRE_Int
+hypre_ParCSRMatrixGetExternalMatrix_flt( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data );
+HYPRE_Int
+hypre_ParCSRMatrixGetExternalMatrix_dbl( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data );
+HYPRE_Int
+hypre_ParCSRMatrixGetExternalMatrix_long_dbl( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data );
 
 HYPRE_Int
 hypre_ParCSRMatrixGetLocalRange_flt( hypre_ParCSRMatrix *matrix, HYPRE_BigInt *row_start, HYPRE_BigInt *row_end, HYPRE_BigInt *col_start, HYPRE_BigInt *col_end );
