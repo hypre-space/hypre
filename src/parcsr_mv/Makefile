@@ -27,6 +27,7 @@ HEADERS =\
  par_chord_matrix.h\
  par_csr_communication.h\
  par_csr_matrix.h\
+ par_csr_overlap.h\
  par_vector.h
 
 FILES =\
@@ -52,6 +53,7 @@ FILES =\
  par_csr_matmat.c\
  par_csr_matvec.c\
  par_csr_matop_marked.c\
+ par_csr_overlap.c\
  par_csr_triplemat.c\
  par_make_system.c\
  par_vector.c\
