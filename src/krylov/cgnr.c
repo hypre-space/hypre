@@ -70,11 +70,20 @@ void *
 hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions )
 {
    hypre_CGNRData *cgnr_data;
+   hypre_Solver   *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    cgnr_data = hypre_CTAlloc( hypre_CGNRData,  1, HYPRE_MEMORY_HOST);
    cgnr_data->functions = cgnr_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) cgnr_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_CGNRSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_CGNRSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_CGNRDestroy;
 
    /* set defaults */
    (cgnr_data -> tol)          = 1.0e-06;
@@ -82,7 +91,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions )
    (cgnr_data -> max_iter)     = 1000;
    (cgnr_data -> stop_crit)    = 0;
    (cgnr_data -> matvec_data)  = NULL;
-   (cgnr_data -> precond_data)  = NULL;
+   (cgnr_data -> precond_data) = NULL;
    (cgnr_data -> logging)      = 0;
    (cgnr_data -> norms)        = NULL;
 

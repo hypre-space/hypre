@@ -143,6 +143,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      stop_crit;
@@ -300,6 +303,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Real   tol;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Int      min_iter;
@@ -448,6 +454,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
@@ -609,6 +618,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      unroll;
    HYPRE_Int      cgs;
@@ -766,6 +778,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
@@ -926,6 +941,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
@@ -1112,6 +1130,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Real   tol;
    HYPRE_Real   atolf;
    HYPRE_Real   cf_tol;

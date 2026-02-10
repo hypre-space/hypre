@@ -64,11 +64,20 @@ void *
 hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
 {
    hypre_BiCGSTABData *bicgstab_data;
+   hypre_Solver       *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    bicgstab_data = hypre_CTAlloc( hypre_BiCGSTABData,  1, HYPRE_MEMORY_HOST);
    bicgstab_data->functions = bicgstab_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) bicgstab_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_BiCGSTABSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_BiCGSTABSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_BiCGSTABDestroy;
 
    /* set defaults */
    (bicgstab_data -> tol)            = 1.0e-06;
@@ -77,7 +86,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
    (bicgstab_data -> a_tol)          = 0.0;
    (bicgstab_data -> precond_data)   = NULL;
-   (bicgstab_data -> precond_Mat)   = NULL;
+   (bicgstab_data -> precond_Mat)    = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> print_level)    = 0;
    (bicgstab_data -> hybrid)         = 0;
@@ -86,7 +95,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> r)              = NULL;
    (bicgstab_data -> r0)             = NULL;
    (bicgstab_data -> s)              = NULL;
-   (bicgstab_data -> v)             = NULL;
+   (bicgstab_data -> v)              = NULL;
    (bicgstab_data -> matvec_data)    = NULL;
    (bicgstab_data -> norms)          = NULL;
    (bicgstab_data -> log_file_name)  = NULL;
