@@ -443,18 +443,20 @@ hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
-   HYPRE_MemoryLocation memory_diag = diag ? hypre_CSRMatrixMemoryLocation(
-                                         diag) : HYPRE_MEMORY_UNDEFINED;
-   HYPRE_MemoryLocation memory_offd = offd ? hypre_CSRMatrixMemoryLocation(
-                                         offd) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_diag = diag ?
+                                      hypre_CSRMatrixMemoryLocation(diag) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_offd = offd ?
+                                      hypre_CSRMatrixMemoryLocation(offd) : HYPRE_MEMORY_UNDEFINED;
 
    if (diag && offd)
    {
-      if (memory_diag != memory_offd)
+      if (hypre_GetActualMemLocation(memory_diag) !=
+          hypre_GetActualMemLocation(memory_offd))
       {
          char err_msg[1024];
-         hypre_sprintf(err_msg, "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
-                       memory_offd);
+         hypre_sprintf(err_msg,
+                       "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n",
+                       memory_diag, memory_offd);
          hypre_error_w_msg(HYPRE_ERROR_MEMORY, err_msg);
          hypre_assert(0);
 
@@ -528,6 +530,71 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
+ *
+ * Header info for overlapping domain decomposition
+ *
+ *****************************************************************************/
+
+#ifndef hypre_PAR_CSR_OVERLAP_HEADER
+#define hypre_PAR_CSR_OVERLAP_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_OverlapData
+ *
+ * Data structure for overlapping domain decomposition.
+ * Stores information about the extended subdomain for a processor.
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_OverlapData_struct
+{
+   /* Overlap configuration */
+   HYPRE_Int            overlap_order;         /* Overlap order (delta >= 0) */
+
+   /* Original local partition info */
+   HYPRE_Int            num_local_rows;        /* Original local rows */
+   HYPRE_BigInt         first_row_index;       /* First row owned by this proc */
+   HYPRE_BigInt         last_row_index;        /* Last row owned by this proc */
+
+   /* Extended subdomain information */
+   HYPRE_Int            num_extended_rows;     /* Total rows in extended domain */
+   HYPRE_Int            num_overlap_rows;      /* External rows (from overlap) */
+   HYPRE_BigInt        *extended_row_indices;  /* Global indices of all extended rows */
+   HYPRE_Int           *row_is_owned;          /* 1 if row is owned, 0 if external */
+
+   /* Communication package for fetching overlap data */
+   hypre_ParCSRCommPkg *overlap_comm_pkg;
+
+   /* External CSR matrix (fetched from other procs) */
+   hypre_CSRMatrix     *A_ext;                 /* CSR matrix of external rows */
+   HYPRE_BigInt        *ext_map;               /* Global row indices for external rows */
+
+} hypre_OverlapData;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros for hypre_OverlapData
+ *--------------------------------------------------------------------------*/
+
+#define hypre_OverlapDataOverlapOrder(data)          ((data)->overlap_order)
+#define hypre_OverlapDataNumLocalRows(data)          ((data)->num_local_rows)
+#define hypre_OverlapDataFirstRowIndex(data)         ((data)->first_row_index)
+#define hypre_OverlapDataLastRowIndex(data)          ((data)->last_row_index)
+#define hypre_OverlapDataNumExtendedRows(data)       ((data)->num_extended_rows)
+#define hypre_OverlapDataNumOverlapRows(data)        ((data)->num_overlap_rows)
+#define hypre_OverlapDataExtendedRowIndices(data)    ((data)->extended_row_indices)
+#define hypre_OverlapDataRowIsOwned(data)            ((data)->row_is_owned)
+#define hypre_OverlapDataOverlapCommPkg(data)        ((data)->overlap_comm_pkg)
+#define hypre_OverlapDataExternalMatrix(data)        ((data)->A_ext)
+#define hypre_OverlapDataExternalRowMap(data)        ((data)->ext_map)
+
+#endif /* hypre_PAR_CSR_OVERLAP_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1311,6 +1378,19 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int hypre_ParVectorStridedCopy( hypre_ParVector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data );
+
+/* par_csr_overlap.c */
+hypre_OverlapData* hypre_OverlapDataCreate( void );
+HYPRE_Int hypre_OverlapDataDestroy( hypre_OverlapData *overlap_data );
+HYPRE_Int hypre_ParCSRMatrixComputeOverlap( hypre_ParCSRMatrix *A, HYPRE_Int overlap_order,
+                                            hypre_OverlapData **overlap_data_ptr );
+HYPRE_Int hypre_ParCSRMatrixGetExternalMatrix( hypre_ParCSRMatrix *A,
+                                               hypre_OverlapData *overlap_data );
+HYPRE_Int hypre_ParCSRMatrixCreateExtendedMatrix( hypre_ParCSRMatrix *A,
+                                                  hypre_OverlapData *overlap_data,
+                                                  hypre_CSRMatrix **A_local_ptr,
+                                                  HYPRE_BigInt **col_map_ptr,
+                                                  HYPRE_Int *num_cols_local_ptr );
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

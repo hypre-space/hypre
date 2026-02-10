@@ -37,6 +37,8 @@ hypre_NumbersEnter
 hypre_NumbersNEntered
 hypre_NumbersNewNode
 hypre_NumbersQuery
+hypre_OverlapDataCreate
+hypre_OverlapDataDestroy
 hypre_ParAat_RowSizes
 hypre_ParBooleanAAt
 hypre_ParBooleanMatmul
@@ -84,6 +86,7 @@ hypre_ParCSRMatrixClone_v2
 hypre_ParCSRMatrixColSum
 hypre_ParCSRMatrixColSumHost
 hypre_ParCSRMatrixCompressOffdMap
+hypre_ParCSRMatrixComputeOverlap
 hypre_ParCSRMatrixComputeScalingTagged
 hypre_ParCSRMatrixCopy
 hypre_ParCSRMatrixCopyColMapOffdToDevice
@@ -91,6 +94,7 @@ hypre_ParCSRMatrixCopyColMapOffdToHost
 hypre_ParCSRMatrixCopy_C
 hypre_ParCSRMatrixCreate
 hypre_ParCSRMatrixCreateAssumedPartition
+hypre_ParCSRMatrixCreateExtendedMatrix
 hypre_ParCSRMatrixCreateFromDenseBlockMatrix
 hypre_ParCSRMatrixCreateFromParVector
 hypre_ParCSRMatrixDestroy
@@ -113,6 +117,7 @@ hypre_ParCSRMatrixGenerateFFFC
 hypre_ParCSRMatrixGenerateFFFC3
 hypre_ParCSRMatrixGenerateFFFCD3
 hypre_ParCSRMatrixGenerateFFFCHost
+hypre_ParCSRMatrixGetExternalMatrix
 hypre_ParCSRMatrixGetLocalRange
 hypre_ParCSRMatrixGetRow
 hypre_ParCSRMatrixGetRowHost
