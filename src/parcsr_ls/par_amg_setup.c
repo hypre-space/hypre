@@ -3807,12 +3807,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (cum_nnz_AP > 0.0)
    {
-      cum_nnz_AP = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
+      cum_nnz_AP = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
       for (j = 0; j < num_levels - 1; j++)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(P_array[j]);
-         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
-         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
+         cum_nnz_AP += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
+         cum_nnz_AP += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
       }
       hypre_ParAMGDataCumNnzAP(amg_data) = cum_nnz_AP;
    }

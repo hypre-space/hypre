@@ -649,14 +649,6 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE
 /*--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixClone)( A, copy_data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone_v2( hypre_ParCSRMatrix *A, HYPRE_Int copy_data, HYPRE_MemoryLocation memory_location )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixClone_v2)( A, copy_data, memory_location );
@@ -697,14 +689,6 @@ hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopy)( A, B, copy_data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRMatrixCopyColMapOffdToDevice( hypre_ParCSRMatrix *A )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopyColMapOffdToDevice)( A );
@@ -724,14 +708,6 @@ HYPRE_Int
 hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_Int *CF_marker )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopy_C)( P, C, CF_marker );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParCSRMatrix *
-hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCreate)( comm, global_num_rows, global_num_cols, row_starts_in, col_starts_in, num_cols_offd, num_nonzeros_diag, num_nonzeros_offd );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -956,14 +932,6 @@ HYPRE_Int
 hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixInitialize)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixInitialize_v2)( matrix, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/

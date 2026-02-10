@@ -333,7 +333,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
    HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
+   hypre_double          d_num_nonzeros;
 
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
@@ -1407,7 +1407,7 @@ hypre_ParVectorCopy_mp( hypre_ParVector *x,
                         hypre_ParVector *y );
 
 HYPRE_Int
-hypre_ParVectorAxpy_mp( hypre_double    alpha,
+hypre_ParVectorAxpy_mp( hypre_long_double    alpha,
                         hypre_ParVector *x,
                         hypre_ParVector *y );
 
@@ -1418,6 +1418,13 @@ hypre_ParVectorConvert_mp ( hypre_ParVector *v,
 HYPRE_Int
 hypre_ParCSRMatrixConvert_mp ( hypre_ParCSRMatrix *A,
                                HYPRE_Precision new_precision );
+
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_mp(hypre_ParCSRMatrix   *A, HYPRE_Precision new_precision);
+
+HYPRE_Int
+hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
+                           hypre_ParCSRMatrix *B );
 
 #endif
 

@@ -359,7 +359,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    {
       num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
-      num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
+      num_coeffs[0]    = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A);
 
       if (block_mode)
