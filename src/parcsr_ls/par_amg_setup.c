@@ -245,7 +245,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("AMGsetup");
-   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup begin", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup begin", 0);
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -3152,7 +3152,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             (coarse_size > (HYPRE_BigInt)coarse_threshold) &&
             (level != max_levels - 1))
    {
-      HYPRE_Solver dslu_solver = hypre_SLUDistCreate();
+      void *dslu_solver = hypre_SLUDistCreate();
       hypre_SLUDistSetPrintLevel(dslu_solver, amg_print_level);
       hypre_SLUDistSetup(dslu_solver, A_array[level], NULL, NULL);
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
@@ -4022,7 +4022,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
-   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end  ", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup end  ", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 

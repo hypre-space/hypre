@@ -141,6 +141,7 @@ hypre_ParCSRMatrixRAPKT
 hypre_ParCSRMatrixRAPKTHost
 hypre_ParCSRMatrixRead
 hypre_ParCSRMatrixReadIJ
+hypre_ParCSRMatrixRef
 hypre_ParCSRMatrixReorder
 hypre_ParCSRMatrixRestoreRow
 hypre_ParCSRMatrixScale

@@ -26,10 +26,12 @@
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif /* defined(HYPRE_USING_UMPIRE) */
 
+#if defined(HYPRE_USING_GPU)
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 typedef void (*GPUMallocFunc)(void **, size_t);
 typedef void (*GPUMfreeFunc)(void *);
+#endif
 
 typedef struct
 {
@@ -45,19 +47,13 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* GPU MPI */
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int              use_gpu_aware_mpi;
-#endif
-
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   HYPRE_Int              device_gs_method; /* device G-S options */
-#endif
 
    /* user malloc/free function pointers */
    GPUMallocFunc          user_device_malloc;
    GPUMfreeFunc           user_device_free;
+#endif
 
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -93,21 +89,15 @@ typedef struct
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
-#define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
-#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
-
+#define hypre_HandleDeviceGSMethod(hypre_handle)                 hypre_DeviceDataGSMethod(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 hypre_DeviceDataUseGpuAwareMPI(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_DeviceDataCusparseHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleVendorSolverHandle(hypre_handle)             hypre_DeviceDataVendorSolverHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStream(hypre_handle)                  hypre_DeviceDataComputeStream(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubBinGrowth(hypre_handle)                   hypre_DeviceDataCubBinGrowth(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMinBin(hypre_handle)                      hypre_DeviceDataCubMinBin(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMaxBin(hypre_handle)                      hypre_DeviceDataCubMaxBin(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMaxCachedBytes(hypre_handle)              hypre_DeviceDataCubMaxCachedBytes(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubDevAllocator(hypre_handle)                hypre_DeviceDataCubDevAllocator(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_DeviceDataCubUvmAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDevice(hypre_handle)                         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceUVM(hypre_handle)                      hypre_DeviceDataDeviceUVM(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxWorkGroupSize(hypre_handle)         hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlockInited(hypre_handle)   hypre_DeviceDataDeviceMaxShmemPerBlockInited(hypre_HandleDeviceData(hypre_handle))

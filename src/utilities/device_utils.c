@@ -27,12 +27,18 @@ hypre_DeviceDataCreate()
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
+   hypre_DeviceDataGSMethod(data)         = 1; /* SpTrSV - CPU: 0; Vendor: 1 */
+   hypre_DeviceDataComputeStreamNum(data) = 0;
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;
 #else
    hypre_DeviceDataDevice(data)           = 0;
 #endif
-   hypre_DeviceDataComputeStreamNum(data) = 0;
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
+   hypre_DeviceDataUseGpuAwareMPI(data)   = 1;
+#else
+   hypre_DeviceDataUseGpuAwareMPI(data)   = 0;
+#endif
 
    /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
@@ -86,7 +92,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
       return;
    }
 
-   hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataReduceBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (data->curand_generator)
@@ -3044,6 +3050,7 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   hypre_MPI_Barrier(comm);
 #endif
 
 #else

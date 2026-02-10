@@ -378,6 +378,8 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
+   HYPRE_Int             ref_count;        /* Reference counter */
+
 #if defined(HYPRE_USING_GPU)
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
@@ -421,6 +423,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
+#define hypre_ParCSRMatrixRefCount(matrix)               ((matrix) -> ref_count)
 #if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
@@ -440,18 +443,20 @@ hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
-   HYPRE_MemoryLocation memory_diag = diag ? hypre_CSRMatrixMemoryLocation(
-                                         diag) : HYPRE_MEMORY_UNDEFINED;
-   HYPRE_MemoryLocation memory_offd = offd ? hypre_CSRMatrixMemoryLocation(
-                                         offd) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_diag = diag ?
+                                      hypre_CSRMatrixMemoryLocation(diag) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_offd = offd ?
+                                      hypre_CSRMatrixMemoryLocation(offd) : HYPRE_MEMORY_UNDEFINED;
 
    if (diag && offd)
    {
-      if (memory_diag != memory_offd)
+      if (hypre_GetActualMemLocation(memory_diag) !=
+          hypre_GetActualMemLocation(memory_offd))
       {
          char err_msg[1024];
-         hypre_sprintf(err_msg, "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
-                       memory_offd);
+         hypre_sprintf(err_msg,
+                       "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n",
+                       memory_diag, memory_offd);
          hypre_error_w_msg(HYPRE_ERROR_MEMORY, err_msg);
          hypre_assert(0);
 
@@ -1156,6 +1161,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm, HYPRE_BigInt globa
                                                HYPRE_Int num_cols_offd,
                                                HYPRE_Int num_nonzeros_diag,
                                                HYPRE_Int num_nonzeros_offd );
+hypre_ParCSRMatrix *hypre_ParCSRMatrixRef( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix,
                                            HYPRE_MemoryLocation memory_location );

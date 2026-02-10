@@ -1,0 +1,232 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["**"]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+  workflow_dispatch:
+
+jobs:
+  require-label:
+    name: Require Run CI label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Ensure Run CI label is present
+        env:
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'Run CI') }}
+        run: |
+          if [ "${HAS_LABEL}" != "true" ]; then
+            echo "::error::Add the 'Run CI' label to this pull request to trigger CI."
+            exit 1
+          fi
+        shell: bash
+
+  build-and-check:
+    name: Build & Check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [[ "${RUNNER_OS}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y libopenmpi-dev openmpi-bin
+          else
+            brew update
+            brew install open-mpi
+          fi
+
+      - name: Configure (Debug)
+        run: cmake -S src -B build -DHYPRE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run check target
+        run: cmake --build build --target check
+
+  code-formatting:
+    name: Check Code Formatting
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y astyle=3.1-3build1
+
+      - name: Check code formatting
+        working-directory: src
+        run: |
+          # Configure git to recognize the workspace
+          git config --global --add safe.directory ${{ github.workspace }}
+
+          # Run astyle-apply.sh to check and apply formatting
+          # This will modify files in place if formatting is needed
+          ./config/astyle-apply.sh .
+
+          # Check if any source files were modified (formatting changes)
+          if ! git diff --exit-code -- '*.c' '*.h' '*.hpp'; then
+            echo "::error::Code formatting check failed. Some source files need formatting."
+            echo "::error::Run './config/astyle-apply.sh .' from the src directory to fix formatting issues."
+            echo "::error::Then commit the formatted files."
+            echo "::error::Modified files:"
+            git diff --name-only -- '*.c' '*.h' '*.hpp'
+            exit 1
+          fi
+          echo "Code formatting check passed"
+
+  mixed-precision-check:
+    name: Check Mixed-Precision Code
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool build-essential
+
+      - name: Check mixed-precision code
+        working-directory: src
+        run: |
+          # Run mixed-precision check
+          echo "Running mixed-precision code check..."
+          ./mup_check
+          MUP_EXIT_CODE=$?
+
+          if [ $MUP_EXIT_CODE -ne 0 ]; then
+            echo "::error::Mixed-precision code check failed"
+            exit 1
+          fi
+          echo "Mixed-precision code check passed"
+          ./mup_clean
+
+  headers-check:
+    name: Check Headers
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ make autoconf automake libtool build-essential libopenmpi-dev openmpi-bin
+
+      - name: Check headers
+        working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-headers.sh "$SRC_DIR"
+          if [ -s check-headers.err ]; then
+            echo "::error::Headers check failed"
+            cat check-headers.err
+            exit 1
+          fi
+          echo "Headers check passed"
+
+  code-checks:
+    name: Code Checks (${{ matrix.check }})
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - license
+          - integer
+          - double
+          - mpi
+          - memory
+          - case
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Check ${{ matrix.check }}
+        working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          case "${{ matrix.check }}" in
+            license)
+              ./test.sh check-license.sh "$SRC_DIR/.."
+              if [ -s check-license.err ]; then
+                echo "::error::License header check failed"
+                cat check-license.err
+                exit 1
+              fi
+              echo "License header check passed"
+              ;;
+            integer)
+              ./test.sh check-int.sh "$SRC_DIR"
+              if [ -s check-int.err ]; then
+                echo "::error::Integer usage check failed"
+                cat check-int.err
+                exit 1
+              fi
+              echo "Integer usage check passed"
+              ;;
+            double)
+              ./test.sh check-double.sh "$SRC_DIR"
+              if [ -s check-double.err ]; then
+                echo "::error::Double usage check failed"
+                cat check-double.err
+                exit 1
+              fi
+              echo "Double usage check passed"
+              ;;
+            mpi)
+              ./test.sh check-mpi.sh "$SRC_DIR"
+              if [ -s check-mpi.err ]; then
+                echo "::error::MPI usage check failed"
+                cat check-mpi.err
+                exit 1
+              fi
+              echo "MPI usage check passed"
+              ;;
+            memory)
+              ./test.sh check-mem.sh "$SRC_DIR"
+              if [ -s check-mem.err ]; then
+                echo "::error::Memory usage check failed"
+                cat check-mem.err
+                exit 1
+              fi
+              echo "Memory usage check passed"
+              ;;
+            case)
+              ./test.sh check-case.sh "$SRC_DIR/.."
+              if [ -s check-case.err ]; then
+                echo "::error::Case-insensitive filename check failed"
+                cat check-case.err
+                exit 1
+              fi
+              echo "Case-insensitive filename check passed"
+              ;;
+          esac

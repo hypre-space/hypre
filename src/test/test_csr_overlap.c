@@ -238,7 +238,13 @@ Test3_Grid1D_Part1D_Overlap8(MPI_Comm comm, HYPRE_Int print_matrices)
    HYPRE_Int J[] = {0, 1, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5, 4, 5, 6, 5, 6, 7, 6, 7};
    HYPRE_Real D[] = {2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0, -1.0, -1.0, 2.0};
    A_expected = CreateCSRMatrixFromData(8, 8, 22, I, J, D);
-   if (hypre_OverlapDataNumExtendedRows(overlap_data) != 8) { hypre_printf("Proc %d: Expected 8 extended rows, got %d\n", test_my_id, hypre_OverlapDataNumExtendedRows(overlap_data)); error = 1; }
+   if (hypre_OverlapDataNumExtendedRows(overlap_data) != 8)
+   {
+      hypre_printf("Proc %d: Expected 8 extended rows, got %d\n",
+                   test_my_id,
+                   hypre_OverlapDataNumExtendedRows(overlap_data));
+      error = 1;
+   }
    TEST_COMPARE_MATRICES("test3")
    TEST_CLEANUP()
 }

@@ -1,0 +1,80 @@
+# Output file: miller.out.0
+Iterations = 16
+Final Relative Residual Norm = 8.455333e-07
+
+# Output file: miller.out.1
+Iterations = 7
+Final Relative Residual Norm = 3.008484e-07
+
+# Output file: miller.out.2
+Iterations = 19
+Final Relative Residual Norm = 6.037878e-07
+
+# Output file: miller.out.3
+Iterations = 9
+Final Relative Residual Norm = 2.315852e-07
+
+# Output file: miller.out.10
+Iterations = 15
+Final Relative Residual Norm = 6.496892e-07
+
+# Output file: miller.out.11
+Iterations = 9
+Final Relative Residual Norm = 3.869998e-07
+
+# Output file: miller.out.12
+Iterations = 15
+Final Relative Residual Norm = 6.812253e-07
+
+# Output file: miller.out.13
+Iterations = 7
+Final Relative Residual Norm = 6.184673e-07
+
+# Output file: miller.out.20
+Iterations = 18
+Final Relative Residual Norm = 3.006677e-07
+
+# Output file: miller.out.21
+Iterations = 7
+Final Relative Residual Norm = 1.958737e-07
+
+# Output file: miller.out.22
+Iterations = 14
+Final Relative Residual Norm = 9.194802e-07
+
+# Output file: miller.out.23
+Iterations = 8
+Final Relative Residual Norm = 1.733470e-07
+
+# Output file: miller.out.30
+Iterations = 37
+Final Relative Residual Norm = 6.181674e-07
+
+# Output file: miller.out.31
+Iterations = 7
+Final Relative Residual Norm = 7.661617e-07
+
+# Output file: miller.out.32
+Iterations = 34
+Final Relative Residual Norm = 8.759786e-07
+
+# Output file: miller.out.33
+Iterations = 11
+Final Relative Residual Norm = 2.673316e-07
+
+# Output file: miller.out.40
+Iterations = 3
+Final Relative Residual Norm = 4.822192e-07
+
+# Output file: miller.out.41
+Iterations = 2
+Final Relative Residual Norm = 2.571870e-07
+
+# Output file: miller.out.42
+Iterations = 4
+Final Relative Residual Norm = 4.398907e-07
+
+# Output file: miller.out.43
+Iterations = 3
+Final Relative Residual Norm = 3.093709e-07
+
