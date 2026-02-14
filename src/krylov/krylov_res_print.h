@@ -18,8 +18,8 @@ typedef enum
 
 static inline hypre_KrylovResPrintMode
 hypre_KrylovResPrintGetMode( HYPRE_Int print_level,
-                                  HYPRE_Int num_tags,
-                                  HYPRE_Int has_xref )
+                             HYPRE_Int num_tags,
+                             HYPRE_Int has_xref )
 {
    if (print_level <= 0)
    {
@@ -46,10 +46,10 @@ hypre_KrylovResPrintGetMode( HYPRE_Int print_level,
 
 static inline void
 hypre_KrylovResPrintHeader( hypre_KrylovResPrintMode print_mode,
-                                 HYPRE_Int                     print_level,
-                                 HYPRE_Int                     num_tags,
-                                 HYPRE_Real                    b_norm,
-                                 HYPRE_Real                    e_norm )
+                            HYPRE_Int                     print_level,
+                            HYPRE_Int                     num_tags,
+                            HYPRE_Real                    b_norm,
+                            HYPRE_Real                    e_norm )
 {
    HYPRE_Int tag;
 
@@ -149,9 +149,9 @@ hypre_KrylovResPrintHeader( hypre_KrylovResPrintMode print_mode,
 
 static inline void
 hypre_KrylovResPrintScalarRow( HYPRE_Int  iter,
-                                    HYPRE_Real norm,
-                                    HYPRE_Real prev_norm,
-                                    HYPRE_Real ref_norm )
+                               HYPRE_Real norm,
+                               HYPRE_Real prev_norm,
+                               HYPRE_Real ref_norm )
 {
    if (ref_norm > 0.0)
    {
@@ -165,10 +165,10 @@ hypre_KrylovResPrintScalarRow( HYPRE_Int  iter,
 
 static inline HYPRE_Real
 hypre_KrylovResPrintTaggedValue( HYPRE_Int      print_level,
-                                      HYPRE_Int      tag,
-                                      HYPRE_Complex *iprod,
-                                      HYPRE_Complex *biprod,
-                                      HYPRE_Complex *xiprod )
+                                 HYPRE_Int      tag,
+                                 HYPRE_Complex *iprod,
+                                 HYPRE_Complex *biprod,
+                                 HYPRE_Complex *xiprod )
 {
    HYPRE_Real value = hypre_sqrt(iprod[tag]);
 
@@ -194,11 +194,11 @@ hypre_KrylovResPrintTaggedValue( HYPRE_Int      print_level,
 
 static inline void
 hypre_KrylovResPrintTaggedRow( HYPRE_Int      iter,
-                                    HYPRE_Int      print_level,
-                                    HYPRE_Int      num_tags,
-                                    HYPRE_Complex *iprod,
-                                    HYPRE_Complex *biprod,
-                                    HYPRE_Complex *xiprod )
+                               HYPRE_Int      print_level,
+                               HYPRE_Int      num_tags,
+                               HYPRE_Complex *iprod,
+                               HYPRE_Complex *biprod,
+                               HYPRE_Complex *xiprod )
 {
    HYPRE_Int tag;
 
