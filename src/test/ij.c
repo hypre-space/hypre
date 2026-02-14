@@ -2605,9 +2605,9 @@ main( hypre_int argc,
          hypre_printf("       0 = no output\n");
          hypre_printf("       1 = matrix and basic solver stats\n");
          hypre_printf("       2 = abs. and rel. residual norms\n");
-         hypre_printf("       3 = abs. residual norms for multi-tag vectors (GMRES only)\n");
-         hypre_printf("       4 = tagged rel. residual norms for multi-tag vectors (GMRES only)\n");
-         hypre_printf("       5 = rel. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       3 = abs. residual norms for multi-tag vectors (GMRES/FlexGMRES)\n");
+         hypre_printf("       4 = tagged rel. residual norms for multi-tag vectors (GMRES/FlexGMRES)\n");
+         hypre_printf("       5 = rel. residual norms for multi-tag vectors (GMRES/FlexGMRES)\n");
          hypre_printf("       6 = abs. and rel. error norms (GMRES only)\n");
          hypre_printf("       7 = abs. error norms for multi-tag vectors (GMRES only)\n");
          hypre_printf("       8 = tagged rel. error norms for multi-tag vectors (GMRES only)\n");
