@@ -13,6 +13,7 @@
 
 #include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_res_print.h"
 
 /*--------------------------------------------------------------------------
  * hypre_GMRESFunctionsCreate
@@ -344,6 +345,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Real            relative_error = 1.0;
    HYPRE_Int             rel_change_passed = 0, num_rel_change_check = 0;
    HYPRE_Real            real_r_norm_old, real_r_norm_new;
+   hypre_KrylovResPrintMode print_mode = hypre_KrylovResPrintNone;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -528,94 +530,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* so now our stop criteria is |r_i| <= epsilon */
 
-   /* Print header for tag-wise residuals if this is the first iteration */
+   print_mode = hypre_KrylovResPrintGetMode(print_level, num_tags, xref != NULL);
    if (print_level > 1 && my_id == 0)
    {
-      hypre_printf("=============================================\n\n");
-      if (num_tags <= 1 || print_level == 2 || print_level > 9 || (!xref && print_level > 5))
-      {
-         if (b_norm > 0.0)
-         {
-            hypre_printf("Iters      resid.norm     conv.rate   rel.res.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      resid.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (xref && (num_tags <= 1 || print_level == 6))
-      {
-         if (e_norm > 0.0)
-         {
-            hypre_printf("Iters      error.norm     conv.rate   rel.err.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      error.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (num_tags > 1)
-      {
-         hypre_printf("  Iters ");
-         if (print_level == 3)
-         {
-            hypre_printf("            |r|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |r%d|_2", tag);
-            }
-         }
-         else if (print_level == 4)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |r%d|_2/|b%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 5)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("     |r%d|_2/|b|_2", tag);
-            }
-         }
-         else if (print_level == 7)
-         {
-            hypre_printf("            |e|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |e%d|_2", tag);
-            }
-         }
-         else if (print_level == 8)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("   |e%d|_2/|eI%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 9)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |e%d|_2/|eI|_2", tag);
-            }
-         }
-         hypre_printf("\n ------  ");
-         for (tag = 0; tag < num_tags + 1; tag++)
-         {
-            hypre_printf("   ------------- ");
-         }
-         hypre_printf("\n");
-      }
+      hypre_KrylovResPrintHeader(print_mode, print_level, num_tags, b_norm, e_norm);
    }
 
    /* once the rel. change check has passed, we do not want to check it again */
@@ -729,22 +647,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
          if (print_level > 0)
          {
             norms[iter] = r_norm;
-            if ((num_tags <= 1 && print_level > 1) || (print_level == 2) ||
-                (print_level > 9) || (!xref && print_level > 5))
+            if (print_mode == hypre_KrylovResPrintScalarResidual)
             {
-               if (!my_id)
+               if (!my_id && print_level > 1)
                {
-                  if (b_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / b_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e      %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovResPrintScalarRow(iter, norms[iter], norms[iter - 1], b_norm);
                }
             }
             else if (num_tags > 1 && print_level > 2)
@@ -802,40 +709,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
 
                /* Print tag-specific residual/error norms */
-               if (!my_id && print_level != 6)
+               if (!my_id && print_mode == hypre_KrylovResPrintTagged)
                {
-                  hypre_printf(" %6d  ", iter);
-                  for (tag = 0; tag < num_tags + 1; tag++)
-                  {
-                     hypre_printf("  %14.6e ",
-                                  print_level == 3 || print_level == 7 ?
-                                  hypre_sqrt(iprod[tag]) :
-                                  print_level == 4 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]) :
-                                  print_level == 5 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[0]) :
-                                  print_level == 8 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[tag]) :
-                                  print_level == 9 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[0]) :
-                                  hypre_sqrt(iprod[tag]));
-                  }
-                  hypre_printf("\n");
+                  hypre_KrylovResPrintTaggedRow(iter, print_level, num_tags, iprod, biprod, xiprod);
                }
-               else if (!my_id && print_level == 6)
+               else if (!my_id && print_mode == hypre_KrylovResPrintScalarError)
                {
                   norms[iter] = hypre_sqrt(iprod[0]);
-                  if (e_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / e_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e    %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovResPrintScalarRow(iter, norms[iter], norms[iter - 1], e_norm);
                }
             }
          }
