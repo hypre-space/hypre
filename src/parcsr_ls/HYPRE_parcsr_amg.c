@@ -980,6 +980,52 @@ HYPRE_BoomerAMGGetLogging( HYPRE_Solver solver,
    return ( hypre_BoomerAMGGetLogging( (void *) solver, logging ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ *                               FLEXIBLE AMG CYCLING
+ *----------------------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetCycleStruct( HYPRE_Solver solver,
+                                     HYPRE_Int    *cycle_struct_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetCycleStruct( (void *) solver, cycle_struct_flexible) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetRelaxTypes( HYPRE_Solver solver,
+                                 HYPRE_Int    *relax_types_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetRelaxTypes( (void *) solver, relax_types_flexible) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetRelaxOrders( HYPRE_Solver solver,
+                                 HYPRE_Int    *relax_orders_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetRelaxOrders( (void *) solver, relax_orders_flexible) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetRelaxWeights( HYPRE_Solver solver,
+                                 HYPRE_Real   *relax_weights_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetRelaxWeights( (void *) solver, relax_weights_flexible) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetOuterWeights( HYPRE_Solver solver,
+                                 HYPRE_Real   *outer_weights_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetOuterWeights( (void *) solver, outer_weights_flexible) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGFlexibleSetCGCScalingFactors( HYPRE_Solver solver,
+                                 HYPRE_Real   *cgc_scaling_factors_flexible)
+{
+   return ( hypre_BoomerAMGFlexibleSetCGCScalingFactors( (void *) solver, cgc_scaling_factors_flexible) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetPrintLevel, HYPRE_BoomerAMGGetPrintLevel
  *--------------------------------------------------------------------------*/

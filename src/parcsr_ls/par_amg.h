@@ -87,7 +87,11 @@ typedef struct
    HYPRE_Int      partial_cycle_coarsest_level;
    HYPRE_Int      partial_cycle_control;
 
-
+   /* flexible cycling params */
+   HYPRE_Int      num_levels_flexible, length_cycle_flexible;
+   HYPRE_Int     *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
+   HYPRE_Real    *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
+   
    /* problem data */
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
@@ -341,7 +345,6 @@ typedef struct
 #define hypre_ParAMGDataSeqThreshold(amg_data)         ((amg_data) -> seq_threshold)
 
 /* solve params */
-
 #define hypre_ParAMGDataMinIter(amg_data) ((amg_data)->min_iter)
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataFCycle(amg_data) ((amg_data)->fcycle)
@@ -361,6 +364,16 @@ typedef struct
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
 #define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
+
+/* flexible cycling params */
+#define hypre_ParAMGDataFlexibleNumLevels(amg_data)    ((amg_data) -> num_levels_flexible)
+#define hypre_ParAMGDataFlexibleCycleLength(amg_data)  ((amg_data) -> length_cycle_flexible)
+#define hypre_ParAMGDataFlexibleCycleStruct(amg_data)  ((amg_data) -> cycle_struct_flexible)
+#define hypre_ParAMGDataFlexibleRelaxTypes(amg_data)   ((amg_data) -> relax_types_flexible)
+#define hypre_ParAMGDataFlexibleRelaxOrders(amg_data)  ((amg_data) -> relax_orders_flexible)
+#define hypre_ParAMGDataFlexibleOuterWeights(amg_data) ((amg_data) -> outer_weights_flexible)
+#define hypre_ParAMGDataFlexibleRelaxWeights(amg_data)  ((amg_data) -> relax_weights_flexible)
+#define hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data) ((amg_data) -> cgc_scaling_factors_flexible)
 
 /* problem data parameters */
 #define hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
