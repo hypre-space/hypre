@@ -3607,12 +3607,6 @@ else $as_nop
 
 fi
 
-if test "$hypre_using_longdouble" = "yes"
-then
-
-printf "%s\n" "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
-
-fi
 
 # Check whether --enable-complex was given.
 if test ${enable_complex+y}
@@ -10658,6 +10652,22 @@ else $as_nop
   as_fn_error $? "unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path." "$LINENO" 5
 fi
 
+fi
+
+
+if test "$hypre_using_longdouble" = "yes"
+then
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+   then
+      as_fn_error $? "******************** Incompatible precision on device **********************
+                  Long double data format is not supported on device.
+                  For GPU builds, please use the default double precision or --enable-single.
+                  ****************************************************************************" "$LINENO" 5
+   else
+
+printf "%s\n" "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
+
+   fi
 fi
 
 

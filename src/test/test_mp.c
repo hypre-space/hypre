@@ -92,9 +92,16 @@ int main (int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   HYPRE_Initialize();
+   /* default memory location */
+   HYPRE_SetMemoryLocation(HYPRE_MEMORY_HOST);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(HYPRE_EXEC_HOST);
+   
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
-   n = 2;
+   n = 20;
    //solver_id = 0;
    /* Preliminaries: want at least one processor per row */
    if (n * n < num_procs) { n = sqrt(num_procs) + 1; }
@@ -310,7 +317,7 @@ int main (int argc, char *argv[])
 
       HYPRE_Solver amg_solver;
       HYPRE_BoomerAMGCreate_flt(&amg_solver);
-      HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 3); /* print amg solution info */
+      HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
       HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
@@ -362,7 +369,7 @@ int main (int argc, char *argv[])
          rprod = 0.;
          HYPRE_ParVectorInnerProd_dbl(hres, hres, &rprod);
          rnrm[i] = rprod;
-         printf("rprod = %f\n", rprod);
+         printf("rprod = %e\n", rprod);
          /*=====================*/
 
          /* step 4: solver for error in single precision */
@@ -428,6 +435,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorDestroy_dbl(ijhres);
    HYPRE_IJVectorDestroy_dbl(ijxtmp);
 
+   HYPRE_Finalize();
    /* Finalize MPI*/
    MPI_Finalize();
 

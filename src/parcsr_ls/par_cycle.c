@@ -169,7 +169,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    }
 
    num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
-   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
+   num_coeffs[0]    = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -184,7 +184,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    {
       for (j = 1; j < num_levels; j++)
       {
-         num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
+         num_coeffs[j] = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       }
    }
 

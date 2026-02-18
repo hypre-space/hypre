@@ -549,7 +549,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(P)) +
                                        hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(P));
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_MatvecCommPkgCreate(P);
    *P_ptr = P;
@@ -888,7 +888,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                  memory_location_P, memory_location_P);
 
    hypre_ParCSRMatrixSetNumNonzeros(P);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
    hypre_MatvecCommPkgCreate(P);
 
    /* Set output pointer */

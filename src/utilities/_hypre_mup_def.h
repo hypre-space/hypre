@@ -59,8 +59,12 @@
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
 #undef  HYPRE_SINGLE
+#if defined (HYPRE_USING_GPU)
+#undef  HYPRE_LONG_DOUBLE
+#else
 #ifndef HYPRE_LONG_DOUBLE
 #define HYPRE_LONG_DOUBLE 1
+#endif
 #endif
 
 #else

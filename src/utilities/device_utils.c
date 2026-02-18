@@ -390,14 +390,8 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
  * hypre_DeviceDataComputeStream
  *--------------------------------------------------------------------*/
 
-/* CUDA/HIP stream */
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
+/* CUDA/HIP/SYCL stream */
+hypre_DeviceStream
 hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
@@ -407,22 +401,10 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
  * hypre_DeviceDataStream
  *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
+hypre_DeviceStream
 hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_CUDA)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_HIP)
-   hipStream_t stream = 0;
-#elif defined(HYPRE_USING_SYCL)
-   sycl::queue *stream = NULL;
-#endif
+   hypre_DeviceStream stream = NULL;
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
    if (i >= HYPRE_MAX_NUM_STREAMS)
@@ -1666,7 +1648,7 @@ hypreDevice_ComplexAxpyzn( HYPRE_Int       n,
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
-curandGenerator_t
+hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
@@ -1735,7 +1717,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
-rocrand_generator
+hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
@@ -3071,3 +3053,42 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
+
+/*--------------------------------------------------------------------------
+ * hypreDevice_ComplexDeviceArrayAxpyn
+ *--------------------------------------------------------------------------*/
+/*
+HYPRE_Int
+hypreDevice_ComplexDeviceArrayAxpyn( HYPRE_Complex alpha,
+                           HYPRE_Complex *x,
+                           HYPRE_Complex *y,
+                           HYPRE_Int n )
+{
+
+#if defined(HYPRE_USING_GPU)
+
+#if ( defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) ) && defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()),
+                                        n, &alpha, x, 1, y, 1) );
+#elif defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
+                                              n, alpha, x, 1, y, 1).wait() );
+#else
+   hypreDevice_ComplexAxpyn(x, n, y, y, alpha);
+#endif
+
+   hypre_SyncComputeStream();
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int i;
+
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y, x)
+   for (i = 0; i < n; i++)
+   {
+      y[i] += alpha * x[i];
+   }
+#endif
+
+   return hypre_error_flag;
+}
+*/

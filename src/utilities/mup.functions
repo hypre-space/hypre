@@ -34,3 +34,4 @@ HYPRE_SolverSetup
 HYPRE_SolverSolve
 HYPRE_Version
 HYPRE_VersionNumber
+hypre_GetSizeOfReal
