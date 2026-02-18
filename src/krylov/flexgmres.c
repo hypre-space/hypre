@@ -30,7 +30,7 @@ hypre_FlexGMRESFunctionsCreate(
    hypre_KrylovPtrToMatvecCreate       MatvecCreate,
    hypre_KrylovPtrToMatvec             Matvec,
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
-   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
    hypre_KrylovPtrToCopyVector         CopyVector,
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,
@@ -337,8 +337,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    HYPRE_Real r_norm_0;
 
    hypre_KrylovPtrToModifyPC modify_pc  = (fgmres_functions -> modify_pc);
-   hypre_KrylovPtrToInnerProdTagged inner_prod_tagged =
-      (hypre_KrylovPtrToInnerProdTagged) (fgmres_functions->InnerProd);
+   hypre_KrylovPtrToInnerProdTagged inner_prod_tagged = (fgmres_functions->InnerProd);
    hypre_KrylovResPrintMode print_mode = hypre_KrylovResPrintNone;
 
    /* We are not checking rel. change for now... */

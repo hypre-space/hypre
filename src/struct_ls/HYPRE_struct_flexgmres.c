@@ -22,7 +22,7 @@ HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
          hypre_StructKrylovCreateVectorArray,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         (hypre_KrylovPtrToInnerProd) hypre_StructKrylovInnerProdTagged,
+         hypre_StructKrylovInnerProdTagged,
          hypre_StructKrylovCopyVector,
          hypre_StructKrylovClearVector,
          hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
