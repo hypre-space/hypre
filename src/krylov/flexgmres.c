@@ -13,6 +13,7 @@
 
 #include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_res_print.h"
 
 /*--------------------------------------------------------------------------
  * hypre_FlexGMRESFunctionsCreate
@@ -29,7 +30,7 @@ hypre_FlexGMRESFunctionsCreate(
    hypre_KrylovPtrToMatvecCreate       MatvecCreate,
    hypre_KrylovPtrToMatvec             Matvec,
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
-   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
    hypre_KrylovPtrToCopyVector         CopyVector,
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,
@@ -319,10 +320,13 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
 
    HYPRE_Int        break_value = 0;
    HYPRE_Int         i, j, k;
-   HYPRE_Real *rs, **hh, *c, *s;
+   HYPRE_Real *rs, **hh, *c, *s, *rs_3 = NULL;
    HYPRE_Int        iter;
    HYPRE_Int        my_id, num_procs;
    HYPRE_Real epsilon, gamma, t, r_norm, b_norm, den_norm;
+   HYPRE_Int        num_tags = 1, tag;
+   HYPRE_Complex   *iprod = NULL;
+   HYPRE_Complex   *biprod = NULL;
 
    HYPRE_Real epsmac = 1.e-16;
    HYPRE_Real ieee_check = 0.;
@@ -333,6 +337,8 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    HYPRE_Real r_norm_0;
 
    hypre_KrylovPtrToModifyPC modify_pc  = (fgmres_functions -> modify_pc);
+   hypre_KrylovPtrToInnerProdTagged inner_prod_tagged = (fgmres_functions->InnerProd);
+   hypre_KrylovResPrintMode print_mode = hypre_KrylovResPrintNone;
 
    /* We are not checking rel. change for now... */
 
@@ -372,7 +378,8 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    /* compute initial residual */
    (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(b, b));
+   inner_prod_tagged(b, b, &num_tags, &biprod);
+   b_norm = hypre_sqrt(biprod[0]);
 
    /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -398,7 +405,8 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(p[0], p[0]));
+   inner_prod_tagged(p[0], p[0], &num_tags, &iprod);
+   r_norm = hypre_sqrt(iprod[0]);
    r_norm_0 = r_norm;
 
    /* Since it does not diminish performance, attempt to return an error flag
@@ -435,7 +443,23 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          {
             hypre_printf("Rel_resid_norm actually contains the residual norm\n");
          }
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("L2 norm of b%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(biprod[tag + 1]));
+            }
+         }
          hypre_printf("Initial L2 norm of residual: %e\n", r_norm);
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("Initial L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(iprod[tag + 1]));
+            }
+         }
 
       }
    }
@@ -463,23 +487,14 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    /* so now our stop criteria is |r_i| <= epsilon */
 
 
+   print_mode = hypre_KrylovResPrintGetMode(print_level, num_tags, 0);
+   if (print_mode == hypre_KrylovResPrintTagged)
+   {
+      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
+   }
    if ( print_level > 1 && my_id == 0 )
    {
-      if (b_norm > 0.0)
-      {
-         hypre_printf("=============================================\n\n");
-         hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-         hypre_printf("-----    ------------    ---------- ------------\n");
-
-      }
-
-      else
-      {
-         hypre_printf("=============================================\n\n");
-         hypre_printf("Iters     resid.norm     conv.rate\n");
-         hypre_printf("-----    ------------    ----------\n");
-
-      };
+      hypre_KrylovResPrintHeader(print_mode, print_level, num_tags, b_norm, 0.0);
    }
 
 
@@ -492,6 +507,9 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       rs[0] = r_norm;
       if (r_norm == 0.0)
       {
+         hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+         hypre_TFree(biprod, HYPRE_MEMORY_HOST);
+         hypre_TFreeF(rs_3, fgmres_functions);
          hypre_TFreeF(c, fgmres_functions);
          hypre_TFreeF(s, fgmres_functions);
          hypre_TFreeF(rs, fgmres_functions);
@@ -514,14 +532,10 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
 
          (*(fgmres_functions->CopyVector))(b, r);
          (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(r, r));
+         inner_prod_tagged(r, r, &num_tags, &iprod);
+         r_norm = hypre_sqrt(iprod[0]);
          if (r_norm <= epsilon)
          {
-            if ( print_level > 1 && my_id == 0)
-            {
-               hypre_printf("\n\n");
-               hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-            }
             break;
          }
          else if ( print_level > 0 && my_id == 0)
@@ -559,10 +573,12 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          /* modified Gram_Schmidt */
          for (j = 0; j < i; j++)
          {
-            hh[j][i - 1] = (*(fgmres_functions->InnerProd))(p[j], p[i]);
+            inner_prod_tagged(p[j], p[i], &num_tags, &iprod);
+            hh[j][i - 1] = iprod[0];
             (*(fgmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = hypre_sqrt((*(fgmres_functions->InnerProd))(p[i], p[i]));
+         inner_prod_tagged(p[i], p[i], &num_tags, &iprod);
+         t = hypre_sqrt(iprod[0]);
          hh[i][i - 1] = t;
          if (t != 0.0)
          {
@@ -596,15 +612,46 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          if ( print_level > 0 )
          {
             norms[iter] = r_norm;
-            if ( print_level > 1 && my_id == 0 )
+            if (print_mode == hypre_KrylovResPrintScalarResidual)
             {
-               if (b_norm > 0.0)
-                  hypre_printf("% 5d    %e    %f   %e\n", iter,
-                               norms[iter], norms[iter] / norms[iter - 1],
-                               norms[iter] / b_norm);
-               else
-                  hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
-                               norms[iter] / norms[iter - 1]);
+               if ( print_level > 1 && my_id == 0 )
+               {
+                  hypre_KrylovResPrintScalarRow(iter, norms[iter], norms[iter - 1], b_norm);
+               }
+            }
+            else if (print_mode == hypre_KrylovResPrintTagged && num_tags > 1)
+            {
+               for (k = 0; k < i; k++)
+               {
+                  rs_3[k] = rs[k];
+               }
+
+               for (k = i - 1; k >= 0; k--)
+               {
+                  rs_3[k] = rs_3[k] / hh[k][k];
+                  for (j = 0; j < k; j++)
+                  {
+                     rs_3[j] -= hh[j][k] * rs_3[k];
+                  }
+               }
+
+               (*(fgmres_functions->CopyVector))(pre_vecs[0], w);
+               (*(fgmres_functions->ScaleVector))(rs_3[0], w);
+               for (j = 1; j < i; j++)
+               {
+                  (*(fgmres_functions->Axpy))(rs_3[j], pre_vecs[j], w);
+               }
+
+               (*(fgmres_functions->CopyVector))(x, r);
+               (*(fgmres_functions->Axpy))(1.0, w, r);
+               (*(fgmres_functions->CopyVector))(b, w);
+               (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, r, 1.0, w);
+               inner_prod_tagged(w, w, &num_tags, &iprod);
+
+               if (my_id == 0)
+               {
+                  hypre_KrylovResPrintTaggedRow(iter, print_level, num_tags, iprod, biprod, NULL);
+               }
             }
          }
          /*convergence factor tolerance */
@@ -677,15 +724,11 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          /* calculate actual residual norm*/
          (*(fgmres_functions->CopyVector))(b, r);
          (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = hypre_sqrt( (*(fgmres_functions->InnerProd))(r, r) );
+         inner_prod_tagged(r, r, &num_tags, &iprod);
+         r_norm = hypre_sqrt(iprod[0]);
 
          if (r_norm <= epsilon)
          {
-            if ( print_level > 1 && my_id == 0 )
-            {
-               hypre_printf("\n\n");
-               hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-            }
             (fgmres_data -> converged) = 1;
             break;
 
@@ -723,6 +766,32 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    } /* END of iteration while loop */
 
 
+   if (print_level > 0)
+   {
+      HYPRE_Real final_r_norm = r_norm;
+      if (num_tags > 1)
+      {
+         (*(fgmres_functions->CopyVector))(b, r);
+         (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+         inner_prod_tagged(r, r, &num_tags, &iprod);
+         final_r_norm = hypre_sqrt(iprod[0]);
+      }
+
+      if (!my_id)
+      {
+         hypre_printf("Final L2 norm of residual: %e\n", final_r_norm);
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("Final L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(iprod[tag + 1]));
+            }
+         }
+         hypre_printf("\n");
+      }
+   }
+
    if ( print_level > 1 && my_id == 0 )
    {
       hypre_printf("\n\n");
@@ -744,6 +813,9 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    hypre_TFreeF(c, fgmres_functions);
    hypre_TFreeF(s, fgmres_functions);
    hypre_TFreeF(rs, fgmres_functions);
+   hypre_TFreeF(rs_3, fgmres_functions);
+   hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+   hypre_TFree(biprod, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < k_dim + 1; i++)
    {
