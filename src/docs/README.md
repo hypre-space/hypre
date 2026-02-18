@@ -59,24 +59,31 @@ to your home directory (here, it's set to `~/texlive/2019`) and install:
 Add `~/texlive/2019/bin/x86_64-linux` to your `PATH` and do `which pdflatex` to
 verify that you did it correctly.
 
+You also need doxygen to build the documentation. You can use a statically
+linked binary release or alternatively you can compile it from the source.
+Please visit the [doxygen website](https://www.doxygen.nl/download.html)
+for detailed instructions.
+
 ## Building the documentation
 
 To build the documentation, first activate the virtual environment:
 
     source ~/python-hypre/env/bin/activate
-        
-Now, just type `make` in the `src/docs` directory to build the documentation.
+
+Run `./configure` in the `src/` directory and then go to the `src/docs` directory
+and just type `make` to build the documentation in pdf and html formats.
+
 When you are finished editing and building, turn off the virtual environment:
 
     deactivate
 
-To view the output, open a browser and navigate to the following links to see
+To view the html output files, open a browser and navigate to the following links to see
 the user and reference manuals (adjust the path as needed):
 
     file:///home/falgout2/hypre/src/docs/usr-manual-html/index.html
     file:///home/falgout2/hypre/src/docs/ref-manual-html/index.html
 
-Alternatively, run a (local) webserver:
+Alternatively, you can run a (local) webserver:
 
     python3 -m http.server --directory usr-manual-html
 
