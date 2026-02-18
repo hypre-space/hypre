@@ -50,15 +50,18 @@ The following jobs run in sequence:
 
 `build-and-check`
 
-:   A matrix job covering `ubuntu-latest` and `macos-latest`. Each
-    worker:
+:   A matrix job covering `ubuntu-latest`, `macos-latest`, and
+    `windows-latest` (MSVC). Windows runs two variants: one with
+    MS-MPI enabled and one with MPI disabled. Each worker:
 
     1.  Checks out the hypre sources.
-    2.  Installs MPI runtime dependencies (`mpich` via `apt` on Ubuntu
-        and `open-mpi` via Homebrew on macOS) so that `mpiexec` is
-        available.
+    2.  Installs MPI runtime dependencies (`open-mpi` via `apt` on
+        Ubuntu, `open-mpi` via Homebrew on macOS, and MS-MPI runtime +
+        SDK downloaded from Microsoft's GitHub releases on Windows) so
+        that `mpiexec` is available for MPI-enabled jobs.
     3.  Configures a Debug CMake build from `src` into `build` with
-        tests enabled.
+        tests enabled, and disables MPI for the Windows sequential
+        variant.
     4.  Builds the library with `cmake --build build --parallel`.
     5.  Invokes `cmake --build build --target check` to run simple tests
         using each of the three conceptual interfaces in hypre: IJ,

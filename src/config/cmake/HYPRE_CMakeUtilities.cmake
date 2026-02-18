@@ -656,6 +656,102 @@ function(setup_tpl_or_internal LIB_NAME)
   endif()
 endfunction()
 
+# Verify external LAPACK integer ABI is compatible with HYPRE_ENABLE_BIGINT.
+# This check compiles and runs a tiny dgetrf() probe using 64-bit integers.
+function(check_bigint_external_lapack_abi)
+  if(NOT HYPRE_ENABLE_BIGINT)
+    return()
+  endif()
+
+  if(HYPRE_ENABLE_HYPRE_LAPACK)
+    return()
+  endif()
+
+  if(HYPRE_ALLOW_BIGINT_WITH_LP64_BLAS)
+    message(WARNING "Skipping BIGINT/external LAPACK ABI check because HYPRE_ALLOW_BIGINT_WITH_LP64_BLAS=ON")
+    return()
+  endif()
+
+  # Resolve LAPACK symbol name from configured mangling.
+  if(HYPRE_FMANGLE_LAPACK EQUAL 1)
+    set(_lapack_dgetrf_symbol "dgetrf")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 2 OR HYPRE_FMANGLE_LAPACK EQUAL 0)
+    set(_lapack_dgetrf_symbol "dgetrf_")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 3)
+    set(_lapack_dgetrf_symbol "dgetrf__")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 4)
+    set(_lapack_dgetrf_symbol "DGETRF")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 5)
+    set(_lapack_dgetrf_symbol "_dgetrf_")
+  else()
+    set(_lapack_dgetrf_symbol "dgetrf_")
+  endif()
+
+  # Mirror the same external link line used by HYPRE for LAPACK/BLAS.
+  # Support both variable-based discovery and imported-target discovery.
+  set(_abi_required_libs)
+  if(TPL_LAPACK_LIBRARIES)
+    list(APPEND _abi_required_libs ${TPL_LAPACK_LIBRARIES})
+  elseif(TARGET LAPACK::LAPACK)
+    list(APPEND _abi_required_libs LAPACK::LAPACK)
+  elseif(LAPACK_LIBRARIES)
+    list(APPEND _abi_required_libs ${LAPACK_LIBRARIES})
+  endif()
+
+  if(TPL_BLAS_LIBRARIES)
+    list(APPEND _abi_required_libs ${TPL_BLAS_LIBRARIES})
+  elseif(TARGET BLAS::BLAS)
+    list(APPEND _abi_required_libs BLAS::BLAS)
+  elseif(BLAS_LIBRARIES)
+    list(APPEND _abi_required_libs ${BLAS_LIBRARIES})
+  endif()
+
+  if(_abi_required_libs)
+    list(REMOVE_DUPLICATES _abi_required_libs)
+  else()
+    message(FATAL_ERROR
+      "Unable to determine LAPACK libraries for BIGINT ABI check. "
+      "Set TPL_LAPACK_LIBRARIES/TPL_BLAS_LIBRARIES, or ensure LAPACK::LAPACK "
+      "(and optionally BLAS::BLAS) is discoverable, or use internal LAPACK.")
+  endif()
+
+  include(CheckCSourceRuns)
+
+  set(_old_required_libs "${CMAKE_REQUIRED_LIBRARIES}")
+  set(CMAKE_REQUIRED_LIBRARIES "${_abi_required_libs}")
+
+  set(_abi_probe_code
+"extern void ${_lapack_dgetrf_symbol}(const long long *m, const long long *n, double *a,
+                                      const long long *lda, long long *ipiv, long long *info);
+int main(void)
+{
+  long long m = 2, n = 2, lda = 2, info = 0;
+  double a[4] = {1.0, 3.0, 2.0, 4.0};
+  long long ipiv[2] = {0, 0};
+  ${_lapack_dgetrf_symbol}(&m, &n, a, &lda, ipiv, &info);
+  if (info != 0) { return 11; }
+  /* For this matrix, both pivots should be 2 with a 64-bit integer ABI. */
+  return (ipiv[0] == 2 && ipiv[1] == 2) ? 0 : 12;
+}")
+
+  check_c_source_runs("${_abi_probe_code}" HYPRE_EXTERNAL_LAPACK_ILP64_OK)
+
+  set(CMAKE_REQUIRED_LIBRARIES "${_old_required_libs}")
+
+  if(NOT HYPRE_EXTERNAL_LAPACK_ILP64_OK)
+    message(FATAL_ERROR
+      "Incompatible external LAPACK integer ABI for HYPRE_ENABLE_BIGINT=ON.\n"
+      "The configured external LAPACK appears to use LP64 integers (32-bit), "
+      "but BIGINT requires an ILP64-compatible BLAS/LAPACK integer interface.\n"
+      "Use one of:\n"
+      "  1) Provide ILP64 BLAS/LAPACK libraries\n"
+      "  2) Set -DHYPRE_ENABLE_MIXEDINT=ON (recommended for external LP64 BLAS/LAPACK)\n"
+      "  3) Use internal BLAS/LAPACK: -DHYPRE_ENABLE_HYPRE_BLAS=ON -DHYPRE_ENABLE_HYPRE_LAPACK=ON\n")
+  endif()
+
+  message(STATUS "Verified: external LAPACK integer ABI is compatible with HYPRE_ENABLE_BIGINT.")
+endfunction()
+
 # Verify that Umpire provides the C interface headers by compiling a tiny C program
 function(check_umpire_c_interface)
   if(NOT HYPRE_ENABLE_UMPIRE)

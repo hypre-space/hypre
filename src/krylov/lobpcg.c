@@ -43,7 +43,7 @@ lobpcg_chol( utilities_FortranMatrix* a,
    HYPRE_Int lda, n;
    HYPRE_Real* aval;
    char uplo;
-   HYPRE_Int ierr;
+   HYPRE_Int ierr = 0;
 
    lda  = (HYPRE_Int) utilities_FortranMatrixGlobalHeight( a );
    n    = (HYPRE_Int) utilities_FortranMatrixHeight( a );
@@ -66,7 +66,7 @@ lobpcg_solveGEVP(
 )
 {
 
-   HYPRE_Int n, lda, ldb, itype, lwork, info;
+   HYPRE_Int n, lda, ldb, itype, lwork, info = 0;
    char jobz, uplo;
    HYPRE_Real* work;
    HYPRE_Real* a;
@@ -124,7 +124,7 @@ lobpcg_MultiVectorImplicitQR(
 
    /* B-orthonormalizes x using y = B x */
 
-   HYPRE_Int ierr;
+   HYPRE_Int ierr = 0;
 
    lobpcg_MultiVectorByMultiVector( x, y, r );
 

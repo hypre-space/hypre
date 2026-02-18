@@ -23,6 +23,7 @@ set(TEST_SRCS
   ams_driver.c
   struct_migrate.c
   ij_assembly.c
+  test_csr_overlap.c
 )
 
 # Collect targets derived from source file names
@@ -70,18 +71,33 @@ find_program(BASH_PROGRAM bash)
 set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 # Define HYPRE's check target (this will override any existing check target)
-add_custom_target(check
-  COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
-  COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:ij> 2> ij.err
-  COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:struct> 2> struct.err
-  COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:sstruct> 2> sstruct.err
-  COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
-  COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ij struct sstruct
-  COMMENT "Running basic library check"
-  VERBATIM
-)
+if (HYPRE_ENABLE_MPI)
+  add_custom_target(check
+    COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:ij> 2> ij.err
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:struct> 2> struct.err
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:sstruct> 2> sstruct.err
+    COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
+    COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ij struct sstruct
+    COMMENT "Running basic library check"
+    VERBATIM
+  )
+else ()
+  add_custom_target(check
+    COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
+    COMMAND $<TARGET_FILE:ij> 2> ij.err
+    COMMAND $<TARGET_FILE:struct> 2> struct.err
+    COMMAND $<TARGET_FILE:sstruct> 2> sstruct.err
+    COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
+    COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ij struct sstruct
+    COMMENT "Running basic library check"
+    VERBATIM
+  )
+endif ()
 
 # Add checkpar target for parallel testing
 add_custom_target(checkpar
@@ -171,7 +187,38 @@ if(BUILD_TESTING)
     DEPENDS sstruct
     FAIL_REGULAR_EXPRESSION "Failed"
   )
+
+  # Unit tests
+  add_test(NAME test_unit
+    COMMAND ${BASH_PROGRAM} -c "\
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+        -atol ${HYPRE_CHECK_TOL} \
+        -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_unit/unit.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+  )
+  set_tests_properties(test_unit PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS test_csr_overlap
+    FAIL_REGULAR_EXPRESSION "Failed"
+  )
 endif()
+
+# Add unit_tests make target for convenience
+add_custom_target(unit_tests
+  COMMAND ${CMAKE_COMMAND} -E echo "Running unit tests..."
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
+          -atol ${HYPRE_CHECK_TOL}
+          -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
+          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_unit/unit.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS test_csr_overlap
+  COMMENT "Running unit tests"
+  VERBATIM
+)
 
 # Optional Fortran-based drivers
 if(HYPRE_ENABLE_FORTRAN)

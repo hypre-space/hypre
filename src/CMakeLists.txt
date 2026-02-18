@@ -185,6 +185,7 @@ set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCPRIM              "Use rocPRIM" ON)
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
@@ -216,6 +217,7 @@ set_hypre_option(SKIP TPL_LAPACK_LIBRARIES              "Absolute paths to LAPAC
 set_hypre_option(SKIP TPL_FEI_INCLUDE_DIRS              "Absolute paths to FEI include directories [Optional]." "")
 
 # Extra flags
+set_hypre_option(SKIP HYPRE_ALLOW_BIGINT_WITH_LP64_BLAS "Allow potentially unsafe BIGINT with external LP64 BLAS/LAPACK" OFF)
 set(HYPRE_WITH_EXTRA_CFLAGS "" CACHE STRING             "Define extra C compile flags")
 set(HYPRE_WITH_EXTRA_CXXFLAGS "" CACHE STRING           "Define extra CXX compile flags")
 set(HYPRE_SYCL_TARGET "" CACHE STRING                   "Target SYCL architecture, e.g. 'spir64_gen'.")
@@ -478,6 +480,7 @@ setup_tpl(magma)
 setup_tpl(caliper)
 setup_tpl_or_internal(blas)
 setup_tpl_or_internal(lapack)
+check_bigint_external_lapack_abi()
 
 # Some TPLs need C++ to be enabled (GPU already enables C++ by default)
 if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
