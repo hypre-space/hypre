@@ -54,7 +54,7 @@ typedef struct
    hypre_KrylovPtrToMatvecCreate       MatvecCreate;
    hypre_KrylovPtrToMatvec             Matvec;
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy;
-   hypre_KrylovPtrToInnerProd          InnerProd;
+   hypre_KrylovPtrToInnerProdTagged    InnerProd;
    hypre_KrylovPtrToCopyVector         CopyVector;
    hypre_KrylovPtrToClearVector        ClearVector;
    hypre_KrylovPtrToScaleVector        ScaleVector;
@@ -136,7 +136,7 @@ hypre_FlexGMRESFunctionsCreate(
    hypre_KrylovPtrToMatvecCreate       MatvecCreate,
    hypre_KrylovPtrToMatvec             Matvec,
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
-   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
    hypre_KrylovPtrToCopyVector         CopyVector,
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,

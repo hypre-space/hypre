@@ -84,7 +84,7 @@ jobs:
             Write-Host "SDK install log (last 50 lines):"
             Get-Content sdk_install.log -Tail 50
           }
-          
+
           # SDK installs to a different location - check both
           $sdkRoot = "C:\Program Files (x86)\Microsoft SDKs\MPI"
           if (Test-Path "$sdkRoot\Include\mpi.h") {
@@ -107,7 +107,7 @@ jobs:
           Get-ChildItem "$msmpiRoot" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
           Write-Host "mpi.h exists: $(Test-Path "$msmpiRoot\Include\mpi.h")"
           Write-Host "msmpi.lib exists: $(Test-Path "$msmpiRoot\Lib\x64\msmpi.lib")"
-          
+
           # Set environment variables for CMake to find MPI
           Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
           Add-Content $env:GITHUB_ENV "MSMPI_INC=$msmpiRoot\Include"
