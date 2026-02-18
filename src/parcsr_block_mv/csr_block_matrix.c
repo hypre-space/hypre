@@ -1441,7 +1441,7 @@ hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Com
    {
       /* same as solving A^T C^T = B^T */
       HYPRE_Complex *m_i1;
-      HYPRE_Int info;
+      HYPRE_Int info = 0;
       HYPRE_Int *piv;
       HYPRE_Int sz, one;
 

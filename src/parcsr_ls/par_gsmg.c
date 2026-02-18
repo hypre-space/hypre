@@ -660,7 +660,7 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
    HYPRE_Int i, j;
    HYPRE_Real *work;
    HYPRE_Int    work_size;
-   HYPRE_Int    info;
+   HYPRE_Int    info = 0;
    HYPRE_Int  temp;
 
    /*
