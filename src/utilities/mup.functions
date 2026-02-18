@@ -29,5 +29,8 @@ HYPRE_SetSpGemmUseVendor
 HYPRE_SetSpMVUseVendor
 HYPRE_SetSpTransUseVendor
 HYPRE_SetUseGpuRand
+HYPRE_SolverDestroy
+HYPRE_SolverSetup
+HYPRE_SolverSolve
 HYPRE_Version
 HYPRE_VersionNumber

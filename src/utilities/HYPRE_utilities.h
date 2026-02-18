@@ -748,6 +748,17 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
 
+/* Base public solver APIs */
+HYPRE_Int HYPRE_SolverSetup(HYPRE_Solver solver,
+                            HYPRE_Matrix A,
+                            HYPRE_Vector b,
+                            HYPRE_Vector x);
+HYPRE_Int HYPRE_SolverSolve(HYPRE_Solver solver,
+                            HYPRE_Matrix A,
+                            HYPRE_Vector b,
+                            HYPRE_Vector x);
+HYPRE_Int HYPRE_SolverDestroy(HYPRE_Solver solver);
+
 /*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 
 #ifdef __cplusplus

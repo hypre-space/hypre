@@ -311,6 +311,33 @@ HYPRE_Int
 HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
 
 HYPRE_Int
+HYPRE_SolverDestroy_flt( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_SolverDestroy_dbl( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_SolverDestroy_long_dbl( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_SolverDestroy( HYPRE_Solver solver );
+
+HYPRE_Int
+HYPRE_SolverSetup_flt( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSetup_dbl( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSetup_long_dbl( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+
+HYPRE_Int
+HYPRE_SolverSolve_flt( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSolve_dbl( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSolve_long_dbl( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+HYPRE_Int
+HYPRE_SolverSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+
+HYPRE_Int
 HYPRE_Version_flt( char **version_ptr );
 HYPRE_Int
 HYPRE_Version_dbl( char **version_ptr );
@@ -431,6 +458,15 @@ HYPRE_SetSpTransUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor )
 
 HYPRE_Int
 HYPRE_SetUseGpuRand_pre( HYPRE_Precision precision, HYPRE_Int use_curand );
+
+HYPRE_Int
+HYPRE_SolverDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver );
+
+HYPRE_Int
+HYPRE_SolverSetup_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
+
+HYPRE_Int
+HYPRE_SolverSolve_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x );
 
 HYPRE_Int
 HYPRE_Version_pre( HYPRE_Precision precision, char **version_ptr );
