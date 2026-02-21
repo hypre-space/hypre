@@ -360,7 +360,7 @@ hypre_MatTCommPkgCreate_core (
                            }
                         }
             */
-            for ( kc = row_starts[my_id]; kc < row_starts[my_id + 1]; kc++ )
+            for ( kc = row_starts[0]; kc < row_starts[1]; kc++ )
             {
                if ( kc == col && i != my_id )
                {
