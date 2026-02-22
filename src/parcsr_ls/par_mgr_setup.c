@@ -887,7 +887,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if (aff_solver[j])
          {
-            if ((mgr_data -> Frelax_type)[i] == 29)
+            if ((mgr_data -> Frelax_type)[j] == 29)
             {
                hypre_MGRDirectSolverDestroy(aff_solver[j]);
             }
