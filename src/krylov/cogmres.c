@@ -397,6 +397,13 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFreeF(c, cogmres_functions);
+      hypre_TFreeF(s, cogmres_functions);
+      hypre_TFreeF(rs, cogmres_functions);
+      hypre_TFreeF(rv, cogmres_functions);
+      if (rel_change) { hypre_TFreeF(rs_2, cogmres_functions); }
+      hypre_TFreeF(hh, cogmres_functions);
+      hypre_TFreeF(uu, cogmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -424,6 +431,13 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFreeF(c, cogmres_functions);
+      hypre_TFreeF(s, cogmres_functions);
+      hypre_TFreeF(rs, cogmres_functions);
+      hypre_TFreeF(rv, cogmres_functions);
+      if (rel_change) { hypre_TFreeF(rs_2, cogmres_functions); }
+      hypre_TFreeF(hh, cogmres_functions);
+      hypre_TFreeF(uu, cogmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
