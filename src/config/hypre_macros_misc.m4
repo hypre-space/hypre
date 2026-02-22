@@ -102,29 +102,29 @@ then
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -fopenmp"
-          LDFLAGS+=" -fopenmp"
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qopenmp"
-          LDFLAGS+=" -qopenmp"
+          CFLAGS="$CFLAGS -qopenmp"
+          LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -mp"
-          LDFLAGS+=" -mp"
+          CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpixlc-gpu|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qsmp=omp"
-          LDFLAGS+=" -qsmp=omp"
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -142,25 +142,25 @@ then
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -fopenmp"
+          CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qopenmp"
+          CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -mp"
+          CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
       CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlC-gpu|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qsmp=omp"
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -178,25 +178,25 @@ then
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -fopenmp"
+          FFLAGS="$FFLAGS -fopenmp"
         fi
         ;;
       ifort|mpiifort)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -qopenmp"
+          FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
       pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -mp"
+          FFLAGS="$FFLAGS -mp"
         fi
         ;;
       f77|f90|xlf|xlf_r|mpxlf|mpixlf77|mpixlf77_r)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -qsmp=omp"
+          FFLAGS="$FFLAGS -qsmp=omp"
         fi
         ;;
       kf77|mpikf77)
@@ -222,29 +222,29 @@ then
       gcc|mpigcc|mpicc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -fopenmp"
-          LDFLAGS+=" -fopenmp"
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qopenmp"
-          LDFLAGS+=" -qopenmp"
+          CFLAGS="$CFLAGS -qopenmp"
+          LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -mp"
-          LDFLAGS+=" -mp"
+          CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       cc|xlc|mpxlc|mpixlc|mpcc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qsmp=omp"
-          LDFLAGS+=" -qsmp=omp"
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -262,25 +262,25 @@ then
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -fopenmp"
+          CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qopenmp"
+          CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -mp"
+          CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
       CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
         CXXFLAGS="-O0 -g"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qsmp=omp"
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
