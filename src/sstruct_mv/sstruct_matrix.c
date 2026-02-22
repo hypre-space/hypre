@@ -1128,7 +1128,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
                                                   &col_coords[ncoeffs], matrix_type);
 
-            coeffs[ncoeffs] = values[i];
+            coeffs[ncoeffs] = h_values[i];
             ncoeffs++;
          }
       }
