@@ -267,7 +267,7 @@ hypre_PCGSetup( void *pcg_vdata,
 
    if (flex)
    {
-      if ( pcg_data -> v != NULL )
+      if ( pcg_data -> r_old != NULL )
       {
          (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
       }
