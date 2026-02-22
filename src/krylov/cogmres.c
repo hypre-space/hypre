@@ -359,17 +359,6 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
       norms = (cogmres_data -> norms);
    }
 
-   /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
-   c  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   s  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   if (rel_change) { rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST); }
-
-   rv = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
-
-   hh = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   uu = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-
    (*(cogmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
@@ -397,13 +386,6 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
-      hypre_TFreeF(c, cogmres_functions);
-      hypre_TFreeF(s, cogmres_functions);
-      hypre_TFreeF(rs, cogmres_functions);
-      hypre_TFreeF(rv, cogmres_functions);
-      if (rel_change) { hypre_TFreeF(rs_2, cogmres_functions); }
-      hypre_TFreeF(hh, cogmres_functions);
-      hypre_TFreeF(uu, cogmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -431,17 +413,21 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
-      hypre_TFreeF(c, cogmres_functions);
-      hypre_TFreeF(s, cogmres_functions);
-      hypre_TFreeF(rs, cogmres_functions);
-      hypre_TFreeF(rv, cogmres_functions);
-      if (rel_change) { hypre_TFreeF(rs_2, cogmres_functions); }
-      hypre_TFreeF(hh, cogmres_functions);
-      hypre_TFreeF(uu, cogmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
    }
+
+   /* initialize work arrays */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
+   c  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   s  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   if (rel_change) { rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST); }
+
+   rv = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
+
+   hh = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   uu = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
 
    if ( logging > 0 || print_level > 0)
    {

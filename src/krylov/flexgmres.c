@@ -369,19 +369,6 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       /* fp = fopen(log_file_name,"w"); */
    }
 
-   /* initialize work arrays  */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-
-
-   /* fgmres mod. - need non-modified hessenberg ???? */
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-   }
-
    (*(fgmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
@@ -411,15 +398,6 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       hypre_error(HYPRE_ERROR_GENERIC);
       hypre_TFree(iprod, HYPRE_MEMORY_HOST);
       hypre_TFree(biprod, HYPRE_MEMORY_HOST);
-      hypre_TFreeF(rs_3, fgmres_functions);
-      hypre_TFreeF(c, fgmres_functions);
-      hypre_TFreeF(s, fgmres_functions);
-      hypre_TFreeF(rs, fgmres_functions);
-      for (i = 0; i < k_dim + 1; i++)
-      {
-         hypre_TFreeF(hh[i], fgmres_functions);
-      }
-      hypre_TFreeF(hh, fgmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -450,18 +428,22 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       hypre_error(HYPRE_ERROR_GENERIC);
       hypre_TFree(iprod, HYPRE_MEMORY_HOST);
       hypre_TFree(biprod, HYPRE_MEMORY_HOST);
-      hypre_TFreeF(rs_3, fgmres_functions);
-      hypre_TFreeF(c, fgmres_functions);
-      hypre_TFreeF(s, fgmres_functions);
-      hypre_TFreeF(rs, fgmres_functions);
-      for (i = 0; i < k_dim + 1; i++)
-      {
-         hypre_TFreeF(hh[i], fgmres_functions);
-      }
-      hypre_TFreeF(hh, fgmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays  */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
+
+
+   /* fgmres mod. - need non-modified hessenberg ???? */
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if ( logging > 0 || print_level > 0)

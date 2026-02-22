@@ -379,24 +379,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
       norms = (gmres_data -> norms);
    }
 
-   /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   if (rel_change)
-   {
-      rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-   if (print_level > 2)
-   {
-      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-
    (*(gmres_functions->CopyVector))(b, p[0]);
 
    /* Compute initial residual */
@@ -440,13 +422,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
       hypre_TFree(iprod, HYPRE_MEMORY_HOST);
       hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
       hypre_TFree(biprod, HYPRE_MEMORY_HOST);
-      hypre_TFreeF(c, gmres_functions);
-      hypre_TFreeF(s, gmres_functions);
-      hypre_TFreeF(rs, gmres_functions);
-      if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
-      if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
-      for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
-      hypre_TFreeF(hh, gmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -481,16 +456,27 @@ hypre_GMRESSolve(void  *gmres_vdata,
       hypre_TFree(iprod, HYPRE_MEMORY_HOST);
       hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
       hypre_TFree(biprod, HYPRE_MEMORY_HOST);
-      hypre_TFreeF(c, gmres_functions);
-      hypre_TFreeF(s, gmres_functions);
-      hypre_TFreeF(rs, gmres_functions);
-      if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
-      if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
-      for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
-      hypre_TFreeF(hh, gmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
+   if (rel_change)
+   {
+      rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   }
+   if (print_level > 2)
+   {
+      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   }
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if (logging > 0 || print_level > 0)

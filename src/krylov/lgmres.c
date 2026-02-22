@@ -405,18 +405,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       /* fp = fopen(log_file_name,"w"); */
    }
 
-   /* initialize work arrays  - lgmres includes aug_dim*/
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1 + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-
-   /* lgmres mod. - need non-modified hessenberg to avoid aug_dim matvecs */
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + aug_dim + 1, lgmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + aug_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-   }
-
    (*(lgmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
@@ -443,14 +431,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
-      hypre_TFreeF(c, lgmres_functions);
-      hypre_TFreeF(s, lgmres_functions);
-      hypre_TFreeF(rs, lgmres_functions);
-      for (i = 0; i < k_dim + aug_dim + 1; i++)
-      {
-         hypre_TFreeF(hh[i], lgmres_functions);
-      }
-      hypre_TFreeF(hh, lgmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -478,17 +458,21 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
-      hypre_TFreeF(c, lgmres_functions);
-      hypre_TFreeF(s, lgmres_functions);
-      hypre_TFreeF(rs, lgmres_functions);
-      for (i = 0; i < k_dim + aug_dim + 1; i++)
-      {
-         hypre_TFreeF(hh[i], lgmres_functions);
-      }
-      hypre_TFreeF(hh, lgmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays  - lgmres includes aug_dim*/
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1 + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+
+   /* lgmres mod. - need non-modified hessenberg to avoid aug_dim matvecs */
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + aug_dim + 1, lgmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + aug_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if ( logging > 0 || print_level > 0)
