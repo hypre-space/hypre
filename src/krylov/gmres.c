@@ -715,7 +715,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
                /* Apply preconditioner to get the correction */
                (*(gmres_functions->ClearVector))(w);
-               precond(precond_data, A, w_3, w);
+               precond(precond_data, precond_Mat, w_3, w);
 
                /* Compute current approximate solution x_i = x_0 + correction */
                (*(gmres_functions->CopyVector))(x, w_3);
