@@ -437,6 +437,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
+      hypre_TFreeF(c, gmres_functions);
+      hypre_TFreeF(s, gmres_functions);
+      hypre_TFreeF(rs, gmres_functions);
+      if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
+      if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
+      for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
+      hypre_TFreeF(hh, gmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -468,6 +478,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
+      hypre_TFreeF(c, gmres_functions);
+      hypre_TFreeF(s, gmres_functions);
+      hypre_TFreeF(rs, gmres_functions);
+      if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
+      if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
+      for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
+      hypre_TFreeF(hh, gmres_functions);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
