@@ -314,8 +314,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *w_3                = (gmres_data -> w_3);
    void                **p                  = (gmres_data -> p);
 
-   hypre_KrylovPtrToPrecond precond = (gmres_functions -> precond);
-   void                 *precond_data = (gmres_data -> precond_data);
+   hypre_KrylovPtrToPrecond precond         = (gmres_functions -> precond);
+   void                 *precond_data       = (gmres_data -> precond_data);
+   void                 *precond_Mat        = (gmres_data -> precond_Mat);
 
    HYPRE_Int             print_level        = (gmres_data -> print_level);
    HYPRE_Int             logging            = (gmres_data -> logging);
@@ -349,6 +350,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
    hypre_KrylovResPrintMode print_mode = hypre_KrylovResPrintNone;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -600,7 +607,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          i++;
          iter++;
          (*(gmres_functions->ClearVector))(r);
-         precond(precond_data, A, p[i - 1], r);
+         precond(precond_data, precond_Mat, p[i - 1], r);
          (*(gmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
 
          /* modified Gram_Schmidt */
@@ -687,7 +694,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
                /* Apply preconditioner to get the correction */
                (*(gmres_functions->ClearVector))(w);
-               precond(precond_data, A, w_3, w);
+               precond(precond_data, precond_Mat, w_3, w);
 
                /* Compute current approximate solution x_i = x_0 + correction */
                (*(gmres_functions->CopyVector))(x, w_3);
@@ -788,7 +795,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                }
                (*(gmres_functions->ClearVector))(r);
                /* find correction (in r) */
-               precond(precond_data, A, w, r);
+               precond(precond_data, precond_Mat, w, r);
                /* copy current solution (x) to w (don't want to over-write x)*/
                (*(gmres_functions->CopyVector))(x, w);
 
@@ -832,7 +839,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                      (*(gmres_functions->Axpy))(rs_2[i - 1], p[i - 1], w);
                      (*(gmres_functions->ClearVector))(r);
                      /* apply the preconditioner */
-                     precond(precond_data, A, w, r);
+                     precond(precond_data, precond_Mat, w, r);
                      /* now r contains x_i - x_i-1 */
                   }
                   /* find the norm of x_i - x_i-1 */
@@ -888,7 +895,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
       (*(gmres_functions->ClearVector))(r);
       /* find correction (in r) */
-      precond(precond_data, A, w, r);
+      precond(precond_data, precond_Mat, w, r);
 
       /* update current solution x (in x) */
       (*(gmres_functions->Axpy))(1.0, r, x);
@@ -929,7 +936,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                   (*(gmres_functions->Axpy))(rs[i - 1], p[i - 1], w);
                   (*(gmres_functions->ClearVector))(r);
                   /* apply the preconditioner */
-                  precond(precond_data, A, w, r);
+                  precond(precond_data, precond_Mat, w, r);
                   /* find the norm of x_i - x_i-1 */
                   (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
                   w_norm = hypre_sqrt(iprod[0]);
