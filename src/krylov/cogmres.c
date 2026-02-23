@@ -142,33 +142,18 @@ hypre_COGMRESDestroy( void *cogmres_vdata )
          }
       }
 
-      if ( (cogmres_data -> matvec_data) != NULL )
-      {
-         (*(cogmres_functions->MatvecDestroy))(cogmres_data -> matvec_data);
-      }
+      (*(cogmres_functions->MatvecDestroy))(cogmres_data -> matvec_data);
 
-      if ( (cogmres_data -> r) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> r);
-      }
-      if ( (cogmres_data -> w) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> w);
-      }
-      if ( (cogmres_data -> w_2) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> w_2);
-      }
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> r);
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> w);
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> w_2);
 
 
       if ( (cogmres_data -> p) != NULL )
       {
          for (i = 0; i < (cogmres_data -> k_dim + 1); i++)
          {
-            if ( (cogmres_data -> p)[i] != NULL )
-            {
-               (*(cogmres_functions->DestroyVector))( (cogmres_data -> p) [i]);
-            }
+            (*(cogmres_functions->DestroyVector))( (cogmres_data -> p) [i]);
          }
          hypre_TFreeF( cogmres_data->p, cogmres_functions );
       }

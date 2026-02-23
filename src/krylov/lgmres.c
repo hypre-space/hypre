@@ -138,33 +138,18 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
          }
       }
 
-      if ( (lgmres_data -> matvec_data) != NULL )
-      {
-         (*(lgmres_functions->MatvecDestroy))(lgmres_data -> matvec_data);
-      }
+      (*(lgmres_functions->MatvecDestroy))(lgmres_data -> matvec_data);
 
-      if ( (lgmres_data -> r) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> r);
-      }
-      if ( (lgmres_data -> w) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> w);
-      }
-      if ( (lgmres_data -> w_2) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> w_2);
-      }
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> r);
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> w);
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> w_2);
 
 
       if ( (lgmres_data -> p) != NULL )
       {
          for (i = 0; i < (lgmres_data -> k_dim + 1); i++)
          {
-            if ( (lgmres_data -> p)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> p) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> p) [i]);
          }
          hypre_TFreeF( lgmres_data->p, lgmres_functions );
       }
@@ -174,10 +159,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
       {
          for (i = 0; i < (lgmres_data -> aug_dim + 1); i++)
          {
-            if ( (lgmres_data -> aug_vecs)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> aug_vecs) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> aug_vecs) [i]);
          }
          hypre_TFreeF( lgmres_data->aug_vecs, lgmres_functions );
       }
@@ -185,10 +167,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
       {
          for (i = 0; i < (lgmres_data -> aug_dim); i++)
          {
-            if ( (lgmres_data -> a_aug_vecs)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> a_aug_vecs) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> a_aug_vecs) [i]);
          }
          hypre_TFreeF( lgmres_data->a_aug_vecs, lgmres_functions );
       }

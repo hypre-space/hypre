@@ -156,31 +156,18 @@ hypre_PCGDestroy( void *pcg_vdata )
          (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
          pcg_data -> matvec_data = NULL;
       }
-      if ( pcg_data -> p != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> p);
-         pcg_data -> p = NULL;
-      }
-      if ( pcg_data -> s != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> s);
-         pcg_data -> s = NULL;
-      }
-      if ( pcg_data -> r != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r);
-         pcg_data -> r = NULL;
-      }
-      if ( pcg_data -> r_old != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
-         pcg_data -> r_old = NULL;
-      }
-      if ( pcg_data -> v != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> v);
-         pcg_data -> v = NULL;
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> p);
+      (*(pcg_functions->DestroyVector))(pcg_data -> s);
+      (*(pcg_functions->DestroyVector))(pcg_data -> r);
+      (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
+      (*(pcg_functions->DestroyVector))(pcg_data -> v);
+
+      pcg_data -> p = NULL;
+      pcg_data -> s = NULL;
+      pcg_data -> r = NULL;
+      pcg_data -> r_old = NULL;
+      pcg_data -> v = NULL;
+
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
@@ -241,22 +228,13 @@ hypre_PCGSetup( void *pcg_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   if ( pcg_data -> p != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> p);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> p);
    (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
 
-   if ( pcg_data -> s != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> s);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> s);
    (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
 
-   if ( pcg_data -> r != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> r);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> r);
    (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
 
    if ( pcg_data -> matvec_data != NULL && pcg_data->owns_matvec_data )
@@ -267,19 +245,13 @@ hypre_PCGSetup( void *pcg_vdata,
 
    if (flex)
    {
-      if ( pcg_data -> r_old != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
       (pcg_data -> r_old) = (*(pcg_functions->CreateVector))(b);
    }
 
    if (rtol != 0.0 && recompute_residual_p && (!two_norm))
    {
-      if ( pcg_data -> v != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> v);
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> v);
       (pcg_data -> v) = (*(pcg_functions->CreateVector))(b);
    }
 

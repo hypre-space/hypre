@@ -140,10 +140,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
          }
       }
 
-      if ( (gmres_data -> matvec_data) != NULL )
-      {
-         (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
-      }
+      (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
 
       /* Destroy work vectors */
       (*(gmres_functions->DestroyVector))(gmres_data -> r);
@@ -155,10 +152,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
       {
          for (i = 0; i < (gmres_data -> k_dim + 1); i++)
          {
-            if ( (gmres_data -> p)[i] != NULL )
-            {
-               (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
-            }
+            (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
          }
          hypre_TFreeF( gmres_data->p, gmres_functions );
       }
