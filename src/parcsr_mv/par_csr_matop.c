@@ -4607,7 +4607,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       {
          for (j = 0; j < s; j++)
          {
-            if ( hypre_abs(dense[j + i * blockSize]) < eps * Fnorm )
+            if ( hypre_cabs(dense[j + i * blockSize]) < eps * Fnorm )
             {
                dense[j + i * blockSize] = 0.0;
             }
@@ -6901,7 +6901,7 @@ hypre_ParCSRMatrixBlockRowSumHost( hypre_ParCSRMatrix     *A,
       for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          jr  = A_diag_j[j] % num_cols_block_B;
-         val = use_abs ? hypre_abs(A_diag_data[j]) : A_diag_data[j];
+         val = use_abs ? hypre_cabs(A_diag_data[j]) : A_diag_data[j];
 
          hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
                       hypre_DenseBlockMatrixRowStride(B) * ir +
@@ -6924,7 +6924,7 @@ hypre_ParCSRMatrixBlockRowSumHost( hypre_ParCSRMatrix     *A,
             HYPRE_Int  lcol = A_offd_j[j];
             HYPRE_BigInt gcol = col_map_offd[lcol];
             jr  = (HYPRE_Int) (gcol % (HYPRE_BigInt) num_cols_block_B);
-            val = use_abs ? hypre_abs(A_offd_data[j]) : A_offd_data[j];
+            val = use_abs ? hypre_cabs(A_offd_data[j]) : A_offd_data[j];
 
             hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
                          hypre_DenseBlockMatrixRowStride(B) * ir +
