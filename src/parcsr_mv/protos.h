@@ -358,6 +358,10 @@ HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *
 HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
+                                         HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
+                                         HYPRE_Int use_abs,
+                                         hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
                                                   HYPRE_MemoryLocation memloc_tags,
@@ -471,6 +475,7 @@ HYPRE_Int hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
                                               HYPRE_Int nrows, HYPRE_Int *rows);
+HYPRE_Int hypre_ParCSRMatrixSortColMapOffd(hypre_ParCSRMatrix *A);
 
 /* par_csr_matrix_stats.c */
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
