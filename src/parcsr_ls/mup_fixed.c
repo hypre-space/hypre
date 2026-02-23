@@ -6057,6 +6057,14 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int blk_dim, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildBlockRowLumpedInterp)( A, A_FF, A_FC, CF_marker, blk_dim, use_abs, Wp_ptr, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRBuildCoarseOperator( void *mgr_data, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr, HYPRE_Int level )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildCoarseOperator)( mgr_data, A_FF, A_FC, A_CF, A_CC_ptr, Wp, Wr, level );
@@ -6124,6 +6132,14 @@ HYPRE_Int
 hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int blk_size, HYPRE_Int method, hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr, hypre_ParCSRMatrix **RT_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildRestrict)( A, A_FF, A_FC, A_CF, CF_marker, num_cpts_global, trunc_factor, max_elmts, strong_threshold, max_row_sum, blk_size, method, W_ptr, R_ptr, RT_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildRowLumpedInterp)( A, A_FF, A_FC, CF_marker, use_abs, Wp_ptr, P_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

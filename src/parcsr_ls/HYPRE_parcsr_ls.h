@@ -4598,6 +4598,8 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
  *    - 3    : classical modified interpolation
  *    - 4    : approximate inverse
  *    - 12   : Block Jacobi
+ *    - 13   : block row-sum (lumped) with regular sums
+ *    - 14   : block row-sum (lumped) with absolute-value sums
  *    - else : classical modified interpolation
  *
  * The default is diagonal scaling.

@@ -778,6 +778,7 @@ hypre_MGRBlockRelaxSolveDevice
 hypre_MGRBuildAff
 hypre_MGRBuildBlockJacobiP
 hypre_MGRBuildBlockJacobiWp
+hypre_MGRBuildBlockRowLumpedInterp
 hypre_MGRBuildCoarseOperator
 hypre_MGRBuildInterp
 hypre_MGRBuildInterpApproximateInverse
@@ -792,6 +793,7 @@ hypre_MGRBuildPHost
 hypre_MGRBuildRFromWr
 hypre_MGRBuildRFromWrHost
 hypre_MGRBuildRestrict
+hypre_MGRBuildRowLumpedInterp
 hypre_MGRCoarseParms
 hypre_MGRCoarsen
 hypre_MGRColLumpedRestrict

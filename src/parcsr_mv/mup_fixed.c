@@ -648,6 +648,14 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, HYPRE_Int use_abs, hypre_DenseBlockMatrix **B_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixBlockRowSum)( A, row_major, num_rows_block, num_cols_block, use_abs, B_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data )
 {
@@ -1164,6 +1172,14 @@ HYPRE_Int
 hypre_ParCSRMatrixSetPatternOnly( hypre_ParCSRMatrix *matrix, HYPRE_Int pattern_only )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSetPatternOnly)( matrix, pattern_only );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixSortColMapOffd( hypre_ParCSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSortColMapOffd)( A );
 }
 
 /*--------------------------------------------------------------------------*/
