@@ -515,7 +515,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* Setup for global block smoothers*/
    if (set_c_points_method == 0)
    {
-      if (my_id == num_procs)
+      if (my_id == (num_procs - 1))
       {
          mgr_data -> n_block   = (n - reserved_coarse_size) / block_size;
          mgr_data -> left_size = n - block_size * (mgr_data -> n_block);
@@ -887,7 +887,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if (aff_solver[j])
          {
-            if ((mgr_data -> Frelax_type)[i] == 29)
+            if ((mgr_data -> Frelax_type)[j] == 29)
             {
                hypre_MGRDirectSolverDestroy(aff_solver[j]);
             }
