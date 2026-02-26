@@ -295,6 +295,7 @@ hypre_ILUGetName(void *ilu_vdata)
       case 40: return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0"  : "ddPQ-GMRES-ILUK";
       case 41: return "ddPQ-GMRES-ILUT";
       case 50: return "RAP-modILU0";
+      case 60: return "BJ-ILU0_LS";
       default: return "Unknown";
    }
 }

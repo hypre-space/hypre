@@ -49,5 +49,5 @@ mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > ilu.out.324
 mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > ilu.out.325
 
 ## TODO: organize
-# new ILU & DILU tests
-mpirun -np 1  ./ij -solver 80 -ilu_type 60 -ilu_lfil 0 > ilu.out.326
+# new ILU test (GPU)
+mpirun -np 1  ./ij -solver 80 -ilu_type 60 -ilu_lfil 0 -exec_device -memory_device > ilu.out.326

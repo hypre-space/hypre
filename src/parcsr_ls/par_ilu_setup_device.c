@@ -129,26 +129,103 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    }
 #endif
 
-   // If we are using the new ILU0 level-set based implementation
+   /* If we are using the level-set based ILU implementations */
    if (ilu_type == 60)
    {
-      // We need to create a partitioning of the rows in level sets based on matrix structure
-      // Not assuming symmetric structure we partition once for lower and one for upper solves
+      /* We need to create a partitioning of the rows in level sets based on matrix structure
+         Not assuming symmetric structure we partition once for lower and one for upper solves */
 
-      // Right now I guess the matrix resides on the device, but coloring is faster on the CPU
-      // So first we copy it down to the host, and then we traverse it serially.
-      hypre_CSRMatrixMigrate(A_diag, HYPRE_MEMORY_HOST); // can this function be used like this?
-      if (A_diag)
+      /* For now we only do lower triangular part, which is the correct for symmetric non-zero matrix structure */
+
+      hypre_CSRMatrix *A_diag_d = hypre_ParCSRMatrixDiag(A);
+      /* Will the copy call only copying the structure avoid the allocation for the data or just the transfer of the data? */
+      hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag_d, /*only copy structure*/ 0, HYPRE_MEMORY_HOST);
+
+      /* Traverse matrix structure to verify index operations */
+      HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag_h);
+      HYPRE_Int *A_i = hypre_CSRMatrixI(A_diag_h);
+      HYPRE_Int *A_j = hypre_CSRMatrixJ(A_diag_h);
+
+      /* Compute level sets for the lower triangular part of the matrix */
+      /* Each row starts in level set 0, then is assigned to max(level[dep]) + 1 */
+      HYPRE_Int *row_level = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+
+      HYPRE_Int num_levels = 1;
+      /* Compute row_level which maps every row to a level-set */
+      for (HYPRE_Int row_idx = 0; row_idx < num_rows; row_idx++)
       {
-         HYPRE_Int     nnz  = hypre_CSRMatrixNumNonzeros(A_diag);
-         HYPRE_Int    *rowi = hypre_CSRMatrixI(A_diag);
-         HYPRE_Int    *colj = hypre_CSRMatrixJ(A_diag);
-         HYPRE_Real   *vals = hypre_CSRMatrixData(A_diag);
-         assert(false);
+         for (HYPRE_Int j = A_i[row_idx]; j < A_i[row_idx + 1]; j++)
+         {
+            HYPRE_Int col_idx = A_j[j];
+            /* For now we only handle the lower triangular solve dependencies */
+            if (col_idx < row_idx)
+            {
+               if (row_level[col_idx] + 1 > row_level[row_idx])
+               {
+                  row_level[row_idx] = row_level[col_idx] + 1;
+
+                  /* Keep track of the amount of level sets */
+                  if (row_level[row_idx] + 1 > num_levels)
+                  {
+                     num_levels = row_level[row_idx] + 1;
+                  }
+               }
+            } // TODO: if handling upper/lower colors separately then skip traversel of upper triangular elements
+         }
       }
-      else{
-         assert(false);
+
+      /* Count the number of rows in each level set */
+      low_set_sizes = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+      for (HYPRE_Int row_idx = 0; row_idx < num_rows; row_idx++)
+      {
+         low_set_sizes[row_level[row_idx]]++;
       }
+
+      /* Compute offsets for each level set, this is just a prefix sum of level set sizes*/
+      low_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels + 1, HYPRE_MEMORY_HOST);
+      low_set_offsets[0] = 0;
+      for (HYPRE_Int i = 0; i < num_levels; i++)
+      {
+         low_set_offsets[i + 1] = low_set_offsets[i] + low_set_sizes[i];
+      }
+
+      /* Fill in the row indices grouped by level set */
+      HYPRE_Int *lower_level_set = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+
+      /* Fill level sets in correct places by starting at offsets and incrementing from there*/
+      HYPRE_Int *fill_pos = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+
+      for (HYPRE_Int i = 0; i < num_levels; i++)
+      {
+         fill_pos[i] = low_set_offsets[i];
+      }
+      for (HYPRE_Int i = 0; i < num_rows; i++)
+      {
+         HYPRE_Int lvl = row_level[i];
+         lower_level_set[fill_pos[lvl]++] = i;
+      }
+
+      /* Temporary to validate reasonable results. */
+      FILE *fp = fopen("level_sets.txt", "w");
+      if (fp)
+      {
+         fprintf(fp, "Number of levels: %d\n", num_levels);
+         for (HYPRE_Int i = 0; i < num_levels; i++)
+         {
+            fprintf(fp, "Level %d (size %d): ", i, low_set_sizes[i]);
+            for (HYPRE_Int j = low_set_offsets[i]; j < low_set_offsets[i + 1]; j++)
+            {
+               fprintf(fp, "%d ", lower_level_set[j]);
+            }
+            fprintf(fp, "\n");
+         }
+         fclose(fp);
+      }
+
+      // TODO: host-device communication
+      // TODO: free unneeded memory
+
+      hypre_CSRMatrixDestroy(A_diag_h);
    }
 
    /* Build the inverse permutation arrays */
