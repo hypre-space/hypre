@@ -129,7 +129,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    }
 #endif
 
-/* TODO: move level set computation to something like `hypre_CSRMatrixComputeLevelSet` in `seq_mv` */
+   /* TODO: move level set computation to something like `hypre_CSRMatrixComputeLevelSet` in `seq_mv` */
    if (ilu_type == 60)
    {
       /* We need to create a partitioning of the rows in level sets based on matrix structure
@@ -139,7 +139,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
 
       hypre_CSRMatrix *A_diag_d = hypre_ParCSRMatrixDiag(A);
       /* Will the copy call only copying the structure avoid the allocation for the data or just the transfer of the data? */
-      hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag_d, /*only copy structure*/ 0, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag_d, /*only copy structure*/ 0,
+                                                          HYPRE_MEMORY_HOST);
 
       /* Traverse matrix structure to verify index operations */
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag_h);
@@ -205,8 +206,6 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       }
 
       /* Temporary to validate reasonable results. */
-
-#if defined ILU_DEBUG	
       FILE *fp = fopen("level_sets.txt", "w");
       if (fp)
       {
@@ -222,7 +221,6 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          }
          fclose(fp);
       }
- #endif
 
       // TODO: host-device communication
       // TODO: free unneeded memory

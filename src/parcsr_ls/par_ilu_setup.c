@@ -442,7 +442,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                   &matmL, &matmD, &matmU, &u_end);
          }
          break;
-      
+
       case 60: /* BJ + level-set device_ilu0 */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
