@@ -650,9 +650,9 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    if (threshold > 0.0)
    {
 #if defined (HYPRE_USING_GPU)
-      HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(RAP);
+      HYPRE_MemoryLocation rap_memory_location = hypre_ParCSRMatrixMemoryLocation(RAP);
 
-      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      if (hypre_GetExecPolicy1(rap_memory_location) == HYPRE_EXEC_DEVICE)
       {
          hypre_ParCSRMatrixDropSmallEntriesDevice(RAP, threshold, -1);
          rebuild_commpkg = 1;

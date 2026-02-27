@@ -570,9 +570,9 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   /* bj setup */
   else {
     HYPRE_Int *o2n = s->o2n_col, *n2o = s->n2o_row;
-    HYPRE_Int i, m = s->m;
+    HYPRE_Int i;
 
-    for (i=0; i<m; ++i) {
+    for (i=0; i<s->m; ++i) {
       o2n[i] = i;
       n2o[i] = i;
     }

@@ -614,7 +614,6 @@ hypre_BoomerAMGDestroy( void *data )
       }
       if (grid_relax_type)
       {
-         HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
          if (grid_relax_type[1] == 15 || grid_relax_type[3] == 15 )
          {
             if (grid_relax_type[1] == 15)
