@@ -129,7 +129,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    }
 #endif
 
-   /* If we are using the level-set based ILU implementations */
+/* TODO: move level set computation to something like `hypre_CSRMatrixComputeLevelSet` in `seq_mv` */
    if (ilu_type == 60)
    {
       /* We need to create a partitioning of the rows in level sets based on matrix structure
