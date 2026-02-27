@@ -183,7 +183,6 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
 
       /* Compute offsets for each level set, this is just a prefix sum of level set sizes*/
       low_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels + 1, HYPRE_MEMORY_HOST);
-      low_set_offsets[0] = 0;
       for (HYPRE_Int i = 0; i < num_levels; i++)
       {
          low_set_offsets[i + 1] = low_set_offsets[i] + low_set_sizes[i];
