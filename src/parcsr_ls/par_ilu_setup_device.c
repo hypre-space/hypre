@@ -206,6 +206,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       }
 
       /* Temporary to validate reasonable results. */
+
+#if defined ILU_DEBUG	
       FILE *fp = fopen("level_sets.txt", "w");
       if (fp)
       {
@@ -221,6 +223,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          }
          fclose(fp);
       }
+ #endif
 
       // TODO: host-device communication
       // TODO: free unneeded memory
