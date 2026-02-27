@@ -139,9 +139,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       /* Will the copy call only copying the structure avoid the allocation for the data or just the transfer of the data? */
       hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag_d, /*only copy structure*/ 0,
                                                           HYPRE_MEMORY_HOST);
-
-      hypre_CSRMatrixComputeLevelSetHost(A_diag_h, low_set_offsets, low_level_sets,
-                                         upp_set_offsets, upp_level_sets);
+      hypre_CSRMatrixComputeLevelSetsHost(A_diag_h, low_set_offsets, low_level_sets,
+                                          upp_set_offsets, upp_level_sets);
 
       // TODO: host-device communication
       // TODO: free unneeded memory

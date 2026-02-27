@@ -354,6 +354,12 @@ HYPRE_Int hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A, HYPRE_Complex va
 HYPRE_Int hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
 HYPRE_Int hypre_CSRMatrixTaggedFnorm( hypre_CSRMatrix *A, HYPRE_Int num_tags, HYPRE_Int *tags,
                                       HYPRE_Real **tnorms_ptr );
+HYPRE_Int
+hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
+                                    HYPRE_Int       *low_set_offsets,
+                                    HYPRE_Int       *low_level_sets,
+                                    HYPRE_Int       *upp_set_offsets,
+                                    HYPRE_Int       *upp_level_sets);
 
 /* csr_matop_device.c */
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix *A,
