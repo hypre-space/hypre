@@ -162,6 +162,7 @@
 #undef hypre_SStructMatrixRAP
 #undef hypre_SStructMatrixRTtAP
 #undef hypre_SStructMatrixRef
+#undef hypre_SStructMatrixScale
 #undef hypre_SStructMatrixSetBoxValues
 #undef hypre_SStructMatrixSetInterPartValues
 #undef hypre_SStructMatrixSetValues

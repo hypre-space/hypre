@@ -406,6 +406,7 @@
 #define hypre_StructMatrixRef HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixRef )
 #define hypre_StructMatrixResize HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixResize )
 #define hypre_StructMatrixRestore HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixRestore )
+#define hypre_StructMatrixScale HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixScale )
 #define hypre_StructMatrixSetBoxValues HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetBoxValues )
 #define hypre_StructMatrixSetConstantEntries HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetConstantEntries )
 #define hypre_StructMatrixSetConstantValues HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetConstantValues )
