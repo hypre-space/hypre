@@ -158,3 +158,44 @@ hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrixScale
+ *
+ * Scales SStruct matrix: A = scalar * A.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixScale( hypre_SStructMatrix  *A,
+                          HYPRE_Complex         scalar)
+{
+   HYPRE_Int                part, vi, vj, nvars;
+
+   hypre_SStructPMatrix    *pmatrix;
+   hypre_StructMatrix      *smatrix;
+
+   hypre_SStructGraph      *graph  = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid       *grid   = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                nparts = hypre_SStructGridNParts(grid);
+
+   /* Scale the struct matrices */
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(A, part);
+      nvars   = hypre_SStructPMatrixNVars(pmatrix);
+
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+            hypre_StructMatrixScale(smatrix, scalar);
+         }
+      }
+   }
+
+   /* Scale the parcsr matrix */
+   hypre_ParCSRMatrixScale(hypre_SStructMatrixParCSRMatrix(A), scalar);
+
+   return hypre_error_flag;
+}

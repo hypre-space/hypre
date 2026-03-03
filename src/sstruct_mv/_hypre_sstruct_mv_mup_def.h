@@ -165,6 +165,7 @@
 #define hypre_SStructMatrixRAP HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRAP )
 #define hypre_SStructMatrixRTtAP HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRTtAP )
 #define hypre_SStructMatrixRef HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRef )
+#define hypre_SStructMatrixScale HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixScale )
 #define hypre_SStructMatrixSetBoxValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSetBoxValues )
 #define hypre_SStructMatrixSetInterPartValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSetInterPartValues )
 #define hypre_SStructMatrixSetValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSetValues )

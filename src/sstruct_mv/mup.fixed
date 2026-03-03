@@ -57,6 +57,7 @@ hypre_SStructMatrixPtAP
 hypre_SStructMatrixRAP
 hypre_SStructMatrixRTtAP
 hypre_SStructMatrixRef
+hypre_SStructMatrixScale
 hypre_SStructMatrixSetBoxValues
 hypre_SStructMatrixSetInterPartValues
 hypre_SStructMatrixSetValues
