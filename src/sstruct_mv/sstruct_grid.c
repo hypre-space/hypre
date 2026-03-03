@@ -2463,7 +2463,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
       bbox_imin = hypre_BoxIMin(bounding_box);
       for (d = 0; d < ndim; d++)
       {
-         O[d] = (HYPRE_Real) -bbox_imin[d];
+         O[d] = (HYPRE_Real) - bbox_imin[d];
       }
 
       for (part = 1; part < nparts; part++)
@@ -2484,7 +2484,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          O[part * ndim] = (HYPRE_Real) (total_bbox_size_x - bbox_imin[0]);
          for (d = 1; d < ndim; d++)
          {
-            O[part * ndim + d] = (HYPRE_Real) -bbox_imin[d];
+            O[part * ndim + d] = (HYPRE_Real) - bbox_imin[d];
          }
       }
 
