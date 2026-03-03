@@ -55,6 +55,7 @@
 #undef hypre_CSRMatrixClone_v2
 #undef hypre_CSRMatrixComputeColSum
 #undef hypre_CSRMatrixComputeColSumHost
+#undef hypre_CSRMatrixComputeLevelSetsHost
 #undef hypre_CSRMatrixComputeRowSum
 #undef hypre_CSRMatrixComputeRowSumHost
 #undef hypre_CSRMatrixCopy

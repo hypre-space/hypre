@@ -94,6 +94,12 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    HYPRE_Real              *parD                = NULL;
    HYPRE_Int               *uend                = NULL;
 
+   /* level-set datastructures */
+   HYPRE_Int              *low_set_offsets      = NULL;
+   HYPRE_Int              *low_level_sets       = NULL;
+   HYPRE_Int              *upp_set_offsets      = NULL;
+   HYPRE_Int              *upp_level_sets       = NULL;
+
    /* Local variables */
    HYPRE_BigInt            *send_buf            = NULL;
    hypre_ParCSRCommPkg     *comm_pkg;
@@ -121,6 +127,43 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       return hypre_error_flag;
    }
 #endif
+
+   /* TODO: move level set computation to something like `hypre_CSRMatrixComputeLevelSet` in `seq_mv` */
+   if (ilu_type == 60)
+   {
+      /* We need to create a partitioning of the rows in level sets based on matrix structure
+         Not assuming symmetric structure we partition once for lower and one for upper solves */
+
+      hypre_CSRMatrix *A_diag_d = hypre_ParCSRMatrixDiag(A);
+      /* Will the copy call only copying the structure avoid the allocation for the data or just the transfer of the data? */
+      hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag_d, /*only copy structure*/ 0,
+                                                          HYPRE_MEMORY_HOST);
+
+      HYPRE_Int *h_low_set_offsets = NULL;
+      HYPRE_Int *h_low_level_sets = NULL;
+      HYPRE_Int *h_upp_set_offsets = NULL;
+      HYPRE_Int *h_upp_level_sets = NULL;
+
+      hypre_CSRMatrixComputeLevelSetsHost(A_diag_h, h_low_set_offsets, h_low_level_sets,
+                                          h_upp_set_offsets, h_upp_level_sets);
+
+      /* Allocate device memory and copy level set data */
+      HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag_h);
+      low_level_sets = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+      upp_level_sets = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+
+      hypre_TMemcpy(low_level_sets, h_low_level_sets, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(upp_level_sets, h_upp_level_sets, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(h_low_set_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_low_level_sets, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_upp_set_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_upp_level_sets, HYPRE_MEMORY_HOST);
+
+      hypre_CSRMatrixDestroy(A_diag_h);
+   }
 
    /* Build the inverse permutation arrays */
    if (perm_data && qperm_data)

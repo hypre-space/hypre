@@ -266,7 +266,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1:
+         case 0: case 1: case 60:
          default:
             /* RCM or none */
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
@@ -443,6 +443,21 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
          break;
 
+      case 60: /* BJ + level-set device_ilu0 */
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, n,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
+         }
+         else
+#endif
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Level-set based ILU0 setup on host is not supported!");
+            return hypre_error_flag;
+         }
+         break;
+
       default: /* BJ + device_ilu0() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
@@ -471,7 +486,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* setup Schur solver - TODO (VPM): merge host and device paths below */
    switch (ilu_type)
    {
-      case 0: case 1:
+      case 0: case 1: case 60:
       default:
          break;
 
@@ -1080,7 +1095,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int nnzBEF = 0;
    HYPRE_Int nnzG; /* Global nnz */
 
-   if (ilu_type == 0 && fill_level == 0)
+   if ((ilu_type == 0 || ilu_type == 60) && fill_level == 0)
    {
       /* The nnz is for sure 1.0 in this case */
       hypre_ParILUDataOperatorComplexity(ilu_data) =  1.0;
@@ -1967,7 +1982,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
          break;
       }
 
-      case 0:
+      case 0: case 60:
       default:
       {
          /* RAP where we save EU^{-1}, L^{-1}F as sparse matrices */

@@ -10,6 +10,7 @@ hypre_CSRMatrixClone
 hypre_CSRMatrixClone_v2
 hypre_CSRMatrixComputeColSum
 hypre_CSRMatrixComputeColSumHost
+hypre_CSRMatrixComputeLevelSetsHost
 hypre_CSRMatrixComputeRowSum
 hypre_CSRMatrixComputeRowSumHost
 hypre_CSRMatrixCopy
