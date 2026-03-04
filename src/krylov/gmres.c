@@ -220,42 +220,55 @@ hypre_GMRESSetup( void *gmres_vdata,
     * ecompute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   if ((gmres_data -> p) == NULL)
+   if ( (gmres_data -> p) != NULL )
    {
-      (gmres_data -> p) = (void**)(*(gmres_functions->CreateVectorArray))(k_dim + 1, x);
+      for (HYPRE_Int i = 0; i < (gmres_data -> k_dim + 1); i++)
+      {
+         if ( (gmres_data -> p)[i] != NULL )
+         {
+            (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
+         }
+      }
+      hypre_TFreeF( gmres_data->p, gmres_functions );
    }
+   (gmres_data -> p) = (void**)(*(gmres_functions->CreateVectorArray))(k_dim + 1, x);
 
-   if ((gmres_data -> r) == NULL)
+   if ( gmres_data -> r != NULL )
    {
-      (gmres_data -> r) = (*(gmres_functions->CreateVector))(b);
+      (*(gmres_functions->DestroyVector))(gmres_data -> r);
    }
+   (gmres_data -> r) = (*(gmres_functions->CreateVector))(b);
 
-   if ((gmres_data -> w) == NULL)
+   if ( gmres_data -> w != NULL )
    {
-      (gmres_data -> w) = (*(gmres_functions->CreateVector))(b);
+      (*(gmres_functions->DestroyVector))(gmres_data -> w);
    }
+   (gmres_data -> w) = (*(gmres_functions->CreateVector))(b);
 
    if (rel_change)
    {
-      if ((gmres_data -> w_2) == NULL)
+      if ( gmres_data -> w_2 != NULL )
       {
-         (gmres_data -> w_2) = (*(gmres_functions->CreateVector))(b);
+         (*(gmres_functions->DestroyVector))(gmres_data -> w_2);
       }
+      (gmres_data -> w_2) = (*(gmres_functions->CreateVector))(b);
    }
 
    /* Additional work vector for computing individual function (DOF) residuals */
    if ((gmres_data -> print_level) > 2 || (gmres_data -> xref))
    {
-      if ((gmres_data -> w_3) == NULL)
+      if ( gmres_data -> w_3 != NULL )
       {
-         (gmres_data -> w_3) = (*(gmres_functions->CreateVector))(b);
+         (*(gmres_functions->DestroyVector))(gmres_data -> w_3);
       }
+      (gmres_data -> w_3) = (*(gmres_functions->CreateVector))(b);
    }
 
-   if ((gmres_data -> matvec_data) == NULL)
+   if ((gmres_data -> matvec_data) != NULL)
    {
-      (gmres_data -> matvec_data) = (*(gmres_functions->MatvecCreate))(A, x);
+      (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
    }
+   (gmres_data -> matvec_data) = (*(gmres_functions->MatvecCreate))(A, x);
 
    precond_setup(precond_data, precond_Mat, b, x);
 
