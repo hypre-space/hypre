@@ -1511,7 +1511,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *dval_box;
    hypre_Index          dval_start;
    hypre_Index          dval_stride;
-   HYPRE_Int            dvali;
+   HYPRE_Int            dvali_outer;
 
    hypre_Index          loop_size;
    HYPRE_Int            i, j, s, istart, istop;
@@ -1585,15 +1585,15 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                         Should use SetConstantValues instead. */
                if (constant[j])
                {
-                  dvali = hypre_BoxIndexRank(dval_box, dval_start);
+                  dvali_outer = hypre_BoxIndexRank(dval_box, dval_start);
 
                   if (action > 0)
                   {
-                     *datap += values[dvali];
+                     *datap += values[dvali_outer];
                   }
                   else if (action > -1)
                   {
-                     *datap = values[dvali];
+                     *datap = values[dvali_outer];
                   }
                   else
                   {
