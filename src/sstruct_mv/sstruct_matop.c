@@ -160,6 +160,36 @@ hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructPMatrixScale
+ *
+ * Scales SStructP matrix: pA = scalar * pA.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixScale( hypre_SStructPMatrix  *pA,
+                           HYPRE_Complex          scalar)
+{
+   HYPRE_Int nvars = hypre_SStructPMatrixNVars(pA);
+   HYPRE_Int vi, vj;
+
+   hypre_StructMatrix *sA;
+
+   for (vi = 0; vi < nvars; vi++)
+   {
+      for (vj = 0; vj < nvars; vj++)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
+         if (sA)
+         {
+            hypre_StructMatrixScale(sA, scalar);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SStructMatrixScale
  *
  * Scales SStruct matrix: A = scalar * A.
@@ -169,33 +199,22 @@ HYPRE_Int
 hypre_SStructMatrixScale( hypre_SStructMatrix  *A,
                           HYPRE_Complex         scalar)
 {
-   HYPRE_Int                part, vi, vj, nvars;
+   HYPRE_Int  object_type = hypre_SStructMatrixObjectType(A);
+   HYPRE_Int  nparts      = hypre_SStructMatrixNParts(A);
+   HYPRE_Int  part;
 
-   hypre_SStructPMatrix    *pmatrix;
-   hypre_StructMatrix      *smatrix;
-
-   hypre_SStructGraph      *graph  = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid       *grid   = hypre_SStructGraphGrid(graph);
-   HYPRE_Int                nparts = hypre_SStructGridNParts(grid);
-
-   /* Scale the struct matrices */
-   for (part = 0; part < nparts; part++)
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_STRUCT)
    {
-      pmatrix = hypre_SStructMatrixPMatrix(A, part);
-      nvars   = hypre_SStructPMatrixNVars(pmatrix);
-
-      for (vi = 0; vi < nvars; vi++)
+      for (part = 0; part < nparts; part++)
       {
-         for (vj = 0; vj < nvars; vj++)
-         {
-            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
-            hypre_StructMatrixScale(smatrix, scalar);
-         }
+         hypre_SStructPMatrixScale(hypre_SStructMatrixPMatrix(A, part), scalar);
       }
    }
 
-   /* Scale the parcsr matrix */
-   hypre_ParCSRMatrixScale(hypre_SStructMatrixParCSRMatrix(A), scalar);
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_PARCSR)
+   {
+      hypre_ParCSRMatrixScale(hypre_SStructMatrixParCSRMatrix(A), scalar);
+   }
 
    return hypre_error_flag;
 }

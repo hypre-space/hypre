@@ -796,6 +796,9 @@ HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                           HYPRE_StructGrid   *grid);
 HYPRE_Int
 HYPRE_StructMatrixClearBoundary(HYPRE_StructMatrix matrix);
+HYPRE_Int
+HYPRE_StructMatrixScale(HYPRE_StructMatrix  matrix,
+                        HYPRE_Complex       scalar);
 
 struct hypre_CommPkg_struct;
 typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;

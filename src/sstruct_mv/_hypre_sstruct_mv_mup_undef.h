@@ -59,6 +59,7 @@
 #undef HYPRE_SStructMatrixMatvec
 #undef HYPRE_SStructMatrixPrint
 #undef HYPRE_SStructMatrixRead
+#undef HYPRE_SStructMatrixScale
 #undef HYPRE_SStructMatrixSetBoxValues
 #undef HYPRE_SStructMatrixSetBoxValues2
 #undef HYPRE_SStructMatrixSetConstantEntries
@@ -210,6 +211,7 @@
 #undef hypre_SStructPMatrixRAP
 #undef hypre_SStructPMatrixRTtAP
 #undef hypre_SStructPMatrixRef
+#undef hypre_SStructPMatrixScale
 #undef hypre_SStructPMatrixSetBoxValues
 #undef hypre_SStructPMatrixSetCEntries
 #undef hypre_SStructPMatrixSetDomainStride

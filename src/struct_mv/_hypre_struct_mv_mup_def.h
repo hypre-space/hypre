@@ -43,6 +43,7 @@
 #define HYPRE_StructMatrixMatvecT HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixMatvecT )
 #define HYPRE_StructMatrixPrint HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixPrint )
 #define HYPRE_StructMatrixRead HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixRead )
+#define HYPRE_StructMatrixScale HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixScale )
 #define HYPRE_StructMatrixSetBoxValues HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixSetBoxValues )
 #define HYPRE_StructMatrixSetBoxValues2 HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixSetBoxValues2 )
 #define HYPRE_StructMatrixSetConstantEntries HYPRE_MULTIPRECISION_FUNC ( HYPRE_StructMatrixSetConstantEntries )
