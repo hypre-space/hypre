@@ -770,6 +770,13 @@ HYPRE_Int
 hypre_SStructPMatrixRef_long_dbl( hypre_SStructPMatrix *matrix, hypre_SStructPMatrix **matrix_ref );
 
 HYPRE_Int
+hypre_SStructPMatrixScale_flt( hypre_SStructPMatrix *pA, hypre_float scalar );
+HYPRE_Int
+hypre_SStructPMatrixScale_dbl( hypre_SStructPMatrix *pA, hypre_double scalar );
+HYPRE_Int
+hypre_SStructPMatrixScale_long_dbl( hypre_SStructPMatrix *pA, hypre_long_double scalar );
+
+HYPRE_Int
 hypre_SStructPMatrixSetBoxValues_flt( hypre_SStructPMatrix *pmatrix, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, hypre_float *values, HYPRE_Int action );
 HYPRE_Int
 hypre_SStructPMatrixSetBoxValues_dbl( hypre_SStructPMatrix *pmatrix, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, hypre_double *values, HYPRE_Int action );

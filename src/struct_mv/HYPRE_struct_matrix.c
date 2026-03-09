@@ -517,3 +517,13 @@ HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
    return ( hypre_StructMatrixClearBoundary(matrix) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixScale( HYPRE_StructMatrix  matrix,
+                         HYPRE_Complex       scalar )
+{
+   return hypre_StructMatrixScale((hypre_StructMatrix *) matrix, scalar);
+}
