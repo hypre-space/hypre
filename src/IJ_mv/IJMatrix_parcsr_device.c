@@ -15,6 +15,12 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300200)
+#define HYPRE_THRUST_MAKE_REVERSE_ITERATOR thrust::make_reverse_iterator
+#else
+#define HYPRE_THRUST_MAKE_REVERSE_ITERATOR ::cuda::std::make_reverse_iterator
+#endif
+
 #if defined(HYPRE_USING_GPU)
 
 __global__ void
@@ -394,10 +400,10 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
-      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) + N0),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X) + N0),
       char(0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
@@ -582,10 +588,10 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
-      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) + N0),
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) + N0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 

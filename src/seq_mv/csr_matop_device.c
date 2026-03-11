@@ -16,6 +16,12 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300200)
+#define HYPRE_THRUST_PAIR thrust::pair
+#else
+#define HYPRE_THRUST_PAIR ::cuda::std::pair
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE)  ||\
     defined(HYPRE_USING_ROCSPARSE) ||\
     defined(HYPRE_USING_ONEMKLSPARSE)
@@ -1211,7 +1217,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
    num_reduced_col_indices = new_end.first - reduced_col_indices;
 #else
-   thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
+   HYPRE_THRUST_PAIR<HYPRE_Int*, HYPRE_Int*> new_end =
       HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,
                         thrust::make_constant_iterator(1),
                         reduced_col_indices,

@@ -15,6 +15,12 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300200)
+#define HYPRE_THRUST_MAKE_REVERSE_ITERATOR thrust::make_reverse_iterator
+#else
+#define HYPRE_THRUST_MAKE_REVERSE_ITERATOR ::cuda::std::make_reverse_iterator
+#endif
+
 #if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------
@@ -110,11 +116,11 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) +
                                     N0),         /* input value begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) +
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X) +
                                     N0),          /* output value begin */
       char(0),                                                                           /* init */
       thrust::equal_to<HYPRE_BigInt>(),
@@ -193,11 +199,11 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) +
                                     N0),         /* input value begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
+      HYPRE_THRUST_MAKE_REVERSE_ITERATOR(thrust::device_pointer_cast<char>(X0) +
                                     N0),         /* output value begin */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );

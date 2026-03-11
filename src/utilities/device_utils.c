@@ -10,6 +10,12 @@
 #include "_hypre_utilities.hpp"
 #include <math.h>
 
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300200)
+#define HYPRE_THRUST_PAIR thrust::pair
+#else
+#define HYPRE_THRUST_PAIR ::cuda::std::pair
+#endif
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      generic device functions (HYPRE_USING_GPU)
  *      NOTE: This includes device openmp for now
@@ -1531,7 +1537,7 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
-      thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_THRUST_CALL( reduce_by_key,
+      HYPRE_THRUST_PAIR<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_THRUST_CALL( reduce_by_key,
                                                                          map2,
                                                                          map2 + ny,
                                                                          y,
