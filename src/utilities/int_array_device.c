@@ -46,7 +46,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    HYPRE_Int  size       = hypre_IntArraySize(v);
 
 #if defined(HYPRE_USING_GPU)
-   hypreDevice_IntFilln( array_data, size, value );
+   hypre_IntFillnDevice( array_data, size, value );
 
    hypre_SyncComputeStream();
 

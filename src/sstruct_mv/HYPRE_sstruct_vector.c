@@ -605,7 +605,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
 #if defined(HYPRE_USING_GPU)
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_ComplexStridedCopy(nelts, fem_nvars, values + i, tvalues);
+         hypre_ComplexStridedCopyDevice(nelts, fem_nvars, values + i, tvalues);
       }
       else
 #endif

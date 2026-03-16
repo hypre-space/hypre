@@ -259,8 +259,8 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                      B_diag_i, B_offd_i );
 
    /* Compute row pointers and get total number of nonzeros */
-   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_diag_i);
-   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_offd_i);
+   hypre_IntegerExclusiveScanDevice(num_rows + 1, B_diag_i);
+   hypre_IntegerExclusiveScanDevice(num_rows + 1, B_offd_i);
    hypre_TMemcpy(&B_diag_nnz, B_diag_i + num_rows, HYPRE_Int, 1,
                  HYPRE_MEMORY_HOST, memory_location);
    hypre_TMemcpy(&B_offd_nnz, B_offd_i + num_rows, HYPRE_Int, 1,
