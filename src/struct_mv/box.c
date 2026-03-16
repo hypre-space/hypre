@@ -1521,6 +1521,7 @@ hypre_AppendBox( hypre_Box      *box,
    size = hypre_BoxArraySize(box_array);
    hypre_BoxArraySetSize(box_array, (size + 1));
    hypre_CopyBox(box, hypre_BoxArrayBox(box_array, size));
+   hypre_BoxArrayID(box_array, size) = size;  // use box rank-1 as the default ID
 
    return hypre_error_flag;
 }

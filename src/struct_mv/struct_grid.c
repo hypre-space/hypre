@@ -39,7 +39,6 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridComm(grid)        = comm;
    hypre_StructGridNDim(grid)        = ndim;
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0, ndim);
-   hypre_StructGridIDs(grid)         = NULL;
 
    hypre_SetIndex(hypre_StructGridMaxDistance(grid), 8);
 
@@ -95,7 +94,6 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
       if (hypre_StructGridRefCount(grid) == 0)
       {
          hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
-         hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructGridBoxes(grid));
 
          hypre_BoxManDestroy(hypre_StructGridBoxMan(grid));
@@ -171,19 +169,6 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructGridSetIDs( hypre_StructGrid *grid,
-                        HYPRE_Int        *ids )
-{
-   hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
-   hypre_StructGridIDs(grid) = ids;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
                                hypre_BoxManager *boxman )
 {
@@ -248,7 +233,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int           *num_ghost    = hypre_StructGridNumGhost(grid);
 
    HYPRE_Int            myid, num_procs;
-   HYPRE_Int           *ids = NULL;
    HYPRE_Int            iperiodic, notcenter;
    HYPRE_Int            is_boxman;
    HYPRE_Int            size, ghost_size;
@@ -294,30 +278,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    else
    {
       is_boxman = 1;
-   }
-
-   /* are the ids known? (these may have been set in coarsen)  - if not we need
-      to set them */
-   if (hypre_StructGridIDs(grid) == NULL)
-   {
-      /* TODO: Move IDs to BoxArray data structure */
-      ids = hypre_CTAlloc(HYPRE_Int, num_local_boxes, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_local_boxes; i++)
-      {
-         ids[i] = i;
-      }
-      hypre_StructGridIDs(grid) = ids;
-
-      hypre_BoxArrayIDs(local_boxes) = hypre_TReAlloc(hypre_BoxArrayIDs(local_boxes), HYPRE_Int,
-                                                      num_local_boxes, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_local_boxes; i++)
-      {
-         hypre_BoxArrayID(local_boxes, i) = i;
-      }
-   }
-   else
-   {
-      ids = hypre_StructGridIDs(grid);
    }
 
    /******** calculate the periodicity information ****************/
