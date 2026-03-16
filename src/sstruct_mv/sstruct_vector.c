@@ -1030,10 +1030,13 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
          }
 
          /* grid function header */
-         hypre_fprintf(file[vartype], "FiniteElementSpace\n");
-         hypre_fprintf(file[vartype], "FiniteElementCollection: %s\n", fe_coll);
-         hypre_fprintf(file[vartype], "VDim: 1\n");
-         hypre_fprintf(file[vartype], "Ordering: 0\n\n");
+         if (part == 0)
+         {
+            hypre_fprintf(file[vartype], "FiniteElementSpace\n");
+            hypre_fprintf(file[vartype], "FiniteElementCollection: %s\n", fe_coll);
+            hypre_fprintf(file[vartype], "VDim: 1\n");
+            hypre_fprintf(file[vartype], "Ordering: 0\n\n");
+         }
 
          grid_boxes  = hypre_StructGridBoxes(sgrid);
          data_space  = hypre_StructVectorDataSpace(svector);
