@@ -268,6 +268,15 @@ HYPRE_StructMatrixRead( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghos
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixScale( HYPRE_StructMatrix matrix, hypre_long_double scalar )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatrixScale_pre( precision, matrix, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

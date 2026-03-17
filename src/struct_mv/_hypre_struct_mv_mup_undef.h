@@ -40,6 +40,7 @@
 #undef HYPRE_StructMatrixMatvecT
 #undef HYPRE_StructMatrixPrint
 #undef HYPRE_StructMatrixRead
+#undef HYPRE_StructMatrixScale
 #undef HYPRE_StructMatrixSetBoxValues
 #undef HYPRE_StructMatrixSetBoxValues2
 #undef HYPRE_StructMatrixSetConstantEntries
@@ -403,6 +404,7 @@
 #undef hypre_StructMatrixRef
 #undef hypre_StructMatrixResize
 #undef hypre_StructMatrixRestore
+#undef hypre_StructMatrixScale
 #undef hypre_StructMatrixSetBoxValues
 #undef hypre_StructMatrixSetConstantEntries
 #undef hypre_StructMatrixSetConstantValues

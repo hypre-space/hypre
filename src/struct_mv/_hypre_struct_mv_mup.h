@@ -2114,6 +2114,13 @@ HYPRE_Int
 hypre_StructMatrixRestore_long_dbl( hypre_StructMatrix *matrix );
 
 HYPRE_Int
+hypre_StructMatrixScale_flt( hypre_StructMatrix *A, hypre_float scalar );
+HYPRE_Int
+hypre_StructMatrixScale_dbl( hypre_StructMatrix *A, hypre_double scalar );
+HYPRE_Int
+hypre_StructMatrixScale_long_dbl( hypre_StructMatrix *A, hypre_long_double scalar );
+
+HYPRE_Int
 hypre_StructMatrixSetBoxValues_flt( hypre_StructMatrix *matrix, hypre_Box *set_box, hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_float *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int
 hypre_StructMatrixSetBoxValues_dbl( hypre_StructMatrix *matrix, hypre_Box *set_box, hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );

@@ -26,6 +26,7 @@ HYPRE_StructMatrixMatvec
 HYPRE_StructMatrixMatvecT
 HYPRE_StructMatrixPrint
 HYPRE_StructMatrixRead
+HYPRE_StructMatrixScale
 HYPRE_StructMatrixSetBoxValues
 HYPRE_StructMatrixSetBoxValues2
 HYPRE_StructMatrixSetConstantEntries
