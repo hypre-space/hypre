@@ -2312,13 +2312,19 @@ PrintUsage( char *progname,
       hypre_printf("  -interp <r>        : SSAMG unstructured interpolation type\n");
       hypre_printf("                       -1 - No unstructured interpolation\n");
       hypre_printf("                        0 - Classical modified interpolation\n");
-      hypre_printf("  -relax <r>         : (S)Struct - relaxation type\n");
+      hypre_printf("  -relax <r>         : (Sys)PFMG - relaxation type\n");
       hypre_printf("                        0 - Jacobi\n");
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       hypre_printf("\n");
-      hypre_printf("                       ParCSR - relaxation type\n");
+      hypre_printf("                       SSAMG - relaxation type\n");
+      hypre_printf("                        0 - Jacobi\n");
+      hypre_printf("                        1 - Weighted Jacobi (default)\n");
+      hypre_printf("                        2 - L1 Jacobi\n");
+      hypre_printf("                       10 - symmetric R/B Gauss-Seidel\n");
+      hypre_printf("\n");
+      hypre_printf("                       BoomerAMG - relaxation type\n");
       hypre_printf("                        0 - Weighted Jacobi\n");
       hypre_printf("                        1 - Gauss-Seidel (very slow!)\n");
       hypre_printf("                        3 - Hybrid Gauss-Seidel\n");
@@ -4776,7 +4782,6 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetRelChange(solver, rel_change);
          HYPRE_SStructSSAMGSetSkipRelax(solver, skip);
          HYPRE_SStructSSAMGSetInterpType(solver, interp_type);
-         /* weighted Jacobi = 1; red-black GS = 2 */
          HYPRE_SStructSSAMGSetRelaxType(solver, relax[0]);
          if (usr_jacobi_weight)
          {
