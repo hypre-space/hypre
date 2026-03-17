@@ -873,6 +873,14 @@ hypre_SStructPMatrixRef( hypre_SStructPMatrix *matrix, hypre_SStructPMatrix **ma
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPMatrixScale( hypre_SStructPMatrix *pA, HYPRE_Complex scalar )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixScale)( pA, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetBoxValues)( pmatrix, set_box, var, nentries, entries, value_box, values, action );

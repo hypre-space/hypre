@@ -105,6 +105,7 @@ hypre_SStructPMatrixPtAP
 hypre_SStructPMatrixRAP
 hypre_SStructPMatrixRTtAP
 hypre_SStructPMatrixRef
+hypre_SStructPMatrixScale
 hypre_SStructPMatrixSetBoxValues
 hypre_SStructPMatrixSetCEntries
 hypre_SStructPMatrixSetDomainStride

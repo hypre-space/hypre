@@ -299,6 +299,7 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA, HYPRE_Int type,
                                               hypre_SStructPVector *prowsum );
+HYPRE_Int hypre_SStructPMatrixScale ( hypre_SStructPMatrix *pA, HYPRE_Complex scalar );
 HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A, HYPRE_Int type,
                                              hypre_SStructVector **rowsum_ptr );
 HYPRE_Int hypre_SStructMatrixComputeL1Norms ( hypre_SStructMatrix *A, HYPRE_Int option,
