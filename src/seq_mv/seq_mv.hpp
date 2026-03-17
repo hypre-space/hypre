@@ -33,13 +33,13 @@ cusparseDnMatDescr_t hypre_VectorToCusparseDnMat_core(HYPRE_Complex *x_data, HYP
 cusparseDnMatDescr_t hypre_VectorToCusparseDnMat(const hypre_Vector *x);
 #endif
 
-HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmCusparseOldAPIDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                               cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                               cusparseMatDescr_t descr_B, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
                                               cusparseMatDescr_t descr_C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                               HYPRE_Complex **d_c_out);
 
-HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmCusparseDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                         cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                         cusparseMatDescr_t descr_B, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
                                         cusparseMatDescr_t descr_C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
@@ -51,7 +51,7 @@ HYPRE_Int hypre_SortCSRCusparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypreDevice_CSRSpGemmRocsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmRocsparseDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                          rocsparse_mat_descr descrA, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                          rocsparse_mat_descr descrB, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
                                          rocsparse_mat_descr descrC, rocsparse_mat_info infoC, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
@@ -63,7 +63,7 @@ HYPRE_Int hypre_SortCSRRocsparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
 #endif
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
-HYPRE_Int hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmOnemklsparseDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                             oneapi::mkl::sparse::matrix_handle_t handle_A,
                                             HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                             oneapi::mkl::sparse::matrix_handle_t handle_B,

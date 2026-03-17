@@ -201,7 +201,7 @@ void hypre_GPUKernelComputeAffAfc( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 HYPRE_Int
-hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
+hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
                         HYPRE_Int      W_nr_of_rows,
                         HYPRE_Int      W_nr_of_cols,
                         HYPRE_Int     *CF_marker,
@@ -235,7 +235,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 
    hypre_Memset(PWoffset + P_nr_of_rows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_IntegerExclusiveScan(P_nr_of_rows + 1, PWoffset);
+   hypre_IntegerExclusiveScanDevice(P_nr_of_rows + 1, PWoffset);
 
    // map F+C to (next) F
    HYPRE_Int *map2F = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
@@ -262,7 +262,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                      W_diag_i,
                      P_diag_i );
 
-   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
+   hypre_IntAxpynDevice( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)
@@ -279,7 +279,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       W_diag_i,
                       P_diag_i );
 
-   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
+   hypre_IntAxpynDevice( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)
@@ -315,7 +315,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    hypre_TFree(PWoffset, HYPRE_MEMORY_DEVICE);
 
    // elements shift
-   HYPRE_Int *shift = hypreDevice_CsrRowPtrsToIndices(W_nr_of_rows, W_diag_nnz, W_diag_i);
+   HYPRE_Int *shift = hypre_CsrRowPtrsToIndicesDevice(W_nr_of_rows, W_diag_nnz, W_diag_i);
 #if defined(HYPRE_USING_SYCL)
    hypreSycl_gather( shift,
                      shift + W_diag_nnz,
@@ -399,7 +399,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       P_diag_j );
 #endif
 
-   hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
+   hypre_ScatterConstantDevice(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
 
    hypre_TFree(PC_i, HYPRE_MEMORY_DEVICE);
 
@@ -926,7 +926,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_extendWtoP( A_nr_of_rows,
+   hypre_extendWtoPDevice( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
                            CF_marker,
@@ -1204,7 +1204,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_extendWtoP( A_nr_of_rows,
+   hypre_extendWtoPDevice( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
                            CF_marker,
@@ -1481,7 +1481,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_extendWtoP( A_nr_of_rows,
+   hypre_extendWtoPDevice( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
                            CF_marker,

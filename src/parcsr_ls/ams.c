@@ -1684,7 +1684,7 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, Pi_diag_I, dim );
+            hypre_IntScalenDevice( G_diag_I, G_diag_nrows + 1, Pi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nnz, "thread", bDim);
@@ -1752,7 +1752,7 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, Pi_offd_I, dim );
+               hypre_IntScalenDevice( G_offd_I, G_offd_nrows + 1, Pi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -2649,7 +2649,7 @@ hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, GPi_diag_I, dim );
+            hypre_IntScalenDevice( G_diag_I, G_diag_nrows + 1, GPi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nnz, "thread", bDim);
@@ -2718,7 +2718,7 @@ hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, GPi_offd_I, dim );
+               hypre_IntScalenDevice( G_offd_I, G_offd_nrows + 1, GPi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();

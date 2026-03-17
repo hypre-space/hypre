@@ -374,10 +374,10 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
-   hypreDevice_CharFilln(stack_sora + stack_elmts_current, num_values, SorA);
+   hypre_CharFillnDevice(stack_sora + stack_elmts_current, num_values, SorA);
    if (num_vectors > 1)
    {
-      hypreDevice_BigIntFilln(stack_voff + stack_elmts_current, num_values,
+      hypre_BigIntFillnDevice(stack_voff + stack_elmts_current, num_values,
                               (HYPRE_BigInt) component * vecstride);
    }
 
@@ -551,7 +551,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* Shift stack_i with multivector component offsets */
       if (num_vectors > 1)
       {
-         hypreDevice_BigIntAxpyn(stack_voff, nelms, stack_i, stack_i, 1);
+         hypre_BigIntAxpynDevice(stack_voff, nelms, stack_i, stack_i, 1);
       }
 
       /* sort and reduce */

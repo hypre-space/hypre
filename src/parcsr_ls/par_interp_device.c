@@ -1058,8 +1058,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    /* scan P_diag_i (which has number of nonzeros in each row) to get row indices */
-   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
+   hypre_IntegerExclusiveScanDevice(n_fine + 1, P_diag_i);
+   hypre_IntegerExclusiveScanDevice(n_fine + 1, P_offd_i);
 
    /* get the number of nonzeros and allocate column index and data arrays */
    hypre_TMemcpy(&nnz_diag, &P_diag_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -1073,8 +1073,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_offd_data = hypre_TAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
 
    /* set data values to 1.0 */
-   hypreDevice_ComplexFilln( P_diag_data, nnz_diag, 1.0 );
-   hypreDevice_ComplexFilln( P_offd_data, nnz_offd, 1.0 );
+   hypre_ComplexFillnDevice( P_diag_data, nnz_diag, 1.0 );
+   hypre_ComplexFillnDevice( P_offd_data, nnz_offd, 1.0 );
 
    /* compress temporary column indices */
    P_diag_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
@@ -1166,7 +1166,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    /* also get an inverse mapping from A offd indices to P offd indices */
    /* offd_map_A_to_P[ A offd idx ] = -1 if not a P idx, else P offd idx */
    HYPRE_Int *offd_map_A_to_P = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-   hypreDevice_IntFilln( offd_map_A_to_P, num_cols_A_offd, -1 );
+   hypre_IntFillnDevice( offd_map_A_to_P, num_cols_A_offd, -1 );
 
 #if defined(HYPRE_USING_SYCL)
    hypreSycl_scatter( count,
@@ -1446,8 +1446,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_Memset(P_diag_i + n_fine, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
    hypre_Memset(P_offd_i + n_fine, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
+   hypre_IntegerExclusiveScanDevice(n_fine + 1, P_diag_i);
+   hypre_IntegerExclusiveScanDevice(n_fine + 1, P_offd_i);
 
    fine_to_coarse_d = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a

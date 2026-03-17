@@ -27,7 +27,7 @@
  *
  * Template parameters:
  *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
- *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   2) F:  fill-mode. See hypre_CSRMatrixMatvecDevice for supported values
  *   3) NV: number of vectors (> 1 for multi-component vectors)
  *   4) T:  data type of matrix/vector coefficients
  *--------------------------------------------------------------------------*/
@@ -141,7 +141,7 @@ hypre_GPUKernelCSRMatvecShuffleGT8(hypre_DeviceItem &item,
  *
  * Template parameters:
  *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
- *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   2) F:  fill-mode. See hypre_CSRMatrixMatvecDevice for supported values
  *   3) NV: number of vectors (> 1 for multi-component vectors)
  *   4) T:  data type of matrix/vector coefficients
  *--------------------------------------------------------------------------*/
@@ -262,7 +262,7 @@ hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_CSRMatrixMatvec
+ * hypre_CSRMatrixMatvecDevice
  *
  * Templated host function for launching the device kernels for SpMV.
  *
@@ -277,7 +277,7 @@ hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
 
 template <HYPRE_Int F, typename T>
 HYPRE_Int
-hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
+hypre_CSRMatrixMatvecDevice( HYPRE_Int  num_vectors,
                              HYPRE_Int  num_rows,
                              HYPRE_Int *rowid,
                              HYPRE_Int  num_nonzeros,
@@ -451,7 +451,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    {
       case HYPRE_SPMV_FILL_STRICT_LOWER:
          /* Strict lower matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_LOWER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_STRICT_LOWER>(num_vectors_x,
                                                                    num_rows,
                                                                    d_rownnz_A,
                                                                    num_nonzeros,
@@ -470,7 +470,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_LOWER:
          /* Lower matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_LOWER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_LOWER>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -489,7 +489,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_WHOLE:
          /* Full matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_WHOLE>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -508,7 +508,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_UPPER:
          /* Upper matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_UPPER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_UPPER>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -527,7 +527,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_STRICT_UPPER:
          /* Strict upper matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_UPPER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_STRICT_UPPER>(num_vectors_x,
                                                                    num_rows,
                                                                    d_rownnz_A,
                                                                    num_nonzeros,
@@ -585,7 +585,7 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
    HYPRE_Int        vecstride_y = 1;
    HYPRE_Int       *d_rownnz    = NULL;
 
-   hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE, HYPRE_Int>(num_vectors,
+   hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_WHOLE, HYPRE_Int>(num_vectors,
                                                                  num_rows,
                                                                  d_rownnz,
                                                                  num_nonzeros,

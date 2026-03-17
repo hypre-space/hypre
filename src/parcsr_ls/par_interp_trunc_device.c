@@ -455,8 +455,8 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    hypre_Memset(&P_diag_i_new[nrows], 0, sizeof(HYPRE_Int), memory_location);
    hypre_Memset(&P_offd_i_new[nrows], 0, sizeof(HYPRE_Int), memory_location);
 
-   hypreDevice_IntegerExclusiveScan(nrows + 1, P_diag_i_new);
-   hypreDevice_IntegerExclusiveScan(nrows + 1, P_offd_i_new);
+   hypre_IntegerExclusiveScanDevice(nrows + 1, P_diag_i_new);
+   hypre_IntegerExclusiveScanDevice(nrows + 1, P_offd_i_new);
 
    HYPRE_Int nnz_diag, nnz_offd;
 
@@ -619,8 +619,8 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(P);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz_diag, P_diag_i, P_i);
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz_offd, P_offd_i, P_i + nnz_diag);
+   hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnz_diag, P_diag_i, P_i);
+   hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnz_offd, P_offd_i, P_i + nnz_diag);
 
    hypre_TMemcpy(P_j, P_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* offd col id := -2 - offd col id */
@@ -637,9 +637,9 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
                  HYPRE_MEMORY_DEVICE);
 
    /* sort rows based on (rowind, abs(P_a)) */
-   hypreDevice_StableSortByTupleKey(nnz_P, P_i, P_a, P_j, 1);
+   hypre_StableSortByTupleKeyDevice(nnz_P, P_i, P_a, P_j, 1);
 
-   hypreDevice_CsrRowIndicesToPtrs_v2(nrows, nnz_P, P_i, P_rowptr);
+   hypre_CsrRowIndicesToPtrsDevice_v2(nrows, nnz_P, P_i, P_rowptr);
 
    /* truncate P, unwanted entries are marked -1 in P_j */
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -671,7 +671,7 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
 
       hypre_assert(new_nnz_diag <= nnz_diag);
 
-      hypreDevice_CsrRowIndicesToPtrs_v2(nrows, new_nnz_diag, tmp_rowid, P_diag_i);
+      hypre_CsrRowIndicesToPtrsDevice_v2(nrows, new_nnz_diag, tmp_rowid, P_diag_i);
    }
 
    if (nnz_offd)
@@ -704,7 +704,7 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
       HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j, -_1 - 2);
 #endif
 
-      hypreDevice_CsrRowIndicesToPtrs_v2(nrows, new_nnz_offd, tmp_rowid, P_offd_i);
+      hypre_CsrRowIndicesToPtrsDevice_v2(nrows, new_nnz_offd, tmp_rowid, P_offd_i);
    }
 
    hypre_CSRMatrixJ   (P_diag) = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int,  nnz_diag, HYPRE_Int,

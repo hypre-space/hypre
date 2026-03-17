@@ -75,7 +75,7 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
    P_offd = hypre_ParCSRMatrixOffd(P);
 
    /* Copy contents from W to P and set identity matrix for the mapping between coarse points */
-   hypreDevice_extendWtoP(hypre_ParCSRMatrixNumRows(A),
+   hypre_extendWtoPDevice(hypre_ParCSRMatrixNumRows(A),
                           hypre_ParCSRMatrixNumRows(Wp),
                           hypre_CSRMatrixNumCols(Wp_diag),
                           CF_marker,
@@ -249,7 +249,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_extendWtoP( A_nr_of_rows,
+   hypre_extendWtoPDevice( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_CSRMatrixNumCols(W_diag),
                            CF_marker,
@@ -634,7 +634,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    {
       /* Compute block row indices */
       blk_row_indices = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-      hypreDevice_IntFilln(blk_row_indices, (size_t) num_rows, 1);
+      hypre_IntFillnDevice(blk_row_indices, (size_t) num_rows, 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan_by_segment,
                         CF_marker,
@@ -716,11 +716,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       /* Set work array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, tmpdiag, tmpdiag_aop);
+      hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, tmpdiag, tmpdiag_aop);
 #endif
 
       /* Set array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, B_diag_data, diag_aop);
+      hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, B_diag_data, diag_aop);
 
       /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)

@@ -520,7 +520,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
 
-   hypreDevice_extendWtoP( P_nr_local,
+   hypre_extendWtoPDevice( P_nr_local,
                            AF2F_nr_local,
                            hypre_ParCSRMatrixNumCols(W),
                            C2F2_marker,
@@ -873,7 +873,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
 
-   hypreDevice_extendWtoP( P_nr_local,
+   hypre_extendWtoPDevice( P_nr_local,
                            AF2F_nr_local,
                            hypre_ParCSRMatrixNumCols(W),
                            C2F2_marker,

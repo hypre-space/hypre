@@ -362,7 +362,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
          beta = gamma / gamma_old;
 
          /* p = s + beta p */
-         hypreDevice_ComplexAxpyn(p_data, local_size, s_data, p_data, beta);
+         hypre_ComplexAxpynDevice(p_data, local_size, s_data, p_data, beta);
       }
 
       if (scale)

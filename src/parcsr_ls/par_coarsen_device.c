@@ -281,7 +281,7 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    /* add to the local column nnz of the diag part */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
-   hypreDevice_GenScatterAdd(measure_diag, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+   hypre_GenScatterAddDevice(measure_diag, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                              hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), real_send_buf, NULL);
 
    /* Augments the measures with a random number between 0 and 1 (only for the local part) */

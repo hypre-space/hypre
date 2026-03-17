@@ -233,7 +233,7 @@ hypre_CSRMatrixAddDevice( HYPRE_Complex    alpha,
       return NULL;
    }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, nnz_A, nnz_B,
+   hypre_CSRSpAddDevice(nrows_A, nrows_B, nnz_A, nnz_B,
                         A_i, A_j, alpha, A_data, NULL, B_i, B_j,
                         beta, B_data, NULL, NULL,
                         &nnzC, &C_i, &C_j, &C_data);
@@ -271,7 +271,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
    hypre_GpuProfilingPushRange("CSRMatrixMultiply");
 
-   hypreDevice_CSRSpGemm(A, B, &C);
+   hypre_CSRSpGemmDevice(A, B, &C);
 
    hypre_SyncComputeStream();
 
@@ -466,7 +466,7 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
    HYPRE_Int B_ext_nnz = hypre_CSRMatrixNumNonzeros(B_ext);
 
    HYPRE_Int *B_ext_ii = hypre_TAlloc(HYPRE_Int, B_ext_nnz, HYPRE_MEMORY_DEVICE);
-   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_nnz, hypre_CSRMatrixI(B_ext), B_ext_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(num_rows, B_ext_nnz, hypre_CSRMatrixI(B_ext), B_ext_ii);
 
    HYPRE_Int B_ext_diag_nnz;
    HYPRE_Int B_ext_offd_nnz;
@@ -533,8 +533,8 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
    hypre_TFree(B_ext_ii, HYPRE_MEMORY_DEVICE);
 
    /* convert to row ptrs */
-   HYPRE_Int *B_ext_diag_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_diag_nnz, B_ext_diag_ii);
-   HYPRE_Int *B_ext_offd_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_offd_nnz, B_ext_offd_ii);
+   HYPRE_Int *B_ext_diag_i = hypre_CsrRowIndicesToPtrsDevice(num_rows, B_ext_diag_nnz, B_ext_diag_ii);
+   HYPRE_Int *B_ext_offd_i = hypre_CsrRowIndicesToPtrsDevice(num_rows, B_ext_offd_nnz, B_ext_offd_ii);
 
    hypre_TFree(B_ext_diag_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(B_ext_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -1156,7 +1156,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
       return NULL;
    }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, nnz_A, nnz_B,
+   hypre_CSRSpAddDevice(nrows_A, nrows_B, nnz_A, nnz_B,
                         A_i, A_j, 1.0, A_data, NULL, B_i, B_j,
                         1.0, B_data, NULL, row_nums,
                         &nnzC, &C_i, &C_j, &C_data);
@@ -1983,8 +1983,8 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
    HYPRE_Int *Cjj = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
    HYPRE_Int *idx = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzA, hypre_CSRMatrixI(A), Cii);
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
+   hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnzA, hypre_CSRMatrixI(A), Cii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
    hypre_TMemcpy(Cjj,        hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(Cjj + nnzA, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE,
@@ -2491,7 +2491,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_ii   = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
+   HYPRE_Int     *A_ii   = hypre_CsrRowPtrsToIndicesDevice(nrows, nnz, A_i);
    HYPRE_Int      new_nnz;
    HYPRE_Int     *new_ii;
    HYPRE_Int     *new_j;
@@ -2577,7 +2577,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
 
    hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-   hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
+   hypre_CSRMatrixI(A) = hypre_CsrRowIndicesToPtrsDevice(nrows, new_nnz, new_ii);
    hypre_CSRMatrixJ(A) = new_j;
    hypre_CSRMatrixData(A) = new_data;
    hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
@@ -2772,7 +2772,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 
    if (!A_ii)
    {
-      A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
+      A_ii = hypre_CsrRowPtrsToIndicesDevice(nrows, nnz, A_i);
    }
    new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
    new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
@@ -2831,7 +2831,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
 
    hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-   hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
+   hypre_CSRMatrixI(A) = hypre_CsrRowIndicesToPtrsDevice(nrows, new_nnz, new_ii);
    hypre_CSRMatrixJ(A) = new_j;
    hypre_CSRMatrixData(A) = new_data;
    hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
@@ -3034,11 +3034,11 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                      thrust::make_transform_iterator(thrust::make_counting_iterator(0), adj_functor(A_i)),
                      B_i);
 #endif
-   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
+   hypre_IntegerExclusiveScanDevice(num_rows + 1, B_i);
 
    /* Build B_ii (row indices array) */
    B_ii = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
-   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, num_nonzeros, B_i, B_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(num_rows, num_nonzeros, B_i, B_ii);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL(std::for_each,
                      count,
@@ -3106,19 +3106,19 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
       if ( !hypre_HandleSpTransUseVendor(hypre_handle()) )
       {
 #if defined(HYPRE_USING_GPU)
-         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+         hypre_CSRSpTransDevice(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
       }
       else
       {
 #if defined(HYPRE_USING_CUSPARSE)
-         hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+         hypre_CSRSpTransCusparseDevice(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                         data);
 #elif defined(HYPRE_USING_ROCSPARSE)
-         hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+         hypre_CSRSpTransRocsparseDevice(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                          data);
 #elif defined(HYPRE_USING_GPU)
-         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+         hypre_CSRSpTransDevice(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
       }
    }

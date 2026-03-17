@@ -1087,8 +1087,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange();
 
       hypre_GpuProfilingPushRange("FormAOP");
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, block_size, mat_data, mat_aop);
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row, sol_data, sol_aop);
+      hypre_ComplexArrayToArrayOfPtrsDevice(num_rows, block_size, mat_data, mat_aop);
+      hypre_ComplexArrayToArrayOfPtrsDevice(num_rows, max_nnz_row, sol_data, sol_aop);
       hypre_GpuProfilingPopRange();
    }
 
@@ -1221,7 +1221,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_FSAIScalingDevice(num_rows, max_nnz_row, sol_data, rhs_data, scaling, info);
 
    /* Compute the row pointer G_i */
-   hypreDevice_IntegerInclusiveScan(num_rows + 1, hypre_CSRMatrixI(G_diag));
+   hypre_IntegerInclusiveScanDevice(num_rows + 1, hypre_CSRMatrixI(G_diag));
 
    /* Get the actual number of nonzero coefficients of G_diag */
    hypre_TMemcpy(&num_nonzeros_G, hypre_CSRMatrixI(G_diag) + num_rows,
