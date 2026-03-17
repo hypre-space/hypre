@@ -29,7 +29,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> non_galerkin)     = 0;
    (ssamg_data -> zero_guess)       = 0;
    (ssamg_data -> max_levels)       = 0;
-   (ssamg_data -> relax_type)       = 0;
+   (ssamg_data -> relax_type)       = 1;
    (ssamg_data -> interp_type)      = 0;
    (ssamg_data -> skip_relax)       = 0;
    (ssamg_data -> usr_relax_weight) = 1.0;
