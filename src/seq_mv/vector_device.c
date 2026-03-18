@@ -494,12 +494,12 @@ hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(transform,
-                     x_data, x_data + size, y_data, z_data,
+                     y_data, y_data + size, x_data, z_data,
                      thrust::divides<HYPRE_Complex>());
 
 #elif defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL(std::transform,
-                     x_data, x_data + size, y_data, z_data,
+                     y_data, y_data + size, x_data, z_data,
                      std::divides<HYPRE_Complex>());
 #endif
 
