@@ -620,21 +620,21 @@ void hypre_GPUKernelGeneratePdiagjPoffdj( hypre_DeviceItem    &item,
 
 __global__
 void hypre_GPUKernelInsertRemainingWeights( hypre_DeviceItem &item,
-                                              HYPRE_Int   start,
-                                              HYPRE_Int   stop,
-                                              HYPRE_Int  *pass_order,
-                                              HYPRE_Int  *Pi_diag_i,
-                                              HYPRE_Int  *Pi_diag_j,
-                                              HYPRE_Real *Pi_diag_data,
-                                              HYPRE_Int  *P_diag_i,
-                                              HYPRE_Int  *P_diag_j,
-                                              HYPRE_Real *P_diag_data,
-                                              HYPRE_Int  *Pi_offd_i,
-                                              HYPRE_Int  *Pi_offd_j,
-                                              HYPRE_Real *Pi_offd_data,
-                                              HYPRE_Int  *P_offd_i,
-                                              HYPRE_Int  *P_offd_j,
-                                              HYPRE_Real *P_offd_data )
+                                            HYPRE_Int   start,
+                                            HYPRE_Int   stop,
+                                            HYPRE_Int  *pass_order,
+                                            HYPRE_Int  *Pi_diag_i,
+                                            HYPRE_Int  *Pi_diag_j,
+                                            HYPRE_Real *Pi_diag_data,
+                                            HYPRE_Int  *P_diag_i,
+                                            HYPRE_Int  *P_diag_j,
+                                            HYPRE_Real *P_diag_data,
+                                            HYPRE_Int  *Pi_offd_i,
+                                            HYPRE_Int  *Pi_offd_j,
+                                            HYPRE_Real *Pi_offd_data,
+                                            HYPRE_Int  *P_offd_i,
+                                            HYPRE_Int  *P_offd_j,
+                                            HYPRE_Real *P_offd_data )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
