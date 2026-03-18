@@ -599,21 +599,21 @@ void hypre_GPUKernelComputeTwiaffW( hypre_DeviceItem    &item,
 //-----------------------------------------------------------------------
 __global__
 void hypre_GPUKernelComputeAffAfcEpe( hypre_DeviceItem    &item,
-                                         HYPRE_Int      nr_of_rows,
-                                         HYPRE_Int     *AFF_diag_i,
-                                         HYPRE_Int     *AFF_diag_j,
-                                         HYPRE_Complex *AFF_diag_data,
-                                         HYPRE_Int     *AFF_offd_i,
-                                         HYPRE_Int     *AFF_offd_j,
-                                         HYPRE_Complex *AFF_offd_data,
-                                         HYPRE_Int     *AFC_diag_i,
-                                         HYPRE_Complex *AFC_diag_data,
-                                         HYPRE_Int     *AFC_offd_i,
-                                         HYPRE_Complex *AFC_offd_data,
-                                         HYPRE_Complex *rsW,
-                                         HYPRE_Complex *dlam,
-                                         HYPRE_Complex *dtmp,
-                                         HYPRE_Complex *dtmp_offd )
+                                      HYPRE_Int      nr_of_rows,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_data,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Int     *AFF_offd_j,
+                                      HYPRE_Complex *AFF_offd_data,
+                                      HYPRE_Int     *AFC_diag_i,
+                                      HYPRE_Complex *AFC_diag_data,
+                                      HYPRE_Int     *AFC_offd_i,
+                                      HYPRE_Complex *AFC_offd_data,
+                                      HYPRE_Complex *rsW,
+                                      HYPRE_Complex *dlam,
+                                      HYPRE_Complex *dtmp,
+                                      HYPRE_Complex *dtmp_offd )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 

@@ -194,17 +194,17 @@ hypre_ModmpComputeNumColsOffdFineToCoarseDevice( HYPRE_Int  *pass_marker_offd,
 
 __global__
 void hypre_GPUKernelCfmarkerMaskedRowsum( hypre_DeviceItem    &item,
-                                            HYPRE_Int      nrows,
-                                            HYPRE_Int     *A_diag_i,
-                                            HYPRE_Int     *A_diag_j,
-                                            HYPRE_Complex *A_diag_data,
-                                            HYPRE_Int     *A_offd_i,
-                                            HYPRE_Int     *A_offd_j,
-                                            HYPRE_Complex *A_offd_data,
-                                            HYPRE_Int     *CF_marker,
-                                            HYPRE_Int     *dof_func,
-                                            HYPRE_Int     *dof_func_offd,
-                                            HYPRE_Complex *row_sums )
+                                          HYPRE_Int      nrows,
+                                          HYPRE_Int     *A_diag_i,
+                                          HYPRE_Int     *A_diag_j,
+                                          HYPRE_Complex *A_diag_data,
+                                          HYPRE_Int     *A_offd_i,
+                                          HYPRE_Int     *A_offd_j,
+                                          HYPRE_Complex *A_offd_data,
+                                          HYPRE_Int     *CF_marker,
+                                          HYPRE_Int     *dof_func,
+                                          HYPRE_Int     *dof_func_offd,
+                                          HYPRE_Complex *row_sums )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -279,15 +279,15 @@ void hypre_GPUKernelCfmarkerMaskedRowsum( hypre_DeviceItem    &item,
 
 __global__
 void hypre_GPUKernelMutliPiRowsum( hypre_DeviceItem    &item,
-                                     HYPRE_Int      num_points,
-                                     HYPRE_Int     *pass_order,
-                                     HYPRE_Int     *A_diag_i,
-                                     HYPRE_Complex *A_diag_data,
-                                     HYPRE_Int     *Pi_diag_i,
-                                     HYPRE_Complex *Pi_diag_data,
-                                     HYPRE_Int     *Pi_offd_i,
-                                     HYPRE_Complex *Pi_offd_data,
-                                     HYPRE_Complex *w_row_sum )
+                                   HYPRE_Int      num_points,
+                                   HYPRE_Int     *pass_order,
+                                   HYPRE_Int     *A_diag_i,
+                                   HYPRE_Complex *A_diag_data,
+                                   HYPRE_Int     *Pi_diag_i,
+                                   HYPRE_Complex *Pi_diag_data,
+                                   HYPRE_Int     *Pi_offd_i,
+                                   HYPRE_Complex *Pi_offd_data,
+                                   HYPRE_Complex *w_row_sum )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -360,17 +360,17 @@ void hypre_GPUKernelMutliPiRowsum( hypre_DeviceItem    &item,
 
 __global__
 void hypre_GPUKernelGeneratePdiagiPoffdi( hypre_DeviceItem &item,
-                                              HYPRE_Int  num_points,
-                                              HYPRE_Int  color,
-                                              HYPRE_Int *pass_order,
-                                              HYPRE_Int *pass_marker,
-                                              HYPRE_Int *pass_marker_offd,
-                                              HYPRE_Int *S_diag_i,
-                                              HYPRE_Int *S_diag_j,
-                                              HYPRE_Int *S_offd_i,
-                                              HYPRE_Int *S_offd_j,
-                                              HYPRE_Int *P_diag_i,
-                                              HYPRE_Int *P_offd_i )
+                                          HYPRE_Int  num_points,
+                                          HYPRE_Int  color,
+                                          HYPRE_Int *pass_order,
+                                          HYPRE_Int *pass_marker,
+                                          HYPRE_Int *pass_marker_offd,
+                                          HYPRE_Int *S_diag_i,
+                                          HYPRE_Int *S_diag_j,
+                                          HYPRE_Int *S_offd_i,
+                                          HYPRE_Int *S_offd_j,
+                                          HYPRE_Int *P_diag_i,
+                                          HYPRE_Int *P_offd_i )
 {
    /*
     nnz_diag = 0;
@@ -468,26 +468,26 @@ void hypre_GPUKernelGeneratePdiagiPoffdi( hypre_DeviceItem &item,
 
 __global__
 void hypre_GPUKernelGeneratePdiagjPoffdj( hypre_DeviceItem    &item,
-                                              HYPRE_Int      num_points,
-                                              HYPRE_Int      color,
-                                              HYPRE_Int     *pass_order,
-                                              HYPRE_Int     *pass_marker,
-                                              HYPRE_Int     *pass_marker_offd,
-                                              HYPRE_Int     *fine_to_coarse,
-                                              HYPRE_Int     *fine_to_coarse_offd,
-                                              HYPRE_Int     *A_diag_i,
-                                              HYPRE_Complex *A_diag_data,
-                                              HYPRE_Int     *A_offd_i,
-                                              HYPRE_Complex *A_offd_data,
-                                              HYPRE_Int     *Soc_diag_j,
-                                              HYPRE_Int     *Soc_offd_j,
-                                              HYPRE_Int     *P_diag_i,
-                                              HYPRE_Int     *P_offd_i,
-                                              HYPRE_Int     *P_diag_j,
-                                              HYPRE_Complex *P_diag_data,
-                                              HYPRE_Int     *P_offd_j,
-                                              HYPRE_Complex *P_offd_data,
-                                              HYPRE_Complex *row_sums )
+                                          HYPRE_Int      num_points,
+                                          HYPRE_Int      color,
+                                          HYPRE_Int     *pass_order,
+                                          HYPRE_Int     *pass_marker,
+                                          HYPRE_Int     *pass_marker_offd,
+                                          HYPRE_Int     *fine_to_coarse,
+                                          HYPRE_Int     *fine_to_coarse_offd,
+                                          HYPRE_Int     *A_diag_i,
+                                          HYPRE_Complex *A_diag_data,
+                                          HYPRE_Int     *A_offd_i,
+                                          HYPRE_Complex *A_offd_data,
+                                          HYPRE_Int     *Soc_diag_j,
+                                          HYPRE_Int     *Soc_offd_j,
+                                          HYPRE_Int     *P_diag_i,
+                                          HYPRE_Int     *P_offd_i,
+                                          HYPRE_Int     *P_diag_j,
+                                          HYPRE_Complex *P_diag_data,
+                                          HYPRE_Int     *P_offd_j,
+                                          HYPRE_Complex *P_offd_data,
+                                          HYPRE_Complex *row_sums )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -683,31 +683,31 @@ void hypre_GPUKernelInsertRemainingWeights( hypre_DeviceItem &item,
 
 __global__
 void hypre_GPUKernelGenerateQdiagjQoffdj( hypre_DeviceItem    &item,
-                                              HYPRE_Int      num_points,
-                                              HYPRE_Int      color,
-                                              HYPRE_Int     *pass_order,
-                                              HYPRE_Int     *pass_marker,
-                                              HYPRE_Int     *pass_marker_offd,
-                                              HYPRE_Int     *fine_to_coarse,
-                                              HYPRE_Int     *fine_to_coarse_offd,
-                                              HYPRE_Int     *A_diag_i,
-                                              HYPRE_Int     *A_diag_j,
-                                              HYPRE_Complex *A_diag_data,
-                                              HYPRE_Int     *A_offd_i,
-                                              HYPRE_Int     *A_offd_j,
-                                              HYPRE_Complex *A_offd_data,
-                                              HYPRE_Int     *Soc_diag_j,
-                                              HYPRE_Int     *Soc_offd_j,
-                                              HYPRE_Int     *Q_diag_i,
-                                              HYPRE_Int     *Q_offd_i,
-                                              HYPRE_Int     *Q_diag_j,
-                                              HYPRE_Complex *Q_diag_data,
-                                              HYPRE_Int     *Q_offd_j,
-                                              HYPRE_Complex *Q_offd_data,
-                                              HYPRE_Complex *w_row_sum,
-                                              HYPRE_Int      num_functions,
-                                              HYPRE_Int     *dof_func,
-                                              HYPRE_Int     *dof_func_offd )
+                                          HYPRE_Int      num_points,
+                                          HYPRE_Int      color,
+                                          HYPRE_Int     *pass_order,
+                                          HYPRE_Int     *pass_marker,
+                                          HYPRE_Int     *pass_marker_offd,
+                                          HYPRE_Int     *fine_to_coarse,
+                                          HYPRE_Int     *fine_to_coarse_offd,
+                                          HYPRE_Int     *A_diag_i,
+                                          HYPRE_Int     *A_diag_j,
+                                          HYPRE_Complex *A_diag_data,
+                                          HYPRE_Int     *A_offd_i,
+                                          HYPRE_Int     *A_offd_j,
+                                          HYPRE_Complex *A_offd_data,
+                                          HYPRE_Int     *Soc_diag_j,
+                                          HYPRE_Int     *Soc_offd_j,
+                                          HYPRE_Int     *Q_diag_i,
+                                          HYPRE_Int     *Q_offd_i,
+                                          HYPRE_Int     *Q_diag_j,
+                                          HYPRE_Complex *Q_diag_data,
+                                          HYPRE_Int     *Q_offd_j,
+                                          HYPRE_Complex *Q_offd_data,
+                                          HYPRE_Complex *w_row_sum,
+                                          HYPRE_Int      num_functions,
+                                          HYPRE_Int     *dof_func,
+                                          HYPRE_Int     *dof_func_offd )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -888,16 +888,16 @@ void hypre_GPUKernelGenerateQdiagjQoffdj( hypre_DeviceItem    &item,
 
 __global__
 void hypre_GPUKernelPassOrderCount( hypre_DeviceItem &item,
-                                      HYPRE_Int  num_points,
-                                      HYPRE_Int  color,
-                                      HYPRE_Int *points_left,
-                                      HYPRE_Int *pass_marker,
-                                      HYPRE_Int *pass_marker_offd,
-                                      HYPRE_Int *S_diag_i,
-                                      HYPRE_Int *S_diag_j,
-                                      HYPRE_Int *S_offd_i,
-                                      HYPRE_Int *S_offd_j,
-                                      HYPRE_Int *diag_shifts )
+                                    HYPRE_Int  num_points,
+                                    HYPRE_Int  color,
+                                    HYPRE_Int *points_left,
+                                    HYPRE_Int *pass_marker,
+                                    HYPRE_Int *pass_marker_offd,
+                                    HYPRE_Int *S_diag_i,
+                                    HYPRE_Int *S_diag_j,
+                                    HYPRE_Int *S_offd_i,
+                                    HYPRE_Int *S_offd_j,
+                                    HYPRE_Int *diag_shifts )
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -988,13 +988,13 @@ void hypre_GPUKernelPassOrderCount( hypre_DeviceItem &item,
 
 __global__
 void hypre_GPUKernelPopulateBigPoffdj( hypre_DeviceItem   &item,
-                                           HYPRE_Int     start,
-                                           HYPRE_Int     stop,
-                                           HYPRE_Int    *pass_order,
-                                           HYPRE_Int    *P_offd_i,
-                                           HYPRE_Int    *P_offd_j,
-                                           HYPRE_BigInt *col_map_offd_Pi,
-                                           HYPRE_BigInt *big_P_offd_j )
+                                       HYPRE_Int     start,
+                                       HYPRE_Int     stop,
+                                       HYPRE_Int    *pass_order,
+                                       HYPRE_Int    *P_offd_i,
+                                       HYPRE_Int    *P_offd_j,
+                                       HYPRE_BigInt *col_map_offd_Pi,
+                                       HYPRE_BigInt *big_P_offd_j )
 {
    HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item) + start;
 

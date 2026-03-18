@@ -579,13 +579,13 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 
 __global__ void
 hypre_GPUKernelIJVectorUpdateValues( hypre_DeviceItem    &item,
-                                      HYPRE_Int            n,
-                                      const HYPRE_Complex *x,
-                                      const HYPRE_BigInt  *indices,
-                                      HYPRE_BigInt         start,
-                                      HYPRE_BigInt         stop,
-                                      HYPRE_Int            action,
-                                      HYPRE_Complex       *y )
+                                     HYPRE_Int            n,
+                                     const HYPRE_Complex *x,
+                                     const HYPRE_BigInt  *indices,
+                                     HYPRE_BigInt         start,
+                                     HYPRE_BigInt         stop,
+                                     HYPRE_Int            action,
+                                     HYPRE_Complex       *y )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
