@@ -284,6 +284,15 @@ HYPRE_Int
 HYPRE_StructMatrixRead( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost, HYPRE_StructMatrix *matrix );
 
 HYPRE_Int
+HYPRE_StructMatrixScale_flt( HYPRE_StructMatrix matrix, hypre_float scalar );
+HYPRE_Int
+HYPRE_StructMatrixScale_dbl( HYPRE_StructMatrix matrix, hypre_double scalar );
+HYPRE_Int
+HYPRE_StructMatrixScale_long_dbl( HYPRE_StructMatrix matrix, hypre_long_double scalar );
+HYPRE_Int
+HYPRE_StructMatrixScale( HYPRE_StructMatrix matrix, hypre_long_double scalar );
+
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues_flt( HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
 HYPRE_Int
 HYPRE_StructMatrixSetBoxValues_dbl( HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, hypre_double *values );
@@ -746,6 +755,9 @@ HYPRE_StructMatrixPrint_pre( HYPRE_Precision precision, const char *filename, HY
 
 HYPRE_Int
 HYPRE_StructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_Int *num_ghost, HYPRE_StructMatrix *matrix );
+
+HYPRE_Int
+HYPRE_StructMatrixScale_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, hypre_long_double scalar );
 
 HYPRE_Int
 HYPRE_StructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values );

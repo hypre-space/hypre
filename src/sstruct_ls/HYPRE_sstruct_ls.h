@@ -316,10 +316,8 @@ HYPRE_SStructSSAMGSetRelChange(HYPRE_SStructSolver solver,
  *
  * Current operators set by {\tt rap\_type} are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 0 & Galerkin (default) \\
- * 1 & non-Galerkin 5-pt or 7-pt stencils \\
- * \end{tabular}
+ *    - 0 : Galerkin (default)
+ *    - 1 : non-Galerkin 5-pt or 7-pt stencils
  *
  * Both operators are constructed algebraically. The non-Galerkin option
  * maintains a 5-pt stencil in 2D and a 7-pt stencil in 3D on all grid levels.
@@ -349,10 +347,8 @@ HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
  *
  * Current interpolation methods set by {\tt interp\_type} are:
  *
- * \begin{tabular}{l@{ -- }l}
- * -1  & Structured interpolation only (default) \\
- *  0  & Structured and classical modified unstructured interpolation \\
- * \end{tabular}
+ *    - -1 : Structured interpolation only (default)
+ *    -  0 : Structured and classical modified unstructured interpolation
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetInterpType(HYPRE_SStructSolver solver,
@@ -363,12 +359,10 @@ HYPRE_SStructSSAMGSetInterpType(HYPRE_SStructSolver solver,
  *
  * Current relaxation methods set by {\tt relax\_type} are:
  *
- * \begin{tabular}{l@{ -- }l}
- * 0  & Jacobi \\
- * 1  & Weighted Jacobi (default) \\
- * 2  & L1-Jacobi \\
- * 10 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
- * \end{tabular}
+ *    - 0  : Jacobi
+ *    - 1  : Weighted Jacobi (default)
+ *    - 2  : L1-Jacobi
+ *    - 10 : Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation)
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetRelaxType(HYPRE_SStructSolver solver,
@@ -421,10 +415,8 @@ HYPRE_SStructSSAMGSetMaxCoarseSize(HYPRE_SStructSolver solver,
 
 /**
  * (Optional) Set coarse solver type for SSAMG. Current options are
- * \begin{tabular}{l@{ -- }l}
- * 0 & Weighted Jacobi (default) \\
- * 1 & BoomerAMG \\
- * \end{tabular}
+ *    - 0 : Weighted Jacobi (default)
+ *    - 1 : BoomerAMG
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetCoarseSolverType(HYPRE_SStructSolver solver,

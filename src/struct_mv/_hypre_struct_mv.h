@@ -2434,6 +2434,7 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int                  nterms,
 HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A, HYPRE_Int type,
                                             hypre_StructVector *rowsum );
+HYPRE_Int hypre_StructMatrixScale( hypre_StructMatrix *A, HYPRE_Complex scalar );
 
 /* struct_matrix.c */
 HYPRE_Int
