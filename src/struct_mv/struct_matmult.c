@@ -1100,7 +1100,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          hypre_CopyToIndex(loop_start, ndim, fdstart);
          hypre_StructVectorMapDataIndex(mask, fdstart);
 
-         maskptr = hypre_StructVectorBoxData(mask, b);
+         maskptr = hypre_StructVectorBaseBoxData(mask, b);
 
 #define DEVICE_VAR is_device_ptr(maskptr)
          hypre_BoxLoop1Begin(ndim, loop_size,
@@ -1525,7 +1525,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   }
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
-                  a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
+                  a[i].tptrs[t] = hypre_StructVectorBaseBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
                   //                  hypre_BoxIndexRank(fdbox, tdstart);

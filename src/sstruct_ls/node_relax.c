@@ -646,12 +646,9 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(
-                                              hypre_SStructPMatrixSMatrix(A, 0, 0)), i);
-            b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                              hypre_SStructPVectorSVector(b, 0)), i);
-            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                              hypre_SStructPVectorSVector(x, 0)), i);
+            A_data_box = hypre_StructMatrixDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i);
+            b_data_box = hypre_StructVectorDataBox(hypre_SStructPVectorSVector(b, 0), i);
+            x_data_box = hypre_StructVectorDataBox(hypre_SStructPVectorSVector(x, 0), i);
 
             for (vi = 0; vi < nvars; vi++)
             {
@@ -789,14 +786,10 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_BoxArrayBox( hypre_StructMatrixDataSpace(
-                                               hypre_SStructPMatrixSMatrix(A, 0, 0)), i );
-            b_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(b, 0)), i );
-            x_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(x, 0)), i );
-            t_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(t, 0)), i );
+            A_data_box = hypre_StructMatrixDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i );
+            b_data_box = hypre_StructVectorDataBox(hypre_SStructPVectorSVector(b, 0), i );
+            x_data_box = hypre_StructVectorDataBox(hypre_SStructPVectorSVector(x, 0), i );
+            t_data_box = hypre_StructVectorDataBox(hypre_SStructPVectorSVector(t, 0), i );
 
             for (vi = 0; vi < nvars; vi++)
             {

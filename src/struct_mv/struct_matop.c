@@ -117,7 +117,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
 HYPRE_Int
 hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
                                         hypre_StructVector  *rowsum,
-                                        HYPRE_Int            box_id,
+                                        HYPRE_Int            boxnum,
                                         HYPRE_Int            nentries,
                                         HYPRE_Int           *entries,
                                         hypre_Box           *box,
@@ -137,44 +137,44 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
    start = hypre_BoxIMin(box);
    hypre_BoxGetSize(box, loop_size);
    hypre_SetIndex(ustride, 1);
-   rp = hypre_StructVectorBoxData(rowsum, box_id);
+   rp = hypre_StructVectorBoxData(rowsum, boxnum);
 
    switch (nentries)
    {
       case 9:
-         Ap8 = hypre_StructMatrixBoxData(A, box_id, entries[8]);
+         Ap8 = hypre_StructMatrixBoxData(A, boxnum, entries[8]);
          HYPRE_FALLTHROUGH;
 
       case 8:
-         Ap7 = hypre_StructMatrixBoxData(A, box_id, entries[7]);
+         Ap7 = hypre_StructMatrixBoxData(A, boxnum, entries[7]);
          HYPRE_FALLTHROUGH;
 
       case 7:
-         Ap6 = hypre_StructMatrixBoxData(A, box_id, entries[6]);
+         Ap6 = hypre_StructMatrixBoxData(A, boxnum, entries[6]);
          HYPRE_FALLTHROUGH;
 
       case 6:
-         Ap5 = hypre_StructMatrixBoxData(A, box_id, entries[5]);
+         Ap5 = hypre_StructMatrixBoxData(A, boxnum, entries[5]);
          HYPRE_FALLTHROUGH;
 
       case 5:
-         Ap4 = hypre_StructMatrixBoxData(A, box_id, entries[4]);
+         Ap4 = hypre_StructMatrixBoxData(A, boxnum, entries[4]);
          HYPRE_FALLTHROUGH;
 
       case 4:
-         Ap3 = hypre_StructMatrixBoxData(A, box_id, entries[3]);
+         Ap3 = hypre_StructMatrixBoxData(A, boxnum, entries[3]);
          HYPRE_FALLTHROUGH;
 
       case 3:
-         Ap2 = hypre_StructMatrixBoxData(A, box_id, entries[2]);
+         Ap2 = hypre_StructMatrixBoxData(A, boxnum, entries[2]);
          HYPRE_FALLTHROUGH;
 
       case 2:
-         Ap1 = hypre_StructMatrixBoxData(A, box_id, entries[1]);
+         Ap1 = hypre_StructMatrixBoxData(A, boxnum, entries[1]);
          HYPRE_FALLTHROUGH;
 
       case 1:
-         Ap0 = hypre_StructMatrixBoxData(A, box_id, entries[0]);
+         Ap0 = hypre_StructMatrixBoxData(A, boxnum, entries[0]);
          HYPRE_FALLTHROUGH;
 
       case 0:
@@ -492,7 +492,7 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
 HYPRE_Int
 hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                         hypre_StructVector  *rowsum,
-                                        HYPRE_Int            box_id,
+                                        HYPRE_Int            boxnum,
                                         HYPRE_Int            nentries,
                                         HYPRE_Int           *entries,
                                         hypre_Box           *box,
@@ -513,44 +513,44 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
    start = hypre_BoxIMin(box);
    hypre_BoxGetSize(box, loop_size);
    hypre_SetIndex(ustride, 1);
-   rp = hypre_StructVectorBoxData(rowsum, box_id);
+   rp = hypre_StructVectorBoxData(rowsum, boxnum);
 
    switch (nentries)
    {
       case 9:
-         Ap8 = hypre_StructMatrixBoxData(A, box_id, entries[8]);
+         Ap8 = hypre_StructMatrixBoxData(A, boxnum, entries[8]);
          HYPRE_FALLTHROUGH;
 
       case 8:
-         Ap7 = hypre_StructMatrixBoxData(A, box_id, entries[7]);
+         Ap7 = hypre_StructMatrixBoxData(A, boxnum, entries[7]);
          HYPRE_FALLTHROUGH;
 
       case 7:
-         Ap6 = hypre_StructMatrixBoxData(A, box_id, entries[6]);
+         Ap6 = hypre_StructMatrixBoxData(A, boxnum, entries[6]);
          HYPRE_FALLTHROUGH;
 
       case 6:
-         Ap5 = hypre_StructMatrixBoxData(A, box_id, entries[5]);
+         Ap5 = hypre_StructMatrixBoxData(A, boxnum, entries[5]);
          HYPRE_FALLTHROUGH;
 
       case 5:
-         Ap4 = hypre_StructMatrixBoxData(A, box_id, entries[4]);
+         Ap4 = hypre_StructMatrixBoxData(A, boxnum, entries[4]);
          HYPRE_FALLTHROUGH;
 
       case 4:
-         Ap3 = hypre_StructMatrixBoxData(A, box_id, entries[3]);
+         Ap3 = hypre_StructMatrixBoxData(A, boxnum, entries[3]);
          HYPRE_FALLTHROUGH;
 
       case 3:
-         Ap2 = hypre_StructMatrixBoxData(A, box_id, entries[2]);
+         Ap2 = hypre_StructMatrixBoxData(A, boxnum, entries[2]);
          HYPRE_FALLTHROUGH;
 
       case 2:
-         Ap1 = hypre_StructMatrixBoxData(A, box_id, entries[1]);
+         Ap1 = hypre_StructMatrixBoxData(A, boxnum, entries[1]);
          HYPRE_FALLTHROUGH;
 
       case 1:
-         Ap0 = hypre_StructMatrixBoxData(A, box_id, entries[0]);
+         Ap0 = hypre_StructMatrixBoxData(A, boxnum, entries[0]);
          HYPRE_FALLTHROUGH;
 
       case 0:

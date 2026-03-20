@@ -159,14 +159,20 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 
+// The following use a base-grid box index
+#define hypre_StructMatrixDataSpaceBox(matrix, b) \
+hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, data_box, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + hypre_BoxIndexRank(data_box, index))
-
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
+
+// New macro names
+// The following use a grid box index
+#define hypre_StructMatrixDataBox(matrix, i) \
+hypre_StructMatrixDataSpaceBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)

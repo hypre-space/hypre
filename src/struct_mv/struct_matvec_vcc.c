@@ -59,9 +59,9 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VCC");
 
-   xp = hypre_StructVectorBoxData(x, xb);
-   yp = hypre_StructVectorBoxData(y, yb);
-   zp = hypre_StructVectorBoxData(z, zb);
+   xp = hypre_StructVectorBaseBoxData(x, xb);
+   yp = hypre_StructVectorBaseBoxData(y, yb);
+   zp = hypre_StructVectorBaseBoxData(z, zb);
 
    hypre_CopyToIndex(start, ndim, Adstart);
 

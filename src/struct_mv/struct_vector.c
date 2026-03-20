@@ -678,10 +678,9 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
                              hypre_Index         grid_index,
                              HYPRE_Complex      *values,
                              HYPRE_Int           action,
-                             HYPRE_Int           boxnum,
+                             HYPRE_Int           boxnum,    // grid boxnum (not base boxnum)
                              HYPRE_Int           outside    )
 {
-   hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    HYPRE_Complex       *vecp;
    HYPRE_Int            i, istart, istop;
@@ -689,19 +688,10 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
 #endif
 
-   if (outside > 0)
-   {
-      grid_boxes = hypre_StructVectorDataSpace(vector);
-   }
-   else
-   {
-      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   }
-
    if (boxnum < 0)
    {
       istart = 0;
-      istop  = hypre_BoxArraySize(grid_boxes);
+      istop  = hypre_StructVectorNBoxes(vector);
    }
    else
    {
@@ -711,7 +701,8 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
 
    for (i = istart; i < istop; i++)
    {
-      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+      grid_box = (outside > 0) ?
+         hypre_StructVectorDataBox(vector, i) : hypre_StructVectorBox(vector, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -780,14 +771,12 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                                 hypre_Box          *value_box,
                                 HYPRE_Complex      *values,
                                 HYPRE_Int           action,
-                                HYPRE_Int           boxnum,
+                                HYPRE_Int           boxnum,    // grid boxnum (not base boxnum)
                                 HYPRE_Int           outside )
 {
-   hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
    hypre_Box          *int_box;
 
-   hypre_BoxArray     *data_space;
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
@@ -805,20 +794,10 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   if (outside > 0)
-   {
-      grid_boxes = hypre_StructVectorDataSpace(vector);
-   }
-   else
-   {
-      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   }
-   data_space = hypre_StructVectorDataSpace(vector);
-
    if (boxnum < 0)
    {
       istart = 0;
-      istop  = hypre_BoxArraySize(grid_boxes);
+      istop  = hypre_StructVectorNBoxes(vector);
    }
    else
    {
@@ -838,8 +817,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 
    for (i = istart; i < istop; i++)
    {
-      grid_box = hypre_BoxArrayBox(grid_boxes, i);
-      data_box = hypre_BoxArrayBox(data_space, i);
+      grid_box = (outside > 0) ?
+         hypre_StructVectorDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+      data_box = hypre_StructVectorDataBox(vector, i);
 
       hypre_IntersectBoxes(set_box, grid_box, int_box);
 
@@ -902,10 +882,9 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 HYPRE_Int
 hypre_StructVectorClearValues( hypre_StructVector *vector,
                                hypre_Index         grid_index,
-                               HYPRE_Int           boxnum,
+                               HYPRE_Int           boxnum,    // grid boxnum (not base boxnum)
                                HYPRE_Int           outside    )
 {
-   hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    HYPRE_Complex       *vecp;
    HYPRE_Int            i, istart, istop;
@@ -913,19 +892,10 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
 #endif
 
-   if (outside > 0)
-   {
-      grid_boxes = hypre_StructVectorDataSpace(vector);
-   }
-   else
-   {
-      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   }
-
    if (boxnum < 0)
    {
       istart = 0;
-      istop  = hypre_BoxArraySize(grid_boxes);
+      istop  = hypre_StructVectorNBoxes(vector);
    }
    else
    {
@@ -935,7 +905,8 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
 
    for (i = istart; i < istop; i++)
    {
-      grid_box = hypre_BoxArrayBox(grid_boxes, i);
+      grid_box = (outside > 0) ?
+         hypre_StructVectorDataBox(vector, i) : hypre_StructVectorBox(vector, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -972,14 +943,12 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
 HYPRE_Int
 hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
                                   hypre_Box          *clear_box,
-                                  HYPRE_Int           boxnum,
+                                  HYPRE_Int           boxnum,    // grid boxnum (not base boxnum)
                                   HYPRE_Int           outside )
 {
-   hypre_BoxArray     *grid_boxes;
    hypre_Box          *grid_box;
    hypre_Box          *int_box;
 
-   hypre_BoxArray     *data_space;
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
@@ -993,20 +962,10 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   if (outside > 0)
-   {
-      grid_boxes = hypre_StructVectorDataSpace(vector);
-   }
-   else
-   {
-      grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
-   }
-   data_space = hypre_StructVectorDataSpace(vector);
-
    if (boxnum < 0)
    {
       istart = 0;
-      istop  = hypre_BoxArraySize(grid_boxes);
+      istop  = hypre_StructVectorNBoxes(vector);
    }
    else
    {
@@ -1024,8 +983,9 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
 
    for (i = istart; i < istop; i++)
    {
-      grid_box = hypre_BoxArrayBox(grid_boxes, i);
-      data_box = hypre_BoxArrayBox(data_space, i);
+      grid_box = (outside > 0) ?
+         hypre_StructVectorDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+      data_box = hypre_StructVectorDataBox(vector, i);
 
       hypre_IntersectBoxes(clear_box, grid_box, int_box);
 
@@ -1507,6 +1467,7 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
  * hypre_StructVectorPrintData
  *
  * RDF TODO: Update to allow for non-unitary stride?
+ * RDF BASE: This needs to be updated to work with a base grid!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1559,6 +1520,7 @@ hypre_StructVectorPrintData( FILE               *file,
  * hypre_StructVectorReadData
  *
  * RDF TODO: Update to allow for non-unitary stride?
+ * RDF BASE: This needs to be updated to work with a base grid!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
