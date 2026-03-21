@@ -131,7 +131,7 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
 
-   HYPRE_Int               Pi;
+   HYPRE_Int               Pi_outer;
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Pp0, *Pp1;
@@ -306,9 +306,9 @@ hypre_SemiInterp( void               *interp_vdata,
             if ( constant_coefficient )
             {
                HYPRE_Complex Pp0val, Pp1val;
-               Pi = hypre_CCBoxIndexRank( P_dbox, startc );
-               Pp0val = Pp0[Pi];
-               Pp1val = Pp1[Pi + Pp1_offset];
+               Pi_outer = hypre_CCBoxIndexRank( P_dbox, startc );
+               Pp0val = Pp0[Pi_outer];
+               Pp1val = Pp1[Pi_outer + Pp1_offset];
 
 #define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,

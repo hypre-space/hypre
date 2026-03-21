@@ -1866,7 +1866,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
 
-   HYPRE_Int i, j, k, in_i;
+   HYPRE_Int i, j, k, in_i, li;
    HYPRE_Int myid;
 
    HYPRE_Int proc_id, last_proc, prev_id, tmp_id;
@@ -2451,10 +2451,9 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
                                                    HYPRE_MEMORY_HOST);
             }
 
-            HYPRE_Int i;
-            for (i = 0; i < num_elements; i++)
+            for (li = 0; li < num_elements; li++)
             {
-               off_proc_i_recv[off_proc_nelm_recv_cur + i] = row;
+               off_proc_i_recv[off_proc_nelm_recv_cur + li] = row;
             }
             hypre_TMemcpy(off_proc_j_recv + off_proc_nelm_recv_cur, col_ptr, HYPRE_BigInt, num_elements,
                           HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
