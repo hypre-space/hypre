@@ -409,7 +409,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   relax_order         = relax_orders_flexible[index_flex];
                if (relax_weights_flexible)
                   relax_weight[level] = relax_weights_flexible[index_flex];
-               if (cgc_scaling_factors_flexible)
+               if (outer_weights_flexible)
                   omega[level]        = outer_weights_flexible[index_flex];
                num_sweep              = 1;
             }
