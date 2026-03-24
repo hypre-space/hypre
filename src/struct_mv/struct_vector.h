@@ -141,19 +141,25 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorDataSpaceBox(vector, b), index))
 // The following use a grid box index
-//#define hypre_StructVectorBoxBaseBox(vector, i) \
-//hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
+#if 0
+#define hypre_StructVectorBoxBaseBox(vector, i) \
+hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
+#endif
 #define hypre_StructVectorBox(vector, i) \
 hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
-//#define hypre_StructVectorBoxCopy(vector, i, box) \
-//hypre_CopyBox(hypre_StructVectorBoxBaseBox(vector, i), box); /* on base-grid index space */ \
-//hypre_StructVectorMapDataBox(vector, box);                   /* maps to data index space */
+#if 0
+#define hypre_StructVectorBoxCopy(vector, i, box) \
+hypre_CopyBox(hypre_StructVectorBoxBaseBox(vector, i), box); /* on base-grid index space */ \
+hypre_StructVectorMapDataBox(vector, box);                   /* maps to data index space */
+#endif
 #define hypre_StructVectorDataBox(vector, i) \
 hypre_StructVectorDataSpaceBox(vector, hypre_StructVectorBoxnum(vector, i))
-//#define hypre_StructVectorBoxData(vector, i) \
-//hypre_StructVectorBoxData(vector, hypre_StructVectorBoxnum(vector, i))
-//#define hypre_StructVectorBoxDataValue(vector, i, index) \
-//hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i), index)
+#if 0
+#define hypre_StructVectorBoxData(vector, i) \
+hypre_StructVectorBoxData(vector, hypre_StructVectorBoxnum(vector, i))
+#define hypre_StructVectorBoxDataValue(vector, i, index) \
+hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i), index)
+#endif
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)
