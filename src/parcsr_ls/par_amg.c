@@ -2806,7 +2806,7 @@ hypre_BoomerAMGGetSmoothNumSweeps( void     *data,
 /* -------------FLEXIBLE AMG CYCLING SETTERS------------------------------*/
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleCycleStruct( void     *data,
-                                        HYPRE_Int  *cycle_struct_flexible)
+                                       HYPRE_Int  *cycle_struct_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2830,12 +2830,12 @@ hypre_BoomerAMGSetFlexibleCycleStruct( void     *data,
            cycle_struct_flexible[i] == 1 || // cycle up
            cycle_struct_flexible[i] == -1 ) // cycle down
    {
-   lvl += (-cycle_struct_flexible[i]); // depth of the flexible cycle
-   if (lvl > num_levels_flexible)
-   {
-      num_levels_flexible = lvl;
-   }
-   i++;
+      lvl += (-cycle_struct_flexible[i]); // depth of the flexible cycle
+      if (lvl > num_levels_flexible)
+      {
+         num_levels_flexible = lvl;
+      }
+      i++;
    }
 
    if ((num_levels_flexible <= 0) || (i <= 0))
@@ -2857,7 +2857,7 @@ hypre_BoomerAMGSetFlexibleCycleStruct( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleRelaxTypes( void     *data,
-                                    HYPRE_Int  *relax_types_flexible)
+                                      HYPRE_Int  *relax_types_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2884,7 +2884,7 @@ hypre_BoomerAMGSetFlexibleRelaxTypes( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleRelaxOrders( void     *data,
-                                    HYPRE_Int  *relax_orders_flexible)
+                                       HYPRE_Int  *relax_orders_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2911,7 +2911,7 @@ hypre_BoomerAMGSetFlexibleRelaxOrders( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleRelaxWeights( void     *data,
-                                    HYPRE_Real  *relax_weights_flexible)
+                                        HYPRE_Real  *relax_weights_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2938,7 +2938,7 @@ hypre_BoomerAMGSetFlexibleRelaxWeights( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleOuterWeights( void     *data,
-                                    HYPRE_Real  *outer_weights_flexible)
+                                        HYPRE_Real  *outer_weights_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2965,7 +2965,7 @@ hypre_BoomerAMGSetFlexibleOuterWeights( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFlexibleCGCScalingFactors( void     *data,
-                                    HYPRE_Real  *cgc_scaling_factors_flexible)
+                                             HYPRE_Real  *cgc_scaling_factors_flexible)
 
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -2980,7 +2980,7 @@ hypre_BoomerAMGSetFlexibleCGCScalingFactors( void     *data,
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   
+
    if (hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data))
    {
       hypre_TFree(hypre_ParAMGDataFlexibleCGCScalingFactors(amg_data), HYPRE_MEMORY_HOST);

@@ -1089,7 +1089,7 @@ HYPRE_Int HYPRE_BoomerAMGGetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int *sm
  *    1 : move to the next finer level
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleCycleStruct(HYPRE_Solver  solver,
-                                               HYPRE_Int    *cycle_struct_flexible);
+                                                HYPRE_Int    *cycle_struct_flexible);
 
 /**
  * (Optional) Defines the relax orders (lexicographical or CF) used during
@@ -1100,7 +1100,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFlexibleCycleStruct(HYPRE_Solver  solver,
  * structure. See also HYPRE_BoomerAMGSetRelaxOrder.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxTypes(HYPRE_Solver  solver,
-                                              HYPRE_Int    *relax_types_flexible);
+                                               HYPRE_Int    *relax_types_flexible);
 /**
  * (Optional) Defines the relax orders (lexicographical or CF) used during
  * a flexible cycle. Different relax orders may be used at each point in
@@ -1110,7 +1110,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxTypes(HYPRE_Solver  solver,
  * structure. See also HYPRE_BoomerAMGSetRelaxOrder.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxOrders(HYPRE_Solver  solver,
-                                               HYPRE_Int    *relax_orders_flexible);
+                                                HYPRE_Int    *relax_orders_flexible);
 
 /**
  * (Optional) Defines the relaxation weigths used during a flexible cycle.
@@ -1121,7 +1121,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxOrders(HYPRE_Solver  solver,
  * structure. See also HYPRE_BoomerAMGSetRelaxWeight.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxWeights(HYPRE_Solver  solver,
-                                                HYPRE_Real   *relax_weights_flexible);
+                                                 HYPRE_Real   *relax_weights_flexible);
 
 /**
  * (Optional) Defines the outer relaxation weigths used during a flexible
@@ -1132,7 +1132,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxWeights(HYPRE_Solver  solver,
  * structure. See also HYPRE_BoomerAMGSetOuterWt.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleOuterWeights(HYPRE_Solver  solver,
-                                                HYPRE_Real   *outer_weights_flexible);
+                                                 HYPRE_Real   *outer_weights_flexible);
 
 /**
  * (Optional) Defines the a scaling factor for the coarse-grid correction
@@ -1145,7 +1145,7 @@ HYPRE_Int HYPRE_BoomerAMGSetFlexibleOuterWeights(HYPRE_Solver  solver,
  * i.e. when the value of the array passed for the cycle structure is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(HYPRE_Solver  solver,
-                                               HYPRE_Real   *cgc_scaling_factors_flexible);
+                                                      HYPRE_Real   *cgc_scaling_factors_flexible);
 
 /**
  * (Optional) Defines which variant of the Schwarz method is used.
@@ -4116,7 +4116,7 @@ HYPRE_ParCSRHybridSetOmega(HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver  solver,
-                                             HYPRE_Int    *cycle_struct_flexible );
+                                          HYPRE_Int    *cycle_struct_flexible );
 
 /**
  * (Optional) Defines the relaxation types used during a flexible cycle.
@@ -4129,7 +4129,7 @@ HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver  solver,
-                                        HYPRE_Int    *relax_types_flexible );
+                                         HYPRE_Int    *relax_types_flexible );
 
 /**
  * (Optional) Defines the relax orders (lexicographical or CF) used during
@@ -4141,7 +4141,7 @@ HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver  solver,
-                                         HYPRE_Int    *relax_orders_flexible );
+                                          HYPRE_Int    *relax_orders_flexible );
 
 /**
  * (Optional) Defines the relaxation weigths used during a flexible cycle.
@@ -4153,7 +4153,7 @@ HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver  solver,
-                                          HYPRE_Real   *relax_weights_flexible );
+                                           HYPRE_Real   *relax_weights_flexible );
 
 /**
  * (Optional) Defines the outer relaxation weigths used during a flexible
@@ -4165,7 +4165,7 @@ HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver  solver,
-                                 HYPRE_Real   *outer_weights_flexible );
+                                           HYPRE_Real   *outer_weights_flexible );
 
 /**
  * (Optional) Defines the a scaling factor for the coarse-grid correction
@@ -4179,7 +4179,7 @@ HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver  solver,
-                                     HYPRE_Real   *cgc_scaling_factors_flexible );
+                                                HYPRE_Real   *cgc_scaling_factors_flexible );
 
 /**
  * (Optional) Defines the number of levels of aggressive coarsening,

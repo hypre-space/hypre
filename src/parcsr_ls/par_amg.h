@@ -91,7 +91,7 @@ typedef struct
    HYPRE_Int      num_levels_flexible, length_cycle_flexible;
    HYPRE_Int     *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
    HYPRE_Real    *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
-   
+
    /* problem data */
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;

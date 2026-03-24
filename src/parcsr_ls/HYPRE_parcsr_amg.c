@@ -986,7 +986,7 @@ HYPRE_BoomerAMGGetLogging( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleCycleStruct( HYPRE_Solver solver,
-                                     HYPRE_Int    *cycle_struct_flexible)
+                                       HYPRE_Int    *cycle_struct_flexible)
 {
    return ( hypre_BoomerAMGSetFlexibleCycleStruct( (void *) solver, cycle_struct_flexible) );
 }
@@ -997,7 +997,7 @@ HYPRE_BoomerAMGSetFlexibleCycleStruct( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleRelaxTypes( HYPRE_Solver solver,
-                                 HYPRE_Int    *relax_types_flexible)
+                                      HYPRE_Int    *relax_types_flexible)
 {
    return ( hypre_BoomerAMGSetFlexibleRelaxTypes( (void *) solver, relax_types_flexible) );
 }
@@ -1008,7 +1008,7 @@ HYPRE_BoomerAMGSetFlexibleRelaxTypes( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleRelaxOrders( HYPRE_Solver solver,
-                                 HYPRE_Int    *relax_orders_flexible)
+                                       HYPRE_Int    *relax_orders_flexible)
 {
    return ( hypre_BoomerAMGSetFlexibleRelaxOrders( (void *) solver, relax_orders_flexible) );
 }
@@ -1019,7 +1019,7 @@ HYPRE_BoomerAMGSetFlexibleRelaxOrders( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleRelaxWeights( HYPRE_Solver solver,
-                                 HYPRE_Real   *relax_weights_flexible)
+                                        HYPRE_Real   *relax_weights_flexible)
 {
    return ( hypre_BoomerAMGSetFlexibleRelaxWeights( (void *) solver, relax_weights_flexible) );
 }
@@ -1030,7 +1030,7 @@ HYPRE_BoomerAMGSetFlexibleRelaxWeights( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleOuterWeights( HYPRE_Solver solver,
-                                 HYPRE_Real   *outer_weights_flexible)
+                                        HYPRE_Real   *outer_weights_flexible)
 {
    return ( hypre_BoomerAMGSetFlexibleOuterWeights( (void *) solver, outer_weights_flexible) );
 }
@@ -1041,9 +1041,10 @@ HYPRE_BoomerAMGSetFlexibleOuterWeights( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFlexibleCGCScalingFactors( HYPRE_Solver solver,
-                                 HYPRE_Real   *cgc_scaling_factors_flexible)
+                                             HYPRE_Real   *cgc_scaling_factors_flexible)
 {
-   return ( hypre_BoomerAMGSetFlexibleCGCScalingFactors( (void *) solver, cgc_scaling_factors_flexible) );
+   return ( hypre_BoomerAMGSetFlexibleCGCScalingFactors( (void *) solver,
+                                                         cgc_scaling_factors_flexible) );
 }
 
 /*--------------------------------------------------------------------------

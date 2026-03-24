@@ -70,7 +70,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real     *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
    HYPRE_Real     cgc_scaling_factor_tmp = 1.0;
    HYPRE_Int      index_flex;
-   
+
    /* Local variables  */
    HYPRE_Int      *lev_counter;
    HYPRE_Int       Solve_err_flag;
@@ -398,19 +398,27 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          /*---------------------------------------------------------------------------------
          * Override relaxation type, order, weights and outer weights for flexible cycles
          *----------------------------------------------------------------------------------*/
-         if (num_levels_flexible > 0) 
+         if (num_levels_flexible > 0)
          {
             relax_order = hypre_ParAMGDataRelaxOrder(amg_data);
             if ((level < num_levels_flexible - 1) || (level == num_levels - 1))
             {
                if (relax_types_flexible)
+               {
                   relax_type          = relax_types_flexible[index_flex];
+               }
                if (relax_orders_flexible)
+               {
                   relax_order         = relax_orders_flexible[index_flex];
+               }
                if (relax_weights_flexible)
+               {
                   relax_weight[level] = relax_weights_flexible[index_flex];
+               }
                if (outer_weights_flexible)
+               {
                   omega[level]        = outer_weights_flexible[index_flex];
+               }
                num_sweep              = 1;
             }
          }
@@ -684,32 +692,36 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        *-----------------------------------------------------------------*/
 
       --lev_counter[level];
-      
+
       /*-------------------------------------------
        * Override lev_counter for flexible cycles
        *-------------------------------------------*/
-      if (num_levels_flexible > 0) 
+      if (num_levels_flexible > 0)
       {
-         if ((level < num_levels_flexible - 1) || (level == num_levels -1))
+         if ((level < num_levels_flexible - 1) || (level == num_levels - 1))
          {
             if (index_flex == (length_cycle_flexible - 1))
-               {
-                  Not_Finished=0; 
-                  continue;
-               }
+            {
+               Not_Finished = 0;
+               continue;
+            }
             else if (cycle_struct_flexible[index_flex] == -1) // cycle down
+            {
                lev_counter[level] = 0;
+            }
             else if (cycle_struct_flexible[index_flex] == 1) // cycle up
+            {
+               if (cgc_scaling_factors_flexible)
                {
-                  if (cgc_scaling_factors_flexible)
-                     cgc_scaling_factor_tmp = cgc_scaling_factors_flexible[index_flex]; // scaling factor for CGC
-                  lev_counter[level] = -1;
+                  cgc_scaling_factor_tmp = cgc_scaling_factors_flexible[index_flex];   // scaling factor for CGC
                }
+               lev_counter[level] = -1;
+            }
             else if (cycle_struct_flexible[index_flex] == 0) // relax again on the same level
-               {
-                  index_flex++;
-                  continue;
-               } 
+            {
+               index_flex++;
+               continue;
+            }
             index_flex++;
          }
       }
@@ -804,12 +816,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
-         
+
          // set scaling factor for coarse-grid correction in flexible cycles
          if (fine_grid < num_levels_flexible - 1)
-            {
-               alpha = cgc_scaling_factor_tmp;
-            }
+         {
+            alpha = cgc_scaling_factor_tmp;
+         }
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
