@@ -1753,6 +1753,60 @@ HYPRE_Int
 HYPRE_BoomerAMGSetFilterThresholdR( HYPRE_Solver solver, hypre_long_double filter_threshold );
 
 HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_flt( HYPRE_Solver solver, hypre_float *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_dbl( HYPRE_Solver solver, hypre_double *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_long_dbl( HYPRE_Solver solver, hypre_long_double *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors( HYPRE_Solver solver, void *cgc_scaling_factors_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct_flt( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct_dbl( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct_long_dbl( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights_flt( HYPRE_Solver solver, hypre_float *outer_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights_dbl( HYPRE_Solver solver, hypre_double *outer_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights_long_dbl( HYPRE_Solver solver, hypre_long_double *outer_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights( HYPRE_Solver solver, void *outer_weights_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders_flt( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders_dbl( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders_long_dbl( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes_flt( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes_dbl( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes_long_dbl( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights_flt( HYPRE_Solver solver, hypre_float *relax_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights_dbl( HYPRE_Solver solver, hypre_double *relax_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights_long_dbl( HYPRE_Solver solver, hypre_long_double *relax_weights_flexible );
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights( HYPRE_Solver solver, void *relax_weights_flexible );
+
+HYPRE_Int
 HYPRE_BoomerAMGSetGMRESSwitchR_flt( HYPRE_Solver solver, HYPRE_Int gmres_switch );
 HYPRE_Int
 HYPRE_BoomerAMGSetGMRESSwitchR_dbl( HYPRE_Solver solver, HYPRE_Int gmres_switch );
@@ -6439,6 +6493,24 @@ HYPRE_BoomerAMGSetFilterFunctions_pre( HYPRE_Precision precision, HYPRE_Solver s
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFilterThresholdR_pre( HYPRE_Precision precision, HYPRE_Solver solver, hypre_long_double filter_threshold );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cgc_scaling_factors_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *outer_weights_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *relax_weights_flexible );
 
 HYPRE_Int
 HYPRE_BoomerAMGSetGMRESSwitchR_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int gmres_switch );

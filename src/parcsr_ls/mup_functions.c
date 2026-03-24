@@ -1681,6 +1681,60 @@ HYPRE_BoomerAMGSetFilterThresholdR( HYPRE_Solver solver, hypre_long_double filte
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors( HYPRE_Solver solver, void *cgc_scaling_factors_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_pre( precision, solver, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleCycleStruct_pre( precision, solver, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights( HYPRE_Solver solver, void *outer_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleOuterWeights_pre( precision, solver, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxOrders_pre( precision, solver, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxTypes_pre( precision, solver, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights( HYPRE_Solver solver, void *relax_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxWeights_pre( precision, solver, relax_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGSetGMRESSwitchR( HYPRE_Solver solver, HYPRE_Int gmres_switch )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
