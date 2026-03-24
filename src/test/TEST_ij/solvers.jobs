@@ -112,7 +112,7 @@ mpirun -np 2 ./ij -n 40 40 40 -solver 1 \
                   -flexamg_relax_orders 1,1,0,0,0,1,0,0,0,0,0 \
                   -flexamg_outer_weights 1.2,0.9,1.0,0,1.0,1.0,1,0.95,0.8,0,1.0 \
                   -flexamg_relax_weights 0.95,1.85,1.0,0,1.0,1.0,1,1.8,1.2,0,1.0 \
-                  -flexamg_cgc_scaling 0,0,1,1,1,1,1.35,0.7,1.3,1.1 > solvers.out.123
+                  -flexamg_cgc_scaling 0,0,0,0,0,0,1.1,0.9,1.1,0.9,0 > solvers.out.123
 mpirun -np 2 ./ij -n 40 40 40 -solver 20 \
                   -flexamg_cycle_struct -1,-1,-1,-1,1,0,0,0,-1,1,1,1,1,0,0,-2 > solvers.out.124
 

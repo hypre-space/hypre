@@ -935,10 +935,10 @@ main( hypre_int argc,
             i++;
          }
 
-         len_cycle = i + 1;
-         cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle - 1, HYPRE_MEMORY_HOST);
+         len_cycle = i;
+         cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle - 1; j++)
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
          {
             cgc_scaling_factors_flexible[j] = tmp2[j];
          }
