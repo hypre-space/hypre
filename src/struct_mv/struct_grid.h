@@ -24,7 +24,14 @@ typedef struct hypre_StructGrid_struct
 
    HYPRE_Int            ndim;         /* Number of grid dimensions */
 
-   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
+   hypre_BoxArray      *baseboxes;    /* Array of base boxes in this process */
+   hypre_Index          origin;       /* Origin index for coarsening baseboxes */
+   hypre_Index          stride;       /* Stride index for coarsening baseboxes */
+
+   hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
+   HYPRE_Int           *baseboxnums;  /* Array of base boxnums for the boxes array */
+                                      /* RDF: Keep temporarily, then switch to boxes ids */
+
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -52,7 +59,11 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
 #define hypre_StructGridNDim(grid)          ((grid) -> ndim)
+#define hypre_StructGridBaseBoxes(grid)     ((grid) -> baseboxes)
+#define hypre_StructGridOrigin(grid)        ((grid) -> origin)
+#define hypre_StructGridStride(grid)        ((grid) -> stride)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
+#define hypre_StructGridBaseBoxnums(grid)   ((grid) -> baseboxnums)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -67,6 +78,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)
 
 #define hypre_StructGridBox(grid, i)        (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridNumBaseBoxes(grid)  (hypre_BoxArraySize(hypre_StructGridBaseBoxes(grid)))
 #define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridIDs(grid)           (hypre_BoxArrayIDs(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridID(grid, i)         (hypre_BoxArrayID(hypre_StructGridBoxes(grid), i))

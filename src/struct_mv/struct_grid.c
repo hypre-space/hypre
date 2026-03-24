@@ -38,7 +38,13 @@ hypre_StructGridCreate( MPI_Comm           comm,
 
    hypre_StructGridComm(grid)        = comm;
    hypre_StructGridNDim(grid)        = ndim;
+
+   hypre_StructGridBaseBoxes(grid)   = hypre_BoxArrayCreate(0, ndim);
+   hypre_SetIndex(hypre_StructGridOrigin(grid), 0);
+   hypre_SetIndex(hypre_StructGridStride(grid), 1);
+
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0, ndim);
+   hypre_StructGridBaseBoxnums(grid) = NULL;
 
    hypre_SetIndex(hypre_StructGridMaxDistance(grid), 8);
 
@@ -93,8 +99,10 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
       hypre_StructGridRefCount(grid) --;
       if (hypre_StructGridRefCount(grid) == 0)
       {
-         hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
+         hypre_BoxArrayDestroy(hypre_StructGridBaseBoxes(grid));
          hypre_BoxArrayDestroy(hypre_StructGridBoxes(grid));
+         hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
+         hypre_TFree(hypre_StructGridBaseBoxnums(grid), HYPRE_MEMORY_HOST);
 
          hypre_BoxManDestroy(hypre_StructGridBoxMan(grid));
          hypre_TFree( hypre_StructGridPShifts(grid), HYPRE_MEMORY_HOST);
@@ -131,8 +139,23 @@ hypre_StructGridSetExtents( hypre_StructGrid  *grid,
 
    box = hypre_BoxCreate(hypre_StructGridNDim(grid));
    hypre_BoxSetExtents(box, ilower, iupper);
+   hypre_AppendBox(box, hypre_StructGridBaseBoxes(grid));
    hypre_AppendBox(box, hypre_StructGridBoxes(grid));
    hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructGridSetBaseBoxes( hypre_StructGrid *grid,
+                              hypre_BoxArray   *baseboxes )
+{
+
+   hypre_TFree(hypre_StructGridBaseBoxes(grid), HYPRE_MEMORY_HOST);
+   hypre_StructGridBaseBoxes(grid) = baseboxes;
 
    return hypre_error_flag;
 }
@@ -278,6 +301,17 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    else
    {
       is_boxman = 1;
+   }
+
+   /* Create baseboxnums array */
+   if (hypre_StructGridBaseBoxnums(grid) == NULL)
+   {
+      HYPRE_Int  *baseboxnums = hypre_TAlloc(HYPRE_Int, num_local_boxes, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_local_boxes; i++)
+      {
+         baseboxnums[i] = i;
+      }
+      hypre_StructGridBaseBoxnums(grid) = baseboxnums;
    }
 
    /******** calculate the periodicity information ****************/

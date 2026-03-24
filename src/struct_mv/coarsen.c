@@ -416,6 +416,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    hypre_BoxArray   *fboxes;
    hypre_BoxArray   *cboxes;
+   HYPRE_Int        *cbaseboxnums;
 
    hypre_Index       periodic;
    hypre_Index       ilower, iupper;
@@ -471,6 +472,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       avoid its computation on hypre_StructGridAssemble. */
    hypre_StructGridGlobalSize(cgrid) = -1;
 
+   /* Set up baseboxes, origin, stride */
+   /* RDF: Maybe add reference counting for baseboxes instead of cloning */
+   hypre_StructGridSetBaseBoxes(cgrid, hypre_BoxArrayClone(hypre_StructGridBaseBoxes(fgrid)));
+   if (origin != NULL)
+   {
+      hypre_CopyIndex(origin, hypre_StructGridOrigin(cgrid));
+   }
+   hypre_CopyIndex(stride, hypre_StructGridStride(cgrid));
+
    /* RDF TODO: Inherit num ghost from fgrid here... */
 
    /* coarsen boxes and create the coarse grid ids (same as fgrid) */
@@ -491,6 +501,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       }
 
       cboxes = hypre_BoxArrayCreate(count, ndim);
+      cbaseboxnums = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
       count = 0;
       hypre_ForBoxI(i, fboxes)
       {
@@ -500,9 +511,11 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          {
             hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, count));
             hypre_BoxArrayID(cboxes, count) = hypre_StructGridID(fgrid, i);
+            cbaseboxnums[count] = count;  // RDF: Change this in final version after testing
             count++;
          }
       }
+      hypre_StructGridBaseBoxnums(cgrid) = cbaseboxnums;
       hypre_BoxDestroy(box);
    }
    else

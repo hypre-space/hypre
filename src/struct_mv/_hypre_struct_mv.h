@@ -818,7 +818,14 @@ typedef struct hypre_StructGrid_struct
 
    HYPRE_Int            ndim;         /* Number of grid dimensions */
 
-   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
+   hypre_BoxArray      *baseboxes;    /* Array of base boxes in this process */
+   hypre_Index          origin;       /* Origin index for coarsening baseboxes */
+   hypre_Index          stride;       /* Stride index for coarsening baseboxes */
+
+   hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
+   HYPRE_Int           *baseboxnums;  /* Array of base boxnums for the boxes array */
+                                      /* RDF: Keep temporarily, then switch to boxes ids */
+
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -846,7 +853,11 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
 #define hypre_StructGridNDim(grid)          ((grid) -> ndim)
+#define hypre_StructGridBaseBoxes(grid)     ((grid) -> baseboxes)
+#define hypre_StructGridOrigin(grid)        ((grid) -> origin)
+#define hypre_StructGridStride(grid)        ((grid) -> stride)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
+#define hypre_StructGridBaseBoxnums(grid)   ((grid) -> baseboxnums)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -861,6 +872,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)
 
 #define hypre_StructGridBox(grid, i)        (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridNumBaseBoxes(grid)  (hypre_BoxArraySize(hypre_StructGridBaseBoxes(grid)))
 #define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridIDs(grid)           (hypre_BoxArrayIDs(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridID(grid, i)         (hypre_BoxArrayID(hypre_StructGridBoxes(grid), i))
@@ -961,17 +973,18 @@ typedef struct hypre_CommStencil_struct
 typedef struct hypre_CommInfo_struct
 {
    HYPRE_Int              ndim;
-   hypre_BoxArrayArray   *send_boxes;
+
+   hypre_BoxArrayArray   *send_boxes;        /* BoxArrayArrayIDs are used as base boxnums */
    hypre_Index            send_stride;
    HYPRE_Int            **send_processes;
    HYPRE_Int            **send_rboxnums;
-   hypre_BoxArrayArray   *send_rboxes;  /* send_boxes, some with periodic shift */
+   hypre_BoxArrayArray   *send_rboxes;       /* send_boxes, some with periodic shift */
 
-   hypre_BoxArrayArray   *recv_boxes;
+   hypre_BoxArrayArray   *recv_boxes;        /* BoxArrayArrayIDs are used as base boxnums */
    hypre_Index            recv_stride;
    HYPRE_Int            **recv_processes;
    HYPRE_Int            **recv_rboxnums;
-   hypre_BoxArrayArray   *recv_rboxes;  /* recv_boxes, some with periodic shift */
+   hypre_BoxArrayArray   *recv_rboxes;       /* recv_boxes, some with periodic shift */
 
    HYPRE_Int              num_transforms;  /* may be 0    = identity transform */
    hypre_Index           *coords;          /* may be NULL = identity transform */
@@ -1104,6 +1117,7 @@ typedef struct hypre_CommHandle_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_CommInfoNDim(info)           (info -> ndim)
+
 #define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
 #define hypre_CommInfoSendStride(info)     (info -> send_stride)
 #define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
@@ -2280,6 +2294,7 @@ HYPRE_Int hypre_StructGridDestroy ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridSetPeriodic ( hypre_StructGrid *grid, hypre_Index periodic );
 HYPRE_Int hypre_StructGridSetExtents ( hypre_StructGrid *grid, hypre_Index ilower,
                                        hypre_Index iupper );
+HYPRE_Int hypre_StructGridSetBaseBoxes ( hypre_StructGrid *grid, hypre_BoxArray *baseboxes );
 HYPRE_Int hypre_StructGridSetBoxes ( hypre_StructGrid *grid, hypre_BoxArray *boxes );
 HYPRE_Int hypre_StructGridSetBoundingBox ( hypre_StructGrid *grid, hypre_Box *new_bb );
 HYPRE_Int hypre_StructGridSetIDs ( hypre_StructGrid *grid, HYPRE_Int *ids );

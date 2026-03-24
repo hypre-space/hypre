@@ -401,6 +401,7 @@ HYPRE_Int hypre_StructGridDestroy ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridSetPeriodic ( hypre_StructGrid *grid, hypre_Index periodic );
 HYPRE_Int hypre_StructGridSetExtents ( hypre_StructGrid *grid, hypre_Index ilower,
                                        hypre_Index iupper );
+HYPRE_Int hypre_StructGridSetBaseBoxes ( hypre_StructGrid *grid, hypre_BoxArray *baseboxes );
 HYPRE_Int hypre_StructGridSetBoxes ( hypre_StructGrid *grid, hypre_BoxArray *boxes );
 HYPRE_Int hypre_StructGridSetBoundingBox ( hypre_StructGrid *grid, hypre_Box *new_bb );
 HYPRE_Int hypre_StructGridSetIDs ( hypre_StructGrid *grid, HYPRE_Int *ids );

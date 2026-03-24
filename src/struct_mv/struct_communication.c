@@ -169,12 +169,8 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       data_box = hypre_BoxArrayBox(send_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
 
-      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
-      if (i < hypre_BoxArrayArraySize(send_boxes))
-      {
-         box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-         num_boxes += hypre_BoxArraySize(box_array);
-      }
+      box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+      num_boxes += hypre_BoxArraySize(box_array);
    }
 
    /* set up comm_boxes_[pij] */
@@ -342,12 +338,8 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       data_box = hypre_BoxArrayBox(recv_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
 
-      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
-      if (i < hypre_BoxArrayArraySize(recv_boxes))
-      {
-         box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-         num_boxes += hypre_BoxArraySize(box_array);
-      }
+      box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+      num_boxes += hypre_BoxArraySize(box_array);
    }
 
    {
