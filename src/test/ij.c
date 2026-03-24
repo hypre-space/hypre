@@ -758,7 +758,7 @@ main( hypre_int argc,
          len_cycle = i;
          cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle - 1; j++)
+         for (HYPRE_Int j = 0; j < len_cycle; j++)
          {
             cycle_struct_flexible[j] = tmp1[j];
          }

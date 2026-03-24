@@ -229,6 +229,12 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          hypre_TFree( (AMGhybrid_data -> dof_func), HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> dof_func) = NULL;
       }
+      hypre_TFree( (AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_types_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_orders_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> outer_weights_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_weights_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> cgc_scaling_factors_flexible), HYPRE_MEMORY_HOST );
       hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
    }
 
