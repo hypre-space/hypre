@@ -4808,14 +4808,7 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-      HYPRE_Real time[4];
-      HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
 
-      if (myid == 0)
-      {
-         hypre_printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
-                      time[0], time[1], time[2], time[3]);
-      }
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
