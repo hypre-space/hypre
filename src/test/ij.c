@@ -4749,12 +4749,12 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
       if (length_cycle_flexible > 0)
       {
-         HYPRE_ParCSRHybridFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
-         HYPRE_ParCSRHybridFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
-         HYPRE_ParCSRHybridFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
-         HYPRE_ParCSRHybridFlexibleSetOuterWeights(amg_solver, outer_weights_flexible);
-         HYPRE_ParCSRHybridFlexibleSetRelaxWeights(amg_solver, relax_weights_flexible);
-         HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
+         HYPRE_ParCSRHybridSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+         HYPRE_ParCSRHybridSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+         HYPRE_ParCSRHybridSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+         HYPRE_ParCSRHybridSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+         HYPRE_ParCSRHybridSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+         HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (level_w > -1)
       {
@@ -5014,12 +5014,12 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (length_cycle_flexible > 0)
       {  
-         HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_solver, cycle_struct_flexible);
-         HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_solver, relax_types_flexible);
-         HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_solver, relax_orders_flexible);
-         HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_solver, outer_weights_flexible);
-         HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_solver, relax_weights_flexible);
-         HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
+         HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+         HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+         HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+         HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+         HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+         HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (ns_down > -1)
       {
@@ -5568,12 +5568,12 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (length_cycle_flexible > 0)
          {
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(pcg_precond, cycle_struct_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(pcg_precond, relax_types_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(pcg_precond, relax_orders_flexible);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(pcg_precond, outer_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(pcg_precond, relax_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
+            HYPRE_BoomerAMGSetFlexibleCycleStruct(pcg_precond, cycle_struct_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, relax_types_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, relax_orders_flexible);
+            HYPRE_BoomerAMGSetFlexibleOuterWeights(pcg_precond, outer_weights_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, relax_weights_flexible);
+            HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
          }
          if (num_functions > 1)
          {
@@ -7356,12 +7356,12 @@ main( hypre_int argc,
          }
          if (length_cycle_flexible > 0)
          {
-            HYPRE_BoomerAMGFlexibleSetCycleStruct(amg_precond, cycle_struct_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxTypes(amg_precond, relax_types_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxOrders(amg_precond, relax_orders_flexible);
-            HYPRE_BoomerAMGFlexibleSetOuterWeights(amg_precond, outer_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetRelaxWeights(amg_precond, relax_weights_flexible);
-            HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
+            HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_precond, cycle_struct_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_precond, relax_types_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_precond, relax_orders_flexible);
+            HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_precond, outer_weights_flexible);
+            HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_precond, relax_weights_flexible);
+            HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
          }
          HYPRE_BoomerAMGSetAdditive(amg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(amg_precond, mult_add);

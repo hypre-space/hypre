@@ -2805,7 +2805,7 @@ hypre_BoomerAMGGetSmoothNumSweeps( void     *data,
 
 /* -------------FLEXIBLE AMG CYCLING SETTERS------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetCycleStruct( void     *data,
+hypre_BoomerAMGSetFlexibleCycleStruct( void     *data,
                                         HYPRE_Int  *cycle_struct_flexible)
 
 {
@@ -2856,7 +2856,7 @@ hypre_BoomerAMGFlexibleSetCycleStruct( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetRelaxTypes( void     *data,
+hypre_BoomerAMGSetFlexibleRelaxTypes( void     *data,
                                     HYPRE_Int  *relax_types_flexible)
 
 {
@@ -2883,7 +2883,7 @@ hypre_BoomerAMGFlexibleSetRelaxTypes( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetRelaxOrders( void     *data,
+hypre_BoomerAMGSetFlexibleRelaxOrders( void     *data,
                                     HYPRE_Int  *relax_orders_flexible)
 
 {
@@ -2910,7 +2910,7 @@ hypre_BoomerAMGFlexibleSetRelaxOrders( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetRelaxWeights( void     *data,
+hypre_BoomerAMGSetFlexibleRelaxWeights( void     *data,
                                     HYPRE_Real  *relax_weights_flexible)
 
 {
@@ -2937,7 +2937,7 @@ hypre_BoomerAMGFlexibleSetRelaxWeights( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetOuterWeights( void     *data,
+hypre_BoomerAMGSetFlexibleOuterWeights( void     *data,
                                     HYPRE_Real  *outer_weights_flexible)
 
 {
@@ -2964,7 +2964,7 @@ hypre_BoomerAMGFlexibleSetOuterWeights( void     *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGFlexibleSetCGCScalingFactors( void     *data,
+hypre_BoomerAMGSetFlexibleCGCScalingFactors( void     *data,
                                     HYPRE_Real  *cgc_scaling_factors_flexible)
 
 {

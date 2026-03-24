@@ -1088,17 +1088,17 @@ HYPRE_Int HYPRE_BoomerAMGGetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int *sm
 * scaling factors during coarse-grid correction (alpha); 
 * each list provides SEPARATE VALUES for each step during the cycling */
 
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetCycleStruct(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleCycleStruct(HYPRE_Solver  solver,
                                                HYPRE_Int    *cycle_struct_flexible);
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxTypes(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxTypes(HYPRE_Solver  solver,
                                               HYPRE_Int    *relax_types_flexible);
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxOrders(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxOrders(HYPRE_Solver  solver,
                                                HYPRE_Int    *relax_orders_flexible);
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetRelaxWeights(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxWeights(HYPRE_Solver  solver,
                                                 HYPRE_Real   *relax_weights_flexible);
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetOuterWeights(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleOuterWeights(HYPRE_Solver  solver,
                                                 HYPRE_Real   *outer_weights_flexible);
-HYPRE_Int HYPRE_BoomerAMGFlexibleSetCGCScalingFactors(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(HYPRE_Solver  solver,
                                                HYPRE_Real   *cgc_scaling_factors_flexible);
 /*------------------------------------------------------------------------------------
                   END OF FLEXIBLE AMG CYCLES
@@ -4078,22 +4078,22 @@ HYPRE_ParCSRHybridSetOmega(HYPRE_Solver  solver,
 * each list provides SEPARATE VALUES for each step during the cycling */
 
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetCycleStruct( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver  solver,
                                              HYPRE_Int    *cycle_struct_flexible );
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxTypes( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver  solver,
                                         HYPRE_Int    *relax_types_flexible );
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxOrders( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver  solver,
                                          HYPRE_Int    *relax_orders_flexible );
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxWeights( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver  solver,
                                           HYPRE_Real   *relax_weights_flexible );
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetOuterWeights( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver  solver,
                                  HYPRE_Real   *outer_weights_flexible );
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors( HYPRE_Solver  solver,
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver  solver,
                                      HYPRE_Real   *cgc_scaling_factors_flexible );
 /*-------------------------------------------------------------------------
                      END OF FLEXIBLE AMG CYCLES

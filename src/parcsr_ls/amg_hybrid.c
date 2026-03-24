@@ -2443,12 +2443,12 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          if (num_levels_flexible > 0)
          {
-         hypre_BoomerAMGFlexibleSetCycleStruct(pcg_precond, cycle_struct_flexible);
-         hypre_BoomerAMGFlexibleSetRelaxTypes(pcg_precond, relax_types_flexible);
-         hypre_BoomerAMGFlexibleSetRelaxOrders(pcg_precond, relax_orders_flexible);
-         hypre_BoomerAMGFlexibleSetRelaxWeights(pcg_precond, relax_weights_flexible);
-         hypre_BoomerAMGFlexibleSetOuterWeights(pcg_precond, outer_weights_flexible);
-         hypre_BoomerAMGFlexibleSetCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
+         hypre_BoomerAMGSetFlexibleCycleStruct(pcg_precond, cycle_struct_flexible);
+         hypre_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, relax_types_flexible);
+         hypre_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, relax_orders_flexible);
+         hypre_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, relax_weights_flexible);
+         hypre_BoomerAMGSetFlexibleOuterWeights(pcg_precond, outer_weights_flexible);
+         hypre_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
          }
 
          pcg_precond_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
