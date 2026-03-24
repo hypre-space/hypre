@@ -1979,8 +1979,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int        **boom_grp;
    HYPRE_Real        *boom_rlxw;
    HYPRE_Real        *boom_omega;
-   HYPRE_Int         *boom_cycle_struct_flexible, *boom_relax_types_flexible, *boom_relax_orders_flexible;
-   HYPRE_Real        *boom_relax_weights_flexible, *boom_outer_weights_flexible, *boom_cgc_scaling_factors_flexible;
+   HYPRE_Int         *boom_cycle_struct_flexible, *boom_relax_types_flexible,
+                     *boom_relax_orders_flexible;
+   HYPRE_Real        *boom_relax_weights_flexible, *boom_outer_weights_flexible,
+                     *boom_cgc_scaling_factors_flexible;
 
    HYPRE_Int          pcg_default;
    HYPRE_Int          (*pcg_precond_solve)(void*, void*, void*, void*);
@@ -2448,37 +2450,44 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             if (cycle_struct_flexible)
             {
                boom_cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_cycle_struct_flexible, cycle_struct_flexible, HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_cycle_struct_flexible, cycle_struct_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleCycleStruct(pcg_precond, boom_cycle_struct_flexible);
             }
             if (relax_types_flexible)
             {
                boom_relax_types_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_relax_types_flexible, relax_types_flexible, HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_types_flexible, relax_types_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, boom_relax_types_flexible);
             }
             if (relax_orders_flexible)
             {
                boom_relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_relax_orders_flexible, relax_orders_flexible, HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_orders_flexible, relax_orders_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, boom_relax_orders_flexible);
             }
             if (relax_weights_flexible)
             {
                boom_relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_relax_weights_flexible, relax_weights_flexible, HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_weights_flexible, relax_weights_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, boom_relax_weights_flexible);
             }
             if (outer_weights_flexible)
             {
                boom_outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_outer_weights_flexible, outer_weights_flexible, HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_outer_weights_flexible, outer_weights_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleOuterWeights(pcg_precond, boom_outer_weights_flexible);
             }
             if (cgc_scaling_factors_flexible)
             {
-               boom_cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
-               hypre_TMemcpy(boom_cgc_scaling_factors_flexible, cgc_scaling_factors_flexible, HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               boom_cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible,
+                                                                 HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_cgc_scaling_factors_flexible, cgc_scaling_factors_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                hypre_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, boom_cgc_scaling_factors_flexible);
             }
          }
