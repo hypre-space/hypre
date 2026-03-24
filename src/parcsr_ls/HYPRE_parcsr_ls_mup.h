@@ -4579,6 +4579,60 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver, HYPRE_Int *dof_func );
 
 HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors_flt( HYPRE_Solver solver, hypre_float *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors_dbl( HYPRE_Solver solver, hypre_double *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors_long_dbl( HYPRE_Solver solver, hypre_long_double *cgc_scaling_factors_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver solver, void *cgc_scaling_factors_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct_flt( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct_dbl( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct_long_dbl( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights_flt( HYPRE_Solver solver, hypre_float *outer_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights_dbl( HYPRE_Solver solver, hypre_double *outer_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights_long_dbl( HYPRE_Solver solver, hypre_long_double *outer_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver solver, void *outer_weights_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders_flt( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders_dbl( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders_long_dbl( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes_flt( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes_dbl( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes_long_dbl( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights_flt( HYPRE_Solver solver, hypre_float *relax_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights_dbl( HYPRE_Solver solver, hypre_double *relax_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights_long_dbl( HYPRE_Solver solver, hypre_long_double *relax_weights_flexible );
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver solver, void *relax_weights_flexible );
+
+HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxPoints_flt( HYPRE_Solver solver, HYPRE_Int **grid_relax_points );
 HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxPoints_dbl( HYPRE_Solver solver, HYPRE_Int **grid_relax_points );
@@ -7435,6 +7489,24 @@ HYPRE_ParCSRHybridSetDSCGMaxIter_pre( HYPRE_Precision precision, HYPRE_Solver so
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetDofFunc_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *dof_func );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *cgc_scaling_factors_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *outer_weights_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *relax_types_flexible );
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *relax_weights_flexible );
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxPoints_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int **grid_relax_points );

@@ -672,48 +672,6 @@ HYPRE_Int
 hypre_AMGHybridDestroy_long_dbl( void *AMGhybrid_vdata );
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetCGCScalingFactors_flt( void *AMGhybrid_vdata, hypre_float *cgc_scaling_factors_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCGCScalingFactors_dbl( void *AMGhybrid_vdata, hypre_double *cgc_scaling_factors_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCGCScalingFactors_long_dbl( void *AMGhybrid_vdata, hypre_long_double *cgc_scaling_factors_flexible );
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCycleStruct_flt( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCycleStruct_dbl( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCycleStruct_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetOuterWeights_flt( void *AMGhybrid_vdata, hypre_float *outer_weights_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetOuterWeights_dbl( void *AMGhybrid_vdata, hypre_double *outer_weights_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetOuterWeights_long_dbl( void *AMGhybrid_vdata, hypre_long_double *outer_weights_flexible );
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxOrders_flt( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxOrders_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxOrders_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxTypes_flt( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxTypes_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxTypes_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxWeights_flt( void *AMGhybrid_vdata, hypre_float *relax_weights_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxWeights_dbl( void *AMGhybrid_vdata, hypre_double *relax_weights_flexible );
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxWeights_long_dbl( void *AMGhybrid_vdata, hypre_long_double *relax_weights_flexible );
-
-HYPRE_Int
 hypre_AMGHybridGetDSCGNumIterations_flt( void *AMGhybrid_vdata, HYPRE_Int *dscg_num_its );
 HYPRE_Int
 hypre_AMGHybridGetDSCGNumIterations_dbl( void *AMGhybrid_vdata, HYPRE_Int *dscg_num_its );
@@ -831,6 +789,48 @@ HYPRE_Int
 hypre_AMGHybridSetDofFunc_dbl( void *AMGhybrid_vdata, HYPRE_Int *dof_func );
 HYPRE_Int
 hypre_AMGHybridSetDofFunc_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *dof_func );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors_flt( void *AMGhybrid_vdata, hypre_float *cgc_scaling_factors_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors_dbl( void *AMGhybrid_vdata, hypre_double *cgc_scaling_factors_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors_long_dbl( void *AMGhybrid_vdata, hypre_long_double *cgc_scaling_factors_flexible );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct_flt( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct_dbl( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights_flt( void *AMGhybrid_vdata, hypre_float *outer_weights_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights_dbl( void *AMGhybrid_vdata, hypre_double *outer_weights_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights_long_dbl( void *AMGhybrid_vdata, hypre_long_double *outer_weights_flexible );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders_flt( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes_flt( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes_long_dbl( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible );
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights_flt( void *AMGhybrid_vdata, hypre_float *relax_weights_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights_dbl( void *AMGhybrid_vdata, hypre_double *relax_weights_flexible );
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights_long_dbl( void *AMGhybrid_vdata, hypre_long_double *relax_weights_flexible );
 
 HYPRE_Int
 hypre_AMGHybridSetGridRelaxPoints_flt( void *AMGhybrid_vdata, HYPRE_Int **grid_relax_points );

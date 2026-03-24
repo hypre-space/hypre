@@ -1430,14 +1430,11 @@ hypre_AMGHybridSetLevelOuterWt( void   *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
-                     FLEXIBLE AMG CYCLING SETTERS
---------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetCycleStruct
+ * hypre_AMGHybridSetFlexibleCycleStruct
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetCycleStruct( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleCycleStruct( void  *AMGhybrid_vdata,
                                        HYPRE_Int    *cycle_struct_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1487,11 +1484,11 @@ hypre_AMGHybridFlexibleSetCycleStruct( void  *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetRelaxTypes
+ * hypre_AMGHybridSetFlexibleRelaxTypes
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxTypes( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleRelaxTypes( void  *AMGhybrid_vdata,
                                       HYPRE_Int    *relax_types_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1517,11 +1514,11 @@ hypre_AMGHybridFlexibleSetRelaxTypes( void  *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetRelaxOrders
+ * hypre_AMGHybridSetFlexibleRelaxOrders
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxOrders( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleRelaxOrders( void  *AMGhybrid_vdata,
                                        HYPRE_Int    *relax_orders_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1547,11 +1544,11 @@ hypre_AMGHybridFlexibleSetRelaxOrders( void  *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetRelaxWeights
+ * hypre_AMGHybridSetFlexibleRelaxWeights
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxWeights( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleRelaxWeights( void  *AMGhybrid_vdata,
                                         HYPRE_Real    *relax_weights_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1577,11 +1574,11 @@ hypre_AMGHybridFlexibleSetRelaxWeights( void  *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetOuterWeights
+ * hypre_AMGHybridSetFlexibleOuterWeights
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetOuterWeights( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleOuterWeights( void  *AMGhybrid_vdata,
                                         HYPRE_Real    *outer_weights_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1607,11 +1604,11 @@ hypre_AMGHybridFlexibleSetOuterWeights( void  *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridFlexibleSetCGCScalingFactors
+ * hypre_AMGHybridSetFlexibleCGCScalingFactors
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetCGCScalingFactors( void  *AMGhybrid_vdata,
+hypre_AMGHybridSetFlexibleCGCScalingFactors( void  *AMGhybrid_vdata,
                                              HYPRE_Real    *cgc_scaling_factors_flexible)
 {
    hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
@@ -1636,9 +1633,6 @@ hypre_AMGHybridFlexibleSetCGCScalingFactors( void  *AMGhybrid_vdata,
    return hypre_error_flag;
 }
 
-/* ------------------------------------------------------------------------
-                     END OF FLEXIBLE AMG CYCLING SETTERS
------------------------------------------------------------------------- */
 /*--------------------------------------------------------------------------
  * hypre_AMGHybridSetNumPaths
  *--------------------------------------------------------------------------*/

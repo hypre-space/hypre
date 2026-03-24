@@ -825,54 +825,6 @@ hypre_AMGHybridDestroy( void *AMGhybrid_vdata )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridFlexibleSetCGCScalingFactors( void *AMGhybrid_vdata, HYPRE_Real *cgc_scaling_factors_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetCGCScalingFactors)( AMGhybrid_vdata, cgc_scaling_factors_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetCycleStruct( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetCycleStruct)( AMGhybrid_vdata, cycle_struct_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetOuterWeights( void *AMGhybrid_vdata, HYPRE_Real *outer_weights_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetOuterWeights)( AMGhybrid_vdata, outer_weights_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxOrders( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetRelaxOrders)( AMGhybrid_vdata, relax_orders_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxTypes( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetRelaxTypes)( AMGhybrid_vdata, relax_types_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_AMGHybridFlexibleSetRelaxWeights( void *AMGhybrid_vdata, HYPRE_Real *relax_weights_flexible )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridFlexibleSetRelaxWeights)( AMGhybrid_vdata, relax_weights_flexible );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_AMGHybridGetDSCGNumIterations( void *AMGhybrid_vdata, HYPRE_Int *dscg_num_its )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridGetDSCGNumIterations)( AMGhybrid_vdata, dscg_num_its );
@@ -1004,6 +956,54 @@ HYPRE_Int
 hypre_AMGHybridSetDofFunc( void *AMGhybrid_vdata, HYPRE_Int *dof_func )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetDofFunc)( AMGhybrid_vdata, dof_func );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors( void *AMGhybrid_vdata, HYPRE_Real *cgc_scaling_factors_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleCGCScalingFactors)( AMGhybrid_vdata, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleCycleStruct)( AMGhybrid_vdata, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights( void *AMGhybrid_vdata, HYPRE_Real *outer_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleOuterWeights)( AMGhybrid_vdata, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxOrders)( AMGhybrid_vdata, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxTypes)( AMGhybrid_vdata, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights( void *AMGhybrid_vdata, HYPRE_Real *relax_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxWeights)( AMGhybrid_vdata, relax_weights_flexible );
 }
 
 /*--------------------------------------------------------------------------*/
