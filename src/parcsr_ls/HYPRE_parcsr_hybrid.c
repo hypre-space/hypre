@@ -560,49 +560,69 @@ HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
 }
 
 /*----------------------------------------------------------------------------------------
- *                               FLEXIBLE AMG CYCLING
+ * HYPRE_ParCSRHybridSetFlexibleCycleStruct
  *----------------------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetCycleStruct( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver    solver,
                                         HYPRE_Int     *cycle_struct_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetCycleStruct( (void *) solver, cycle_struct_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleCycleStruct( (void *) solver, cycle_struct_flexible ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetFlexibleRelaxTypes
+ *----------------------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxTypes( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver    solver,
                                      HYPRE_Int    *relax_types_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetRelaxTypes( (void *) solver, relax_types_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleRelaxTypes( (void *) solver, relax_types_flexible ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetFlexibleRelaxOrders
+ *----------------------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxOrders( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver    solver,
                                       HYPRE_Int    *relax_orders_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetRelaxOrders( (void *) solver, relax_orders_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleRelaxOrders( (void *) solver, relax_orders_flexible ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetFlexibleRelaxWeights
+ *----------------------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetRelaxWeights( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver    solver,
                                        HYPRE_Real   *relax_weights_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetRelaxWeights( (void *) solver, relax_weights_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleRelaxWeights( (void *) solver, relax_weights_flexible ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetFlexibleOuterWeights
+ *----------------------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetOuterWeights( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver    solver,
                                       HYPRE_Real   *outer_weights_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetOuterWeights( (void *) solver, outer_weights_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleOuterWeights( (void *) solver, outer_weights_flexible ) );
 }
 
+/*----------------------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors
+ *----------------------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ParCSRHybridFlexibleSetCGCScalingFactors( HYPRE_Solver    solver,
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver    solver,
                                         HYPRE_Real   *cgc_scaling_factors_flexible )
 {
-   return ( hypre_AMGHybridFlexibleSetCGCScalingFactors( (void *) solver, cgc_scaling_factors_flexible ) );
+   return ( hypre_AMGHybridSetFlexibleCGCScalingFactors( (void *) solver, cgc_scaling_factors_flexible ) );
 }
 
 /*--------------------------------------------------------------------------

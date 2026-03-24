@@ -689,6 +689,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        * Override lev_counter for flexible cycles
        *-------------------------------------------*/
       if (num_levels_flexible > 0) 
+      {
          if ((level < num_levels_flexible - 1) || (level == num_levels -1))
          {
             if (index_flex == (length_cycle_flexible - 1))
@@ -711,6 +712,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                } 
             index_flex++;
          }
+      }
 
       //if ( level != num_levels-1 && lev_counter[level] >= 0 )
       if (lev_counter[level] >= 0 && level != num_levels - 1)

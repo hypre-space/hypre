@@ -1079,30 +1079,73 @@ HYPRE_Int HYPRE_BoomerAMGSetSmoothNumSweeps(HYPRE_Solver solver,
 
 HYPRE_Int HYPRE_BoomerAMGGetSmoothNumSweeps ( HYPRE_Solver solver, HYPRE_Int *smooth_num_sweeps );
 
-/*-----------------------------------------------------------------------------------
-                      FLEXIBLE AMG CYCLES
--------------------------------------------------------------------------------------
-* Flexible AMG cycles passed as a list of arrays, defining:  
-* the cycling pattern (which could be arbitrary, non-recursive), 
-* relaxation types / orders / weights, and outer weights (omega),
-* scaling factors during coarse-grid correction (alpha); 
-* each list provides SEPARATE VALUES for each step during the cycling */
-
+/**
+ * (Optional) Defines a flexible cycle structure for the BoomerAMG cycle.
+ * Cycle structure is defined by an array of integers with values:
+ *
+ *   -2 : terminate the cycle
+ *   -1 : move to the next coarser level
+ *    0 : remain on the current level
+ *    1 : move to the next finer level
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleCycleStruct(HYPRE_Solver  solver,
                                                HYPRE_Int    *cycle_struct_flexible);
+
+/**
+ * (Optional) Defines the relax orders (lexicographical or CF) used during
+ * a flexible cycle. Different relax orders may be used at each point in
+ * the cycle. This must be used in conjunction with a cycle structure defined
+ * by HYPRE_BoomerAMGSetFlexibleRelaxTypes. The array of relax orders
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetRelaxOrder.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxTypes(HYPRE_Solver  solver,
                                               HYPRE_Int    *relax_types_flexible);
+/**
+ * (Optional) Defines the relax orders (lexicographical or CF) used during
+ * a flexible cycle. Different relax orders may be used at each point in
+ * the cycle. This must be used in conjunction with a cycle structure defined
+ * by HYPRE_BoomerAMGSetFlexibleRelaxTypes. The array of relax orders
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetRelaxOrder.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxOrders(HYPRE_Solver  solver,
                                                HYPRE_Int    *relax_orders_flexible);
+
+/**
+ * (Optional) Defines the relaxation weigths used during a flexible cycle.
+ * Different relaxation weigths may be used at each point in the cycle.
+ * This must be used in conjunction with a cycle structure defined by
+ * HYPRE_BoomerAMGSetFlexibleRelaxTypes. The array of relax weigths
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetRelaxWeight.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleRelaxWeights(HYPRE_Solver  solver,
                                                 HYPRE_Real   *relax_weights_flexible);
+
+/**
+ * (Optional) Defines the outer relaxation weigths used during a flexible
+ * cycle. Different outer weigths may be used at each point in the cycle.
+ * This must be used in conjunction with a cycle structure defined by
+ * HYPRE_BoomerAMGSetFlexibleRelaxTypes. The array of outer weigths
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetOuterWt.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleOuterWeights(HYPRE_Solver  solver,
                                                 HYPRE_Real   *outer_weights_flexible);
+
+/**
+ * (Optional) Defines the a scaling factor for the coarse-grid correction
+ * during a flexible cycle. Different scaling factors may be used at each
+ * point in the cycle. This must be used in conjunction with a cycle structure
+ * defined by HYPRE_BoomerAMGSetFlexibleRelaxTypes. The array of coarse-
+ * grid correction scaling factors passed must have the same length as the
+ * array defining the cycle structure. Note, however, that the scaling factors
+ * will only be used when the flexible cycle performs a coarse-grid correction,
+ * i.e. when the value of the array passed for the cycle structure is 1.
+ **/
 HYPRE_Int HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(HYPRE_Solver  solver,
                                                HYPRE_Real   *cgc_scaling_factors_flexible);
-/*------------------------------------------------------------------------------------
-                  END OF FLEXIBLE AMG CYCLES
---------------------------------------------------------------------------------------       
 
 /**
  * (Optional) Defines which variant of the Schwarz method is used.
@@ -4063,42 +4106,86 @@ HYPRE_ParCSRHybridSetOmega(HYPRE_Solver  solver,
                            HYPRE_Real   *omega);
 
 /**
+ * (Optional) Defines a flexible cycle structure for the BoomerAMG cycle.
+ * Cycle structure is defined by an array of integers with values:
+ *
+ *   -2 : terminate the cycle
+ *   -1 : move to the next coarser level
+ *    0 : remain on the current level
+ *    1 : move to the next finer level
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver  solver,
+                                             HYPRE_Int    *cycle_struct_flexible );
+
+/**
+ * (Optional) Defines the relaxation types used during a flexible cycle.
+ * Different relaxation methods may be used at each point in the cycle.
+ * This must be used in conjunction with a cycle structure defined by
+ * HYPRE_ParCSRHybridSetFlexibleCycleStruct. The array of relax types
+ * passed must have the same length as the array defining the cycle
+ * structure. See HYPRE_BoomerAMGSetRelaxType for possible relax type
+ * values.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver  solver,
+                                        HYPRE_Int    *relax_types_flexible );
+
+/**
+ * (Optional) Defines the relax orders (lexicographical or CF) used during
+ * a flexible cycle. Different relax orders may be used at each point in
+ * the cycle. This must be used in conjunction with a cycle structure defined
+ * by HYPRE_ParCSRHybridSetFlexibleCycleStruct. The array of relax orders
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetRelaxOrder.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver  solver,
+                                         HYPRE_Int    *relax_orders_flexible );
+
+/**
+ * (Optional) Defines the relaxation weigths used during a flexible cycle.
+ * Different relaxation weigths may be used at each point in the cycle.
+ * This must be used in conjunction with a cycle structure defined by
+ * HYPRE_ParCSRHybridSetFlexibleCycleStruct. The array of relax weigths
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetRelaxWeight.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver  solver,
+                                          HYPRE_Real   *relax_weights_flexible );
+
+/**
+ * (Optional) Defines the outer relaxation weigths used during a flexible
+ * cycle. Different outer weigths may be used at each point in the cycle.
+ * This must be used in conjunction with a cycle structure defined by
+ * HYPRE_ParCSRHybridSetFlexibleCycleStruct. The array of outer weigths
+ * passed must have the same length as the array defining the cycle
+ * structure. See also HYPRE_BoomerAMGSetOuterWt.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver  solver,
+                                 HYPRE_Real   *outer_weights_flexible );
+
+/**
+ * (Optional) Defines the a scaling factor for the coarse-grid correction
+ * during a flexible cycle. Different scaling factors may be used at each
+ * point in the cycle. This must be used in conjunction with a cycle structure
+ * defined by HYPRE_ParCSRHybridSetFlexibleCycleStruct. The array of coarse-
+ * grid correction scaling factors passed must have the same length as the
+ * array defining the cycle structure. Note, however, that the scaling factors
+ * will only be used when the flexible cycle performs a coarse-grid correction,
+ * i.e. when the value of the array passed for the cycle structure is 1.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver  solver,
+                                     HYPRE_Real   *cgc_scaling_factors_flexible );
+
+/**
  * (Optional) Defines the number of levels of aggressive coarsening,
  * starting with the finest level.
  * The default is 0, i.e. no aggressive coarsening.
  **/
-
-/*-------------------------------------------------------------------------
-                      FLEXIBLE AMG CYCLES
----------------------------------------------------------------------------
-* Flexible AMG cycles passed as a list of arrays defining:  
-* the cycling pattern (which could be arbitrary, non-recursive), 
-* relaxation types / orders / weights, and outer weights (omega),
-* scaling factors during coarse-grid correction (alpha); 
-* each list provides SEPARATE VALUES for each step during the cycling */
-
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver  solver,
-                                             HYPRE_Int    *cycle_struct_flexible );
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver  solver,
-                                        HYPRE_Int    *relax_types_flexible );
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver  solver,
-                                         HYPRE_Int    *relax_orders_flexible );
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver  solver,
-                                          HYPRE_Real   *relax_weights_flexible );
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver  solver,
-                                 HYPRE_Real   *outer_weights_flexible );
-HYPRE_Int
-HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver  solver,
-                                     HYPRE_Real   *cgc_scaling_factors_flexible );
-/*-------------------------------------------------------------------------
-                     END OF FLEXIBLE AMG CYCLES
----------------------------------------------------------------------------*/
-                              
 HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
