@@ -1347,10 +1347,13 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      /* allocate CommInfo arguments if needed */
                      if (cinfo_a[cinfoi] == NULL)
                      {
-                        HYPRE_Int  i_num_boxes = hypre_StructGridNumBoxes(
-                                                    hypre_SStructPGridSGrid(pgrids[pi], vi));
-                        HYPRE_Int  j_num_boxes = hypre_StructGridNumBoxes(
-                                                    hypre_SStructPGridSGrid(pgrids[pj], vj));
+                        hypre_StructGrid  *i_sgrid       = hypre_SStructPGridSGrid(pgrids[pi], vi);
+                        hypre_StructGrid  *j_sgrid       = hypre_SStructPGridSGrid(pgrids[pj], vj);
+                        HYPRE_Int          i_num_boxes   = hypre_StructGridNumBoxes(i_sgrid);
+                        HYPRE_Int          j_num_boxes   = hypre_StructGridNumBoxes(j_sgrid);
+                        HYPRE_Int         *i_baseboxnums = hypre_StructGridBaseBoxnums(i_sgrid);
+                        HYPRE_Int         *j_baseboxnums = hypre_StructGridBaseBoxnums(j_sgrid);
+                        HYPRE_Int          k;
 
                         cnum_transforms = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                         ccoords = hypre_CTAlloc(hypre_Index, nvneighbors[pi][vi],
@@ -1360,6 +1363,10 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                         cinfo = hypre_TAlloc(CInfo, 1, HYPRE_MEMORY_HOST);
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
+                        hypre_ForBoxI(k, (cinfo->boxes))
+                        {
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) = i_baseboxnums[k];
+                        }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, i_num_boxes,
                                                        HYPRE_MEMORY_HOST);
@@ -1374,6 +1381,10 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                         cinfo = hypre_TAlloc(CInfo, 1, HYPRE_MEMORY_HOST);
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
+                        hypre_ForBoxI(k, (cinfo->boxes))
+                        {
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) = j_baseboxnums[k];
+                        }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, j_num_boxes,
                                                        HYPRE_MEMORY_HOST);
