@@ -1236,7 +1236,6 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
                            &remote_all_boxnums);
 
       comm_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(local_boxes), ndim);
-      hypre_ForBoxI(i, local_boxes)
       comm_procs = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(local_boxes), HYPRE_MEMORY_HOST);
       comm_boxnums = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(local_boxes),
                                    HYPRE_MEMORY_HOST);

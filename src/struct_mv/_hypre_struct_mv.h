@@ -1067,11 +1067,12 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType      *copy_to_type;
 
    /* needed for setting recv entries after the first communication */
-   HYPRE_Int            num_blocks;        /* arrays below are num_blocks x ... */
-   hypre_Index         *recv_strides;
-   hypre_BoxArray     **recv_data_spaces;  /* recv data dimensions (by box) */
-   HYPRE_Int          **recv_data_offsets; /* offsets into recv data (by box) */
-   HYPRE_Int           *boxes_match;       /* same meaning as in CommInfo */
+   HYPRE_Int            num_blocks;          /* arrays below are num_blocks x ... */
+   hypre_BoxArrayArray**b_recv_boxes;        /* needed only for mapping into data boxes */
+   hypre_Index         *b_recv_stride;
+   hypre_BoxArray     **b_recv_data_space;   /* recv data dimensions (by box) */
+   HYPRE_Int          **b_recv_data_offsets; /* offsets into recv data (by box) */
+   HYPRE_Int           *b_boxes_match;       /* same meaning as in CommInfo */
 
    hypre_Index          identity_coord;
    hypre_Index          identity_dir;
@@ -1204,10 +1205,11 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
 #define hypre_CommPkgNumBlocks(comm_pkg)       (comm_pkg -> num_blocks)
-#define hypre_CommPkgRecvStrides(comm_pkg)     (comm_pkg -> recv_strides)
-#define hypre_CommPkgRecvDataSpaces(comm_pkg)  (comm_pkg -> recv_data_spaces)
-#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
-#define hypre_CommPkgBoxesMatch(comm_pkg)      (comm_pkg -> boxes_match)
+#define hypre_CommPkgBRecvBoxes(comm_pkg)      (comm_pkg -> b_recv_boxes)
+#define hypre_CommPkgBRecvStride(comm_pkg)     (comm_pkg -> b_recv_stride)
+#define hypre_CommPkgBRecvDataSpace(comm_pkg)  (comm_pkg -> b_recv_data_space)
+#define hypre_CommPkgBRecvDataOffsets(comm_pkg)(comm_pkg -> b_recv_data_offsets)
+#define hypre_CommPkgBBoxesMatch(comm_pkg)     (comm_pkg -> b_boxes_match)
 
 #define hypre_CommPkgIdentityCoord(comm_pkg)   (comm_pkg -> idenditity_coord)
 #define hypre_CommPkgIdentityDir(comm_pkg)     (comm_pkg -> idenditity_dir)
@@ -2251,10 +2253,15 @@ HYPRE_Int hypre_CommPkgCreate ( hypre_CommInfo *comm_info, hypre_BoxArray *send_
                                 HYPRE_Int **orders, HYPRE_Int reverse,
                                 MPI_Comm comm, HYPRE_MemoryLocation memory_location,
                                 hypre_CommPkg **comm_pkg_ptr );
-HYPRE_Int hypre_CommBlockSetEntries ( hypre_CommBlock *comm_block, HYPRE_Int *boxnums,
-                                      hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride,
-                                      hypre_BoxArray *data_space,
-                                      HYPRE_Int *data_offsets );
+HYPRE_Int
+hypre_CommBlockSetEntries( hypre_CommBlock      *comm_block,
+                           HYPRE_Int            *boxnums,
+                           hypre_Box            *boxes,
+                           HYPRE_Int            *orders,
+                           hypre_BoxArrayArray  *comm_boxes,
+                           hypre_Index           stride,
+                           hypre_BoxArray       *data_space,
+                           HYPRE_Int            *data_offsets );
 HYPRE_Int hypre_CommBlockSetEntry ( hypre_CommBlock *comm_block, HYPRE_Int comm_num, hypre_Box *box,
                                     hypre_Index stride, hypre_Index coord, hypre_Index dir,
                                     HYPRE_Int *order, HYPRE_Int *rem_order,
