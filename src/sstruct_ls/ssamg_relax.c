@@ -1001,7 +1001,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                         sb = hypre_SStructPVectorSVector(pb, vi);
                         sx = hypre_SStructPVectorSVector(px, vi);
 
-                        A_data_box = hypre_StructMatrixDataBox(sA, i);
+                        A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
                         b_data_box = hypre_StructVectorBoxDataBox(sb, i);
                         x_data_box = hypre_StructVectorBoxDataBox(sx, i);
 
@@ -1116,7 +1116,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                      sx = hypre_SStructPVectorSVector(px, 0);
                      st = hypre_SStructPVectorSVector(pt, 0);
 
-                     A_data_box = hypre_StructMatrixDataBox(sA, i);
+                     A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
                      b_data_box = hypre_StructVectorBoxDataBox(sb, i);
                      x_data_box = hypre_StructVectorBoxDataBox(sx, i);
                      t_data_box = hypre_StructVectorBoxDataBox(st, i);
@@ -1214,7 +1214,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                   start  = hypre_BoxIMin(compute_box);
                   hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
-                  A_data_box = hypre_StructMatrixDataBox(sA, i);
+                  A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
                   x_data_box = hypre_StructVectorBoxDataBox(sx, i);
                   t_data_box = hypre_StructVectorBoxDataBox(st, i);
 

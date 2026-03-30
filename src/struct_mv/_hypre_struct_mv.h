@@ -1621,19 +1621,40 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 
 // The following use a base-grid box index
-#define hypre_StructMatrixDataSpaceBox(matrix, b) \
+#define hypre_StructMatrixBaseDataBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
-#define hypre_StructMatrixBoxData(matrix, b, s) \
+#define hypre_StructMatrixBaseData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-#define hypre_StructMatrixBoxDataValue(matrix, b, s, data_box, index) \
-(hypre_StructMatrixBoxData(matrix, b, s) + hypre_BoxIndexRank(data_box, index))
+#define hypre_StructMatrixBaseDataValue(matrix, b, s, index) \
+(hypre_StructMatrixBaseData(matrix, b, s) + \
+ hypre_BoxIndexRank(hypre_StructMatrixBaseDataBox(matrix, b), index))
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
-// New macro names
 // The following use a grid box index
-#define hypre_StructMatrixDataBox(matrix, i) \
-hypre_StructMatrixDataSpaceBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixRanDataBox(matrix, i) \
+hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixRanData(matrix, i, s) \
+hypre_StructMatrixBaseData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
+#define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
+hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
+#define hypre_StructMatrixDomDataBox(matrix, i) \
+hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
+#define hypre_StructMatrixDomData(matrix, i, s) \
+hypre_StructMatrixBaseData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
+#define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
+hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
+// The following assume a square matrix
+// RDF BASE - fix these later - they currently assume base-grid and box indexes are the same
+//          - somewhere in SMG there is a distinction between RanBoxnums and BaseBoxnums
+#define hypre_StructMatrixBox(matrix, i) \
+hypre_StructGridBox(hypre_StructMatrixGrid(matrix), i)
+#define hypre_StructMatrixBoxDataBox(matrix, i) \
+hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixBoxData(matrix, i, s) \
+hypre_StructMatrixBaseData(matrix, i, s)
+#define hypre_StructMatrixBoxDataValue(matrix, i, s, index) \
+hypre_StructMatrixBaseDataValue(matrix, i, s, index)
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)

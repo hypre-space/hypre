@@ -32,13 +32,13 @@
    hypre_SubtractIndexes(offset, xdstart, ndim, offset);
 
 #define HYPRE_SET_CAX(Ap, xoff, entry)                               \
-   Ap = hypre_StructMatrixBoxData(A, Ab, entry);                     \
+   Ap = hypre_StructMatrixBaseData(A, Ab, entry);                    \
    hypre_AddIndexes(start, stencil_shape[entry], ndim, offset);      \
    HYPRE_MAP_X_OFFSET(offset);                                       \
    xoff = hypre_BoxOffsetDistance(x_data_box, offset);
 
 #define HYPRE_SET_CAX_TRANS(Ap, xoff, entry)                         \
-   Ap = hypre_StructMatrixBoxData(A, Ab, entry);                     \
+   Ap = hypre_StructMatrixBaseData(A, Ab, entry);                    \
    hypre_SubtractIndexes(start, stencil_shape[entry], ndim, offset); \
    HYPRE_MAP_X_OFFSET(offset);                                       \
    xoff = hypre_BoxOffsetDistance(x_data_box, offset);

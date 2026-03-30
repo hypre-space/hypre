@@ -646,7 +646,7 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_StructMatrixDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i);
+            A_data_box = hypre_StructMatrixBoxDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i);
             b_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(b, 0), i);
             x_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(x, 0), i);
 
@@ -786,7 +786,7 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_StructMatrixDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i );
+            A_data_box = hypre_StructMatrixBoxDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i );
             b_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(b, 0), i );
             x_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(x, 0), i );
             t_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(t, 0), i );
