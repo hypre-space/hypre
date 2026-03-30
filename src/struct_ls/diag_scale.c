@@ -47,17 +47,17 @@ hypre_StructDiagScale( hypre_StructMatrix   *A,
 
    for (i = 0; i < nboxes; i++)
    {
-      hypre_StructVectorGridBoxCopy(x, i, loop_box);
+      hypre_StructVectorBoxCopy(x, i, loop_box);
       start = hypre_BoxIMin(loop_box);
 
       A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      x_data_box = hypre_StructVectorGridDataBox(x, i);
-      y_data_box = hypre_StructVectorGridDataBox(y, i);
+      x_data_box = hypre_StructVectorBoxDataBox(x, i);
+      y_data_box = hypre_StructVectorBoxDataBox(y, i);
 
       hypre_SetIndex(index, 0);
       Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-      xp = hypre_StructVectorGridData(x, i);
-      yp = hypre_StructVectorGridData(y, i);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetSize(loop_box, loop_size);
 

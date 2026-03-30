@@ -446,8 +446,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       xb = 0;
       for (i = 0; i < ran_nboxes; i++)
       {
-         HYPRE_Int   *Aids = hypre_StructMatrixBoxIDs(A);
-         HYPRE_Int   *xids = hypre_StructVectorBoxIDs(x);
+         HYPRE_Int   *Aids = hypre_StructMatrixBaseBoxIDs(A);
+         HYPRE_Int   *xids = hypre_StructVectorBaseBoxIDs(x);
          HYPRE_Int    num_ss;
          HYPRE_Int   *se_sspaces;
          hypre_Index *ss_origins;

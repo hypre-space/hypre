@@ -150,12 +150,10 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSaveDataSpace(matrix)       ((matrix) -> save_data_space)
 #define hypre_StructMatrixSaveDataSize(matrix)        ((matrix) -> save_data_size)
 
-#define hypre_StructMatrixBoxIDs(matrix) \
+#define hypre_StructMatrixBaseBoxIDs(matrix) \
 hypre_BoxArrayIDs(hypre_StructMatrixDataSpace(matrix))
-
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
-
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 
