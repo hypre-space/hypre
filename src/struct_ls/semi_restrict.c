@@ -229,9 +229,9 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-         R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
-         r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
-         rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
+         R_dbox  = hypre_StructMatrixBoxDataBox(R,  fi);
+         r_dbox  = hypre_StructVectorBoxDataBox(r,  fi);
+         rc_dbox = hypre_StructVectorBoxDataBox(rc, ci);
 
          // RL: PTROFFSET
          HYPRE_Int Rp0_offset = 0, rp0_offset, rp1_offset;

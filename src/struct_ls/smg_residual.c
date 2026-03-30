@@ -184,10 +184,8 @@ hypre_SMGResidual( void               *residual_vdata,
                compute_box = hypre_BoxArrayBox(compute_box_a, i);
                start = hypre_BoxIMin(compute_box);
 
-               b_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-               r_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+               b_data_box = hypre_StructVectorBoxDataBox(b, i);
+               r_data_box = hypre_StructVectorBoxDataBox(r, i);
 
                bp = hypre_StructVectorBoxData(b, i);
                rp = hypre_StructVectorBoxData(r, i);
@@ -223,9 +221,9 @@ hypre_SMGResidual( void               *residual_vdata,
       {
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+         A_data_box = hypre_StructMatrixBoxDataBox(A, i);
+         x_data_box = hypre_StructVectorBoxDataBox(x, i);
+         r_data_box = hypre_StructVectorBoxDataBox(r, i);
 
          rp = hypre_StructVectorBoxData(r, i);
 

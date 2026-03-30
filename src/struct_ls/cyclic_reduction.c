@@ -254,8 +254,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
       cstart = hypre_BoxIMin(cgrid_box);
       hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-      Ac_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(Ac), ci);
+      A_dbox  = hypre_StructMatrixBoxDataBox(A, fi);
+      Ac_dbox = hypre_StructMatrixBoxDataBox(Ac, ci);
 
       /*-----------------------------------------------
        * Extract pointers for 3-point fine grid operator:
@@ -403,7 +403,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
          cstart = hypre_BoxIMin(cgrid_box);
 
-         Ac_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(Ac), ci);
+         Ac_dbox = hypre_StructMatrixBoxDataBox(Ac, ci);
 
          /*-----------------------------------------------
           * Extract pointers for coarse grid operator - always 3-point:
@@ -805,8 +805,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    {
       compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-      x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), fi);
-      b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), fi);
+      x_dbox = hypre_StructVectorBoxDataBox(x, fi);
+      b_dbox = hypre_StructVectorBoxDataBox(b, fi);
 
       xp = hypre_StructVectorBoxData(x, fi);
       bp = hypre_StructVectorBoxData(b, fi);
@@ -855,8 +855,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       {
          compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-         x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+         A_dbox = hypre_StructMatrixBoxDataBox(A_l[l], fi);
+         x_dbox = hypre_StructVectorBoxDataBox(x_l[l], fi);
 
          hypre_SetIndex3(index, 0, 0, 0);
          Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
@@ -914,9 +914,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-            A_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-            x_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
-            xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l + 1]), ci);
+            A_dbox  = hypre_StructMatrixBoxDataBox(A_l[l], fi);
+            x_dbox  = hypre_StructVectorBoxDataBox(x_l[l], fi);
+            xc_dbox = hypre_StructVectorBoxDataBox(x_l[l + 1], ci);
 
             xp  = hypre_StructVectorBoxData(x_l[l], fi);
             xcp = hypre_StructVectorBoxData(x_l[l + 1], ci);
@@ -977,8 +977,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    {
       compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-      x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+      A_dbox = hypre_StructMatrixBoxDataBox(A_l[l], fi);
+      x_dbox = hypre_StructVectorBoxDataBox(x_l[l], fi);
 
       hypre_SetIndex3(index, 0, 0, 0);
       Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
@@ -1038,8 +1038,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
          hypre_StructMapCoarseToFine(startc, cindex, stride, start);
 
-         x_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
-         xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l + 1]), ci);
+         x_dbox  = hypre_StructVectorBoxDataBox(x_l[l], fi);
+         xc_dbox = hypre_StructVectorBoxDataBox(x_l[l + 1], ci);
 
          xp  = hypre_StructVectorBoxData(x_l[l], fi);
          xcp = hypre_StructVectorBoxData(x_l[l + 1], ci);
@@ -1083,8 +1083,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-            A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-            x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+            A_dbox = hypre_StructMatrixBoxDataBox(A_l[l], fi);
+            x_dbox = hypre_StructVectorBoxDataBox(x_l[l], fi);
 
             hypre_SetIndex3(index, 0, 0, 0);
             Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);

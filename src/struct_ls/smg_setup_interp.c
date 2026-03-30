@@ -235,10 +235,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             compute_box_a =
                hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            x_data_box  =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-            PT_data_box =
-               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+            x_data_box  = hypre_StructVectorBoxDataBox(x, i);
+            PT_data_box = hypre_StructMatrixBoxDataBox(PT, i);
 
             xp  = hypre_StructVectorBoxData(x, i);
             PTp = hypre_StructMatrixBoxData(PT, i, si);

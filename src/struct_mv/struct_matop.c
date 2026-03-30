@@ -46,7 +46,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
       start  = hypre_BoxIMin(compute_box);
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      A_dbox = hypre_StructMatrixBoxDataBox(A, i);
       hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
       Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
@@ -920,8 +920,8 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
       box = hypre_BoxArrayBox(boxes, i);
       hypre_BoxGetSize(box, loop_size);
 
-      Adbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      rdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rowsum), i);
+      Adbox = hypre_StructMatrixBoxDataBox(A, i);
+      rdbox = hypre_StructVectorBoxDataBox(rowsum, i);
 
       /* unroll up to depth UNROLL_MAXDEPTH */
       for (si = 0; si < stencil_size; si += UNROLL_MAXDEPTH)

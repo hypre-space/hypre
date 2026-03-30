@@ -1246,7 +1246,6 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
    HYPRE_Complex      *vp;
 
-   hypre_BoxArray     *boxes;
    hypre_Box          *box;
    hypre_BoxArray     *diff_boxes;
    hypre_Box          *diff_box;
@@ -1254,7 +1253,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
    hypre_IndexRef      start;
    hypre_Index         ustride;
 
-   HYPRE_Int           i, j;
+   HYPRE_Int           i, j, nboxes;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -1262,12 +1261,12 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
    hypre_SetIndex(ustride, 1);
 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   nboxes = hypre_StructVectorNBoxes(vector);
    diff_boxes = hypre_BoxArrayCreate(0, ndim);
-   hypre_ForBoxI(i, boxes)
+   for (i = 0; i < nboxes; i++)
    {
-      box        = hypre_BoxArrayBox(boxes, i);
-      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      box        = hypre_StructVectorBox(vector, i);
+      v_data_box = hypre_StructVectorBoxDataBox(vector, i);
       hypre_BoxArraySetSize(diff_boxes, 0);
       hypre_SubtractBoxes(v_data_box, box, diff_boxes);
 
@@ -1333,8 +1332,7 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
       {
          box        = hypre_BoxArrayBox(boxes, i);
          boundary_boxes = hypre_BoxArrayCreate( 0, ndim );
-         v_data_box =
-            hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+         v_data_box = hypre_StructVectorBoxDataBox(vector, i);
          hypre_BoxBoundaryG( v_data_box, grid, boundary_boxes );
          vp = hypre_StructVectorBoxData(vector, i);
 
@@ -1753,8 +1751,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    hypre_ForBoxI(i, boxes)
    {
       box  = hypre_BoxArrayBox(boxes, i);
-      /*v_data_box =
-        hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);*/
+      /*v_data_box = hypre_StructVectorBoxDataBox(vector, i);*/
       data = hypre_StructVectorBoxData(vector, i);
       hypre_BoxGetSize(box, loop_size);
       hypre_CopyIndex( hypre_BoxIMin(box), imin );

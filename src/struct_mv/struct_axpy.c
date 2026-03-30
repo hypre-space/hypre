@@ -167,9 +167,9 @@ hypre_StructVectorPointwiseDivpy( HYPRE_Complex       alpha,
       box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      xdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      ydbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-      zdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(z), i);
+      xdbox = hypre_StructVectorBoxDataBox(x, i);
+      ydbox = hypre_StructVectorBoxDataBox(y, i);
+      zdbox = hypre_StructVectorBoxDataBox(z, i);
 
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);

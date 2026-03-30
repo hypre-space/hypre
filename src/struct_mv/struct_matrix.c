@@ -2763,8 +2763,6 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
    hypre_StructGrid       *grid    = hypre_StructMatrixGrid(matrix);
    hypre_BoxArray         *boxes   = hypre_StructGridBoxes(grid);
    hypre_StructStencil    *stencil = hypre_StructMatrixStencil(matrix);
-   hypre_BoxArray         *A_data_space = hypre_StructMatrixDataSpace(matrix);
-   hypre_BoxArray         *x_data_space = hypre_StructVectorDataSpace(diag);
 
    hypre_IndexRef          start;
    hypre_Index             ustride;
@@ -2782,8 +2780,8 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
       box = hypre_BoxArrayBox(boxes, i);
       stencil_diag = hypre_StructStencilDiagEntry(stencil);
 
-      A_data_box = hypre_BoxArrayBox(A_data_space, i);
-      d_data_box = hypre_BoxArrayBox(x_data_space, i);
+      A_data_box = hypre_StructMatrixBoxDataBox(matrix, i);
+      d_data_box = hypre_StructVectorBoxDataBox(diag, i);
 
       Ap = hypre_StructMatrixBoxData(matrix, i, stencil_diag);
       dp = hypre_StructVectorBoxData(diag, i);

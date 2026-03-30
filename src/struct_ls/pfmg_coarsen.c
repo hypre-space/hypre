@@ -150,8 +150,8 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
       start = hypre_BoxIMin(compute_box);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      w_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(work[0]), i);
+      A_dbox = hypre_StructMatrixBoxDataBox(A, i);
+      w_dbox = hypre_StructVectorBoxDataBox(work[0], i);
       for (d = 0; d < ndim; d++)
       {
          w_data[d] = hypre_StructVectorBoxData(work[d], i);

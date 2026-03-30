@@ -824,7 +824,7 @@ typedef struct hypre_StructGrid_struct
 
    hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
    HYPRE_Int           *baseboxnums;  /* Array of base boxnums for the boxes array */
-                                      /* RDF: Keep temporarily, then switch to boxes ids */
+                                      /* RDF BASE: Keep temporarily, then switch to boxes ids */
 
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
@@ -1645,12 +1645,12 @@ hypre_StructMatrixBaseData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
 #define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
 hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
 // The following assume a square matrix
-// RDF BASE - fix these later - they currently assume base-grid and box indexes are the same
+// RDF BASE - fix these later - some currently assume the base-grid and box indexes are the same
 //          - somewhere in SMG there is a distinction between RanBoxnums and BaseBoxnums
 #define hypre_StructMatrixBox(matrix, i) \
 hypre_StructGridBox(hypre_StructMatrixGrid(matrix), i)
 #define hypre_StructMatrixBoxDataBox(matrix, i) \
-hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+hypre_StructMatrixBaseDataBox(matrix, i)
 #define hypre_StructMatrixBoxData(matrix, i, s) \
 hypre_StructMatrixBaseData(matrix, i, s)
 #define hypre_StructMatrixBoxDataValue(matrix, i, s, index) \

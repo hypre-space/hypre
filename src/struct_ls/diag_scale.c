@@ -50,7 +50,7 @@ hypre_StructDiagScale( hypre_StructMatrix   *A,
       hypre_StructVectorBoxCopy(x, i, loop_box);
       start = hypre_BoxIMin(loop_box);
 
-      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      A_data_box = hypre_StructMatrixBoxDataBox(A, i);
       x_data_box = hypre_StructVectorBoxDataBox(x, i);
       y_data_box = hypre_StructVectorBoxDataBox(y, i);
 

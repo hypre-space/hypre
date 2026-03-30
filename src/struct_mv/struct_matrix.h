@@ -187,7 +187,7 @@ hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), 
 #define hypre_StructMatrixBox(matrix, i) \
 hypre_StructGridBox(hypre_StructMatrixGrid(matrix), i)
 #define hypre_StructMatrixBoxDataBox(matrix, i) \
-hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+hypre_StructMatrixBaseDataBox(matrix, i)
 #define hypre_StructMatrixBoxData(matrix, i, s) \
 hypre_StructMatrixBaseData(matrix, i, s)
 #define hypre_StructMatrixBoxDataValue(matrix, i, s, index) \

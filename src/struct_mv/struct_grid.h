@@ -30,7 +30,7 @@ typedef struct hypre_StructGrid_struct
 
    hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
    HYPRE_Int           *baseboxnums;  /* Array of base boxnums for the boxes array */
-                                      /* RDF: Keep temporarily, then switch to boxes ids */
+                                      /* RDF BASE: Keep temporarily, then switch to boxes ids */
 
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
