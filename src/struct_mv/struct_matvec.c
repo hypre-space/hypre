@@ -466,14 +466,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xb);
 
-         A_data_box = hypre_StructMatrixBoxDataBox(A, Ab);
-// RDF BASE - figure out why the following commented out lines don't work for PFMG
-//         x_data_box = hypre_StructVectorBoxDataBox(x, xb);
-//         y_data_box = hypre_StructVectorBoxDataBox(y, yb);
-//         z_data_box = hypre_StructVectorBoxDataBox(z, zb);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), xb);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), yb);
-         z_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(z), zb);
+         A_data_box = hypre_StructMatrixBaseDataBox(A, Ab);
+         x_data_box = hypre_StructVectorBaseDataBox(x, xb);
+         y_data_box = hypre_StructVectorBaseDataBox(y, yb);
+         z_data_box = hypre_StructVectorBaseDataBox(z, zb);
 
          /* Get stencil spaces - then do unrolling for entries in each */
          hypre_StructMatrixGetStSpaces(A, transpose, &num_ss, &se_sspaces, &ss_origins, stride);
