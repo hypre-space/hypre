@@ -2673,11 +2673,12 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
+hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix )
 {
    HYPRE_Int            ndim = hypre_StructMatrixNDim(matrix);
+   HYPRE_Int            nboxes = hypre_StructMatrixRanNBoxes(matrix);
    HYPRE_Complex       *data;
-   hypre_BoxArray      *grid_boxes, *data_space, *boundary;
+   hypre_BoxArray      *boundary;
    hypre_Box           *box, *dbox, *tbox;
    hypre_Index         *shape;
    hypre_Index          stencil_offset;
@@ -2697,9 +2698,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    grid = hypre_StructMatrixGrid(matrix);
    stencil = hypre_StructMatrixStencil(matrix);
-   grid_boxes = hypre_StructGridBoxes(grid);
    ndim = hypre_StructStencilNDim(stencil);
-   data_space = hypre_StructMatrixDataSpace(matrix);
    hypre_SetIndex(dstride, 1);
    shape = hypre_StructStencilShape(stencil);
 
@@ -2710,15 +2709,14 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
          hypre_CopyIndex(shape[e], stencil_offset);
          if (!hypre_IndexEqual(stencil_offset, 0, ndim))
          {
-            hypre_ForBoxI(i, grid_boxes)
+            for (i = 0; i < nboxes; i++)
             {
-               hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), box);
+               hypre_CopyBox(hypre_StructMatrixRanBox(matrix, i), box);
                hypre_StructMatrixGetStencilSpace(matrix, e, 0, origin, stride);
-               /*hypre_ProjectBox(box, origin, stride);*/
-               dbox = hypre_BoxArrayBox(data_space, i);
+               dbox = hypre_StructMatrixRanDataBox(matrix, i);
                boundary = hypre_BoxArrayCreate(0, ndim);
                hypre_GeneralBoxBoundaryIntersect(box, grid, stencil_offset, boundary);
-               data = hypre_StructMatrixBoxData(matrix, i, e);
+               data = hypre_StructMatrixRanData(matrix, i, e);
                hypre_ForBoxI(j, boundary)
                {
                   tbox = hypre_BoxArrayBox(boundary, j);

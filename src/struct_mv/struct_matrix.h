@@ -169,12 +169,16 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
 // The following use a grid box index
-#define hypre_StructMatrixRanDataBox(matrix, i) \
+#define hypre_StructMatrixRanBox(matrix, i) \
+hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixRanDataBox(matrix, i)                         \
 hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
 #define hypre_StructMatrixRanData(matrix, i, s) \
 hypre_StructMatrixBaseData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
 #define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
 hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
+#define hypre_StructMatrixDomBox(matrix, i) \
+hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomDataBox(matrix, i) \
 hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomData(matrix, i, s) \
