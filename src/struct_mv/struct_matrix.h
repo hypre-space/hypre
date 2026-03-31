@@ -182,16 +182,14 @@ hypre_StructMatrixBaseData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
 #define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
 hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
 // The following assume a square matrix
-// RDF BASE - fix these later - some currently assume the base-grid and box indexes are the same
-//          - somewhere in SMG there is a distinction between RanBoxnums and BaseBoxnums
 #define hypre_StructMatrixBox(matrix, i) \
-hypre_StructGridBox(hypre_StructMatrixGrid(matrix), i)
+hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixRanBoxnum(matrix, i))
 #define hypre_StructMatrixBoxDataBox(matrix, i) \
-hypre_StructMatrixBaseDataBox(matrix, i)
+hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
 #define hypre_StructMatrixBoxData(matrix, i, s) \
-hypre_StructMatrixBaseData(matrix, i, s)
+hypre_StructMatrixBaseData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
 #define hypre_StructMatrixBoxDataValue(matrix, i, s, index) \
-hypre_StructMatrixBaseDataValue(matrix, i, s, index)
+hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)

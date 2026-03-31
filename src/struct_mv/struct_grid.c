@@ -572,7 +572,7 @@ hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
                                 HYPRE_Int        *new_nboxes_ptr,
                                 HYPRE_Int       **new_boxnums_ptr )
 {
-   HYPRE_Int   new_nboxes, *new_boxnums, i, b;
+   HYPRE_Int   new_nboxes, *new_boxnums, i, b, vol;
    hypre_Box  *box;
 
    box = hypre_BoxCreate(hypre_StructGridNDim(grid));
@@ -595,8 +595,12 @@ hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
          b = boxnums[i];
       }
       hypre_CopyBox(hypre_StructGridBox(grid, b), box);
+      vol = hypre_BoxVolume(box);
       hypre_CoarsenBox(box, NULL, stride);
-      if (hypre_BoxVolume(box))
+      // If the original box size is zero, assume it was intended to be kept.
+      // This assumption is necessary to support SMG as currently written.
+      // Otherwise, keep only boxes with nonzero coarse size.
+      if (!vol || hypre_BoxVolume(box))
       {
          new_boxnums[new_nboxes++] = b;
       }
