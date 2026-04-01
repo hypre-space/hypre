@@ -15,7 +15,7 @@
 #define hypre_STRUCT_VECTOR_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructVector:
+ * hypre_StructVector: RDF BASE - update this comment
  *
  * Most of the routines currently only work when the base grid and grid are the
  * same (i.e., when nboxes equals the number of boxes in the grid and stride is

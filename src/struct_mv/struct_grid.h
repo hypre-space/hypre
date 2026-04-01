@@ -15,7 +15,7 @@
 #define hypre_STRUCT_GRID_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructGrid:
+ * hypre_StructGrid: RDF BASE - write some high level comments here
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructGrid_struct
@@ -64,6 +64,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridStride(grid)        ((grid) -> stride)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridBaseBoxnums(grid)   ((grid) -> baseboxnums)
+#define hypre_StructGridBaseBoxnum(grid, i) ((grid) -> baseboxnums[i])
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)

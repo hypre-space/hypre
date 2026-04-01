@@ -15,7 +15,7 @@
 #define hypre_STRUCT_MATRIX_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrix:
+ * hypre_StructMatrix: RDF BASE - update this comment
  *
  * Rectangular matrices have different range and domain grids, which are defined
  * in terms of a common base grid and index space.  The range grid consists of a
@@ -33,10 +33,10 @@
  *
  * The 'data' pointer below has space at the beginning for constant stencil
  * coefficient values followed by the stored variable coefficient values.
- * Accessing coefficients is done via 'data_indices' through the interface
- * routine hypre_StructMatrixBoxData().  The number of boxes in data_space and
- * data_indices is the same as in the base grid, even though both ran_nboxes and
- * dom_nboxes may be smaller.
+ * Accessing coefficients is done via 'data_indices' through the accessor macro
+ * hypre_StructMatrixBoxData().  Both 'data_space' and 'data_indices' reference
+ * the same number of boxes as in the base grid, while the number of boxes given
+ * by 'ran_nboxes' and 'dom_nboxes' may be smaller.
  *
  * The 'num_ghost' and 'sym_ghost' arrays are used to determine how many ghost
  * layers of storage to keep.  They determine the dimensions of 'data_space',
@@ -49,12 +49,13 @@ typedef struct hypre_StructMatrix_struct
 {
    MPI_Comm              comm;
 
-   hypre_StructGrid     *grid;             /* Base grid */
+   hypre_StructGrid     *grid;             /* Grid where the stencil operates */
+
    HYPRE_Int             ran_nboxes;       /* Range grid number of boxes */
-   HYPRE_Int            *ran_boxnums;      /* Range grid boxnums in base grid */
+   HYPRE_Int            *ran_boxnums;      /* Range grid boxnums in grid */
    hypre_Index           ran_stride;       /* Range grid coarsening stride */
    HYPRE_Int             dom_nboxes;       /* Domain grid number of boxes */
-   HYPRE_Int            *dom_boxnums;      /* Domain grid boxnums in base grid */
+   HYPRE_Int            *dom_boxnums;      /* Domain grid boxnums in grid */
    hypre_Index           dom_stride;       /* Domain grid coarsening stride */
 
    hypre_StructStencil  *user_stencil;
@@ -63,10 +64,11 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_MemoryLocation  memory_location;  /* Memory location of the data array */
    HYPRE_Complex        *data;             /* Pointer to matrix data */
-   hypre_BoxArray       *data_space;       /* Layout of data (coarse index space) */
+   hypre_BoxArray       *data_space;       /* Layout of data (on data index space) */
+   hypre_Index           data_stride;      /* Data index space (relative to base) */
    HYPRE_Int           **data_indices;     /* Array of indices into the data array.
-                                              data_indices[b][s] is the starting index of
-                                              data for boxnum b and stencil coefficient s */
+                                              data_indices[b][s] is the starting index of data
+                                              for base boxnum b and stencil coefficient s */
    HYPRE_Int             data_alloced;     /* Boolean used for freeing data */
    HYPRE_Int             data_size;        /* Size of matrix data */
    HYPRE_BigInt          global_size;      /* Total number of nonzero coeffs */
@@ -153,8 +155,10 @@ hypre_BoxArrayIDs(hypre_StructMatrixDataSpace(matrix))
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
+#define hypre_StructMatrixConstData(matrix, s) \
+(hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
-// The following use a base-grid box index
+/* The following use a base-grid box index */
 #define hypre_StructMatrixBaseDataBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBaseData(matrix, b, s) \
@@ -162,35 +166,36 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 #define hypre_StructMatrixBaseDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBaseData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBaseDataBox(matrix, b), index))
-#define hypre_StructMatrixConstData(matrix, s) \
-(hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
-// The following use a grid box index
-#define hypre_StructMatrixRanBox(matrix, i) \
-hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixRanBoxnum(matrix, i))
-#define hypre_StructMatrixRanDataBox(matrix, i)                         \
-hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
-#define hypre_StructMatrixRanData(matrix, i, s) \
-hypre_StructMatrixBaseData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
-#define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
-hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
-#define hypre_StructMatrixDomBox(matrix, i) \
-hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixDomBoxnum(matrix, i))
-#define hypre_StructMatrixDomDataBox(matrix, i) \
-hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
-#define hypre_StructMatrixDomData(matrix, i, s) \
-hypre_StructMatrixBaseData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
-#define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
-hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
-// The following assume a square matrix
+/*  The following use a (stencil) grid box index */
+#define hypre_StructMatrixBaseBoxnum(matrix, i) \
+hypre_StructGridBaseBoxnum(hypre_StructMatrixGrid(matrix), i)
 #define hypre_StructMatrixBox(matrix, i) \
-hypre_StructGridBox(hypre_StructMatrixGrid(matrix), hypre_StructMatrixRanBoxnum(matrix, i))
+hypre_StructGridBox(hypre_StructMatrixGrid(matrix), i)
 #define hypre_StructMatrixBoxDataBox(matrix, i) \
-hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+hypre_StructMatrixBaseDataBox(matrix, hypre_StructMatrixBaseBoxnum(matrix, i))
 #define hypre_StructMatrixBoxData(matrix, i, s) \
-hypre_StructMatrixBaseData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
+hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), s)
 #define hypre_StructMatrixBoxDataValue(matrix, i, s, index) \
-hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
+hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), s, index)
+
+/* The following use a ran/dom-grid box index */
+#define hypre_StructMatrixRanBox(matrix, i) \
+hypre_StructMatrixBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixRanDataBox(matrix, i)                         \
+hypre_StructMatrixBoxDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
+#define hypre_StructMatrixRanData(matrix, i, s) \
+hypre_StructMatrixBoxData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
+#define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
+hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
+#define hypre_StructMatrixDomBox(matrix, i) \
+hypre_StructMatrixBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
+#define hypre_StructMatrixDomDataBox(matrix, i) \
+hypre_StructMatrixBoxDataBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
+#define hypre_StructMatrixDomData(matrix, i, s) \
+hypre_StructMatrixBoxData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
+#define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
+hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)
