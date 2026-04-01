@@ -314,8 +314,9 @@ hypre_SeqVectorInitialize_v2( hypre_Vector         *vector,
     * when being used, and freed */
    if (!hypre_VectorData(vector))
    {
-      hypre_assert((num_vectors * size) >= 0);
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
+      /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, (size_t)num_vectors * (size_t)size,
+                                               memory_location);
    }
 
    return hypre_error_flag;
@@ -378,8 +379,9 @@ hypre_SeqVectorResize( hypre_Vector *vector,
    HYPRE_Int  method        = hypre_VectorMultiVecStorageMethod(vector);
    HYPRE_Int  size          = hypre_VectorSize(vector);
    HYPRE_Int  num_vectors   = hypre_VectorNumVectors(vector);
-   HYPRE_Int  total_size    = num_vectors * size;
-   HYPRE_Int  total_size_in = num_vectors_in * size_in;
+   /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
+   size_t     total_size    = (size_t)num_vectors * (size_t)size;
+   size_t     total_size_in = (size_t)num_vectors_in * (size_t)size_in;
 
    /* Reallocate data array */
    if (total_size_in > total_size)

@@ -73,6 +73,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
@@ -143,8 +146,8 @@ hypre_GMRESFunctionsCreate(
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,
    hypre_KrylovPtrToAxpy               Axpy,
-   hypre_KrylovPtrToPrecond            Precond,
-   hypre_KrylovPtrToPrecondSetup       PrecondSetup
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 );
 
 /**

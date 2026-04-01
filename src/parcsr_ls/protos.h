@@ -1389,10 +1389,14 @@ HYPRE_Int hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix *A, HYPR
 HYPRE_Int hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker, HYPRE_Int size );
 
 #ifdef HYPRE_USING_DSUPERLU
-/* superlu.c */
-HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level);
-HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x);
-HYPRE_Int hypre_SLUDistDestroy( void* solver);
+/* dsuperlu.c */
+void *hypre_SLUDistCreate( void );
+HYPRE_Int hypre_SLUDistSetPrintLevel( void *solver, HYPRE_Int print_level );
+HYPRE_Int hypre_SLUDistSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                              hypre_ParVector *x );
+HYPRE_Int hypre_SLUDistDestroy( void *solver );
 #endif
 
 /* par_mgr.c */
@@ -1586,6 +1590,16 @@ HYPRE_Int hypre_MGRColLumpedRestrict(HYPRE_Int colsum_type,
                                      hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                      hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_MGRBuildRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                         hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker,
+                                         HYPRE_Int use_abs,
+                                         hypre_ParCSRMatrix **Wp_ptr,
+                                         hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_MGRBuildBlockRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                              hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker,
+                                              HYPRE_Int blk_dim, HYPRE_Int use_abs,
+                                              hypre_ParCSRMatrix **Wp_ptr,
+                                              hypre_ParCSRMatrix **P_ptr );
 
 /* par_mgr_rap.c */
 HYPRE_Int hypre_MGRBuildCoarseOperator(void *mgr_data, hypre_ParCSRMatrix *A_FF,

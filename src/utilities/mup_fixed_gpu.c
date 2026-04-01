@@ -379,6 +379,22 @@ hypre_SetSyncCudaCompute( HYPRE_Int action )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SetUserDeviceMalloc( GPUMallocFunc func )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetUserDeviceMalloc)( func );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetUserDeviceMfree( GPUMfreeFunc func )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetUserDeviceMfree)( func );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SyncComputeStream( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SyncComputeStream)( );

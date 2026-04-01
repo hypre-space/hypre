@@ -22,7 +22,7 @@ endif()
 # Regular sources
 set(REGULAR_SRCS
   cyclic_reduction.c
-  diagscale.c
+  diag_scale.c
   F90_HYPRE_struct_bicgstab.c
   F90_HYPRE_struct_cycred.c
   F90_HYPRE_struct_flexgmres.c
@@ -61,7 +61,7 @@ set(REGULAR_SRCS
   smg_setup_restrict.c
   smg_solve.c
   cyclic_reduction.c
-  diagscale.c
+  diag_scale.c
   HYPRE_struct_int.c
   HYPRE_struct_pcg.c
   pfmg2_setup_rap.c
@@ -105,7 +105,7 @@ endif()
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     cyclic_reduction.c
-    diagscale.c
+    diag_scale.c
     jacobi.c
     HYPRE_struct_int.c
     HYPRE_struct_pcg.c

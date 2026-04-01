@@ -90,10 +90,10 @@ mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -
 mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -add_rlx 0 -add_w 0.7 -mult_add 0 > solvers.out.110
 mpirun -np 4 ./ij -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 > solvers.out.111
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
-mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -tol 1e-3 > solvers.out.113
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -add_end 2 > solvers.out.118
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 > solvers.out.119
-mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 > solvers.out.121
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 -tol 1e-3 > solvers.out.121
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 -rap 1 > solvers.out.122
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -rlx 18 -ns 2 -rlx_coarse 18 -ns_coarse 2 > solvers.out.120
 

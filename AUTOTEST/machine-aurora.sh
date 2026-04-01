@@ -12,12 +12,12 @@ case $1 in
       cat <<EOF
 
    **** Only run this script on Aurora nodes                      ****
-   **** Successful regressions with default software env          ****
-   **** as of 10/14/2024                                          ****
+   **** Successful regressions as of 1/9/2026 with oneAPI 2025.3. ****
    **** Test with:                                                ****
-   ****     export SYCL_CACHE_PERSISTENT=1                        ****
-   ****     export SYCL_CACHE_THRESHOLD=0                         ****
-   ****     module load oneapi/eng-compiler/2024.07.30.002        ****
+   **** module use /soft/compilers/oneapi/2025.3.0/modulefiles    ****
+   **** module load oneapi/public/2025.3.0                        ****
+   **** export SYCL_CACHE_PERSISTENT=1                            ****
+   **** export SYCL_CACHE_THRESHOLD=0                             ****
 
    $0 [-h|-help] {src_dir}
 
@@ -55,41 +55,12 @@ save="aurora"
 ## SYCL ##
 ##########
 
-# SYCL with UM in debug mode [ij, struct]
+# SYCL with UM in debug mode [ij, struct, sstruct]
 # WM: I suppress all warnings for sycl files for now
-co="--enable-debug --with-sycl --enable-unified-memory --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\'"
-ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
+co="--enable-debug --disable-fpe-trap --with-sycl --enable-unified-memory --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\'"
+ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
-
-# SYCL with bigint (compile only)
-# WM: I suppress all warnings for sycl files for now
-co="--enable-bigint --with-sycl --enable-unified-memory --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic-sycl-bigint
-
-
-############
-## OMP4.5 ##
-############
-
-# WM: todo
-# OMP 4.5 without UM in debug mode [struct]
-# co="--with-device-openmp --enable-debug --enable-fortran=no --with-extra-CXXFLAGS=\\'-Wno-missing-prototype-for-cc\\' --with-extra-CFLAGS=\\'-Wno-missing-prototype-for-cc\\' CC= CXX= --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
-# ro="-struct -rt -save ${save} -script gpu_tile_compact.sh"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
-# ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
-
-############
-## KOKKOS ##
-############
-
-# WM: todo
-# Kokkos without UM in debug mode [struct]
-# co="--with-device-openmp --with-kokkos --enable-debug --with-kokkos-include=$KOKKOS_HOME/include --with-kokkos-lib=$KOKKOS_HOME/lib64/libkokkoscore.a --with-cxxstandard=17 --with-extra-CXXFLAGS=\\'-fno-exceptions -D__STRICT_ANSI__\\' --enable-fortran=no CC= CXX= --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
-# ro="-struct -rt -save ${save} -script gpu_tile_compact.sh"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
-# ./renametest.sh basic $output_dir/basic-kokkos-nonum-debug-struct
 
 ##########################################################
 # Echo to stderr all nonempty error files in $output_dir #

@@ -35,9 +35,9 @@ export LC_COLLATE=C  # sort by listing capital letters first
 if [ "$BUILD_TYPE" = "GPU" ]; then
     # Combine CPU and GPU function lists.
     # Some directories may not have GPU lists so we suppress "file not found" warnings
-    cat mup.fixed mup.fixed.gpu \
-        mup.functions mup.functions.gpu \
-        mup.methods mup.methods.gpu \
+    cat mup.fixed mup.fixed_gpu \
+        mup.functions mup.functions_gpu \
+        mup.methods mup.methods_gpu \
         2>/dev/null \
         | sort | uniq  > mup_check.old
 else
@@ -57,6 +57,8 @@ diff -wc mup_check.old mup_check.new                   > mup_check.err
 SZ=`ls -l mup_check.err | awk '{print $5}'`
 if [ "$SZ" != 0 ]; then
     echo -ne "${RED}UPDATE${NC} - see $(pwd)/mup_check.err\n"
+    exit 1
 else
     echo -ne "${GREEN}OK${NC}\n"
+    exit 0
 fi

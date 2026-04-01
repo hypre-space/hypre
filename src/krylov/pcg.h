@@ -103,6 +103,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Real   tol;
    HYPRE_Real   atolf;
    HYPRE_Real   cf_tol;

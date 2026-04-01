@@ -520,6 +520,24 @@ HYPRE_StructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixScale_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, hypre_long_double scalar )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatrixScale_flt( matrix, (hypre_float)scalar );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatrixScale_dbl( matrix, (hypre_double)scalar );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatrixScale_long_dbl( matrix, (hypre_long_double)scalar );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)

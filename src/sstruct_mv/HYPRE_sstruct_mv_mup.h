@@ -445,6 +445,15 @@ HYPRE_Int
 HYPRE_SStructMatrixRead( MPI_Comm comm, const char *filename, HYPRE_SStructMatrix *matrix_ptr );
 
 HYPRE_Int
+HYPRE_SStructMatrixScale_flt( HYPRE_SStructMatrix matrix, hypre_float scalar );
+HYPRE_Int
+HYPRE_SStructMatrixScale_dbl( HYPRE_SStructMatrix matrix, hypre_double scalar );
+HYPRE_Int
+HYPRE_SStructMatrixScale_long_dbl( HYPRE_SStructMatrix matrix, hypre_long_double scalar );
+HYPRE_Int
+HYPRE_SStructMatrixScale( HYPRE_SStructMatrix matrix, hypre_long_double scalar );
+
+HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
 HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_double *values );
@@ -982,6 +991,9 @@ HYPRE_SStructMatrixPrint_pre( HYPRE_Precision precision, const char *filename, H
 
 HYPRE_Int
 HYPRE_SStructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char *filename, HYPRE_SStructMatrix *matrix_ptr );
+
+HYPRE_Int
+HYPRE_SStructMatrixScale_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, hypre_long_double scalar );
 
 HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );

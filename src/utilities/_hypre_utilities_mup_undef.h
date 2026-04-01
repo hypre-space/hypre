@@ -43,6 +43,9 @@
 #undef HYPRE_SetSpMVUseVendor
 #undef HYPRE_SetSpTransUseVendor
 #undef HYPRE_SetUseGpuRand
+#undef HYPRE_SolverDestroy
+#undef HYPRE_SolverSetup
+#undef HYPRE_SolverSolve
 #undef HYPRE_Version
 #undef HYPRE_VersionNumber
 #undef hypre_GetSizeOfReal
@@ -83,6 +86,7 @@
 #undef hypre_Free
 #undef hypre_GetDevice
 #undef hypre_GetDeviceCount
+#undef hypre_GetDeviceGSMethod
 #undef hypre_GetDeviceLastError
 #undef hypre_GetDeviceMaxShmemSize
 #undef hypre_GetExecPolicy1
@@ -221,8 +225,6 @@
 #undef hypre_SetSpMVUseVendor
 #undef hypre_SetSpTransUseVendor
 #undef hypre_SetUseGpuRand
-#undef hypre_SetUserDeviceMalloc
-#undef hypre_SetUserDeviceMfree
 #undef hypre_UniqueIntArrayND
 #undef hypre_UnorderedBigIntMapCreate
 #undef hypre_UnorderedBigIntMapDestroy
@@ -386,6 +388,8 @@
 #undef hypre_ResetDeviceRandGenerator
 #undef hypre_RestoreSyncCudaCompute
 #undef hypre_SetSyncCudaCompute
+#undef hypre_SetUserDeviceMalloc
+#undef hypre_SetUserDeviceMfree
 #undef hypre_SyncComputeStream
 #undef hypre_SyncComputeStream_core
 #undef hypre_SyncDevice

@@ -43,6 +43,7 @@ FILES =\
  HYPRE_handle.c\
  HYPRE_version.c\
  amg_linklist.c\
+ base_solver.c\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\

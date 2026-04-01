@@ -986,6 +986,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
                                     &L_comm_pkg);
 
    Lambda = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixRefCount(Lambda) = 1;
    hypre_ParCSRMatrixDiag(Lambda) = L_diag;
    hypre_ParCSRMatrixOffd(Lambda) = L_offd;
    hypre_ParCSRMatrixCommPkg(Lambda) = L_comm_pkg;

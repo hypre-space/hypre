@@ -2397,6 +2397,9 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
    hypre_StructGrid    *sgrid;
    hypre_BoxArray      *boxes;
    hypre_Box           *box;
+   hypre_Box           *bounding_box;
+   HYPRE_IndexRef       bbox_imin;
+   HYPRE_Int            total_bbox_size_x = 0;
    hypre_Index          loop_size;
    hypre_Index          index;
    hypre_Index          stride;
@@ -2451,11 +2454,48 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
    }
    else
    {
-      T = hypre_CTAlloc(HYPRE_Real, ndim * ndim, HYPRE_MEMORY_HOST);
-      O = hypre_CTAlloc(HYPRE_Real, ndim, HYPRE_MEMORY_HOST);
+      O = hypre_CTAlloc(HYPRE_Real, nparts * ndim, HYPRE_MEMORY_HOST);
+
+      /* WM: todo - is it safe to just take the first variable for the sgrids here? */
+      pgrid = hypre_SStructGridPGrid(grid, 0);
+      sgrid = hypre_SStructPGridSGrid(pgrid, 0);
+      bounding_box = hypre_StructGridBoundingBox(sgrid);
+      bbox_imin = hypre_BoxIMin(bounding_box);
       for (d = 0; d < ndim; d++)
       {
-         T[ndim * d + d] = 1.0;
+         O[d] = (HYPRE_Real) - bbox_imin[d];
+      }
+
+      for (part = 1; part < nparts; part++)
+      {
+         /* Previous part's size in x */
+         pgrid = hypre_SStructGridPGrid(grid, part - 1);
+         sgrid = hypre_SStructPGridSGrid(pgrid, 0);
+         bounding_box = hypre_StructGridBoundingBox(sgrid);
+         total_bbox_size_x += hypre_BoxSizeD(bounding_box, 0) + 2;
+
+         /* Current part's min */
+         pgrid = hypre_SStructGridPGrid(grid, part);
+         sgrid = hypre_SStructPGridSGrid(pgrid, 0);
+         bounding_box = hypre_StructGridBoundingBox(sgrid);
+         bbox_imin = hypre_BoxIMin(bounding_box);
+
+         /* Shift the origin of subsequent parts in x to not overlap part 0 (other dims start at 0) */
+         O[part * ndim] = (HYPRE_Real) (total_bbox_size_x - bbox_imin[0]);
+         for (d = 1; d < ndim; d++)
+         {
+            O[part * ndim + d] = (HYPRE_Real) - bbox_imin[d];
+         }
+      }
+
+
+      T = hypre_CTAlloc(HYPRE_Real, nparts * ndim * ndim, HYPRE_MEMORY_HOST);
+      for (part = 0; part < nparts; part++)
+      {
+         for (d = 0; d < ndim; d++)
+         {
+            T[(part * ndim * ndim) + ndim * d + d] = 1.0;
+         }
       }
    }
 
@@ -2547,10 +2587,10 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
             {
                for (d = 0; d < ndim; d++)
                {
-                  coords[d] = O[d];
+                  coords[d] = O[part * ndim + d];
                   for (dd = 0; dd < ndim; dd++)
                   {
-                     coords[d] += T[d * ndim + dd] * (index[dd] + vinc[v][dd]);
+                     coords[d] += T[(part * ndim * ndim) + d * ndim + dd] * (index[dd] + vinc[v][dd]);
                   }
                   hypre_fprintf(file, "%.14e ", coords[d]);
                }
@@ -2560,12 +2600,6 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          hypre_SerialBoxLoop0End()
       }
       hypre_fprintf(file, "\n");
-
-      if (use_trans)
-      {
-         T += ndim * ndim;
-         O += ndim;
-      }
    }
 
    /* Close file */

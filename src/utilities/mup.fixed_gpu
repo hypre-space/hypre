@@ -61,6 +61,8 @@ hypre_ResetDevice
 hypre_ResetDeviceRandGenerator
 hypre_RestoreSyncCudaCompute
 hypre_SetSyncCudaCompute
+hypre_SetUserDeviceMalloc
+hypre_SetUserDeviceMfree
 hypre_SyncComputeStream
 hypre_SyncComputeStream_core
 hypre_SyncDevice

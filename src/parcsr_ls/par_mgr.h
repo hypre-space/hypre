@@ -47,7 +47,7 @@ typedef struct
 
    hypre_ParVector     **F_fine_array;
    hypre_ParVector     **U_fine_array;
-   HYPRE_Solver        **aff_solver;
+   HYPRE_Solver         *aff_solver;
    HYPRE_Int           (*fine_grid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int           (*fine_grid_solver_solve)(void*, void*, void*, void*);
 

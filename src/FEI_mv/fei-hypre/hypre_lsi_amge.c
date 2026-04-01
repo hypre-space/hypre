@@ -20,7 +20,7 @@
 #include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
 #include "seq_ls/amge/AMGe_matrix_topology.h"
-#include "seq_mv/csr_matrix.h"
+#include "seq_mv/_hypre_seq_mv.h"
 
 extern int hypre_AMGeMatrixTopologySetup(hypre_AMGeMatrixTopology ***A,
                  int *level, int *i_element_node_0, int *j_element_node_0,

@@ -20,29 +20,25 @@
 
 hypre_COGMRESFunctions *
 hypre_COGMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*MassInnerProd) (void *x, void **y, HYPRE_Int k, HYPRE_Int unroll, void *result),
-   HYPRE_Int    (*MassDotpTwo)   (void *x, void *y, void **z, HYPRE_Int k, HYPRE_Int unroll,
-                                  void *result_x, void *result_y),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*MassAxpy)      ( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k,
-                                   HYPRE_Int unroll),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToCreateVectorArray  CreateVectorArray,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToMassInnerProd      MassInnerProd,
+   hypre_KrylovPtrToMassDotpTwo        MassDotpTwo,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToMassAxpy           MassAxpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_COGMRESFunctions * cogmres_functions;
@@ -81,11 +77,20 @@ void *
 hypre_COGMRESCreate( hypre_COGMRESFunctions *cogmres_functions )
 {
    hypre_COGMRESData *cogmres_data;
+   hypre_Solver      *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    cogmres_data = hypre_CTAllocF(hypre_COGMRESData, 1, cogmres_functions, HYPRE_MEMORY_HOST);
    cogmres_data->functions = cogmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) cogmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_COGMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_COGMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_COGMRESDestroy;
 
    /* set defaults */
    (cogmres_data -> k_dim)          = 5;
@@ -203,7 +208,7 @@ hypre_COGMRESSetup( void *cogmres_vdata,
 
    HYPRE_Int k_dim            = (cogmres_data -> k_dim);
    HYPRE_Int max_iter         = (cogmres_data -> max_iter);
-   HYPRE_Int (*precond_setup)(void*, void*, void*, void*) = (cogmres_functions->precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (cogmres_functions->precond_setup);
    void       *precond_data   = (cogmres_data -> precond_data);
    HYPRE_Int rel_change       = (cogmres_data -> rel_change);
 
@@ -302,7 +307,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
 
    void        **p                 = (cogmres_data -> p);
 
-   HYPRE_Int (*precond)(void*, void*, void*, void*) = (cogmres_functions -> precond);
+   hypre_KrylovPtrToPrecond precond = (cogmres_functions -> precond);
    HYPRE_Int  *precond_data       = (HYPRE_Int*)(cogmres_data -> precond_data);
 
    HYPRE_Int print_level = (cogmres_data -> print_level);
@@ -1138,8 +1143,8 @@ hypre_COGMRESGetSkipRealResidualCheck( void *cogmres_vdata,
 
 HYPRE_Int
 hypre_COGMRESSetPrecond( void  *cogmres_vdata,
-                         HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                         HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                         hypre_KrylovPtrToPrecond precond,
+                         hypre_KrylovPtrToPrecondSetup precond_setup,
                          void  *precond_data )
 {
    hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
@@ -1249,7 +1254,7 @@ hypre_COGMRESGetFinalRelativeResidualNorm( void   *cogmres_vdata,
 
 HYPRE_Int
 hypre_COGMRESSetModifyPC(void *cogmres_vdata,
-                         HYPRE_Int (*modify_pc)(void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm))
+                         hypre_KrylovPtrToModifyPC modify_pc)
 {
    hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
    hypre_COGMRESFunctions *cogmres_functions = cogmres_data->functions;

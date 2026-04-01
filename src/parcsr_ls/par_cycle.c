@@ -371,7 +371,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          hypre_GpuProfilingPushRange("Coarse solve");
-         hypre_SLUDistSolve(hypre_ParAMGDataDSLUSolver(amg_data), Aux_F, Aux_U);
+         hypre_SLUDistSolve(hypre_ParAMGDataDSLUSolver(amg_data), NULL, Aux_F, Aux_U);
          HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
          hypre_GpuProfilingPopRange();
       }

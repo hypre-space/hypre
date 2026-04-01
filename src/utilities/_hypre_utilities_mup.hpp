@@ -336,6 +336,20 @@ HYPRE_Int
 hypre_SetSyncCudaCompute_long_dbl( HYPRE_Int action );
 
 HYPRE_Int
+hypre_SetUserDeviceMalloc_flt( GPUMallocFunc func );
+HYPRE_Int
+hypre_SetUserDeviceMalloc_dbl( GPUMallocFunc func );
+HYPRE_Int
+hypre_SetUserDeviceMalloc_long_dbl( GPUMallocFunc func );
+
+HYPRE_Int
+hypre_SetUserDeviceMfree_flt( GPUMfreeFunc func );
+HYPRE_Int
+hypre_SetUserDeviceMfree_dbl( GPUMfreeFunc func );
+HYPRE_Int
+hypre_SetUserDeviceMfree_long_dbl( GPUMfreeFunc func );
+
+HYPRE_Int
 hypre_SyncComputeStream_flt( );
 HYPRE_Int
 hypre_SyncComputeStream_dbl( );

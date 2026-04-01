@@ -38,6 +38,7 @@ set(REGULAR_SRCS
   par_csr_communication.c
   par_csr_filter.c
   par_csr_matop.c
+  par_csr_overlap.c
   par_csr_matrix.c
   par_csr_matrix_stats.c
   par_csr_matmat.c

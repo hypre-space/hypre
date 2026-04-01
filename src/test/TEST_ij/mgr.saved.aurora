@@ -1,55 +1,56 @@
-# Output file: solvers.out.200
+# Output file: mgr.out.200
 MGR Iterations = 9
-Final Relative Residual Norm = 1.247303e-09
+Final Relative Residual Norm = 1.613351e-09
 
-# Output file: solvers.out.201
+# Output file: mgr.out.201
 MGR Iterations = 9
-Final Relative Residual Norm = 3.708381e-09
+Final Relative Residual Norm = 2.410068e-09
 
-# Output file: solvers.out.202
+# Output file: mgr.out.202
 MGR Iterations = 9
-Final Relative Residual Norm = 1.247303e-09
+Final Relative Residual Norm = 1.613351e-09
 
-# Output file: solvers.out.203
+# Output file: mgr.out.203
 MGR Iterations = 9
-Final Relative Residual Norm = 3.708381e-09
+Final Relative Residual Norm = 2.410068e-09
 
-# Output file: solvers.out.204
-MGR Iterations = 74
-Final Relative Residual Norm = 9.572092e-09
+# Output file: mgr.out.204
+MGR Iterations = 75
+Final Relative Residual Norm = 9.189719e-09
 
-# Output file: solvers.out.205
+# Output file: mgr.out.205
 MGR Iterations = 71
-Final Relative Residual Norm = 8.439033e-09
+Final Relative Residual Norm = 9.840978e-09
 
-# Output file: solvers.out.206
-MGR Iterations = 52
-Final Relative Residual Norm = 8.583644e-09
+# Output file: mgr.out.206
+MGR Iterations = 36
+Final Relative Residual Norm = 6.678138e-09
 
-# Output file: solvers.out.207
-MGR Iterations = 50
-Final Relative Residual Norm = 9.909484e-09
+# Output file: mgr.out.207
+MGR Iterations = 35
+Final Relative Residual Norm = 5.974190e-09
 
-# Output file: solvers.out.208
-MGR Iterations = 16
-Final Relative Residual Norm = 4.090193e-09
+# Output file: mgr.out.208
+MGR Iterations = 48
+Final Relative Residual Norm = 9.704665e-09
 
-# Output file: solvers.out.209
-MGR Iterations = 15
-Final Relative Residual Norm = 7.976848e-09
+# Output file: mgr.out.209
+MGR Iterations = 47
+Final Relative Residual Norm = 8.597882e-09
 
-# Output file: solvers.out.210
-MGR Iterations = 22
-Final Relative Residual Norm = 9.412142e-09
+# Output file: mgr.out.210
+MGR Iterations = 32
+Final Relative Residual Norm = 6.536899e-09
 
-# Output file: solvers.out.211
-MGR Iterations = 29
-Final Relative Residual Norm = 9.128075e-09
+# Output file: mgr.out.211
+MGR Iterations = 31
+Final Relative Residual Norm = 7.207025e-09
 
-# Output file: solvers.out.212
-Iterations = 11
-Final Relative Residual Norm = 6.598043e-09
+# Output file: mgr.out.212
+Iterations = 63
+Final Relative Residual Norm = 9.877489e-09
 
-# Output file: solvers.out.213
-Iterations = 28
-Final Relative Residual Norm = 9.579850e-09
+# Output file: mgr.out.213
+Iterations = 26
+Final Relative Residual Norm = 6.865624e-09
+

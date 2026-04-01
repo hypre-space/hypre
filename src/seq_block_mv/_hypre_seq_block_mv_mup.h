@@ -103,6 +103,13 @@ hypre_DenseBlockMatrixPrint_dbl( MPI_Comm comm, hypre_DenseBlockMatrix *A, const
 HYPRE_Int
 hypre_DenseBlockMatrixPrint_long_dbl( MPI_Comm comm, hypre_DenseBlockMatrix *A, const char* filename );
 
+HYPRE_Int
+hypre_DenseBlockMatrixTranspose_flt( hypre_DenseBlockMatrix *A, hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int
+hypre_DenseBlockMatrixTranspose_dbl( hypre_DenseBlockMatrix *A, hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int
+hypre_DenseBlockMatrixTranspose_long_dbl( hypre_DenseBlockMatrix *A, hypre_DenseBlockMatrix **B_ptr );
+
 /* functions */
 
 /* pre */

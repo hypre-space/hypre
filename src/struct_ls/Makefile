@@ -62,7 +62,7 @@ CUFILES =\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
  cyclic_reduction.c\
- diagscale.c\
+ diag_scale.c\
  jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\

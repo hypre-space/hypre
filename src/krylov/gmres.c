@@ -13,6 +13,7 @@
 
 #include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_res_print.h"
 
 /*--------------------------------------------------------------------------
  * hypre_GMRESFunctionsCreate
@@ -20,25 +21,22 @@
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
-                                   HYPRE_Complex **iprod_ptr ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToCreateVectorArray  CreateVectorArray,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_GMRESFunctions * gmres_functions;
@@ -74,11 +72,20 @@ void *
 hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
 {
    hypre_GMRESData *gmres_data;
+   hypre_Solver    *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    gmres_data = hypre_CTAllocF(hypre_GMRESData, 1, gmres_functions, HYPRE_MEMORY_HOST);
    gmres_data->functions = gmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) gmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_GMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_GMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_GMRESDestroy;
 
    /* set defaults */
    (gmres_data -> k_dim)          = 5;
@@ -195,18 +202,17 @@ hypre_GMRESSetup( void *gmres_vdata,
    void                 *precond_Mat     = (gmres_data -> precond_Mat);
    HYPRE_Int             rel_change      = (gmres_data -> rel_change);
 
-   HYPRE_Int (*precond_setup)(void*, void*, void*, void*) = (gmres_functions->precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (gmres_functions->precond_setup);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   //set preconditioning matrix
-   if ((gmres_data -> precond_Mat)  == NULL)
-   {
-      (gmres_data -> precond_Mat)  = A;
-      precond_Mat = (gmres_data -> precond_Mat) ;
-   }
-
    (gmres_data -> A) = A;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    /*--------------------------------------------------
     * The arguments for NewVector are important to
@@ -314,7 +320,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *w_3                = (gmres_data -> w_3);
    void                **p                  = (gmres_data -> p);
 
-   HYPRE_Int           (*precond)(void*, void*, void*, void*) = (gmres_functions -> precond);
+   hypre_KrylovPtrToPrecond precond = (gmres_functions -> precond);
    void                 *precond_data = (gmres_data -> precond_data);
    // preconditioning matrix
    void          *precond_Mat = (gmres_data -> precond_Mat) ;
@@ -348,8 +354,15 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Real            relative_error = 1.0;
    HYPRE_Int             rel_change_passed = 0, num_rel_change_check = 0;
    HYPRE_Real            real_r_norm_old, real_r_norm_new;
+   hypre_KrylovResPrintMode print_mode = hypre_KrylovResPrintNone;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (gmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -526,94 +539,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* so now our stop criteria is |r_i| <= epsilon */
 
-   /* Print header for tag-wise residuals if this is the first iteration */
+   print_mode = hypre_KrylovResPrintGetMode(print_level, num_tags, xref != NULL);
    if (print_level > 1 && my_id == 0)
    {
-      hypre_printf("=============================================\n\n");
-      if (num_tags <= 1 || print_level == 2 || print_level > 9 || (!xref && print_level > 5))
-      {
-         if (b_norm > 0.0)
-         {
-            hypre_printf("Iters      resid.norm     conv.rate   rel.res.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      resid.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (xref && (num_tags <= 1 || print_level == 6))
-      {
-         if (e_norm > 0.0)
-         {
-            hypre_printf("Iters      error.norm     conv.rate   rel.err.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      error.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (num_tags > 1)
-      {
-         hypre_printf("  Iters ");
-         if (print_level == 3)
-         {
-            hypre_printf("            |r|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |r%d|_2", tag);
-            }
-         }
-         else if (print_level == 4)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |r%d|_2/|b%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 5)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("     |r%d|_2/|b|_2", tag);
-            }
-         }
-         else if (print_level == 7)
-         {
-            hypre_printf("            |e|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |e%d|_2", tag);
-            }
-         }
-         else if (print_level == 8)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("   |e%d|_2/|eI%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 9)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |e%d|_2/|eI|_2", tag);
-            }
-         }
-         hypre_printf("\n ------  ");
-         for (tag = 0; tag < num_tags + 1; tag++)
-         {
-            hypre_printf("   ------------- ");
-         }
-         hypre_printf("\n");
-      }
+      hypre_KrylovResPrintHeader(print_mode, print_level, num_tags, b_norm, e_norm);
    }
 
    /* once the rel. change check has passed, we do not want to check it again */
@@ -727,22 +656,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
          if (print_level > 0)
          {
             norms[iter] = r_norm;
-            if ((num_tags <= 1 && print_level > 1) || (print_level == 2) ||
-                (print_level > 9) || (!xref && print_level > 5))
+            if (print_mode == hypre_KrylovResPrintScalarResidual)
             {
-               if (!my_id)
+               if (!my_id && print_level > 1)
                {
-                  if (b_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / b_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e      %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovResPrintScalarRow(iter, norms[iter], norms[iter - 1], b_norm);
                }
             }
             else if (num_tags > 1 && print_level > 2)
@@ -800,40 +718,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
 
                /* Print tag-specific residual/error norms */
-               if (!my_id && print_level != 6)
+               if (!my_id && print_mode == hypre_KrylovResPrintTagged)
                {
-                  hypre_printf(" %6d  ", iter);
-                  for (tag = 0; tag < num_tags + 1; tag++)
-                  {
-                     hypre_printf("  %14.6e ",
-                                  print_level == 3 || print_level == 7 ?
-                                  hypre_sqrt(iprod[tag]) :
-                                  print_level == 4 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]) :
-                                  print_level == 5 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[0]) :
-                                  print_level == 8 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[tag]) :
-                                  print_level == 9 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[0]) :
-                                  hypre_sqrt(iprod[tag]));
-                  }
-                  hypre_printf("\n");
+                  hypre_KrylovResPrintTaggedRow(iter, print_level, num_tags, iprod, biprod, xiprod);
                }
-               else if (!my_id && print_level == 6)
+               else if (!my_id && print_mode == hypre_KrylovResPrintScalarError)
                {
                   norms[iter] = hypre_sqrt(iprod[0]);
-                  if (e_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / e_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e    %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovResPrintScalarRow(iter, norms[iter], norms[iter - 1], e_norm);
                }
             }
          }
@@ -1454,8 +1346,8 @@ hypre_GMRESGetStopCrit( void      *gmres_vdata,
 
 HYPRE_Int
 hypre_GMRESSetPrecond( void  *gmres_vdata,
-                       HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                       HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                       hypre_KrylovPtrToPrecond precond,
+                       hypre_KrylovPtrToPrecondSetup precond_setup,
                        void  *precond_data )
 {
    hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;

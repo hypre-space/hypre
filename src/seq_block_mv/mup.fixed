@@ -10,3 +10,4 @@ hypre_DenseBlockMatrixMigrate
 hypre_DenseBlockMatrixMultiply
 hypre_DenseBlockMatrixMultiplyHost
 hypre_DenseBlockMatrixPrint
+hypre_DenseBlockMatrixTranspose

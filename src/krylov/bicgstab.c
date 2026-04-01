@@ -20,21 +20,19 @@
 
 hypre_BiCGSTABFunctions *
 hypre_BiCGSTABFunctionsCreate(
-   void *     (*CreateVector)  ( void *vvector ),
-   HYPRE_Int  (*DestroyVector) ( void *vvector ),
-   void *     (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int  (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                 void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int  (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int  (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int  (*ClearVector)   ( void *x ),
-   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int  (*CommInfo)      ( void *A, HYPRE_Int *my_id,
-                                 HYPRE_Int *num_procs ),
-   HYPRE_Int  (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int  (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCreateVector  CreateVector,
+   hypre_KrylovPtrToDestroyVector DestroyVector,
+   hypre_KrylovPtrToMatvecCreate  MatvecCreate,
+   hypre_KrylovPtrToMatvec        Matvec,
+   hypre_KrylovPtrToMatvecDestroy MatvecDestroy,
+   hypre_KrylovPtrToInnerProd     InnerProd,
+   hypre_KrylovPtrToCopyVector    CopyVector,
+   hypre_KrylovPtrToClearVector   ClearVector,
+   hypre_KrylovPtrToScaleVector   ScaleVector,
+   hypre_KrylovPtrToAxpy          Axpy,
+   hypre_KrylovPtrToCommInfo      CommInfo,
+   hypre_KrylovPtrToPrecondSetup  PrecondSetup,
+   hypre_KrylovPtrToPrecond       Precond
 )
 {
    hypre_BiCGSTABFunctions * bicgstab_functions;
@@ -66,11 +64,20 @@ void *
 hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
 {
    hypre_BiCGSTABData *bicgstab_data;
+   hypre_Solver       *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    bicgstab_data = hypre_CTAlloc( hypre_BiCGSTABData,  1, HYPRE_MEMORY_HOST);
    bicgstab_data->functions = bicgstab_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) bicgstab_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_BiCGSTABSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_BiCGSTABSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_BiCGSTABDestroy;
 
    /* set defaults */
    (bicgstab_data -> tol)            = 1.0e-06;
@@ -79,7 +86,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> stop_crit)      = 0; /* rel. residual norm */
    (bicgstab_data -> a_tol)          = 0.0;
    (bicgstab_data -> precond_data)   = NULL;
-   (bicgstab_data -> precond_Mat)   = NULL;
+   (bicgstab_data -> precond_Mat)    = NULL;
    (bicgstab_data -> logging)        = 0;
    (bicgstab_data -> print_level)    = 0;
    (bicgstab_data -> hybrid)         = 0;
@@ -88,7 +95,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
    (bicgstab_data -> r)              = NULL;
    (bicgstab_data -> r0)             = NULL;
    (bicgstab_data -> s)              = NULL;
-   (bicgstab_data -> v)             = NULL;
+   (bicgstab_data -> v)              = NULL;
    (bicgstab_data -> matvec_data)    = NULL;
    (bicgstab_data -> norms)          = NULL;
    (bicgstab_data -> log_file_name)  = NULL;
@@ -149,21 +156,19 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
 
    HYPRE_Int            max_iter         = (bicgstab_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*,
-                                       void*) = (bicgstab_functions -> precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (bicgstab_functions -> precond_setup);
    void          *precond_data     = (bicgstab_data -> precond_data);
    void          *precond_Mat      = (bicgstab_data -> precond_Mat);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   //set preconditioning matrix
-   if ((bicgstab_data -> precond_Mat)  == NULL)
-   {
-      (bicgstab_data -> precond_Mat)  = A;
-      precond_Mat = (bicgstab_data -> precond_Mat) ;
-   }
-
    (bicgstab_data -> A) = A;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    /*--------------------------------------------------
     * The arguments for NewVector are important to
@@ -258,7 +263,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    void             *p            = (bicgstab_data -> p);
    void             *q            = (bicgstab_data -> q);
 
-   HYPRE_Int              (*precond)(void*, void*, void*, void*)   = (bicgstab_functions -> precond);
+   hypre_KrylovPtrToPrecond precond   = (bicgstab_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(bicgstab_data -> precond_data);
    // preconditioning matrix
    void          *precond_Mat = (bicgstab_data -> precond_Mat) ;
@@ -284,6 +289,12 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    HYPRE_Real gamma_denom;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (bicgstab_data -> converged) = 0;
 
@@ -683,8 +694,8 @@ hypre_BiCGSTABSetStopCrit( void   *bicgstab_vdata,
 
 HYPRE_Int
 hypre_BiCGSTABSetPrecond( void  *bicgstab_vdata,
-                          HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                          HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                          hypre_KrylovPtrToPrecond precond,
+                          hypre_KrylovPtrToPrecondSetup precond_setup,
                           void  *precond_data )
 {
    hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;

@@ -273,11 +273,13 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
 
+#if defined(HYPRE_USING_GPU)
    if ( hypre_HandleUserDeviceMalloc(hypre_handle()) )
    {
       hypre_HandleUserDeviceMalloc(hypre_handle())(&ptr, size);
    }
    else
+#endif
    {
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
       hypre_umpire_device_pooled_allocate(&ptr, size);
@@ -463,11 +465,13 @@ hypre_HostFree(void *ptr)
 static inline void
 hypre_DeviceFree(void *ptr)
 {
+#if defined(HYPRE_USING_GPU)
    if ( hypre_HandleUserDeviceMfree(hypre_handle()) )
    {
       hypre_HandleUserDeviceMfree(hypre_handle())(ptr);
    }
    else
+#endif
    {
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
       hypre_umpire_device_pooled_free(ptr);
