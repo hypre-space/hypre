@@ -34,16 +34,15 @@
  * The 'data' pointer below has space at the beginning for constant stencil
  * coefficient values followed by the stored variable coefficient values.
  * Accessing coefficients is done via 'data_indices' through the interface
- * routine hypre_StructMatrixBoxData().  The number of boxes in data_boxes,
- * data_space, and data_indices is the same as in the base grid, even though
- * both ran_nboxes and dom_nboxes may be smaller.
+ * routine hypre_StructMatrixBoxData().  The number of boxes in data_space and
+ * data_indices is the same as in the base grid, even though both ran_nboxes and
+ * dom_nboxes may be smaller.
  *
  * The 'num_ghost' and 'sym_ghost' arrays are used to determine how many ghost
- * layers of storage to keep.  They determine the dimensions of 'data_space' and
- * 'data_boxes', but they do not imply communication of any sort.  That is, the
- * values stored in the ghost layers will not be correct without triggering some
- * additional communication either explicitly or by setting the 'symmetric' or
- * 'transpose' flags.
+ * layers of storage to keep.  They determine the dimensions of 'data_space',
+ * but they do not imply communication.  That is, the values stored in the ghost
+ * layers will not be correct without triggering some additional communication
+ * either explicitly or by setting the 'symmetric' or 'transpose' flags.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -65,7 +64,6 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_MemoryLocation  memory_location;  /* Memory location of the data array */
    HYPRE_Complex        *data;             /* Pointer to matrix data */
    hypre_BoxArray       *data_space;       /* Layout of data (coarse index space) */
-   hypre_BoxArray       *data_boxes;       /* Data extents on fine index space */
    HYPRE_Int           **data_indices;     /* Array of indices into the data array.
                                               data_indices[b][s] is the starting index of
                                               data for boxnum b and stencil coefficient s */
@@ -126,7 +124,6 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
 #define hypre_StructMatrixData(matrix)                ((matrix) -> data)
 #define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
-#define hypre_StructMatrixDataBoxes(matrix)           ((matrix) -> data_boxes)
 #define hypre_StructMatrixDataIndices(matrix)         ((matrix) -> data_indices)
 #define hypre_StructMatrixDataAlloced(matrix)         ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)            ((matrix) -> data_size)
