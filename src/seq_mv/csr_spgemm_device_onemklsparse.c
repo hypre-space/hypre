@@ -12,7 +12,7 @@
 #if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
+hypre_CSRSpGemmOnemklsparseDevice(HYPRE_Int                            m,
                                   HYPRE_Int                            k,
                                   HYPRE_Int                            n,
                                   oneapi::mkl::sparse::matrix_handle_t handle_A,

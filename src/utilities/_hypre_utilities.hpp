@@ -2459,26 +2459,26 @@ dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                            T3 *vals, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortTupleByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                                 T3 *vals1, T4 *vals2, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
+HYPRE_Int hypre_ReduceByTupleKeyDevice(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
                                        T3 *vals_in, T1 *keys1_out, T2 *keys2_out,
                                        T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+HYPRE_Int hypre_ScatterConstantDevice(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
+HYPRE_Int hypre_GenScatterAddDevice(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
                                     HYPRE_Real *y, char *work);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+HYPRE_Int hypre_CsrRowPtrsToIndicesWithRowNumDevice(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 #endif

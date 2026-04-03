@@ -2341,61 +2341,61 @@ HYPRE_Int hypre_SyncComputeStream();
 HYPRE_Int hypre_SyncDevice();
 HYPRE_Int hypre_ResetDevice();
 
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
+HYPRE_Int hypre_DiagScaleVectorDevice(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta,
                                       HYPRE_Complex *y);
-HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int num_vectors, HYPRE_Int num_rows,
+HYPRE_Int hypre_DiagScaleVector2Device(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                        HYPRE_Complex *diag, HYPRE_Complex *x,
                                        HYPRE_Complex beta, HYPRE_Complex *y,
                                        HYPRE_Complex *z, HYPRE_Int computeY);
-HYPRE_Int hypreDevice_ComplexArrayToArrayOfPtrs(HYPRE_Int n, HYPRE_Int m,
+HYPRE_Int hypre_ComplexArrayToArrayOfPtrsDevice(HYPRE_Int n, HYPRE_Int m,
                                                 HYPRE_Complex *data, HYPRE_Complex **data_aop);
-HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha,
+HYPRE_Int hypre_zeqxmyddDevice(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha,
                                HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d);
-HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
+HYPRE_Int hypre_IVAXPYDevice(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
+HYPRE_Int hypre_IVAXPYMarkedDevice(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
-HYPRE_Int hypreDevice_IVAMXPMY(HYPRE_Int m, HYPRE_Int n, HYPRE_Complex *a,
+HYPRE_Int hypre_IVAMXPMYDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Complex *a,
                                HYPRE_Complex *x, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
-HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
-HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
-HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
-HYPRE_Int hypreDevice_IntStridedCopy ( HYPRE_Int size, HYPRE_Int stride,
+HYPRE_Int hypre_IntFillnDevice(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
+HYPRE_Int hypre_BigIntFillnDevice(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
+HYPRE_Int hypre_ComplexFillnDevice(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypre_CharFillnDevice(char *d_x, size_t n, char v);
+HYPRE_Int hypre_IntStridedCopyDevice ( HYPRE_Int size, HYPRE_Int stride,
                                        HYPRE_Int *in, HYPRE_Int *out );
-HYPRE_Int hypreDevice_ComplexStridedCopy ( HYPRE_Int size, HYPRE_Int stride,
+HYPRE_Int hypre_ComplexStridedCopyDevice ( HYPRE_Int size, HYPRE_Int stride,
                                            HYPRE_Complex *in, HYPRE_Complex *out );
-HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
-HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+HYPRE_Int hypre_IntScalenDevice(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
+HYPRE_Int hypre_ComplexScalenDevice(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                     HYPRE_Complex v);
-HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+HYPRE_Int hypre_ComplexAxpynDevice(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                    HYPRE_Complex *d_z, HYPRE_Complex a);
-HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+HYPRE_Int hypre_ComplexAxpyznDevice(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
                                     HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
-HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
+HYPRE_Int hypre_IntAxpynDevice(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
                                HYPRE_Int a);
-HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
+HYPRE_Int hypre_BigIntAxpynDevice(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
-HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+HYPRE_Int* hypre_CsrRowPtrsToIndicesDevice(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
+HYPRE_Int hypre_CsrRowPtrsToIndicesDevice_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
-HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
-HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+HYPRE_Int* hypre_CsrRowIndicesToPtrsDevice(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+HYPRE_Int hypre_CsrRowIndicesToPtrsDevice_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
                                              HYPRE_Int *d_row_ptr);
-HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+HYPRE_Int hypre_GetRowNnzDevice(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
+HYPRE_Int hypre_CopyParCSRRowsDevice(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
                                      HYPRE_Int has_offd, HYPRE_BigInt first_col,
                                      HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
                                      HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                      HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
                                      HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib,
                                      HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-HYPRE_Complex hypreDevice_ComplexReduceSum(HYPRE_Int m, HYPRE_Complex *d_x);
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+HYPRE_Int hypre_IntegerReduceSumDevice(HYPRE_Int m, HYPRE_Int *d_i);
+HYPRE_Complex hypre_ComplexReduceSumDevice(HYPRE_Int m, HYPRE_Complex *d_x);
+HYPRE_Int hypre_IntegerInclusiveScanDevice(HYPRE_Int n, HYPRE_Int *d_i);
+HYPRE_Int hypre_IntegerExclusiveScanDevice(HYPRE_Int n, HYPRE_Int *d_i);
 HYPRE_Int hypre_CudaCompileFlagCheck(void);
 #endif
 

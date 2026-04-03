@@ -12,7 +12,7 @@
 #if defined(HYPRE_USING_CUSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+hypre_CSRSpTransCusparseDevice(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                                HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                                HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                                HYPRE_Int   want_data)
@@ -88,7 +88,7 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
 #if defined(HYPRE_USING_ROCSPARSE)
 HYPRE_Int
-hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+hypre_CSRSpTransRocsparseDevice(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                                 HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                                 HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                                 HYPRE_Int   want_data)
@@ -150,7 +150,7 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
-hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+hypre_CSRSpTransDevice(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                        HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
@@ -177,7 +177,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    /* expansion: A's row idx */
    //d_it = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
    d_it = d_pm + nnzA;
-   hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
+   hypre_CsrRowPtrsToIndicesDevice_v2(m, nnzA, d_ia, d_it);
 
    /* a copy of col idx of A */
    //d_jt = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
@@ -194,7 +194,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    }
 
    /* convert into ic: row idx --> row ptrs */
-   d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
+   d_ic = hypre_CsrRowIndicesToPtrsDevice(n, nnzA, d_jt);
 
 #ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;
@@ -224,7 +224,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 
 #if defined(HYPRE_USING_SYCL)
 HYPRE_Int
-hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+hypre_CSRSpTransDevice(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                        HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
@@ -249,7 +249,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 
    /* expansion: A's row idx */
    d_it = d_pm + nnzA;
-   hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
+   hypre_CsrRowPtrsToIndicesDevice_v2(m, nnzA, d_ia, d_it);
 
    /* a copy of col idx of A */
    d_jt = d_it + nnzA;
@@ -284,7 +284,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    }
 
    /* convert into ic: row idx --> row ptrs */
-   d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
+   d_ic = hypre_CsrRowIndicesToPtrsDevice(n, nnzA, d_jt);
 
 #ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;

@@ -13,7 +13,7 @@
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
+hypre_CSRSpGemmCusparseDevice(HYPRE_Int          m,
                               HYPRE_Int          k,
                               HYPRE_Int          n,
                               cusparseMatDescr_t descr_A,
@@ -33,7 +33,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
                               HYPRE_Complex    **d_c_out)
 {
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-   hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
+   hypre_CSRSpGemmCusparseGenericAPIDevice(m, k, n,
                                            nnzA, d_ia, d_ja, d_a,
                                            nnzB, d_ib, d_jb, d_b,
                                            nnzC_out, d_ic_out, d_jc_out, d_c_out);
@@ -41,7 +41,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
    HYPRE_UNUSED_VAR(descr_B);
    HYPRE_UNUSED_VAR(descr_C);
 #else
-   hypreDevice_CSRSpGemmCusparseOldAPI(m, k, n,
+   hypre_CSRSpGemmCusparseOldAPIDevice(m, k, n,
                                        descr_A, nnzA, d_ia, d_ja, d_a,
                                        descr_B, nnzB, d_ib, d_jb, d_b,
                                        descr_C, nnzC_out, d_ic_out, d_jc_out, d_c_out);
@@ -72,7 +72,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
  */
 
 HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
+hypre_CSRSpGemmCusparseGenericAPIDevice(HYPRE_Int       m,
                                         HYPRE_Int       k,
                                         HYPRE_Int       n,
                                         HYPRE_Int       nnzA,
@@ -214,7 +214,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 #else
 
 HYPRE_Int
-hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
+hypre_CSRSpGemmCusparseOldAPIDevice(HYPRE_Int          m,
                                     HYPRE_Int          k,
                                     HYPRE_Int          n,
                                     cusparseMatDescr_t descr_A,
