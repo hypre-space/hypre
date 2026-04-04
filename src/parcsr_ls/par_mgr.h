@@ -86,12 +86,6 @@ typedef struct
    HYPRE_Int           (*coarse_grid_solver_solve)(void*, void*, void*, void*);
 
    HYPRE_Int             use_default_cgrid_solver;
-   // Mode to use an external AMG solver for F-relaxation
-   // 0: use an external AMG solver that is already setup
-   // 1: use an external AMG solver but do setup inside MGR
-   // 2: use default internal AMG solver
-   HYPRE_Int             fsolver_mode;
-   //  HYPRE_Int          fsolver_type;
    HYPRE_Real            omega;
 
    /* temp vectors for solve phase */
@@ -203,6 +197,7 @@ typedef struct
 
 #define HYPRE_MGR_SOLVER_TYPE_NONE      0
 #define HYPRE_MGR_SOLVER_TYPE_USER     -1
+#define HYPRE_MGR_SOLVER_TYPE_USER_FGRID -2
 #define HYPRE_MGR_SOLVER_TYPE_BOOMERAMG 2
 #define HYPRE_MGR_SOLVER_TYPE_EUCLID    8
 #define HYPRE_MGR_SOLVER_TYPE_DIRECT    29

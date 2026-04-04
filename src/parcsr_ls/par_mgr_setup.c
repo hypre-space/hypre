@@ -1065,9 +1065,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_ParVectorInitialize(U_fine_array[lev + 1]);
          }
 
-         if (lev == 0 && (mgr_data -> fsolver_mode) == 0 &&
-             aff_solver[lev] &&
-             aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER)
+         if (lev == 0 && aff_solver[lev] &&
+             aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER &&
+             aff_solver_type[lev] == HYPRE_MGR_SOLVER_TYPE_USER_FGRID)
          {
             if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
             {
@@ -1100,7 +1100,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                      A_ff_array[lev],
                                      F_fine_array[lev + 1],
                                      U_fine_array[lev + 1]);
-                  (mgr_data -> fsolver_mode) = 1;
+                  aff_solver_type[lev] = HYPRE_MGR_SOLVER_TYPE_USER;
                }
             }
             else if (aff_solver[lev])
@@ -1160,8 +1160,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                                            (HYPRE_Matrix) A_ff_array[lev],
                                            (HYPRE_Vector) F_fine_array[lev + 1],
                                            (HYPRE_Vector) U_fine_array[lev + 1]);
-
-               (mgr_data -> fsolver_mode) = 2;
             }
             else if (desired_aff_solver_type == HYPRE_MGR_SOLVER_TYPE_DIRECT)
             {
