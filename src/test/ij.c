@@ -464,6 +464,11 @@ main( hypre_int argc,
    HYPRE_Int mgr_num_gsmooth_sweeps = 1;
    HYPRE_Int mgr_restrict_type = 0;
    HYPRE_Int mgr_num_restrict_sweeps = 0;
+   HYPRE_Int mgr_use_default_cgrid_solver = 0;
+   HYPRE_Int mgr_use_user_fsolver = 0;
+   HYPRE_Int mgr_use_user_gsmoother = 0;
+   HYPRE_Int second_time_mgr_relax_type = -999;
+   HYPRE_Int second_time_mgr_gsmooth_type = -999;
    /* end mgr options */
 
    /* hypre_ILU options */
@@ -1441,6 +1446,31 @@ main( hypre_int argc,
          /* number of restriction sweeps*/
          arg_index++;
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_use_default_cgrid_solver") == 0 )
+      {
+         arg_index++;
+         mgr_use_default_cgrid_solver = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_use_user_fsolver") == 0 )
+      {
+         arg_index++;
+         mgr_use_user_fsolver = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_use_user_gsmoother") == 0 )
+      {
+         arg_index++;
+         mgr_use_user_gsmoother = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-second_time_mgr_relax_type") == 0 )
+      {
+         arg_index++;
+         second_time_mgr_relax_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-second_time_mgr_gsmooth_type") == 0 )
+      {
+         arg_index++;
+         second_time_mgr_gsmooth_type = atoi(argv[arg_index++]);
       }
       /* end mgr options */
       /* begin ilu options*/
@@ -2709,6 +2739,11 @@ main( hypre_int argc,
          hypre_printf("                                     for F-relaxation \n");
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");
          hypre_printf("                                     for F-relaxation \n");
+         hypre_printf("  -mgr_use_default_cgrid_solver <0/1> : use MGR's internal default coarse solver on repeated setup tests\n");
+         hypre_printf("  -mgr_use_user_fsolver <0/1>         : attach a user BoomerAMG F-solver at the first level\n");
+         hypre_printf("  -mgr_use_user_gsmoother <0/1>       : attach a user BoomerAMG global smoother at level 0\n");
+         hypre_printf("  -second_time_mgr_relax_type <val>   : override MGR relax type before the second setup\n");
+         hypre_printf("  -second_time_mgr_gsmooth_type <val> : override MGR global smooth type before the second setup\n");
          /* end MGR options */
          /* hypre ILU options */
          hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");
@@ -9291,7 +9326,15 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_Solver mgr_solver;
+      HYPRE_Solver mgr_fsolver = NULL;
+      HYPRE_Solver mgr_gsmoother = NULL;
+      HYPRE_Int    mgr_setup_relax_type = mgr_relax_type;
       HYPRE_MGRCreate(&mgr_solver);
+
+      if (mgr_use_user_fsolver && mgr_setup_relax_type == 0)
+      {
+         mgr_setup_relax_type = 2;
+      }
 
       mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int,  mgr_nlevels, HYPRE_MEMORY_HOST);
       for (i = 0; i < mgr_nlevels; i++)
@@ -9327,7 +9370,7 @@ main( hypre_int argc,
       /* set F relaxation strategy */
       HYPRE_MGRSetFRelaxMethod(mgr_solver, mgr_frelax_method);
       /* set relax type for single level F-relaxation and post-relaxation */
-      HYPRE_MGRSetRelaxType(mgr_solver, mgr_relax_type);
+      HYPRE_MGRSetRelaxType(mgr_solver, mgr_setup_relax_type);
       HYPRE_MGRSetNumRelaxSweeps(mgr_solver, mgr_num_relax_sweeps);
       /* set interpolation type */
       HYPRE_MGRSetRestrictType(mgr_solver, mgr_restrict_type);
@@ -9342,59 +9385,77 @@ main( hypre_int argc,
       /* set global smoother */
       HYPRE_MGRSetGlobalSmoothType(mgr_solver, mgr_gsmooth_type);
       HYPRE_MGRSetMaxGlobalSmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
+      if (mgr_use_user_gsmoother)
+      {
+         HYPRE_BoomerAMGCreate(&mgr_gsmoother);
+         HYPRE_BoomerAMGSetMaxIter(mgr_gsmoother, mgr_num_gsmooth_sweeps);
+         HYPRE_BoomerAMGSetTol(mgr_gsmoother, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(mgr_gsmoother, 0);
+         HYPRE_MGRSetGlobalSmootherAtLevel(mgr_solver, mgr_gsmoother, 0);
+      }
+      if (mgr_use_user_fsolver)
+      {
+         HYPRE_BoomerAMGCreate(&mgr_fsolver);
+         HYPRE_BoomerAMGSetMaxIter(mgr_fsolver, mgr_num_relax_sweeps);
+         HYPRE_BoomerAMGSetTol(mgr_fsolver, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(mgr_fsolver, 0);
+         HYPRE_MGRSetFSolver(mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, mgr_fsolver);
+      }
 
       /* create AMG coarse grid solver */
-
-      HYPRE_BoomerAMGCreate(&amg_solver);
-      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      if (!mgr_use_default_cgrid_solver)
       {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
-      }
-      else
-      {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-         if (relax_down > -1)
+         HYPRE_BoomerAMGCreate(&amg_solver);
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
          }
-         if (relax_up > -1)
+         else
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+            HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+            HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+            HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
-         if (relax_coarse > -1)
+         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+         HYPRE_BoomerAMGSetTol(amg_solver, tol);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         if (mgr_nlevels < 1 || mgr_bsize < 2)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
+            HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
+         else
+         {
+            HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
+            HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+            HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+         }
+         /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
+         HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
       }
-      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
-      HYPRE_BoomerAMGSetTol(amg_solver, tol);
-      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-      HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-      if (mgr_nlevels < 1 || mgr_bsize < 2)
-      {
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
-      }
-      else
-      {
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
-         HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
-      }
-      /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
-      HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
       /* setup MGR solver */
       HYPRE_MGRSetup(mgr_solver, parcsr_M, b, x);
@@ -9423,6 +9484,15 @@ main( hypre_int argc,
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
+
+         if (second_time_mgr_relax_type != -999)
+         {
+            HYPRE_MGRSetRelaxType(mgr_solver, second_time_mgr_relax_type);
+         }
+         if (second_time_mgr_gsmooth_type != -999)
+         {
+            HYPRE_MGRSetGlobalSmoothType(mgr_solver, second_time_mgr_gsmooth_type);
+         }
 
          HYPRE_MGRSetup(mgr_solver, parcsr_M, b, x);
          HYPRE_MGRSolve(mgr_solver, parcsr_A, b, x);
@@ -9465,8 +9535,19 @@ main( hypre_int argc,
          mgr_cindexes = NULL;
       }
 
-      HYPRE_BoomerAMGDestroy(amg_solver);
       HYPRE_MGRDestroy(mgr_solver);
+      if (!mgr_use_default_cgrid_solver)
+      {
+         HYPRE_BoomerAMGDestroy(amg_solver);
+      }
+      if (mgr_fsolver)
+      {
+         HYPRE_BoomerAMGDestroy(mgr_fsolver);
+      }
+      if (mgr_gsmoother)
+      {
+         HYPRE_BoomerAMGDestroy(mgr_gsmoother);
+      }
    }
 
    /*-----------------------------------------------------------

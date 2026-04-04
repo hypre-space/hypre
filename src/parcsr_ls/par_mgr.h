@@ -48,6 +48,8 @@ typedef struct
    hypre_ParVector     **F_fine_array;
    hypre_ParVector     **U_fine_array;
    HYPRE_Solver         *aff_solver;
+   HYPRE_Int            *aff_solver_owner;
+   HYPRE_Int            *aff_solver_type;
    HYPRE_Int           (*fine_grid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int           (*fine_grid_solver_solve)(void*, void*, void*, void*);
 
@@ -55,7 +57,9 @@ typedef struct
    HYPRE_Int             num_interp_sweeps;
    HYPRE_Int             num_restrict_sweeps;
    HYPRE_Int            *interp_type;
+   HYPRE_Int            *user_interp_type;
    HYPRE_Int            *restrict_type;
+   HYPRE_Int            *user_restrict_type;
    HYPRE_Real            strong_threshold;
    HYPRE_Real            trunc_factor;
    HYPRE_Real            S_commpkg_switch;
@@ -77,6 +81,7 @@ typedef struct
    char                 *data_path;
 
    HYPRE_Solver          coarse_grid_solver;
+   HYPRE_Int             coarse_grid_solver_owner;
    HYPRE_Int           (*coarse_grid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int           (*coarse_grid_solver_solve)(void*, void*, void*, void*);
 
@@ -103,6 +108,8 @@ typedef struct
    HYPRE_Int            *level_smooth_iters;
    HYPRE_Int            *level_smooth_type;
    HYPRE_Solver         *level_smoother;
+   HYPRE_Int            *level_smoother_owner;
+   HYPRE_Int            *level_smoother_type;
    HYPRE_Int             global_smooth_cycle;
 
    /*
@@ -119,6 +126,7 @@ typedef struct
    /* F-relaxation type */
    HYPRE_Int            *Frelax_method;
    HYPRE_Int            *Frelax_type;
+   HYPRE_Int            *user_Frelax_type;
    HYPRE_Int            *Frelax_num_functions;
 
    /* Non-Galerkin coarse grid */
@@ -183,6 +191,24 @@ typedef struct
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
 /*--------------------------------------------------------------------------
+ * MGR cleanup and solver ownership/type codes
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_MGR_CLEANUP_REBUILD       0
+#define HYPRE_MGR_CLEANUP_DESTROY       1
+
+#define HYPRE_MGR_SOLVER_OWNER_NONE     0
+#define HYPRE_MGR_SOLVER_OWNER_USER     1
+#define HYPRE_MGR_SOLVER_OWNER_INTERNAL 2
+
+#define HYPRE_MGR_SOLVER_TYPE_NONE      0
+#define HYPRE_MGR_SOLVER_TYPE_USER     -1
+#define HYPRE_MGR_SOLVER_TYPE_BOOMERAMG 2
+#define HYPRE_MGR_SOLVER_TYPE_EUCLID    8
+#define HYPRE_MGR_SOLVER_TYPE_DIRECT    29
+#define HYPRE_MGR_SOLVER_TYPE_ILU       32
+
+/*--------------------------------------------------------------------------
  * MGR print level codes
  *--------------------------------------------------------------------------*/
 
@@ -229,23 +255,31 @@ typedef struct
 
 #define hypre_ParMGRDataInterpType(data)            ((data) -> interp_type)
 #define hypre_ParMGRDataInterpTypeI(data, i)        ((data) -> interp_type[i])
+#define hypre_ParMGRDataUserInterpType(data)        ((data) -> user_interp_type)
 #define hypre_ParMGRDataRestrictType(data)          ((data) -> restrict_type)
 #define hypre_ParMGRDataRestrictTypeI(data, i)      ((data) -> restrict_type[i])
+#define hypre_ParMGRDataUserRestrictType(data)      ((data) -> user_restrict_type)
 
 #define hypre_ParMGRDataLevelSmoothType(data)       ((data) -> level_smooth_type)
 #define hypre_ParMGRDataLevelSmoothTypeI(data, i)   ((data) -> level_smooth_type[i])
 #define hypre_ParMGRDataLevelSmoother(data)         ((data) -> level_smoother)
 #define hypre_ParMGRDataLevelSmootherI(data, i)     ((data) -> level_smoother[i])
+#define hypre_ParMGRDataLevelSmootherOwner(data)    ((data) -> level_smoother_owner)
+#define hypre_ParMGRDataLevelSmootherType(data)     ((data) -> level_smoother_type)
 
 #define hypre_ParMGRDataRelaxType(data)             ((data) -> relax_type)
 #define hypre_ParMGRDataFRelaxType(data)            ((data) -> Frelax_type)
 #define hypre_ParMGRDataFRelaxTypeI(data, i)        ((data) -> Frelax_type[i])
+#define hypre_ParMGRDataUserFRelaxType(data)        ((data) -> user_Frelax_type)
 #define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver)
 #define hypre_ParMGRDataAFFsolverI(data, i)         ((data) -> aff_solver[i])
+#define hypre_ParMGRDataAFFsolverOwner(data)        ((data) -> aff_solver_owner)
+#define hypre_ParMGRDataAFFsolverType(data)         ((data) -> aff_solver_type)
 
 #define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> coarse_grid_method)
 #define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> coarse_grid_method[i])
 #define hypre_ParMGRDataCoarseGridSolver(data)      ((data) -> coarse_grid_solver)
 #define hypre_ParMGRDataCoarseGridSolverSetup(data) ((data) -> coarse_grid_solver_setup)
+#define hypre_ParMGRDataCoarseGridSolverOwner(data) ((data) -> coarse_grid_solver_owner)
 
 #endif
