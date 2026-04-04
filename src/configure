@@ -9795,29 +9795,29 @@ then
       gcc|mpigcc|mpicc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -fopenmp"
-          LDFLAGS+=" -fopenmp"
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qopenmp"
-          LDFLAGS+=" -qopenmp"
+          CFLAGS="$CFLAGS -qopenmp"
+          LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -mp"
-          LDFLAGS+=" -mp"
+          CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       cc|xlc|mpxlc|mpixlc|mpcc)
         CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qsmp=omp"
-          LDFLAGS+=" -qsmp=omp"
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9835,25 +9835,25 @@ then
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -fopenmp"
+          CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qopenmp"
+          CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -mp"
+          CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
       CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
         CXXFLAGS="-O0 -g"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qsmp=omp"
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9911,29 +9911,29 @@ then
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -fopenmp"
-          LDFLAGS+=" -fopenmp"
+          CFLAGS="$CFLAGS -fopenmp"
+          LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qopenmp"
-          LDFLAGS+=" -qopenmp"
+          CFLAGS="$CFLAGS -qopenmp"
+          LDFLAGS="$LDFLAGS -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -mp"
-          LDFLAGS+=" -mp"
+          CFLAGS="$CFLAGS -mp"
+          LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
       cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpixlc-gpu|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS+=" -qsmp=omp"
-          LDFLAGS+=" -qsmp=omp"
+          CFLAGS="$CFLAGS -qsmp=omp"
+          LDFLAGS="$LDFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9951,25 +9951,25 @@ then
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -fopenmp"
+          CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qopenmp"
+          CXXFLAGS="$CXXFLAGS -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -mp"
+          CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
       CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlC-gpu|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS+=" -qsmp=omp"
+          CXXFLAGS="$CXXFLAGS -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9987,25 +9987,25 @@ then
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -fopenmp"
+          FFLAGS="$FFLAGS -fopenmp"
         fi
         ;;
       ifort|mpiifort)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -qopenmp"
+          FFLAGS="$FFLAGS -qopenmp"
         fi
         ;;
       pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -mp"
+          FFLAGS="$FFLAGS -mp"
         fi
         ;;
       f77|f90|xlf|xlf_r|mpxlf|mpixlf77|mpixlf77_r)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS+=" -qsmp=omp"
+          FFLAGS="$FFLAGS -qsmp=omp"
         fi
         ;;
       kf77|mpikf77)
@@ -10176,7 +10176,7 @@ then
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes" || test "$hypre_using_kokkos" == "yes"
+   if test "$hypre_using_cuda" = "yes" || test "$hypre_using_hip" = "yes" || test "$hypre_using_kokkos" = "yes"
    then
             BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
@@ -10639,7 +10639,7 @@ fi
 fi
 
 
-if  test x"$hypre_using_hip" == x"yes"
+if  test x"$hypre_using_hip" = x"yes"
 then :
    if  test -n "$ROCM_PATH"
 then :
@@ -10897,12 +10897,12 @@ printf "%s\n" "#define HYPRE_USING_CUDA 1" >>confdefs.h
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
 
-   if test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"
+   if test x"$hypre_using_cusparse" = x"yes" || test x"$hypre_using_cublas" = x"yes" || test x"$hypre_using_cusolver" = x"yes"
 then :
   if test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"
 then :
-  HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
-           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"
+  HYPRE_CUDA_INCLUDE="$HYPRE_CUDA_INCLUDE -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -L${HYPRE_VENDOR_MATH_PATH}/lib64"
 fi
 fi
 
@@ -10911,7 +10911,7 @@ fi
 
 printf "%s\n" "#define HYPRE_USING_NVTX 1" >>confdefs.h
 
-      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lnvToolsExt"
    fi
 
    if test "$hypre_using_cusparse" = "yes"
@@ -10919,7 +10919,7 @@ printf "%s\n" "#define HYPRE_USING_NVTX 1" >>confdefs.h
 
 printf "%s\n" "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
-      HYPRE_CUDA_LIBS+=" -lcusparse"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcusparse"
    fi
 
    if test "$hypre_using_cublas" = "yes"
@@ -10927,7 +10927,7 @@ printf "%s\n" "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
 
 printf "%s\n" "#define HYPRE_USING_CUBLAS 1" >>confdefs.h
 
-      HYPRE_CUDA_LIBS+=" -lcublas"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcublas"
    fi
 
    if test "$hypre_using_curand" = "yes"
@@ -10935,7 +10935,7 @@ printf "%s\n" "#define HYPRE_USING_CUBLAS 1" >>confdefs.h
 
 printf "%s\n" "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
-      HYPRE_CUDA_LIBS+=" -lcurand"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcurand"
    fi
 
    if test "$hypre_using_cusolver" = "yes"
@@ -10943,7 +10943,7 @@ printf "%s\n" "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
 printf "%s\n" "#define HYPRE_USING_CUSOLVER 1" >>confdefs.h
 
-      HYPRE_CUDA_LIBS+=" -lcusolver"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcusolver"
    fi
 
    if test "$hypre_using_device_malloc_async" = "yes"
@@ -10968,7 +10968,7 @@ printf "%s\n" "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
    fi
 fi
 
-if test x"$hypre_using_hip" == x"yes"
+if test x"$hypre_using_hip" = x"yes"
 then :
 
 
@@ -10993,7 +10993,7 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
 
                                         HIPCXXFLAGS="-x hip -fPIE -std=c++${hypre_cxxstd} ${HIPCXXFLAGS}"
 
-                                if test x"$hypre_using_debug" == x"yes"
+                                if test x"$hypre_using_debug" = x"yes"
 then :
   HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"
 elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"
@@ -11016,52 +11016,52 @@ fi
 
                 HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
 
-                if test x"$hypre_using_rocsparse" == x"yes"
+                if test x"$hypre_using_rocsparse" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ROCSPARSE 1" >>confdefs.h
 
-               HYPRE_HIP_LIBS+=" -lrocsparse"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocsparse"
 
 fi
 
-                if test x"$hypre_using_rocblas" == x"yes"
+                if test x"$hypre_using_rocblas" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ROCBLAS 1" >>confdefs.h
 
-               HYPRE_HIP_LIBS+=" -lrocblas"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocblas"
 
 fi
 
-                if test x"$hypre_using_rocsolver" == x"yes"
+                if test x"$hypre_using_rocsolver" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ROCSOLVER 1" >>confdefs.h
 
-               HYPRE_HIP_LIBS+=" -lrocsolver"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocsolver"
 
 fi
 
-                if test x"$hypre_using_rocrand" == x"yes"
+                if test x"$hypre_using_rocrand" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
 
-               HYPRE_HIP_LIBS+=" -lrocrand"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocrand"
 
 fi
 
-                if test x"$hypre_using_gpu_profiling" == x"yes"
+                if test x"$hypre_using_gpu_profiling" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ROCTX 1" >>confdefs.h
 
-               HYPRE_HIP_LIBS+=" -lroctx64"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lroctx64"
 
 fi
 
-        if test x"$hypre_using_cuda_streams" == x"yes"
+        if test x"$hypre_using_cuda_streams" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
@@ -11072,7 +11072,7 @@ fi
 
 fi
 
-if test x"$hypre_using_sycl" == x"yes"
+if test x"$hypre_using_sycl" = x"yes"
 then :
 
 
@@ -11093,15 +11093,15 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
 
-        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
+        LDFLAGS="$LDFLAGS -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
                 if test "x${HYPRE_SYCL_TARGET}" != "x"
         then
-           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+           LDFLAGS="$LDFLAGS -fsycl-targets=${HYPRE_SYCL_TARGET}"
         fi
         if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
         then
-           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+           LDFLAGS="$LDFLAGS -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
         fi
 
                 if test "$hypre_using_shared" = "yes"
@@ -11115,7 +11115,7 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
            CUFLAGS="${SYCLFLAGS}"
         fi
 
-        if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"
+        if test x"$hypre_using_onemklsparse" = x"yes" || test x"$hypre_using_onemklblas" = x"yes" || test x"$hypre_using_onemklrand" = x"yes"
 then :
   as_ac_Header=`printf "%s\n" "ac_cv_header_"${MKLROOT}/include/mkl.h"" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" ""${MKLROOT}/include/mkl.h"" "$as_ac_Header" "$ac_includes_default"
@@ -11131,21 +11131,21 @@ fi
 
 fi
 
-        if test x"$hypre_using_onemklsparse" == x"yes"
+        if test x"$hypre_using_onemklsparse" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
 
 fi
 
-        if test x"$hypre_using_onemklblas" == x"yes"
+        if test x"$hypre_using_onemklblas" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
 fi
 
-        if test x"$hypre_using_onemklrand" == x"yes"
+        if test x"$hypre_using_onemklrand" = x"yes"
 then :
 
 printf "%s\n" "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
@@ -11240,7 +11240,7 @@ printf "%s\n" "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
          #CUFLAGS+=" -fopenmp-nonaliased-maps"
             if test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"
       then
-         CUFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         CUFLAGS="$CUFLAGS -qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
@@ -11248,7 +11248,7 @@ printf "%s\n" "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
    then
       if test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"
       then
-         LDFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         LDFLAGS="$LDFLAGS -qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
@@ -12790,4 +12790,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

@@ -2233,7 +2233,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes" || test "$hypre_using_kokkos" == "yes"
+   if test "$hypre_using_cuda" = "yes" || test "$hypre_using_hip" = "yes" || test "$hypre_using_kokkos" = "yes"
    then
       dnl BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
@@ -2421,7 +2421,7 @@ dnl then we default to `/opt/rocm`.
 dnl
 dnl TODO: Add an ARG_WITH for rocm so the user can control the ROCm path
 dnl       through the configure line
-AS_IF([ test x"$hypre_using_hip" == x"yes" ],
+AS_IF([ test x"$hypre_using_hip" = x"yes" ],
       [ AS_IF([ test -n "$ROCM_PATH"],
               [ HYPRE_ROCM_PREFIX=$ROCM_PATH ],
               [ HYPRE_ROCM_PREFIX=/opt/rocm ])
@@ -2673,39 +2673,39 @@ then
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
 
-   AS_IF([test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"],
+   AS_IF([test x"$hypre_using_cusparse" = x"yes" || test x"$hypre_using_cublas" = x"yes" || test x"$hypre_using_cusolver" = x"yes"],
          [AS_IF([test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"],
-          [HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
-           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"])])
+          [HYPRE_CUDA_INCLUDE="$HYPRE_CUDA_INCLUDE -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -L${HYPRE_VENDOR_MATH_PATH}/lib64"])])
 
    if test "$hypre_using_gpu_profiling" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
-      HYPRE_CUDA_LIBS+=" -lnvToolsExt"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lnvToolsExt"
    fi
 
    if test "$hypre_using_cusparse" = "yes"
    then
       AC_DEFINE(HYPRE_USING_CUSPARSE, 1, [Define to 1 if using cuSPARSE])
-      HYPRE_CUDA_LIBS+=" -lcusparse"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcusparse"
    fi
 
    if test "$hypre_using_cublas" = "yes"
    then
       AC_DEFINE(HYPRE_USING_CUBLAS, 1, [Define to 1 if using cuBLAS])
-      HYPRE_CUDA_LIBS+=" -lcublas"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcublas"
    fi
 
    if test "$hypre_using_curand" = "yes"
    then
       AC_DEFINE(HYPRE_USING_CURAND, 1, [Define to 1 if using cuRAND])
-      HYPRE_CUDA_LIBS+=" -lcurand"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcurand"
    fi
 
    if test "$hypre_using_cusolver" = "yes"
    then
       AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSOLVER])
-      HYPRE_CUDA_LIBS+=" -lcusolver"
+      HYPRE_CUDA_LIBS="$HYPRE_CUDA_LIBS -lcusolver"
    fi
 
    if test "$hypre_using_device_malloc_async" = "yes"
@@ -2727,7 +2727,7 @@ fi
 dnl *********************************************************************
 dnl * Set HIP options
 dnl *********************************************************************
-AS_IF([test x"$hypre_using_hip" == x"yes"],
+AS_IF([test x"$hypre_using_hip" = x"yes"],
       [
         AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_HIP, 1, [HIP being used])
@@ -2765,7 +2765,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
         dnl plus flags for debugging symbols
-        AS_IF([test x"$hypre_using_debug" == x"yes"],
+        AS_IF([test x"$hypre_using_debug" = x"yes"],
               [HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"],
               [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
@@ -2794,46 +2794,46 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
 
         dnl rocSPARSE, for things like dcsrmv on AMD GPUs
-        AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
+        AS_IF([test x"$hypre_using_rocsparse" = x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
-               HYPRE_HIP_LIBS+=" -lrocsparse"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocsparse"
                ])
 
         dnl rocBLAS: basic linear algebra operations on AMD GPUs
-        AS_IF([test x"$hypre_using_rocblas" == x"yes"],
+        AS_IF([test x"$hypre_using_rocblas" = x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
-               HYPRE_HIP_LIBS+=" -lrocblas"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocblas"
               ])
 
         dnl rocSOLVER: dense linear solvers on AMD GPUs (requires rocBLAS)
-        AS_IF([test x"$hypre_using_rocsolver" == x"yes"],
+        AS_IF([test x"$hypre_using_rocsolver" = x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSOLVER, 1, [rocSOLVER being used])
-               HYPRE_HIP_LIBS+=" -lrocsolver"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocsolver"
                ])
 
         dnl rocRAND: random number generation on AMD GPUs
-        AS_IF([test x"$hypre_using_rocrand" == x"yes"],
+        AS_IF([test x"$hypre_using_rocrand" = x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
-               HYPRE_HIP_LIBS+=" -lrocrand"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lrocrand"
                ])
 
         dnl rocTX tracing API
-        AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
+        AS_IF([test x"$hypre_using_gpu_profiling" = x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
-               HYPRE_HIP_LIBS+=" -lroctx64"
+               HYPRE_HIP_LIBS="$HYPRE_HIP_LIBS -lroctx64"
                ])
 
-        AS_IF([test x"$hypre_using_cuda_streams" == x"yes"],
+        AS_IF([test x"$hypre_using_cuda_streams" = x"yes"],
               [AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
                ])
 
-      ]) dnl AS_IF([test x"$hypre_using_hip" == x"yes"]
+      ]) dnl AS_IF([test x"$hypre_using_hip" = x"yes"]
 
 
 dnl *********************************************************************
 dnl * Set SYCL options
 dnl *********************************************************************
-AS_IF([test x"$hypre_using_sycl" == x"yes"],
+AS_IF([test x"$hypre_using_sycl" = x"yes"],
       [
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
@@ -2851,16 +2851,16 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
 
-        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
+        LDFLAGS="$LDFLAGS -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
         if test "x${HYPRE_SYCL_TARGET}" != "x"
         then
-           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+           LDFLAGS="$LDFLAGS -fsycl-targets=${HYPRE_SYCL_TARGET}"
         fi
         if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
         then
-           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+           LDFLAGS="$LDFLAGS -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
         fi
 
         dnl Shared build needs the sycl compiler
@@ -2876,7 +2876,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            CUFLAGS="${SYCLFLAGS}"
         fi
 
-        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
+        AS_IF([test x"$hypre_using_onemklsparse" = x"yes" || test x"$hypre_using_onemklblas" = x"yes" || test x"$hypre_using_onemklrand" = x"yes"],
               [AC_CHECK_HEADER(["${MKLROOT}/include/mkl.h"],
                                [hypre_found_mkl=yes],
                                AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
@@ -2884,16 +2884,16 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
 
-        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])
+        AS_IF([test x"$hypre_using_onemklsparse" = x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])
 
-        AS_IF([test x"$hypre_using_onemklblas" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])])
+        AS_IF([test x"$hypre_using_onemklblas" = x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])])
 
-        AS_IF([test x"$hypre_using_onemklrand" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])])
+        AS_IF([test x"$hypre_using_onemklrand" = x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])])
 
         dnl SYCL should always use streams
         AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
 
-      ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
+      ]) dnl AS_IF([test x"$hypre_using_sycl" = x"yes"]
 
 
 dnl *********************************************************************
@@ -2965,7 +2965,7 @@ then
       dnl fi
       if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
       then
-         CUFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         CUFLAGS="$CUFLAGS -qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
@@ -2973,7 +2973,7 @@ then
    then
       if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
       then
-         LDFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         LDFLAGS="$LDFLAGS -qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
