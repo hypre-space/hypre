@@ -1490,6 +1490,10 @@
 #undef hypre_MGRBuildRFromWrHost
 #undef hypre_MGRBuildRestrict
 #undef hypre_MGRBuildRowLumpedInterp
+#undef hypre_MGRCleanup
+#undef hypre_MGRCleanupBuildData
+#undef hypre_MGRCleanupPersistentConfig
+#undef hypre_MGRCleanupReusableSolvers
 #undef hypre_MGRCoarseParms
 #undef hypre_MGRCoarsen
 #undef hypre_MGRColLumpedRestrict
@@ -1517,6 +1521,9 @@
 #undef hypre_MGRGetSubBlock
 #undef hypre_MGRNonGalerkinTruncate
 #undef hypre_MGRPrintCoarseSystem
+#undef hypre_MGRReleaseCoarseGridSolver
+#undef hypre_MGRReleaseFSolverAtLevel
+#undef hypre_MGRReleaseLevelSmootherAtLevel
 #undef hypre_MGRSetBlockJacobiBlockSize
 #undef hypre_MGRSetBlockSize
 #undef hypre_MGRSetCoarseGridMethod
