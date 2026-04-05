@@ -242,6 +242,11 @@ hypre_SLUDistSetup(void               *solver,
 
    hypre_DSLUDataOptions(dslu_data)->Fact = FACTORED;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
+   }
+
    return hypre_error_flag;
 }
 

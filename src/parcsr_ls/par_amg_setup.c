@@ -4026,5 +4026,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) amg_vdata);
+   }
+
    return (hypre_error_flag);
 }

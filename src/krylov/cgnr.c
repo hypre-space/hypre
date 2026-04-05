@@ -185,6 +185,11 @@ hypre_CGNRSetup(void *cgnr_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!ierr)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) cgnr_vdata);
+   }
+
    return ierr;
 }
 

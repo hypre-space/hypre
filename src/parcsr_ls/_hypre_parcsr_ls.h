@@ -852,6 +852,9 @@ typedef struct
 
 typedef struct hypre_ParFSAIData_struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    /* FSAI Setup input data */
    HYPRE_Int             algo_type;        /* FSAI algorithm type */
    HYPRE_Int             local_solve_type; /* Local linear solver type */

@@ -273,6 +273,11 @@ hypre_COGMRESSetup( void *cogmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) cogmres_vdata);
+   }
+
    return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------

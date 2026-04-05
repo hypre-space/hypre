@@ -1044,6 +1044,11 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) fsai_vdata);
+   }
+
    return hypre_error_flag;
 }
 

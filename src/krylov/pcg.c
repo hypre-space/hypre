@@ -309,6 +309,11 @@ hypre_PCGSetup( void *pcg_vdata,
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) pcg_vdata);
+   }
+
    return hypre_error_flag;
 }
 

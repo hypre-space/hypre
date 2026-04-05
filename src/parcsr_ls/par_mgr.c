@@ -2718,7 +2718,6 @@ hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
       (mgr_data -> aff_solver_type) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels,
                                                     HYPRE_MEMORY_HOST);
    }
-
    hypre_MGRReleaseFSolverAtLevel(mgr_data, level);
 
    aff_solver[level] = (HYPRE_Solver) fsolver;
@@ -3485,7 +3484,6 @@ hypre_MGRSetGlobalSmootherAtLevel( void         *mgr_vdata,
                                                         max_num_coarse_levels,
                                                         HYPRE_MEMORY_HOST);
    }
-
    /* Allocate level_smooth_type if needed */
    if (!(mgr_data -> level_smooth_type))
    {
@@ -4506,3 +4504,4 @@ hypre_MGRDirectSolverDestroy(void *solver)
    return hypre_error_flag;
 #endif
 }
+

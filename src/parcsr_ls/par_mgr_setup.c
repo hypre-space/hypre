@@ -781,10 +781,15 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_Solver *smoother_base = (hypre_Solver*) level_smoother[lev];
 
-            /* Call setup function */
-            hypre_SolverSetup(smoother_base)((HYPRE_Solver) level_smoother[lev],
-                                             (HYPRE_Matrix) A_array[lev],
-                                             NULL, NULL);
+            /* Generic reuse: skip setup when the solver reports it is already
+             * built (is_setup == 1). This flag is set inside the solver's own
+             * Setup function and reset when the solver is destroyed or rebuilt. */
+            if (!hypre_SolverSetupIsDone(smoother_base))
+            {
+               hypre_SolverSetup(smoother_base)((HYPRE_Solver) level_smoother[lev],
+                                                (HYPRE_Matrix) A_array[lev],
+                                                NULL, NULL);
+            }
          }
          else if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
@@ -1076,8 +1081,14 @@ hypre_MGRSetup( void               *mgr_vdata,
                {
                   if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                   {
-                     /* F-solver is already set up, only need to store A_ff_ptr */
-                     A_ff_array[lev] = ((hypre_ParAMGData*) aff_solver[lev]) -> A_array[0];
+                     /* F-solver hierarchy is already built; store the current A_FF
+                      * as A_ff_array so the MGR solve uses valid matrix data.
+                      * BoomerAMGSolve will update A_array[0] to A_FF at solve time,
+                      * applying the frozen coarse-grid hierarchy to the new matrix. */
+                     /* hypre_ParPrintf(comm, */
+                     /*                 "hypre_MGRSetup: reusing F-solver at level %d" */
+                     /*                 " (skipping setup)\n", lev); */
+                     A_ff_array[lev] = A_FF;
                   }
                   else
                   {
@@ -1096,6 +1107,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                   A_ff_array[lev] = A_FF;
 
                   /* Setup F-solver */
+                  /* hypre_ParPrintf(comm, */
+                  /*                 "hypre_MGRSetup: setting up F-solver at level %d\n", lev); */
                   fgrid_solver_setup(aff_solver[lev],
                                      A_ff_array[lev],
                                      F_fine_array[lev + 1],
@@ -1119,12 +1132,15 @@ hypre_MGRSetup( void               *mgr_vdata,
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
 
-            /* Call setup function */
             aff_base = (hypre_Solver*) aff_solver[lev];
-            hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
-                                        (HYPRE_Matrix) A_ff_array[lev],
-                                        (HYPRE_Vector) F_fine_array[lev + 1],
-                                        (HYPRE_Vector) U_fine_array[lev + 1]);
+
+            if (!hypre_SolverSetupIsDone(aff_base))
+            {
+               hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                           (HYPRE_Matrix) A_ff_array[lev],
+                                           (HYPRE_Vector) F_fine_array[lev + 1],
+                                           (HYPRE_Vector) U_fine_array[lev + 1]);
+            }
          }
          else
          {
@@ -1165,6 +1181,12 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                /* Save A_FF splitting */
                A_ff_array[lev] = A_FF;
+
+               if (aff_solver[lev] &&
+                   aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_INTERNAL)
+               {
+                  hypre_MGRReleaseFSolverAtLevel(mgr_data, lev);
+               }
 
                if (!aff_solver[lev])
                {
@@ -1438,10 +1460,16 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_GpuProfilingPushRange(region_name);
    HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-   cgrid_solver_setup((mgr_data -> coarse_grid_solver),
-                      A_array[num_c_levels],
-                      F_array[num_c_levels],
-                      U_array[num_c_levels]);
+   {
+      if (use_default_cgrid_solver ||
+          !hypre_SolverSetupIsDone((hypre_Solver *)(mgr_data -> coarse_grid_solver)))
+      {
+         cgrid_solver_setup((mgr_data -> coarse_grid_solver),
+                            A_array[num_c_levels],
+                            F_array[num_c_levels],
+                            U_array[num_c_levels]);
+      }
+   }
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_REGION_END("%s", region_name);

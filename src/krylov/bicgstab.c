@@ -229,6 +229,11 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) bicgstab_vdata);
+   }
+
    return hypre_error_flag;
 }
 
