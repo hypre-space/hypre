@@ -104,8 +104,9 @@ typedef struct
    HYPRE_Solver         *level_smoother;
    HYPRE_Int            *level_smoother_owner;
    HYPRE_Int            *level_smoother_type;
-   HYPRE_Int             global_smooth_cycle;
-   HYPRE_Int             cycle_type;         /* 1=V-cycle (default), 2=W-cycle */
+   HYPRE_Int             global_smooth_cycle;  /* 0=none, 1=pre, 2=post, 3=both (G-relax) */
+   HYPRE_Int             frelax_smooth_cycle;  /* 0=none, 1=pre, 2=post, 3=both (F-relax) */
+   HYPRE_Int             cycle_type;           /* 1=V-cycle (default), 2=W-cycle */
 
    /*
     Number of points that remain part of the coarse grid throughout the hierarchy.

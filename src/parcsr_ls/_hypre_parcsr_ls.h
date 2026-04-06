@@ -3068,6 +3068,7 @@ HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *level_smooth_type );
 HYPRE_Int hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *level_smooth_iters );
 HYPRE_Int hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int global_smooth_cycle );
+HYPRE_Int hypre_MGRSetFRelaxSmoothCycle( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
 HYPRE_Int hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type );
 HYPRE_Int hypre_MGRSetGlobalSmootherAtLevel( void *mgr_vdata, HYPRE_Solver smoother,
                                              HYPRE_Int level );
