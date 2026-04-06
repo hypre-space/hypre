@@ -276,7 +276,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
 {
    hypre_ParAMGData    *Frelax_data = (hypre_ParAMGData*) Frelax_vdata;
 
-   HYPRE_Int            Not_Finished = 0;
+   HYPRE_Int            not_done = 0;
    HYPRE_Int            level = 0;
    HYPRE_Int            cycle_param = 1;
    HYPRE_Int            j, Solve_err_flag, coarse_grid, fine_grid;
@@ -384,10 +384,10 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
    /* coarse grids exist */
    if (num_c_levels > 0)
    {
-      Not_Finished = 1;
+      not_done = 1;
    }
 
-   while (Not_Finished)
+   while (not_done)
    {
       if (cycle_param == 1)
       {
@@ -511,7 +511,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
       }
       else
       {
-         Not_Finished = 0;
+         not_done = 0;
       }
    }
    HYPRE_ANNOTATE_FUNC_END;
@@ -536,8 +536,11 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int              level;
    HYPRE_Int              coarse_grid;
    HYPRE_Int              fine_grid;
-   HYPRE_Int              Not_Finished;
-   HYPRE_Int              cycle_type;
+   HYPRE_Int              not_done;
+   HYPRE_Int              phase;       /* 1=down, 2=up, 3=coarse solve */
+   HYPRE_Int              cycle_type;  /* 1=V-cycle, 2=W-cycle */
+   HYPRE_Int             *lev_counter; /* visit counter per level (W-cycle support) */
+   HYPRE_Int              k;
    HYPRE_Int              print_level = (mgr_data -> print_level);
    HYPRE_Int              frelax_print_level = (mgr_data -> frelax_print_level);
 
@@ -593,8 +596,9 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int             *level_smooth_iters = (mgr_data -> level_smooth_iters);
 
    HYPRE_Int             *restrict_type  = (mgr_data -> restrict_type);
-   HYPRE_Int              pre_smoothing  = (mgr_data -> global_smooth_cycle) == 1 ? 1 : 0;
-   HYPRE_Int              post_smoothing = (mgr_data -> global_smooth_cycle) == 2 ? 1 : 0;
+   HYPRE_Int              gsc            = (mgr_data -> global_smooth_cycle);
+   HYPRE_Int              pre_smoothing  = (gsc == 1 || gsc == 3) ? 1 : 0;
+   HYPRE_Int              post_smoothing = (gsc == 2 || gsc == 3) ? 1 : 0;
    HYPRE_Int              my_id;
    char                   region_name[1024];
    char                   msg[1024];
@@ -611,12 +615,26 @@ hypre_MGRCycle( void              *mgr_vdata,
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   Not_Finished = 1;
-   cycle_type = 1;
-   level = 0;
+   /* Cycle type: 1=V-cycle (default), 2=W-cycle */
+   cycle_type  = (mgr_data -> cycle_type);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_coarse_levels + 1, HYPRE_MEMORY_HOST);
+
+   /* Initialize level counters (mirrors par_cycle.c):
+    *   lev_counter[0]   = 1            (root visited once)
+    *   lev_counter[k>0] = cycle_type   (V: once, W: twice)
+    */
+   lev_counter[0] = 1;
+   for (k = 1; k <= num_coarse_levels; k++)
+   {
+      lev_counter[k] = cycle_type;
+   }
+
+   not_done = 1;
+   phase    = 1;   /* start on down cycle */
+   level    = 0;
 
    /***** Main loop ******/
-   while (Not_Finished)
+   while (not_done)
    {
       /* Update scratch vector sizes */
       local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
@@ -625,7 +643,7 @@ hypre_MGRCycle( void              *mgr_vdata,
       hypre_ParVectorSetLocalSize(Utemp, local_size);
 
       /* Do coarse grid correction solve */
-      if (cycle_type == 3)
+      if (phase == 3)
       {
          /* call coarse grid solver here (default is BoomerAMG) */
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", level);
@@ -664,13 +682,13 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
 
          /**** cycle up ***/
-         cycle_type = 2;
+         phase = 2;
 
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
       }
       /* Down cycle */
-      else if (cycle_type == 1)
+      else if (phase == 1)
       {
          /* Set fine/coarse grid level indices */
          fine_grid       = level;
@@ -1126,17 +1144,24 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
-         /* Initialize coarse grid solution array (VPM: double-check this for multiple cycles)*/
-         hypre_ParVectorSetZeros(U_array[coarse_grid]);
-
-         ++level;
-         if (level == num_coarse_levels)
+         /* Decrement visit counter and decide next direction */
+         --lev_counter[level];
+         if (lev_counter[level] >= 0 && level < num_coarse_levels)
          {
-            cycle_type = 3;
+            /* Go to next coarser level */
+            hypre_ParVectorSetZeros(U_array[coarse_grid]);
+            ++level;
+            lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
+            phase = (level == num_coarse_levels) ? 3 : 1;
+         }
+         else
+         {
+            /* Counter exhausted: turn around and go up */
+            phase = 2;
          }
       }
       /* Up cycle */
-      else if (level != 0)
+      else if (phase == 2 && level != 0)
       {
          /* Set fine/coarse grid level indices */
          fine_grid       = level - 1;
@@ -1291,12 +1316,24 @@ hypre_MGRCycle( void              *mgr_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          --level;
+         if (level == 0)
+         {
+            not_done = 0;
+         }
+         else
+         {
+            /* For W/F-cycles: lev_counter may allow another down visit */
+            phase = 1;
+         }
       } /* End interpolate */
       else
       {
-         Not_Finished = 0;
+         not_done = 0;
       }
    }
+
+   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
 

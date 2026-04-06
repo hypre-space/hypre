@@ -101,7 +101,8 @@ hypre_MGRCreate(void)
    (mgr_data -> level_smoother) = NULL;
    (mgr_data -> level_smoother_owner) = NULL;
    (mgr_data -> level_smoother_type) = NULL;
-   (mgr_data -> global_smooth_cycle) = 1; // Pre = 1 or Post  = 2 global smoothing
+   (mgr_data -> global_smooth_cycle) = 1; /* 0=none, 1=pre, 2=post, 3=both */
+   (mgr_data -> cycle_type)          = 1; /* 1=V-cycle, 2=W-cycle */
 
    (mgr_data -> logging) = 0;
    (mgr_data -> print_level) = 0;
@@ -2865,6 +2866,22 @@ hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> global_smooth_cycle) = smooth_cycle;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetCycleType
+ *
+ * Set the multigrid cycling strategy:
+ *   1 = V-cycle (default)
+ *   2 = W-cycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   (mgr_data -> cycle_type) = cycle_type;
    return hypre_error_flag;
 }
 
