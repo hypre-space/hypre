@@ -878,6 +878,29 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFRelaxSmoothCycle
+ *
+ * Controls when F-relaxation sweeps are applied:
+ *   0 - no F-relaxation
+ *   1 - pre-relaxation only (default, applied on the way down)
+ *   2 - post-relaxation only (applied on the way up, after coarse correction)
+ *   3 - both pre- and post-relaxation
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver,
+                               HYPRE_Int    frelax_smooth_cycle )
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetFRelaxSmoothCycle(solver, frelax_smooth_cycle);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCycleType
  *
  * Set the multigrid cycling strategy:
