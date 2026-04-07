@@ -122,7 +122,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    xstride = hypre_StructVectorStride(x);
 
    /* Matrix stencil offsets are on the index space of the finest grid */
-   hypre_StructMatrixGetFStride(A, &fstride);
+//   hypre_StructMatrixGetFStride(A, &fstride);
+   fstride = hypre_StructMatrixStride(A);
 
    /* Need to compute xfstride such that (xgrid, xfstride) has the same index
     * space as (grid, fstride) where the stencil is applied.  Can do this by
@@ -342,7 +343,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box, *z_data_box;
    HYPRE_Complex           *xp;
-   HYPRE_Int                Ab, xb, yb, zb;
+   HYPRE_Int                Ab, xb, yb, zb, xi;
    hypre_Index              Adstride, xdstride, ydstride, zdstride, ustride;
 
    HYPRE_Int                ran_nboxes;
@@ -444,27 +445,29 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_MapToCoarseIndex(zdstride, NULL, ran_stride, ndim);
 
       xb = 0;
+      xi = 0;
       for (i = 0; i < ran_nboxes; i++)
       {
          HYPRE_Int   *Aids = hypre_StructMatrixBaseBoxIDs(A);
-         HYPRE_Int   *xids = hypre_StructVectorBaseBoxIDs(x);
          HYPRE_Int    num_ss;
          HYPRE_Int   *se_sspaces;
          hypre_Index *ss_origins;
          HYPRE_Int    s;
 
+         // RDF BASE: Rework how range boxes and vector boxes are matched
          /* The corresponding box IDs for the following boxnums should match */
-         Ab = ran_boxnums[i];
+         Ab = hypre_StructMatrixBaseBoxnum(A, ran_boxnums[i]);
 
          /* Rebase ensures that all box ids in A are also in x */
-         while (xids[xb] != Aids[Ab])
+         while (hypre_StructVectorTmpBaseBoxnum(x, xi) != Aids[Ab])
          {
-            xb++;
+            xi++;
          }
+         xb = hypre_StructVectorTmpBaseBoxnum(x, xi);
          yb = hypre_StructVectorBoxnum(y, i);
          zb = hypre_StructVectorBoxnum(z, i);
 
-         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xb);
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xi);
 
          A_data_box = hypre_StructMatrixBaseDataBox(A, Ab);
          x_data_box = hypre_StructVectorBaseDataBox(x, xb);

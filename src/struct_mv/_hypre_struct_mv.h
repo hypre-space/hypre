@@ -1507,6 +1507,28 @@ hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
  * but they do not imply communication.  That is, the values stored in the ghost
  * layers will not be correct without triggering some additional communication
  * either explicitly or by setting the 'symmetric' or 'transpose' flags.
+ *
+ * The following illustrates the relationship between the grid, range grid,
+ * domain grid, and data layout.  The index space for each is denoted by I(s),
+ * where s is a stride (anchor/origin points are omitted for brevity).  The
+ * boxes and box numbering for each are also depicted (e.g., gb2 is a grid box
+ * with box number 2).
+ *
+ * ---------------------------------------  grid (origin, stride, baseboxes):
+ * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
+ * |     gb0 gb1         gb2 gb3     gb4 |    gridboxes - I(stride)
+ * ---------------------------------------
+ *           rg0             rg1     rg2    range grid  - I(stride*'ran_stride')
+ *                       dg0         dg1    domain grid - I(stride*'dom_stride')
+ *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride*'data_stride')
+ *
+ * Notes:
+ * - The entries 'ran_stride', 'dom_stride', and 'data_stride' are strides over
+ *   the points in the grid, i.e., over points in I(stride), not I(1).
+ * - The index space for the data layout is a subset of both the range and
+ *   domain grids: 'data_stride' = lcm('ran_stride', 'dom_stride').
+ * - The number of boxes in the data layout is always the same as in baseboxes.
+ *
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -1517,10 +1539,10 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_Int             ran_nboxes;       /* Range grid number of boxes */
    HYPRE_Int            *ran_boxnums;      /* Range grid boxnums in grid */
-   hypre_Index           ran_stride;       /* Range grid coarsening stride */
+   hypre_Index           ran_stride;       /* Range grid stride on grid */
    HYPRE_Int             dom_nboxes;       /* Domain grid number of boxes */
    HYPRE_Int            *dom_boxnums;      /* Domain grid boxnums in grid */
-   hypre_Index           dom_stride;       /* Domain grid coarsening stride */
+   hypre_Index           dom_stride;       /* Domain grid stride on grid */
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
@@ -1528,9 +1550,9 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_MemoryLocation  memory_location;  /* Memory location of the data array */
    HYPRE_Complex        *data;             /* Pointer to matrix data */
-   hypre_BoxArray       *data_space;       /* Layout of data (on data index space) */
-   hypre_Index           data_stride;      /* Data index space (relative to base) */
-   HYPRE_Int           **data_indices;     /* Array of indices into the data array.
+   hypre_BoxArray       *data_space;       /* Boxes describing the data layout */
+   hypre_Index           data_stride;      /* Data layout stride on grid */
+   HYPRE_Int           **data_indices;     /* Array of indices into the data array -
                                               data_indices[b][s] is the starting index of data
                                               for base boxnum b and stencil coefficient s */
    HYPRE_Int             data_alloced;     /* Boolean used for freeing data */
@@ -1590,6 +1612,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
 #define hypre_StructMatrixData(matrix)                ((matrix) -> data)
 #define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
+#define hypre_StructMatrixDataStride(matrix)          ((matrix) -> data_stride)
 #define hypre_StructMatrixDataIndices(matrix)         ((matrix) -> data_indices)
 #define hypre_StructMatrixDataAlloced(matrix)         ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)            ((matrix) -> data_size)
@@ -1614,9 +1637,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSaveDataSize(matrix)        ((matrix) -> save_data_size)
 
 #define hypre_StructMatrixBaseBoxIDs(matrix) \
-hypre_BoxArrayIDs(hypre_StructMatrixDataSpace(matrix))
+hypre_BoxArrayIDs(hypre_StructGridBaseBoxes(hypre_StructMatrixGrid(matrix)))
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
+#define hypre_StructMatrixStride(matrix) \
+hypre_StructGridStride(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 #define hypre_StructMatrixConstData(matrix, s) \
@@ -1644,14 +1669,18 @@ hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), s)
 hypre_StructMatrixBaseDataValue(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), s, index)
 
 /* The following use a ran/dom-grid box index */
+#define hypre_StructMatrixRanBaseBoxnum(matrix, i) \
+hypre_StructMatrixBaseBoxnum(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
 #define hypre_StructMatrixRanBox(matrix, i) \
 hypre_StructMatrixBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
-#define hypre_StructMatrixRanDataBox(matrix, i)                         \
+#define hypre_StructMatrixRanDataBox(matrix, i) \
 hypre_StructMatrixBoxDataBox(matrix, hypre_StructMatrixRanBoxnum(matrix, i))
 #define hypre_StructMatrixRanData(matrix, i, s) \
 hypre_StructMatrixBoxData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
 #define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
 hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
+#define hypre_StructMatrixDomBaseBoxnum(matrix, i) \
+hypre_StructMatrixBaseBoxBoxnum(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomBox(matrix, i) \
 hypre_StructMatrixBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomDataBox(matrix, i) \
@@ -1690,6 +1719,27 @@ hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s
  * the unit stride).  The number of boxes in data_space and data_indices is the
  * same as in the base grid, even though nboxes may be smaller.
  *
+ * The following illustrates the relationship between the grid, vector grid, and
+ * data layout.  The index space for each is denoted by I(s), where s is a
+ * stride (anchor/origin points are omitted for brevity).  The boxes and box
+ * numbering for each are shown (e.g., gb2 is a grid box with box number 2).
+ *
+ * ---------------------------------------  grid (origin, stride, baseboxes):
+ * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
+ * |     gb0 gb1         gb2 gb3     gb4 |    gridboxes - I(stride)
+ * ---------------------------------------
+ *                       vg0         vg1    vector grid - I(stride*'vec_stride')
+ *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride*'vec_stride')
+ *
+ * Notes:
+ * - The entry 'vec_stride' is a stride over the points in the grid, i.e., over
+ *   points in I(stride), not I(1).
+ * - The index space for the data layout is the same as the vector grid.
+ * - The number of boxes in the data layout is always the same as in baseboxes.
+ *
+ * RDF BASE TODO: Eliminate the separate vector grid in stages - make it the
+ * same as the grid.
+ *
  * NOTE/TODO: The 'data_alloced=2' and 'save_data' aspects of the vector are
  * only needed to support InitializeData(). Consider removing this feature,
  * especially since it creates an issue with Forget().
@@ -1701,19 +1751,19 @@ typedef struct hypre_StructVector_struct
 
    /* Note: nboxes and boxnums are computed from (grid, stride) */
    hypre_StructGrid     *grid;                        /* Base grid */
-   hypre_Index           stride;                      /* Grid coarsening stride */
-   HYPRE_Int             nboxes;                      /* Grid number of boxes */
-   HYPRE_Int            *boxnums;                     /* Grid boxnums in base grid */
+   HYPRE_Int             vec_nboxes;                  /* Vector grid number of boxes */
+   HYPRE_Int            *vec_boxnums;                 /* Vector grid boxnums in grid */
+   hypre_Index           vec_stride;                  /* Vector grid stride on grid */
 
    HYPRE_MemoryLocation  memory_location;             /* memory location of data */
    HYPRE_Int             memory_mode;                 /* memory management mode */
-   hypre_BoxArray       *data_space;
    HYPRE_Complex        *data;                        /* Pointer to vector data on device*/
+   hypre_BoxArray       *data_space;                  /* Boxes describing the data layout */
+   HYPRE_Int            *data_indices;                /* Array of indices into the data array -
+                                                         data_indices[b] is the starting index of
+                                                         data for base boxnum b. */
    HYPRE_Int             data_alloced;                /* TODO (VPM): change this to owns_data */
    HYPRE_Int             data_size;                   /* Size of vector data */
-   HYPRE_Int            *data_indices;                /* Array of indices into the data array.
-                                                         data_indices[b] is the starting index of
-                                                         data for boxnum b. */
    HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
    HYPRE_Int             bghost_not_clear;            /* Are boundary ghosts clear? */
    HYPRE_BigInt          global_size;                 /* Total number coefficients */
@@ -1740,17 +1790,17 @@ typedef struct hypre_StructVector_struct
 
 #define hypre_StructVectorComm(vector)           ((vector) -> comm)
 #define hypre_StructVectorGrid(vector)           ((vector) -> grid)
-#define hypre_StructVectorStride(vector)         ((vector) -> stride)
-#define hypre_StructVectorNBoxes(vector)         ((vector) -> nboxes)
-#define hypre_StructVectorBoxnums(vector)        ((vector) -> boxnums)
-#define hypre_StructVectorBoxnum(vector, i)      ((vector) -> boxnums[i])
+#define hypre_StructVectorNBoxes(vector)         ((vector) -> vec_nboxes)
+#define hypre_StructVectorBoxnums(vector)        ((vector) -> vec_boxnums)
+#define hypre_StructVectorBoxnum(vector, i)      ((vector) -> vec_boxnums[i])
+#define hypre_StructVectorStride(vector)         ((vector) -> vec_stride)
 #define hypre_StructVectorMemoryLocation(vector) ((vector) -> memory_location)
 #define hypre_StructVectorMemoryMode(vector)     ((vector) -> memory_mode)
-#define hypre_StructVectorDataSpace(vector)      ((vector) -> data_space)
 #define hypre_StructVectorData(vector)           ((vector) -> data)
+#define hypre_StructVectorDataSpace(vector)      ((vector) -> data_space)
+#define hypre_StructVectorDataIndices(vector)    ((vector) -> data_indices)
 #define hypre_StructVectorDataAlloced(vector)    ((vector) -> data_alloced)
 #define hypre_StructVectorDataSize(vector)       ((vector) -> data_size)
-#define hypre_StructVectorDataIndices(vector)    ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)       ((vector) -> num_ghost)
 #define hypre_StructVectorBGhostNotClear(vector) ((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)     ((vector) -> global_size)
@@ -1762,9 +1812,11 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
 
 #define hypre_StructVectorBaseBoxIDs(vector) \
-hypre_BoxArrayIDs(hypre_StructVectorDataSpace(vector))
+hypre_BoxArrayIDs(hypre_StructGridBaseBoxes(hypre_StructVectorGrid(vector)))
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
+#define hypre_StructVectorTmpStride(vector) \
+hypre_StructGridStride(hypre_StructVectorGrid(vector))
 
 /* The following use a base-grid box index */
 #define hypre_StructVectorBaseDataBox(vector, b) \
@@ -1775,20 +1827,36 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 (hypre_StructVectorBaseData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBaseDataBox(vector, b), index))
 
+// RDF BASE TODO: Delete 'Tmp' and '(tmp)' in these macro definitions
+/*  The following use a (tmp) grid box index */
+#define hypre_StructVectorTmpBaseBoxnum(vector, i) \
+hypre_StructGridBaseBoxnum(hypre_StructVectorGrid(vector), i)
+#define hypre_StructVectorTmpBox(vector, i) \
+hypre_StructGridBox(hypre_StructVectorGrid(vector), i)
+#define hypre_StructVectorTmpBoxCopy(vector, i, box) \
+hypre_CopyBox(hypre_StructVectorTmpBox(vector, i), box); /* on (tmp) grid index space */ \
+hypre_StructVectorMapDataBox(vector, box);               /* maps to data index space */
+#define hypre_StructVectorTmpBoxDataBox(vector, i) \
+hypre_StructVectorBaseDataBox(vector, hypre_StructVectorTmpBaseBoxnum(vector, i))
+#define hypre_StructVectorTmpBoxData(vector, i) \
+hypre_StructVectorBaseData(vector, hypre_StructVectorTmpBaseBoxnum(vector, i))
+#define hypre_StructVectorTmpBoxDataValue(vector, i, index) \
+hypre_StructVectorBaseDataValue(vector, hypre_StructVectorTmpBaseBoxnum(vector, i), index)
+
+// RDF BASE TODO: Delete these macros since they will replicate the renamed 'Tmp' ones above
 /* The following use a grid box index */
-#define hypre_StructVectorBoxBaseBox(vector, i) \
-hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
+#define hypre_StructVectorBaseBoxnum(vector, i) \
+hypre_StructVectorTmpBaseBoxnum(vector, hypre_StructVectorBoxnum(vector, i))
 #define hypre_StructVectorBox(vector, i) \
-hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
+hypre_StructVectorTmpBox(vector, hypre_StructVectorBoxnum(vector, i))
 #define hypre_StructVectorBoxCopy(vector, i, box) \
-hypre_CopyBox(hypre_StructVectorBoxBaseBox(vector, i), box); /* on base-grid index space */ \
-hypre_StructVectorMapDataBox(vector, box);                   /* maps to data index space */
+hypre_StructVectorTmpBoxCopy(vector, hypre_StructVectorBoxnum(vector, i), box)
 #define hypre_StructVectorBoxDataBox(vector, i) \
-hypre_StructVectorBaseDataBox(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructVectorTmpBoxDataBox(vector, hypre_StructVectorBoxnum(vector, i))
 #define hypre_StructVectorBoxData(vector, i) \
-hypre_StructVectorBaseData(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructVectorTmpBoxData(vector, hypre_StructVectorBoxnum(vector, i))
 #define hypre_StructVectorBoxDataValue(vector, i, index) \
-hypre_StructVectorBaseDataValue(vector, hypre_StructVectorBoxnum(vector, i), index)
+hypre_StructVectorTmpBoxDataValue(vector, hypre_StructVectorBoxnum(vector, i), index)
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)
@@ -2523,6 +2591,8 @@ HYPRE_Int hypre_StructMatrixSetRangeStride ( hypre_StructMatrix *matrix,
                                              hypre_IndexRef range_stride );
 HYPRE_Int hypre_StructMatrixSetDomainStride ( hypre_StructMatrix *matrix,
                                               hypre_IndexRef domain_stride );
+HYPRE_Int
+hypre_StructMatrixSetDataStride( hypre_StructMatrix *matrix );
 HYPRE_Int
 hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
                                     HYPRE_Int          *num_ghost,

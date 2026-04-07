@@ -271,15 +271,16 @@ hypre_StructVectorRebase( hypre_StructVector *vector,
 
 HYPRE_Int
 hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
-                                    hypre_IndexRef      stride,
+                                    hypre_IndexRef      stride, // RDF BASE: Remove eventually
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr )
 {
    HYPRE_Int          ndim      = hypre_StructVectorNDim(vector);
    hypre_StructGrid  *grid      = hypre_StructVectorGrid(vector);
+   hypre_BoxArray    *boxes     = hypre_StructGridBoxes(grid);
    hypre_BoxArray    *data_space, *cdata_space;
    hypre_Box         *data_box;
-   HYPRE_Int          i, d;
+   HYPRE_Int          i, b, d;
 
    if (num_ghost == NULL)
    {
@@ -288,10 +289,12 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
    }
 
    /* Add ghost layers and map the data space */
-   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
-   hypre_ForBoxI(i, data_space)
+   data_space = hypre_BoxArrayClone(hypre_StructGridBaseBoxes(grid));
+   hypre_CoarsenBoxArray(data_space, hypre_StructGridOrigin(grid), hypre_StructGridStride(grid));
+   hypre_ForBoxI(i, boxes)
    {
-      data_box = hypre_BoxArrayBox(data_space, i);
+      b = hypre_StructVectorTmpBaseBoxnum(vector, i);
+      data_box = hypre_BoxArrayBox(data_space, b);
       if (stride != NULL)
       {
          hypre_CoarsenBox(data_box, NULL, stride);

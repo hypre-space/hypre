@@ -638,6 +638,8 @@ HYPRE_Int hypre_StructMatrixSetRangeStride ( hypre_StructMatrix *matrix,
 HYPRE_Int hypre_StructMatrixSetDomainStride ( hypre_StructMatrix *matrix,
                                               hypre_IndexRef domain_stride );
 HYPRE_Int
+hypre_StructMatrixSetDataStride( hypre_StructMatrix *matrix );
+HYPRE_Int
 hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr );

@@ -511,7 +511,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          {
             hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, count));
             hypre_BoxArrayID(cboxes, count) = hypre_StructGridID(fgrid, i);
-            cbaseboxnums[count] = count;  // RDF: Change this in final version after testing
+//            cbaseboxnums[count] = count;  // RDF BASE: Change this in final version after testing
+            cbaseboxnums[count] = hypre_StructGridBaseBoxnum(fgrid, i);  // RDF BASE
             count++;
          }
       }
@@ -522,7 +523,13 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    {
       /* number of boxes in coarse and fine grids are equal */
       cboxes = hypre_BoxArrayClone(fboxes);
+      cbaseboxnums = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(fboxes), HYPRE_MEMORY_HOST);
       hypre_CoarsenBoxArray(cboxes, origin, stride);
+      hypre_ForBoxI(i, fboxes)
+      {
+         cbaseboxnums[i] = hypre_StructGridBaseBoxnum(fgrid, i);  // RDF BASE
+      }
+      hypre_StructGridBaseBoxnums(cgrid) = cbaseboxnums;
    }
 
    /* set coarse grid boxes */

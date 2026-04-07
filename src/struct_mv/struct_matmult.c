@@ -684,11 +684,13 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
-   hypre_StructMatrixGetDataMapStride(matrices[0], &fstride);
+//   hypre_StructMatrixGetDataMapStride(matrices[0], &fstride);
+   fstride = hypre_StructMatrixDataStride(matrices[0]);
    cstride = fstride;
    for (m = 1; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+//      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -710,7 +712,8 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices + 1, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+//      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -1427,7 +1430,8 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Set Mstride */
-   hypre_StructMatrixGetDataMapStride(M, &stride);
+//   hypre_StructMatrixGetDataMapStride(M, &stride);
+   stride = hypre_StructMatrixDataStride(M);
    hypre_CopyToIndex(stride, ndim, Mstride);                    /* M's index space */
    hypre_MapToFineIndex(Mstride, NULL, coarsen_stride, ndim);   /* base index space */
 

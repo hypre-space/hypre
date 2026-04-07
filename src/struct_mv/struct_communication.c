@@ -421,7 +421,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       rbox_array = hypre_BoxArrayArrayBoxArray(recv_rboxes, i);
       box  = hypre_BoxArrayBox(box_array, j);
       rbox = hypre_BoxArrayBox(rbox_array, j);
-      id = hypre_BoxArrayArrayID(recv_boxes, i);  // databoxnum corresponding to boxnum i
+//      id = hypre_BoxArrayArrayID(recv_boxes, i);  // databoxnum corresponding to boxnum i
 
       if ((hypre_BoxVolume(box) != 0) && (hypre_BoxVolume(rbox) != 0))
       {
