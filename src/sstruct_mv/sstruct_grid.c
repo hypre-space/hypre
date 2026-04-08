@@ -306,7 +306,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxArray        *nbor_boxes;
    hypre_BoxArray        *diff_boxes;
    hypre_BoxArray        *tmp_boxes;
-   hypre_BoxArray        *boxes;
+   hypre_BoxArray        *boxes, *baseboxes;
    hypre_Box             *box;
    hypre_Index            varoffset;
    HYPRE_Int              pneighbors_size, vneighbors_size;
@@ -405,6 +405,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
          HYPRE_StructGridSetPeriodic(sgrid, periodic);
 
          hypre_StructGridSetBoxes(sgrid, boxes);
+         /* RDF BASE: For now, just set baseboxes = boxes (change this for Engwer) */
+         baseboxes = hypre_BoxArrayClone(boxes);
+         hypre_StructGridSetBaseBoxes(sgrid, baseboxes);
          HYPRE_StructGridAssemble(sgrid);
          sgrids[t] = sgrid;
       }

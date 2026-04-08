@@ -389,7 +389,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    } /* end ForBoxI */
 
-   hypre_StructMatrixAssemble(Ac);
+// RDF BASE: Why were we assembling Ac twice?
+//   hypre_StructMatrixAssemble(Ac);
 
    /*-----------------------------------------------------------------------
     * Collapse stencil in periodic direction on coarsest grid.

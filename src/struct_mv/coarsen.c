@@ -102,15 +102,21 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
 }
 
 /*--------------------------------------------------------------------------
- * Compute a new coarse (origin, stride) pair from an old (origin, stride) pair.
- * This new pair can be used with the RefineBox() function to map back to the
- * finest grid with just one call, i.e., the following two lines of code are
- * equivalent:
+ * Compute a new coarsening tuple (coarse_origin, coarse_stride) that represents
+ * coarsening consecutively by (origin_old, stride_old) and (origin, stride).
+ * That is, the following two lines of code are equivalent:
  *
- *    RefineBox(box, origin_new, stride_new);
+ *    CoarsenBox(box, coarse_origin, coarse_stride);
+ *    CoarsenBox(box, origin_old, stride_old); CoarsenBox(box, origin, stride);
+ *
+ * Similarly, the following two lines of code are equivalent:
+ *
+ *    RefineBox(box, coarse_origin, coarse_stride);
  *    RefineBox(box, origin, stride); RefineBox(box, origin_old, stride_old);
  *
- * NOTE: Need to check to see if this holds for CoarsenBox() also.
+ * On input, (coarse_origin, coarse_stride) = (origin_old, stride_old)
+ *
+ * NOTE: Coarsening then refining a box may not produce the original box.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -475,11 +481,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* Set up baseboxes, origin, stride */
    /* RDF: Maybe add reference counting for baseboxes instead of cloning */
    hypre_StructGridSetBaseBoxes(cgrid, hypre_BoxArrayClone(hypre_StructGridBaseBoxes(fgrid)));
-   if (origin != NULL)
-   {
-      hypre_CopyIndex(origin, hypre_StructGridOrigin(cgrid));
-   }
-   hypre_CopyIndex(stride, hypre_StructGridStride(cgrid));
+   hypre_CopyIndex(hypre_StructGridOrigin(fgrid), hypre_StructGridOrigin(cgrid));
+   hypre_CopyIndex(hypre_StructGridStride(fgrid), hypre_StructGridStride(cgrid));
+   hypre_ComputeCoarseOriginStride(hypre_StructGridOrigin(cgrid), hypre_StructGridStride(cgrid),
+                                   origin, stride, ndim );
 
    /* RDF TODO: Inherit num ghost from fgrid here... */
 

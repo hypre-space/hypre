@@ -1099,11 +1099,11 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          loop_start = hypre_BoxIMin(loop_box);
          hypre_BoxGetStrideSize(loop_box, loop_stride, loop_size);
 
-         fdbox = hypre_BoxArrayBox(fdata_space, b);
+         fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
          hypre_CopyToIndex(loop_start, ndim, fdstart);
          hypre_StructVectorMapDataIndex(mask, fdstart);
 
-         maskptr = hypre_StructVectorBaseData(mask, b);
+         maskptr = hypre_StructVectorBoxData(mask, b);
 
 #define DEVICE_VAR is_device_ptr(maskptr)
          hypre_BoxLoop1Begin(ndim, loop_size,
@@ -1472,9 +1472,9 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
        * that neither MatrixMapDataIndex nor VectorMapDataIndex is used here,
        * because we want to use both matrices and vectors in one boxloop.  This
        * is accounted for when setting the data pointer values a.tptrs[] below. */
-      Mdbox = hypre_BoxArrayBox(Mdata_space, Mb);
-      fdbox = hypre_BoxArrayBox(fdata_space, b);
-      cdbox = hypre_BoxArrayBox(cdata_space, b);
+      Mdbox = hypre_BoxArrayBox(Mdata_space, hypre_StructGridBaseBoxnum(Mgrid, Mb));
+      fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
+      cdbox = hypre_BoxArrayBox(cdata_space, hypre_StructGridBaseBoxnum(grid, b));
       hypre_CopyToIndex(loop_start, ndim, Mdstart);
       hypre_MapToCoarseIndex(Mdstart, NULL, Mstride, ndim);   /* at loop_start */
       hypre_CopyToIndex(hypre_BoxIMin(fdbox), ndim, fdstart); /* at beginning of databox */
@@ -1485,7 +1485,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       for (i = 0; i < na; i++)
       {
          Mentry = a[i].mentry;
-         a[i].mptr = hypre_StructMatrixBaseData(M, Mb, Mentry);
+         a[i].mptr = hypre_StructMatrixBoxData(M, Mb, Mentry);
          a[i].cprod = 1.0;
 
          hypre_StructMatrixPlaceStencil(M, Mentry, Mdstart, Mstart); /* M's index space */
@@ -1504,7 +1504,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
             {
                case 0: /* variable coefficient on fine data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
-                  a[i].tptrs[t] = hypre_StructMatrixBaseData(matrix, b, entry) +
+                  a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
                   //                  hypre_BoxIndexRank(fdbox, tdstart);
@@ -1512,7 +1512,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
                case 1: /* variable coefficient on coarse data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
-                  a[i].tptrs[t] = hypre_StructMatrixBaseData(matrix, b, entry) +
+                  a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                                   hypre_BoxIndexRank(cdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
                   //                  hypre_BoxIndexRank(cdbox, tdstart);
@@ -1529,7 +1529,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   }
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
-                  a[i].tptrs[t] = hypre_StructVectorBaseData(mask, b) +
+                  a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
                   //                  hypre_BoxIndexRank(fdbox, tdstart);

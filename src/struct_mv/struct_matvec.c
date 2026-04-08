@@ -122,8 +122,9 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    xstride = hypre_StructVectorStride(x);
 
    /* Matrix stencil offsets are on the index space of the finest grid */
-//   hypre_StructMatrixGetFStride(A, &fstride);
-   fstride = hypre_StructMatrixStride(A);
+// RDF BASE: Don't want to use this routine
+   hypre_StructMatrixGetFStride(A, &fstride);
+//   fstride = hypre_StructMatrixStride(A);
 
    /* Need to compute xfstride such that (xgrid, xfstride) has the same index
     * space as (grid, fstride) where the stencil is applied.  Can do this by

@@ -1935,8 +1935,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);
       }
 
-//      hypre_StructMatrixGetFStride(matrix, &fstride);
-      fstride = hypre_StructMatrixStride(matrix);
+// RDF BASE: Don't want to use this
+      hypre_StructMatrixGetFStride(matrix, &fstride);
       hypre_CreateCommInfoFromNumGhost(grid, fstride, tot_num_ghost, &comm_info);
       hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
 
