@@ -2214,7 +2214,6 @@ hypre_StructMatrixPrintData( FILE               *file,
    HYPRE_Int            *cvalue_ids;
 
    hypre_BoxArray       *boxes;
-   hypre_Index           data_origin;
    HYPRE_Complex        *h_data;
    HYPRE_Complex        *h_vdata;
    HYPRE_Complex         value;
@@ -2230,9 +2229,6 @@ hypre_StructMatrixPrintData( FILE               *file,
    {
       h_data = data;
    }
-
-   /* This assumes that zero maps to/from zero in the data space */
-   hypre_SetIndex(data_origin, 0);
 
    /* Build constant and variable coefficient stencil indices */
    value_ids  = hypre_TAlloc(HYPRE_Int, num_values, HYPRE_MEMORY_HOST);

@@ -74,9 +74,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             zero_init;
 
    char                  region_name[1024];
-#if DEBUG
-   char                  filename[255];
-#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_sprintf(region_name, "%s", "PFMG-Init");

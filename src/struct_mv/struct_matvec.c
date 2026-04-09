@@ -465,8 +465,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             xi++;
          }
          xb = hypre_StructVectorTmpBaseBoxnum(x, xi);
-         yb = hypre_StructVectorBoxnum(y, i);
-         zb = hypre_StructVectorBoxnum(z, i);
+         yb = hypre_StructVectorBaseBoxnum(y, i);
+         zb = hypre_StructVectorBaseBoxnum(z, i);
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xi);
 

@@ -321,6 +321,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
    cdata_space = hypre_StructVectorDataSpace(vector);
    if ((hypre_StructVectorMemoryMode(vector) == 2) && (cdata_space != NULL))
    {
+      // RDF BASE - won't need to match ids since data_space length will always be the same
       HYPRE_Int  *cids = hypre_BoxArrayIDs(cdata_space);
       HYPRE_Int  *ids  = hypre_BoxArrayIDs(data_space);
       HYPRE_Int   ci;
@@ -1475,7 +1476,6 @@ hypre_StructVectorPrintData( FILE               *file,
 {
    HYPRE_Int             ndim            = hypre_StructVectorNDim(vector);
    hypre_StructGrid     *grid            = hypre_StructVectorGrid(vector);
-   hypre_BoxArray       *grid_boxes      = hypre_StructGridBoxes(grid);
    hypre_BoxArray       *data_space      = hypre_StructVectorDataSpace(vector);
    HYPRE_Int             data_size       = hypre_StructVectorDataSize(vector);
    HYPRE_Complex        *data            = hypre_StructVectorData(vector);
@@ -1499,9 +1499,6 @@ hypre_StructVectorPrintData( FILE               *file,
    {
       h_data = data;
    }
-
-   /* Print ghost data (all) also or only real data? */
-   boxes = (all) ? data_space : grid_boxes;
 
    boxes      = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
