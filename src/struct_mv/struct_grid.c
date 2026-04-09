@@ -1124,6 +1124,7 @@ hypre_StructGridRead( MPI_Comm           comm,
    ndim = hypre_BoxArrayNDim(boxes);
    hypre_StructGridCreate(comm, ndim, &grid);
    hypre_StructGridSetBoxes(grid, boxes);
+   hypre_StructGridSetBaseBoxes(grid, hypre_BoxArrayClone(boxes));
 
    /* Read line of the form: "Periodic: <periodic index>\n" */
    hypre_fscanf(file, "\nPeriodic: ");

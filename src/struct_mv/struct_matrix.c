@@ -2214,7 +2214,6 @@ hypre_StructMatrixPrintData( FILE               *file,
    HYPRE_Int            *cvalue_ids;
 
    hypre_BoxArray       *boxes;
-   hypre_Box            *box;
    hypre_Index           data_origin;
    HYPRE_Complex        *h_data;
    HYPRE_Complex        *h_vdata;
@@ -2254,18 +2253,20 @@ hypre_StructMatrixPrintData( FILE               *file,
       }
    }
 
-   /* Print ghost data (all) also or only real data? */
-   if (all)
+   boxes      = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
+   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
+   hypre_ForBoxI(i, boxes)
    {
-      boxes = data_space;
-   }
-   else
-   {
-      boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
-      hypre_ForBoxI(i, boxes)
+      hypre_CopyBox(hypre_StructMatrixBoxDataBox(matrix, i), hypre_BoxArrayBox(data_space, i));
+      if (all)
       {
-         box = hypre_BoxArrayBox(boxes, i);
-         hypre_StructMatrixMapDataBox(matrix, box);
+         /* Print real data and ghost data */
+         hypre_CopyBox(hypre_BoxArrayBox(data_space, i), hypre_BoxArrayBox(boxes, i));
+      }
+      else
+      {
+         /* Print only real data */
+         hypre_StructMatrixMapDataBox(matrix, hypre_BoxArrayBox(boxes, i));
       }
    }
 
@@ -2303,10 +2304,8 @@ hypre_StructMatrixPrintData( FILE               *file,
 
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
    hypre_TFree(cvalue_ids, HYPRE_MEMORY_HOST);
-   if (!all)
-   {
-      hypre_BoxArrayDestroy(boxes);
-   }
+   hypre_BoxArrayDestroy(boxes);
+   hypre_BoxArrayDestroy(data_space);
    if (h_data != data)
    {
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);

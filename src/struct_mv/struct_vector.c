@@ -1466,9 +1466,6 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
 
 /*--------------------------------------------------------------------------
  * hypre_StructVectorPrintData
- *
- * RDF TODO: Update to allow for non-unitary stride?
- * RDF BASE: This needs to be updated to work with a base grid!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1486,6 +1483,7 @@ hypre_StructVectorPrintData( FILE               *file,
 
    HYPRE_Int             num_values      = 1;
    HYPRE_Int             value_ids[1]    = {0};
+   HYPRE_Int             i;
 
    hypre_BoxArray       *boxes;
    HYPRE_Complex        *h_data;
@@ -1505,10 +1503,29 @@ hypre_StructVectorPrintData( FILE               *file,
    /* Print ghost data (all) also or only real data? */
    boxes = (all) ? data_space : grid_boxes;
 
+   boxes      = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
+   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
+   hypre_ForBoxI(i, boxes)
+   {
+      hypre_CopyBox(hypre_StructVectorBoxDataBox(vector, i), hypre_BoxArrayBox(data_space, i));
+      if (all)
+      {
+         /* Print real data and ghost data */
+         hypre_CopyBox(hypre_BoxArrayBox(data_space, i), hypre_BoxArrayBox(boxes, i));
+      }
+      else
+      {
+         /* Print only real data */
+         hypre_StructVectorMapDataBox(vector, hypre_BoxArrayBox(boxes, i));
+      }
+   }
+
    /* Print data to file */
    hypre_PrintBoxArrayData(file, ndim, boxes, data_space, num_values, value_ids, h_data);
 
    /* Free memory */
+   hypre_BoxArrayDestroy(boxes);
+   hypre_BoxArrayDestroy(data_space);
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);
@@ -1519,9 +1536,6 @@ hypre_StructVectorPrintData( FILE               *file,
 
 /*--------------------------------------------------------------------------
  * hypre_StructVectorReadData
- *
- * RDF TODO: Update to allow for non-unitary stride?
- * RDF BASE: This needs to be updated to work with a base grid!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1568,10 +1582,7 @@ hypre_StructVectorReadData( FILE               *file,
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
-      HYPRE_StructVectorSetBoxValues(vector,
-                                     hypre_BoxIMin(box),
-                                     hypre_BoxIMax(box),
-                                     &values[vi]);
+      HYPRE_StructVectorSetBoxValues(vector, hypre_BoxIMin(box), hypre_BoxIMax(box), &values[vi]);
       vi += hypre_BoxVolume(box);
    }
 
