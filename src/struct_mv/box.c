@@ -539,8 +539,13 @@ hypre_BoxInBox( hypre_Box  *box1,
 {
    HYPRE_Int inbox = 0;
 
-   if ( hypre_IndexInBox(hypre_BoxIMin(box1), box2) &&
-        hypre_IndexInBox(hypre_BoxIMax(box1), box2) )
+   if (hypre_BoxVolume(box1) == 0)
+   {
+      // when box1 is empty, define it to be in box2 (even if box2 is also empty)
+      inbox = 1;
+   }
+   else if ( hypre_IndexInBox(hypre_BoxIMin(box1), box2) &&
+             hypre_IndexInBox(hypre_BoxIMax(box1), box2) )
    {
       inbox = 1;
    }

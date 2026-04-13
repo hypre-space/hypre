@@ -504,7 +504,6 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
    /*------------------------------------------------------
     * Debugging stuff - ONLY WORKS FOR 3D
-    * - Also needs to be updated to use new data structures
     *------------------------------------------------------*/
 
 #if DEBUG
@@ -587,7 +586,8 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 #if DEBUG
    {
       hypre_CommEntry  *comm_entry;
-      HYPRE_Int         offset, ndim;
+      hypre_CommBlock  *comm_block;
+      HYPRE_Int         offset, ndim, b;
       HYPRE_Int        *length;
       HYPRE_Int        *stride;
 
@@ -611,18 +611,23 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       {
          comm_type = &comm_types[m];
          hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-         hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
-         for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
+         hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+         for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
          {
-            comm_entry = hypre_CommTypeEntry(comm_type, i);
-            offset = hypre_CommEntryOffset(comm_entry);
-            dnim   = hypre_CommEntryNDim(comm_entry);
-            length = hypre_CommEntryLengthArray(comm_entry);
-            stride = hypre_CommEntryStrideArray(comm_entry);
-            hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
-                          i, offset, ndim,
-                          length[0], length[1], length[2], length[3],
-                          stride[0], stride[1], stride[2], stride[3]);
+            comm_block = hypre_CommTypeBlock(comm_type, b);
+            hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+            for (i = 0; i < hypre_CommBlockNumEntries(comm_block); i++)
+            {
+               comm_entry = hypre_CommBlockEntry(comm_block, i);
+               offset = hypre_CommEntryOffset(comm_entry);
+               ndim   = hypre_CommEntryNDim(comm_entry);
+               length = hypre_CommEntryLengthArray(comm_entry);
+               stride = hypre_CommEntryStrideArray(comm_entry);
+               hypre_fprintf(file, "%d,%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+                             b, i, offset, ndim,
+                             length[0], length[1], length[2], length[3],
+                             stride[0], stride[1], stride[2], stride[3]);
+            }
          }
       }
 
@@ -635,25 +640,35 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
       comm_type = &comm_types[0];
       hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-      hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
-      for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
+      hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+      for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
       {
-         comm_entry = hypre_CommTypeEntry(comm_type, i);
-         offset = hypre_CommEntryOffset(comm_entry);
-         ndim   = hypre_CommEntryNDim(comm_entry);
-         length = hypre_CommEntryLengthArray(comm_entry);
-         stride = hypre_CommEntryStrideArray(comm_entry);
-         hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
-                       i, offset, ndim,
-                       length[0], length[1], length[2], length[3],
-                       stride[0], stride[1], stride[2], stride[3]);
+         comm_block = hypre_CommTypeBlock(comm_type, b);
+         hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+         for (i = 0; i < hypre_CommBlockNumEntries(comm_block); i++)
+         {
+            comm_entry = hypre_CommBlockEntry(comm_block, i);
+            offset = hypre_CommEntryOffset(comm_entry);
+            ndim   = hypre_CommEntryNDim(comm_entry);
+            length = hypre_CommEntryLengthArray(comm_entry);
+            stride = hypre_CommEntryStrideArray(comm_entry);
+            hypre_fprintf(file, "%d,%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+                          b, i, offset, ndim,
+                          length[0], length[1], length[2], length[3],
+                          stride[0], stride[1], stride[2], stride[3]);
+         }
       }
 
       for (m = 1; m < (hypre_CommPkgNumRecvs(comm_pkg) + 1); m++)
       {
          comm_type = &comm_types[m];
          hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-         hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
+         hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+         for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
+         {
+            comm_block = hypre_CommTypeBlock(comm_type, b);
+            hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+         }
       }
 
       fflush(file);
