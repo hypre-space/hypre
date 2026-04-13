@@ -311,30 +311,13 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       hypre_StructVectorMapDataBox(vector, data_box);
    }
 
-   /* Assume that the index space for the vector base grid (grid) is at least as
-    * fine as that of the saved base grid (call it sgrid).  Rebase ensures this.
-    * In other words, since the vector's grid is given by both (grid, stride)
-    * and (sgrid, sstride), we assume that stride >= sstride.  As a consequence,
-    * we can assume that all box ids in cdata_space (the current data space) are
-    * also in data_space, and that cdata_space has at most as many boxes as
-    * data_space. */
+   /* Make sure the new data_space is at least as large as the current one */
    cdata_space = hypre_StructVectorDataSpace(vector);
    if ((hypre_StructVectorMemoryMode(vector) == 2) && (cdata_space != NULL))
    {
-      // RDF BASE - won't need to match ids since data_space length will always be the same
-      HYPRE_Int  *cids = hypre_BoxArrayIDs(cdata_space);
-      HYPRE_Int  *ids  = hypre_BoxArrayIDs(data_space);
-      HYPRE_Int   ci;
-
-      i = 0;
-      hypre_ForBoxI(ci, cdata_space)
+      hypre_ForBoxI(i, data_space)
       {
-         while (ids[i] != cids[ci])
-         {
-            i++;
-         }
-         hypre_BoxGrowByBox(hypre_BoxArrayBox(data_space, i),
-                            hypre_BoxArrayBox(cdata_space, ci));
+         hypre_BoxGrowByBox(hypre_BoxArrayBox(data_space, i), hypre_BoxArrayBox(cdata_space, i));
       }
    }
 

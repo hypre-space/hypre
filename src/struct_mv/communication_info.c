@@ -647,7 +647,6 @@ hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
                       hypre_CommInfo    **comm_info_ptr )
 {
    HYPRE_Int              ndim        = hypre_StructGridNDim(bgrid);
-   HYPRE_Int             *baseboxnums = hypre_StructGridBaseBoxnums(bgrid);
    hypre_Box             *csbox  = hypre_CommStencilBox(comm_stencil);
    HYPRE_Int             *csdata = hypre_CommStencilData(comm_stencil);
    HYPRE_Int             *mgrow  = hypre_CommStencilMGrow(comm_stencil);
@@ -729,8 +728,8 @@ hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
    recv_boxes = hypre_BoxArrayArrayCreate(num_boxes, ndim);
    for (i = 0; i < num_boxes; i++)
    {
-      hypre_BoxArrayArrayID(send_boxes, i) = baseboxnums[i];
-      hypre_BoxArrayArrayID(recv_boxes, i) = baseboxnums[i];
+      hypre_BoxArrayArrayID(send_boxes, i) = hypre_StructGridBaseBoxnum(bgrid, i);
+      hypre_BoxArrayArrayID(recv_boxes, i) = hypre_StructGridBaseBoxnum(bgrid, i);
    }
    send_procs = hypre_CTAlloc(HYPRE_Int *, num_boxes, HYPRE_MEMORY_HOST);
    recv_procs = hypre_CTAlloc(HYPRE_Int *, num_boxes, HYPRE_MEMORY_HOST);
@@ -1187,7 +1186,6 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
    hypre_StructGrid        *local_grid;
    hypre_StructGrid        *remote_grid;
 
-   HYPRE_Int               *baseboxnums;
    hypre_BoxArray          *local_boxes;
    hypre_BoxArray          *remote_boxes;
    hypre_BoxArray          *remote_all_boxes;
@@ -1225,7 +1223,6 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
        * Compute comm_boxes and comm_procs
        *---------------------------------------------------*/
 
-      baseboxnums  = hypre_StructGridBaseBoxnums(local_grid);
       local_boxes  = hypre_StructGridBoxes(local_grid);
       remote_boxes = hypre_StructGridBoxes(remote_grid);
       hypre_GatherAllBoxes(hypre_StructGridComm(remote_grid), remote_boxes, ndim,
@@ -1243,7 +1240,7 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
       comm_box = hypre_BoxCreate(ndim);
       hypre_ForBoxI(i, local_boxes)
       {
-         hypre_BoxArrayArrayID(comm_boxes, i) = baseboxnums[i];
+         hypre_BoxArrayArrayID(comm_boxes, i) = hypre_StructGridBaseBoxnum(local_grid, i);
          local_box = hypre_BoxArrayBox(local_boxes, i);
 
          comm_box_array = hypre_BoxArrayArrayBoxArray(comm_boxes, i);

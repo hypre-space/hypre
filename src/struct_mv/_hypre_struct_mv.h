@@ -823,8 +823,6 @@ typedef struct hypre_StructGrid_struct
    hypre_Index          stride;       /* Stride index for coarsening baseboxes */
 
    hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
-   HYPRE_Int           *baseboxnums;  /* Array of base boxnums for the boxes array */
-                                      /* RDF BASE: Keep temporarily, then switch to boxes ids */
 
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
@@ -857,8 +855,6 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridOrigin(grid)        ((grid) -> origin)
 #define hypre_StructGridStride(grid)        ((grid) -> stride)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
-#define hypre_StructGridBaseBoxnums(grid)   ((grid) -> baseboxnums)
-#define hypre_StructGridBaseBoxnum(grid, i) ((grid) -> baseboxnums[i])
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -877,6 +873,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridIDs(grid)           (hypre_BoxArrayIDs(hypre_StructGridBoxes(grid)))
 #define hypre_StructGridID(grid, i)         (hypre_BoxArrayID(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridBaseBoxnum(grid, i) (hypre_StructGridID(grid, i))
 
 #define hypre_StructGridIDPeriod(grid)      hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

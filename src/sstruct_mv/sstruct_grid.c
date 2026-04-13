@@ -1354,8 +1354,6 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                         hypre_StructGrid  *j_sgrid       = hypre_SStructPGridSGrid(pgrids[pj], vj);
                         HYPRE_Int          i_num_boxes   = hypre_StructGridNumBoxes(i_sgrid);
                         HYPRE_Int          j_num_boxes   = hypre_StructGridNumBoxes(j_sgrid);
-                        HYPRE_Int         *i_baseboxnums = hypre_StructGridBaseBoxnums(i_sgrid);
-                        HYPRE_Int         *j_baseboxnums = hypre_StructGridBaseBoxnums(j_sgrid);
                         HYPRE_Int          k;
 
                         cnum_transforms = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
@@ -1368,7 +1366,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
                         hypre_ForBoxI(k, (cinfo->boxes))
                         {
-                           hypre_BoxArrayArrayID((cinfo->boxes), k) = i_baseboxnums[k];
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) =
+                              hypre_StructGridBaseBoxnum(i_sgrid, k);
                         }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, i_num_boxes,
@@ -1386,7 +1385,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
                         hypre_ForBoxI(k, (cinfo->boxes))
                         {
-                           hypre_BoxArrayArrayID((cinfo->boxes), k) = j_baseboxnums[k];
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) =
+                              hypre_StructGridBaseBoxnum(j_sgrid, k);
                         }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, j_num_boxes,
