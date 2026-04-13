@@ -26,8 +26,34 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-/* WM: dpct below currently needed for constant iterators */
-#include <dpct/dpl_extras/iterators.h>
+/* WM: workaround oneDPL's lack of constant iterator and the removal of dpct */
+namespace dpct
+{
+   namespace internal
+   {
+      template <typename Tp>
+      struct return_const
+      {
+         return_const(const Tp &value) : my_value(value) {}
+         template <typename _Idx>
+         const Tp operator()(_Idx) const { return my_value; }
+         private:
+         Tp my_value;
+      };
+   } // namespace internal
+
+   template <typename _Tp>
+   using constant_iterator = oneapi::dpl::transform_iterator<oneapi::dpl::counting_iterator<std::size_t>, internal::return_const<_Tp>>;
+
+   template <typename _Tp>
+   auto make_constant_iterator(_Tp __value)
+   {
+      return dpct::constant_iterator<_Tp>{oneapi::dpl::counting_iterator<std::size_t>{0}, internal::return_const<_Tp>{__value}};
+   }
+} // namespace dpct
+
+template <typename Tp>
+struct sycl::is_device_copyable<dpct::internal::return_const<Tp>> : sycl::is_device_copyable<Tp>{};
 
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
 template <typename T, typename Predicate, typename Operator>

@@ -1204,7 +1204,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                      A_j_sorted,
                                      A_j_sorted + nnz_A,
-                                     dpct::constant_iterator(1),
+                                     dpct::make_constant_iterator<HYPRE_Int>(1),
                                      reduced_col_indices,
                                      reduced_col_nnz);
 
