@@ -237,10 +237,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       auto zip_out = oneapi::dpl::make_zip_iterator(stack_j + stack_elmts_current,
                                                     stack_data + stack_elmts_current);
       auto new_end = hypre_CopyIfSycl( zip_in,
-                                        zip_in + len,
-                                        indicator,
-                                        zip_out,
-                                        is_nonnegative<HYPRE_Int>() );
+                                       zip_in + len,
+                                       indicator,
+                                       zip_out,
+                                       is_nonnegative<HYPRE_Int>() );
 
       HYPRE_Int nnz_tmp = std::get<0>(new_end.base()) - (stack_j + stack_elmts_current);
 #else
@@ -374,9 +374,9 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
                       oneapi::dpl::maximum<char>() );
 
    hypre_TransformIfSycl(A0,
-                          A0 + N0,
-                          X,
-                          A0,
+                         A0 + N0,
+                         X,
+                         A0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
@@ -563,9 +563,9 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
                       oneapi::dpl::maximum<char>() );
 
    hypre_TransformIfSycl(A0,
-                          A0 + N0,
-                          X0,
-                          A0,
+                         A0 + N0,
+                         X0,
+                         A0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
@@ -608,9 +608,9 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
    /* remove numrical zeros */
 #if defined(HYPRE_USING_SYCL)
    auto new_end2 = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(I, J, A),
-                                      oneapi::dpl::make_zip_iterator(I + Nt, J + Nt, A + Nt),
-                                      A,
-                                      oneapi::dpl::make_zip_iterator(I0, J0, A0),
+                                     oneapi::dpl::make_zip_iterator(I + Nt, J + Nt, A + Nt),
+                                     A,
+                                     oneapi::dpl::make_zip_iterator(I0, J0, A0),
    [] (const auto & x) {return x;});
 
    *N1 = std::get<0>(new_end2.base()) - I0;
@@ -683,17 +683,17 @@ hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_j, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_j, off_proc_data, off_proc_sora);
          auto new_end1 = hypre_CopyIfSycl( zip_in,         /* first */
-                                            zip_in + nelms, /* last */
-                                            is_on_proc,     /* stencil */
-                                            zip_out,        /* result */
+                                           zip_in + nelms, /* last */
+                                           is_on_proc,     /* stencil */
+                                           zip_out,        /* result */
          [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
          /* remove off-proc entries from stack */
          auto new_end2 = hypre_RemoveIfSycl( zip_in,          /* first */
-                                              zip_in + nelms,  /* last */
-                                              is_on_proc,      /* stencil */
+                                             zip_in + nelms,  /* last */
+                                             is_on_proc,      /* stencil */
          [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);

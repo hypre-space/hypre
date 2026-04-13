@@ -604,10 +604,10 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
                       CF_C,
                       is_positive<HYPRE_Int>() );
    hypre_CopyIfSycl( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
-                      hypre_IntArrayData(CF_marker),
-                      indices,
-                      is_positive<HYPRE_Int>() );
+                     oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
+                     hypre_IntArrayData(CF_marker),
+                     indices,
+                     is_positive<HYPRE_Int>() );
 
    /* replace CF_marker at C points with 1 */
    HYPRE_ONEDPL_CALL( std::replace_if,
@@ -618,11 +618,11 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
 
    /* update with new_CF_marker wherever C point value was initially 1 */
    hypre_ScatterIfSycl( hypre_IntArrayData(new_CF_marker),
-                         hypre_IntArrayData(new_CF_marker) + n_coarse,
-                         indices,
-                         CF_C,
-                         hypre_IntArrayData(CF_marker),
-                         equal<HYPRE_Int>(1) );
+                        hypre_IntArrayData(new_CF_marker) + n_coarse,
+                        indices,
+                        CF_C,
+                        hypre_IntArrayData(CF_marker),
+                        equal<HYPRE_Int>(1) );
 #else
    /* save CF_marker values at C points in CF_C and C point indices */
    HYPRE_THRUST_CALL( copy_if,
@@ -675,10 +675,10 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
 #if defined(HYPRE_USING_SYCL)
    /* save C point indices */
    hypre_CopyIfSycl( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
-                      hypre_IntArrayData(CF_marker),
-                      indices,
-                      is_positive<HYPRE_Int>() );
+                     oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
+                     hypre_IntArrayData(CF_marker),
+                     indices,
+                     is_positive<HYPRE_Int>() );
 
    /* replace CF_marker at C points with 1 */
    HYPRE_ONEDPL_CALL( std::replace_if,
@@ -689,10 +689,10 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
 
    /* update values in CF_marker to -2 wherever new_CF_marker == -1 */
    hypre_TransformIfSycl( oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker),
-                                                                  indices),
-                           oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices) + n_coarse,
-                           hypre_IntArrayData(new_CF_marker),
-                           oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices),
+                                                                 indices),
+                          oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices) + n_coarse,
+                          hypre_IntArrayData(new_CF_marker),
+                          oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices),
    [] (const auto & x) { return -2; },
    equal<HYPRE_Int>(-1) );
 #else

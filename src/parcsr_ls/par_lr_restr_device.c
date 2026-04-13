@@ -100,15 +100,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    hypre_CopyIfSycl( count,
-                      count + n_fine,
-                      CF_marker,
-                      Fmap,
-                      is_negative<HYPRE_Int>());
+                     count + n_fine,
+                     CF_marker,
+                     Fmap,
+                     is_negative<HYPRE_Int>());
    hypre_CopyIfSycl( count,
-                      count + n_fine,
-                      CF_marker,
-                      Cmap,
-                      is_positive<HYPRE_Int>());
+                     count + n_fine,
+                     CF_marker,
+                     Cmap,
+                     is_positive<HYPRE_Int>());
 #else
    HYPRE_THRUST_CALL( copy_if,
                       thrust::make_counting_iterator(0),

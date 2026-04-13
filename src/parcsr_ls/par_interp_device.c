@@ -1276,15 +1276,15 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
    hypre_CopyIfSycl( P_diag_j_temp,
-                      P_diag_j_temp + n_fine,
-                      diag_compress_marker,
-                      P_diag_j_temp_compressed,
-                      equal<HYPRE_Int>(1) );
+                     P_diag_j_temp + n_fine,
+                     diag_compress_marker,
+                     P_diag_j_temp_compressed,
+                     equal<HYPRE_Int>(1) );
    hypre_CopyIfSycl( P_offd_j_temp,
-                      P_offd_j_temp + n_fine,
-                      offd_compress_marker,
-                      P_offd_j_temp_compressed,
-                      equal<HYPRE_Int>(1) );
+                     P_offd_j_temp + n_fine,
+                     offd_compress_marker,
+                     P_offd_j_temp_compressed,
+                     equal<HYPRE_Int>(1) );
 
    /* map the diag column indices */
    hypre_GatherSycl( P_diag_j_temp_compressed,
@@ -1343,10 +1343,10 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    hypre_CopyIfSycl( count,
-                      count + num_cols_A_offd,
-                      mark_P_offd_idx,
-                      offd_map_P_to_A,
-                      equal<HYPRE_Int>(1) );
+                     count + num_cols_A_offd,
+                     mark_P_offd_idx,
+                     offd_map_P_to_A,
+                     equal<HYPRE_Int>(1) );
 #else
    HYPRE_THRUST_CALL( copy_if,
                       thrust::make_counting_iterator(0),

@@ -419,9 +419,9 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             }
 #if defined(HYPRE_USING_SYCL)
             hypre_TransformIfSycl( edge_bc,
-                                    edge_bc + ne,
-                                    l1norm_arr,
-                                    edge_bc,
+                                   edge_bc + ne,
+                                   l1norm_arr,
+                                   edge_bc,
             [] (const auto & x) {return 1;},
             less_than<HYPRE_Real>(eps) );
 #else
@@ -689,9 +689,9 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             {
 #if defined(HYPRE_USING_SYCL)
                hypre_TransformIfSycl( data,
-                                       data + ne,
-                                       edge_bc,
-                                       data,
+                                      data + ne,
+                                      edge_bc,
+                                      data,
                [] (const auto & x) {return 0.0;},
                [] (const auto & x) {return x;} );
 #else

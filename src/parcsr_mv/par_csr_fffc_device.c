@@ -348,11 +348,11 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) );
 
    hypre_ScatterIfSycl( itmp,
-                         itmp + n_local,
-                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                         CF_marker,
-                         map2FC,
-                         is_nonnegative<HYPRE_Int>() ); /* FC combined */
+                        itmp + n_local,
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                        CF_marker,
+                        map2FC,
+                        is_nonnegative<HYPRE_Int>() ); /* FC combined */
 #else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
@@ -471,10 +471,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(AFF_diag_ii, AFF_diag_j, AFF_diag_a),
-                                        AFF_pred_diag );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(AFF_diag_ii, AFF_diag_j, AFF_diag_a),
+                                       AFF_pred_diag );
 
       hypre_assert( std::get<0>(new_end.base()) == AFF_diag_ii + AFF_diag_nnz );
 
@@ -536,10 +536,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(AFF_offd_ii, AFF_offd_j, AFF_offd_a),
-                                   AFF_pred_offd );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(AFF_offd_ii, AFF_offd_j, AFF_offd_a),
+                                  AFF_pred_offd );
 
       hypre_assert( std::get<0>(new_end.base()) == AFF_offd_ii + AFF_offd_nnz );
 
@@ -596,9 +596,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         AFF_offd_j );
       col_map_offd_AFF = hypre_TAlloc(HYPRE_BigInt, num_cols_AFF_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( recv_buf,
-                                                     recv_buf + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_AFF,
+                                                    recv_buf + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_AFF,
       [] (const auto & x) {return x;} );
       HYPRE_ONEDPL_CALL( std::transform,
                          col_map_offd_AFF,
@@ -703,10 +703,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(AFC_diag_ii, AFC_diag_j, AFC_diag_a),
-                                        AFC_pred_diag );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(AFC_diag_ii, AFC_diag_j, AFC_diag_a),
+                                       AFC_pred_diag );
 
       hypre_assert( std::get<0>(new_end.base()) == AFC_diag_ii + AFC_diag_nnz );
 
@@ -765,10 +765,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(AFC_offd_ii, AFC_offd_j, AFC_offd_a),
-                                   AFC_pred_offd );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(AFC_offd_ii, AFC_offd_j, AFC_offd_a),
+                                  AFC_pred_offd );
 
       hypre_assert( std::get<0>(new_end.base()) == AFC_offd_ii + AFC_offd_nnz );
 
@@ -824,9 +824,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         AFC_offd_j );
       col_map_offd_AFC = hypre_TAlloc(HYPRE_BigInt, num_cols_AFC_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( recv_buf,
-                                                     recv_buf + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_AFC,
+                                                    recv_buf + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_AFC,
       [] (const auto & x) {return x;});
 #else
       HYPRE_THRUST_CALL( sort,
@@ -926,10 +926,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(ACF_diag_ii, ACF_diag_j, ACF_diag_a),
-                                        ACF_pred_diag );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(ACF_diag_ii, ACF_diag_j, ACF_diag_a),
+                                       ACF_pred_diag );
 
       hypre_assert( std::get<0>(new_end.base()) == ACF_diag_ii + ACF_diag_nnz );
 
@@ -988,10 +988,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(ACF_offd_ii, ACF_offd_j, ACF_offd_a),
-                                   ACF_pred_offd );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(ACF_offd_ii, ACF_offd_j, ACF_offd_a),
+                                  ACF_pred_offd );
 
       hypre_assert( std::get<0>(new_end.base()) == ACF_offd_ii + ACF_offd_nnz );
 
@@ -1047,9 +1047,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         ACF_offd_j );
       col_map_offd_ACF = hypre_TAlloc(HYPRE_BigInt, num_cols_ACF_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( recv_buf,
-                                                     recv_buf + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_ACF,
+                                                    recv_buf + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_ACF,
       [] (const auto & x) {return x;} );
       HYPRE_ONEDPL_CALL( std::transform,
                          col_map_offd_ACF,
@@ -1155,10 +1155,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(ACC_diag_ii, ACC_diag_j, ACC_diag_a),
-                                        ACC_pred_diag );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(ACC_diag_ii, ACC_diag_j, ACC_diag_a),
+                                       ACC_pred_diag );
 
       hypre_assert( std::get<0>(new_end.base()) == ACC_diag_ii + ACC_diag_nnz );
 
@@ -1217,10 +1217,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(ACC_offd_ii, ACC_offd_j, ACC_offd_a),
-                                   ACC_pred_offd );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(ACC_offd_ii, ACC_offd_j, ACC_offd_a),
+                                  ACC_pred_offd );
 
       hypre_assert( std::get<0>(new_end.base()) == ACC_offd_ii + ACC_offd_nnz );
 
@@ -1276,9 +1276,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         ACC_offd_j );
       col_map_offd_ACC = hypre_TAlloc(HYPRE_BigInt, num_cols_ACC_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( recv_buf,
-                                                     recv_buf + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_ACC,
+                                                    recv_buf + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_ACC,
       [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( sort,
@@ -1556,11 +1556,11 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    hypre_ScatterIfSycl( itmp,
-                         itmp + n_local,
-                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                         CF_marker,
-                         map2FC, /* FC combined */
-                         is_nonnegative<HYPRE_Int>() );
+                        itmp + n_local,
+                        oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                        CF_marker,
+                        map2FC, /* FC combined */
+                        is_nonnegative<HYPRE_Int>() );
 #else
    /* map from all points (i.e, F+C) to F/C indices */
    HYPRE_THRUST_CALL( exclusive_scan,
@@ -1660,10 +1660,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(ACX_diag_ii, ACX_diag_j, ACX_diag_a),
-                                        ACX_pred );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(ACX_diag_ii, ACX_diag_j, ACX_diag_a),
+                                       ACX_pred );
 
       hypre_assert( std::get<0>(new_end.base()) == ACX_diag_ii + ACX_diag_nnz );
 
@@ -1710,10 +1710,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(ACX_offd_ii, ACX_offd_j, ACX_offd_a),
-                                   ACX_pred );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(ACX_offd_ii, ACX_offd_j, ACX_offd_a),
+                                  ACX_pred );
 
       hypre_assert( std::get<0>(new_end.base()) == ACX_offd_ii + ACX_offd_nnz );
 
@@ -1775,9 +1775,9 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                         ACX_offd_j );
       col_map_offd_ACX = hypre_TAlloc(HYPRE_BigInt, num_cols_ACX_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( col_map_offd_A,
-                                                     col_map_offd_A + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_ACX,
+                                                    col_map_offd_A + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_ACX,
       [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
@@ -1869,10 +1869,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
-                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
-                                        oneapi::dpl::make_zip_iterator(AXC_diag_ii, AXC_diag_j, AXC_diag_a),
-                                        AXC_pred_diag );
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                       oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                       oneapi::dpl::make_zip_iterator(AXC_diag_ii, AXC_diag_j, AXC_diag_a),
+                                       AXC_pred_diag );
 
       hypre_assert( std::get<0>(new_end.base()) == AXC_diag_ii + AXC_diag_nnz );
 
@@ -1920,10 +1920,10 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
-                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
-                                   oneapi::dpl::make_zip_iterator(AXC_offd_ii, AXC_offd_j, AXC_offd_a),
-                                   AXC_pred_offd );
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                  oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                  oneapi::dpl::make_zip_iterator(AXC_offd_ii, AXC_offd_j, AXC_offd_a),
+                                  AXC_pred_offd );
 
       hypre_assert( std::get<0>(new_end.base()) == AXC_offd_ii + AXC_offd_nnz );
 #else
@@ -1974,9 +1974,9 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                         AXC_offd_j );
       col_map_offd_AXC = hypre_TAlloc(HYPRE_BigInt, num_cols_AXC_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = hypre_CopyIfSycl( recv_buf,
-                                                     recv_buf + num_cols_A_offd,
-                                                     offd_mark,
-                                                     col_map_offd_AXC,
+                                                    recv_buf + num_cols_A_offd,
+                                                    offd_mark,
+                                                    col_map_offd_AXC,
       [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( exclusive_scan,

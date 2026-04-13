@@ -82,10 +82,10 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
 
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    new_end = hypre_CopyIfSycl( count,
-                                count + hypre_ParCSRMatrixNumCols(S_CX),
-                                CF_marker,
-                                hypre_CSRMatrixJ(Id),
-                                is_nonnegative<HYPRE_Int>()  );
+                               count + hypre_ParCSRMatrixNumCols(S_CX),
+                               CF_marker,
+                               hypre_CSRMatrixJ(Id),
+                               is_nonnegative<HYPRE_Int>()  );
 #else
    HYPRE_THRUST_CALL( sequence,
                       hypre_CSRMatrixI(Id),

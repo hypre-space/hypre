@@ -204,8 +204,8 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                         diag_iwork );
 
       HYPRE_Int *new_end = hypre_RemoveIfSycl( graph_diag,
-                                                graph_diag + graph_diag_size,
-                                                diag_iwork,
+                                               graph_diag + graph_diag_size,
+                                               diag_iwork,
       [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( gather,
@@ -432,9 +432,9 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    new_end = hypre_RemoveCopyIfSycl( count,
-                                       count + num_rows_diag,
-                                       CF_marker_diag,
-                                       graph_diag,
+                                     count + num_rows_diag,
+                                     CF_marker_diag,
+                                     graph_diag,
    [] (const auto & x) {return x;} );
 #else
    new_end = HYPRE_THRUST_CALL( remove_copy_if,

@@ -93,9 +93,9 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                       oneapi::dpl::maximum<char>() );
 
    hypre_TransformIfSycl(A0,
-                          A0 + N0,
-                          X,
-                          A0,
+                         A0 + N0,
+                         X,
+                         A0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
@@ -178,9 +178,9 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                       oneapi::dpl::maximum<char>() );
 
    hypre_TransformIfSycl(A0,
-                          A0 + N0,
-                          X0,
-                          A0,
+                         A0 + N0,
+                         X0,
+                         A0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
@@ -220,9 +220,9 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    /* remove numerical zeros */
 #if defined(HYPRE_USING_SYCL)
    auto new_end2 = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(I, A),
-                                      oneapi::dpl::make_zip_iterator(I, A) + Nt,
-                                      A,
-                                      oneapi::dpl::make_zip_iterator(I0, A0),
+                                     oneapi::dpl::make_zip_iterator(I, A) + Nt,
+                                     A,
+                                     oneapi::dpl::make_zip_iterator(I0, A0),
    [] (const auto & x) {return x;} );
 
    *N1 = std::get<0>(new_end2.base()) - I0;
@@ -462,17 +462,17 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_data, off_proc_sora);
          auto new_end1 = hypre_CopyIfSycl( zip_in,  /* first */
-                                            zip_in + nelms, /* last */
-                                            is_on_proc, /* stencil */
-                                            zip_out, /* result */
+                                           zip_in + nelms, /* last */
+                                           is_on_proc, /* stencil */
+                                           zip_out, /* result */
          [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
          /* remove off-proc entries from stack */
          auto new_end2 = hypre_RemoveIfSycl( zip_in,         /* first */
-                                              zip_in + nelms, /* last */
-                                              is_on_proc,     /* stencil */
+                                             zip_in + nelms, /* last */
+                                             is_on_proc,     /* stencil */
          [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);

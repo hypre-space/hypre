@@ -89,10 +89,10 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
 
 #if defined(HYPRE_USING_SYCL)
       hypre_CopyIfSycl( hypre_IntArrayData(dof_func),
-                         hypre_IntArrayData(dof_func) + local_num_variables,
-                         hypre_IntArrayData(CF_marker),
-                         hypre_IntArrayData(*coarse_dof_func_ptr),
-                         equal<HYPRE_Int>(1) );
+                        hypre_IntArrayData(dof_func) + local_num_variables,
+                        hypre_IntArrayData(CF_marker),
+                        hypre_IntArrayData(*coarse_dof_func_ptr),
+                        equal<HYPRE_Int>(1) );
 #else
       HYPRE_THRUST_CALL( copy_if,
                          hypre_IntArrayData(dof_func),

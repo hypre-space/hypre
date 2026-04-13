@@ -758,8 +758,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    {
 #if defined(HYPRE_USING_SYCL)
       hypre_TransformIfSycl( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
-                              std::negate<HYPRE_Real>(),
-                              is_negative<HYPRE_Real>() );
+                             std::negate<HYPRE_Real>(),
+                             is_negative<HYPRE_Real>() );
       bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
                                                 oneapi::dpl::minimum<HYPRE_Real>() );
 #else

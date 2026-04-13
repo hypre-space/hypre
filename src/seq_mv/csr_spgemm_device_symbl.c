@@ -329,9 +329,9 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          oneapi::dpl::counting_iterator count(0);
          HYPRE_Int *new_end =
             hypre_CopyIfSycl( count,
-                               count + m,
-                               d_rf,
-                               d_rind,
+                              count + m,
+                              d_rf,
+                              d_rind,
          [] (const auto & x) {return x;} );
 #else
          HYPRE_Int *new_end =

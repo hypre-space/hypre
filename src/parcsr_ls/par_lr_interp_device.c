@@ -298,10 +298,10 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    HYPRE_Int *WPoffset = hypre_TAlloc(HYPRE_Int, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int *new_end = hypre_CopyIfSycl( PWoffset,
-                                           PWoffset + P_nr_of_rows,
-                                           CF_marker,
-                                           WPoffset,
-                                           is_negative<HYPRE_Int>() );
+                                          PWoffset + P_nr_of_rows,
+                                          CF_marker,
+                                          WPoffset,
+                                          is_negative<HYPRE_Int>() );
 #else
    HYPRE_Int *new_end = HYPRE_THRUST_CALL( copy_if,
                                            PWoffset,
@@ -371,10 +371,10 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    HYPRE_Int *PC_i = hypre_TAlloc(HYPRE_Int, W_nr_of_cols, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    new_end = hypre_CopyIfSycl( P_diag_i,
-                                P_diag_i + P_nr_of_rows,
-                                CF_marker,
-                                PC_i,
-                                is_nonnegative<HYPRE_Int>() );
+                               P_diag_i + P_nr_of_rows,
+                               CF_marker,
+                               PC_i,
+                               is_nonnegative<HYPRE_Int>() );
 #else
    new_end = HYPRE_THRUST_CALL( copy_if,
                                 P_diag_i,
@@ -858,10 +858,10 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1069,10 +1069,10 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1346,10 +1346,10 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,

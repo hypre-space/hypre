@@ -190,12 +190,12 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
-                                                                       hypre_CSRMatrixData(Cbar)),
-                                        oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
-                                                                       hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
-                                        hypre_CSRMatrixJ(Cbar),
-                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
-                                        pred );
+                                                                      hypre_CSRMatrixData(Cbar)),
+                                       oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                      hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                       hypre_CSRMatrixJ(Cbar),
+                                       oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
+                                       pred );
       hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag );
 #else
       auto new_end = HYPRE_THRUST_CALL(
@@ -220,12 +220,12 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
 #if defined(HYPRE_USING_SYCL)
       new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
-                                                                  hypre_CSRMatrixData(Cbar)),
-                                   oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
-                                                                  hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
-                                   hypre_CSRMatrixJ(Cbar),
-                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
-                                   std::not_fn(pred) );
+                                                                 hypre_CSRMatrixData(Cbar)),
+                                  oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                 hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                  hypre_CSRMatrixJ(Cbar),
+                                  oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
+                                  std::not_fn(pred) );
       hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
 #else
       new_end = HYPRE_THRUST_CALL(
@@ -970,12 +970,12 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       // Cext offd
 #if defined(HYPRE_USING_SYCL)
       auto off_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
-                                                                       Cext_bigj),
-                                        oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
-                                                                       Cext_bigj) + Cext_nnz,
-                                        Cext_bigj,
-                                        oneapi::dpl::make_zip_iterator(work, big_work),
-                                        std::not_fn(pred1) );
+                                                                      Cext_bigj),
+                                       oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
+                                                                      Cext_bigj) + Cext_nnz,
+                                       Cext_bigj,
+                                       oneapi::dpl::make_zip_iterator(work, big_work),
+                                       std::not_fn(pred1) );
 
       HYPRE_Int Cext_offd_nnz = std::get<0>(off_end.base()) - work;
 #else
@@ -1029,12 +1029,12 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       // Cext diag
 #if defined(HYPRE_USING_SYCL)
       auto dia_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
-                                                                       Cext_bigj),
-                                        oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
-                                                                       Cext_bigj) + Cext_nnz,
-                                        Cext_bigj,
-                                        oneapi::dpl::make_zip_iterator(work, big_work),
-                                        pred1 );
+                                                                      Cext_bigj),
+                                       oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
+                                                                      Cext_bigj) + Cext_nnz,
+                                       Cext_bigj,
+                                       oneapi::dpl::make_zip_iterator(work, big_work),
+                                       pred1 );
 
       HYPRE_Int Cext_diag_nnz = std::get<0>(dia_end.base()) - work;
 #else
@@ -1210,10 +1210,10 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
 #if defined(HYPRE_USING_SYCL)
    auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
-                                     oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
-                                     zmp_j,
-                                     oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
-                                     pred );
+                                    oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                                    zmp_j,
+                                    oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
+                                    pred );
    hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag );
 #else
    auto new_end = HYPRE_THRUST_CALL( copy_if,
@@ -1236,10 +1236,10 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
 #if defined(HYPRE_USING_SYCL)
    new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
-                                oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
-                                zmp_j,
-                                oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
-                                std::not_fn(pred) );
+                               oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                               zmp_j,
+                               oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
+                               std::not_fn(pred) );
    hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
 #else
    new_end = HYPRE_THRUST_CALL( copy_if,
