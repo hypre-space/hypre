@@ -19,7 +19,7 @@
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-// RDF BASE: Can delete this - it's no longer used
+// RDF BASE: Delete this - always return a unit stride
 
 HYPRE_Int
 hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
@@ -30,37 +30,6 @@ hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
    {
       *fstride = hypre_StructMatrixDomStride(matrix);
    }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-// RDF BASE: Can delete this - it's no longer used
-
-HYPRE_Int
-hypre_StructMatrixGetCStride( hypre_StructMatrix *matrix,
-                              hypre_IndexRef     *cstride )
-{
-   *cstride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      *cstride = hypre_StructMatrixDomStride(matrix);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Matrix data is currently stored relative to the coarse matrix stride
- *--------------------------------------------------------------------------*/
-// RDF BASE: Can delete this - it's no longer used
-
-HYPRE_Int
-hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
-                                    hypre_IndexRef     *stride )
-{
-   *stride = hypre_StructMatrixDataStride(matrix);
 
    return hypre_error_flag;
 }
@@ -79,7 +48,6 @@ hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix,
 
    /* Assume that 'dindex' is in the range index space */
 
-//   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    stride = hypre_StructMatrixDataStride(matrix);
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
@@ -116,7 +84,6 @@ hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-//   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    stride = hypre_StructMatrixDataStride(matrix);
    hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
 
@@ -132,7 +99,6 @@ hypre_StructMatrixUnMapDataIndex( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-//   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    stride = hypre_StructMatrixDataStride(matrix);
    hypre_MapToFineIndex(dindex, NULL, stride, ndim);
 
@@ -160,7 +126,6 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-//   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    stride = hypre_StructMatrixDataStride(matrix);
    hypre_MapToFineIndex(dstride, NULL, stride, ndim);
 
@@ -333,7 +298,6 @@ hypre_StructMatrixMapCommInfo( hypre_StructMatrix *matrix,
    hypre_IndexRef  dmstride;
 
    /* Map the comm_info boxes only for non-unit stride */
-//   hypre_StructMatrixGetDataMapStride(matrix, &dmstride);
    dmstride = hypre_StructMatrixDataStride(matrix);
    if ( !hypre_IndexEqual(stride, 1, ndim) ||
         !hypre_IndexEqual(dmstride, 1, ndim) )
@@ -498,7 +462,6 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
       hypre_IndexRef  stride;
 
       comm_data = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
-//      hypre_StructMatrixGetDataMapStride(matrix, &stride);
       stride = hypre_StructMatrixDataStride(matrix);
       hypre_StructMatrixMapCommInfo(matrix, NULL, stride, comm_info);
       hypre_CommPkgCreate(comm_info,
@@ -1925,8 +1888,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkg     *comm_pkg;
       hypre_CommHandle  *comm_handle;
       HYPRE_Complex    **comm_data;
-      hypre_IndexRef     fstride;
+      hypre_Index        ustride;
       HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
+
+      hypre_SetIndex(ustride, 1);
 
       /* RDF TODO: Use CommStencil to do communication; don't forget to account
        * for symmetric stencil entries */
@@ -1935,9 +1900,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);
       }
 
-// RDF BASE: Don't want to use this
-      hypre_StructMatrixGetFStride(matrix, &fstride);
-      hypre_CreateCommInfoFromNumGhost(grid, fstride, tot_num_ghost, &comm_info);
+      hypre_CreateCommInfoFromNumGhost(grid, ustride, tot_num_ghost, &comm_info);
       hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
 
       hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
