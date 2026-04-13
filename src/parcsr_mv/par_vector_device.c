@@ -60,7 +60,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
 #if defined(HYPRE_USING_SYCL)
          auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base,
          first_index] (const auto & x) {return x - base - first_index;} );
-         hypreSycl_gather_if( trans_it,
+         hypre_GatherIfSycl( trans_it,
                               trans_it + num_values,
                               indices,
                               data + vecoffset,
@@ -71,7 +71,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       {
          auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base,
          first_index] (const auto & x) {return x - base - first_index;} );
-         hypreSycl_gather( trans_it,
+         hypre_GatherSycl( trans_it,
                            trans_it + num_values,
                            data + vecoffset,
                            values);

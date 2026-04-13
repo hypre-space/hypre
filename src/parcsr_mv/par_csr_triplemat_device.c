@@ -189,7 +189,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                                            hypre_CSRMatrixI(Cbar));
 
 #if defined(HYPRE_USING_SYCL)
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+      auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
                                                                        hypre_CSRMatrixData(Cbar)),
                                         oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
                                                                        hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
@@ -219,7 +219,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
 #if defined(HYPRE_USING_SYCL)
-      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+      new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
                                                                   hypre_CSRMatrixData(Cbar)),
                                    oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
                                                                   hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
@@ -969,7 +969,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       // Convert Cext from BigJ to J
       // Cext offd
 #if defined(HYPRE_USING_SYCL)
-      auto off_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
+      auto off_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj),
                                         oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj) + Cext_nnz,
@@ -1028,7 +1028,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
       // Cext diag
 #if defined(HYPRE_USING_SYCL)
-      auto dia_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
+      auto dia_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj),
                                         oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj) + Cext_nnz,
@@ -1128,9 +1128,9 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       }
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_sequence(ie_ii, ie_ii + num_rows, 0);
+      hypre_SequenceSycl(ie_ii, ie_ii + num_rows, 0);
       HYPRE_ONEDPL_CALL( std::copy, send_map, send_map + num_elemt, ie_ii + num_rows);
-      hypreSycl_sequence(ie_j, ie_j + num_rows + num_elemt, 0);
+      hypre_SequenceSycl(ie_j, ie_j + num_rows + num_elemt, 0);
       auto zipped_begin = oneapi::dpl::make_zip_iterator(ie_ii, ie_j);
       HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + num_rows + num_elemt,
       [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
@@ -1209,7 +1209,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
 #if defined(HYPRE_USING_SYCL)
-   auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+   auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
                                      oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                      zmp_j,
                                      oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
@@ -1235,7 +1235,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
    HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
 #if defined(HYPRE_USING_SYCL)
-   new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+   new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
                                 oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                 zmp_j,
                                 oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
