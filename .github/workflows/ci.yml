@@ -240,9 +240,13 @@ jobs:
           - mpi
           - memory
           - case
+          - annotation
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
+
+      - name: Install code-check dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3 universal-ctags
 
       - name: Check ${{ matrix.check }}
         working-directory: AUTOTEST
@@ -304,5 +308,9 @@ jobs:
                 exit 1
               fi
               echo "Case-insensitive filename check passed"
+              ;;
+            annotation)
+              python3 "$SRC_DIR/config/check_annotation.py"
+              echo "Annotation check passed"
               ;;
           esac
