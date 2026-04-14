@@ -242,7 +242,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Real cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
-   if (setup_type == 0) { return hypre_error_flag; }
+   if (hypre_ParAMGDataSetupType(amg_data) == 0) { return hypre_error_flag; }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("AMGsetup");
@@ -1249,7 +1249,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
 #ifdef HYPRE_MIXEDINT
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "CGC coarsening is not available in mixedint mode!");
-               return hypre_error_flag;
+               goto cleanup;
 #endif
                hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type, coarsen_type,
                                           cgc_its, debug_flag, &(CF_marker_array[level]));

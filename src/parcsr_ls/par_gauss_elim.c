@@ -516,7 +516,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
        solver_type != 19 && solver_type != 98 && solver_type != 198)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported solver type!");
-      hypre_GpuProfilingPop();
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
