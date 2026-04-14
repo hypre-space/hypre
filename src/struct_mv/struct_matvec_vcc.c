@@ -34,7 +34,8 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      stride,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+//                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      ran_stride,
                                     hypre_IndexRef      Adstride,
                                     hypre_IndexRef      xdstride,
@@ -78,8 +79,10 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
     * choice, Neg vs Pos, doesn't matter because an offset will be used to index
     * into the vector x (xoff = index - xdstart). */
    hypre_SnapIndexNeg(xdstart, NULL, stride, ndim);
-   hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-   hypre_StructVectorMapDataIndex(x, xdstart);
+//   hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
+//   hypre_StructVectorMapDataIndex(x, xdstart);
+//   hypre_CopyToIndex(start, ndim, xdstart);
+   hypre_MapToCoarseIndex(xdstart, NULL, dom_stride, ndim);
    hypre_CopyToIndex(start, ndim, ydstart);
    hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
    hypre_CopyToIndex(start, ndim, zdstart);
@@ -91,7 +94,7 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    /* Initialize output vector (z = beta * y + alpha * A*x) with a first pass */
    hypre_StructMatvecCompute_core_IVCC(A, x, Ab, depth, alpha, beta, xp, yp, zp,
                                        ndim, transpose, centry, nentries, entries,
-                                       stencil_shape, loop_size, xfstride, start,
+                                       stencil_shape, loop_size, dom_stride, start,
                                        Adstart, xdstart, ydstart, zdstart,
                                        Adstride, xdstride, ydstride, zdstride,
                                        A_data_box, x_data_box, y_data_box, z_data_box);

@@ -26,9 +26,14 @@
    hypre_StructMatrixMapDataIndex(A, offset);            \
    hypre_SubtractIndexes(offset, Adstart, ndim, offset);
 
+#if 0 // RDF BASE - remove
 #define HYPRE_MAP_X_OFFSET(offset)                       \
    hypre_MapToFineIndex(offset, NULL, xfstride, ndim);   \
    hypre_StructVectorMapDataIndex(x, offset);            \
+   hypre_SubtractIndexes(offset, xdstart, ndim, offset);
+#endif
+#define HYPRE_MAP_X_OFFSET(offset)                         \
+   hypre_MapToCoarseIndex(offset, NULL, dom_stride, ndim); \
    hypre_SubtractIndexes(offset, xdstart, ndim, offset);
 
 #define HYPRE_SET_CAX(Ap, xoff, entry)                               \
@@ -554,7 +559,7 @@ hypre_StructMatvecCompute_core_ICC( hypre_StructMatrix *A,
                                     HYPRE_Int          *entries,
                                     hypre_Index        *stencil_shape,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      xdstart,
                                     hypre_IndexRef      ydstart,
@@ -583,7 +588,7 @@ hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
                                     HYPRE_Int          *entries,
                                     hypre_Index        *stencil_shape,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      Adstart,
                                     hypre_IndexRef      xdstart,
@@ -616,7 +621,7 @@ hypre_StructMatvecCompute_core_IVCC( hypre_StructMatrix *A,
                                      HYPRE_Int          *entries,
                                      hypre_Index        *stencil_shape,
                                      hypre_IndexRef      loop_size,
-                                     hypre_IndexRef      xfstride,
+                                     hypre_IndexRef      dom_stride,
                                      hypre_IndexRef      start,
                                      hypre_IndexRef      Adstart,
                                      hypre_IndexRef      xdstart,
@@ -649,7 +654,7 @@ hypre_StructMatvecCompute_core_CC( HYPRE_Complex       alpha,
                                    hypre_IndexRef      start,
                                    hypre_IndexRef      stride,
                                    hypre_IndexRef      loop_size,
-                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      dom_stride,
                                    hypre_IndexRef      ran_stride,
                                    hypre_IndexRef      xdstride,
                                    hypre_IndexRef      ydstride,
@@ -677,7 +682,7 @@ hypre_StructMatvecCompute_core_VC( HYPRE_Complex       alpha,
                                    hypre_IndexRef      start,
                                    hypre_IndexRef      stride,
                                    hypre_IndexRef      loop_size,
-                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      dom_stride,
                                    hypre_IndexRef      ran_stride,
                                    hypre_IndexRef      Adstride,
                                    hypre_IndexRef      xdstride,
@@ -707,7 +712,7 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      stride,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      ran_stride,
                                     hypre_IndexRef      Adstride,
                                     hypre_IndexRef      xdstride,

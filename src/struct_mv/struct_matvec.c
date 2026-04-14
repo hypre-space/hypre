@@ -103,6 +103,9 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_IndexRef           dom_stride, xstride;
    HYPRE_Int                d, need_resize, need_computepkg;
 
+   hypre_Index              ustride;
+   hypre_SetIndex(ustride, 1);
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Ensure that the base grid for x is at least as fine as the one for A */
@@ -115,27 +118,28 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    {
       dom_stride = hypre_StructMatrixDomStride(A);
    }
-   hypre_StructVectorRebase(x, grid, dom_stride);
+//   hypre_StructVectorRebase(x, grid, dom_stride);
 
    /* Rebase may not change the base grid, so get the grid directly from x */
    xgrid = hypre_StructVectorGrid(x);
    xstride = hypre_StructVectorStride(x);
 
-   /* Need to compute xsstride such that (xgrid, xsstride) has the same index
-    * space as (grid, ustride) where the stencil is applied.  Can do this by
-    * using the fact that (xgrid, xstride) and (grid, dom_stride) have the same
-    * index spaces, and hence xsstride/ustride = xstride/dom_stride.  Note that
-    * if A and x end up having the same base grids, then xstride = dom_stride
-    * and xsstride = ustride. */
-   for (d = 0; d < ndim; d++)
-   {
-      xsstride[d] = xstride[d] / dom_stride[d];
-   }
+//   /* Need to compute xsstride such that (xgrid, xsstride) has the same index
+//    * space as (grid, ustride) where the stencil is applied.  Can do this by
+//    * using the fact that (xgrid, xstride) and (grid, dom_stride) have the same
+//    * index spaces, and hence xsstride/ustride = xstride/dom_stride.  Note that
+//    * if A and x end up having the same base grids, then xstride = dom_stride
+//    * and xsstride = ustride. */
+//   for (d = 0; d < ndim; d++)
+//   {
+//      xsstride[d] = xstride[d] / dom_stride[d];
+//   }
 
    /* Compute the minimal data_space needed to resize x */
    stencil = hypre_StructMatrixStencil(A);
    hypre_StructNumGhostFromStencil(stencil, &num_ghost);
-   hypre_StructVectorComputeDataSpace(x, xsstride, num_ghost, &data_space);
+//   hypre_StructVectorComputeDataSpace(x, xsstride, num_ghost, &data_space);
+   hypre_StructVectorComputeDataSpace(x, NULL, num_ghost, &data_space);  // RDF: too big for now
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
    /* Determine if a resize is needed */
@@ -177,12 +181,15 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
       data_space = hypre_StructVectorDataSpace(x);
 
       /* This computes the communication pattern for the new x data_space */
-      hypre_CreateComputeInfo(xgrid, xsstride, stencil, &compute_info);
+      // RDF REBASE - pass in matrix grid and ustride - project to x data space
+//      hypre_CreateComputeInfo(xgrid, xsstride, stencil, &compute_info);
+      hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
 
       /* First refine commm_info to put it on the index space of xgrid, then map */
       /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
-      hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xsstride);
-      hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+//      hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xsstride);
+//      hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+      hypre_CommInfoCoarsen(hypre_ComputeInfoCommInfo(compute_info), NULL, dom_stride);
       hypre_ComputePkgCreate(memloc, compute_info, data_space, 1, grid, &compute_pkg);
 
       /* Save compute_pkg */
@@ -339,12 +346,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box, *z_data_box;
    HYPRE_Complex           *xp;
-   HYPRE_Int                Ab, xb, yb, zb, xi;
+   HYPRE_Int                b, Ab, xb, yb, zb, xi;
    hypre_Index              Adstride, xdstride, ydstride, zdstride, ustride;
 
    HYPRE_Int                ran_nboxes;
    HYPRE_Int               *ran_boxnums;
-   hypre_IndexRef           ran_stride;
+   hypre_IndexRef           ran_stride, dom_stride;
 
    hypre_StructVector      *x_tmp = NULL;
 
@@ -374,15 +381,17 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /* Switch domain and range information if doing a transpose matvec */
    if (transpose)
    {
-      ran_stride    = hypre_StructMatrixDomStride(A);
-      ran_nboxes    = hypre_StructMatrixDomNBoxes(A);
-      ran_boxnums   = hypre_StructMatrixDomBoxnums(A);
+      ran_stride  = hypre_StructMatrixDomStride(A);
+      ran_nboxes  = hypre_StructMatrixDomNBoxes(A);
+      ran_boxnums = hypre_StructMatrixDomBoxnums(A);
+      dom_stride  = hypre_StructMatrixRanStride(A);
    }
    else
    {
-      ran_stride    = hypre_StructMatrixRanStride(A);
-      ran_nboxes    = hypre_StructMatrixRanNBoxes(A);
-      ran_boxnums   = hypre_StructMatrixRanBoxnums(A);
+      ran_stride  = hypre_StructMatrixRanStride(A);
+      ran_nboxes  = hypre_StructMatrixRanNBoxes(A);
+      ran_boxnums = hypre_StructMatrixRanBoxnums(A);
+      dom_stride  = hypre_StructMatrixDomStride(A);
    }
 
    compute_box = hypre_BoxCreate(ndim);
@@ -431,8 +440,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_StructMatrixMapDataStride(A, Adstride);
 
       hypre_CopyToIndex(stride, ndim, xdstride);
-      hypre_MapToFineIndex(xdstride, NULL, xsstride, ndim);
-      hypre_StructVectorMapDataStride(x, xdstride);
+//      hypre_MapToFineIndex(xdstride, NULL, xsstride, ndim);
+//      hypre_StructVectorMapDataStride(x, xdstride);
+      hypre_MapToCoarseIndex(xdstride, NULL, dom_stride, ndim);
 
       hypre_CopyToIndex(stride, ndim, ydstride);
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
@@ -450,20 +460,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_Index *ss_origins;
          HYPRE_Int    s;
 
-         // RDF BASE: Rework how range boxes and vector boxes are matched
-         /* The corresponding box IDs for the following boxnums should match */
-         Ab = hypre_StructMatrixBaseBoxnum(A, ran_boxnums[i]);
-
-         /* Rebase ensures that all box ids in A are also in x */
-         while (hypre_StructVectorTmpBaseBoxnum(x, xi) != Aids[Ab])
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, ran_boxnums[i]);
+         if (hypre_BoxArraySize(compute_box_a) == 0)
          {
-            xi++;
+            /* Nothing to compute so go to the next range box */
+            continue;
          }
-         xb = hypre_StructVectorTmpBaseBoxnum(x, xi);
-         yb = hypre_StructVectorBaseBoxnum(y, i);
-         zb = hypre_StructVectorBaseBoxnum(z, i);
 
-         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xi);
+         b = hypre_StructMatrixBaseBoxnum(A, ran_boxnums[i]);
+         Ab = xb = yb = zb = b;
 
          A_data_box = hypre_StructMatrixBaseDataBox(A, Ab);
          x_data_box = hypre_StructVectorBaseDataBox(x, xb);
@@ -507,7 +512,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   hypre_StructMatvecCompute_core_VCC(alpha, A, x, beta, y, z,
                                                      Ab, xb, yb, zb, transpose,
                                                      centries[0], vnentries, ventries,
-                                                     start, stride, loop_size, xsstride, ran_stride,
+                                                     start, stride, loop_size, dom_stride, ran_stride,
                                                      Adstride, xdstride, ydstride, zdstride,
                                                      A_data_box, x_data_box, y_data_box, z_data_box);
                }
@@ -517,7 +522,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   hypre_StructMatvecCompute_core_CC(alpha, A, x, beta, y, z,
                                                     Ab, xb, yb, zb, transpose,
                                                     cnentries, centries,
-                                                    start, stride, loop_size, xsstride, ran_stride,
+                                                    start, stride, loop_size, dom_stride, ran_stride,
                                                     xdstride, ydstride, zdstride,
                                                     x_data_box, y_data_box, z_data_box);
 
@@ -525,7 +530,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   hypre_StructMatvecCompute_core_VC(alpha, A, x, beta, y, z,
                                                     Ab, xb, yb, zb, transpose,
                                                     (cnentries > 0), vnentries, ventries,
-                                                    start, stride, loop_size, xsstride, ran_stride,
+                                                    start, stride, loop_size, dom_stride, ran_stride,
                                                     Adstride, xdstride, ydstride, zdstride,
                                                     A_data_box, x_data_box, y_data_box, z_data_box);
                }

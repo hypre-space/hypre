@@ -104,7 +104,7 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 
 HYPRE_Int
 hypre_CreateComputeInfo( hypre_StructGrid      *grid,
-                         hypre_Index            stride,
+                         hypre_Index            stride,    // RDF BASE: Remove this
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
