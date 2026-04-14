@@ -22,7 +22,6 @@
 typedef struct
 {
    hypre_StructMatrix  *A;
-   hypre_Index          xsstride;     // stencil stride on xgrid (the grid for x)
    hypre_ComputePkg    *compute_pkg;
    hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
@@ -90,26 +89,23 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
                           hypre_StructVector      *x )
 {
    hypre_StructMatrix      *A        = (matvec_data -> A);
-   hypre_IndexRef           xsstride = (matvec_data -> xsstride);
-   HYPRE_Int                ndim     = hypre_StructMatrixNDim(A);
+   hypre_StructGrid        *grid     = hypre_StructMatrixGrid(A);
    HYPRE_MemoryLocation     memloc   = hypre_StructVectorMemoryLocation(x);
 
-   hypre_StructGrid        *grid, *xgrid;
    hypre_StructStencil     *stencil;
    hypre_ComputeInfo       *compute_info;
    hypre_ComputePkg        *compute_pkg;
    hypre_BoxArray          *data_space;
    HYPRE_Int               *num_ghost;
-   hypre_IndexRef           dom_stride, xstride;
-   HYPRE_Int                d, need_resize, need_computepkg;
+   hypre_IndexRef           dom_stride;
+   HYPRE_Int                need_resize, need_computepkg;
 
    hypre_Index              ustride;
    hypre_SetIndex(ustride, 1);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   /* Ensure that the base grid for x is at least as fine as the one for A */
-   grid = hypre_StructMatrixGrid(A);
+   /* Set dom_stride based on transpose flag */
    if (matvec_data -> transpose)
    {
       dom_stride = hypre_StructMatrixRanStride(A);
@@ -118,27 +114,10 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    {
       dom_stride = hypre_StructMatrixDomStride(A);
    }
-//   hypre_StructVectorRebase(x, grid, dom_stride);
-
-   /* Rebase may not change the base grid, so get the grid directly from x */
-   xgrid = hypre_StructVectorGrid(x);
-   xstride = hypre_StructVectorStride(x);
-
-//   /* Need to compute xsstride such that (xgrid, xsstride) has the same index
-//    * space as (grid, ustride) where the stencil is applied.  Can do this by
-//    * using the fact that (xgrid, xstride) and (grid, dom_stride) have the same
-//    * index spaces, and hence xsstride/ustride = xstride/dom_stride.  Note that
-//    * if A and x end up having the same base grids, then xstride = dom_stride
-//    * and xsstride = ustride. */
-//   for (d = 0; d < ndim; d++)
-//   {
-//      xsstride[d] = xstride[d] / dom_stride[d];
-//   }
 
    /* Compute the minimal data_space needed to resize x */
    stencil = hypre_StructMatrixStencil(A);
    hypre_StructNumGhostFromStencil(stencil, &num_ghost);
-//   hypre_StructVectorComputeDataSpace(x, xsstride, num_ghost, &data_space);
    hypre_StructVectorComputeDataSpace(x, NULL, num_ghost, &data_space);  // RDF: too big for now
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
@@ -180,15 +159,11 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
       /* Note: It's important to use the data_space in x in case there is no resize */
       data_space = hypre_StructVectorDataSpace(x);
 
-      /* This computes the communication pattern for the new x data_space */
-      // RDF REBASE - pass in matrix grid and ustride - project to x data space
-//      hypre_CreateComputeInfo(xgrid, xsstride, stencil, &compute_info);
+      /* This computes the communication pattern for the x data_space.
+         Pass in the matrix grid and ustride - map (coarsen) to x data space */
       hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
 
-      /* First refine commm_info to put it on the index space of xgrid, then map */
-      /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
-//      hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xsstride);
-//      hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+      /* Map (coarsen) the comm info - compute boxes will be mapped in MatvecCompute */
       hypre_CommInfoCoarsen(hypre_ComputeInfoCommInfo(compute_info), NULL, dom_stride);
       hypre_ComputePkgCreate(memloc, compute_info, data_space, 1, grid, &compute_pkg);
 
@@ -311,6 +286,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
  *
  * RDF TODO: Consider modifications to the current DataMap interfaces to avoid
  * making assumptions like the above.  Look at the Matmult routine as well.
+ *
+ * RDF BASE - check the above comments for correctness
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -324,7 +301,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 {
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
 
-   hypre_IndexRef           xsstride    = (matvec_data -> xsstride);
    HYPRE_Int                transpose   = (matvec_data -> transpose);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
    HYPRE_Int               *stentries   = (matvec_data -> stentries);
@@ -346,7 +322,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box, *z_data_box;
    HYPRE_Complex           *xp;
-   HYPRE_Int                b, Ab, xb, yb, zb, xi;
    hypre_Index              Adstride, xdstride, ydstride, zdstride, ustride;
 
    HYPRE_Int                ran_nboxes;
@@ -440,8 +415,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_StructMatrixMapDataStride(A, Adstride);
 
       hypre_CopyToIndex(stride, ndim, xdstride);
-//      hypre_MapToFineIndex(xdstride, NULL, xsstride, ndim);
-//      hypre_StructVectorMapDataStride(x, xdstride);
       hypre_MapToCoarseIndex(xdstride, NULL, dom_stride, ndim);
 
       hypre_CopyToIndex(stride, ndim, ydstride);
@@ -450,15 +423,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_CopyToIndex(stride, ndim, zdstride);
       hypre_MapToCoarseIndex(zdstride, NULL, ran_stride, ndim);
 
-      xb = 0;
-      xi = 0;
       for (i = 0; i < ran_nboxes; i++)
       {
-         HYPRE_Int   *Aids = hypre_StructMatrixBaseBoxIDs(A);
          HYPRE_Int    num_ss;
          HYPRE_Int   *se_sspaces;
          hypre_Index *ss_origins;
-         HYPRE_Int    s;
+         HYPRE_Int    bb, s;
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, ran_boxnums[i]);
          if (hypre_BoxArraySize(compute_box_a) == 0)
@@ -467,13 +437,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             continue;
          }
 
-         b = hypre_StructMatrixBaseBoxnum(A, ran_boxnums[i]);
-         Ab = xb = yb = zb = b;
+         bb = hypre_StructMatrixBaseBoxnum(A, ran_boxnums[i]);
 
-         A_data_box = hypre_StructMatrixBaseDataBox(A, Ab);
-         x_data_box = hypre_StructVectorBaseDataBox(x, xb);
-         y_data_box = hypre_StructVectorBaseDataBox(y, yb);
-         z_data_box = hypre_StructVectorBaseDataBox(z, zb);
+         A_data_box = hypre_StructMatrixBaseDataBox(A, bb);
+         x_data_box = hypre_StructVectorBaseDataBox(x, bb);
+         y_data_box = hypre_StructVectorBaseDataBox(y, bb);
+         z_data_box = hypre_StructVectorBaseDataBox(z, bb);
 
          /* Get stencil spaces - then do unrolling for entries in each */
          hypre_StructMatrixGetStSpaces(A, transpose, &num_ss, &se_sspaces, &ss_origins, stride);
@@ -509,30 +478,27 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                if (cnentries == 1 && vnentries > 0)
                {
                   /* One constant and an arbitrary number of variable coefficients */
-                  hypre_StructMatvecCompute_core_VCC(alpha, A, x, beta, y, z,
-                                                     Ab, xb, yb, zb, transpose,
-                                                     centries[0], vnentries, ventries,
-                                                     start, stride, loop_size, dom_stride, ran_stride,
-                                                     Adstride, xdstride, ydstride, zdstride,
-                                                     A_data_box, x_data_box, y_data_box, z_data_box);
+                  hypre_StructMatvecCompute_core_VCC(
+                     alpha, A, x, beta, y, z, bb, transpose, centries[0], vnentries, ventries,
+                     start, stride, loop_size, ran_stride, dom_stride,
+                     Adstride, xdstride, ydstride, zdstride,
+                     A_data_box, x_data_box, y_data_box, z_data_box);
                }
                else
                {
                   /* Operate on constant coefficients */
-                  hypre_StructMatvecCompute_core_CC(alpha, A, x, beta, y, z,
-                                                    Ab, xb, yb, zb, transpose,
-                                                    cnentries, centries,
-                                                    start, stride, loop_size, dom_stride, ran_stride,
-                                                    xdstride, ydstride, zdstride,
-                                                    x_data_box, y_data_box, z_data_box);
+                  hypre_StructMatvecCompute_core_CC(
+                     alpha, A, x, beta, y, z, bb, transpose, cnentries, centries,
+                     start, stride, loop_size, ran_stride, dom_stride,
+                     xdstride, ydstride, zdstride,
+                     x_data_box, y_data_box, z_data_box);
 
                   /* Operate on variable coefficients */
-                  hypre_StructMatvecCompute_core_VC(alpha, A, x, beta, y, z,
-                                                    Ab, xb, yb, zb, transpose,
-                                                    (cnentries > 0), vnentries, ventries,
-                                                    start, stride, loop_size, dom_stride, ran_stride,
-                                                    Adstride, xdstride, ydstride, zdstride,
-                                                    A_data_box, x_data_box, y_data_box, z_data_box);
+                  hypre_StructMatvecCompute_core_VC(
+                     alpha, A, x, beta, y, z, bb, transpose, (cnentries > 0), vnentries, ventries,
+                     start, stride, loop_size, ran_stride, dom_stride,
+                     Adstride, xdstride, ydstride, zdstride,
+                     A_data_box, x_data_box, y_data_box, z_data_box);
                }
             } /* hypre_ForBoxI */
          } /* for stencil space s */

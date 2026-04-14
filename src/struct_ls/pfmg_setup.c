@@ -81,12 +81,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_GpuProfilingPushRange(region_name);
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "PFMG setup begin", 0);
 
-   /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
-   if (relax_type > 1)
-   {
-      v_memory_mode = 0;
-   }
-
    /* Set flag for initializing matrix/vector entries to zeroes
 
       TODO (VPM): due to TEST_struct regressions, this feature is
