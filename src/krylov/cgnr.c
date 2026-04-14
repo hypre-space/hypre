@@ -156,6 +156,8 @@ hypre_CGNRSetup(void *cgnr_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) cgnr_vdata);
+
    (cgnr_data -> A) = A;
 
    /*--------------------------------------------------

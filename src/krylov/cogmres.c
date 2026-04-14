@@ -214,6 +214,8 @@ hypre_COGMRESSetup( void *cogmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) cogmres_vdata);
+
    (cogmres_data -> A) = A;
 
    /*--------------------------------------------------

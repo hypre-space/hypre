@@ -94,6 +94,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
+   hypre_SolverResetIsSetup((hypre_Solver *) amg_vdata);
+
    /* Local variables */
    HYPRE_Int           *CF_marker;
    hypre_IntArray      *CFN_marker = NULL;
@@ -4023,8 +4025,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
-cleanup:
    hypre_SolverSetIsSetup((hypre_Solver *) amg_vdata);
+
+cleanup:
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup end  ", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;

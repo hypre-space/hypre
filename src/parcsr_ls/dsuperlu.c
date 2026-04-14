@@ -99,6 +99,8 @@ hypre_SLUDistSetup(void               *solver,
    int_t             *slu_colidx;
    hypre_double      *slu_data;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 

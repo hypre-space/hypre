@@ -206,6 +206,8 @@ hypre_GMRESSetup( void *gmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) gmres_vdata);
+
    (gmres_data -> A) = A;
 
    // if a preconditioning matrix has not been set, use A

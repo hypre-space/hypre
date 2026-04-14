@@ -93,6 +93,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Solver          schur_precond        = NULL;
    HYPRE_Solver          schur_precond_gotten = NULL;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) ilu_vdata);
+
    /* Whether or not to use exact (direct) triangular solves */
    HYPRE_Int             tri_solve            = hypre_ParILUDataTriSolve(ilu_data);
 

@@ -225,6 +225,8 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) fgmres_vdata);
+
    (fgmres_data -> A) = A;
 
    /*--------------------------------------------------

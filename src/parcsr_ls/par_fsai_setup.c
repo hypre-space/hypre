@@ -956,6 +956,8 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) fsai_vdata);
+
    /* Create and initialize work vectors used in the solve phase */
    r_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
    z_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
