@@ -194,7 +194,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_ComputePkg     **compute_pkgs;
    hypre_ComputePkg    ***svec_compute_pkgs;
    hypre_CommHandle     **comm_handle;
-   hypre_Index            ustride;
 
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
@@ -231,8 +230,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_BigInt           global_size;
 
    HYPRE_MemoryLocation   memory_location;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -370,7 +367,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                                                     sstencil_union_shape);
 
 
-         hypre_CreateComputeInfo(sgrid, ustride, sstencil_union, &compute_info);
+         hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
          orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
          orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
 

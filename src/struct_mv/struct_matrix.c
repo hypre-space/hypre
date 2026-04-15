@@ -1888,10 +1888,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkg     *comm_pkg;
       hypre_CommHandle  *comm_handle;
       HYPRE_Complex    **comm_data;
-      hypre_Index        ustride;
       HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
-
-      hypre_SetIndex(ustride, 1);
 
       /* RDF TODO: Use CommStencil to do communication; don't forget to account
        * for symmetric stencil entries */
@@ -1900,7 +1897,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);
       }
 
-      hypre_CreateCommInfoFromNumGhost(grid, ustride, tot_num_ghost, &comm_info);
+      hypre_CreateCommInfoFromNumGhost(grid, tot_num_ghost, &comm_info);
       hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
 
       hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);

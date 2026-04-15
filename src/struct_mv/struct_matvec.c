@@ -99,9 +99,6 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride;
    HYPRE_Int                need_resize, need_computepkg;
-   hypre_Index              ustride;
-
-   hypre_SetIndex(ustride, 1);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -160,8 +157,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
       data_space = hypre_StructVectorDataSpace(x);
 
       /* This computes the communication pattern for the x data_space.
-         Pass in the matrix grid and ustride - map (coarsen) to x data space */
-      hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+         Pass in the matrix grid - map (coarsen) to x data space */
+      hypre_CreateComputeInfo(grid, stencil, &compute_info);
 
       /* Map (coarsen) the comm info - compute boxes will be mapped in MatvecCompute */
       hypre_CommInfoCoarsen(hypre_ComputeInfoCommInfo(compute_info), NULL, dom_stride);

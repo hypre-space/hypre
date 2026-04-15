@@ -341,7 +341,6 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
    HYPRE_Complex         *data;
-   hypre_Index            ustride;
 
    HYPRE_Int              ndim      = hypre_SStructPGridNDim(pgrid);
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
@@ -357,8 +356,6 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
       return hypre_error_flag;
    }
 
-   hypre_SetIndex(ustride, 1);
-
    for (var = 0; var < nvars; var++)
    {
       if (vartypes[var] > 0)
@@ -370,7 +367,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
             num_ghost[2 * d]   = num_ghost[2 * d + 1] = hypre_IndexD(varoffset, d);
          }
 
-         hypre_CreateCommInfoFromNumGhost(sgrid, ustride, num_ghost, &comm_info);
+         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
          hypre_CommPkgDestroy(comm_pkgs[var]);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(svectors[var]),

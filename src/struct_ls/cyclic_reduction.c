@@ -504,7 +504,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_ComputePkg      **down_compute_pkg_l;
    hypre_ComputePkg      **up_compute_pkg_l;
    hypre_ComputeInfo      *compute_info;
-   hypre_Index             ustride;
 
    hypre_Index             cindex;
    hypre_Index             findex;
@@ -515,8 +514,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    HYPRE_Int               l;
    HYPRE_Int               flop_divisor;
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
-
-   hypre_SetIndex(ustride, 1);
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -656,8 +653,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
       /* down-cycle */
-      hypre_CreateComputeInfo(grid_l[l], ustride, hypre_StructMatrixStencil(A_l[l]),
-                              &compute_info);
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]), &compute_info);
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
       hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
@@ -666,8 +662,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                              grid_l[l], &down_compute_pkg_l[l]);
 
       /* up-cycle */
-      hypre_CreateComputeInfo(grid_l[l], ustride, hypre_StructMatrixStencil(A_l[l]),
-                              &compute_info);
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]), &compute_info);
       hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
       hypre_ComputeInfoProjectComp(compute_info, findex, stride);

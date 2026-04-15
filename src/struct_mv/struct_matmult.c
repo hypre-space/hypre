@@ -1134,7 +1134,6 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 {
    HYPRE_Int             nmatrices     = (mmdata -> nmatrices);
    hypre_StructMatrix  **matrices      = (mmdata -> matrices);
-   hypre_IndexRef        fstride       = (mmdata -> fstride);
    hypre_StructVector   *mask          = (mmdata -> mask);
    hypre_CommPkg        *comm_pkg      = (mmdata -> comm_pkg);
    HYPRE_Complex       **comm_data     = (mmdata -> comm_data);
@@ -1177,7 +1176,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
-            hypre_CreateCommInfo(grid, fstride, comm_stencils[m], &comm_info);
+            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
             hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
                                             &comm_data_a[num_comm_pkgs]);
             num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
@@ -1188,7 +1187,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
       /* Compute mask communications */
       if (mask != NULL)
       {
-         hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
+         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,

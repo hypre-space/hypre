@@ -43,8 +43,7 @@ hypre_ComputeInfoProjectSend( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   hypre_CommInfoProjectSend(hypre_ComputeInfoCommInfo(compute_info),
-                             index, stride);
+   hypre_CommInfoProjectSend(hypre_ComputeInfoCommInfo(compute_info), index, stride);
 
    return hypre_error_flag;
 }
@@ -57,8 +56,7 @@ hypre_ComputeInfoProjectRecv( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   hypre_CommInfoProjectRecv(hypre_ComputeInfoCommInfo(compute_info),
-                             index, stride);
+   hypre_CommInfoProjectRecv(hypre_ComputeInfoCommInfo(compute_info), index, stride);
 
    return hypre_error_flag;
 }
@@ -71,10 +69,8 @@ hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   hypre_ProjectBoxArrayArray(hypre_ComputeInfoIndtBoxes(compute_info),
-                              index, stride);
-   hypre_ProjectBoxArrayArray(hypre_ComputeInfoDeptBoxes(compute_info),
-                              index, stride);
+   hypre_ProjectBoxArrayArray(hypre_ComputeInfoIndtBoxes(compute_info), index, stride);
+   hypre_ProjectBoxArrayArray(hypre_ComputeInfoDeptBoxes(compute_info), index, stride);
    hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
 
    return hypre_error_flag;
@@ -104,7 +100,6 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 
 HYPRE_Int
 hypre_CreateComputeInfo( hypre_StructGrid      *grid,
-                         hypre_Index            stride,    // RDF BASE: Remove this
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
@@ -138,7 +133,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Get communication info
     *------------------------------------------------------*/
 
-   hypre_CreateCommInfoFromStencil(grid, stride, stencil, &comm_info);
+   hypre_CreateCommInfoFromStencil(grid, stencil, &comm_info);
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
 
@@ -254,7 +249,6 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
       hypre_BoxArraySetSize(cbox_array, 1);
       cbox = hypre_BoxArrayBox(cbox_array, 0);
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
-      hypre_CoarsenBox(cbox, NULL, stride);
    }
 
 #endif
