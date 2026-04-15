@@ -119,6 +119,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_EndTiming(pfmg_data -> time_index);
 
          hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
    }
