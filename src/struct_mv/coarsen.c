@@ -129,7 +129,10 @@ hypre_ComposeOriginStride( hypre_Index     origin1,  // = comp_origin on output
 
    for (d = 0; d < ndim; d++)
    {
-      origin1[d] = origin1[d] + origin2[d] * stride1[d];
+      if (origin2 != NULL) // RDF: Still using NULL for origin = 0 in some places
+      {
+         origin1[d] = origin1[d] + origin2[d] * stride1[d];
+      }
       stride1[d] = stride1[d] * stride2[d];
    }
 
