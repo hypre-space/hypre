@@ -99,8 +99,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride;
    HYPRE_Int                need_resize, need_computepkg;
-
    hypre_Index              ustride;
+
    hypre_SetIndex(ustride, 1);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;

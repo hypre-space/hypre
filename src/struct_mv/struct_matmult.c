@@ -1075,17 +1075,19 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
     * couplings in the unstructured matrix until then. */
    if (need_mask)
    {
+      hypre_Index  ustride;
+
+      hypre_SetIndex(ustride, 1);
+
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
       hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
       boxnums = hypre_StructVectorBoxnums(mask);
-      stride  = hypre_StructVectorStride(mask);
 
-      loop_stride = stride;
+      loop_stride = ustride;
       hypre_CopyToIndex(loop_stride, ndim, fdstride);
-      hypre_StructVectorMapDataStride(mask, fdstride);
       for (j = 0; j < nboxes; j++)
       {
          b = boxnums[j];
@@ -1098,7 +1100,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
 
          fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
          hypre_CopyToIndex(loop_start, ndim, fdstart);
-         hypre_StructVectorMapDataIndex(mask, fdstart);
 
          maskptr = hypre_StructVectorBoxData(mask, b);
 
@@ -1188,7 +1189,6 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
       if (mask != NULL)
       {
          hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
-         hypre_StructVectorMapCommInfo(mask, comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
@@ -1524,7 +1524,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      offsetref = hypre_StructStencilOffset(stencil, entry);
                      hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   }
-                  hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +

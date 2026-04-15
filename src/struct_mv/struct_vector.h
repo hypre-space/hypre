@@ -31,8 +31,8 @@
  * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
  * |     gb0 gb1         gb2 gb3     gb4 |    gridboxes - I(stride)
  * ---------------------------------------
- *                       vg0         vg1    vector grid - I(stride*'vec_stride')
- *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride*'vec_stride')
+ *       vg0 vg1         vg2 vg3     vg4    vector grid - I(stride)
+ *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride)
  *
  * Notes:
  * - The entry 'vec_stride' is a stride over the points in the grid, i.e., over
@@ -40,8 +40,7 @@
  * - The index space for the data layout is the same as the vector grid.
  * - The number of boxes in the data layout is always the same as in baseboxes.
  *
- * RDF BASE TODO: Eliminate the separate vector grid in stages - make it the
- * same as the grid.
+ * RDF BASE TODO: Eliminate vec_boxnums, hypre_StructVectorBoxnums, hypre_StructVectorBoxnum
  *
  * NOTE/TODO: The 'data_alloced=2' and 'save_data' aspects of the vector are
  * only needed to support InitializeData(). Consider removing this feature,
@@ -54,9 +53,7 @@ typedef struct hypre_StructVector_struct
 
    /* Note: nboxes and boxnums are computed from (grid, stride) */
    hypre_StructGrid     *grid;                        /* Base grid */
-   HYPRE_Int             vec_nboxes;                  /* Vector grid number of boxes */
    HYPRE_Int            *vec_boxnums;                 /* Vector grid boxnums in grid */
-   hypre_Index           vec_stride;                  /* Vector grid stride on grid */
 
    HYPRE_MemoryLocation  memory_location;             /* memory location of data */
    HYPRE_Int             memory_mode;                 /* memory management mode */
@@ -93,10 +90,8 @@ typedef struct hypre_StructVector_struct
 
 #define hypre_StructVectorComm(vector)           ((vector) -> comm)
 #define hypre_StructVectorGrid(vector)           ((vector) -> grid)
-#define hypre_StructVectorNBoxes(vector)         ((vector) -> vec_nboxes)
 #define hypre_StructVectorBoxnums(vector)        ((vector) -> vec_boxnums)
 #define hypre_StructVectorBoxnum(vector, i)      ((vector) -> vec_boxnums[i])
-#define hypre_StructVectorStride(vector)         ((vector) -> vec_stride)
 #define hypre_StructVectorMemoryLocation(vector) ((vector) -> memory_location)
 #define hypre_StructVectorMemoryMode(vector)     ((vector) -> memory_mode)
 #define hypre_StructVectorData(vector)           ((vector) -> data)
@@ -114,12 +109,13 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
 
-#define hypre_StructVectorBaseBoxIDs(vector) \
+#define hypre_StructVectorNBoxes(vector) \
+hypre_StructGridNumBoxes(hypre_StructVectorGrid(vector))
+
+#define hypre_StructVectorBaseBoxIDs(vector)                            \
 hypre_BoxArrayIDs(hypre_StructGridBaseBoxes(hypre_StructVectorGrid(vector)))
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
-#define hypre_StructVectorTmpStride(vector) \
-hypre_StructGridStride(hypre_StructVectorGrid(vector))
 
 /* The following use a base-grid box index */
 #define hypre_StructVectorBaseDataBox(vector, b) \
@@ -130,36 +126,19 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 (hypre_StructVectorBaseData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBaseDataBox(vector, b), index))
 
-// RDF BASE TODO: Delete 'Tmp' and '(tmp)' in these macro definitions
-/*  The following use a (tmp) grid box index */
-#define hypre_StructVectorTmpBaseBoxnum(vector, i) \
-hypre_StructGridBaseBoxnum(hypre_StructVectorGrid(vector), i)
-#define hypre_StructVectorTmpBox(vector, i) \
-hypre_StructGridBox(hypre_StructVectorGrid(vector), i)
-#define hypre_StructVectorTmpBoxCopy(vector, i, box) \
-hypre_CopyBox(hypre_StructVectorTmpBox(vector, i), box); /* on (tmp) grid index space */ \
-hypre_StructVectorMapDataBox(vector, box);               /* maps to data index space */
-#define hypre_StructVectorTmpBoxDataBox(vector, i) \
-hypre_StructVectorBaseDataBox(vector, hypre_StructVectorTmpBaseBoxnum(vector, i))
-#define hypre_StructVectorTmpBoxData(vector, i) \
-hypre_StructVectorBaseData(vector, hypre_StructVectorTmpBaseBoxnum(vector, i))
-#define hypre_StructVectorTmpBoxDataValue(vector, i, index) \
-hypre_StructVectorBaseDataValue(vector, hypre_StructVectorTmpBaseBoxnum(vector, i), index)
-
-// RDF BASE TODO: Delete these macros since they will replicate the renamed 'Tmp' ones above
-/* The following use a grid box index */
+/*  The following use a grid box index */
 #define hypre_StructVectorBaseBoxnum(vector, i) \
-hypre_StructVectorTmpBaseBoxnum(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructGridBaseBoxnum(hypre_StructVectorGrid(vector), i)
 #define hypre_StructVectorBox(vector, i) \
-hypre_StructVectorTmpBox(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructGridBox(hypre_StructVectorGrid(vector), i)
 #define hypre_StructVectorBoxCopy(vector, i, box) \
-hypre_StructVectorTmpBoxCopy(vector, hypre_StructVectorBoxnum(vector, i), box)
+hypre_CopyBox(hypre_StructVectorBox(vector, i), box)
 #define hypre_StructVectorBoxDataBox(vector, i) \
-hypre_StructVectorTmpBoxDataBox(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructVectorBaseDataBox(vector, hypre_StructVectorBaseBoxnum(vector, i))
 #define hypre_StructVectorBoxData(vector, i) \
-hypre_StructVectorTmpBoxData(vector, hypre_StructVectorBoxnum(vector, i))
+hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i))
 #define hypre_StructVectorBoxDataValue(vector, i, index) \
-hypre_StructVectorTmpBoxDataValue(vector, hypre_StructVectorBoxnum(vector, i), index)
+hypre_StructVectorBaseDataValue(vector, hypre_StructVectorBaseBoxnum(vector, i), index)
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)

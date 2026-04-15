@@ -17,98 +17,6 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypre_StructVectorMapDataIndex( hypre_StructVector *vector,
-                                hypre_Index         dindex )
-{
-   hypre_MapToCoarseIndex(dindex, NULL,
-                          hypre_StructVectorStride(vector), hypre_StructVectorNDim(vector));
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataIndex( hypre_StructVector *vector,
-                                  hypre_Index         dindex )
-{
-   hypre_MapToFineIndex(dindex, NULL,
-                        hypre_StructVectorStride(vector), hypre_StructVectorNDim(vector));
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapDataBox( hypre_StructVector *vector,
-                              hypre_Box          *dbox )
-{
-   hypre_CoarsenBox(dbox, NULL, hypre_StructVectorStride(vector));
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataBox( hypre_StructVector *vector,
-                                hypre_Box          *dbox )
-{
-   hypre_RefineBox(dbox, NULL, hypre_StructVectorStride(vector));
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapDataStride( hypre_StructVector *vector,
-                                 hypre_Index         dstride )
-{
-   hypre_StructVectorMapDataIndex(vector, dstride);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataStride( hypre_StructVector *vector,
-                                   hypre_Index         dstride )
-{
-   hypre_StructVectorUnMapDataIndex(vector, dstride);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
-                               hypre_CommInfo     *comm_info )
-{
-   HYPRE_Int  ndim = hypre_StructVectorNDim(vector);
-
-   /* Map the comm_info boxes only if the vector does not have a unit stride */
-   if (!hypre_IndexEqual(hypre_StructVectorStride(vector), 1, ndim))
-   {
-      hypre_CommInfoCoarsen(comm_info, NULL, hypre_StructVectorStride(vector));
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
 hypre_StructVector *
 hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )
@@ -190,21 +98,14 @@ HYPRE_Int
 hypre_StructVectorSetStride( hypre_StructVector *vector,
                              hypre_IndexRef      stride )
 {
-   HYPRE_Int  nboxes, *boxnums, ndim = hypre_StructVectorNDim(vector);
+   HYPRE_Int  nboxes, *boxnums;
+   hypre_Index  ustride;
 
-   if (stride != NULL)
-   {
-      hypre_CopyToIndex(stride, ndim, hypre_StructVectorStride(vector));
-   }
-   else
-   {
-      /* set default stride of 1 */
-      hypre_SetIndex(hypre_StructVectorStride(vector), 1);
-   }
+   hypre_SetIndex(ustride, 1);
    hypre_StructGridComputeBoxnums(hypre_StructVectorGrid(vector), 0, NULL,
-                                  hypre_StructVectorStride(vector), &nboxes, &boxnums);
+                                  ustride, &nboxes, &boxnums);
    hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
-   hypre_StructVectorNBoxes(vector)  = nboxes;
+//   hypre_StructVectorNBoxes(vector)  = nboxes;
    hypre_StructVectorBoxnums(vector) = boxnums;
 
    return hypre_error_flag;
@@ -222,42 +123,6 @@ hypre_StructVectorSetMemoryMode( hypre_StructVector *vector,
                                  HYPRE_Int           memory_mode )
 {
    hypre_StructVectorMemoryMode(vector) = memory_mode;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * This routine changes the base grid.  Before the vector can actually be used,
- * hypre_StructVectorResize() must be called with an appropriate data space.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorRebase( hypre_StructVector *vector,
-                          hypre_StructGrid   *grid,
-                          hypre_Index         stride )
-{
-   hypre_StructGrid *old_grid   = hypre_StructVectorGrid(vector);
-   hypre_IndexRef    old_stride = hypre_StructVectorStride(vector);
-
-   if (hypre_StructVectorSaveGrid(vector) != NULL)
-   {
-      /* Call Restore or Forget first */
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Rebase has already been called");
-      return hypre_error_flag;
-   }
-
-   if (hypre_StructVectorMemoryMode(vector) == 2)
-   {
-      /* If stride is not greater than the current stride, keep the current base grid */
-      if ( !hypre_IndexesGreaterEqual(stride, old_stride, hypre_StructVectorNDim(vector)) )
-      {
-         return hypre_error_flag;
-      }
-   }
-   hypre_StructVectorSaveGrid(vector) = old_grid;
-   hypre_CopyIndex(old_stride, hypre_StructVectorSaveStride(vector));
-   hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
-   hypre_StructVectorSetStride(vector, stride);
 
    return hypre_error_flag;
 }
@@ -306,7 +171,6 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       {
          hypre_RefineBox(data_box, NULL, stride);
       }
-      hypre_StructVectorMapDataBox(vector, data_box);
    }
 
    /* Make sure the new data_space is at least as large as the current one */
@@ -1450,11 +1314,6 @@ hypre_StructVectorPrintData( FILE               *file,
          /* Print real data and ghost data */
          hypre_CopyBox(hypre_BoxArrayBox(data_space, i), hypre_BoxArrayBox(boxes, i));
       }
-      else
-      {
-         /* Print only real data */
-         hypre_StructVectorMapDataBox(vector, hypre_BoxArrayBox(boxes, i));
-      }
    }
 
    /* Print data to file */
@@ -1753,7 +1612,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
    HYPRE_Int             i;
 
    y = hypre_StructVectorCreate(comm, grid);
-   hypre_StructVectorSetStride(y, hypre_StructVectorStride(x));
+//   hypre_StructVectorSetStride(y, hypre_StructVectorStride(x));
 
    hypre_StructVectorDataSize(y)    = data_size;
    hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);
