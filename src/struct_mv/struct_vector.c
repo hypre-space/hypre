@@ -92,6 +92,8 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
 /*--------------------------------------------------------------------------
  * Set vector stride, nboxes, and boxnums.
  * If stride == NULL, set default values.
+ *
+ * RDF BASE: Need this only to set boxnums for now
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -105,7 +107,6 @@ hypre_StructVectorSetStride( hypre_StructVector *vector,
    hypre_StructGridComputeBoxnums(hypre_StructVectorGrid(vector), 0, NULL,
                                   ustride, &nboxes, &boxnums);
    hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
-//   hypre_StructVectorNBoxes(vector)  = nboxes;
    hypre_StructVectorBoxnums(vector) = boxnums;
 
    return hypre_error_flag;
@@ -129,48 +130,52 @@ hypre_StructVectorSetMemoryMode( hypre_StructVector *vector,
 
 /*--------------------------------------------------------------------------
  * This computes a vector data space from a num_ghost array.  The num_ghost
- * array applies to the coarse index space indicated by stride.  If the stride
- * argument is NULL, a unit stride is used.  If the num_ghost argument is NULL,
- * the vector num_ghost is used.
+ * array is applied to the argument ggrid (ghost grid).  If ggrid is NULL, the
+ * vector grid is used.  If num_ghost is NULL, the vector num_ghost is used.
+ * Note that ggrid may be finer but not coarser than the vector grid.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
-                                    hypre_IndexRef      stride, // RDF BASE: Remove eventually
+                                    hypre_StructGrid   *ggrid,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr )
 {
-   HYPRE_Int          ndim      = hypre_StructVectorNDim(vector);
-   hypre_StructGrid  *grid      = hypre_StructVectorGrid(vector);
+   HYPRE_Int          ndim = hypre_StructVectorNDim(vector);
    hypre_BoxArray    *data_space, *cdata_space;
    hypre_Box         *data_box;
+   hypre_Index        origin, stride;
    HYPRE_Int          i, d;
 
+   if (ggrid == NULL)
+   {
+      /* Use the vector num_ghost */
+      ggrid = hypre_StructVectorGrid(vector);
+   }
    if (num_ghost == NULL)
    {
       /* Use the vector num_ghost */
       num_ghost = hypre_StructVectorNumGhost(vector);
    }
 
-   /* Add ghost layers and map the data space */
-   data_space = hypre_BoxArrayClone(hypre_StructGridBaseBoxes(grid));
-   hypre_CoarsenBoxArray(data_space, hypre_StructGridOrigin(grid), hypre_StructGridStride(grid));
+   /* Compute tuple (origin, stride) for coarsening from ggrid to the vector grid */
+   hypre_CopyIndex(hypre_StructGridOrigin(hypre_StructVectorGrid(vector)), origin);
+   hypre_CopyIndex(hypre_StructGridStride(hypre_StructVectorGrid(vector)), stride);
+   hypre_DecomposeOriginStride(hypre_StructGridOrigin(ggrid), hypre_StructGridStride(ggrid),
+                               origin, stride, ndim);
+
+   /* Add ghost layers on ggrid and map to the vector grid data space */
+   data_space = hypre_BoxArrayClone(hypre_StructGridBaseBoxes(ggrid));
+   hypre_CoarsenBoxArray(data_space, hypre_StructGridOrigin(ggrid), hypre_StructGridStride(ggrid));
    hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
-      if (stride != NULL)
-      {
-         hypre_CoarsenBox(data_box, NULL, stride);
-      }
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(data_box, d) -= num_ghost[2 * d];
          hypre_BoxIMaxD(data_box, d) += num_ghost[2 * d + 1];
       }
-      if (stride != NULL)
-      {
-         hypre_RefineBox(data_box, NULL, stride);
-      }
+      hypre_CoarsenBox(data_box, origin, stride);
    }
 
    /* Make sure the new data_space is at least as large as the current one */
@@ -276,7 +281,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy old_data to data */
-      if ((old_data != NULL) && (data != NULL))
+      if ((old_data != NULL) && (data != NULL))  // RDF BASE: Is this possible without rebase?
       {
          /* At this point we have either called or mimiced Rebase(), so the
           * saved grid corresponds to the old data */
@@ -346,7 +351,6 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       hypre_TFree(old_data, memory_location);
 
       /* Reset certain fields to enable the Resize call below */
-      hypre_StructVectorSaveGrid(vector)      = NULL;
       hypre_StructVectorSaveData(vector)      = NULL;
       hypre_StructVectorSaveDataSpace(vector) = NULL;
       hypre_StructVectorSaveDataSize(vector)  = 0;
@@ -1612,7 +1616,6 @@ hypre_StructVectorClone( hypre_StructVector *x )
    HYPRE_Int             i;
 
    y = hypre_StructVectorCreate(comm, grid);
-//   hypre_StructVectorSetStride(y, hypre_StructVectorStride(x));
 
    hypre_StructVectorDataSize(y)    = data_size;
    hypre_StructVectorDataSpace(y)   = hypre_BoxArrayClone(data_space);

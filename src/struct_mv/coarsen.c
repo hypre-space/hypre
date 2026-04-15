@@ -102,39 +102,60 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
 }
 
 /*--------------------------------------------------------------------------
- * Compute a new coarsening tuple (coarse_origin, coarse_stride) that represents
- * coarsening consecutively by (origin_old, stride_old) and (origin, stride).
- * That is, the following two lines of code are equivalent:
+ * Compute tuple (comp_origin, comp_stride) such that (comp_origin, comp_stride)
+ * represents coarsening by (origin1, stride1) then (origin2, stride2).
  *
- *    CoarsenBox(box, coarse_origin, coarse_stride);
- *    CoarsenBox(box, origin_old, stride_old); CoarsenBox(box, origin, stride);
+ * The following two lines of code are equivalent:
+ *
+ *    CoarsenBox(box, comp_origin, comp_stride);
+ *    CoarsenBox(box, origin1, stride1); CoarsenBox(box, origin2, stride2);
  *
  * Similarly, the following two lines of code are equivalent:
  *
- *    RefineBox(box, coarse_origin, coarse_stride);
- *    RefineBox(box, origin, stride); RefineBox(box, origin_old, stride_old);
- *
- * On input, (coarse_origin, coarse_stride) = (origin_old, stride_old)
+ *    RefineBox(box, comp_origin, comp_stride);
+ *    RefineBox(box, origin2, stride2); RefineBox(box, origin1, stride1);
  *
  * NOTE: Coarsening then refining a box may not produce the original box.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputeCoarseOriginStride( hypre_Index     coarse_origin,
-                                 hypre_Index     coarse_stride,
-                                 hypre_IndexRef  origin,
-                                 hypre_Index     stride,
-                                 HYPRE_Int       ndim )
+hypre_ComposeOriginStride( hypre_Index     origin1,  // = comp_origin on output
+                           hypre_Index     stride1,  // = comp_stride on output
+                           hypre_IndexRef  origin2,
+                           hypre_Index     stride2,
+                           HYPRE_Int       ndim )
 {
-   HYPRE_Int d;
+   HYPRE_Int  d;
 
    for (d = 0; d < ndim; d++)
    {
-      if (origin != NULL)
-      {
-         coarse_origin[d] += origin[d] * coarse_stride[d];
-      }
-      coarse_stride[d] *= stride[d];
+      origin1[d] = origin1[d] + origin2[d] * stride1[d];
+      stride1[d] = stride1[d] * stride2[d];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute tuple (origin2, stride2) such that (comp_origin, comp_stride)
+ * represents coarsening by (origin1, stride1) then (origin2, stride2).
+ *
+ * This reverses what hypre_ComposeOriginStride() does above.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DecomposeOriginStride( hypre_Index     origin1,
+                             hypre_Index     stride1,
+                             hypre_IndexRef  origin2,  // = comp_origin on input
+                             hypre_Index     stride2,  // = comp_stride on input
+                             HYPRE_Int       ndim )
+{
+   HYPRE_Int  d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      origin2[d] = (origin2[d] - origin1[d]) / stride1[d];
+      stride2[d] = stride2[d] / stride1[d];
    }
 
    return hypre_error_flag;
@@ -482,8 +503,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_StructGridSetBaseBoxes(cgrid, hypre_BoxArrayClone(hypre_StructGridBaseBoxes(fgrid)));
    hypre_CopyIndex(hypre_StructGridOrigin(fgrid), hypre_StructGridOrigin(cgrid));
    hypre_CopyIndex(hypre_StructGridStride(fgrid), hypre_StructGridStride(cgrid));
-   hypre_ComputeCoarseOriginStride(hypre_StructGridOrigin(cgrid), hypre_StructGridStride(cgrid),
-                                   origin, stride, ndim );
+   hypre_ComposeOriginStride(hypre_StructGridOrigin(cgrid), hypre_StructGridStride(cgrid),
+                             origin, stride, ndim );
 
    /* RDF TODO: Inherit num ghost from fgrid here... */
 

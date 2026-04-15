@@ -1763,9 +1763,7 @@ typedef struct hypre_StructVector_struct
    HYPRE_BigInt          global_size;                 /* Total number coefficients */
    HYPRE_Int             ref_count;
 
-   /* Information needed to Restore() after Rebase() and Resize() */
-   hypre_StructGrid     *save_grid;
-   hypre_Index           save_stride;
+   /* Information needed to Restore() after Resize() */
    HYPRE_Complex        *save_data;                   /* Only needed to support InitializeData() */
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
@@ -1797,8 +1795,6 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector) ((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)     ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)       ((vector) -> ref_count)
-#define hypre_StructVectorSaveGrid(vector)       ((vector) -> save_grid)
-#define hypre_StructVectorSaveStride(vector)     ((vector) -> save_stride)
 #define hypre_StructVectorSaveData(vector)       ((vector) -> save_data)
 #define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
@@ -2140,8 +2136,17 @@ HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex, hypre_Index origin, 
 HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex, hypre_Index origin, hypre_Index stride,
                                         hypre_Index findex );
 HYPRE_Int
-hypre_ComputeCoarseOriginStride ( hypre_Index coarse_origin, hypre_Index coarse_stride,
-                                  hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
+hypre_ComposeOriginStride( hypre_Index     origin1,  // = comp_origin on output
+                           hypre_Index     stride1,  // = comp_stride on output
+                           hypre_IndexRef  origin2,
+                           hypre_Index     stride2,
+                           HYPRE_Int       ndim );
+HYPRE_Int
+hypre_DecomposeOriginStride( hypre_Index     origin1,
+                             hypre_Index     stride1,
+                             hypre_IndexRef  origin2,  // = comp_origin on input
+                             hypre_Index     stride2,  // = comp_stride on input
+                             HYPRE_Int       ndim );
 HYPRE_Int hypre_CoarsenBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int hypre_CoarsenBoxArray ( hypre_BoxArray *box_array, hypre_IndexRef origin,
@@ -2666,7 +2671,7 @@ HYPRE_Int hypre_StructVectorRebase ( hypre_StructVector *vector, hypre_StructGri
                                      hypre_Index stride );
 HYPRE_Int
 hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
-                                    hypre_IndexRef      stride,
+                                    hypre_StructGrid   *ggrid,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr );
 HYPRE_Int

@@ -118,7 +118,7 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    /* Compute the minimal data_space needed to resize x */
    stencil = hypre_StructMatrixStencil(A);
    hypre_StructNumGhostFromStencil(stencil, &num_ghost);
-   hypre_StructVectorComputeDataSpace(x, NULL, num_ghost, &data_space);  // RDF: too big for now
+   hypre_StructVectorComputeDataSpace(x, grid, num_ghost, &data_space);
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
    /* Determine if a resize is needed */

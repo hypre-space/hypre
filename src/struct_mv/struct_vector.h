@@ -69,9 +69,7 @@ typedef struct hypre_StructVector_struct
    HYPRE_BigInt          global_size;                 /* Total number coefficients */
    HYPRE_Int             ref_count;
 
-   /* Information needed to Restore() after Rebase() and Resize() */
-   hypre_StructGrid     *save_grid;
-   hypre_Index           save_stride;
+   /* Information needed to Restore() after Resize() */
    HYPRE_Complex        *save_data;                   /* Only needed to support InitializeData() */
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
@@ -103,8 +101,6 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector) ((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)     ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)       ((vector) -> ref_count)
-#define hypre_StructVectorSaveGrid(vector)       ((vector) -> save_grid)
-#define hypre_StructVectorSaveStride(vector)     ((vector) -> save_stride)
 #define hypre_StructVectorSaveData(vector)       ((vector) -> save_data)
 #define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
