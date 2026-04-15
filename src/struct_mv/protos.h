@@ -606,9 +606,6 @@ HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A, HYPRE_Int typ
 HYPRE_Int hypre_StructMatrixScale( hypre_StructMatrix *A, HYPRE_Complex scalar );
 
 /* struct_matrix.c */
-HYPRE_Int
-hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
-                              hypre_IndexRef     *fstride );
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );

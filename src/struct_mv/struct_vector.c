@@ -281,10 +281,8 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy old_data to data */
-      if ((old_data != NULL) && (data != NULL))  // RDF BASE: Is this possible without rebase?
+      if ((old_data != NULL) && (data != NULL))
       {
-         /* At this point we have either called or mimiced Rebase(), so the
-          * saved grid corresponds to the old data */
          hypre_StructDataCopy(old_data, old_data_space, data, data_space, ndim, 1);
       }
 

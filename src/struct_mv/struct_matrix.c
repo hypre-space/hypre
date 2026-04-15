@@ -18,23 +18,6 @@
 #endif
 
 /*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-// RDF BASE: Delete this - always return a unit stride
-
-HYPRE_Int
-hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
-                              hypre_IndexRef     *fstride )
-{
-   *fstride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixRangeIsCoarse(matrix))
-   {
-      *fstride = hypre_StructMatrixDomStride(matrix);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * Routines for mapping to/from the data grid:
  * RDF BASE: Add comments here describing the Map/UnMap functions
  *--------------------------------------------------------------------------*/
