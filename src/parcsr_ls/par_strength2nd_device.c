@@ -49,12 +49,12 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
 
    /* give S data arrays */
    hypre_CSRMatrixData(S_diag) = hypre_TAlloc(HYPRE_Complex, S_diag_nnz, HYPRE_MEMORY_DEVICE );
-   hypreDevice_ComplexFilln( hypre_CSRMatrixData(S_diag),
+   hypre_ComplexFillnDevice( hypre_CSRMatrixData(S_diag),
                              S_diag_nnz,
                              1.0 );
 
    hypre_CSRMatrixData(S_offd) = hypre_TAlloc(HYPRE_Complex, S_offd_nnz, HYPRE_MEMORY_DEVICE );
-   hypreDevice_ComplexFilln( hypre_CSRMatrixData(S_offd),
+   hypre_ComplexFillnDevice( hypre_CSRMatrixData(S_offd),
                              S_offd_nnz,
                              1.0 );
 
@@ -102,7 +102,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
 
    hypre_assert(new_end - hypre_CSRMatrixJ(Id) == hypre_ParCSRMatrixNumRows(S_CX));
 
-   hypreDevice_ComplexFilln( hypre_CSRMatrixData(Id),
+   hypre_ComplexFillnDevice( hypre_CSRMatrixData(Id),
                              hypre_ParCSRMatrixNumRows(S_CX),
                              coeff );
 

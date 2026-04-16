@@ -2202,7 +2202,7 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexScalen(data, k, data, scalar);
+      hypre_ComplexScalenDevice(data, k, data, scalar);
    }
    else
 #endif
@@ -2382,7 +2382,7 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexFilln(hypre_CSRMatrixData(A), nnz, value);
+      hypre_ComplexFillnDevice(hypre_CSRMatrixData(A), nnz, value);
    }
    else
 #endif

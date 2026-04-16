@@ -12,7 +12,7 @@
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
+hypre_CSRSpGemmRocsparseDevice(HYPRE_Int           m,
                                HYPRE_Int           k,
                                HYPRE_Int           n,
                                rocsparse_mat_descr descrA,
