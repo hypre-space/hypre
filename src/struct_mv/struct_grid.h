@@ -15,7 +15,19 @@
 #define hypre_STRUCT_GRID_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructGrid: RDF BASE - write some high level comments here
+ * A grid is defined by an index space I('origin', 'stride') intersected with a
+ * set of 'baseboxes'.  The grid maps (coarsens) to form a set of 'boxes' with a
+ * uniform index numbering.
+ *
+ * The following illustrates the relationship between the baseboxes and boxes in
+ * the grid.  The index space for each is denoted by I(s), where s is a stride
+ * (omitting the origin/anchor point for brevity).  The boxes and box numbering
+ * for each are shown (e.g., gb2 is a grid box with box number 2).
+ *
+ * ---------------------------------------  grid (origin, stride, baseboxes):
+ * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
+ * |     gb0 gb1         gb2 gb3     gb4 |    boxes     - I(stride)
+ * ---------------------------------------
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructGrid_struct

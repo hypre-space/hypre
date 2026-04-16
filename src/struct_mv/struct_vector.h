@@ -15,30 +15,26 @@
 #define hypre_STRUCT_VECTOR_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructVector: RDF BASE - update this comment
- *
- * Most of the routines currently only work when the base grid and grid are the
- * same (i.e., when nboxes equals the number of boxes in the grid and stride is
- * the unit stride).  The number of boxes in data_space and data_indices is the
- * same as in the base grid, even though nboxes may be smaller.
+ * A vector is defined in terms of a 'grid'.  Its 'data' is associated with the
+ * grid boxes and lives at the same index space.  However, the layout of the
+ * data in memory is associated with the numbering of the grid baseboxes.  This
+ * enables and simplifies interactions with rectangular matrices.
  *
  * The following illustrates the relationship between the grid, vector grid, and
  * data layout.  The index space for each is denoted by I(s), where s is a
- * stride (anchor/origin points are omitted for brevity).  The boxes and box
+ * stride (omitting origin/anchor points for brevity).  The boxes and box
  * numbering for each are shown (e.g., gb2 is a grid box with box number 2).
  *
  * ---------------------------------------  grid (origin, stride, baseboxes):
  * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
  * |     gb0 gb1         gb2 gb3     gb4 |    gridboxes - I(stride)
  * ---------------------------------------
- *       vg0 vg1         vg2 vg3     vg4    vector grid - I(stride)
- *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride)
+ *       vg0 vg1         vg2 vg3     vg4    vector grid - I(stride) - same as grid
+ *   dl0 dl1 dl2 dl3 dl4 dl5 dl6 dl7 dl8    data layout - I(stride) - same as grid
  *
  * Notes:
- * - The entry 'vec_stride' is a stride over the points in the grid, i.e., over
- *   points in I(stride), not I(1).
  * - The index space for the data layout is the same as the vector grid.
- * - The number of boxes in the data layout is always the same as in baseboxes.
+ * - The number of boxes in the data layout is always the same as baseboxes.
  *
  * RDF BASE TODO: Eliminate vec_boxnums, hypre_StructVectorBoxnums, hypre_StructVectorBoxnum
  *
