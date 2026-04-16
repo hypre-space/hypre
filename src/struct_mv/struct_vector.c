@@ -514,7 +514,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+                 hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -630,7 +630,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+                 hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
       data_box = hypre_StructVectorBoxDataBox(vector, i);
 
       hypre_IntersectBoxes(set_box, grid_box, int_box);
@@ -718,7 +718,7 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+                 hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -796,7 +796,7 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
+                 hypre_StructVectorBoxDataBox(vector, i) : hypre_StructVectorBox(vector, i);
       data_box = hypre_StructVectorBoxDataBox(vector, i);
 
       hypre_IntersectBoxes(clear_box, grid_box, int_box);

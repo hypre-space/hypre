@@ -389,8 +389,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    } /* end ForBoxI */
 
-//   RDF (2026): This extra Assemble has been here for a long time but doesn't seem to be needed
-//   hypre_StructMatrixAssemble(Ac);
+   // RDF (2026): This extra Assemble has been here for a long time but doesn't
+   // seem to be needed hypre_StructMatrixAssemble(Ac);
 
    /*-----------------------------------------------------------------------
     * Collapse stencil in periodic direction on coarsest grid.

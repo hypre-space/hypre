@@ -683,7 +683,7 @@ hypre_StructMatrixSetDataStride( hypre_StructMatrix *matrix )
       hypre_IndexD(dstride, d) =
          hypre_lcm( hypre_IndexD(ran_stride, d), hypre_IndexD(dom_stride, d) );
    }
-   
+
    return hypre_error_flag;
 }
 
@@ -1349,7 +1349,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
+                 hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -1502,7 +1502,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
+                 hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
       data_box = hypre_StructMatrixBoxDataBox(matrix, i);
 
       hypre_IntersectBoxes(set_box, grid_box, int_box);
@@ -1736,7 +1736,7 @@ hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
+                 hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
 
       if (hypre_IndexInBox(grid_index, grid_box))
       {
@@ -1808,7 +1808,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
    for (i = istart; i < istop; i++)
    {
       grid_box = (outside > 0) ?
-         hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
+                 hypre_StructMatrixBoxDataBox(matrix, i) : hypre_StructMatrixBox(matrix, i);
       data_box = hypre_StructMatrixBoxDataBox(matrix, i);
 
       hypre_IntersectBoxes(clear_box, grid_box, int_box);
