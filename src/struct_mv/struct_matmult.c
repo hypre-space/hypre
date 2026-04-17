@@ -645,7 +645,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    hypre_StructGrid          *grid;
    hypre_IndexRef             stride;
    HYPRE_Int                  nboxes;
-   HYPRE_Int                 *boxnums;
    hypre_Box                 *box;
    HYPRE_Int                 *symm;
 
@@ -989,7 +988,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       HYPRE_Int   *num_ghost;
 
       HYPRE_StructVectorCreate(comm, grid, &mask);
-      HYPRE_StructVectorSetStride(mask, fstride); /* same stride as fine data-map stride */
       hypre_CommStencilCreateNumGhost(comm_stencils[nmatrices], &num_ghost);
       hypre_StructVectorComputeDataSpace(mask, NULL, num_ghost, &data_spaces[nmatrices]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
@@ -1084,14 +1082,11 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
-      boxnums = hypre_StructVectorBoxnums(mask);
 
       loop_stride = ustride;
       hypre_CopyToIndex(loop_stride, ndim, fdstride);
-      for (j = 0; j < nboxes; j++)
+      for (b = 0; b < nboxes; b++)
       {
-         b = boxnums[j];
-
          box = hypre_StructGridBox(grid, b);
          hypre_CopyBox(box, loop_box);
          hypre_ProjectBox(loop_box, NULL, loop_stride);

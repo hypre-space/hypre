@@ -1742,8 +1742,6 @@ hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s
  * - The index space for the data layout is the same as the vector grid.
  * - The number of boxes in the data layout is always the same as baseboxes.
  *
- * RDF BASE TODO: Eliminate vec_boxnums, hypre_StructVectorBoxnums, hypre_StructVectorBoxnum
- *
  * NOTE/TODO: The 'data_alloced=2' and 'save_data' aspects of the vector are
  * only needed to support InitializeData(). Consider removing this feature,
  * especially since it creates an issue with Forget().
@@ -1755,7 +1753,6 @@ typedef struct hypre_StructVector_struct
 
    /* Note: nboxes and boxnums are computed from (grid, stride) */
    hypre_StructGrid     *grid;                        /* Base grid */
-   HYPRE_Int            *vec_boxnums;                 /* Vector grid boxnums in grid */
 
    HYPRE_MemoryLocation  memory_location;             /* memory location of data */
    HYPRE_Int             memory_mode;                 /* memory management mode */
@@ -1790,8 +1787,6 @@ typedef struct hypre_StructVector_struct
 
 #define hypre_StructVectorComm(vector)           ((vector) -> comm)
 #define hypre_StructVectorGrid(vector)           ((vector) -> grid)
-#define hypre_StructVectorBoxnums(vector)        ((vector) -> vec_boxnums)
-#define hypre_StructVectorBoxnum(vector, i)      ((vector) -> vec_boxnums[i])
 #define hypre_StructVectorMemoryLocation(vector) ((vector) -> memory_location)
 #define hypre_StructVectorMemoryMode(vector)     ((vector) -> memory_mode)
 #define hypre_StructVectorData(vector)           ((vector) -> data)
@@ -2669,7 +2664,6 @@ HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil,
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm, hypre_StructGrid *grid );
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorSetStride ( hypre_StructVector *vector, hypre_IndexRef stride );
 HYPRE_Int
 hypre_StructVectorSetMemoryMode( hypre_StructVector *vector,
                                  HYPRE_Int           memory_mode );

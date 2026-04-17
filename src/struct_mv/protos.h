@@ -735,7 +735,6 @@ HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil,
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm, hypre_StructGrid *grid );
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorSetStride ( hypre_StructVector *vector, hypre_IndexRef stride );
 HYPRE_Int
 hypre_StructVectorSetMemoryMode( hypre_StructVector *vector,
                                  HYPRE_Int           memory_mode );

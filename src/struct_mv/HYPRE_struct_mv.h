@@ -510,9 +510,7 @@ typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 #endif
 
 /**
- * Create a vector object.  Similarly to matrices, the grid is in general a
- * coarsening of \e grid as specified by \ref HYPRE_StructVectorSetStride.
- * By default, the two are the same (the stride is one).
+ * Create a vector object.
  **/
 HYPRE_Int
 HYPRE_StructVectorCreate(MPI_Comm            comm,

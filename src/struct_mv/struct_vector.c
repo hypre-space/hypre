@@ -29,7 +29,6 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 
    hypre_StructVectorComm(vector)           = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
-   hypre_StructVectorSetStride(vector, NULL);                       /* Set default stride */
    hypre_StructVectorSetMemoryMode(vector, 0);
    hypre_StructVectorDataAlloced(vector)    = 0;
    hypre_StructVectorBGhostNotClear(vector) = 0;
@@ -79,35 +78,11 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
 
          hypre_TFree(hypre_StructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
-         hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
          hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
          hypre_StructVectorForget(vector);
          hypre_TFree(vector, HYPRE_MEMORY_HOST);
       }
    }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Set vector stride, nboxes, and boxnums.
- * If stride == NULL, set default values.
- *
- * RDF BASE: Need this only to set boxnums for now
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorSetStride( hypre_StructVector *vector,
-                             hypre_IndexRef      stride )
-{
-   HYPRE_Int  nboxes, *boxnums;
-   hypre_Index  ustride;
-
-   hypre_SetIndex(ustride, 1);
-   hypre_StructGridComputeBoxnums(hypre_StructVectorGrid(vector), 0, NULL,
-                                  ustride, &nboxes, &boxnums);
-   hypre_TFree(hypre_StructVectorBoxnums(vector), HYPRE_MEMORY_HOST);
-   hypre_StructVectorBoxnums(vector) = boxnums;
 
    return hypre_error_flag;
 }
