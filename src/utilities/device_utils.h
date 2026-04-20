@@ -249,7 +249,6 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
-#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -1937,7 +1936,7 @@ HYPRE_Int hypre_popc(hypre_mask mask)
 static __device__ __forceinline__
 HYPRE_Int hypre_ffs(hypre_mask mask)
 {
-   return (HYPRE_Int) dpct::ffs<HYPRE_Int>(mask);
+   return (HYPRE_Int) (mask == 0) ? 0 : sycl::ctz(mask) + 1;
 }
 
 static __device__ __forceinline__

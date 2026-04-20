@@ -715,11 +715,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
 #if defined(HYPRE_USING_SYCL)
          HYPRE_Int *new_end =
-            hypreSycl_copy_if( C_points_marker,
-                               C_points_marker + num_C_points_coarse,
-                               C_points_marker,
-                               C_points_local_marker,
-                               in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+            hypre_CopyIfSycl( C_points_marker,
+                              C_points_marker + num_C_points_coarse,
+                              C_points_marker,
+                              C_points_local_marker,
+                              in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
          HYPRE_ONEDPL_CALL( std::transform,
                             C_points_local_marker,
                             C_points_local_marker + num_C_points_coarse,
@@ -1195,10 +1195,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  hypre_IntArrayData(CF_marker_array[level]),
                                  oneapi::dpl::make_transform_iterator( isolated_F_points_marker,
                [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
-               hypreSycl_transform_if( perm_it,
-                                       perm_it + num_isolated_F_points,
-                                       isolated_F_points_marker,
-                                       perm_it,
+               hypre_TransformIfSycl( perm_it,
+                                      perm_it + num_isolated_F_points,
+                                      isolated_F_points_marker,
+                                      perm_it,
                [] (const auto & x) {return -3;},
                in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
@@ -1516,10 +1516,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  hypre_IntArrayData(CF_marker_array[level]),
                                  oneapi::dpl::make_transform_iterator( F_points_marker,
                [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
-               hypreSycl_transform_if( perm_it,
-                                       perm_it + num_F_points,
-                                       F_points_marker,
-                                       perm_it,
+               hypre_TransformIfSycl( perm_it,
+                                      perm_it + num_F_points,
+                                      F_points_marker,
+                                      perm_it,
                [] (const auto & x) {return -1;},
                in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
@@ -1589,11 +1589,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         HYPRE_Int(0) );
 
                      /* RL: total local_coarse_size is not computed. I don't think it's needed */
-                     hypreSycl_copy_if( tmp,
-                                        tmp + local_num_vars,
-                                        hypre_IntArrayData(CF_marker_array[level]),
-                                        C_points_local_marker,
-                                        equal<HYPRE_Int>(2) );
+                     hypre_CopyIfSycl( tmp,
+                                       tmp + local_num_vars,
+                                       hypre_IntArrayData(CF_marker_array[level]),
+                                       C_points_local_marker,
+                                       equal<HYPRE_Int>(2) );
 #else
                      HYPRE_THRUST_CALL( exclusive_scan,
                                         thrust::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),

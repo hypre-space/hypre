@@ -66,26 +66,6 @@ if(NOT oneDPL_FOUND)
   message(FATAL_ERROR "Could not find oneDPL installation. Please set DPLROOT")
 endif()
 
-# Find Intel DPCT
-if(NOT DEFINED DPCTROOT)
-  if(DEFINED ENV{DPCTROOT})
-    set(DPCTROOT $ENV{DPCTROOT})
-  elseif(DEFINED ENV{DPCT_BUNDLE_ROOT})
-    set(DPCTROOT $ENV{DPCT_BUNDLE_ROOT})
-  elseif(DEFINED ENV{ONEAPI_ROOT} AND EXISTS "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
-    set(DPCTROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
-  endif()
-endif()
-
-# Check if DPCT is found
-if(NOT EXISTS "${DPCTROOT}/include/dpct/dpct.hpp")
-  message(FATAL_ERROR "Could not find DPCT installation. Please set DPCTROOT")
-endif()
-
-# Add DPCT include directory
-target_include_directories(${PROJECT_NAME} PUBLIC "${DPCTROOT}/include")
-message(STATUS "DPCT include directory: ${DPCTROOT}/include")
-
 if (HYPRE_ENABLE_ONEMKLSPARSE)
   set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
 endif()
