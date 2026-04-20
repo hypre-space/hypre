@@ -774,8 +774,8 @@ main( hypre_int argc,
       hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1. For solver -1,0,1,3\n");
       hypre_printf("  -solver <ID>        : solver ID\n");
       hypre_printf("                       -1  - Struct Matvec\n");
-      hypre_printf("                        0  - SMG (default)\n");
-      hypre_printf("                        1  - PFMG\n");
+      hypre_printf("                        0  - SMG\n");
+      hypre_printf("                        1  - PFMG (default)\n");
       hypre_printf("                        3  - PFMG constant coeffs\n");
       hypre_printf("                        4  - PFMG constant coeffs var diag\n");
       hypre_printf("                        8  - Jacobi\n");
