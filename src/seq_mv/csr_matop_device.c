@@ -4096,6 +4096,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after analysis\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
    else if (status != CUSPARSE_STATUS_SUCCESS)
@@ -4103,6 +4105,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "cuSPARSE ERROR (code = %d, %s) at %s:%d\n",
                     status, cusparseGetErrorString(status), __FILE__, __LINE__);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -4113,6 +4117,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after analysis\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
    else if (status != rocsparse_status_success)
@@ -4120,6 +4126,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "rocSPARSE ERROR (code = %d) at %s:%d\n",
                     status, __FILE__, __LINE__);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 #endif
@@ -4151,6 +4159,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after factorization\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
    else if (status != CUSPARSE_STATUS_SUCCESS)
@@ -4158,6 +4168,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "cuSPARSE ERROR (code = %d, %s) at %s:%d\n",
                     status, cusparseGetErrorString(status), __FILE__, __LINE__);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -4168,6 +4180,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after factorization\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
    else if (status != rocsparse_status_success)
@@ -4175,6 +4189,8 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
       hypre_sprintf(errmsg, "rocSPARSE ERROR (code = %d) at %s:%d\n",
                     status, __FILE__, __LINE__);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 #endif

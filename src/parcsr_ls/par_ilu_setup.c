@@ -343,6 +343,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "NSH+ILUK setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -357,6 +358,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "NSH+ILUT setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -371,6 +373,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "RAS+ILUK setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -385,6 +388,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "RAS+ILUT setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -399,6 +403,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ddPQ+GMRES+ILUK setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -413,6 +418,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ddPQ+GMRES+ILUT setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
 #endif
@@ -428,6 +434,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "GMRES+ILU0-RAP setup on device runs requires unified memory!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
 #else
             hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU,
