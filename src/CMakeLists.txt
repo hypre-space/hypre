@@ -371,8 +371,19 @@ endif ()
 
 if (HYPRE_ENABLE_UMPIRE)
   set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+
+  # If no specific Umpire resource was requested, choose the default that matches
+  # hypre's memory model. Device-memory builds should not silently enable Umpire UM.
+  if (NOT HYPRE_ENABLE_UMPIRE_HOST AND
+      NOT HYPRE_ENABLE_UMPIRE_DEVICE AND
+      NOT HYPRE_ENABLE_UMPIRE_UM AND
+      NOT HYPRE_ENABLE_UMPIRE_PINNED)
+    if (HYPRE_ENABLE_UNIFIED_MEMORY)
+      set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+    else ()
+      set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+    endif ()
+  endif ()
 endif ()
 
 if (HYPRE_ENABLE_UMPIRE_HOST)
