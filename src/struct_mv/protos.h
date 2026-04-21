@@ -395,8 +395,6 @@ HYPRE_Int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
 
 /* struct_copy.c */
 HYPRE_Int hypre_StructCopy ( hypre_StructVector *x, hypre_StructVector *y );
-HYPRE_Int hypre_StructPartialCopy ( hypre_StructVector *x, hypre_StructVector *y,
-                                    hypre_BoxArrayArray *array_boxes );
 
 /* struct_data.c */
 HYPRE_Int
