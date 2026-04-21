@@ -114,7 +114,7 @@ for path in [p for p in (sys.argv[1:] or glob.glob(str(SRC_ROOT/"**"/"*.c"), rec
             if v=='return':
                 if not any(pre(end,p) for end in ends):
                     print(f"{path}:{ln}: {name}: return before FUNC_END",file=sys.stderr); err=1; nr+=1
-                cond=next((b for b in p if kinds.get(b) in {'if','else'}), None)
+                cond=next((b for b in reversed(p) if kinds.get(b) in {'if','else','switch','for','while','do'}), None)
                 if cond is not None: skip=(cond, entry.get(cond, st[:]))
                 continue
             if v in OPEN: st.append(OPEN[v]); continue
