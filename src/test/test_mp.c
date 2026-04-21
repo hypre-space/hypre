@@ -98,7 +98,7 @@ int main (int argc, char *argv[])
 
    /* default execution policy */
    HYPRE_SetExecutionPolicy(HYPRE_EXEC_HOST);
-   
+
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
    n = 20;
