@@ -4783,13 +4783,28 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
       HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
-      if (length_cycle_flexible > 0)
+      if (cycle_struct_flexible)
       {
          HYPRE_ParCSRHybridSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+      }
+      if (relax_types_flexible)
+      {
          HYPRE_ParCSRHybridSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+      }
+      if (relax_orders_flexible)
+      {
          HYPRE_ParCSRHybridSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+      }
+      if (outer_weights_flexible)
+      {
          HYPRE_ParCSRHybridSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+      }
+      if (relax_weights_flexible)
+      {
          HYPRE_ParCSRHybridSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+      }
+      if (cgc_scaling_factors_flexible)
+      {
          HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (level_w > -1)
@@ -5041,13 +5056,28 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
-      if (length_cycle_flexible > 0)
+      if (cycle_struct_flexible)
       {
          HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+      }
+      if (relax_types_flexible)
+      {
          HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+      }
+      if (relax_orders_flexible)
+      {
          HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+      }
+      if (outer_weights_flexible)
+      {
          HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+      }
+      if (relax_weights_flexible)
+      {
          HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+      }
+      if (cgc_scaling_factors_flexible)
+      {
          HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
       }
       if (ns_down > -1)
@@ -5595,13 +5625,28 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFSAIThreshold(pcg_precond, fsai_threshold);
          HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
-         if (length_cycle_flexible > 0)
+         if (cycle_struct_flexible)
          {
             HYPRE_BoomerAMGSetFlexibleCycleStruct(pcg_precond, cycle_struct_flexible);
+         }
+         if (relax_types_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, relax_types_flexible);
+         }
+         if (relax_orders_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, relax_orders_flexible);
+         }
+         if (outer_weights_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleOuterWeights(pcg_precond, outer_weights_flexible);
+         }
+         if (relax_weights_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, relax_weights_flexible);
+         }
+         if (cgc_scaling_factors_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
          }
          if (num_functions > 1)
@@ -7383,13 +7428,28 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetDofFunc(amg_precond, dof_func);
             free_dof_func = 0;
          }
-         if (length_cycle_flexible > 0)
+         if (cycle_struct_flexible)
          {
             HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_precond, cycle_struct_flexible);
+         }
+         if (relax_types_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_precond, relax_types_flexible);
+         }
+         if (relax_orders_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_precond, relax_orders_flexible);
+         }
+         if (outer_weights_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_precond, outer_weights_flexible);
+         }
+         if (relax_weights_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_precond, relax_weights_flexible);
+         }
+         if (cgc_scaling_factors_flexible)
+         {
             HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
          }
          HYPRE_BoomerAMGSetAdditive(amg_precond, additive);
