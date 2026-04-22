@@ -144,6 +144,7 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
                                                         hypre_CSRMatrixGPUMatHandle(matrix),
                                                         hypre_CSRMatrixNumRows(matrix),
                                                         hypre_CSRMatrixNumCols(matrix),
+                                                        (std::int64_t) hypre_CSRMatrixNumNonzeros(matrix),
                                                         oneapi::mkl::index_base::zero,
                                                         reinterpret_cast<std::int64_t*>(hypre_CSRMatrixI(matrix)),
                                                         reinterpret_cast<std::int64_t*>(hypre_CSRMatrixJ(matrix)),
@@ -153,6 +154,7 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
                                                         hypre_CSRMatrixGPUMatHandle(matrix),
                                                         hypre_CSRMatrixNumRows(matrix),
                                                         hypre_CSRMatrixNumCols(matrix),
+                                                        (std::int64_t) hypre_CSRMatrixNumNonzeros(matrix),
                                                         oneapi::mkl::index_base::zero,
                                                         hypre_CSRMatrixI(matrix),
                                                         hypre_CSRMatrixJ(matrix),
@@ -396,10 +398,10 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
                          B_row_indices,
                          hypreFunctor_NonzeroAboveTol(tol));
 #elif defined(HYPRE_USING_SYCL)
-      hypreSycl_copy_if( row_indices,
-                         row_indices + num_nonzeros,
-                         A_data,
-                         B_row_indices,
+      hypre_CopyIfSycl( row_indices,
+                        row_indices + num_nonzeros,
+                        A_data,
+                        B_row_indices,
       [ = ] (HYPRE_Complex v) { return hypre_cabs(v) > tol; } );
 #endif
       hypre_TFree(row_indices, memory_location);
@@ -601,7 +603,7 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_sequence(*map_B_to_C_ptr, *map_B_to_C_ptr + num_cols_offd_B, 0);
+      hypre_SequenceSycl(*map_B_to_C_ptr, *map_B_to_C_ptr + num_cols_offd_B, 0);
 #else
       HYPRE_THRUST_CALL( sequence,
                          *map_B_to_C_ptr,
@@ -773,7 +775,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data, B_ext_xata);
-      auto new_end = hypreSycl_copy_if(
+      auto new_end = hypre_CopyIfSycl(
                         first,                                                             /* first   */
                         first + B_ext_nnz,                                                 /* last    */
                         B_ext_bigj,                                                        /* stencil */
@@ -800,7 +802,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data);
-      auto new_end = hypreSycl_copy_if(
+      auto new_end = hypre_CopyIfSycl(
                         first,                                                                /* first   */
                         first + B_ext_nnz,                                                    /* last    */
                         B_ext_bigj,                                                           /* stencil */
@@ -846,7 +848,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data, B_ext_xata);
-      auto new_end = hypreSycl_copy_if(
+      auto new_end = hypre_CopyIfSycl(
                         first,                                           /* first */
                         first + B_ext_nnz,                               /* last */
                         B_ext_bigj,                                      /* stencil */
@@ -873,7 +875,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data);
-      auto new_end = hypreSycl_copy_if(
+      auto new_end = hypre_CopyIfSycl(
                         first,                                                              /* first   */
                         first + B_ext_nnz,                                                  /* last    */
                         B_ext_bigj,                                                         /* stencil */
@@ -975,16 +977,16 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
       oneapi::dpl::counting_iterator count(0);
-      hypreSycl_scatter( count,
+      hypre_ScatterSycl( count,
                          count + num_cols_new,
                          tmp_j,
                          offd_mark );
 
-      hypreSycl_gather(A_j, A_j + nnz, offd_mark, A_j);
+      hypre_GatherSycl(A_j, A_j + nnz, offd_mark, A_j);
 
       if (col_map_new_ptr)
       {
-         hypreSycl_gather(tmp_j, tmp_j + num_cols_new, col_map, col_map_new);
+         hypre_GatherSycl(tmp_j, tmp_j + num_cols_new, col_map, col_map_new);
       }
 #else
       HYPRE_THRUST_CALL( scatter,
@@ -1204,7 +1206,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                      A_j_sorted,
                                      A_j_sorted + nnz_A,
-                                     dpct::constant_iterator(1),
+                                     dpct::make_constant_iterator<HYPRE_Int>(1),
                                      reduced_col_indices,
                                      reduced_col_nnz);
 
@@ -1991,7 +1993,7 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
                  HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_sequence(idx, idx + nnzA + nnzB, 0);
+   hypre_SequenceSycl(idx, idx + nnzA + nnzB, 0);
 
    auto zipped_begin = oneapi::dpl::make_zip_iterator(Cii, Cjj, idx);
    HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + nnzA + nnzB,
@@ -2527,7 +2529,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
 #if defined(HYPRE_USING_SYCL)
       auto zip_ija = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
       auto zip_new_ija = oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data);
-      auto new_end = hypreSycl_copy_if(
+      auto new_end = hypre_CopyIfSycl(
                         zip_ija,
                         zip_ija + nnz,
                         zip_ij,
@@ -2552,11 +2554,11 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
 
 #if defined(HYPRE_USING_SYCL)
       auto zip_new_ij = oneapi::dpl::make_zip_iterator(new_ii, new_j);
-      auto new_end = hypreSycl_copy_if( zip_ij,
-                                        zip_ij + nnz,
-                                        zip_ij,
-                                        zip_new_ij,
-                                        Int2Unequal() );
+      auto new_end = hypre_CopyIfSycl( zip_ij,
+                                       zip_ij + nnz,
+                                       zip_ij,
+                                       zip_new_ij,
+                                       Int2Unequal() );
 
       hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
 #else
@@ -2781,21 +2783,21 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 #if defined(HYPRE_USING_SYCL)
    if (elmt_tols == NULL)
    {
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data),
-                                        oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data) + nnz,
-                                        A_data,
-                                        oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
+      auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data),
+                                       oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data) + nnz,
+                                       A_data,
+                                       oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
       [tol] (const auto & x) {return !(x < tol);} );
 
       hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
    }
    else
    {
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data),
-                                        oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data) + nnz,
-                                        oneapi::dpl::make_zip_iterator(A_data, elmt_tols),
-                                        oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
-                                        cabsfirst_greaterthan_second_pred() );
+      auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data),
+                                       oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data) + nnz,
+                                       oneapi::dpl::make_zip_iterator(A_data, elmt_tols),
+                                       oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
+                                       cabsfirst_greaterthan_second_pred() );
 
       hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
    }
@@ -2853,11 +2855,11 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_sequence( hypre_CSRMatrixI(A),
+   hypre_SequenceSycl( hypre_CSRMatrixI(A),
                        hypre_CSRMatrixI(A) + n + 1,
                        0  );
 
-   hypreSycl_sequence( hypre_CSRMatrixJ(A),
+   hypre_SequenceSycl( hypre_CSRMatrixJ(A),
                        hypre_CSRMatrixJ(A) + n,
                        0  );
 
@@ -2899,11 +2901,11 @@ hypre_CSRMatrixDiagMatrixFromVectorDevice(HYPRE_Int n, HYPRE_Complex *v)
    hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_sequence( hypre_CSRMatrixI(A),
+   hypre_SequenceSycl( hypre_CSRMatrixI(A),
                        hypre_CSRMatrixI(A) + n + 1,
                        0  );
 
-   hypreSycl_sequence( hypre_CSRMatrixJ(A),
+   hypre_SequenceSycl( hypre_CSRMatrixJ(A),
                        hypre_CSRMatrixJ(A) + n,
                        0  );
 
@@ -3023,7 +3025,7 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
    /* Build B_i */
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator count(0);
-   hypreSycl_gather(perm,
+   hypre_GatherSycl(perm,
                     perm + num_rows,
                     oneapi::dpl::make_transform_iterator(count, adj_functor(A_i)),
                     B_i);
@@ -3046,7 +3048,7 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                      bii_functor(perm, A_i, B_i, B_ii));
 
    /* Build B_j and B_a */
-   hypreSycl_gather( B_ii,
+   hypre_GatherSycl( B_ii,
                      B_ii + num_nonzeros,
                      oneapi::dpl::make_zip_iterator(oneapi::dpl::make_permutation_iterator(rqperm, A_j), A_a),
                      oneapi::dpl::make_zip_iterator(B_j, B_a));
