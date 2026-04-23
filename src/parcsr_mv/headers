@@ -107,6 +107,10 @@ extern "C++" {
 # Structures and prototypes
 #===========================================================================
 
+# Placeholder for copyright info to pass "check-license"
+# Can be removed if we "cat" proto/ structure header files here.
+../config/write_header.sh >> $INTERNAL_HEADER
+
 #===========================================================================
 # Include guards
 #===========================================================================
