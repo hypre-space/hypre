@@ -523,16 +523,6 @@ HYPRE_StructVectorCreate(MPI_Comm            comm,
 HYPRE_Int
 HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 
-/* RDF: Need a good user interface for setting the grid. */
-
-/**
- * (Optional) Set the coarsening stride.  For more information, see
- * \ref HYPRE_StructVectorCreate.
- **/
-HYPRE_Int
-HYPRE_StructVectorSetStride(HYPRE_StructVector vector,
-                            HYPRE_Int         *stride);
-
 /**
  * Prepare a vector object for setting coefficient values.
  **/
