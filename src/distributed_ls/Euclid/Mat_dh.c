@@ -742,23 +742,23 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
       hypre_fprintf(fp, "     1st bdry row= %i \n", 1+end_row-sg->bdry_count[oldBlock]);
 
       for (oldRow=beg_row; oldRow<end_row; ++oldRow) {
-        HYPRE_Int len = 0, *cval;
-        HYPRE_Real *aval;
+        HYPRE_Int len = 0, *lcval;
+        HYPRE_Real *laval;
 
         hypre_fprintf(fp, "%3i (old= %3i) :: ", idx, 1+oldRow);
         ++idx;
-        Mat_dhGetRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
+        Mat_dhGetRow(A, oldRow, &len, &lcval, &laval); CHECK_V_ERROR;
 
         for (k=0; k<len; ++k) {
           if (noValues) {
-            hypre_fprintf(fp, "%i ", 1+sg->o2n_col[cval[k]]);
+            hypre_fprintf(fp, "%i ", 1+sg->o2n_col[lcval[k]]);
           } else {
-            hypre_fprintf(fp, "%i,%g ; ", 1+sg->o2n_col[cval[k]], aval[k]);
+            hypre_fprintf(fp, "%i,%g ; ", 1+sg->o2n_col[lcval[k]], laval[k]);
           }
         }
 
         hypre_fprintf(fp, "\n");
-        Mat_dhRestoreRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
+        Mat_dhRestoreRow(A, oldRow, &len, &lcval, &laval); CHECK_V_ERROR;
       }
     }
   }
@@ -873,28 +873,28 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
       HYPRE_Int end_row = beg_row + sg->row_count[oldBlock];
 
       for (j=beg_row; j<end_row; ++j) {
-        HYPRE_Int len = 0, *cval;
-        HYPRE_Real *aval;
+        HYPRE_Int len = 0, *lcval;
+        HYPRE_Real *laval;
         HYPRE_Int oldRow = sg->n2o_row[j];
 
-        Mat_dhGetRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
+        Mat_dhGetRow(A, oldRow, &len, &lcval, &laval); CHECK_V_ERROR;
 
         if (noValues) {
           for (k=0; k<len; ++k) {
-            hypre_fprintf(fp, "%i %i\n", idx, 1+sg->o2n_col[cval[k]]);
+            hypre_fprintf(fp, "%i %i\n", idx, 1+sg->o2n_col[lcval[k]]);
           }
           ++idx;
         }
 
         else {
           for (k=0; k<len; ++k) {
-            HYPRE_Real val = aval[k];
+            HYPRE_Real val = laval[k];
             if (val == 0.0 && matlab) val = _MATLAB_ZERO_;
-            hypre_fprintf(fp, TRIPLES_FORMAT, idx, 1+sg->o2n_col[cval[k]], val);
+            hypre_fprintf(fp, TRIPLES_FORMAT, idx, 1+sg->o2n_col[lcval[k]], val);
           }
           ++idx;
         }
-        Mat_dhRestoreRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
+        Mat_dhRestoreRow(A, oldRow, &len, &lcval, &laval); CHECK_V_ERROR;
       }
     }
   }
