@@ -95,7 +95,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                      Dbeta,
                      send_buf );
@@ -143,11 +143,11 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
-                                               rsWA + A_nr_local,
-                                               CF_marker,
-                                               rsW,
-                                               equal<HYPRE_Int>(-2) );
+   HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
+                                              rsWA + A_nr_local,
+                                              CF_marker,
+                                              rsW,
+                                              equal<HYPRE_Int>(-2) );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -182,11 +182,11 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *tmp_end = hypreSycl_copy_if( map_to_F,
-                                           map_to_F + A_nr_local,
-                                           CF_marker,
-                                           map_F2_to_F,
-                                           equal<HYPRE_Int>(-2) );
+   HYPRE_Int *tmp_end = hypre_CopyIfSycl( map_to_F,
+                                          map_to_F + A_nr_local,
+                                          CF_marker,
+                                          map_F2_to_F,
+                                          equal<HYPRE_Int>(-2) );
 #else
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
@@ -251,11 +251,11 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   tmp_end = hypreSycl_copy_if( CF_marker,
-                                CF_marker + A_nr_local,
-                                CF_marker,
-                                C2F2_marker,
-                                out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+   tmp_end = hypre_CopyIfSycl( CF_marker,
+                               CF_marker + A_nr_local,
+                               CF_marker,
+                               C2F2_marker,
+                               out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
 #else
    tmp_end = HYPRE_THRUST_CALL( copy_if,
                                 CF_marker,
@@ -420,7 +420,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                      dtmp,
                      send_buf );
@@ -445,7 +445,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                      dlam,
                      send_buf );
@@ -493,11 +493,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
-                                               rsWA + A_nr_local,
-                                               CF_marker,
-                                               rsW,
-                                               equal<HYPRE_Int>(-2) );
+   HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
+                                              rsWA + A_nr_local,
+                                              CF_marker,
+                                              rsW,
+                                              equal<HYPRE_Int>(-2) );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -531,11 +531,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *tmp_end = hypreSycl_copy_if( map_to_F,
-                                           map_to_F + A_nr_local,
-                                           CF_marker,
-                                           map_F2_to_F,
-                                           equal<HYPRE_Int>(-2) );
+   HYPRE_Int *tmp_end = hypre_CopyIfSycl( map_to_F,
+                                          map_to_F + A_nr_local,
+                                          CF_marker,
+                                          map_F2_to_F,
+                                          equal<HYPRE_Int>(-2) );
 #else
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
@@ -604,11 +604,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   tmp_end = hypreSycl_copy_if( CF_marker,
-                                CF_marker + A_nr_local,
-                                CF_marker,
-                                C2F2_marker,
-                                out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+   tmp_end = hypre_CopyIfSycl( CF_marker,
+                               CF_marker + A_nr_local,
+                               CF_marker,
+                               C2F2_marker,
+                               out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
 #else
    tmp_end = HYPRE_THRUST_CALL( copy_if,
                                 CF_marker,

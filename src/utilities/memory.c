@@ -1502,29 +1502,31 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GiB",
                          gmem[ne * i + 0], gmem[ne * i + 2],
                          gmem[ne * i + 1], gmem[ne * i + 3]);
-            hypre_printf(" | Used/Total RAM: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
+            hypre_printf(" | Used/Total RAM: (%.2f / %.2f) GiB",
+                         gmem[ne * i + 4], gmem[ne * i + 5]);
 #if defined(HYPRE_USING_GPU)
-            hypre_printf(" | Used/Total VRAM: (%.2f / %.2f)", gmem[ne * i + 6], gmem[ne * i + 7]);
+            hypre_printf(" | Used/Total VRAM: (%.2f / %.2f) GiB",
+                         gmem[ne * i + 6], gmem[ne * i + 7]);
 #endif
 #if defined(HYPRE_USING_UMPIRE)
             if (gmem[ne * i + 9])
             {
-               hypre_printf(" | UmpHSize/UmpHPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpHSize/UmpHPeak: (%.2f / %.2f) GiB",
                             gmem[ne * i + 8], gmem[ne * i + 9]);
             }
             if (gmem[ne * i + 11])
             {
-               hypre_printf(" | UmpDSize/UmpDPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpDSize/UmpDPeak: (%.2f / %.2f) GiB",
                             gmem[ne * i + 10], gmem[ne * i + 11]);
             }
             if (gmem[ne * i + 13])
             {
-               hypre_printf(" | UmpUSize/UmpUPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpUSize/UmpUPeak: (%.2f / %.2f) GiB",
                             gmem[ne * i + 12], gmem[ne * i + 13]);
             }
             if (gmem[ne * i + 15])
             {
-               hypre_printf(" | UmpPSize/UmpPPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpPSize/UmpPPeak: (%.2f / %.2f) GiB",
                             gmem[ne * i + 14], gmem[ne * i + 15]);
             }
 #endif

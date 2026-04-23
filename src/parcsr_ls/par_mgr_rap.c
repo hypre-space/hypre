@@ -628,6 +628,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       else
       {
          hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either Wp, Wr, R or RT!");
          return hypre_error_flag;
       }

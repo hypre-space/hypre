@@ -249,7 +249,6 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
-#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -358,7 +357,7 @@ typedef sycl::queue* hypre_DeviceStream;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -379,7 +378,7 @@ typedef sycl::queue* hypre_DeviceStream;
       hypre_HandleComputeStreamNum(hypre_handle) = HYPRE_MAX_NUM_STREAMS - 1;                \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -401,7 +400,7 @@ typedef sycl::queue* hypre_DeviceStream;
          sycl::range<1> shmem_range(shmem_size);                                             \
          sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -422,7 +421,7 @@ typedef sycl::queue* hypre_DeviceStream;
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -445,7 +444,7 @@ typedef sycl::queue* hypre_DeviceStream;
          sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -1932,7 +1931,7 @@ HYPRE_Int hypre_popc(hypre_mask mask)
 static __device__ __forceinline__
 HYPRE_Int hypre_ffs(hypre_mask mask)
 {
-   return (HYPRE_Int) dpct::ffs<HYPRE_Int>(mask);
+   return (HYPRE_Int) (mask == 0) ? 0 : sycl::ctz(mask) + 1;
 }
 
 static __device__ __forceinline__

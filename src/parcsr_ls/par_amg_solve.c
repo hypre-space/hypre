@@ -76,7 +76,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Residual = NULL;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -90,7 +89,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    A_array          = hypre_ParAMGDataAArray(amg_data);
    F_array          = hypre_ParAMGDataFArray(amg_data);
    U_array          = hypre_ParAMGDataUArray(amg_data);
-
    converge_type    = hypre_ParAMGDataConvergeType(amg_data);
    tol              = hypre_ParAMGDataTol(amg_data);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
@@ -120,6 +118,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    }
 
    /* Update work vectors */
+   HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_ParVectorResize(Vtemp, num_rows_fine, num_vectors);
    hypre_ParVectorResize(Rtemp, num_rows_fine, num_vectors);
    hypre_ParVectorResize(Ptemp, num_rows_fine, num_vectors);

@@ -350,7 +350,8 @@ hypre_ForceSyncComputeStream()
  *    - mem[0]: Current memory usage (allocated by the process).
  *    - mem[1]: Total device memory available on the GPU.
  *
- * This implementation supports NVIDIA GPUs using CUDA and AMD GPUs using HIP.
+ * This implementation supports NVIDIA GPUs using CUDA, AMD GPUs using HIP,
+ * and SYCL devices that expose the Intel free-memory extension.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -373,6 +374,20 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
 
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipMemGetInfo(&free_mem, &total_mem));
+
+#elif defined(HYPRE_USING_SYCL)
+   auto device = *hypre_HandleDevice(hypre_handle());
+   total_mem = device.get_info<sycl::info::device::global_mem_size>();
+
+   if (device.has(sycl::aspect::ext_intel_free_memory))
+   {
+      free_mem = device.get_info<sycl::ext::intel::info::device::free_memory>();
+   }
+   else
+   {
+      /* Total memory is still useful even if free-memory accounting is unavailable. */
+      free_mem = total_mem;
+   }
 
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No supported GPU backend found!");
@@ -2060,7 +2075,7 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
    hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+   hypre_GatherSycl(map, map + nnz, d_row_num, d_row_ind);
 #else
    HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 #endif

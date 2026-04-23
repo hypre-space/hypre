@@ -1409,10 +1409,11 @@ AS_HELP_STRING([--enable-onemklrand],
 )
 
 dnl ***** RAJA
+dnl * Legacy developer-only option: keep support wired up, but omit it from
+dnl * configure --help since RAJA is no longer being actively developed here.
 
 AC_ARG_WITH(raja,
-AS_HELP_STRING([--with-raja],
-               [Use RAJA. Require RAJA package to be compiled properly (default is NO).]),
+[],
 [case "$withval" in
     yes) hypre_using_raja=yes;;
     no)  hypre_using_raja=no ;;
@@ -1422,10 +1423,7 @@ AS_HELP_STRING([--with-raja],
 )
 
 AC_ARG_WITH(raja-include,
-AS_HELP_STRING([--with-raja-include=DIR],
-               [User specifies that RAJA/*.h is in DIR.  The options
-                --with-raja-include --with-raja-libs and
-                --with-raja-lib-dirs must be used together.]),
+[],
 [for raja_dir in $withval; do
     HYPRE_RAJA_INCLUDE="-I$raja_dir $HYPRE_RAJA_INCLUDE"
  done;
@@ -1433,20 +1431,15 @@ AS_HELP_STRING([--with-raja-include=DIR],
 )
 
 AC_ARG_WITH(raja-lib,
-AS_HELP_STRING([--with-raja-lib=LIBS],
-               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
-                needed for RAJA. OK to use -L and -l flags in the list]),
+[],
 [for raja_lib in $withval; do
-       HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
+        HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
  done;
 hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(raja-libs,
-AS_HELP_STRING([--with-raja-libs=LIBS],
-               [LIBS is space-separated list (enclosed in quotes) of libraries
-                needed for RAJA (base name only). The options --with-raja-libs and
-                --with-raja-lib-dirs must be used together.]),
+[],
 [for raja_lib in $withval; do
     HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
  done;
@@ -1454,12 +1447,7 @@ hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(raja-lib-dirs,
-AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of
-                directories containing the libraries specified by
-                --with-raja-libs, e.g "usr/lib /usr/local/lib".
-                The  options --with-raja-libs and --raja-blas-lib-dirs
-                must be used together.]),
+[],
 [for raja_lib_dir in $withval; do
     HYPRE_RAJA_LIB_DIR="$HYPRE_RAJA_LIB_DIR -L$raja_lib_dir"
  done;
@@ -1467,10 +1455,11 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
 )
 
 dnl ***** Kokkos
+dnl * Legacy developer-only option: keep support wired up, but omit it from
+dnl * configure --help since Kokkos is no longer being actively developed here.
 
 AC_ARG_WITH(kokkos,
-AS_HELP_STRING([--with-kokkos],
-               [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
+[],
 [case "$withval" in
     yes) hypre_using_kokkos=yes ;;
     no)  hypre_using_kokkos=no ;;
@@ -1480,10 +1469,7 @@ AS_HELP_STRING([--with-kokkos],
 )
 
 AC_ARG_WITH(kokkos-include,
-AS_HELP_STRING([--with-kokkos-include=DIR],
-               [User specifies that KOKKOS headers is in DIR.  The options
-                --with-kokkos-include --with-kokkos-libs and
-                --with-kokkos-dirs must be used together.]),
+[],
 [for kokkos_dir in $withval; do
 HYPRE_KOKKOS_INCLUDE="-I$kokkos_dir $HYPRE_KOKKOS_INCLUDE"
 done;
@@ -1491,9 +1477,7 @@ hypre_user_chose_kokkos=yes]
 )
 
 AC_ARG_WITH(kokkos-lib,
-AS_HELP_STRING([--with-kokkos-lib=LIBS],
-               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
-                needed for KOKKOS. OK to use -L and -l flags in the list]),
+[],
 [for kokkos_lib in $withval; do
        HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB $kokkos_lib"
  done;
@@ -1501,10 +1485,7 @@ hypre_user_chose_kokkos=yes]
 )
 
 AC_ARG_WITH(kokkos-libs,
-AS_HELP_STRING([--with-kokkos-libs=LIBS],
-               [LIBS is space-separated list (enclosed in quotes) of libraries
-                needed for KOKKOS (base name only). The options --with-kokkos-libs and
-                --with-kokkos-dirs must be used together.]),
+[],
 [for kokkos_lib in $withval; do
     HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB -l$kokkos_lib"
  done;
@@ -1512,12 +1493,7 @@ hypre_user_chose_kokkos=yes]
 )
 
 AC_ARG_WITH(kokkos-lib-dirs,
-AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
-               [DIRS is space-separated list (enclosed in quotes) of
-                directories containing the libraries and
-                Makefile.kokkos is assumed to be in DIRS/../ .
-                The  options --with-kokkos-libs and --with-kokkos-dirs
-                must be used together.]),
+[],
 [for kokkos_lib_dir in $withval; do
     HYPRE_KOKKOS_LIB_DIR="$HYPRE_KOKKOS_LIB_DIR -L$kokkos_lib_dir"
  done;

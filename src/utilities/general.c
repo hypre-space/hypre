@@ -511,6 +511,9 @@ HYPRE_PrintDeviceInfo(void)
    hypre_printf("Platform Version: %s\n", p_version.c_str());
    auto d_name = device.get_info<sycl::info::device::name>();
    hypre_printf("Device Name: %s\n", d_name.c_str());
+   auto total_vram = device.get_info<sycl::info::device::global_mem_size>();
+   hypre_printf("Total VRAM: %.2f GiB\n",
+                ((HYPRE_Real) total_vram) / (HYPRE_Real) (1 << 30));
    auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
    hypre_printf("Max Work Groups: %d\n", max_work_group);
    auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
