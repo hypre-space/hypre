@@ -129,15 +129,13 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
