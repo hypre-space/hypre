@@ -99,6 +99,8 @@ hypre_SLUDistSetup(void               *solver,
    int_t             *slu_colidx;
    hypre_double      *slu_data;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -241,6 +243,11 @@ hypre_SLUDistSetup(void               *solver,
            &slu_info);
 
    hypre_DSLUDataOptions(dslu_data)->Fact = FACTORED;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
+   }
 
    return hypre_error_flag;
 }

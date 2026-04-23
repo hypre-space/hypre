@@ -227,6 +227,8 @@ hypre_PCGSetup( void *pcg_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Setup");
 
+   hypre_SolverResetIsSetup((hypre_Solver *) pcg_vdata);
+
    (pcg_data -> A) = A;
 
    // if a preconditioning matrix has not been set, use A
@@ -308,6 +310,11 @@ hypre_PCGSetup( void *pcg_vdata,
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) pcg_vdata);
+   }
 
    return hypre_error_flag;
 }

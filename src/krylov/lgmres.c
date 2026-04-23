@@ -244,6 +244,8 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) lgmres_vdata);
+
    (lgmres_data -> A) = A;
 
    /*--------------------------------------------------
@@ -319,6 +321,11 @@ hypre_LGMRESSetup( void *lgmres_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) lgmres_vdata);
+   }
 
    return hypre_error_flag;
 }
