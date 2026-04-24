@@ -3380,8 +3380,8 @@ HYPRE_Int hypre_ParILUExtractEBFC( hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
                                    hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp );
 HYPRE_Int hypre_ParILURAPReorder( hypre_ParCSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_ParCSRMatrix **A_pq );
-HYPRE_Int hypre_ILUSetupLDUtoCusparse( hypre_ParCSRMatrix *L, HYPRE_Real *D,
-                                       hypre_ParCSRMatrix  *U, hypre_ParCSRMatrix **LDUp );
+HYPRE_Int hypre_ILUSetupLDUtoVendor( hypre_ParCSRMatrix *L, HYPRE_Real *D,
+                                     hypre_ParCSRMatrix  *U, hypre_ParCSRMatrix **LDUp );
 HYPRE_Int hypre_ILUSetupRAPMILU0( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **ALUp,
                                   HYPRE_Int modified );
 HYPRE_Int hypre_ILUSetupRAPILU0Device( hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,

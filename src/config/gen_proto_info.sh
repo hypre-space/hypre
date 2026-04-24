@@ -35,16 +35,9 @@ sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /[;]/) {print} else {printf "%s ", $0}
 # Match and print the prototype for each function, then strip away extra space,
 # parentheses, and commas.  Also strip away ' , void ' at the end of a line to
 # make it easy to handle functions with no arguments, i.e., Foo(void).
-cat $FFILE | while read -r FLINE
+cat $FFILE | while read -r FNAME
 do
-   FNAME=${FLINE%%|*}
-   FGUARD=""
-   if [ "$FLINE" != "$FNAME" ]
-   then
-      FGUARD=${FLINE#*|}
-   fi
-
-   awk -v fname="$FNAME" '
+   awk -v fname=$FNAME '
    BEGIN { pattern = ("(const)?[[:blank:]]*[a-zA-Z0-9_]+[[:blank:]*]+" fname "[[:blank:]]*[(][^)]*[)][[:blank:]]*[;]$") }
    {
       # The first call to match speeds things up a bit
@@ -59,16 +52,7 @@ do
 
    }' $HFILE.tmp |
    sed -e 's/;//g' -e 's/(/,/g' -e 's/)/ /g' -e 's/,/ , /g' -e 's/[[:blank:]][[:blank:]]*/ /g' |
-   sed -e 's/ , void $//' -e 's/ , $//' |
-   while read -r proto_line
-   do
-      if [ -n "$FGUARD" ]
-      then
-         echo "$proto_line , #guard=$FGUARD"
-      else
-         echo "$proto_line"
-      fi
-   done
+   sed -e 's/ , void $//'
 done
 
 # Clean up temporary files

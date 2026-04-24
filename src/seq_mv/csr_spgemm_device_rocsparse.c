@@ -12,26 +12,29 @@
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
-                               HYPRE_Int           k,
-                               HYPRE_Int           n,
-                               rocsparse_mat_descr descrA,
-                               HYPRE_Int           nnzA,
-                               HYPRE_Int          *d_ia,
-                               HYPRE_Int          *d_ja,
-                               HYPRE_Complex      *d_a,
-                               rocsparse_mat_descr descrB,
-                               HYPRE_Int           nnzB,
-                               HYPRE_Int          *d_ib,
-                               HYPRE_Int          *d_jb,
-                               HYPRE_Complex      *d_b,
-                               rocsparse_mat_descr descrC,
-                               rocsparse_mat_info  infoC,
-                               HYPRE_Int          *nnzC_out,
-                               HYPRE_Int         **d_ic_out,
-                               HYPRE_Int         **d_jc_out,
-                               HYPRE_Complex     **d_c_out)
+hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix  *C,
+                      HYPRE_Int        *nnzC_out,
+                      HYPRE_Int       **d_ic_out,
+                      HYPRE_Int       **d_jc_out,
+                      HYPRE_Complex   **d_c_out)
 {
+   const HYPRE_Int      m      = hypre_CSRMatrixNumRows(A);
+   const HYPRE_Int      k      = hypre_CSRMatrixNumCols(A);
+   const HYPRE_Int      n      = hypre_CSRMatrixNumCols(B);
+   rocsparse_mat_descr  descrA = hypre_CSRMatrixGPUMatDescr(A);
+   rocsparse_mat_descr  descrB = hypre_CSRMatrixGPUMatDescr(B);
+   rocsparse_mat_descr  descrC = hypre_CSRMatrixGPUMatDescr(C);
+   rocsparse_mat_info   infoC  = hypre_CSRMatrixGPUMatInfo(C);
+   HYPRE_Int           *d_ia   = hypre_CSRMatrixI(A);
+   HYPRE_Int           *d_ja   = hypre_CSRMatrixJ(A);
+   HYPRE_Complex       *d_a    = hypre_CSRMatrixData(A);
+   HYPRE_Int           *d_ib   = hypre_CSRMatrixI(B);
+   HYPRE_Int           *d_jb   = hypre_CSRMatrixJ(B);
+   HYPRE_Complex       *d_b    = hypre_CSRMatrixData(B);
+   const HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
+   const HYPRE_Int      nnzB   = hypre_CSRMatrixNumNonzeros(B);
    HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
@@ -56,8 +59,12 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    /* RL: for matrices with long rows, it seemed that the sorting is still needed */
    /* VPM: Adding sorting back since it is necessary for correctness in a few cases */
 #if 1
-   hypre_SortCSRRocsparse(m, k, nnzA, descrA, d_ia, d_ja_sorted, d_a_sorted);
-   hypre_SortCSRRocsparse(k, n, nnzB, descrB, d_ib, d_jb_sorted, d_b_sorted);
+   hypre_SortCSRVendor(A);
+   hypre_TMemcpy(d_ja_sorted, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_a_sorted,  hypre_CSRMatrixData(A), HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_SortCSRVendor(B);
+   hypre_TMemcpy(d_jb_sorted, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_b_sorted,  hypre_CSRMatrixData(B), HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #endif
 
    // nnzTotalDevHostPtr points to host memory

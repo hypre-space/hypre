@@ -760,7 +760,7 @@ hypre_ILUSetupILUKRASSymbolic
 hypre_ILUSetupILUKSymbolic
 hypre_ILUSetupILUT
 hypre_ILUSetupILUTRAS
-hypre_ILUSetupLDUtoCusparse
+hypre_ILUSetupLDUtoVendor
 hypre_ILUSetupMILU0
 hypre_ILUSetupRAPILU0
 hypre_ILUSetupRAPILU0Device

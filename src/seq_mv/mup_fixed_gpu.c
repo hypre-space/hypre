@@ -32,17 +32,6 @@ hypreDevice_CSRSpGemm( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *
    return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpGemm)( A, B, C_ptr );
 }
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI( HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpGemmCusparseGenericAPI)( m, k, n, nnzA, d_ia, d_ja, d_a, nnzB, d_ib, d_jb, d_b, nnzC_out, d_ic_out, d_jc_out, d_c_out );
-}
-
-#endif
-
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -50,28 +39,6 @@ hypreDevice_CSRSpTrans( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_i
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpTrans)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
 }
-
-#if defined(HYPRE_USING_CUSPARSE)
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_CSRSpTransCusparse( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpTransCusparse)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
-}
-
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_CSRSpTransRocsparse( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpTransRocsparse)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
-}
-
-#endif
 
 /*--------------------------------------------------------------------------*/
 
@@ -225,28 +192,6 @@ hypre_CSRMatrixIntersectPattern( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_I
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixIntersectPattern)( A, B, markA, diag_option );
 }
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMatvecCusparseNewAPI)( trans, alpha, A, x, beta, y, offset );
-}
-
-#endif
-
-#if defined(HYPRE_USING_CUSPARSE)
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparse( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMatvecCusparse)( trans, alpha, A, x, beta, y, offset );
-}
-
-#endif
-
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -255,16 +200,13 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatr
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMatvecDevice)( trans, alpha, A, x, beta, b, y, offset );
 }
 
-#if defined(HYPRE_USING_ROCSPARSE)
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatvecRocsparse( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset )
+hypre_CSRMatrixMatvecVendor( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMatvecRocsparse)( trans, alpha, A, x, beta, y, offset );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMatvecVendor)( trans, alpha, A, x, beta, y, offset );
 }
-
-#endif
 
 /*--------------------------------------------------------------------------*/
 
@@ -386,17 +328,6 @@ hypre_CSRMatrixTransposeDevice( hypre_CSRMatrix *A, hypre_CSRMatrix **AT, HYPRE_
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTransposeDevice)( A, AT, data );
 }
 
-#if defined(HYPRE_USING_CUSPARSE)
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveCusparse( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTriLowerUpperSolveCusparse)( uplo, unit_diag, A, l1_norms, f, u );
-}
-
-#endif
-
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -413,16 +344,13 @@ hypre_CSRMatrixTriLowerUpperSolveDevice_core( char uplo, HYPRE_Int unit_diag, hy
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTriLowerUpperSolveDevice_core)( uplo, unit_diag, A, l1_norms, f, offset_f, u, offset_u );
 }
 
-#if defined(HYPRE_USING_ROCSPARSE)
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveRocsparse( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u )
+hypre_CSRMatrixTriLowerUpperSolveVendor( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTriLowerUpperSolveRocsparse)( uplo, unit_diag, A, l1_norms, f, u );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixTriLowerUpperSolveVendor)( uplo, unit_diag, A, l1_norms, f, u );
 }
-
-#endif
 
 /*--------------------------------------------------------------------------*/
 
@@ -434,8 +362,24 @@ hypre_CSRMatrixTripleMultiplyDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hyp
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_CSRSpGemmVendor( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpGemmVendor)( A, B, C, nnzC_out, d_ic_out, d_jc_out, d_c_out );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRSpTransVendor( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpTransVendor)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_CsrsvData*
-hypre_CsrsvDataCreate( void )
+hypre_CsrsvDataCreate( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CsrsvDataCreate)( );
 }
@@ -459,7 +403,7 @@ hypre_GPUMatDataSetCSRData( hypre_CSRMatrix *matrix )
 /*--------------------------------------------------------------------------*/
 
 hypre_GpuMatData*
-hypre_GpuMatDataCreate( void )
+hypre_GpuMatDataCreate( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GpuMatDataCreate)( );
 }
@@ -574,6 +518,14 @@ HYPRE_Complex
 hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorSumEltsDevice)( vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SortCSRVendor( hypre_CSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SortCSRVendor)( A );
 }
 
 

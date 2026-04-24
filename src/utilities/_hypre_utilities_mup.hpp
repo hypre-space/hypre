@@ -252,11 +252,11 @@ HYPRE_Int
 hypre_DeviceMemoryGetUsage_long_dbl( hypre_long_double *mem );
 
 HYPRE_Int
-hypre_ForceSyncComputeStream_flt( void );
+hypre_ForceSyncComputeStream_flt( );
 HYPRE_Int
-hypre_ForceSyncComputeStream_dbl( void );
+hypre_ForceSyncComputeStream_dbl( );
 HYPRE_Int
-hypre_ForceSyncComputeStream_long_dbl( void );
+hypre_ForceSyncComputeStream_long_dbl( );
 
 HYPRE_Int
 hypre_GetSyncCudaCompute_flt( HYPRE_Int *cuda_compute_stream_sync_ptr );
@@ -308,11 +308,11 @@ HYPRE_Int
 hypre_IntArraySetInterleavedValuesDevice_long_dbl( hypre_IntArray *v, HYPRE_Int cycle );
 
 HYPRE_Int
-hypre_ResetDevice_flt( void );
+hypre_ResetDevice_flt( );
 HYPRE_Int
-hypre_ResetDevice_dbl( void );
+hypre_ResetDevice_dbl( );
 HYPRE_Int
-hypre_ResetDevice_long_dbl( void );
+hypre_ResetDevice_long_dbl( );
 
 HYPRE_Int
 hypre_ResetDeviceRandGenerator_flt( hypre_ulonglongint seed, hypre_ulonglongint offset );
@@ -350,18 +350,18 @@ HYPRE_Int
 hypre_SetUserDeviceMfree_long_dbl( GPUMfreeFunc func );
 
 HYPRE_Int
-hypre_SyncComputeStream_flt( void );
+hypre_SyncComputeStream_flt( );
 HYPRE_Int
-hypre_SyncComputeStream_dbl( void );
+hypre_SyncComputeStream_dbl( );
 HYPRE_Int
-hypre_SyncComputeStream_long_dbl( void );
+hypre_SyncComputeStream_long_dbl( );
 
 HYPRE_Int
-hypre_SyncDevice_flt( void );
+hypre_SyncDevice_flt( );
 HYPRE_Int
-hypre_SyncDevice_dbl( void );
+hypre_SyncDevice_dbl( );
 HYPRE_Int
-hypre_SyncDevice_long_dbl( void );
+hypre_SyncDevice_long_dbl( );
 
 /* functions_gpu */
 
@@ -391,29 +391,12 @@ hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hy
 HYPRE_Int
 hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
-
 hypre_DeviceData*
-hypre_DeviceDataCreate_flt( void );
+hypre_DeviceDataCreate_flt( );
 hypre_DeviceData*
-hypre_DeviceDataCreate_dbl( void );
+hypre_DeviceDataCreate_dbl( );
 hypre_DeviceData*
-hypre_DeviceDataCreate_long_dbl( void );
-
-#if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t
-hypre_DeviceDataCublasHandle_flt( hypre_DeviceData *data );
-cublasHandle_t
-hypre_DeviceDataCublasHandle_dbl( hypre_DeviceData *data );
-cublasHandle_t
-hypre_DeviceDataCublasHandle_long_dbl( hypre_DeviceData *data );
-
-#endif
+hypre_DeviceDataCreate_long_dbl( );
 
 hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_flt( hypre_DeviceData *data );
@@ -421,13 +404,6 @@ hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
 hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
 
 void
 hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );
@@ -443,19 +419,12 @@ hypre_DeviceDataStream_dbl( hypre_DeviceData *data, HYPRE_Int i );
 hypre_DeviceStream
 hypre_DeviceDataStream_long_dbl( hypre_DeviceData *data, HYPRE_Int i );
 
-vendorSolverHandle_t
-hypre_DeviceDataVendorSolverHandle_flt( hypre_DeviceData *data );
-vendorSolverHandle_t
-hypre_DeviceDataVendorSolverHandle_dbl( hypre_DeviceData *data );
-vendorSolverHandle_t
-hypre_DeviceDataVendorSolverHandle_long_dbl( hypre_DeviceData *data );
-
 dim3
-hypre_GetDefaultDeviceBlockDimension_flt( void );
+hypre_GetDefaultDeviceBlockDimension_flt( );
 dim3
-hypre_GetDefaultDeviceBlockDimension_dbl( void );
+hypre_GetDefaultDeviceBlockDimension_dbl( );
 dim3
-hypre_GetDefaultDeviceBlockDimension_long_dbl( void );
+hypre_GetDefaultDeviceBlockDimension_long_dbl( );
 
 dim3
 hypre_GetDefaultDeviceGridDimension_flt( HYPRE_Int n, const char *granularity, dim3 bDim );
@@ -463,16 +432,6 @@ dim3
 hypre_GetDefaultDeviceGridDimension_dbl( HYPRE_Int n, const char *granularity, dim3 bDim );
 dim3
 hypre_GetDefaultDeviceGridDimension_long_dbl( HYPRE_Int n, const char *granularity, dim3 bDim );
-
-#if defined(HYPRE_USING_CUSPARSE)
-cudaDataType
-hypre_HYPREComplexToCudaDataType_flt( void );
-cudaDataType
-hypre_HYPREComplexToCudaDataType_dbl( void );
-cudaDataType
-hypre_HYPREComplexToCudaDataType_long_dbl( void );
-
-#endif
 
 dim3
 hypre_dim3_flt( HYPRE_Int x );

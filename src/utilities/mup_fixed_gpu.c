@@ -283,7 +283,7 @@ hypre_DeviceMemoryGetUsage( HYPRE_Real *mem )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ForceSyncComputeStream( void )
+hypre_ForceSyncComputeStream( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ForceSyncComputeStream)( );
 }
@@ -347,7 +347,7 @@ hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v, HYPRE_Int cycle )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ResetDevice( void )
+hypre_ResetDevice( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ResetDevice)( );
 }
@@ -395,7 +395,7 @@ hypre_SetUserDeviceMfree( GPUMfreeFunc func )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncComputeStream( void )
+hypre_SyncComputeStream( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SyncComputeStream)( );
 }
@@ -403,7 +403,7 @@ hypre_SyncComputeStream( void )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncDevice( void )
+hypre_SyncDevice( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SyncDevice)( );
 }
@@ -419,30 +419,11 @@ hypreDevice_GenScatterAdd( HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Re
 
 /*--------------------------------------------------------------------------*/
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataComputeStream)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
 hypre_DeviceData*
-hypre_DeviceDataCreate( void )
+hypre_DeviceDataCreate( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCreate)( );
 }
-
-#if defined(HYPRE_USING_CUBLAS)
-/*--------------------------------------------------------------------------*/
-
-cublasHandle_t
-hypre_DeviceDataCublasHandle( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCublasHandle)( data );
-}
-
-#endif
 
 /*--------------------------------------------------------------------------*/
 
@@ -450,14 +431,6 @@ hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator( hypre_DeviceData *data )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCurandGenerator)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCusparseHandle)( data );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -478,16 +451,8 @@ hypre_DeviceDataStream( hypre_DeviceData *data, HYPRE_Int i )
 
 /*--------------------------------------------------------------------------*/
 
-vendorSolverHandle_t
-hypre_DeviceDataVendorSolverHandle( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataVendorSolverHandle)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
 dim3
-hypre_GetDefaultDeviceBlockDimension( void )
+hypre_GetDefaultDeviceBlockDimension( )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceBlockDimension)( );
 }
@@ -499,17 +464,6 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDefaultDeviceGridDimension)( n, granularity, bDim );
 }
-
-#if defined(HYPRE_USING_CUSPARSE)
-/*--------------------------------------------------------------------------*/
-
-cudaDataType
-hypre_HYPREComplexToCudaDataType( void )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_HYPREComplexToCudaDataType)( );
-}
-
-#endif
 
 /*--------------------------------------------------------------------------*/
 

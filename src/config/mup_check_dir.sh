@@ -32,11 +32,6 @@ fi
 
 export LC_COLLATE=C  # sort by listing capital letters first
 
-strip_guard_suffix()
-{
-    sed 's/|.*$//'
-}
-
 if [ "$BUILD_TYPE" = "GPU" ]; then
     # Combine CPU and GPU function lists.
     # Some directories may not have GPU lists so we suppress "file not found" warnings
@@ -44,9 +39,9 @@ if [ "$BUILD_TYPE" = "GPU" ]; then
         mup.functions mup.functions_gpu \
         mup.methods mup.methods_gpu \
         2>/dev/null \
-        | strip_guard_suffix | sort | uniq  > mup_check.old
+        | sort | uniq  > mup_check.old
 else
-    cat mup.fixed mup.functions mup.methods 2>/dev/null | strip_guard_suffix | sort | uniq  > mup_check.old
+    cat mup.fixed mup.functions mup.methods | sort | uniq  > mup_check.old
 fi
 
 $scriptdir/generate_function_list.sh    | sort | uniq  > mup_check.new

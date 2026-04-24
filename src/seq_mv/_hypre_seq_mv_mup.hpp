@@ -34,42 +34,12 @@ hypreDevice_CSRSpGemm_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatr
 HYPRE_Int
 hypreDevice_CSRSpGemm_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI_flt( HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_float *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_c_out );
-HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI_dbl( HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_double *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_c_out );
-HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI_long_dbl( HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_a, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_long_double *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_c_out );
-
-#endif
-
 HYPRE_Int
 hypreDevice_CSRSpTrans_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
 HYPRE_Int
 hypreDevice_CSRSpTrans_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
 HYPRE_Int
 hypreDevice_CSRSpTrans_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
-
-#if defined(HYPRE_USING_CUSPARSE)
-HYPRE_Int
-hypreDevice_CSRSpTransCusparse_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTransCusparse_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTransCusparse_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
-
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int
-hypreDevice_CSRSpTransRocsparse_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTransRocsparse_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTransRocsparse_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
-
-#endif
 
 hypre_CSRMatrix *
 hypre_CSRMatrixAddDevice_flt( hypre_float alpha, hypre_CSRMatrix *A, hypre_float beta, hypre_CSRMatrix *B );
@@ -204,26 +174,6 @@ hypre_CSRMatrixIntersectPattern_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYP
 HYPRE_Int
 hypre_CSRMatrixIntersectPattern_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA, HYPRE_Int diag_option );
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparseNewAPI_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparseNewAPI_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_double beta, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparseNewAPI_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *y, HYPRE_Int offset );
-
-#endif
-
-#if defined(HYPRE_USING_CUSPARSE)
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparse_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparse_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_double beta, hypre_Vector *y, HYPRE_Int offset );
-HYPRE_Int
-hypre_CSRMatrixMatvecCusparse_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *y, HYPRE_Int offset );
-
-#endif
-
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int
@@ -231,15 +181,12 @@ hypre_CSRMatrixMatvecDevice_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRM
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 
-#if defined(HYPRE_USING_ROCSPARSE)
 HYPRE_Int
-hypre_CSRMatrixMatvecRocsparse_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *y, HYPRE_Int offset );
+hypre_CSRMatrixMatvecVendor_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int
-hypre_CSRMatrixMatvecRocsparse_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_double beta, hypre_Vector *y, HYPRE_Int offset );
+hypre_CSRMatrixMatvecVendor_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_double beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int
-hypre_CSRMatrixMatvecRocsparse_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *y, HYPRE_Int offset );
-
-#endif
+hypre_CSRMatrixMatvecVendor_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *y, HYPRE_Int offset );
 
 HYPRE_Int
 hypre_CSRMatrixMergeColMapOffd_flt( HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int B_ext_offd_nnz, HYPRE_BigInt *B_ext_offd_bigj, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, HYPRE_Int **map_B_to_C_ptr );
@@ -346,16 +293,6 @@ hypre_CSRMatrixTransposeDevice_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix **AT, HY
 HYPRE_Int
 hypre_CSRMatrixTransposeDevice_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix **AT, HYPRE_Int data );
 
-#if defined(HYPRE_USING_CUSPARSE)
-HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveCusparse_flt( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_float *l1_norms, hypre_float *f, hypre_float *u );
-HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveCusparse_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_double *l1_norms, hypre_double *f, hypre_double *u );
-HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveCusparse_long_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_long_double *l1_norms, hypre_long_double *f, hypre_long_double *u );
-
-#endif
-
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveDevice_flt( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_float *l1_norms, hypre_Vector *f, hypre_Vector *u );
 HYPRE_Int
@@ -370,15 +307,12 @@ hypre_CSRMatrixTriLowerUpperSolveDevice_core_dbl( char uplo, HYPRE_Int unit_diag
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveDevice_core_long_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_long_double *l1_norms, hypre_Vector *f, HYPRE_Int offset_f, hypre_Vector *u, HYPRE_Int offset_u );
 
-#if defined(HYPRE_USING_ROCSPARSE)
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveRocsparse_flt( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_float *l1_norms, hypre_float *f, hypre_float *u );
+hypre_CSRMatrixTriLowerUpperSolveVendor_flt( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_float *l1_norms, hypre_float *f, hypre_float *u );
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveRocsparse_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_double *l1_norms, hypre_double *f, hypre_double *u );
+hypre_CSRMatrixTriLowerUpperSolveVendor_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_double *l1_norms, hypre_double *f, hypre_double *u );
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveRocsparse_long_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_long_double *l1_norms, hypre_long_double *f, hypre_long_double *u );
-
-#endif
+hypre_CSRMatrixTriLowerUpperSolveVendor_long_dbl( char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, hypre_long_double *l1_norms, hypre_long_double *f, hypre_long_double *u );
 
 hypre_CSRMatrix *
 hypre_CSRMatrixTripleMultiplyDevice_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C );
@@ -387,12 +321,26 @@ hypre_CSRMatrixTripleMultiplyDevice_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B,
 hypre_CSRMatrix *
 hypre_CSRMatrixTripleMultiplyDevice_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C );
 
+HYPRE_Int
+hypre_CSRSpGemmVendor_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_c_out );
+HYPRE_Int
+hypre_CSRSpGemmVendor_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_c_out );
+HYPRE_Int
+hypre_CSRSpGemmVendor_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_c_out );
+
+HYPRE_Int
+hypre_CSRSpTransVendor_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
+HYPRE_Int
+hypre_CSRSpTransVendor_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
+HYPRE_Int
+hypre_CSRSpTransVendor_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
+
 hypre_CsrsvData*
-hypre_CsrsvDataCreate_flt( void );
+hypre_CsrsvDataCreate_flt( );
 hypre_CsrsvData*
-hypre_CsrsvDataCreate_dbl( void );
+hypre_CsrsvDataCreate_dbl( );
 hypre_CsrsvData*
-hypre_CsrsvDataCreate_long_dbl( void );
+hypre_CsrsvDataCreate_long_dbl( );
 
 HYPRE_Int
 hypre_CsrsvDataDestroy_flt( hypre_CsrsvData *data );
@@ -409,11 +357,11 @@ HYPRE_Int
 hypre_GPUMatDataSetCSRData_long_dbl( hypre_CSRMatrix *matrix );
 
 hypre_GpuMatData*
-hypre_GpuMatDataCreate_flt( void );
+hypre_GpuMatDataCreate_flt( );
 hypre_GpuMatData*
-hypre_GpuMatDataCreate_dbl( void );
+hypre_GpuMatDataCreate_dbl( );
 hypre_GpuMatData*
-hypre_GpuMatDataCreate_long_dbl( void );
+hypre_GpuMatDataCreate_long_dbl( );
 
 HYPRE_Int
 hypre_GpuMatDataDestroy_flt( hypre_GpuMatData *data );
@@ -512,6 +460,13 @@ HYPRE_Complex
 hypre_SeqVectorSumEltsDevice_dbl( hypre_Vector *vector );
 HYPRE_Complex
 hypre_SeqVectorSumEltsDevice_long_dbl( hypre_Vector *vector );
+
+HYPRE_Int
+hypre_SortCSRVendor_flt( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_SortCSRVendor_dbl( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_SortCSRVendor_long_dbl( hypre_CSRMatrix *A );
 
 /* functions_gpu */
 
