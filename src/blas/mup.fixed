@@ -5,9 +5,11 @@ hypre_d_sign
 hypre_dasum
 hypre_daxpy
 hypre_dcopy
+hypre_ddot
 hypre_dgemm
 hypre_dgemv
 hypre_dger
+hypre_dnrm2
 hypre_drot
 hypre_dscal
 hypre_dswap

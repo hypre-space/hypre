@@ -12,8 +12,6 @@
 
 #undef hypre_BLAS_MUP_DEF_HEADER
 
-#undef hypre_ddot
-#undef hypre_dnrm2
 #undef hypre_blas_lsame
 #undef hypre_blas_xerbla
 #undef hypre_d_lg10
@@ -21,9 +19,11 @@
 #undef hypre_dasum
 #undef hypre_daxpy
 #undef hypre_dcopy
+#undef hypre_ddot
 #undef hypre_dgemm
 #undef hypre_dgemv
 #undef hypre_dger
+#undef hypre_dnrm2
 #undef hypre_drot
 #undef hypre_dscal
 #undef hypre_dswap

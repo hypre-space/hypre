@@ -14,24 +14,6 @@
 
 
 
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-hypre_ddot( HYPRE_Int *n, void *dx, HYPRE_Int *incx, void *dy, HYPRE_Int *incy )
-{
-   HYPRE_Precision precision = hypre_GlobalPrecision();
-   return hypre_ddot_pre( precision, n, dx, incx, dy, incy );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-hypre_dnrm2( HYPRE_Int *n, void *dx, HYPRE_Int *incx )
-{
-   HYPRE_Precision precision = hypre_GlobalPrecision();
-   return hypre_dnrm2_pre( precision, n, dx, incx );
-}
-
 
 #endif
 
