@@ -15,6 +15,8 @@
 
 #include "_hypre_mup_def.h"
 
+#define hypre_ddot HYPRE_MULTIPRECISION_FUNC ( hypre_ddot )
+#define hypre_dnrm2 HYPRE_MULTIPRECISION_FUNC ( hypre_dnrm2 )
 #define hypre_blas_lsame HYPRE_FIXEDPRECISION_FUNC ( hypre_blas_lsame )
 #define hypre_blas_xerbla HYPRE_FIXEDPRECISION_FUNC ( hypre_blas_xerbla )
 #define hypre_d_lg10 HYPRE_FIXEDPRECISION_FUNC ( hypre_d_lg10 )
@@ -22,11 +24,9 @@
 #define hypre_dasum HYPRE_FIXEDPRECISION_FUNC ( hypre_dasum )
 #define hypre_daxpy HYPRE_FIXEDPRECISION_FUNC ( hypre_daxpy )
 #define hypre_dcopy HYPRE_FIXEDPRECISION_FUNC ( hypre_dcopy )
-#define hypre_ddot HYPRE_FIXEDPRECISION_FUNC ( hypre_ddot )
 #define hypre_dgemm HYPRE_FIXEDPRECISION_FUNC ( hypre_dgemm )
 #define hypre_dgemv HYPRE_FIXEDPRECISION_FUNC ( hypre_dgemv )
 #define hypre_dger HYPRE_FIXEDPRECISION_FUNC ( hypre_dger )
-#define hypre_dnrm2 HYPRE_FIXEDPRECISION_FUNC ( hypre_dnrm2 )
 #define hypre_drot HYPRE_FIXEDPRECISION_FUNC ( hypre_drot )
 #define hypre_dscal HYPRE_FIXEDPRECISION_FUNC ( hypre_dscal )
 #define hypre_dswap HYPRE_FIXEDPRECISION_FUNC ( hypre_dswap )

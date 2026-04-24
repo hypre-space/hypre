@@ -21,6 +21,14 @@ BEGIN {
 }
 
 {
+   guard = ""
+   nfields = NF
+   if ($NF ~ /^#guard=/)
+   {
+      guard = substr($NF, 8)
+      nfields = NF - 1
+   }
+
    fret  = $1
    fdef  = $2
    tab   = "   "
@@ -124,6 +132,8 @@ function Format(args)
 
 function GenFixed()
 {
+   GuardStart()
+
    pargs     = Format(pargs)
    pargs_flt = SubFloat(pargs)
    pargs_dbl = SubDouble(pargs)
@@ -142,6 +152,8 @@ function GenFixed()
    print "{"                                                                                >> outc
    print tab "return HYPRE_CURRENTPRECISION_FUNC("fdef")("cargs");"                         >> outc
    print "}\n"                                                                              >> outc
+
+   GuardEnd()
 }
 
 #################################################################################
@@ -152,6 +164,8 @@ function GenFixed()
 
 function GenFunctions()
 {
+   GuardStart()
+
    pargs     = Format(pargs)
    pargs_flt = SubFloat(pargs)
    pargs_dbl = SubDouble(pargs)
@@ -181,6 +195,8 @@ function GenFunctions()
    print tab "HYPRE_Precision precision = hypre_GlobalPrecision();"                         >> outc
    print tab "return "fdef"_pre("cargs_pre");"                                              >> outc
    print "}\n"                                                                              >> outc
+
+   GuardEnd()
 }
 
 #################################################################################
@@ -191,6 +207,8 @@ function GenFunctions()
 
 function GenPre()
 {
+   GuardStart()
+
    if (nargs == 0)
    {
       pargs_pre = "HYPRE_Precision precision"
@@ -234,6 +252,26 @@ function GenPre()
    }
    print tab "}"                                                                            >> outc
    print "}\n"                                                                              >> outc
+
+   GuardEnd()
+}
+
+function GuardStart()
+{
+   if (guard != "")
+   {
+      print "#if "guard                                                                     >> outh
+      print "#if "guard                                                                     >> outc
+   }
+}
+
+function GuardEnd()
+{
+   if (guard != "")
+   {
+      print "#endif\n"                                                                      >> outh
+      print "#endif\n"                                                                      >> outc
+   }
 }
 
 #################################################################################
@@ -248,9 +286,9 @@ function ParseArgs(          i, argall, argvar, laststart, lastlength)
 {
    pargs = ""
    cargs = ""
-   nargs = NF-2
+   nargs = nfields-2
 
-   for(i = 3; i <= NF; i++)
+   for(i = 3; i <= nfields; i++)
    {
       argall = $i
       # Find the last legal C token in the argument (should not start with numbers)
@@ -264,7 +302,7 @@ function ParseArgs(          i, argall, argvar, laststart, lastlength)
       }
       argvar = substr($i, laststart, lastlength)
       # Update the argument strings
-      if(i < NF)
+      if(i < nfields)
       {
          pargs = pargs argall ","
          cargs = cargs argvar ","

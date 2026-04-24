@@ -41,6 +41,9 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
+  mup_fixed_gpu.c
+  mup_functions_gpu.c
+  mup_pre_gpu.c
 )
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
@@ -54,7 +57,11 @@ if (HYPRE_USING_GPU)
   set(GPU_SRCS
     IJMatrix_parcsr_device.c
     IJVector_parcsr_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

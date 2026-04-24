@@ -187,9 +187,15 @@
 #undef hypre_SeqVectorStridedCopy
 #undef hypre_SeqVectorSumElts
 #undef hypre_SeqVectorSumEltsHost
+#undef hypre_CSRMatrixSpMVAnalysisDevice
 #undef hypreDevice_CSRSpAdd
 #undef hypreDevice_CSRSpGemm
 #undef hypreDevice_CSRSpGemmBinnedGetBlockNumDim
+#undef hypreDevice_CSRSpGemmCusparse
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+#undef hypreDevice_CSRSpGemmCusparseGenericAPI
+#endif
+#undef hypreDevice_CSRSpGemmCusparseOldAPI
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin
@@ -202,7 +208,12 @@
 #undef hypreDevice_CSRSpGemmRownnzUpperboundBinned
 #undef hypreDevice_CSRSpGemmRownnzUpperboundNoBin
 #undef hypreDevice_CSRSpTrans
+#if defined(HYPRE_USING_CUSPARSE)
+#undef hypreDevice_CSRSpTransCusparse
+#endif
+#if defined(HYPRE_USING_ROCSPARSE)
 #undef hypreDevice_CSRSpTransRocsparse
+#endif
 #undef hypreGPUKernel_CSRCheckDiagFirst
 #undef hypreGPUKernel_CSRDiagScale
 #undef hypreGPUKernel_CSRMatrixCheckForMissingDiagonal
@@ -229,8 +240,16 @@
 #undef hypre_CSRMatrixIdentityDevice
 #undef hypre_CSRMatrixIntSpMVDevice
 #undef hypre_CSRMatrixIntersectPattern
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+#undef hypre_CSRMatrixMatvecCusparseNewAPI
+#endif
+#if defined(HYPRE_USING_CUSPARSE)
+#undef hypre_CSRMatrixMatvecCusparse
+#endif
 #undef hypre_CSRMatrixMatvecDevice
+#if defined(HYPRE_USING_ROCSPARSE)
 #undef hypre_CSRMatrixMatvecRocsparse
+#endif
 #undef hypre_CSRMatrixMergeColMapOffd
 #undef hypre_CSRMatrixMoveDiagFirstDevice
 #undef hypre_CSRMatrixMultiplyDevice
@@ -240,16 +259,22 @@
 #undef hypre_CSRMatrixSetRownnzDevice
 #undef hypre_CSRMatrixSortRow
 #undef hypre_CSRMatrixSortRowOutOfPlace
-#undef hypre_CSRMatrixSpMVAnalysisDevice
 #undef hypre_CSRMatrixSpMVDevice
 #undef hypre_CSRMatrixSplitDevice
 #undef hypre_CSRMatrixSplitDevice_core
 #undef hypre_CSRMatrixStack2Device
 #undef hypre_CSRMatrixTaggedFnormDevice
+#undef hypre_CSRMatrixToCusparseSpMat
+#undef hypre_CSRMatrixToCusparseSpMat_core
 #undef hypre_CSRMatrixTransposeDevice
+#if defined(HYPRE_USING_CUSPARSE)
+#undef hypre_CSRMatrixTriLowerUpperSolveCusparse
+#endif
 #undef hypre_CSRMatrixTriLowerUpperSolveDevice
 #undef hypre_CSRMatrixTriLowerUpperSolveDevice_core
+#if defined(HYPRE_USING_ROCSPARSE)
 #undef hypre_CSRMatrixTriLowerUpperSolveRocsparse
+#endif
 #undef hypre_CSRMatrixTripleMultiplyDevice
 #undef hypre_CsrsvDataCreate
 #undef hypre_CsrsvDataDestroy
@@ -269,9 +294,14 @@
 #undef hypre_SeqVectorSetValuesTaggedDevice
 #undef hypre_SeqVectorStridedCopyDevice
 #undef hypre_SeqVectorSumEltsDevice
+#undef hypre_SortCSRCusparse
 #undef hypre_SortCSRRocsparse
 #undef hypre_SpGemmCreateBins
 #undef hypre_SpGemmCreateGlobalHashTable
 #undef hypre_SpGemmGhashSize
+#undef hypre_VectorToCusparseDnMat
+#undef hypre_VectorToCusparseDnMat_core
+#undef hypre_VectorToCusparseDnVec
+#undef hypre_VectorToCusparseDnVec_core
 #undef hypre_create_ija
 #undef hypre_expdistfromuniform

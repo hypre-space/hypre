@@ -40,13 +40,6 @@ hypre_dcopy_dbl( HYPRE_Int *n, hypre_double *dx, HYPRE_Int *incx, hypre_double *
 HYPRE_Int
 hypre_dcopy_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx, hypre_long_double *dy, HYPRE_Int *incy );
 
-HYPRE_Real
-hypre_ddot_flt( HYPRE_Int *n, hypre_float *dx, HYPRE_Int *incx, hypre_float *dy, HYPRE_Int *incy );
-HYPRE_Real
-hypre_ddot_dbl( HYPRE_Int *n, hypre_double *dx, HYPRE_Int *incx, hypre_double *dy, HYPRE_Int *incy );
-HYPRE_Real
-hypre_ddot_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx, hypre_long_double *dy, HYPRE_Int *incy );
-
 HYPRE_Int
 hypre_dgemm_flt( const char *transa, const char *transb, HYPRE_Int *m, HYPRE_Int *n, HYPRE_Int *k, hypre_float *alpha, hypre_float *a, HYPRE_Int *lda, hypre_float *b, HYPRE_Int *ldb, hypre_float *beta, hypre_float *c, HYPRE_Int *ldc );
 HYPRE_Int
@@ -67,13 +60,6 @@ HYPRE_Int
 hypre_dger_dbl( HYPRE_Int *m, HYPRE_Int *n, hypre_double *alpha, hypre_double *x, HYPRE_Int *incx, hypre_double *y, HYPRE_Int *incy, hypre_double *a, HYPRE_Int *lda );
 HYPRE_Int
 hypre_dger_long_dbl( HYPRE_Int *m, HYPRE_Int *n, hypre_long_double *alpha, hypre_long_double *x, HYPRE_Int *incx, hypre_long_double *y, HYPRE_Int *incy, hypre_long_double *a, HYPRE_Int *lda );
-
-HYPRE_Real
-hypre_dnrm2_flt( HYPRE_Int *n, hypre_float *dx, HYPRE_Int *incx );
-HYPRE_Real
-hypre_dnrm2_dbl( HYPRE_Int *n, hypre_double *dx, HYPRE_Int *incx );
-HYPRE_Real
-hypre_dnrm2_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx );
 
 HYPRE_Int
 hypre_drot_flt( HYPRE_Int *n, hypre_float *dx, HYPRE_Int *incx, hypre_float *dy, HYPRE_Int *incy, hypre_float *c, hypre_float *s );
@@ -168,7 +154,31 @@ hypre_idamax_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx );
 
 /* functions */
 
+HYPRE_Real
+hypre_ddot_flt( HYPRE_Int *n, hypre_float *dx, HYPRE_Int *incx, hypre_float *dy, HYPRE_Int *incy );
+HYPRE_Real
+hypre_ddot_dbl( HYPRE_Int *n, hypre_double *dx, HYPRE_Int *incx, hypre_double *dy, HYPRE_Int *incy );
+HYPRE_Real
+hypre_ddot_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx, hypre_long_double *dy, HYPRE_Int *incy );
+HYPRE_Real
+hypre_ddot( HYPRE_Int *n, void *dx, HYPRE_Int *incx, void *dy, HYPRE_Int *incy );
+
+HYPRE_Real
+hypre_dnrm2_flt( HYPRE_Int *n, hypre_float *dx, HYPRE_Int *incx );
+HYPRE_Real
+hypre_dnrm2_dbl( HYPRE_Int *n, hypre_double *dx, HYPRE_Int *incx );
+HYPRE_Real
+hypre_dnrm2_long_dbl( HYPRE_Int *n, hypre_long_double *dx, HYPRE_Int *incx );
+HYPRE_Real
+hypre_dnrm2( HYPRE_Int *n, void *dx, HYPRE_Int *incx );
+
 /* pre */
+
+HYPRE_Real
+hypre_ddot_pre( HYPRE_Precision precision, HYPRE_Int *n, void *dx, HYPRE_Int *incx, void *dy, HYPRE_Int *incy );
+
+HYPRE_Real
+hypre_dnrm2_pre( HYPRE_Precision precision, HYPRE_Int *n, void *dx, HYPRE_Int *incx );
 
 #endif
 

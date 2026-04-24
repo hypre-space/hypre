@@ -372,15 +372,25 @@
 #define hypre_CurandUniformSingle HYPRE_FIXEDPRECISION_FUNC ( hypre_CurandUniformSingle )
 #define hypre_DeviceDataComputeStream HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataComputeStream )
 #define hypre_DeviceDataCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataCreate )
+#if defined(HYPRE_USING_CUBLAS)
+#define hypre_DeviceDataCublasHandle HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataCublasHandle )
+#endif
 #define hypre_DeviceDataCurandGenerator HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataCurandGenerator )
 #define hypre_DeviceDataCusparseHandle HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataCusparseHandle )
 #define hypre_DeviceDataDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataDestroy )
 #define hypre_DeviceDataStream HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataStream )
+#define hypre_DeviceDataVendorSolverHandle HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceDataVendorSolverHandle )
 #define hypre_DeviceMemoryGetUsage HYPRE_FIXEDPRECISION_FUNC ( hypre_DeviceMemoryGetUsage )
 #define hypre_ForceSyncComputeStream HYPRE_FIXEDPRECISION_FUNC ( hypre_ForceSyncComputeStream )
 #define hypre_GetDefaultDeviceBlockDimension HYPRE_FIXEDPRECISION_FUNC ( hypre_GetDefaultDeviceBlockDimension )
 #define hypre_GetDefaultDeviceGridDimension HYPRE_FIXEDPRECISION_FUNC ( hypre_GetDefaultDeviceGridDimension )
 #define hypre_GetSyncCudaCompute HYPRE_FIXEDPRECISION_FUNC ( hypre_GetSyncCudaCompute )
+#if defined(HYPRE_USING_CUSPARSE)
+#define hypre_HYPREComplexToCudaDataType HYPRE_FIXEDPRECISION_FUNC ( hypre_HYPREComplexToCudaDataType )
+#endif
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
+#define hypre_HYPREIntToCusparseIndexType HYPRE_FIXEDPRECISION_FUNC ( hypre_HYPREIntToCusparseIndexType )
+#endif
 #define hypre_IntArrayCountDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayCountDevice )
 #define hypre_IntArrayInverseMappingDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayInverseMappingDevice )
 #define hypre_IntArrayNegateDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayNegateDevice )

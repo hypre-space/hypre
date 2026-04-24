@@ -16,6 +16,24 @@
 #if defined(HYPRE_USING_GPU)
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixSpMVAnalysisDevice_pre( HYPRE_Precision precision, hypre_CSRMatrix *matrix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_CSRMatrixSpMVAnalysisDevice_flt( matrix );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_CSRMatrixSpMVAnalysisDevice_dbl( matrix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_CSRMatrixSpMVAnalysisDevice_long_dbl( matrix );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
 #endif
 
 #endif

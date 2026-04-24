@@ -96,8 +96,10 @@ MP_CUFILES=\
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c
+MP_CUFILES += umpire.c
 else
 FILES += printf.c multiprecision.c
+CUFILES += umpire.c
 endif
 
 COBJS = ${FILES:.c=.o}
@@ -160,4 +162,4 @@ libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

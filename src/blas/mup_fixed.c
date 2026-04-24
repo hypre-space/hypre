@@ -40,14 +40,6 @@ hypre_dcopy( HYPRE_Int *n, HYPRE_Real *dx, HYPRE_Int *incx, HYPRE_Real *dy, HYPR
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Real
-hypre_ddot( HYPRE_Int *n, HYPRE_Real *dx, HYPRE_Int *incx, HYPRE_Real *dy, HYPRE_Int *incy )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ddot)( n, dx, incx, dy, incy );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_dgemm( const char *transa, const char *transb, HYPRE_Int *m, HYPRE_Int *n, HYPRE_Int *k, HYPRE_Real *alpha, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb, HYPRE_Real *beta, HYPRE_Real *c, HYPRE_Int *ldc )
 {
@@ -68,14 +60,6 @@ HYPRE_Int
 hypre_dger( HYPRE_Int *m, HYPRE_Int *n, HYPRE_Real *alpha, HYPRE_Real *x, HYPRE_Int *incx, HYPRE_Real *y, HYPRE_Int *incy, HYPRE_Real *a, HYPRE_Int *lda )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_dger)( m, n, alpha, x, incx, y, incy, a, lda );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Real
-hypre_dnrm2( HYPRE_Int *n, HYPRE_Real *dx, HYPRE_Int *incx )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_dnrm2)( n, dx, incx );
 }
 
 /*--------------------------------------------------------------------------*/

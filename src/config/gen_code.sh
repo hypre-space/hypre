@@ -50,6 +50,74 @@ then
    gpu="_gpu"
 fi
 
+emit_mup_define()
+{
+   listfile=$1
+   kind=$2
+
+   [ -f "$listfile" ] || return
+
+   while read -r entry
+   do
+      [ -z "$entry" ] && continue
+
+      func_name=${entry%%|*}
+      func_guard=""
+      if [ "$entry" != "$func_name" ]
+      then
+         func_guard=${entry#*|}
+      fi
+
+      if [ -n "$func_guard" ]
+      then
+         echo "#if $func_guard"
+      fi
+
+      if [ "$kind" = "fixed" ]
+      then
+         echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
+      else
+         echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
+      fi
+
+      if [ -n "$func_guard" ]
+      then
+         echo "#endif"
+      fi
+   done < "$listfile"
+}
+
+emit_mup_undef()
+{
+   listfile=$1
+
+   [ -f "$listfile" ] || return
+
+   while read -r entry
+   do
+      [ -z "$entry" ] && continue
+
+      func_name=${entry%%|*}
+      func_guard=""
+      if [ "$entry" != "$func_name" ]
+      then
+         func_guard=${entry#*|}
+      fi
+
+      if [ -n "$func_guard" ]
+      then
+         echo "#if $func_guard"
+      fi
+
+      echo "#undef $func_name"
+
+      if [ -n "$func_guard" ]
+      then
+         echo "#endif"
+      fi
+   done < "$listfile"
+}
+
 ############################################################################
 # Make sure the function list files are sorted (list capital letters first)
 ############################################################################
@@ -107,18 +175,12 @@ $(
       for i in functions methods
       do
          tag=${i}${c}
-         cat mup.${tag} | while read -r func_name
-         do
-            echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
-         done
+         emit_mup_define mup.${tag} multiprecision
       done
       for i in fixed
       do
          tag=${i}${c}
-         cat mup.${tag} | while read -r func_name
-         do
-            echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
-         done
+         emit_mup_define mup.${tag} fixed
       done
    done
 )
@@ -164,10 +226,7 @@ $(
       for i in functions methods fixed
       do
          tag=${i}${c}
-         cat mup.${tag} | while read -r func_name
-         do
-            echo "#undef $func_name"
-         done
+         emit_mup_undef mup.${tag}
       done
    done
 )
@@ -451,4 +510,3 @@ do
       rm -f ${OUTP}_${tag}_intpp.[ch]
    done
 done
-

@@ -14,6 +14,42 @@
 
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_ddot_pre( HYPRE_Precision precision, HYPRE_Int *n, void *dx, HYPRE_Int *incx, void *dy, HYPRE_Int *incy )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_ddot_flt( n, (hypre_float *)dx, incx, (hypre_float *)dy, incy );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_ddot_dbl( n, (hypre_double *)dx, incx, (hypre_double *)dy, incy );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_ddot_long_dbl( n, (hypre_long_double *)dx, incx, (hypre_long_double *)dy, incy );
+      default:
+         { HYPRE_Real value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_dnrm2_pre( HYPRE_Precision precision, HYPRE_Int *n, void *dx, HYPRE_Int *incx )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_dnrm2_flt( n, (hypre_float *)dx, incx );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_dnrm2_dbl( n, (hypre_double *)dx, incx );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_dnrm2_long_dbl( n, (hypre_long_double *)dx, incx );
+      default:
+         { HYPRE_Real value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
 
 #endif
 

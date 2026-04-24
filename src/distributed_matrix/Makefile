@@ -30,6 +30,9 @@ FILES =\
  distributed_matrix_PETSc.c\
  distributed_matrix_parcsr.c
 
+MP_FILES = \
+ distributed_matrix_mp.c
+
 OBJS = ${FILES:.c=.o}
 
 ifeq (${MP_BUILD}, 1) 
@@ -37,8 +40,9 @@ ifeq (${MP_BUILD}, 1)
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}
 COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
 
-OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
 
 endif
 
@@ -75,4 +79,4 @@ libHYPRE_DistributedMatrix.so libHYPRE_DistributedMatrix.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

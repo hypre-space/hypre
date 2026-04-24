@@ -168,6 +168,9 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
+  mup_fixed_gpu.c
+  mup_functions_gpu.c
+  mup_pre_gpu.c
   HYPRE_parcsr_ls_mp.c
 )
 
@@ -207,8 +210,12 @@ if (HYPRE_USING_GPU)
     par_relax_device.c
     par_mgr_device.c
     par_fsai_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
     dsuperlu.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

@@ -369,15 +369,25 @@
 #undef hypre_CurandUniformSingle
 #undef hypre_DeviceDataComputeStream
 #undef hypre_DeviceDataCreate
+#if defined(HYPRE_USING_CUBLAS)
+#undef hypre_DeviceDataCublasHandle
+#endif
 #undef hypre_DeviceDataCurandGenerator
 #undef hypre_DeviceDataCusparseHandle
 #undef hypre_DeviceDataDestroy
 #undef hypre_DeviceDataStream
+#undef hypre_DeviceDataVendorSolverHandle
 #undef hypre_DeviceMemoryGetUsage
 #undef hypre_ForceSyncComputeStream
 #undef hypre_GetDefaultDeviceBlockDimension
 #undef hypre_GetDefaultDeviceGridDimension
 #undef hypre_GetSyncCudaCompute
+#if defined(HYPRE_USING_CUSPARSE)
+#undef hypre_HYPREComplexToCudaDataType
+#endif
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
+#undef hypre_HYPREIntToCusparseIndexType
+#endif
 #undef hypre_IntArrayCountDevice
 #undef hypre_IntArrayInverseMappingDevice
 #undef hypre_IntArrayNegateDevice
