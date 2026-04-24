@@ -60,11 +60,15 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
    /* VPM: Adding sorting back since it is necessary for correctness in a few cases */
 #if 1
    hypre_SortCSRVendor(A);
-   hypre_TMemcpy(d_ja_sorted, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_a_sorted,  hypre_CSRMatrixData(A), HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_ja_sorted, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_a_sorted,  hypre_CSRMatrixData(A), HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
    hypre_SortCSRVendor(B);
-   hypre_TMemcpy(d_jb_sorted, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_b_sorted,  hypre_CSRMatrixData(B), HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_jb_sorted, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(d_b_sorted,  hypre_CSRMatrixData(B), HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
 #endif
 
    // nnzTotalDevHostPtr points to host memory
