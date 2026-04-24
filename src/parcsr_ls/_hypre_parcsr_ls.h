@@ -3787,6 +3787,9 @@ HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
 #ifndef hypre_MP_BUILD
 #include "_hypre_parcsr_ls_mup_undef.h"
 #include "_hypre_parcsr_ls_mup.h"
+#if defined(HYPRE_USING_GPU) && defined(__cplusplus)
+#include "_hypre_parcsr_ls_mup.hpp"
+#endif
 #endif
 #endif
 

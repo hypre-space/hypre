@@ -725,6 +725,9 @@ hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision );
 #ifndef hypre_MP_BUILD
 #include "_hypre_seq_mv_mup_undef.h"
 #include "_hypre_seq_mv_mup.h"
+#if defined(HYPRE_USING_GPU) && defined(__cplusplus)
+#include "_hypre_seq_mv_mup.hpp"
+#endif
 #endif
 #endif
 
