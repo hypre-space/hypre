@@ -474,16 +474,6 @@ hypre_HYPREComplexToCudaDataType_long_dbl( void );
 
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
-cusparseIndexType_t
-hypre_HYPREIntToCusparseIndexType_flt( void );
-cusparseIndexType_t
-hypre_HYPREIntToCusparseIndexType_dbl( void );
-cusparseIndexType_t
-hypre_HYPREIntToCusparseIndexType_long_dbl( void );
-
-#endif
-
 dim3
 hypre_dim3_flt( HYPRE_Int x );
 dim3

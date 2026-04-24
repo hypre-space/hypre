@@ -388,9 +388,6 @@
 #if defined(HYPRE_USING_CUSPARSE)
 #define hypre_HYPREComplexToCudaDataType HYPRE_FIXEDPRECISION_FUNC ( hypre_HYPREComplexToCudaDataType )
 #endif
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
-#define hypre_HYPREIntToCusparseIndexType HYPRE_FIXEDPRECISION_FUNC ( hypre_HYPREIntToCusparseIndexType )
-#endif
 #define hypre_IntArrayCountDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayCountDevice )
 #define hypre_IntArrayInverseMappingDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayInverseMappingDevice )
 #define hypre_IntArrayNegateDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_IntArrayNegateDevice )

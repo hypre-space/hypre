@@ -511,17 +511,6 @@ hypre_HYPREComplexToCudaDataType( void )
 
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
-/*--------------------------------------------------------------------------*/
-
-cusparseIndexType_t
-hypre_HYPREIntToCusparseIndexType( void )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_HYPREIntToCusparseIndexType)( );
-}
-
-#endif
-
 /*--------------------------------------------------------------------------*/
 
 dim3

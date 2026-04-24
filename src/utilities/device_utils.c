@@ -2801,34 +2801,6 @@ hypre_HYPREComplexToCudaDataType()
 #endif // #if defined(HYPRE_COMPLEX)
 }
 
-#if CUSPARSE_VERSION >= 10300
-/*--------------------------------------------------------------------
- * hypre_HYPREIntToCusparseIndexType
- *
- * Determines the associated cusparseIndexType_t for HYPRE_Int
- *--------------------------------------------------------------------*/
-
-cusparseIndexType_t
-hypre_HYPREIntToCusparseIndexType()
-{
-   /*
-   if(sizeof(char)*CHAR_BIT!=8)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR:  Unsupported char size");
-      hypre_assert(false);
-   }
-   */
-
-#if defined(HYPRE_BIGINT)
-   hypre_assert(sizeof(HYPRE_Int) == 8);
-   return CUSPARSE_INDEX_64I;
-#else
-   hypre_assert(sizeof(HYPRE_Int) == 4);
-   return CUSPARSE_INDEX_32I;
-#endif
-}
-#endif
-
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_CUBLAS)

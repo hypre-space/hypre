@@ -385,9 +385,6 @@
 #if defined(HYPRE_USING_CUSPARSE)
 #undef hypre_HYPREComplexToCudaDataType
 #endif
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 10300
-#undef hypre_HYPREIntToCusparseIndexType
-#endif
 #undef hypre_IntArrayCountDevice
 #undef hypre_IntArrayInverseMappingDevice
 #undef hypre_IntArrayNegateDevice

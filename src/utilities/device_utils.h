@@ -2266,7 +2266,17 @@ HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2
 cudaDataType hypre_HYPREComplexToCudaDataType();
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+static inline cusparseIndexType_t
+hypre_HYPREIntToCusparseIndexType()
+{
+#if defined(HYPRE_BIGINT)
+   hypre_assert(sizeof(HYPRE_Int) == 8);
+   return CUSPARSE_INDEX_64I;
+#else
+   hypre_assert(sizeof(HYPRE_Int) == 4);
+   return CUSPARSE_INDEX_32I;
+#endif
+}
 #endif
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
