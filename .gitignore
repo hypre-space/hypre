@@ -23,6 +23,7 @@ config.log
 config.status
 Makefile.config
 HYPRE_config.h
+HYPRE.pc
 autom4te.cache
 *.TVD.v4breakpoints*
 src/TAGS
