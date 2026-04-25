@@ -1728,19 +1728,17 @@ hypre_ParILURAPReorder(hypre_ParCSRMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ILUSetupLDUtoCusparse
+ * hypre_ILUSetupLDUtoVendor
  *
- * Convert the L, D, U style to the cusparse style
+ * Convert the L, D, U style to the vendor-library style
  * Assume the diagonal of L and U are the ilu factorization, directly combine them
- *
- * TODO (VPM): Check this function's name
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
-                            HYPRE_Real          *D,
-                            hypre_ParCSRMatrix  *U,
-                            hypre_ParCSRMatrix **LDUp)
+hypre_ILUSetupLDUtoVendor(hypre_ParCSRMatrix  *L,
+                          HYPRE_Real          *D,
+                          hypre_ParCSRMatrix  *U,
+                          hypre_ParCSRMatrix **LDUp)
 {
    MPI_Comm              comm     = hypre_ParCSRMatrixComm(L);
    hypre_CSRMatrix      *L_diag   = hypre_ParCSRMatrixDiag(L);
@@ -1837,8 +1835,7 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
    hypre_ILUSetupMILU0(A, NULL, NULL, n, n, &L, &D, &U, &S, &u_end, modified);
    hypre_TFree(u_end, HYPRE_MEMORY_HOST);
 
-   /* TODO (VPM): Change this function's name */
-   hypre_ILUSetupLDUtoCusparse(L, D, U, &ALU);
+   hypre_ILUSetupLDUtoVendor(L, D, U, &ALU);
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(L);

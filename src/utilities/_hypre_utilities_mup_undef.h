@@ -367,10 +367,8 @@
 #undef hypre_CudaCompileFlagCheck
 #undef hypre_CurandUniform
 #undef hypre_CurandUniformSingle
-#undef hypre_DeviceDataComputeStream
 #undef hypre_DeviceDataCreate
 #undef hypre_DeviceDataCurandGenerator
-#undef hypre_DeviceDataCusparseHandle
 #undef hypre_DeviceDataDestroy
 #undef hypre_DeviceDataStream
 #undef hypre_DeviceMemoryGetUsage

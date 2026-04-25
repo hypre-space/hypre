@@ -16,6 +16,15 @@
 #if defined(HYPRE_USING_GPU)
 
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixSpMVAnalysisDevice( hypre_CSRMatrix *matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_CSRMatrixSpMVAnalysisDevice_pre( precision, matrix );
+}
+
 #endif
 
 #endif

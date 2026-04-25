@@ -12,39 +12,74 @@
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
+static HYPRE_Int
+hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
+                                        HYPRE_Int       k,
+                                        HYPRE_Int       n,
+                                        HYPRE_Int       nnzA,
+                                        HYPRE_Int      *d_ia,
+                                        HYPRE_Int      *d_ja,
+                                        HYPRE_Complex  *d_a,
+                                        HYPRE_Int       nnzB,
+                                        HYPRE_Int      *d_ib,
+                                        HYPRE_Int      *d_jb,
+                                        HYPRE_Complex  *d_b,
+                                        HYPRE_Int      *nnzC_out,
+                                        HYPRE_Int     **d_ic_out,
+                                        HYPRE_Int     **d_jc_out,
+                                        HYPRE_Complex **d_c_out);
+
+static HYPRE_Int
+hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
+                                    HYPRE_Int          k,
+                                    HYPRE_Int          n,
+                                    cusparseMatDescr_t descr_A,
+                                    HYPRE_Int          nnzA,
+                                    HYPRE_Int         *d_ia,
+                                    HYPRE_Int         *d_ja,
+                                    HYPRE_Complex     *d_a,
+                                    cusparseMatDescr_t descr_B,
+                                    HYPRE_Int          nnzB,
+                                    HYPRE_Int         *d_ib,
+                                    HYPRE_Int         *d_jb,
+                                    HYPRE_Complex     *d_b,
+                                    cusparseMatDescr_t descr_C,
+                                    HYPRE_Int         *nnzC_out,
+                                    HYPRE_Int        **d_ic_out,
+                                    HYPRE_Int        **d_jc_out,
+                                    HYPRE_Complex    **d_c_out);
+
 HYPRE_Int
-hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
-                              HYPRE_Int          k,
-                              HYPRE_Int          n,
-                              cusparseMatDescr_t descr_A,
-                              HYPRE_Int          nnzA,
-                              HYPRE_Int         *d_ia,
-                              HYPRE_Int         *d_ja,
-                              HYPRE_Complex     *d_a,
-                              cusparseMatDescr_t descr_B,
-                              HYPRE_Int          nnzB,
-                              HYPRE_Int         *d_ib,
-                              HYPRE_Int         *d_jb,
-                              HYPRE_Complex     *d_b,
-                              cusparseMatDescr_t descr_C,
-                              HYPRE_Int         *nnzC_out,
-                              HYPRE_Int        **d_ic_out,
-                              HYPRE_Int        **d_jc_out,
-                              HYPRE_Complex    **d_c_out)
+hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix  *C,
+                      HYPRE_Int        *nnzC_out,
+                      HYPRE_Int       **d_ic_out,
+                      HYPRE_Int       **d_jc_out,
+                      HYPRE_Complex   **d_c_out)
 {
+   const HYPRE_Int m = hypre_CSRMatrixNumRows(A);
+   const HYPRE_Int k = hypre_CSRMatrixNumCols(A);
+   const HYPRE_Int n = hypre_CSRMatrixNumCols(B);
+
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
    hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
-                                           nnzA, d_ia, d_ja, d_a,
-                                           nnzB, d_ib, d_jb, d_b,
+                                           hypre_CSRMatrixNumNonzeros(A),
+                                           hypre_CSRMatrixI(A),
+                                           hypre_CSRMatrixJ(A),
+                                           hypre_CSRMatrixData(A),
+                                           hypre_CSRMatrixNumNonzeros(B),
+                                           hypre_CSRMatrixI(B),
+                                           hypre_CSRMatrixJ(B),
+                                           hypre_CSRMatrixData(B),
                                            nnzC_out, d_ic_out, d_jc_out, d_c_out);
-   HYPRE_UNUSED_VAR(descr_A);
-   HYPRE_UNUSED_VAR(descr_B);
-   HYPRE_UNUSED_VAR(descr_C);
 #else
    hypreDevice_CSRSpGemmCusparseOldAPI(m, k, n,
-                                       descr_A, nnzA, d_ia, d_ja, d_a,
-                                       descr_B, nnzB, d_ib, d_jb, d_b,
-                                       descr_C, nnzC_out, d_ic_out, d_jc_out, d_c_out);
+                                       hypre_CSRMatrixGPUMatDescr(A), hypre_CSRMatrixNumNonzeros(A),
+                                       hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                                       hypre_CSRMatrixGPUMatDescr(B), hypre_CSRMatrixNumNonzeros(B),
+                                       hypre_CSRMatrixI(B), hypre_CSRMatrixJ(B), hypre_CSRMatrixData(B),
+                                       hypre_CSRMatrixGPUMatDescr(C), nnzC_out, d_ic_out, d_jc_out, d_c_out);
 #endif
    return hypre_error_flag;
 }
@@ -71,7 +106,7 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
  * @param[out] *d_c_out Array containing values of C
  */
 
-HYPRE_Int
+static HYPRE_Int
 hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                         HYPRE_Int       k,
                                         HYPRE_Int       n,
@@ -213,7 +248,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 
 #else
 
-HYPRE_Int
+static HYPRE_Int
 hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
                                     HYPRE_Int          k,
                                     HYPRE_Int          n,

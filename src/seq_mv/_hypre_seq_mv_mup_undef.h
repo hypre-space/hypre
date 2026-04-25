@@ -187,13 +187,13 @@
 #undef hypre_SeqVectorStridedCopy
 #undef hypre_SeqVectorSumElts
 #undef hypre_SeqVectorSumEltsHost
+#undef hypre_CSRMatrixSpMVAnalysisDevice
 #undef hypreDevice_CSRSpAdd
 #undef hypreDevice_CSRSpGemm
 #undef hypreDevice_CSRSpGemmBinnedGetBlockNumDim
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
 #undef hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin
-#undef hypreDevice_CSRSpGemmRocsparse
 #undef hypreDevice_CSRSpGemmRownnz
 #undef hypreDevice_CSRSpGemmRownnzBinned
 #undef hypreDevice_CSRSpGemmRownnzEstimate
@@ -202,7 +202,6 @@
 #undef hypreDevice_CSRSpGemmRownnzUpperboundBinned
 #undef hypreDevice_CSRSpGemmRownnzUpperboundNoBin
 #undef hypreDevice_CSRSpTrans
-#undef hypreDevice_CSRSpTransRocsparse
 #undef hypreGPUKernel_CSRCheckDiagFirst
 #undef hypreGPUKernel_CSRDiagScale
 #undef hypreGPUKernel_CSRMatrixCheckForMissingDiagonal
@@ -230,7 +229,7 @@
 #undef hypre_CSRMatrixIntSpMVDevice
 #undef hypre_CSRMatrixIntersectPattern
 #undef hypre_CSRMatrixMatvecDevice
-#undef hypre_CSRMatrixMatvecRocsparse
+#undef hypre_CSRMatrixMatvecVendor
 #undef hypre_CSRMatrixMergeColMapOffd
 #undef hypre_CSRMatrixMoveDiagFirstDevice
 #undef hypre_CSRMatrixMultiplyDevice
@@ -240,7 +239,6 @@
 #undef hypre_CSRMatrixSetRownnzDevice
 #undef hypre_CSRMatrixSortRow
 #undef hypre_CSRMatrixSortRowOutOfPlace
-#undef hypre_CSRMatrixSpMVAnalysisDevice
 #undef hypre_CSRMatrixSpMVDevice
 #undef hypre_CSRMatrixSplitDevice
 #undef hypre_CSRMatrixSplitDevice_core
@@ -249,8 +247,10 @@
 #undef hypre_CSRMatrixTransposeDevice
 #undef hypre_CSRMatrixTriLowerUpperSolveDevice
 #undef hypre_CSRMatrixTriLowerUpperSolveDevice_core
-#undef hypre_CSRMatrixTriLowerUpperSolveRocsparse
+#undef hypre_CSRMatrixTriLowerUpperSolveVendor
 #undef hypre_CSRMatrixTripleMultiplyDevice
+#undef hypre_CSRSpGemmVendor
+#undef hypre_CSRSpTransVendor
 #undef hypre_CsrsvDataCreate
 #undef hypre_CsrsvDataDestroy
 #undef hypre_GPUMatDataSetCSRData
@@ -269,7 +269,7 @@
 #undef hypre_SeqVectorSetValuesTaggedDevice
 #undef hypre_SeqVectorStridedCopyDevice
 #undef hypre_SeqVectorSumEltsDevice
-#undef hypre_SortCSRRocsparse
+#undef hypre_SortCSRVendor
 #undef hypre_SpGemmCreateBins
 #undef hypre_SpGemmCreateGlobalHashTable
 #undef hypre_SpGemmGhashSize

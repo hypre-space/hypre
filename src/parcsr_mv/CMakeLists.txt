@@ -62,6 +62,9 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
+  mup_fixed_gpu.c
+  mup_functions_gpu.c
+  mup_pre_gpu.c
   parcsr_mv_mp.c
   HYPRE_parcsr_mv_mp.c
 )
@@ -81,8 +84,12 @@ if (HYPRE_USING_GPU)
     par_csr_filter_device.c
     par_csr_matop_device.c
     par_csr_triplemat_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
     par_vector_device.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

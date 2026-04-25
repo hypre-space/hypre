@@ -40,10 +40,8 @@ hypreGPUKernel_zeqxmydd
 hypre_CudaCompileFlagCheck
 hypre_CurandUniform
 hypre_CurandUniformSingle
-hypre_DeviceDataComputeStream
 hypre_DeviceDataCreate
 hypre_DeviceDataCurandGenerator
-hypre_DeviceDataCusparseHandle
 hypre_DeviceDataDestroy
 hypre_DeviceDataStream
 hypre_DeviceMemoryGetUsage

@@ -229,4 +229,3 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
 
 #endif // HYPRE_USING_GPU || HYPRE_USING_DEVICE_OPENMP
 #endif // HYPRE_MIXED_PRECISION
-

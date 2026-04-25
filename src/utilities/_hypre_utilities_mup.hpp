@@ -391,13 +391,6 @@ hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hy
 HYPRE_Int
 hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
-
 hypre_DeviceData*
 hypre_DeviceDataCreate_flt( );
 hypre_DeviceData*
@@ -411,13 +404,6 @@ hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
 hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
 
 void
 hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );

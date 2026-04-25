@@ -419,14 +419,6 @@ hypreDevice_GenScatterAdd( HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Re
 
 /*--------------------------------------------------------------------------*/
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataComputeStream)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
 hypre_DeviceData*
 hypre_DeviceDataCreate( )
 {
@@ -439,14 +431,6 @@ hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator( hypre_DeviceData *data )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCurandGenerator)( data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle( hypre_DeviceData *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_DeviceDataCusparseHandle)( data );
 }
 
 /*--------------------------------------------------------------------------*/

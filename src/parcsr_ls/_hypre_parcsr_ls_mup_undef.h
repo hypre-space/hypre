@@ -1468,7 +1468,7 @@
 #undef hypre_ILUSetupILUKSymbolic
 #undef hypre_ILUSetupILUT
 #undef hypre_ILUSetupILUTRAS
-#undef hypre_ILUSetupLDUtoCusparse
+#undef hypre_ILUSetupLDUtoVendor
 #undef hypre_ILUSetupMILU0
 #undef hypre_ILUSetupRAPILU0
 #undef hypre_ILUSetupRAPILU0Device
