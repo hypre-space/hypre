@@ -242,9 +242,9 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
       cstart = hypre_BoxIMin(cgrid_box);
       hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-      P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-      RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+      A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+      P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+      RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:

@@ -46,6 +46,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    HYPRE_Int           **data_indices;
    HYPRE_Int           **mask_data_indices;
 
+   HYPRE_Int             nboxes, *boxnums;
    HYPRE_Int             i, j;
 
    stencil       = hypre_StructMatrixStencil(matrix);
@@ -58,6 +59,30 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructGridRef(hypre_StructMatrixGrid(matrix),
                        &hypre_StructMatrixGrid(mask));
+
+   // Set range boxnum info
+   nboxes  = hypre_StructMatrixRanNBoxes(matrix);
+   boxnums = hypre_TAlloc(HYPRE_Int, nboxes, HYPRE_MEMORY_HOST);
+   for (i = 0; i < nboxes; i++)
+   {
+      boxnums[i] = hypre_StructMatrixRanBoxnum(matrix, i);
+   }
+   hypre_StructMatrixRanNBoxes(mask)  = nboxes;
+   hypre_StructMatrixRanBoxnums(mask) = boxnums;
+   hypre_CopyToIndex(hypre_StructMatrixRanStride(matrix), ndim,
+                     hypre_StructMatrixRanStride(mask));
+
+   // Set domain boxnum info
+   nboxes  = hypre_StructMatrixDomNBoxes(matrix);
+   boxnums = hypre_TAlloc(HYPRE_Int, nboxes, HYPRE_MEMORY_HOST);
+   for (i = 0; i < nboxes; i++)
+   {
+      boxnums[i] = hypre_StructMatrixDomBoxnum(matrix, i);
+   }
+   hypre_StructMatrixDomNBoxes(mask)  = nboxes;
+   hypre_StructMatrixDomBoxnums(mask) = boxnums;
+   hypre_CopyToIndex(hypre_StructMatrixDomStride(matrix), ndim,
+                     hypre_StructMatrixDomStride(mask));
 
    hypre_StructMatrixUserStencil(mask) =
       hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));

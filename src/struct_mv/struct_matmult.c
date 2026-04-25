@@ -645,7 +645,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    hypre_StructGrid          *grid;
    hypre_IndexRef             stride;
    HYPRE_Int                  nboxes;
-   HYPRE_Int                 *boxnums;
    hypre_Box                 *box;
    HYPRE_Int                 *symm;
 
@@ -684,11 +683,11 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
-   hypre_StructMatrixGetDataMapStride(matrices[0], &fstride);
+   fstride = hypre_StructMatrixDataStride(matrices[0]);
    cstride = fstride;
    for (m = 1; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -710,7 +709,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices + 1, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -989,7 +988,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       HYPRE_Int   *num_ghost;
 
       HYPRE_StructVectorCreate(comm, grid, &mask);
-      HYPRE_StructVectorSetStride(mask, fstride); /* same stride as fine data-map stride */
       hypre_CommStencilCreateNumGhost(comm_stencils[nmatrices], &num_ghost);
       hypre_StructVectorComputeDataSpace(mask, NULL, num_ghost, &data_spaces[nmatrices]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
@@ -1075,30 +1073,28 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
     * couplings in the unstructured matrix until then. */
    if (need_mask)
    {
+      hypre_Index  ustride;
+
+      hypre_SetIndex(ustride, 1);
+
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
       hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
-      boxnums = hypre_StructVectorBoxnums(mask);
-      stride  = hypre_StructVectorStride(mask);
 
-      loop_stride = stride;
+      loop_stride = ustride;
       hypre_CopyToIndex(loop_stride, ndim, fdstride);
-      hypre_StructVectorMapDataStride(mask, fdstride);
-      for (j = 0; j < nboxes; j++)
+      for (b = 0; b < nboxes; b++)
       {
-         b = boxnums[j];
-
          box = hypre_StructGridBox(grid, b);
          hypre_CopyBox(box, loop_box);
          hypre_ProjectBox(loop_box, NULL, loop_stride);
          loop_start = hypre_BoxIMin(loop_box);
          hypre_BoxGetStrideSize(loop_box, loop_stride, loop_size);
 
-         fdbox = hypre_BoxArrayBox(fdata_space, b);
+         fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
          hypre_CopyToIndex(loop_start, ndim, fdstart);
-         hypre_StructVectorMapDataIndex(mask, fdstart);
 
          maskptr = hypre_StructVectorBoxData(mask, b);
 
@@ -1133,7 +1129,6 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 {
    HYPRE_Int             nmatrices     = (mmdata -> nmatrices);
    hypre_StructMatrix  **matrices      = (mmdata -> matrices);
-   hypre_IndexRef        fstride       = (mmdata -> fstride);
    hypre_StructVector   *mask          = (mmdata -> mask);
    hypre_CommPkg        *comm_pkg      = (mmdata -> comm_pkg);
    HYPRE_Complex       **comm_data     = (mmdata -> comm_data);
@@ -1176,7 +1171,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
-            hypre_CreateCommInfo(grid, fstride, comm_stencils[m], &comm_info);
+            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
             hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
                                             &comm_data_a[num_comm_pkgs]);
             num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
@@ -1187,8 +1182,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
       /* Compute mask communications */
       if (mask != NULL)
       {
-         hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
-         hypre_StructVectorMapCommInfo(mask, comm_info);
+         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
@@ -1427,7 +1421,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Set Mstride */
-   hypre_StructMatrixGetDataMapStride(M, &stride);
+   stride = hypre_StructMatrixDataStride(M);
    hypre_CopyToIndex(stride, ndim, Mstride);                    /* M's index space */
    hypre_MapToFineIndex(Mstride, NULL, coarsen_stride, ndim);   /* base index space */
 
@@ -1468,9 +1462,9 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
        * that neither MatrixMapDataIndex nor VectorMapDataIndex is used here,
        * because we want to use both matrices and vectors in one boxloop.  This
        * is accounted for when setting the data pointer values a.tptrs[] below. */
-      Mdbox = hypre_BoxArrayBox(Mdata_space, Mb);
-      fdbox = hypre_BoxArrayBox(fdata_space, b);
-      cdbox = hypre_BoxArrayBox(cdata_space, b);
+      Mdbox = hypre_BoxArrayBox(Mdata_space, hypre_StructGridBaseBoxnum(Mgrid, Mb));
+      fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
+      cdbox = hypre_BoxArrayBox(cdata_space, hypre_StructGridBaseBoxnum(grid, b));
       hypre_CopyToIndex(loop_start, ndim, Mdstart);
       hypre_MapToCoarseIndex(Mdstart, NULL, Mstride, ndim);   /* at loop_start */
       hypre_CopyToIndex(hypre_BoxIMin(fdbox), ndim, fdstart); /* at beginning of databox */
@@ -1524,7 +1518,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      offsetref = hypre_StructStencilOffset(stencil, entry);
                      hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   }
-                  hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
