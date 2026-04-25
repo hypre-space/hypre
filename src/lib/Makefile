@@ -35,8 +35,7 @@ PILUTFILES          = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_flt
 PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_dbl
 PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_ldbl
 
-DISTMATRIXFILES     = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/distributed_matrix_mp.o
-DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_flt
+DISTMATRIXFILES     = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_flt
 DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_dbl
 DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_ldbl
 

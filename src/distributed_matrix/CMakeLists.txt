@@ -23,7 +23,7 @@ set(REGULAR_SRCS
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("distributed_matrix" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE distributed_matrix_mp.c ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
 else()
   target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
 endif()

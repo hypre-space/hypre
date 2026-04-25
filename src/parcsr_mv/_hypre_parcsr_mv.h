@@ -1445,9 +1445,7 @@ hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
 #ifndef hypre_MP_BUILD
 #include "_hypre_parcsr_mv_mup_undef.h"
 #include "_hypre_parcsr_mv_mup.h"
-#if defined(HYPRE_USING_GPU) && defined(__cplusplus)
 #include "_hypre_parcsr_mv_mup.hpp"
-#endif
 #endif
 #endif
 
