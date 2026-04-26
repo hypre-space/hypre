@@ -1065,12 +1065,10 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
-#endif
 HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs,
                                      HYPRE_Int num_sends, HYPRE_Int *sends );
 
@@ -2431,6 +2429,7 @@ char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+size_t hypre_GetSizeOfReal(void);
 
 /* handle.c */
 HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
@@ -4097,6 +4096,40 @@ hypre_GlobalPrecision();
 
 #endif
 
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/* Mixed precision function protos */
+
+#ifdef HYPRE_MIXED_PRECISION
+/* utilities_mp.c */
+HYPRE_Int
+hypre_RealArrayCopyHost_mp(HYPRE_Precision precision_x, void *x,
+                           HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+HYPRE_Int
+hypre_RealArrayCopy_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocation location_x,
+                       HYPRE_Precision precision_y, void *y, HYPRE_MemoryLocation location_y, HYPRE_Int n);
+void *
+hypre_RealArrayClone_mp(HYPRE_Precision precision_x, void *x, HYPRE_MemoryLocation location_x,
+                        HYPRE_Precision new_precision, HYPRE_MemoryLocation new_location, HYPRE_Int n);
+HYPRE_Int
+hypre_RealArrayAxpynHost_mp(HYPRE_Precision precision_x, hypre_long_double alpha, void *x,
+                            HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+HYPRE_Int
+hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision precision_y, void *y,
+                        HYPRE_MemoryLocation location, HYPRE_Int n, hypre_long_double alpha);
+/* utilities_mp_device.c */
+HYPRE_Int
+hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
+                             HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+HYPRE_Int
+hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alpha, void *x,
+                              HYPRE_Precision precision_y, void *y, HYPRE_Int n);
+#endif
 
 #ifdef __cplusplus
 }

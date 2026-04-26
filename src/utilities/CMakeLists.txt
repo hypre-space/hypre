@@ -51,7 +51,6 @@ set(REGULAR_SRCS
   memory_tracker.c
   merge_sort.c
   mmio.c
-  omp_device.c
   prefix_sum.c
   qsort.c
   unique.c
@@ -79,6 +78,7 @@ set(MUP_SRCS
   mup_functions.c
   mup_pre.c
   printf.c
+  utilities_mp.c
 )
 
 if (HYPRE_ENABLE_MIXED_PRECISION)
@@ -104,6 +104,7 @@ if (HYPRE_USING_GPU)
     omp_device.c
     stl_ops.c
     HYPRE_handle.c
+    utilities_mp_device.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
