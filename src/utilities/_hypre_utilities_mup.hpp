@@ -231,13 +231,6 @@ HYPRE_Int
 hypreDevice_zeqxmydd_long_dbl( HYPRE_Int n, hypre_long_double *x, hypre_long_double alpha, hypre_long_double *y, hypre_long_double *z, hypre_long_double *d );
 
 HYPRE_Int
-hypre_CudaCompileFlagCheck_flt( void );
-HYPRE_Int
-hypre_CudaCompileFlagCheck_dbl( void );
-HYPRE_Int
-hypre_CudaCompileFlagCheck_long_dbl( void );
-
-HYPRE_Int
 hypre_CurandUniform_flt( HYPRE_Int n, hypre_float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );
 HYPRE_Int
 hypre_CurandUniform_dbl( HYPRE_Int n, hypre_double *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );

@@ -259,14 +259,6 @@ hypreDevice_zeqxmydd( HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CudaCompileFlagCheck( void )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CudaCompileFlagCheck)( );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CurandUniform)( n, urand, set_seed, seed, set_offset, offset );
