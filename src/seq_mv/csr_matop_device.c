@@ -2772,6 +2772,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
       return hypre_error_flag;
    }
 
+   hypre_CSRMatrixNumNonzeros(A) = new_nnz;
    if (!A_ii)
    {
       A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
@@ -2826,16 +2827,20 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    }
 #endif
 
+   /* Free column indices and data arrays if matrix A own them. */
+   if (hypre_CSRMatrixOwnsData(A))
+   {
+      hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
+   }
 
+   hypreDevice_CsrRowIndicesToPtrs_v2(nrows, new_nnz, new_ii, hypre_CSRMatrixI(A));
+   hypre_CSRMatrixJ(A)        = new_j;
+   hypre_CSRMatrixData(A)     = new_data;
+   hypre_CSRMatrixOwnsData(A) = 1;
+
+   /* Free memory */
    hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
-
-   hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-   hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
-   hypre_CSRMatrixJ(A) = new_j;
-   hypre_CSRMatrixData(A) = new_data;
    hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
