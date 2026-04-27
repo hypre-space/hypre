@@ -357,6 +357,7 @@
 #define hypreDevice_IntegerExclusiveScan HYPRE_FIXEDPRECISION_FUNC ( hypreDevice_IntegerExclusiveScan )
 #define hypreDevice_IntegerInclusiveScan HYPRE_FIXEDPRECISION_FUNC ( hypreDevice_IntegerInclusiveScan )
 #define hypreDevice_IntegerReduceSum HYPRE_FIXEDPRECISION_FUNC ( hypreDevice_IntegerReduceSum )
+#define hypreDevice_RealReduceMaxAbs HYPRE_FIXEDPRECISION_FUNC ( hypreDevice_RealReduceMaxAbs )
 #define hypreDevice_zeqxmydd HYPRE_FIXEDPRECISION_FUNC ( hypreDevice_zeqxmydd )
 #define hypreGPUKernel_CompileFlagSafetyCheck HYPRE_FIXEDPRECISION_FUNC ( hypreGPUKernel_CompileFlagSafetyCheck )
 #define hypreGPUKernel_CopyParCSRRows HYPRE_FIXEDPRECISION_FUNC ( hypreGPUKernel_CopyParCSRRows )

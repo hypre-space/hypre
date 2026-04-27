@@ -354,6 +354,7 @@
 #undef hypreDevice_IntegerExclusiveScan
 #undef hypreDevice_IntegerInclusiveScan
 #undef hypreDevice_IntegerReduceSum
+#undef hypreDevice_RealReduceMaxAbs
 #undef hypreDevice_zeqxmydd
 #undef hypreGPUKernel_CompileFlagSafetyCheck
 #undef hypreGPUKernel_CopyParCSRRows

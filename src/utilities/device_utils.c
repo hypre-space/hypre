@@ -835,7 +835,7 @@ hypreDevice_CsrRowPtrsToIndices( HYPRE_Int  nrows,
  * hypreSYCLKernel_ScatterRowPtr
  *--------------------------------------------------------------------*/
 
-void
+static void
 hypreSYCLKernel_ScatterRowPtr( hypre_DeviceItem &item,
                                HYPRE_Int         nrows,
                                HYPRE_Int        *d_row_ptr,
@@ -1785,6 +1785,17 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 #if defined(HYPRE_USING_ONEMKLRAND)
 
 /*--------------------------------------------------------------------
+ * hypre_DeviceDataCurandGenerator
+ *--------------------------------------------------------------------*/
+
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
+{
+   HYPRE_UNUSED_VAR(data);
+   return NULL;
+}
+
+/*--------------------------------------------------------------------
  * hypre_CurandUniform_core
  *
  * T = float or hypre_double
@@ -2113,6 +2124,38 @@ hypreDevice_ComplexReduceSum(HYPRE_Int n, HYPRE_Complex *d_x)
    return HYPRE_ONEDPL_CALL(std::reduce, d_x, d_x + n);
 #else
    return HYPRE_THRUST_CALL(reduce, d_x, d_x + n);
+#endif
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_RealReduceMaxAbs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs(HYPRE_Int n, HYPRE_Real *d_x)
+{
+   if (n <= 0)
+   {
+      return 0.0;
+   }
+
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Real *d_abs = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   HYPRE_Real max_abs;
+
+   HYPRE_ONEDPL_CALL(std::transform, d_x, d_x + n, d_abs, absolute_value<HYPRE_Real>());
+   max_abs = HYPRE_ONEDPL_CALL(std::reduce, d_abs, d_abs + n, HYPRE_Real(0),
+                               sycl::maximum<HYPRE_Real>());
+
+   hypre_TFree(d_abs, HYPRE_MEMORY_DEVICE);
+
+   return max_abs;
+#else
+   return HYPRE_THRUST_CALL(reduce,
+                            thrust::make_transform_iterator(d_x,     absolute_value<HYPRE_Real>()),
+                            thrust::make_transform_iterator(d_x + n, absolute_value<HYPRE_Real>()),
+                            HYPRE_Real(0),
+                            thrust::maximum<HYPRE_Real>());
 #endif
 }
 
@@ -2753,6 +2796,14 @@ hypre_CudaCompileFlagCheck()
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+HYPRE_Int
+hypre_CudaCompileFlagCheck()
+{
+   return hypre_error_flag;
+}
+#endif
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      sycl functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -2760,11 +2811,11 @@ hypre_CudaCompileFlagCheck()
 #if defined(HYPRE_USING_SYCL)
 
 /*--------------------------------------------------------------------
- * HYPRE_SetSYCLDevice
+ * hypre_SetSYCLDevice
  *--------------------------------------------------------------------*/
 
-HYPRE_Int
-HYPRE_SetSYCLDevice(sycl::device user_device)
+static HYPRE_Int
+hypre_SetSYCLDevice(sycl::device user_device)
 {
    hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle());
 
