@@ -835,7 +835,7 @@ hypreDevice_CsrRowPtrsToIndices( HYPRE_Int  nrows,
  * hypreSYCLKernel_ScatterRowPtr
  *--------------------------------------------------------------------*/
 
-void
+static void
 hypreSYCLKernel_ScatterRowPtr( hypre_DeviceItem &item,
                                HYPRE_Int         nrows,
                                HYPRE_Int        *d_row_ptr,
@@ -1785,6 +1785,17 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 #if defined(HYPRE_USING_ONEMKLRAND)
 
 /*--------------------------------------------------------------------
+ * hypre_DeviceDataCurandGenerator
+ *--------------------------------------------------------------------*/
+
+hypre_DeviceRandGenerator
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
+{
+   HYPRE_UNUSED_VAR(data);
+   return NULL;
+}
+
+/*--------------------------------------------------------------------
  * hypre_CurandUniform_core
  *
  * T = float or hypre_double
@@ -2113,6 +2124,38 @@ hypreDevice_ComplexReduceSum(HYPRE_Int n, HYPRE_Complex *d_x)
    return HYPRE_ONEDPL_CALL(std::reduce, d_x, d_x + n);
 #else
    return HYPRE_THRUST_CALL(reduce, d_x, d_x + n);
+#endif
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_RealReduceMaxAbs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs(HYPRE_Int n, HYPRE_Real *d_x)
+{
+   if (n <= 0)
+   {
+      return 0.0;
+   }
+
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Real *d_abs = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   HYPRE_Real max_abs;
+
+   HYPRE_ONEDPL_CALL(std::transform, d_x, d_x + n, d_abs, absolute_value<HYPRE_Real>());
+   max_abs = HYPRE_ONEDPL_CALL(std::reduce, d_abs, d_abs + n, HYPRE_Real(0),
+                               sycl::maximum<HYPRE_Real>());
+
+   hypre_TFree(d_abs, HYPRE_MEMORY_DEVICE);
+
+   return max_abs;
+#else
+   return HYPRE_THRUST_CALL(reduce,
+                            thrust::make_transform_iterator(d_x,     absolute_value<HYPRE_Real>()),
+                            thrust::make_transform_iterator(d_x + n, absolute_value<HYPRE_Real>()),
+                            HYPRE_Real(0),
+                            thrust::maximum<HYPRE_Real>());
 #endif
 }
 
@@ -2659,98 +2702,6 @@ hypreDevice_zeqxmydd(HYPRE_Int       n,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-/*--------------------------------------------------------------------
- * hypreGPUKernel_CompileFlagSafetyCheck
- *
- * The architecture identification macro __CUDA_ARCH__ is assigned a
- * three-digit value string xy0 (ending in a literal 0) during each
- * nvcc compilation stage 1 that compiles for compute_xy.
- *
- * This macro can be used in the implementation of GPU functions for
- * determining the virtual architecture for which it is currently being
- * compiled. The host code (the non-GPU code) must not depend on it.
- *
- * Note that compute_XX refers to a PTX version and sm_XX refers to
- * a cubin version.
- *--------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
-                                       hypre_int        *cuda_arch_compile )
-{
-   HYPRE_UNUSED_VAR(item);
-
-#if defined(__CUDA_ARCH__)
-   cuda_arch_compile[0] = __CUDA_ARCH__;
-#else
-   HYPRE_UNUSED_VAR(cuda_arch_compile);
-#endif
-}
-
-/*--------------------------------------------------------------------
- * hypre_CudaCompileFlagCheck
- *
- * Assume this function is called inside HYPRE_Init(), at a place
- * where we do not want to activate memory pooling, so we do not use
- * hypre's memory model to Alloc and Free.
- *
- * See commented out code below (and do not delete)
- *
- * This is really only defined for CUDA and not for HIP
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CudaCompileFlagCheck()
-{
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int device;
-   hypre_GetDevice(&device);
-
-   struct cudaDeviceProp props;
-   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
-   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
-   hypre_int cuda_arch_compile = -1;
-   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
-
-   hypre_int *cuda_arch_compile_d = NULL;
-   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
-   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
-                               cudaMemcpyHostToDevice) );
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
-   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
-                               cudaMemcpyDeviceToHost) );
-   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
-
-   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
-
-   if (cuda_arch_actual < cuda_arch_compile)
-   {
-      char msg[256];
-
-      if (-1 == cuda_arch_compile)
-      {
-         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
-      }
-      else
-      {
-         hypre_sprintf(msg,
-                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') is greater than device arch %d",
-                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
-      }
-
-      hypre_error_w_msg(1, msg);
-#if defined(HYPRE_DEBUG)
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
-#endif
-      hypre_assert(0);
-   }
-#endif // defined(HYPRE_USING_CUDA)
-
-   return hypre_error_flag;
-}
-
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2760,11 +2711,11 @@ hypre_CudaCompileFlagCheck()
 #if defined(HYPRE_USING_SYCL)
 
 /*--------------------------------------------------------------------
- * HYPRE_SetSYCLDevice
+ * hypre_SetSYCLDevice
  *--------------------------------------------------------------------*/
 
-HYPRE_Int
-HYPRE_SetSYCLDevice(sycl::device user_device)
+static HYPRE_Int
+hypre_SetSYCLDevice(sycl::device user_device)
 {
    hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle());
 

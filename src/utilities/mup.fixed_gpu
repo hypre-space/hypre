@@ -27,8 +27,8 @@ hypreDevice_IntStridedCopy
 hypreDevice_IntegerExclusiveScan
 hypreDevice_IntegerInclusiveScan
 hypreDevice_IntegerReduceSum
+hypreDevice_RealReduceMaxAbs
 hypreDevice_zeqxmydd
-hypreGPUKernel_CompileFlagSafetyCheck
 hypreGPUKernel_CopyParCSRRows
 hypreGPUKernel_GetRowNnz
 hypreGPUKernel_IVAXPY
@@ -37,7 +37,6 @@ hypreGPUKernel_IntArrayInverseMapping
 hypreGPUKernel_ScatterAdd
 hypreGPUKernel_ScatterAddTrivial
 hypreGPUKernel_zeqxmydd
-hypre_CudaCompileFlagCheck
 hypre_CurandUniform
 hypre_CurandUniformSingle
 hypre_DeviceDataCreate
