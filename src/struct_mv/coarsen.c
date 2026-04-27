@@ -157,6 +157,9 @@ hypre_DecomposeOriginStride( hypre_Index     origin1,
 
    for (d = 0; d < ndim; d++)
    {
+      hypre_assert((origin2[d] - origin1[d]) % stride1[d] == 0);  // ensure evenly divisible
+      hypre_assert(stride2[d] % stride1[d] == 0);                 // ensure evenly divisible
+
       origin2[d] = (origin2[d] - origin1[d]) / stride1[d];
       stride2[d] = stride2[d] / stride1[d];
    }
