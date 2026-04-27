@@ -60,7 +60,13 @@ FILES =\
  mmio.c\
  prefix_sum.c\
  qsort.c\
+ general.c\
+ handle.c\
+ memory.c\
  unique.c\
+ stl_ops.c\
+ device_markers.c\
+ device_utils.c\
  utilities.c\
  mpistubs.c\
  qsplit.c\
@@ -72,14 +78,8 @@ FILES =\
  caliper_instrumentation.c
 
 CUFILES=\
- device_markers.c\
- device_utils.c\
- general.c\
- handle.c\
  int_array_device.c\
- memory.c\
- omp_device.c\
- stl_ops.c
+ omp_device.c
 
 # Mixed precision files
 MP_FILES = \
@@ -95,7 +95,11 @@ endif
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
+ifeq (${CUCC}, )
+OBJS = ${COBJS}
+else
 OBJS = ${COBJS} ${CUOBJS}
+endif
 
 ifeq (${MP_BUILD}, 1)
 
@@ -108,7 +112,10 @@ CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+endif
 
 endif
 

@@ -21,8 +21,6 @@ endif()
 
 # Regular sources
 set(REGULAR_SRCS
-  cyclic_reduction.c
-  diag_scale.c
   F90_HYPRE_struct_bicgstab.c
   F90_HYPRE_struct_cycred.c
   F90_HYPRE_struct_flexgmres.c
@@ -45,43 +43,38 @@ set(REGULAR_SRCS
   HYPRE_struct_lgmres.c
   HYPRE_struct_pfmg.c
   HYPRE_struct_smg.c
-  jacobi.c
-  pcg_struct.c
-  pfmg.c
-  pfmg_cxyz_cc.c
-  pfmg_cxyz_vc.c
-  pfmg_coarsen.c
-  pfmg_relax.c
-  pfmg_setup_rap.c
-  pfmg_solve.c
-  semi.c
-  smg_relax.c
-  smg_setup.c
-  smg_setup_rap.c
-  smg_setup_restrict.c
-  smg_solve.c
-  cyclic_reduction.c
-  diag_scale.c
   HYPRE_struct_int.c
   HYPRE_struct_pcg.c
+  pcg_struct.c
+  cyclic_reduction.c
+  diag_scale.c
+  jacobi.c
+  pfmg.c
   pfmg2_setup_rap.c
   pfmg3_setup_rap.c
+  pfmg_coarsen.c
+  pfmg_cxyz_cc.c
+  pfmg_cxyz_vc.c
+  pfmg_relax.c
   pfmg_setup.c
   pfmg_setup_interp.c
+  pfmg_setup_rap.c
   pfmg_setup_rap5.c
   pfmg_setup_rap7.c
-  pfmg_setup_rap.c
   pfmg_solve.c
   red_black_constantcoef_gs.c
   red_black_gs.c
+  semi.c
   semi_interp.c
   semi_restrict.c
   semi_setup_rap.c
+  smg.c
   smg2_setup_rap.c
   smg3_setup_rap.c
-  smg.c
   smg_axpy.c
   smg_residual.c
+  smg_relax.c
+  smg_setup.c
   smg_setup_interp.c
   smg_setup_rap.c
   smg_setup_restrict.c
@@ -95,20 +88,13 @@ set(MUP_SRCS
   mup_pre.c
 )
 
-if(HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("struct_ls" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
-
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
-    cyclic_reduction.c
-    diag_scale.c
-    jacobi.c
     HYPRE_struct_int.c
     HYPRE_struct_pcg.c
+    jacobi.c
+    cyclic_reduction.c
+    diag_scale.c
     pfmg2_setup_rap.c
     pfmg3_setup_rap.c
     pfmg_cxyz_cc.c
@@ -118,7 +104,6 @@ if (HYPRE_USING_GPU)
     pfmg_setup_interp.c
     pfmg_setup_rap5.c
     pfmg_setup_rap7.c
-    point_relax.c
     red_black_constantcoef_gs.c
     red_black_gs.c
     semi_interp.c
@@ -134,6 +119,15 @@ if (HYPRE_USING_GPU)
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("struct_ls" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

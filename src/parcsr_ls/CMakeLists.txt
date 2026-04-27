@@ -23,7 +23,6 @@ endif()
 set(REGULAR_SRCS
   amg_hybrid.c
   aux_interp.c
-  dsuperlu.c
   F90_hypre_laplace.c
   F90_HYPRE_parcsr_amg.c
   F90_HYPRE_parcsr_bicgstab.c
@@ -67,6 +66,10 @@ set(REGULAR_SRCS
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
+  ams.c
+  ads.c
+  ame.c
+  dsuperlu.c
   par_2s_interp.c
   par_amg.c
   par_amgdd.c
@@ -84,7 +87,6 @@ set(REGULAR_SRCS
   par_cheby.c
   par_cheby_setup.c
   par_cheby_solve.c
-  par_cheby_device.c
   par_coarse_parms.c
   par_coordinates.c
   par_cr.c
@@ -133,34 +135,11 @@ set(REGULAR_SRCS
   partial.c
   schwarz.c
   block_tridiag.c
-  ams.c
-  ads.c
-  ame.c
   par_restr.c
   par_lr_restr.c
   par_ilu.c
   par_ilu_setup.c
   par_ilu_solve.c
-  par_cheby_device.c
-  par_coarse_parms_device.c
-  par_fsai_device.c
-  par_ge_device.c
-  par_relax_more_device.c
-  par_coarsen_device.c
-  par_indepset_device.c
-  par_interp_device.c
-  par_interp_trunc_device.c
-  par_lr_interp_device.c
-  par_lr_restr_device.c
-  par_strength_device.c
-  par_strength2nd_device.c
-  par_amgdd_fac_cycle_device.c
-  par_2s_interp_device.c
-  par_relax_device.c
-  par_mod_multi_interp_device.c
-  par_mgr_device.c
-  par_ilu_setup_device.c
-  par_ilu_solve_device.c
 )
 
 # Mixed precision sources
@@ -171,13 +150,6 @@ set(MUP_SRCS
   HYPRE_parcsr_ls_mp.c
 )
 
-if(HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("parcsr_ls" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
-
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     ams.c
@@ -185,8 +157,6 @@ if (HYPRE_USING_GPU)
     ame.c
     par_amg_setup.c
     par_ge_device.c
-    par_ilu.c
-    par_ilu_setup.c
     par_ilu_setup_device.c
     par_ilu_solve.c
     par_ilu_solve_device.c
@@ -212,6 +182,27 @@ if (HYPRE_USING_GPU)
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+if(HYPRE_USING_GPU)
+  set(GPU_ONLY_SRCS ${GPU_SRCS})
+  list(REMOVE_ITEM GPU_ONLY_SRCS
+    ams.c
+    ads.c
+    ame.c
+    par_amg_setup.c
+    par_ilu_solve.c
+    dsuperlu.c
+  )
+  list(APPEND COMPILED_SRCS ${GPU_ONLY_SRCS})
+endif()
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("parcsr_ls" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

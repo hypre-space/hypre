@@ -185,6 +185,11 @@ CUFILES =\
  par_mgr_device.c\
  par_fsai_device.c
 
+ifeq (${CUCC}, )
+FILES := ${FILES} $(filter-out %_device.c,$(CUFILES))
+CUFILES =
+endif
+
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
@@ -194,7 +199,11 @@ MP_FILES = \
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
+ifeq (${CUCC}, )
+OBJS = ${COBJS}
+else
 OBJS = ${COBJS} ${CUOBJS}
+endif
 
 ifeq (${MP_BUILD}, 1) 
 
@@ -207,7 +216,9 @@ CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+endif
 
 endif
 

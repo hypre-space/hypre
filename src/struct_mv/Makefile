@@ -85,6 +85,11 @@ CUFILES =\
  struct_scale.c\
  struct_vector.c
 
+ifeq (${CUCC}, )
+FILES := ${FILES} ${CUFILES}
+CUFILES =
+endif
+
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
@@ -108,7 +113,9 @@ CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+endif
 
 endif
 

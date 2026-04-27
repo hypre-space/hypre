@@ -91,7 +91,11 @@ MP_FILES = \
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
+ifeq (${CUCC}, )
+OBJS = ${COBJS}
+else
 OBJS = ${COBJS} ${CUOBJS}
+endif
 
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
@@ -106,7 +110,9 @@ CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+endif
 
 endif
 

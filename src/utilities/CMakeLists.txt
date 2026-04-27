@@ -41,8 +41,6 @@ set(REGULAR_SRCS
   ap.c
   log.c
   complex.c
-  device_markers.c
-  device_utils.c
   error.c
   int_array.c
   hopscotch_hash.c
@@ -51,9 +49,14 @@ set(REGULAR_SRCS
   memory_tracker.c
   merge_sort.c
   mmio.c
-  omp_device.c
   prefix_sum.c
   qsort.c
+  general.c
+  handle.c
+  memory.c
+  stl_ops.c
+  device_markers.c
+  device_utils.c
   unique.c
   utilities.c
   mpistubs.c
@@ -63,12 +66,6 @@ set(REGULAR_SRCS
   threading.c
   timer.c
   timing.c
-  general.c
-  handle.c
-  int_array_device.c
-  memory.c
-  omp_device.c
-  stl_ops.c
   caliper_instrumentation.c
 )
 
@@ -81,33 +78,32 @@ set(MUP_SRCS
   printf.c
 )
 
-if (HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("utilities" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  list(APPEND REGULAR_SRCS
-    multiprecision.c
-    printf.c
-  )
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
-
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
-    device_markers.c
-    device_utils.c
-    general.c
-    handle.c
     int_array_device.c
-    memory.c
-    memory_tracker.c
     omp_device.c
-    stl_ops.c
-    HYPRE_handle.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  if(HYPRE_USING_GPU)
+    list(APPEND COMPILED_SRCS ${GPU_SRCS})
+  endif()
+  setup_mixed_precision_compilation("utilities" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  if(HYPRE_USING_GPU)
+    list(APPEND COMPILED_SRCS ${GPU_SRCS})
+  endif()
+  list(APPEND COMPILED_SRCS
+    multiprecision.c
+    printf.c
+  )
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

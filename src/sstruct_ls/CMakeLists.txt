@@ -64,20 +64,8 @@ set(MUP_SRCS
   mup_pre.c
 )
 
-if(HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("sstruct_ls" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
-
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
-    fac_amr_fcoarsen.c
-    fac_amr_rap.c
-    fac_restrict2.c
-    fac_setup2.c
-    fac_zero_stencilcoef.c
     node_relax.c
     ssamg_interp.c
     ssamg_relax.c
@@ -86,6 +74,15 @@ if (HYPRE_USING_GPU)
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("sstruct_ls" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
