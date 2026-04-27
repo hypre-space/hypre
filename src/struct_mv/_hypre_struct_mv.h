@@ -1689,7 +1689,7 @@ hypre_StructMatrixBoxData(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s)
 #define hypre_StructMatrixRanDataValue(matrix, i, s, index) \
 hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixRanBoxnum(matrix, i), s, index)
 #define hypre_StructMatrixDomBaseBoxnum(matrix, i) \
-hypre_StructMatrixBaseBoxBoxnum(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
+hypre_StructMatrixBaseBoxnum(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomBox(matrix, i) \
 hypre_StructMatrixBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 #define hypre_StructMatrixDomDataBox(matrix, i) \
