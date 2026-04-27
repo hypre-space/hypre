@@ -216,6 +216,13 @@ hypreDevice_IntegerReduceSum_dbl( HYPRE_Int m, HYPRE_Int *d_i );
 HYPRE_Int
 hypreDevice_IntegerReduceSum_long_dbl( HYPRE_Int m, HYPRE_Int *d_i );
 
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_flt( HYPRE_Int m, hypre_float *d_x );
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_dbl( HYPRE_Int m, hypre_double *d_x );
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_long_dbl( HYPRE_Int m, hypre_long_double *d_x );
+
 HYPRE_Int
 hypreDevice_zeqxmydd_flt( HYPRE_Int n, hypre_float *x, hypre_float alpha, hypre_float *y, hypre_float *z, hypre_float *d );
 HYPRE_Int

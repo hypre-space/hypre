@@ -242,6 +242,14 @@ hypreDevice_IntegerReduceSum( HYPRE_Int m, HYPRE_Int *d_i )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs( HYPRE_Int m, HYPRE_Real *d_x )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_RealReduceMaxAbs)( m, d_x );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypreDevice_zeqxmydd( HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d )
 {

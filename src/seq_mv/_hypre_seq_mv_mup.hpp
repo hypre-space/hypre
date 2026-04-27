@@ -238,6 +238,13 @@ HYPRE_Int
 hypre_CSRMatrixSetRownnzDevice_long_dbl( hypre_CSRMatrix *A );
 
 HYPRE_Int
+hypre_CSRMatrixSortDevice_flt( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_CSRMatrixSortDevice_dbl( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_CSRMatrixSortDevice_long_dbl( hypre_CSRMatrix *A );
+
+HYPRE_Int
 hypre_CSRMatrixSortRow_flt( hypre_CSRMatrix *A );
 HYPRE_Int
 hypre_CSRMatrixSortRow_dbl( hypre_CSRMatrix *A );
