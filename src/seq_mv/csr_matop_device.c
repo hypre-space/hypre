@@ -3273,7 +3273,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
    hypre_GpuProfilingPushRange("CSRMatrixSort");
 
-   hypre_SortCSRVendor(A);
+   hypre_CSRMatrixSortDevice(A);
 
    hypre_GpuProfilingPopRange();
 
@@ -3281,7 +3281,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 }
 
 HYPRE_Int
-hypre_SortCSRVendor(hypre_CSRMatrix *A)
+hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A)
 {
 #if defined(HYPRE_USING_CUSPARSE)
    return hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
@@ -3342,22 +3342,6 @@ hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE)
-
-/*--------------------------------------------------------------------------
- * hypre_SortCSRCusparse
- *
- * Sorts values and column indices in each row in ascending order INPLACE
- *
- * Parameters:
- *   n: Number of rows [in]
- *   m: Number of columns [in]
- *   nnzA: Number of nonzeros [in]
- *   d_ia: row pointers [in/out]
- *   d_ja_sorted: column indices [in/out]
- *   d_a_sorted: coefficients [in/out]
- *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveVendor(char             uplo,
                                         HYPRE_Int        unit_diag,
@@ -3384,6 +3368,22 @@ hypre_CSRMatrixTriLowerUpperSolveVendor(char             uplo,
    return hypre_error_flag;
 #endif
 }
+
+#if defined(HYPRE_USING_CUSPARSE)
+
+/*--------------------------------------------------------------------------
+ * hypre_SortCSRCusparse
+ *
+ * Sorts values and column indices in each row in ascending order INPLACE
+ *
+ * Parameters:
+ *   n: Number of rows [in]
+ *   m: Number of columns [in]
+ *   nnzA: Number of nonzeros [in]
+ *   d_ia: row pointers [in/out]
+ *   d_ja_sorted: column indices [in/out]
+ *   d_a_sorted: coefficients [in/out]
+ *--------------------------------------------------------------------------*/
 
 static HYPRE_Int
 hypre_SortCSRCusparse( HYPRE_Int            n,

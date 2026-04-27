@@ -41,10 +41,15 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
-  mup_fixed_gpu.c
-  mup_functions_gpu.c
-  mup_pre_gpu.c
 )
+
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("IJ_mv" SRCS "${REGULAR_SRCS}")

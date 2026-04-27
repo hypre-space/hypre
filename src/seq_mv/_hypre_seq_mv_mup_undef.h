@@ -237,6 +237,7 @@
 #undef hypre_CSRMatrixRemoveDiagonalDevice
 #undef hypre_CSRMatrixReplaceDiagDevice
 #undef hypre_CSRMatrixSetRownnzDevice
+#undef hypre_CSRMatrixSortDevice
 #undef hypre_CSRMatrixSortRow
 #undef hypre_CSRMatrixSortRowOutOfPlace
 #undef hypre_CSRMatrixSpMVDevice
@@ -269,7 +270,6 @@
 #undef hypre_SeqVectorSetValuesTaggedDevice
 #undef hypre_SeqVectorStridedCopyDevice
 #undef hypre_SeqVectorSumEltsDevice
-#undef hypre_SortCSRVendor
 #undef hypre_SpGemmCreateBins
 #undef hypre_SpGemmCreateGlobalHashTable
 #undef hypre_SpGemmGhashSize

@@ -29,6 +29,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                         HYPRE_Int     **d_jc_out,
                                         HYPRE_Complex **d_c_out);
 
+#if CUSPARSE_VERSION < CUSPARSE_NEWAPI_VERSION
 static HYPRE_Int
 hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
                                     HYPRE_Int          k,
@@ -48,6 +49,7 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
                                     HYPRE_Int        **d_ic_out,
                                     HYPRE_Int        **d_jc_out,
                                     HYPRE_Complex    **d_c_out);
+#endif
 
 HYPRE_Int
 hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,

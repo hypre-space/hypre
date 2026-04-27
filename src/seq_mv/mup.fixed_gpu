@@ -47,6 +47,7 @@ hypre_CSRMatrixPermuteDevice
 hypre_CSRMatrixRemoveDiagonalDevice
 hypre_CSRMatrixReplaceDiagDevice
 hypre_CSRMatrixSetRownnzDevice
+hypre_CSRMatrixSortDevice
 hypre_CSRMatrixSortRow
 hypre_CSRMatrixSortRowOutOfPlace
 hypre_CSRMatrixSpMVDevice
@@ -79,7 +80,6 @@ hypre_SeqVectorSetConstantValuesDevice
 hypre_SeqVectorSetValuesTaggedDevice
 hypre_SeqVectorStridedCopyDevice
 hypre_SeqVectorSumEltsDevice
-hypre_SortCSRVendor
 hypre_SpGemmCreateBins
 hypre_SpGemmCreateGlobalHashTable
 hypre_SpGemmGhashSize

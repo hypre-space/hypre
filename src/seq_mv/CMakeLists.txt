@@ -77,11 +77,16 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
-  mup_fixed_gpu.c
-  mup_functions_gpu.c
-  mup_pre_gpu.c
   seq_mv_mp.c
 )
+
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
 
 # Autogenerate csr_spgemm_device_numer$ files
 file(READ "csr_spgemm_device_numer.in" CONTENTS)

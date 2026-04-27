@@ -1370,9 +1370,11 @@ macro(setup_mixed_precision_compilation module_name)
       target_compile_options(${module_name}_${precision} PRIVATE ${_hypre_compile_opts})
     endif()
 
-    # Set position independent code for shared library builds
-    # Object libraries need explicit -fPIC when used in shared libraries
-    if(BUILD_SHARED_LIBS)
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # need an explicit PIC property whenever the parent HYPRE target requires it.
+    get_target_property(_hypre_pic ${PROJECT_NAME} POSITION_INDEPENDENT_CODE)
+    get_target_property(_hypre_interface_pic ${PROJECT_NAME} INTERFACE_POSITION_INDEPENDENT_CODE)
+    if(BUILD_SHARED_LIBS OR _hypre_pic OR _hypre_interface_pic)
       set_target_properties(${module_name}_${precision} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
       )

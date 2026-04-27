@@ -2945,8 +2945,13 @@ struct ReduceSum
       }
       else
       {
+         if (nblocks <= 0)
+         {
+            return init;
+         }
+
          /* 2nd reduction with only *one* block */
-         hypre_assert(nblocks >= 0 && nblocks <= HYPRE_MAX_NTHREADS_BLOCK);
+         hypre_assert(nblocks <= HYPRE_MAX_NTHREADS_BLOCK);
          const dim3 gDim(1), bDim(HYPRE_MAX_NTHREADS_BLOCK);
          HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);

@@ -520,14 +520,6 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorSumEltsDevice)( vector );
 }
 
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SortCSRVendor( hypre_CSRMatrix *A )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SortCSRVendor)( A );
-}
-
 
 #endif
 

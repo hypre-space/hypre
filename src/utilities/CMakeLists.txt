@@ -77,13 +77,18 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
-  mup_fixed_gpu.c
-  mup_functions_gpu.c
-  mup_pre_gpu.c
   printf.c
-  utilities_mp_device.c
   utilities_mp.c
 )
+
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+    utilities_mp_device.c
+  )
+endif()
 
 set(COMMON_SRCS)
 

@@ -1896,14 +1896,14 @@ template<typename T>
 HYPRE_Int
 hypreDevice_Filln(T *d_x, size_t n, T v)
 {
-#if 0
-   HYPRE_THRUST_CALL( fill_n, d_x, n, v);
-#else
    if (n <= 0)
    {
       return hypre_error_flag;
    }
 
+#if defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(fill_n, d_x, n, v);
+#else
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 

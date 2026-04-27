@@ -461,13 +461,6 @@ hypre_SeqVectorSumEltsDevice_dbl( hypre_Vector *vector );
 HYPRE_Complex
 hypre_SeqVectorSumEltsDevice_long_dbl( hypre_Vector *vector );
 
-HYPRE_Int
-hypre_SortCSRVendor_flt( hypre_CSRMatrix *A );
-HYPRE_Int
-hypre_SortCSRVendor_dbl( hypre_CSRMatrix *A );
-HYPRE_Int
-hypre_SortCSRVendor_long_dbl( hypre_CSRMatrix *A );
-
 /* functions_gpu */
 
 HYPRE_Int
