@@ -40,7 +40,6 @@ FILES =\
 
 CUFILES =\
  csr_matop_device.c\
- csr_matrix_cuda_utils.c\
  csr_matvec_device.c\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
@@ -83,7 +82,7 @@ MP_FILES = \
  mup_functions.c\
  mup_pre.c\
  seq_mv_mp.c
- 
+
 MP_CUFILES=\
  mup_fixed_gpu.c\
  mup_functions_gpu.c\

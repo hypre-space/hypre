@@ -34,7 +34,6 @@ set(REGULAR_SRCS
   vector.c
   vector_batched.c
   csr_matop_device.c
-  csr_matrix_cuda_utils.c
   csr_matvec_device.c
   csr_matvec_oomp.c
   csr_spadd_device.c
@@ -119,7 +118,6 @@ endif()
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     csr_matop_device.c
-    csr_matrix_cuda_utils.c
     csr_matvec_device.c
     csr_matvec_oomp.c
     csr_spadd_device.c
