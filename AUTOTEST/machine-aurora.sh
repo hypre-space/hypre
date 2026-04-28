@@ -81,7 +81,7 @@ co="--enable-debug --disable-fpe-trap --with-sycl --enable-unified-memory --with
 ./renametest.sh basic $output_dir/basic-sycl-um
 
 # 2A) SYCL with mixed precision support [make check]
-co="--with-sycl --enable-mixed-precision"
+co="--with-sycl --enable-mixed-precision --with-extra-CUFLAGS=-w"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-sycl-mup
 
