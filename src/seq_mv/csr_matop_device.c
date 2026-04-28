@@ -3273,7 +3273,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
    hypre_GpuProfilingPushRange("CSRMatrixSort");
 
-   hypre_CSRMatrixSortDevice(A);
+   hypre_CSRMatrixSortDevice(A, 0);
 
    hypre_GpuProfilingPopRange();
 
@@ -3281,22 +3281,68 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 }
 
 HYPRE_Int
-hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A)
+hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A, HYPRE_Int use_sorted)
 {
+#if defined(HYPRE_USING_CUSPARSE)     ||\
+    defined(HYPRE_USING_ROCSPARSE)    ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
+   HYPRE_Int     *A_j    = use_sorted ? hypre_CSRMatrixSortedJ(A)    : hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_data = use_sorted ? hypre_CSRMatrixSortedData(A) : hypre_CSRMatrixData(A);
+
+   if (use_sorted && (!A_j || !A_data))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "hypre_CSRMatrixSortDevice requires sorted matrix storage!\n");
+      return hypre_error_flag;
+   }
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE)
    return hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
                                 hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
-                                hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+                                hypre_CSRMatrixI(A), A_j, A_data);
 #elif defined(HYPRE_USING_ROCSPARSE)
    return hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
                                  hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
-                                 hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+                                 hypre_CSRMatrixI(A), A_j, A_data);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
+   if (use_sorted)
+   {
+#if defined(HYPRE_BIGINT)
+      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
+                                                           hypre_CSRMatrixGPUMatHandle(A),
+                                                           hypre_CSRMatrixNumRows(A),
+                                                           hypre_CSRMatrixNumCols(A),
+                                                           (std::int64_t) hypre_CSRMatrixNumNonzeros(A),
+                                                           oneapi::mkl::index_base::zero,
+                                                           reinterpret_cast<std::int64_t*>(hypre_CSRMatrixI(A)),
+                                                           reinterpret_cast<std::int64_t*>(A_j),
+                                                           A_data).wait() );
+#else
+      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
+                                                           hypre_CSRMatrixGPUMatHandle(A),
+                                                           hypre_CSRMatrixNumRows(A),
+                                                           hypre_CSRMatrixNumCols(A),
+                                                           (std::int64_t) hypre_CSRMatrixNumNonzeros(A),
+                                                           oneapi::mkl::index_base::zero,
+                                                           hypre_CSRMatrixI(A),
+                                                           A_j,
+                                                           A_data).wait() );
+#endif
+   }
+
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()),
                                                        hypre_CSRMatrixGPUMatHandle(A), {}).wait() );
+
+   if (use_sorted)
+   {
+      hypre_GPUMatDataSetCSRData(A);
+   }
+
    return hypre_error_flag;
 #else
    HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(use_sorted);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE/oneMKLSparse!\n");
    return hypre_error_flag;
@@ -3331,13 +3377,7 @@ hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
    hypre_TMemcpy(hypre_CSRMatrixSortedData(A), A_a, HYPRE_Complex, nnzA,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
-   hypre_CSRMatrixData(A) = hypre_CSRMatrixSortedData(A);
-
-   hypre_CSRMatrixSortRow(A);
-
-   hypre_CSRMatrixJ(A)    = A_j;
-   hypre_CSRMatrixData(A) = A_a;
+   hypre_CSRMatrixSortDevice(A, 1);
 
    return hypre_error_flag;
 }

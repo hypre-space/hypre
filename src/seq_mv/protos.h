@@ -305,7 +305,7 @@ HYPRE_Int hypre_CSRSpTransVendor(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE
 HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 HYPRE_Int hypre_CSRSpGemmVendor(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C,
                                 HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
-HYPRE_Int hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A);
+HYPRE_Int hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A, HYPRE_Int use_sorted);
 
 /* csr_spmv_device.c */
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,

@@ -267,9 +267,9 @@ hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixSortDevice( hypre_CSRMatrix *A )
+hypre_CSRMatrixSortDevice( hypre_CSRMatrix *A, HYPRE_Int use_sorted )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixSortDevice)( A );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixSortDevice)( A, use_sorted );
 }
 
 /*--------------------------------------------------------------------------*/

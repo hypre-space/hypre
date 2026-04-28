@@ -11,6 +11,25 @@
 
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
+static HYPRE_Int
+hypre_CSRSpGemmSortDeviceCopy(hypre_CSRMatrix *A,
+                              HYPRE_Int       *A_j_sorted,
+                              HYPRE_Complex   *A_data_sorted)
+{
+   HYPRE_Int     *A_j_saved    = hypre_CSRMatrixSortedJ(A);
+   HYPRE_Complex *A_data_saved = hypre_CSRMatrixSortedData(A);
+
+   hypre_CSRMatrixSortedJ(A)    = A_j_sorted;
+   hypre_CSRMatrixSortedData(A) = A_data_sorted;
+
+   hypre_CSRMatrixSortDevice(A, 1);
+
+   hypre_CSRMatrixSortedJ(A)    = A_j_saved;
+   hypre_CSRMatrixSortedData(A) = A_data_saved;
+
+   return hypre_error_flag;
+}
+
 HYPRE_Int
 hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
                       hypre_CSRMatrix  *B,
@@ -59,16 +78,8 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
    /* RL: for matrices with long rows, it seemed that the sorting is still needed */
    /* VPM: Adding sorting back since it is necessary for correctness in a few cases */
 #if 1
-   hypre_CSRMatrixSortDevice(A);
-   hypre_TMemcpy(d_ja_sorted, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_a_sorted,  hypre_CSRMatrixData(A), HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_CSRMatrixSortDevice(B);
-   hypre_TMemcpy(d_jb_sorted, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_b_sorted,  hypre_CSRMatrixData(B), HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
+   hypre_CSRSpGemmSortDeviceCopy(A, d_ja_sorted, d_a_sorted);
+   hypre_CSRSpGemmSortDeviceCopy(B, d_jb_sorted, d_b_sorted);
 #endif
 
    // nnzTotalDevHostPtr points to host memory
