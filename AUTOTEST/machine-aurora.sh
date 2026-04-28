@@ -54,6 +54,8 @@ atol="3e-15"
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="aurora"
 
+module load cmake
+
 ##########
 ## SYCL ##
 ##########
