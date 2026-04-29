@@ -68,7 +68,7 @@ hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector  *vector,
    HYPRE_THRUST_CALL(gather, tags, tags + size, values, data);
 
 #elif defined(HYPRE_USING_SYCL)
-   hypreSycl_gather(tags, tags + size, values, data);
+   hypre_SyclGather(tags, tags + size, values, data);
 
 #endif
    hypre_SyncComputeStream();

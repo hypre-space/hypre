@@ -32,7 +32,7 @@ hypre_IntSequence(HYPRE_MemoryLocation  memory_location,
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_sequence(data, data + size, 0);
+      hypre_SyclSequence(data, data + size, 0);
 #else
       HYPRE_THRUST_CALL(sequence, data, data + size);
 #endif

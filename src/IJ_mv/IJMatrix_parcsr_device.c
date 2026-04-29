@@ -236,7 +236,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       auto zip_in = oneapi::dpl::make_zip_iterator(cols, values);
       auto zip_out = oneapi::dpl::make_zip_iterator(stack_j + stack_elmts_current,
                                                     stack_data + stack_elmts_current);
-      auto new_end = hypreSycl_copy_if( zip_in,
+      auto new_end = hypre_SyclCopy_if( zip_in,
                                         zip_in + len,
                                         indicator,
                                         zip_out,
@@ -367,7 +367,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
                       std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
                       oneapi::dpl::maximum<char>() );
 
-   hypreSycl_transform_if(A0,
+   hypre_SyclTransform_if(A0,
                           A0 + N0,
                           X,
                           A0,
@@ -556,7 +556,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
                       std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
                       oneapi::dpl::maximum<char>() );
 
-   hypreSycl_transform_if(A0,
+   hypre_SyclTransform_if(A0,
                           A0 + N0,
                           X0,
                           A0,
@@ -601,7 +601,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
 
    /* remove numrical zeros */
 #if defined(HYPRE_USING_SYCL)
-   auto new_end2 = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(I, J, A),
+   auto new_end2 = hypre_SyclCopy_if( oneapi::dpl::make_zip_iterator(I, J, A),
                                       oneapi::dpl::make_zip_iterator(I + Nt, J + Nt, A + Nt),
                                       A,
                                       oneapi::dpl::make_zip_iterator(I0, J0, A0),
@@ -676,7 +676,7 @@ hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_j, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_j, off_proc_data, off_proc_sora);
-         auto new_end1 = hypreSycl_copy_if( zip_in,         /* first */
+         auto new_end1 = hypre_SyclCopy_if( zip_in,         /* first */
                                             zip_in + nelms, /* last */
                                             is_on_proc,     /* stencil */
                                             zip_out,        /* result */
@@ -685,7 +685,7 @@ hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
          /* remove off-proc entries from stack */
-         auto new_end2 = hypreSycl_remove_if( zip_in,          /* first */
+         auto new_end2 = hypre_SyclRemove_if( zip_in,          /* first */
                                               zip_in + nelms,  /* last */
                                               is_on_proc,      /* stencil */
          [] (const auto & x) {return !x;} );
@@ -1007,7 +1007,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
             /* adjust with the new col_map_offd_map */
 #if defined(HYPRE_USING_SYCL)
-            hypreSycl_gather( hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
+            hypre_SyclGather( hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
                               hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)) + offd_nnz_existed,
                               col_map_offd_map,
                               offd_j_new );
@@ -1233,7 +1233,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
          else
          {
 #if defined(HYPRE_USING_SYCL)
-            hypreSycl_sequence(temp_row_indexes, temp_row_indexes + nrows + 1, 0);
+            hypre_SyclSequence(temp_row_indexes, temp_row_indexes + nrows + 1, 0);
 #else
             HYPRE_THRUST_CALL(sequence, temp_row_indexes, temp_row_indexes + nrows + 1, 0);
 #endif

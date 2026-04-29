@@ -242,7 +242,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   for (j = 0; j < ndim; j++)
                   {
 #if defined(HYPRE_USING_SYCL)
-                     hypreSycl_gather(box_nnzrows,
+                     hypre_SyclGather(box_nnzrows,
                                       box_nnzrows_end,
                                       all_indices[j],
                                       indices[j]);

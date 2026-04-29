@@ -2072,7 +2072,7 @@ hypre_CsrRowPtrsToIndicesWithRowNumDevice( HYPRE_Int  nrows,
    hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnz, d_row_ptr, map);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+   hypre_SyclGather(map, map + nnz, d_row_num, d_row_ind);
 #else
    HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 #endif

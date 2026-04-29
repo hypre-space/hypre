@@ -31,9 +31,9 @@
 
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
 template <typename T, typename Predicate, typename Operator>
-struct hypreSycl_transform_if_unary_zip_mask_fun
+struct hypre_SyclTransform_if_unary_zip_mask_fun
 {
-   hypreSycl_transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
+   hypre_SyclTransform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
    template <typename _T>
    void operator()(_T&& t) const
    {
@@ -51,7 +51,7 @@ private:
 
 template <class Iter1, class Iter2, class Iter3,
           class UnaryOperation, class Pred>
-Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
+Iter3 hypre_SyclTransform_if(Iter1 first, Iter1 last, Iter2 mask,
                              Iter3 result, UnaryOperation unary_op, Pred pred)
 {
    static_assert(
@@ -67,15 +67,15 @@ Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
    auto begin_for_each = oneapi::dpl::make_zip_iterator(first, mask, result);
    HYPRE_ONEDPL_CALL( std::for_each,
                       begin_for_each, begin_for_each + n,
-                      hypreSycl_transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(pred, unary_op) );
+                      hypre_SyclTransform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(pred, unary_op) );
    return result + n;
 }
 
 // Functor evaluates second element of tied sequence with predicate.
 // Used by: copy_if
-template <typename Predicate> struct hypreSycl_predicate_key_fun
+template <typename Predicate> struct hypre_SyclPredicate_key_fun
 {
-   hypreSycl_predicate_key_fun(Predicate _pred) : pred(_pred) {}
+   hypre_SyclPredicate_key_fun(Predicate _pred) : pred(_pred) {}
 
    template <typename _T1> bool operator()(_T1 &&a) const
    {
@@ -90,7 +90,7 @@ private:
 // instead of the data being copied (natively suppored in thrust, but
 // not supported in oneDPL)
 template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
-Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
+Iter3 hypre_SyclCopy_if(Iter1 first, Iter1 last, Iter2 mask,
                         Iter3 result, Pred pred)
 {
    static_assert(
@@ -105,7 +105,7 @@ Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
                                      oneapi::dpl::make_zip_iterator(first, mask),
                                      oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
                                      oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-                                     hypreSycl_predicate_key_fun<Pred>(pred));
+                                     hypre_SyclPredicate_key_fun<Pred>(pred));
    return std::get<0>(ret_val.base());
 }
 
@@ -113,7 +113,7 @@ Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
 // NOTE: We copy the mask below because this implementation also
 // remove elements from the mask in addition to the input.
 template <typename Iter1, typename Iter2, typename Pred>
-Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
+Iter1 hypre_SyclRemove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
 {
    static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
@@ -127,14 +127,14 @@ Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
    auto ret_val = HYPRE_ONEDPL_CALL( std::remove_if,
                                      oneapi::dpl::make_zip_iterator(first, mask_cpy),
                                      oneapi::dpl::make_zip_iterator(last, mask_cpy + std::distance(first, last)),
-                                     hypreSycl_predicate_key_fun<Pred>(pred));
+                                     hypre_SyclPredicate_key_fun<Pred>(pred));
    hypre_TFree(mask_cpy, HYPRE_MEMORY_DEVICE);
    return std::get<0>(ret_val.base());
 }
 
 // Similar to above, need mask version of remove_copy_if
 template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
-Iter3 hypreSycl_remove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result, Pred pred)
+Iter3 hypre_SyclRemove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result, Pred pred)
 {
    static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
@@ -146,14 +146,14 @@ Iter3 hypreSycl_remove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result
                                      oneapi::dpl::make_zip_iterator(first, mask),
                                      oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
                                      oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-                                     hypreSycl_predicate_key_fun<Pred>(pred));
+                                     hypre_SyclPredicate_key_fun<Pred>(pred));
    return std::get<0>(ret_val.base());
 }
 
 // Equivalent of thrust::scatter_if
 template <typename InputIter1, typename InputIter2,
           typename InputIter3, typename OutputIter, typename Predicate>
-void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
+void hypre_SyclScatter_if(InputIter1 first, InputIter1 last,
                           InputIter2 map, InputIter3 mask, OutputIter result,
                           Predicate pred)
 {
@@ -170,7 +170,7 @@ void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
       typename std::iterator_traits<OutputIter>::iterator_category,
       std::random_access_iterator_tag >::value,
       "Iterators passed to algorithms must be random-access iterators.");
-   hypreSycl_transform_if(first, last, mask,
+   hypre_SyclTransform_if(first, last, mask,
                           oneapi::dpl::make_permutation_iterator(result, map),
    [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });
 }
@@ -178,7 +178,7 @@ void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
 // Equivalent of thrust::scatter
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>
-void hypreSycl_scatter(InputIter1 first, InputIter1 last,
+void hypre_SyclScatter(InputIter1 first, InputIter1 last,
                              InputIter2 map, OutputIter result)
 {
    static_assert(
@@ -199,7 +199,7 @@ void hypreSycl_scatter(InputIter1 first, InputIter1 last,
 // Equivalent of thrust::gather_if
 template <typename InputIter1, typename InputIter2,
           typename InputIter3, typename OutputIter, typename Predicate>
-void hypreSycl_gather_if(InputIter1 map_first, InputIter1 map_last,
+void hypre_SyclGather_if(InputIter1 map_first, InputIter1 map_last,
                           InputIter2 mask, InputIter3 input_first, OutputIter result,
                           Predicate pred)
 {
@@ -219,14 +219,14 @@ void hypreSycl_gather_if(InputIter1 map_first, InputIter1 map_last,
    auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
    const auto n = std::distance(map_first, map_last);
-   hypreSycl_copy_if(perm_begin, perm_begin + n, mask, result,
+   hypre_SyclCopy_if(perm_begin, perm_begin + n, mask, result,
    [ = ](auto &&m) { return pred(m); } );
 }
 
 // Equivalent of thrust::gather
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>
-OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
+OutputIter hypre_SyclGather(InputIter1 map_first, InputIter1 map_last,
                             InputIter2 input_first, OutputIter result)
 {
    static_assert(
@@ -247,7 +247,7 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
 
 // Equivalent of thrust::sequence (with step=1)
 template <class Iter, class T>
-void hypreSycl_sequence(Iter first, Iter last, T init = 0)
+void hypre_SyclSequence(Iter first, Iter last, T init = 0)
 {
    static_assert(
       std::is_same<typename std::iterator_traits<Iter>::iterator_category,
@@ -263,7 +263,7 @@ void hypreSycl_sequence(Iter first, Iter last, T init = 0)
 
 // Equivalent of thrust::stable_sort_by_key
 template <class Iter1, class Iter2>
-void hypreSycl_stable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 values_first)
+void hypre_SyclStable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 values_first)
 {
    static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
