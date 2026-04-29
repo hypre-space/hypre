@@ -158,7 +158,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
          /* sync CF_marker_offd: so it has correct 1/0 now */
 #if defined(HYPRE_USING_SYCL)
-         hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+         hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                            CF_marker_diag,
@@ -198,14 +198,14 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
       /* Update graph_diag. Remove the nodes with CF_marker_diag != 0 */
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather( graph_diag,
+      hypre_GatherSycl( graph_diag,
                         graph_diag + graph_diag_size,
                         CF_marker_diag,
                         diag_iwork );
 
-      HYPRE_Int *new_end = hypreSycl_remove_if( graph_diag,
-                                                graph_diag + graph_diag_size,
-                                                diag_iwork,
+      HYPRE_Int *new_end = hypre_RemoveIfSycl( graph_diag,
+                                               graph_diag + graph_diag_size,
+                                               diag_iwork,
       [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( gather,
@@ -400,7 +400,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* communicate for measure_offd */
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,
@@ -431,10 +431,10 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    /* graph_diag consists points with CF_marker_diag == 0 */
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   new_end = hypreSycl_remove_copy_if( count,
-                                       count + num_rows_diag,
-                                       CF_marker_diag,
-                                       graph_diag,
+   new_end = hypre_RemoveCopyIfSycl( count,
+                                     count + num_rows_diag,
+                                     CF_marker_diag,
+                                     graph_diag,
    [] (const auto & x) {return x;} );
 #else
    new_end = HYPRE_THRUST_CALL( remove_copy_if,
@@ -600,7 +600,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 
    /* communicate for measure_offd */
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,

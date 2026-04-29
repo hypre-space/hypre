@@ -34,7 +34,6 @@ set(REGULAR_SRCS
   vector.c
   vector_batched.c
   csr_matop_device.c
-  csr_matrix_cuda_utils.c
   csr_matvec_device.c
   csr_matvec_oomp.c
   csr_spadd_device.c
@@ -80,6 +79,14 @@ set(MUP_SRCS
   seq_mv_mp.c
 )
 
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
+
 # Autogenerate csr_spgemm_device_numer$ files
 file(READ "csr_spgemm_device_numer.in" CONTENTS)
 foreach(number RANGE 1 10)
@@ -111,7 +118,6 @@ endif()
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     csr_matop_device.c
-    csr_matrix_cuda_utils.c
     csr_matvec_device.c
     csr_matvec_oomp.c
     csr_spadd_device.c
@@ -146,8 +152,12 @@ if (HYPRE_USING_GPU)
     csr_spgemm_device_util.c
     csr_spmv_device.c
     csr_sptrans_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
     vector_device.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

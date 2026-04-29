@@ -2271,7 +2271,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
       {
          nonzero_rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-         hypreSycl_sequence( nonzero_rows, nonzero_rows + num_rows, 0 );
+         hypre_SequenceSycl( nonzero_rows, nonzero_rows + num_rows, 0 );
 #else
          HYPRE_THRUST_CALL( sequence, nonzero_rows, nonzero_rows + num_rows );
 #endif
@@ -2385,17 +2385,17 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                /* Gather indices at non-zero rows of A_u */
                if (ndim > 0)
                {
-                  hypreSycl_gather( box_nnzrows, box_nnzrows_end, all_indices_0, indices_0 );
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_0, indices_0 );
                }
 
                if (ndim > 1)
                {
-                  hypreSycl_gather( box_nnzrows, box_nnzrows_end, all_indices_1, indices_1 );
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_1, indices_1 );
                }
 
                if (ndim > 2)
                {
-                  hypreSycl_gather( box_nnzrows, box_nnzrows_end, all_indices_2, indices_2 );
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_2, indices_2 );
                }
 #else
                /* Get the nonzero rows for this box */
@@ -2637,9 +2637,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
          HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
-         hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
-         hypreSycl_sequence( rows, rows + nrows, sizes[0] );
-         hypreSycl_sequence( cols, cols + nrows, sizes[2] );
+         hypre_SequenceSycl( rowidx, rowidx + nrows, 0 );
+         hypre_SequenceSycl( rows, rows + nrows, sizes[0] );
+         hypre_SequenceSycl( cols, cols + nrows, sizes[2] );
 #else
          HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
          HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );

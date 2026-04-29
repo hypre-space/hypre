@@ -825,6 +825,14 @@ hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m, hypre_MPI_C
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Comm_split_type)( comm, split_type, key, info, newcomm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MPI_Finalize( void )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Finalize)( );
@@ -868,6 +876,22 @@ HYPRE_Int
 hypre_MPI_Group_incl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks, hypre_MPI_Group *newgroup )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Group_incl)( group, n, ranks, newgroup );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Info_create)( info );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Info_free)( info );
 }
 
 /*--------------------------------------------------------------------------*/

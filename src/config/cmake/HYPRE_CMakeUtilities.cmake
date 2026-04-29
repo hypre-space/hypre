@@ -1036,6 +1036,16 @@ function(add_hypre_subdirectories DIRS)
   endforeach()
 endfunction()
 
+function(mark_hypre_gpu_sources)
+  if(HYPRE_USING_CUDA)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CUDA)
+  elseif(HYPRE_USING_HIP)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE HIP)
+  elseif(HYPRE_USING_SYCL)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CXX)
+  endif()
+endfunction()
+
 # A function to add an executable to the build with the correct flags, includes, and linkage.
 function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
   get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
@@ -1290,22 +1300,35 @@ macro(setup_mixed_precision_compilation module_name)
     message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
   endif()
 
+  set(_regular_srcs_abs "")
+  foreach(_src IN LISTS REGULAR_SRCS)
+    if(IS_ABSOLUTE "${_src}")
+      list(APPEND _regular_srcs_abs "${_src}")
+    else()
+      get_filename_component(_src_abs "${_src}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+      list(APPEND _regular_srcs_abs "${_src_abs}")
+    endif()
+  endforeach()
+
   # Create object libraries for each precision
-  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_flt  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_dbl  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_ldbl OBJECT ${_regular_srcs_abs})
 
   # Set precision-specific compile definitions
-  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1)
-  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1)
-  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+  # Keep mixed-precision renaming active for the entire translation unit.
+  # The generated headers only suppress the *_mup_undef.h footer when
+  # hypre_MP_BUILD is already defined at preprocess time.
+  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1 hypre_MP_BUILD=1)
 
   # Set include directories and link libraries for all precision variants
   foreach(precision IN ITEMS flt dbl ldbl)
     target_include_directories(${module_name}_${precision} PRIVATE
-      ${CMAKE_SOURCE_DIR}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}
+      ${CMAKE_SOURCE_DIR}
       ${CMAKE_SOURCE_DIR}/utilities
       ${CMAKE_SOURCE_DIR}/blas
       ${CMAKE_SOURCE_DIR}/lapack
@@ -1324,9 +1347,34 @@ macro(setup_mixed_precision_compilation module_name)
       ${CMAKE_SOURCE_DIR}/matrix_matrix
       ${CMAKE_SOURCE_DIR}/multivector
     )
-    # Set position independent code for shared library builds
-    # Object libraries need explicit -fPIC when used in shared libraries
-    if(BUILD_SHARED_LIBS)
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # do not automatically inherit TPL usage requirements from HYPRE.
+    get_target_property(_hypre_include_dirs ${PROJECT_NAME} INCLUDE_DIRECTORIES)
+    if(_hypre_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_include_dirs})
+    endif()
+
+    get_target_property(_hypre_interface_include_dirs ${PROJECT_NAME} INTERFACE_INCLUDE_DIRECTORIES)
+    if(_hypre_interface_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_interface_include_dirs})
+    endif()
+
+    get_target_property(_hypre_compile_defs ${PROJECT_NAME} COMPILE_DEFINITIONS)
+    if(_hypre_compile_defs)
+      target_compile_definitions(${module_name}_${precision} PRIVATE ${_hypre_compile_defs})
+    endif()
+
+    get_target_property(_hypre_compile_opts ${PROJECT_NAME} COMPILE_OPTIONS)
+    if(_hypre_compile_opts)
+      target_compile_options(${module_name}_${precision} PRIVATE ${_hypre_compile_opts})
+    endif()
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # need an explicit PIC property whenever the parent HYPRE target requires it.
+    get_target_property(_hypre_pic ${PROJECT_NAME} POSITION_INDEPENDENT_CODE)
+    get_target_property(_hypre_interface_pic ${PROJECT_NAME} INTERFACE_POSITION_INDEPENDENT_CODE)
+    if(BUILD_SHARED_LIBS OR _hypre_pic OR _hypre_interface_pic)
       set_target_properties(${module_name}_${precision} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
       )

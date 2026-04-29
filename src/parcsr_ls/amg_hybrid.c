@@ -81,6 +81,10 @@ typedef struct
    HYPRE_Int             num_functions;
    HYPRE_Int             nodal;
    HYPRE_Int            *dof_func;
+   /* flexible AMG cycling params */
+   HYPRE_Int      num_levels_flexible, length_cycle_flexible;
+   HYPRE_Int     *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
+   HYPRE_Real    *outer_weights_flexible, *relax_weights_flexible, *cgc_scaling_factors_flexible;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -156,6 +160,15 @@ hypre_AMGHybridCreate( void )
    (AMGhybrid_data -> dof_func)  = NULL;
    (AMGhybrid_data -> nongalerk_num_tol)  = 0;
    (AMGhybrid_data -> nongalerkin_tol)  = NULL;
+   /*flexible AMG cycling params */
+   (AMGhybrid_data -> num_levels_flexible)    = 0;
+   (AMGhybrid_data -> length_cycle_flexible)  = 0;
+   (AMGhybrid_data -> cycle_struct_flexible)  = NULL;
+   (AMGhybrid_data -> relax_types_flexible)   = NULL;
+   (AMGhybrid_data -> relax_orders_flexible)  = NULL;
+   (AMGhybrid_data -> outer_weights_flexible) = NULL;
+   (AMGhybrid_data -> relax_weights_flexible) = NULL;
+   (AMGhybrid_data -> cgc_scaling_factors_flexible) = NULL;
 
    return (void *) AMGhybrid_data;
 }
@@ -216,6 +229,12 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
          hypre_TFree( (AMGhybrid_data -> dof_func), HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> dof_func) = NULL;
       }
+      hypre_TFree( (AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_types_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_orders_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> outer_weights_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> relax_weights_flexible), HYPRE_MEMORY_HOST );
+      hypre_TFree( (AMGhybrid_data -> cgc_scaling_factors_flexible), HYPRE_MEMORY_HOST );
       hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
    }
 
@@ -1417,6 +1436,210 @@ hypre_AMGHybridSetLevelOuterWt( void   *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleCycleStruct
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct( void  *AMGhybrid_vdata,
+                                       HYPRE_Int    *cycle_struct_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!cycle_struct_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int num_levels_flexible = 0;
+   HYPRE_Int i = 0;
+   HYPRE_Int lvl = 0;
+
+   while ( cycle_struct_flexible[i] == 0 || // same level
+           cycle_struct_flexible[i] == 1 || // cycle up
+           cycle_struct_flexible[i] == -1 ) // cycle down
+   {
+      lvl += (-cycle_struct_flexible[i]); // depth of the flexible cycle
+      if (lvl > num_levels_flexible)
+      {
+         num_levels_flexible = lvl;
+      }
+      i++;
+   }
+
+   if ((num_levels_flexible <= 0) || (i <= 0))
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> cycle_struct_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> cycle_struct_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> cycle_struct_flexible) = cycle_struct_flexible;
+   (AMGhybrid_data -> length_cycle_flexible) = i + 1;
+   (AMGhybrid_data -> num_levels_flexible) = num_levels_flexible + 1;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleRelaxTypes
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes( void  *AMGhybrid_vdata,
+                                      HYPRE_Int    *relax_types_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_types_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> relax_types_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> relax_types_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> relax_types_flexible) = relax_types_flexible;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleRelaxOrders
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders( void  *AMGhybrid_vdata,
+                                       HYPRE_Int    *relax_orders_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_orders_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> relax_orders_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> relax_orders_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> relax_orders_flexible) = relax_orders_flexible;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleRelaxWeights
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights( void  *AMGhybrid_vdata,
+                                        HYPRE_Real    *relax_weights_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!relax_weights_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> relax_weights_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> relax_weights_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> relax_weights_flexible) = relax_weights_flexible;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleOuterWeights
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights( void  *AMGhybrid_vdata,
+                                        HYPRE_Real    *outer_weights_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!outer_weights_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> outer_weights_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> outer_weights_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> outer_weights_flexible) = outer_weights_flexible;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetFlexibleCGCScalingFactors
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors( void  *AMGhybrid_vdata,
+                                             HYPRE_Real    *cgc_scaling_factors_flexible)
+{
+   hypre_AMGHybridData  *AMGhybrid_data = (hypre_AMGHybridData*) AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!cgc_scaling_factors_flexible)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if ((AMGhybrid_data -> cgc_scaling_factors_flexible))
+   {
+      hypre_TFree((AMGhybrid_data -> cgc_scaling_factors_flexible), HYPRE_MEMORY_HOST);
+   }
+   (AMGhybrid_data -> cgc_scaling_factors_flexible) = cgc_scaling_factors_flexible;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridSetNumPaths
  *--------------------------------------------------------------------------*/
 
@@ -1745,6 +1968,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Real        *relax_weight;
    HYPRE_Real        *omega;
    HYPRE_Int         *dof_func;
+   HYPRE_Int         num_levels_flexible;
+   HYPRE_Int         length_cycle_flexible;
+   HYPRE_Int         *cycle_struct_flexible, *relax_types_flexible, *relax_orders_flexible;
+   HYPRE_Real        *relax_weights_flexible, *outer_weights_flexible, *cgc_scaling_factors_flexible;
 
    HYPRE_Int         *boom_ngs;
    HYPRE_Int         *boom_grt;
@@ -1752,6 +1979,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int        **boom_grp;
    HYPRE_Real        *boom_rlxw;
    HYPRE_Real        *boom_omega;
+   HYPRE_Int         *boom_cycle_struct_flexible, *boom_relax_types_flexible,
+                     *boom_relax_orders_flexible;
+   HYPRE_Real        *boom_relax_weights_flexible, *boom_outer_weights_flexible,
+                     *boom_cgc_scaling_factors_flexible;
 
    HYPRE_Int          pcg_default;
    HYPRE_Int          (*pcg_precond_solve)(void*, void*, void*, void*);
@@ -1834,6 +2065,16 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    min_coarse_size = (AMGhybrid_data -> min_coarse_size);
    seq_threshold = (AMGhybrid_data -> seq_threshold);
    dof_func = (AMGhybrid_data -> dof_func);
+   /* flexible AMG cycling info */
+   num_levels_flexible = (AMGhybrid_data -> num_levels_flexible);
+   length_cycle_flexible = (AMGhybrid_data -> length_cycle_flexible);
+   cycle_struct_flexible = (AMGhybrid_data -> cycle_struct_flexible);
+   relax_types_flexible = (AMGhybrid_data -> relax_types_flexible);
+   relax_orders_flexible = (AMGhybrid_data -> relax_orders_flexible);
+   relax_weights_flexible = (AMGhybrid_data -> relax_weights_flexible);
+   outer_weights_flexible = (AMGhybrid_data -> outer_weights_flexible);
+   cgc_scaling_factors_flexible = (AMGhybrid_data -> cgc_scaling_factors_flexible);
+
    pcg_default    = (AMGhybrid_data -> pcg_default);
    nongalerk_num_tol    = (AMGhybrid_data -> nongalerk_num_tol);
    nongalerkin_tol    = (AMGhybrid_data -> nongalerkin_tol);
@@ -2203,6 +2444,54 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             }
             hypre_BoomerAMGSetDofFunc(pcg_precond, boom_dof_func);
          }
+
+         if (num_levels_flexible > 0)
+         {
+            if (cycle_struct_flexible)
+            {
+               boom_cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_cycle_struct_flexible, cycle_struct_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleCycleStruct(pcg_precond, boom_cycle_struct_flexible);
+            }
+            if (relax_types_flexible)
+            {
+               boom_relax_types_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_types_flexible, relax_types_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, boom_relax_types_flexible);
+            }
+            if (relax_orders_flexible)
+            {
+               boom_relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, length_cycle_flexible, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_orders_flexible, relax_orders_flexible, HYPRE_Int, length_cycle_flexible,
+                             HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, boom_relax_orders_flexible);
+            }
+            if (relax_weights_flexible)
+            {
+               boom_relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_relax_weights_flexible, relax_weights_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, boom_relax_weights_flexible);
+            }
+            if (outer_weights_flexible)
+            {
+               boom_outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_outer_weights_flexible, outer_weights_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleOuterWeights(pcg_precond, boom_outer_weights_flexible);
+            }
+            if (cgc_scaling_factors_flexible)
+            {
+               boom_cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, length_cycle_flexible,
+                                                                 HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(boom_cgc_scaling_factors_flexible, cgc_scaling_factors_flexible, HYPRE_Real,
+                             length_cycle_flexible, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, boom_cgc_scaling_factors_flexible);
+            }
+         }
+
          pcg_precond_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
          pcg_precond_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
          (AMGhybrid_data -> pcg_precond_setup) = pcg_precond_setup;

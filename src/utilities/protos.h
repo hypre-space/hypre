@@ -321,9 +321,9 @@ HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, 
                                      HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 HYPRE_Complex hypreDevice_ComplexReduceSum(HYPRE_Int m, HYPRE_Complex *d_x);
+HYPRE_Real hypreDevice_RealReduceMaxAbs(HYPRE_Int m, HYPRE_Real *d_x);
 HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-HYPRE_Int hypre_CudaCompileFlagCheck(void);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed,
@@ -362,6 +362,7 @@ char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
+size_t hypre_GetSizeOfReal(void);
 
 /* handle.c */
 HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );

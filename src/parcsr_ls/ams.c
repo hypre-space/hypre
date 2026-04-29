@@ -571,7 +571,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
          hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-         hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+         hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                                              num_sends),
                            cf_marker,
@@ -757,9 +757,9 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_transform_if( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
-                              std::negate<HYPRE_Real>(),
-                              is_negative<HYPRE_Real>() );
+      hypre_TransformIfSycl( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
+                             std::negate<HYPRE_Real>(),
+                             is_negative<HYPRE_Real>() );
       bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
                                                 oneapi::dpl::minimum<HYPRE_Real>() );
 #else
@@ -1530,6 +1530,9 @@ HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__ void
 hypreGPUKernel_AMSComputePi_copy1(hypre_DeviceItem &item,
                                   HYPRE_Int  nnz,
@@ -1550,6 +1553,9 @@ hypreGPUKernel_AMSComputePi_copy1(hypre_DeviceItem &item,
    }
 }
 
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__ void
 hypreGPUKernel_AMSComputePi_copy2(hypre_DeviceItem &item,
                                   HYPRE_Int   nrows,
@@ -1823,6 +1829,9 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__ void
 hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item,
                                     HYPRE_Int   nrows,
@@ -3070,40 +3079,22 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_SYCL)
                if (nnz_diag)
                {
-                  lfactor = HYPRE_ONEDPL_CALL( std::reduce,
-                                               oneapi::dpl::make_transform_iterator(B_diag_data,            absolute_value<HYPRE_Real>()),
-                                               oneapi::dpl::make_transform_iterator(B_diag_data + nnz_diag, absolute_value<HYPRE_Real>()),
-                                               -1.0,
-                                               sycl::maximum<HYPRE_Real>() );
+                  lfactor = hypreDevice_RealReduceMaxAbs(nnz_diag, B_diag_data);
                }
 
                if (nnz_offd)
                {
-                  lfactor = HYPRE_ONEDPL_CALL( std::reduce,
-                                               oneapi::dpl::make_transform_iterator(B_offd_data,            absolute_value<HYPRE_Real>()),
-                                               oneapi::dpl::make_transform_iterator(B_offd_data + nnz_offd, absolute_value<HYPRE_Real>()),
-                                               lfactor,
-                                               sycl::maximum<HYPRE_Real>() );
-
+                  lfactor = hypre_max(lfactor, hypreDevice_RealReduceMaxAbs(nnz_offd, B_offd_data));
                }
 #else
                if (nnz_diag)
                {
-                  lfactor = HYPRE_THRUST_CALL( reduce,
-                                               thrust::make_transform_iterator(B_diag_data,            absolute_value<HYPRE_Real>()),
-                                               thrust::make_transform_iterator(B_diag_data + nnz_diag, absolute_value<HYPRE_Real>()),
-                                               -1.0,
-                                               thrust::maximum<HYPRE_Real>() );
+                  lfactor = hypreDevice_RealReduceMaxAbs(nnz_diag, B_diag_data);
                }
 
                if (nnz_offd)
                {
-                  lfactor = HYPRE_THRUST_CALL( reduce,
-                                               thrust::make_transform_iterator(B_offd_data,            absolute_value<HYPRE_Real>()),
-                                               thrust::make_transform_iterator(B_offd_data + nnz_offd, absolute_value<HYPRE_Real>()),
-                                               lfactor,
-                                               thrust::maximum<HYPRE_Real>() );
-
+                  lfactor = hypre_max(lfactor, hypreDevice_RealReduceMaxAbs(nnz_offd, B_offd_data));
                }
 #endif
             }
