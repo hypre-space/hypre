@@ -254,11 +254,13 @@
 #undef hypre_error_handler
 #undef hypre_error_handler_clear_messages
 #undef hypre_finalize
+#undef hypre_gcd
 #undef hypre_geterror
 #undef hypre_geterrorarg
 #undef hypre_handle
 #undef hypre_init
 #undef hypre_initialize
+#undef hypre_lcm
 #undef hypre_merge_sort
 #undef hypre_mm_is_valid
 #undef hypre_mm_read_banner

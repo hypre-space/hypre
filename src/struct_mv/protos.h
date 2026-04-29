@@ -210,16 +210,16 @@ HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex, hypre_Index origin, 
 HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex, hypre_Index origin, hypre_Index stride,
                                         hypre_Index findex );
 HYPRE_Int
-hypre_ComposeOriginStride( hypre_Index     origin1,  // = comp_origin on output
-                           hypre_Index     stride1,  // = comp_stride on output
+hypre_ComposeOriginStride( hypre_Index     origin1,
+                           hypre_Index     stride1,
                            hypre_IndexRef  origin2,
                            hypre_Index     stride2,
                            HYPRE_Int       ndim );
 HYPRE_Int
 hypre_DecomposeOriginStride( hypre_Index     origin1,
                              hypre_Index     stride1,
-                             hypre_IndexRef  origin2,  // = comp_origin on input
-                             hypre_Index     stride2,  // = comp_stride on input
+                             hypre_IndexRef  origin2,
+                             hypre_Index     stride2,
                              HYPRE_Int       ndim );
 HYPRE_Int hypre_CoarsenBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
