@@ -389,7 +389,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    } /* end ForBoxI */
 
-   // RDF (2026): This extra Assemble has been here for a long time but doesn't
+   // RDF (2026): This extra Assemble has been here for many years but doesn't
    // seem to be needed hypre_StructMatrixAssemble(Ac);
 
    /*-----------------------------------------------------------------------
