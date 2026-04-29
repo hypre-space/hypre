@@ -35,7 +35,7 @@ if [ $# -eq 1 ]; then
             check_type="GPU"
             ;;
         --sycl)
-            opts="$opts --without-umpire --with-sycl"
+            opts="$opts --without-umpire --with-sycl --with-extra-CUFLAGS=-w"
             check_type="GPU"
             ;;
         -h|--help)
