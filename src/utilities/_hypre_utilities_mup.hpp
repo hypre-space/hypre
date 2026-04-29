@@ -216,19 +216,19 @@ hypreDevice_IntegerReduceSum_dbl( HYPRE_Int m, HYPRE_Int *d_i );
 HYPRE_Int
 hypreDevice_IntegerReduceSum_long_dbl( HYPRE_Int m, HYPRE_Int *d_i );
 
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_flt( HYPRE_Int m, hypre_float *d_x );
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_dbl( HYPRE_Int m, hypre_double *d_x );
+HYPRE_Real
+hypreDevice_RealReduceMaxAbs_long_dbl( HYPRE_Int m, hypre_long_double *d_x );
+
 HYPRE_Int
 hypreDevice_zeqxmydd_flt( HYPRE_Int n, hypre_float *x, hypre_float alpha, hypre_float *y, hypre_float *z, hypre_float *d );
 HYPRE_Int
 hypreDevice_zeqxmydd_dbl( HYPRE_Int n, hypre_double *x, hypre_double alpha, hypre_double *y, hypre_double *z, hypre_double *d );
 HYPRE_Int
 hypreDevice_zeqxmydd_long_dbl( HYPRE_Int n, hypre_long_double *x, hypre_long_double alpha, hypre_long_double *y, hypre_long_double *z, hypre_long_double *d );
-
-HYPRE_Int
-hypre_CudaCompileFlagCheck_flt( void );
-HYPRE_Int
-hypre_CudaCompileFlagCheck_dbl( void );
-HYPRE_Int
-hypre_CudaCompileFlagCheck_long_dbl( void );
 
 HYPRE_Int
 hypre_CurandUniform_flt( HYPRE_Int n, hypre_float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset );
@@ -391,13 +391,6 @@ hypreDevice_GenScatterAdd_dbl( hypre_double *x, HYPRE_Int ny, HYPRE_Int *map, hy
 HYPRE_Int
 hypreDevice_GenScatterAdd_long_dbl( hypre_long_double *x, HYPRE_Int ny, HYPRE_Int *map, hypre_long_double *y, char *work );
 
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_flt( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_dbl( hypre_DeviceData *data );
-hypre_DeviceStream
-hypre_DeviceDataComputeStream_long_dbl( hypre_DeviceData *data );
-
 hypre_DeviceData*
 hypre_DeviceDataCreate_flt( );
 hypre_DeviceData*
@@ -411,13 +404,6 @@ hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_dbl( hypre_DeviceData *data );
 hypre_DeviceRandGenerator
 hypre_DeviceDataCurandGenerator_long_dbl( hypre_DeviceData *data );
-
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_flt( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_dbl( hypre_DeviceData *data );
-hypre_DeviceSparseLibHandle
-hypre_DeviceDataCusparseHandle_long_dbl( hypre_DeviceData *data );
 
 void
 hypre_DeviceDataDestroy_flt( hypre_DeviceData* data );

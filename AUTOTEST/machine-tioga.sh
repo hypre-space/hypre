@@ -58,10 +58,15 @@ ro="-ams -bench -struct -rt -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-hip-nonum
 
-#HIP with UM and single precision [no run]
+# HIP with UM and single precision [no run]
 co="--with-hip --without-umpire --enable-unified-memory --enable-single --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-hip-um-single
+
+# HIP with mixed precision [no run]
+co="--with-hip --without-umpire --enable-mixed-precision --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-hip-mup
 
 # run on CPU
 co="--with-hip --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
@@ -92,6 +97,11 @@ co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C
 co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_ENABLE_HIP=ON -DHYPRE_ENABLE_UMPIRE=OFF -DCMAKE_HIP_ARCHITECTURES=gfx90a -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-hip-um-shared
+
+# HIP with mixed precision + Shared library + CMake (no full run, but with basic "make check")
+co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_ENABLE_HIP=ON -DHYPRE_ENABLE_UMPIRE=OFF -DCMAKE_HIP_ARCHITECTURES=gfx90a -DHYPRE_ENABLE_MIXED_PRECISION=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-hip-mup-shared
 
 # CPU + CMake (no full run, but with basic "make check")
 co="-DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"

@@ -5123,11 +5123,11 @@ HYPRE_Int
 hypre_ILUSetupILUTRAS_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int lfil, hypre_long_double *tol, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, hypre_long_double **Dptr, hypre_ParCSRMatrix **Uptr );
 
 HYPRE_Int
-hypre_ILUSetupLDUtoCusparse_flt( hypre_ParCSRMatrix *L, hypre_float *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
+hypre_ILUSetupLDUtoVendor_flt( hypre_ParCSRMatrix *L, hypre_float *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
 HYPRE_Int
-hypre_ILUSetupLDUtoCusparse_dbl( hypre_ParCSRMatrix *L, hypre_double *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
+hypre_ILUSetupLDUtoVendor_dbl( hypre_ParCSRMatrix *L, hypre_double *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
 HYPRE_Int
-hypre_ILUSetupLDUtoCusparse_long_dbl( hypre_ParCSRMatrix *L, hypre_long_double *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
+hypre_ILUSetupLDUtoVendor_long_dbl( hypre_ParCSRMatrix *L, hypre_long_double *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp );
 
 HYPRE_Int
 hypre_ILUSetupMILU0_flt( hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, hypre_float **Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end, HYPRE_Int modified );

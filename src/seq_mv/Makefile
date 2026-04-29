@@ -40,7 +40,6 @@ FILES =\
 
 CUFILES =\
  csr_matop_device.c\
- csr_matrix_cuda_utils.c\
  csr_matvec_device.c\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
@@ -83,7 +82,7 @@ MP_FILES = \
  mup_functions.c\
  mup_pre.c\
  seq_mv_mp.c
- 
+
 MP_CUFILES=\
  mup_fixed_gpu.c\
  mup_functions_gpu.c\
@@ -122,11 +121,13 @@ all:
 lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: deleteautogen
@@ -173,4 +174,4 @@ libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

@@ -88,11 +88,13 @@ SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_IJ_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
@@ -117,4 +119,4 @@ libHYPRE_IJ_mv.so libHYPRE_IJ_mv.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

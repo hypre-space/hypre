@@ -7,6 +7,8 @@
 #ifndef SEQ_MV_HPP
 #define SEQ_MV_HPP
 
+#include "_hypre_utilities.hpp"
+
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_seq_mv_mup_def.h"
 #endif
@@ -15,61 +17,99 @@
 extern "C" {
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
-#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-cusparseSpMatDescr_t hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A, HYPRE_Int offset);
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+static inline cusparseSpMatDescr_t
+hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int      n,
+                                     HYPRE_Int      m,
+                                     HYPRE_Int      offset,
+                                     HYPRE_Int      nnz,
+                                     HYPRE_Int     *i,
+                                     HYPRE_Int     *j,
+                                     HYPRE_Complex *data )
+{
+   const cudaDataType        data_type  = hypre_HYPREComplexToCudaDataType();
+   const cusparseIndexType_t index_type = hypre_HYPREIntToCusparseIndexType();
+   const cusparseIndexBase_t index_base = CUSPARSE_INDEX_BASE_ZERO;
+   cusparseSpMatDescr_t      matA;
 
-cusparseSpMatDescr_t hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int n, HYPRE_Int m,
-                                                          HYPRE_Int offset, HYPRE_Int nnz, HYPRE_Int *i, HYPRE_Int *j, HYPRE_Complex *data);
+   HYPRE_CUSPARSE_CALL( cusparseCreateCsr(&matA,
+                                          n - offset,
+                                          m,
+                                          nnz,
+                                          i + offset,
+                                          j,
+                                          data,
+                                          index_type,
+                                          index_type,
+                                          index_base,
+                                          data_type) );
 
-cusparseDnVecDescr_t hypre_VectorToCusparseDnVec_core(HYPRE_Complex *x_data, HYPRE_Int n);
+   return matA;
+}
 
-cusparseDnVecDescr_t hypre_VectorToCusparseDnVec(const hypre_Vector *x, HYPRE_Int offset,
-                                                 HYPRE_Int size_override);
+static inline cusparseSpMatDescr_t
+hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
+                               HYPRE_Int              offset)
+{
+   return hypre_CSRMatrixToCusparseSpMat_core(hypre_CSRMatrixNumRows(A),
+                                              hypre_CSRMatrixNumCols(A),
+                                              offset,
+                                              hypre_CSRMatrixNumNonzeros(A),
+                                              hypre_CSRMatrixI(A),
+                                              hypre_CSRMatrixJ(A),
+                                              hypre_CSRMatrixData(A));
+}
 
-cusparseDnMatDescr_t hypre_VectorToCusparseDnMat_core(HYPRE_Complex *x_data, HYPRE_Int nrow,
-                                                      HYPRE_Int ncol, HYPRE_Int order);
+static inline cusparseDnVecDescr_t
+hypre_VectorToCusparseDnVec_core(HYPRE_Complex *x_data,
+                                 HYPRE_Int      n)
+{
+   const cudaDataType   data_type = hypre_HYPREComplexToCudaDataType();
+   cusparseDnVecDescr_t vecX;
 
-cusparseDnMatDescr_t hypre_VectorToCusparseDnMat(const hypre_Vector *x);
-#endif
+   HYPRE_CUSPARSE_CALL( cusparseCreateDnVec(&vecX,
+                                            n,
+                                            x_data,
+                                            data_type) );
+   return vecX;
+}
 
-HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                              cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
-                                              cusparseMatDescr_t descr_B, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
-                                              cusparseMatDescr_t descr_C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                              HYPRE_Complex **d_c_out);
+static inline cusparseDnVecDescr_t
+hypre_VectorToCusparseDnVec(const hypre_Vector *x,
+                            HYPRE_Int           offset,
+                            HYPRE_Int           size_override)
+{
+   return hypre_VectorToCusparseDnVec_core(hypre_VectorData(x) + offset,
+                                           size_override >= 0 ? size_override : hypre_VectorSize(x) - offset);
+}
 
-HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                        cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
-                                        cusparseMatDescr_t descr_B, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
-                                        cusparseMatDescr_t descr_C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                        HYPRE_Complex **d_c_out);
+static inline cusparseDnMatDescr_t
+hypre_VectorToCusparseDnMat_core(HYPRE_Complex *x_data,
+                                 HYPRE_Int      nrow,
+                                 HYPRE_Int      ncol,
+                                 HYPRE_Int      order)
+{
+   const cudaDataType  data_type = hypre_HYPREComplexToCudaDataType();
+   cusparseDnMatDescr_t matX;
 
-HYPRE_Int hypre_SortCSRCusparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
-                                 cusparseMatDescr_t descrA,
-                                 const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
-#endif
+   HYPRE_CUSPARSE_CALL( cusparseCreateDnMat(&matX,
+                                            nrow,
+                                            ncol,
+                                            (order == 0) ? nrow : ncol,
+                                            x_data,
+                                            data_type,
+                                            (order == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW) );
+   return matX;
+}
 
-#if defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypreDevice_CSRSpGemmRocsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                         rocsparse_mat_descr descrA, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
-                                         rocsparse_mat_descr descrB, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
-                                         rocsparse_mat_descr descrC, rocsparse_mat_info infoC, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
-                                         HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
-
-HYPRE_Int hypre_SortCSRRocsparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
-                                  rocsparse_mat_descr descrA,
-                                  const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
-#endif
-
-#if defined(HYPRE_USING_ONEMKLSPARSE)
-HYPRE_Int hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                            oneapi::mkl::sparse::matrix_handle_t handle_A,
-                                            HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
-                                            oneapi::mkl::sparse::matrix_handle_t handle_B,
-                                            HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
-                                            oneapi::mkl::sparse::matrix_handle_t handle_C,
-                                            HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
+static inline cusparseDnMatDescr_t
+hypre_VectorToCusparseDnMat(const hypre_Vector *x)
+{
+   return hypre_VectorToCusparseDnMat_core(hypre_VectorData(x),
+                                           hypre_VectorSize(x),
+                                           hypre_VectorNumVectors(x),
+                                           hypre_VectorMultiVecStorageMethod(x));
+}
 #endif
 
 #ifdef __cplusplus

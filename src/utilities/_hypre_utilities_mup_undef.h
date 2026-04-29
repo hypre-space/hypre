@@ -354,8 +354,8 @@
 #undef hypreDevice_IntegerExclusiveScan
 #undef hypreDevice_IntegerInclusiveScan
 #undef hypreDevice_IntegerReduceSum
+#undef hypreDevice_RealReduceMaxAbs
 #undef hypreDevice_zeqxmydd
-#undef hypreGPUKernel_CompileFlagSafetyCheck
 #undef hypreGPUKernel_CopyParCSRRows
 #undef hypreGPUKernel_GetRowNnz
 #undef hypreGPUKernel_IVAXPY
@@ -364,13 +364,10 @@
 #undef hypreGPUKernel_ScatterAdd
 #undef hypreGPUKernel_ScatterAddTrivial
 #undef hypreGPUKernel_zeqxmydd
-#undef hypre_CudaCompileFlagCheck
 #undef hypre_CurandUniform
 #undef hypre_CurandUniformSingle
-#undef hypre_DeviceDataComputeStream
 #undef hypre_DeviceDataCreate
 #undef hypre_DeviceDataCurandGenerator
-#undef hypre_DeviceDataCusparseHandle
 #undef hypre_DeviceDataDestroy
 #undef hypre_DeviceDataStream
 #undef hypre_DeviceMemoryGetUsage

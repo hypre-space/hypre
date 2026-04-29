@@ -68,6 +68,7 @@ cat >> $INTERNAL_HEADER <<@
 #ifndef hypre_MP_BUILD
 #include "_hypre_parcsr_ls_mup_undef.h"
 #include "_hypre_parcsr_ls_mup.h"
+#include "_hypre_parcsr_ls_mup.hpp"
 #endif
 #endif
 

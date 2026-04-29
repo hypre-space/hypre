@@ -859,21 +859,97 @@ struct hypre_DeviceData
 
 hypre_DeviceData*     hypre_DeviceDataCreate();
 void                  hypre_DeviceDataDestroy(hypre_DeviceData* data);
+hypre_DeviceStream    hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+
+static inline hypre_DeviceStream
+hypre_DeviceDataComputeStream(hypre_DeviceData *data)
+{
+   return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
+}
 
 hypre_DeviceRandGenerator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
+static inline cublasHandle_t
+hypre_DeviceDataCublasHandle(hypre_DeviceData *data)
+{
+   if (data->cublas_handle)
+   {
+      return data->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cublas_handle = handle;
+
+   return handle;
+}
 #endif
 
-hypre_DeviceSparseLibHandle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+#if defined(HYPRE_USING_CUSPARSE)
+static inline hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
+
+   cusparseHandle_t handle;
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
+#elif defined(HYPRE_USING_ROCSPARSE)
+static inline hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
+
+   rocsparse_handle handle;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_handle(&handle) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
+#endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
-vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
+static inline vendorSolverHandle_t
+hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data)
+{
+   if (data->vendor_solver_handle)
+   {
+      return data->vendor_solver_handle;
+   }
+
+#if defined(HYPRE_USING_CUSOLVER)
+   cusolverDnHandle_t handle;
+
+   HYPRE_CUSOLVER_CALL( cusolverDnCreate(&handle) );
+   HYPRE_CUSOLVER_CALL( cusolverDnSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+#else
+   rocblas_handle handle;
+
+   HYPRE_ROCBLAS_CALL( rocblas_create_handle(&handle) );
+   HYPRE_ROCBLAS_CALL( rocblas_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
 #endif
 
-hypre_DeviceStream          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-hypre_DeviceStream          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+   data->vendor_solver_handle = handle;
+
+   return handle;
+}
+#endif
 
 /* Data structure and accessor routines for Sparse Triangular Matrices */
 struct hypre_CsrsvData
@@ -2263,10 +2339,36 @@ HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2
 
 #if defined(HYPRE_USING_CUSPARSE)
 
-cudaDataType hypre_HYPREComplexToCudaDataType();
+static inline cudaDataType
+hypre_HYPREComplexToCudaDataType()
+{
+#if defined(HYPRE_COMPLEX)
+   return CUDA_C_64F;
+#else
+#if defined(HYPRE_SINGLE)
+   hypre_assert(sizeof(HYPRE_Complex) == 4);
+   return CUDA_R_32F;
+#elif defined(HYPRE_LONG_DOUBLE)
+#error "Long Double is not supported on GPUs"
+#else
+   hypre_assert(sizeof(HYPRE_Complex) == 8);
+   return CUDA_R_64F;
+#endif
+#endif
+}
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+static inline cusparseIndexType_t
+hypre_HYPREIntToCusparseIndexType()
+{
+#if defined(HYPRE_BIGINT)
+   hypre_assert(sizeof(HYPRE_Int) == 8);
+   return CUSPARSE_INDEX_64I;
+#else
+   hypre_assert(sizeof(HYPRE_Int) == 4);
+   return CUSPARSE_INDEX_32I;
+#endif
+}
 #endif
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)

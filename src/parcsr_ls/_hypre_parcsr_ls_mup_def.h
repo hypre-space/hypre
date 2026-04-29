@@ -1471,7 +1471,7 @@
 #define hypre_ILUSetupILUKSymbolic HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupILUKSymbolic )
 #define hypre_ILUSetupILUT HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupILUT )
 #define hypre_ILUSetupILUTRAS HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupILUTRAS )
-#define hypre_ILUSetupLDUtoCusparse HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupLDUtoCusparse )
+#define hypre_ILUSetupLDUtoVendor HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupLDUtoVendor )
 #define hypre_ILUSetupMILU0 HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupMILU0 )
 #define hypre_ILUSetupRAPILU0 HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupRAPILU0 )
 #define hypre_ILUSetupRAPILU0Device HYPRE_FIXEDPRECISION_FUNC ( hypre_ILUSetupRAPILU0Device )
