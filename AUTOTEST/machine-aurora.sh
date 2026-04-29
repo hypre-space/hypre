@@ -56,9 +56,9 @@ save="aurora"
 
 module load cmake
 
-##########
-## SYCL ##
-##########
+#################
+## CMake tests ##
+#################
 
 # 1C) SYCL without UM [make check]
 co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF"
@@ -70,9 +70,9 @@ co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_MIXED
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-sycl-mup
 
-##################################
-## Autotools (build only) tests ##
-##################################
+#####################
+## Autotools tests ##
+#####################
 
 # SYCL with UM in debug mode [ij, struct, sstruct]
 # WM: I suppress all warnings for sycl files for now
