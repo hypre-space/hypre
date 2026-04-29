@@ -70,6 +70,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      stop_crit;

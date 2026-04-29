@@ -257,7 +257,7 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
 
    // P_diag_i
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( map2F,
+   hypre_GatherSycl( map2F,
                      map2F + P_nr_of_rows + 1,
                      W_diag_i,
                      P_diag_i );
@@ -267,7 +267,7 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
    // P_offd_i
    if (W_offd_i && P_offd_i)
    {
-      hypreSycl_gather( map2F,
+      hypre_GatherSycl( map2F,
                         map2F + P_nr_of_rows + 1,
                         W_offd_i,
                         P_offd_i );
@@ -297,11 +297,11 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
    // row index shift W --> P
    HYPRE_Int *WPoffset = hypre_TAlloc(HYPRE_Int, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *new_end = hypreSycl_copy_if( PWoffset,
-                                           PWoffset + P_nr_of_rows,
-                                           CF_marker,
-                                           WPoffset,
-                                           is_negative<HYPRE_Int>() );
+   HYPRE_Int *new_end = hypre_CopyIfSycl( PWoffset,
+                                          PWoffset + P_nr_of_rows,
+                                          CF_marker,
+                                          WPoffset,
+                                          is_negative<HYPRE_Int>() );
 #else
    HYPRE_Int *new_end = HYPRE_THRUST_CALL( copy_if,
                                            PWoffset,
@@ -317,7 +317,7 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
    // elements shift
    HYPRE_Int *shift = hypre_CsrRowPtrsToIndicesDevice(W_nr_of_rows, W_diag_nnz, W_diag_i);
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( shift,
+   hypre_GatherSycl( shift,
                      shift + W_diag_nnz,
                      WPoffset,
                      shift);
@@ -342,7 +342,7 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
    // P_diag_j and P_diag_data
    if (W_diag_j && W_diag_data)
    {
-      hypreSycl_scatter( oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
+      hypre_ScatterSycl( oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
                          oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data) + W_diag_nnz,
                          shift,
                          oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data) );
@@ -370,11 +370,11 @@ hypre_extendWtoPDevice( HYPRE_Int      P_nr_of_rows,
    // fill the gap
    HYPRE_Int *PC_i = hypre_TAlloc(HYPRE_Int, W_nr_of_cols, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   new_end = hypreSycl_copy_if( P_diag_i,
-                                P_diag_i + P_nr_of_rows,
-                                CF_marker,
-                                PC_i,
-                                is_nonnegative<HYPRE_Int>() );
+   new_end = hypre_CopyIfSycl( P_diag_i,
+                               P_diag_i + P_nr_of_rows,
+                               CF_marker,
+                               PC_i,
+                               is_nonnegative<HYPRE_Int>() );
 #else
    new_end = HYPRE_THRUST_CALL( copy_if,
                                 P_diag_i,
@@ -857,11 +857,11 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+   HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1068,11 +1068,11 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+   HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1104,7 +1104,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                      rsFC,
                      send_buf );
@@ -1345,11 +1345,11 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
-                                               rsWA + A_nr_of_rows,
-                                               CF_marker,
-                                               rsW,
-                                               is_negative<HYPRE_Int>() );
+   HYPRE_Complex *new_end = hypre_CopyIfSycl( rsWA,
+                                              rsWA + A_nr_of_rows,
+                                              CF_marker,
+                                              rsW,
+                                              is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1409,7 +1409,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                      dtmp,
                      send_buf );

@@ -145,6 +145,8 @@ first_lsb_bit_indx( hypre_uint x )
          x >>= 1;
       }
    }
+#elif defined(__MINGW32__)
+   pos = __builtin_ffs((hypre_int) x);
 #else
    pos = ffs((hypre_int) x);
 #endif

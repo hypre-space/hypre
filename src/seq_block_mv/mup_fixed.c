@@ -110,6 +110,14 @@ hypre_DenseBlockMatrixPrint( MPI_Comm comm, hypre_DenseBlockMatrix *A, const cha
    return HYPRE_CURRENTPRECISION_FUNC(hypre_DenseBlockMatrixPrint)( comm, A, filename );
 }
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DenseBlockMatrixTranspose( hypre_DenseBlockMatrix *A, hypre_DenseBlockMatrix **B_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DenseBlockMatrixTranspose)( A, B_ptr );
+}
+
 
 #endif
 

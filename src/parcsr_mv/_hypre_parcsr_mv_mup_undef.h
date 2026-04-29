@@ -92,6 +92,8 @@
 #undef hypre_NumbersNEntered
 #undef hypre_NumbersNewNode
 #undef hypre_NumbersQuery
+#undef hypre_OverlapDataCreate
+#undef hypre_OverlapDataDestroy
 #undef hypre_ParAat_RowSizes
 #undef hypre_ParBooleanAAt
 #undef hypre_ParBooleanMatmul
@@ -134,11 +136,14 @@
 #undef hypre_ParCSRMatrixBlkFilterHost
 #undef hypre_ParCSRMatrixBlockColSum
 #undef hypre_ParCSRMatrixBlockColSumHost
+#undef hypre_ParCSRMatrixBlockRowSum
+#undef hypre_ParCSRMatrixBlockRowSumHost
 #undef hypre_ParCSRMatrixClone
 #undef hypre_ParCSRMatrixClone_v2
 #undef hypre_ParCSRMatrixColSum
 #undef hypre_ParCSRMatrixColSumHost
 #undef hypre_ParCSRMatrixCompressOffdMap
+#undef hypre_ParCSRMatrixComputeOverlap
 #undef hypre_ParCSRMatrixComputeScalingTagged
 #undef hypre_ParCSRMatrixCopy
 #undef hypre_ParCSRMatrixCopyColMapOffdToDevice
@@ -146,6 +151,7 @@
 #undef hypre_ParCSRMatrixCopy_C
 #undef hypre_ParCSRMatrixCreate
 #undef hypre_ParCSRMatrixCreateAssumedPartition
+#undef hypre_ParCSRMatrixCreateExtendedMatrix
 #undef hypre_ParCSRMatrixCreateFromDenseBlockMatrix
 #undef hypre_ParCSRMatrixCreateFromParVector
 #undef hypre_ParCSRMatrixDestroy
@@ -168,6 +174,7 @@
 #undef hypre_ParCSRMatrixGenerateFFFC3
 #undef hypre_ParCSRMatrixGenerateFFFCD3
 #undef hypre_ParCSRMatrixGenerateFFFCHost
+#undef hypre_ParCSRMatrixGetExternalMatrix
 #undef hypre_ParCSRMatrixGetLocalRange
 #undef hypre_ParCSRMatrixGetRow
 #undef hypre_ParCSRMatrixGetRowHost
@@ -202,6 +209,8 @@
 #undef hypre_ParCSRMatrixSetNumNonzeros_core
 #undef hypre_ParCSRMatrixSetNumRownnz
 #undef hypre_ParCSRMatrixSetPatternOnly
+#undef hypre_ParCSRMatrixSortColMapOffd
+#undef hypre_ParCSRMatrixSortColMapOffdHost
 #undef hypre_ParCSRMatrixStatsArrayCompute
 #undef hypre_ParCSRMatrixStatsComputePassOneLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalHost

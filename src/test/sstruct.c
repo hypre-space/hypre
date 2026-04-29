@@ -2280,6 +2280,7 @@ PrintUsage( char *progname,
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhszero           : rhs vector has zero components\n");
       hypre_printf("  -rhsone            : rhs vector has unit components\n");
+      hypre_printf("  -rhsrand           : rhs vector has random components\n");
       hypre_printf("  -x0zero            : initial solution (x0) has zero components \n");
       hypre_printf("  -x0one             : initial solution (x0) has unit components \n");
       hypre_printf("  -x0rand            : initial solution (x0) has random components \n");
@@ -2312,13 +2313,19 @@ PrintUsage( char *progname,
       hypre_printf("  -interp <r>        : SSAMG unstructured interpolation type\n");
       hypre_printf("                       -1 - No unstructured interpolation\n");
       hypre_printf("                        0 - Classical modified interpolation\n");
-      hypre_printf("  -relax <r>         : (S)Struct - relaxation type\n");
+      hypre_printf("  -relax <r>         : (Sys)PFMG - relaxation type\n");
       hypre_printf("                        0 - Jacobi\n");
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       hypre_printf("\n");
-      hypre_printf("                       ParCSR - relaxation type\n");
+      hypre_printf("                       SSAMG - relaxation type\n");
+      hypre_printf("                        0 - Jacobi\n");
+      hypre_printf("                        1 - Weighted Jacobi (default)\n");
+      hypre_printf("                        2 - L1 Jacobi\n");
+      hypre_printf("                       10 - symmetric R/B Gauss-Seidel\n");
+      hypre_printf("\n");
+      hypre_printf("                       BoomerAMG - relaxation type\n");
       hypre_printf("                        0 - Weighted Jacobi\n");
       hypre_printf("                        1 - Gauss-Seidel (very slow!)\n");
       hypre_printf("                        3 - Hybrid Gauss-Seidel\n");
@@ -2564,6 +2571,7 @@ main( hypre_int argc,
    HYPRE_Int             check_Aones;
    HYPRE_Int             sol_type;
    HYPRE_Int             sol0_type;
+   HYPRE_Int             rhs_type;
    HYPRE_Real            rhs_value;
    HYPRE_Real            scale;
    HYPRE_Int             read_fromfile_flag = 0;
@@ -2712,7 +2720,7 @@ main( hypre_int argc,
    char                     mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int                spgemm_use_vendor   = 1;
 #else
@@ -2730,6 +2738,7 @@ main( hypre_int argc,
    HYPRE_ExecutionPolicy    default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
 
+   global_data.ndim = -1;
    global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
@@ -2755,16 +2764,39 @@ main( hypre_int argc,
       {
          device_id = atoi(argv[++arg_index]);
       }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         arg_index++;
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
    }
 
-   hypre_bind_device_id(device_id, myid, num_procs, comm);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(device_id, myid, num_procs, comm);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
 
-   if (!lazy_device_init)
+   if (!lazy_device_init && (default_exec_policy == HYPRE_EXEC_DEVICE))
    {
       HYPRE_DeviceInitialize();
    }
@@ -2799,6 +2831,7 @@ main( hypre_int argc,
    check_symmetry = 0;
    check_Aones = 0;
    rhs_value = 1.0;
+   rhs_type = 1;
    sol_type = 0;
    sol0_type = 0;
    n_pre  = 1;
@@ -2898,27 +2931,7 @@ main( hypre_int argc,
          arg_index++;
          log_level = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
-      {
-         arg_index++;
-         memory_location = HYPRE_MEMORY_DEVICE;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_DEVICE;
-      }
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
@@ -2967,7 +2980,7 @@ main( hypre_int argc,
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
    HYPRE_SetSpMVUseVendor(spmv_use_vendor);
    HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
@@ -3133,12 +3146,20 @@ main( hypre_int argc,
       {
          arg_index++;
          rhs_value = 0.0;
+         rhs_type = 0;
          sol_type = -1;
       }
       else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
       {
          arg_index++;
          rhs_value = 1.0;
+         rhs_type = 1;
+         sol_type = -1;
+      }
+      else if ( strcmp(argv[arg_index], "-rhsrand") == 0 )
+      {
+         arg_index++;
+         rhs_type = 2;
          sol_type = -1;
       }
       else if ( strcmp(argv[arg_index], "-rhsfromcosine") == 0 )
@@ -4114,141 +4135,168 @@ main( hypre_int argc,
          HYPRE_SStructVectorSetObjectType(b, object_type);
          HYPRE_SStructVectorInitialize(b);
 
-         /* Initialize the rhs values */
-         if (data.rhs_true)
+         /* If ProblemData is not present, use Set routines */
+         if (global_data.ndim == -1)
          {
-            for (j = 0; j < data.max_boxsize; j++)
+            switch (rhs_type)
             {
-               values[j] = data.rhs_value;
-            }
-         }
-         else if (data.fem_rhs_true)
-         {
-            for (j = 0; j < data.max_boxsize; j++)
-            {
-               values[j] = 0.0;
-            }
-         }
-         else /* rhs_value is the default */
-         {
-            for (j = 0; j < data.max_boxsize; j++)
-            {
-               values[j] = rhs_value;
-            }
-         }
+               case 0:
+                  HYPRE_SStructVectorSetConstantValues(b, 0.0);
+                  break;
 
-         hypre_MuPDataCopyToMP(h_values, values, values_size);
-         hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                             memory_location, HYPRE_MEMORY_HOST);
+               case 1:
+                  HYPRE_SStructVectorSetConstantValues(b, 1.0);
+                  break;
 
-         for (part = 0; part < data.nparts; part++)
+               case 2:
+                  HYPRE_SStructVectorSetRandomValues(b, seed);
+                  break;
+            }
+         }
+         /* Use ProblemData to setup RHS */
+         else
          {
-            pdata = data.pdata[part];
-            for (var = 0; var < pdata.nvars; var++)
+
+            /* Initialize the rhs values */
+            if (data.rhs_true)
             {
-               for (box = 0; box < pdata.nboxes; box++)
+               for (j = 0; j < data.max_boxsize; j++)
                {
-                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                 pdata.vartypes[var], ilower, iupper);
-                  HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, d_values);
+                  values[j] = data.rhs_value;
                }
             }
-         }
+            else if (data.fem_rhs_true)
+            {
+               for (j = 0; j < data.max_boxsize; j++)
+               {
+                  values[j] = 0.0;
+               }
+            }
+            else /* rhs_value is the default */
+            {
+               for (j = 0; j < data.max_boxsize; j++)
+               {
+                  if (rhs_type == 2)
+                  {
+                     rhs_value = 2.0 * hypre_Rand() - 1.0;
+                  }
+                  values[j] = rhs_value;
+               }
+            }
 
-         /* Add values for FEMRhsSet */
-         if (data.fem_rhs_true)
-         {
-#if 0    // Use AddFEMValues
-            hypre_MuPDataCopyToMP(h_values, data.fem_rhs_values, data.fem_nvars);
-            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
+            hypre_MuPDataCopyToMP(h_values, values, values_size);
+            hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                 memory_location, HYPRE_MEMORY_HOST);
 
             for (part = 0; part < data.nparts; part++)
             {
                pdata = data.pdata[part];
-               for (box = 0; box < pdata.nboxes; box++)
+               for (var = 0; var < pdata.nvars; var++)
                {
-                  for (index[2] = pdata.ilowers[box][2];
-                       index[2] <= pdata.iuppers[box][2]; index[2]++)
+                  for (box = 0; box < pdata.nboxes; box++)
                   {
-                     for (index[1] = pdata.ilowers[box][1];
-                          index[1] <= pdata.iuppers[box][1]; index[1]++)
+                     GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                    pdata.vartypes[var], ilower, iupper);
+                     HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, d_values);
+                  }
+               }
+            }
+
+            /* Add values for FEMRhsSet */
+            if (data.fem_rhs_true)
+            {
+#if 0       // Use AddFEMValues
+               hypre_MuPDataCopyToMP(h_values, data.fem_rhs_values, data.fem_nvars);
+               hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
+                                   memory_location, HYPRE_MEMORY_HOST);
+
+               for (part = 0; part < data.nparts; part++)
+               {
+                  pdata = data.pdata[part];
+                  for (box = 0; box < pdata.nboxes; box++)
+                  {
+                     for (index[2] = pdata.ilowers[box][2];
+                          index[2] <= pdata.iuppers[box][2]; index[2]++)
                      {
-                        for (index[0] = pdata.ilowers[box][0];
-                             index[0] <= pdata.iuppers[box][0]; index[0]++)
+                        for (index[1] = pdata.ilowers[box][1];
+                             index[1] <= pdata.iuppers[box][1]; index[1]++)
                         {
-                           HYPRE_SStructVectorAddFEMValues(b, part, index, d_values);
+                           for (index[0] = pdata.ilowers[box][0];
+                                index[0] <= pdata.iuppers[box][0]; index[0]++)
+                           {
+                              HYPRE_SStructVectorAddFEMValues(b, part, index, d_values);
+                           }
                         }
                      }
                   }
                }
+#else       // Use AddFEMBoxValues
+               /* TODO: There is probably a smarter way to do this copy */
+               for (i = 0; i < data.max_boxsize; i++)
+               {
+                  j = i * data.fem_nvars;
+                  hypre_TMemcpy(&values[j], data.fem_rhs_values, HYPRE_Real,
+                                data.fem_nvars, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               }
+               hypre_MuPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
+               hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
+                                   memory_location, HYPRE_MEMORY_HOST);
+               for (part = 0; part < data.nparts; part++)
+               {
+                  pdata = data.pdata[part];
+                  for (box = 0; box < pdata.nboxes; box++)
+                  {
+                     HYPRE_SStructVectorAddFEMBoxValues(
+                        b, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
+                  }
+               }
+#endif
             }
-#else    // Use AddFEMBoxValues
-            /* TODO: There is probably a smarter way to do this copy */
-            for (i = 0; i < data.max_boxsize; i++)
-            {
-               j = i * data.fem_nvars;
-               hypre_TMemcpy(&values[j], data.fem_rhs_values, HYPRE_Real,
-                             data.fem_nvars, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-            }
-            hypre_MuPDataCopyToMP(h_values, values, data.fem_nvars * data.max_boxsize);
-            hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars * data.max_boxsize,
-                                memory_location, HYPRE_MEMORY_HOST);
+
+            /* RhsAddToValues: add to some RHS values */
             for (part = 0; part < data.nparts; part++)
             {
                pdata = data.pdata[part];
-               for (box = 0; box < pdata.nboxes; box++)
+               for (box = 0; box < pdata.rhsadd_nboxes; box++)
                {
-                  HYPRE_SStructVectorAddFEMBoxValues(
-                     b, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
-               }
-            }
-#endif
-         }
+                  size = BoxVolume(pdata.rhsadd_ilowers[box], pdata.rhsadd_iuppers[box]);
 
-         /* RhsAddToValues: add to some RHS values */
-         for (part = 0; part < data.nparts; part++)
-         {
-            pdata = data.pdata[part];
-            for (box = 0; box < pdata.rhsadd_nboxes; box++)
-            {
-               size = BoxVolume(pdata.rhsadd_ilowers[box], pdata.rhsadd_iuppers[box]);
-
-               for (j = 0; j < size; j++)
-               {
-                  values[j] = pdata.rhsadd_values[box];
-               }
-
-               hypre_MuPDataCopyToMP(h_values, values, values_size);
-               hypre_MuPDataMemcpy(d_values, h_values, values_size,
-                                   memory_location, HYPRE_MEMORY_HOST);
-
-               HYPRE_SStructVectorAddToBoxValues(b, part,
-                                                 pdata.rhsadd_ilowers[box],
-                                                 pdata.rhsadd_iuppers[box],
-                                                 pdata.rhsadd_vars[box], d_values);
-            }
-         }
-
-         /* FEMRhsAddToValues: add to some RHS values */
-         for (part = 0; part < data.nparts; part++)
-         {
-            pdata = data.pdata[part];
-            for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
-            {
-               hypre_MuPDataCopyToMP(h_values, pdata.fem_rhsadd_values[box], data.fem_nvars);
-               hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
-                                   memory_location, HYPRE_MEMORY_HOST);
-               for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
-                    index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
-               {
-                  for (index[1] = pdata.fem_rhsadd_ilowers[box][1];
-                       index[1] <= pdata.fem_rhsadd_iuppers[box][1]; index[1]++)
+                  for (j = 0; j < size; j++)
                   {
-                     for (index[0] = pdata.fem_rhsadd_ilowers[box][0];
-                          index[0] <= pdata.fem_rhsadd_iuppers[box][0]; index[0]++)
+                     values[j] = pdata.rhsadd_values[box];
+                  }
+
+                  hypre_MuPDataCopyToMP(h_values, values, values_size);
+                  hypre_MuPDataMemcpy(d_values, h_values, values_size,
+                                      memory_location, HYPRE_MEMORY_HOST);
+
+                  HYPRE_SStructVectorAddToBoxValues(b, part,
+                                                    pdata.rhsadd_ilowers[box],
+                                                    pdata.rhsadd_iuppers[box],
+                                                    pdata.rhsadd_vars[box], d_values);
+               }
+            }
+
+            /* FEMRhsAddToValues: add to some RHS values */
+            for (part = 0; part < data.nparts; part++)
+            {
+               pdata = data.pdata[part];
+               for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
+               {
+                  hypre_MuPDataCopyToMP(h_values, pdata.fem_rhsadd_values[box], data.fem_nvars);
+                  hypre_MuPDataMemcpy(d_values, h_values, data.fem_nvars,
+                                      memory_location, HYPRE_MEMORY_HOST);
+                  for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
+                       index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
+                  {
+                     for (index[1] = pdata.fem_rhsadd_ilowers[box][1];
+                          index[1] <= pdata.fem_rhsadd_iuppers[box][1]; index[1]++)
                      {
-                        HYPRE_SStructVectorAddFEMValues(b, part, index, d_values);
+                        for (index[0] = pdata.fem_rhsadd_ilowers[box][0];
+                             index[0] <= pdata.fem_rhsadd_iuppers[box][0]; index[0]++)
+                        {
+                           HYPRE_SStructVectorAddFEMValues(b, part, index, d_values);
+                        }
                      }
                   }
                }
@@ -4773,7 +4821,6 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetRelChange(solver, rel_change);
          HYPRE_SStructSSAMGSetSkipRelax(solver, skip);
          HYPRE_SStructSSAMGSetInterpType(solver, interp_type);
-         /* weighted Jacobi = 1; red-black GS = 2 */
          HYPRE_SStructSSAMGSetRelaxType(solver, relax[0]);
          if (usr_jacobi_weight)
          {

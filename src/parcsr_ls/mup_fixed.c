@@ -961,6 +961,54 @@ hypre_AMGHybridSetDofFunc( void *AMGhybrid_vdata, HYPRE_Int *dof_func )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_AMGHybridSetFlexibleCGCScalingFactors( void *AMGhybrid_vdata, HYPRE_Real *cgc_scaling_factors_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleCGCScalingFactors)( AMGhybrid_vdata, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleCycleStruct( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleCycleStruct)( AMGhybrid_vdata, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleOuterWeights( void *AMGhybrid_vdata, HYPRE_Real *outer_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleOuterWeights)( AMGhybrid_vdata, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxOrders( void *AMGhybrid_vdata, HYPRE_Int *relax_orders_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxOrders)( AMGhybrid_vdata, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxTypes( void *AMGhybrid_vdata, HYPRE_Int *relax_types_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxTypes)( AMGhybrid_vdata, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetFlexibleRelaxWeights( void *AMGhybrid_vdata, HYPRE_Real *relax_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetFlexibleRelaxWeights)( AMGhybrid_vdata, relax_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_AMGHybridSetGridRelaxPoints( void *AMGhybrid_vdata, HYPRE_Int **grid_relax_points )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridSetGridRelaxPoints)( AMGhybrid_vdata, grid_relax_points );
@@ -3857,6 +3905,54 @@ hypre_BoomerAMGSetFilterThresholdR( void *data, HYPRE_Real filter_threshold )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoomerAMGSetFlexibleCGCScalingFactors( void *data, HYPRE_Real *cgc_scaling_factors_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleCGCScalingFactors)( data, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFlexibleCycleStruct( void *data, HYPRE_Int *cycle_struct_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleCycleStruct)( data, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFlexibleOuterWeights( void *data, HYPRE_Real *outer_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleOuterWeights)( data, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFlexibleRelaxOrders( void *data, HYPRE_Int *relax_orders_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleRelaxOrders)( data, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFlexibleRelaxTypes( void *data, HYPRE_Int *relax_types_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleRelaxTypes)( data, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFlexibleRelaxWeights( void *data, HYPRE_Real *relax_weights_flexible )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetFlexibleRelaxWeights)( data, relax_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoomerAMGSetGMRESSwitchR( void *data, HYPRE_Int gmres_switch )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGSetGMRESSwitchR)( data, gmres_switch );
@@ -6057,6 +6153,14 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRBuildBlockRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int blk_dim, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildBlockRowLumpedInterp)( A, A_FF, A_FC, CF_marker, blk_dim, use_abs, Wp_ptr, P_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRBuildCoarseOperator( void *mgr_data, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr, HYPRE_Int level )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildCoarseOperator)( mgr_data, A_FF, A_FC, A_CF, A_CC_ptr, Wp, Wr, level );
@@ -6124,6 +6228,14 @@ HYPRE_Int
 hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int blk_size, HYPRE_Int method, hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr, hypre_ParCSRMatrix **RT_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildRestrict)( A, A_FF, A_FC, A_CF, CF_marker, num_cpts_global, trunc_factor, max_elmts, strong_threshold, max_row_sum, blk_size, method, W_ptr, R_ptr, RT_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRBuildRowLumpedInterp)( A, A_FF, A_FC, CF_marker, use_abs, Wp_ptr, P_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -84,7 +84,7 @@ hypre_CSRSpAddDevice( HYPRE_Int       ma, /* num of rows of A */
    if (d_ja_map)
    {
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather(d_ja, d_ja + nnzA, d_ja_map, d_jt);
+      hypre_GatherSycl(d_ja, d_ja + nnzA, d_ja_map, d_jt);
 #else
       HYPRE_THRUST_CALL(gather, d_ja, d_ja + nnzA, d_ja_map, d_jt);
 #endif
@@ -96,7 +96,7 @@ hypre_CSRSpAddDevice( HYPRE_Int       ma, /* num of rows of A */
    if (d_jb_map)
    {
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather(d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
+      hypre_GatherSycl(d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
 #else
       HYPRE_THRUST_CALL(gather, d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
 #endif

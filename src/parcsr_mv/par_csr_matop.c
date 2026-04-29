@@ -4607,7 +4607,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       {
          for (j = 0; j < s; j++)
          {
-            if ( hypre_abs(dense[j + i * blockSize]) < eps * Fnorm )
+            if ( hypre_cabs(dense[j + i * blockSize]) < eps * Fnorm )
             {
                dense[j + i * blockSize] = 0.0;
             }
@@ -4974,8 +4974,11 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    {
       /* j: row index to send */
       j = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i);
+      hypre_assert(j >= 0);
       send_i[i] = A_diag_i[j + 1] - A_diag_i[j] + A_offd_i[j + 1] - A_offd_i[j];
+      hypre_assert(send_i[i] >= 0);
       num_nnz_send += send_i[i];
+      hypre_assert(num_nnz_send >= 0);
    }
 
    /* send this array out: note the shift in recv_i by one (async) */
@@ -6855,6 +6858,159 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixBlockRowSumHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSumHost( hypre_ParCSRMatrix     *A,
+                                   hypre_DenseBlockMatrix *B,
+                                   HYPRE_Int               use_abs )
+{
+   /* ParCSRMatrix A */
+   hypre_CSRMatrix        *A_diag            = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Complex          *A_diag_data       = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int              *A_diag_i          = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int              *A_diag_j          = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int               num_rows_diag_A   = hypre_CSRMatrixNumRows(A_diag);
+
+   hypre_CSRMatrix        *A_offd            = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Complex          *A_offd_data       = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int              *A_offd_i          = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int              *A_offd_j          = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int               num_rows_offd_A   = hypre_CSRMatrixNumRows(A_offd);
+   HYPRE_Int               num_cols_offd_A   = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_BigInt           *col_map_offd      = hypre_ParCSRMatrixColMapOffd(A);
+
+   /* Output block dims */
+   HYPRE_Int               num_rows_block_B  = hypre_DenseBlockMatrixNumRowsBlock(B);
+   HYPRE_Int               num_cols_block_B  = hypre_DenseBlockMatrixNumColsBlock(B);
+
+   /* Local variables */
+   HYPRE_Int               i, j, ib, ir, jr;
+   HYPRE_Complex           val;
+
+   /* Diagonal part: accumulate by row blocks */
+   for (i = 0; i < num_rows_diag_A; i++)
+   {
+      ib = i / num_rows_block_B;
+      ir = i % num_rows_block_B;
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
+      {
+         jr  = A_diag_j[j] % num_cols_block_B;
+         val = use_abs ? hypre_cabs(A_diag_data[j]) : A_diag_data[j];
+
+         hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
+                      hypre_DenseBlockMatrixRowStride(B) * ir +
+                      hypre_DenseBlockMatrixColStride(B) * jr <
+                      hypre_DenseBlockMatrixNumNonzeros(B));
+
+         hypre_DenseBlockMatrixDataBIJ(B, ib, ir, jr) += val;
+      }
+   }
+
+   /* Off-diagonal part: map offd columns to global, then into column blocks */
+   if (A_offd_i[num_rows_offd_A] - A_offd_i[0] > 0 && num_cols_offd_A > 0 && col_map_offd)
+   {
+      for (i = 0; i < num_rows_offd_A; i++)
+      {
+         ib = i / num_rows_block_B;
+         ir = i % num_rows_block_B;
+         for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+         {
+            HYPRE_Int  lcol = A_offd_j[j];
+            HYPRE_BigInt gcol = col_map_offd[lcol];
+            jr  = (HYPRE_Int) (gcol % (HYPRE_BigInt) num_cols_block_B);
+            val = use_abs ? hypre_cabs(A_offd_data[j]) : A_offd_data[j];
+
+            hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
+                         hypre_DenseBlockMatrixRowStride(B) * ir +
+                         hypre_DenseBlockMatrixColStride(B) * jr <
+                         hypre_DenseBlockMatrixNumNonzeros(B));
+
+            hypre_DenseBlockMatrixDataBIJ(B, ib, ir, jr) += val;
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixBlockRowSum
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix      *A,
+                               HYPRE_Int                row_major,
+                               HYPRE_Int                num_rows_block,
+                               HYPRE_Int                num_cols_block,
+                               HYPRE_Int                use_abs,
+                               hypre_DenseBlockMatrix **B_ptr )
+{
+   HYPRE_BigInt             num_rows_A      = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt             num_cols_A      = hypre_ParCSRMatrixGlobalNumCols(A);
+
+   hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int                num_rows_diag_A = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int                num_cols_diag_A = hypre_CSRMatrixNumCols(A_diag);
+
+   hypre_DenseBlockMatrix  *B;
+
+   /* Sanity checks */
+   if (num_rows_block < 1 || num_cols_block < 1)
+   {
+      *B_ptr = NULL;
+      return hypre_error_flag;
+   }
+   if (num_rows_A % ((HYPRE_BigInt) num_rows_block))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Global number of rows is not divisable by the block dimension");
+      return hypre_error_flag;
+   }
+   if (num_cols_A % ((HYPRE_BigInt) num_cols_block))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Global number of columns is not divisable by the block dimension");
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
+
+   /* Create output matrix */
+   B = hypre_DenseBlockMatrixCreate(row_major,
+                                    num_rows_diag_A, num_cols_diag_A,
+                                    num_rows_block, num_cols_block);
+
+   /* Initialize the output matrix on host for now */
+   hypre_DenseBlockMatrixInitializeOn(B, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+      hypre_DenseBlockMatrixMigrate(B, HYPRE_MEMORY_DEVICE);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixBlockRowSumHost(A, B, use_abs);
+   }
+
+   *B_ptr = B;
+
+   HYPRE_ANNOTATE_FUNC_END;
    return hypre_error_flag;
 }
 

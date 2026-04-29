@@ -956,3 +956,39 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatrixScale
+ *
+ * Scales Struct matrix: A = scalar * A.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixScale( hypre_StructMatrix *A,
+                         HYPRE_Complex       scalar)
+{
+   HYPRE_Complex *data = hypre_StructMatrixData(A);
+   HYPRE_Int      i;
+   HYPRE_Int      k = hypre_StructMatrixDataSize(A);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_StructMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_ComplexScalen(data, k, data, scalar);
+   }
+   else
+#endif
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < k; i++)
+      {
+         data[i] *= scalar;
+      }
+   }
+
+   return hypre_error_flag;
+}

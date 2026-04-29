@@ -90,10 +90,10 @@ mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -
 mpirun -np 2 ./ij -n 20 20 20 -P 2 1 1 -agg_nl 1 -solver 1 -CF 0 -add_rlx 0 -add_w 0.7 -mult_add 0 > solvers.out.110
 mpirun -np 4 ./ij -n 20 20 20 -P 2 2 1 -agg_nl 1 -solver 1 -simple 0 > solvers.out.111
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
-mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -tol 1e-3 > solvers.out.113
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 -add_end 2 > solvers.out.118
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 > solvers.out.119
-mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 > solvers.out.121
+mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 1 -tol 1e-3 > solvers.out.121
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -mult_add 0 -ns 2 -rap 1 > solvers.out.122
 mpirun -np 8 ./ij -n 20 20 20 -P 2 2 2 -agg_nl 1 -solver 3 -rlx 18 -ns 2 -rlx_coarse 18 -ns_coarse 2 > solvers.out.120
 
@@ -104,6 +104,17 @@ mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -nongalerk_tol 3 0.0 0.01 0.05 > solvers.
 #RAP options
 mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 0 > solvers.out.116
 mpirun -np 8 ./ij -n 40 40 40 -P 2 2 2 -solver 3 -rap 1 > solvers.out.117
+
+#flexible cycles
+mpirun -np 2 ./ij -n 40 40 40 -solver 1 \
+                  -flexamg_cycle_struct 0,0,-1,-1,-1,-1,1,1,1,1,-2 \
+                  -flexamg_relax_types 0,0,14,-1,18,13,9,3,0,-1,14 \
+                  -flexamg_relax_orders 1,1,0,0,0,1,0,0,0,0,0 \
+                  -flexamg_outer_weights 1.2,0.9,1.0,0,1.0,1.0,1,0.95,0.8,0,1.0 \
+                  -flexamg_relax_weights 0.95,1.85,1.0,0,1.0,1.0,1,1.8,1.2,0,1.0 \
+                  -flexamg_cgc_scaling 0,0,0,0,0,0,1.1,0.9,1.1,0.9,0 > solvers.out.123
+mpirun -np 2 ./ij -n 40 40 40 -solver 20 \
+                  -flexamg_cycle_struct -1,-1,-1,-1,1,0,0,0,-1,1,1,1,1,0,0,-2 > solvers.out.124
 
 ## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
 mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404

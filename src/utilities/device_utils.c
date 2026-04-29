@@ -27,12 +27,18 @@ hypre_DeviceDataCreate()
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
    hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
+   hypre_DeviceDataGSMethod(data)         = 1; /* SpTrSV - CPU: 0; Vendor: 1 */
+   hypre_DeviceDataComputeStreamNum(data) = 0;
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;
 #else
    hypre_DeviceDataDevice(data)           = 0;
 #endif
-   hypre_DeviceDataComputeStreamNum(data) = 0;
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
+   hypre_DeviceDataUseGpuAwareMPI(data)   = 1;
+#else
+   hypre_DeviceDataUseGpuAwareMPI(data)   = 0;
+#endif
 
    /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
@@ -86,7 +92,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
       return;
    }
 
-   hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataReduceBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (data->curand_generator)
@@ -344,7 +350,8 @@ hypre_ForceSyncComputeStream()
  *    - mem[0]: Current memory usage (allocated by the process).
  *    - mem[1]: Total device memory available on the GPU.
  *
- * This implementation supports NVIDIA GPUs using CUDA and AMD GPUs using HIP.
+ * This implementation supports NVIDIA GPUs using CUDA, AMD GPUs using HIP,
+ * and SYCL devices that expose the Intel free-memory extension.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -367,6 +374,20 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
 
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipMemGetInfo(&free_mem, &total_mem));
+
+#elif defined(HYPRE_USING_SYCL)
+   auto device = *hypre_HandleDevice(hypre_handle());
+   total_mem = device.get_info<sycl::info::device::global_mem_size>();
+
+   if (device.has(sycl::aspect::ext_intel_free_memory))
+   {
+      free_mem = device.get_info<sycl::ext::intel::info::device::free_memory>();
+   }
+   else
+   {
+      /* Total memory is still useful even if free-memory accounting is unavailable. */
+      free_mem = total_mem;
+   }
 
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No supported GPU backend found!");
@@ -2072,7 +2093,7 @@ hypre_CsrRowPtrsToIndicesWithRowNumDevice( HYPRE_Int  nrows,
    hypre_CsrRowPtrsToIndicesDevice_v2(nrows, nnz, d_row_ptr, map);
 
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+   hypre_GatherSycl(map, map + nnz, d_row_num, d_row_ind);
 #else
    HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 #endif
@@ -3044,6 +3065,7 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
+   hypre_MPI_Barrier(comm);
 #endif
 
 #else

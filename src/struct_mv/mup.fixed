@@ -320,6 +320,7 @@ hypre_StructMatrixReadData
 hypre_StructMatrixRef
 hypre_StructMatrixResize
 hypre_StructMatrixRestore
+hypre_StructMatrixScale
 hypre_StructMatrixSetBoxValues
 hypre_StructMatrixSetConstantEntries
 hypre_StructMatrixSetConstantValues

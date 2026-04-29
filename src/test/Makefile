@@ -70,7 +70,10 @@ HYPRE_DRIVERS =\
  ams_driver.c\
  struct_migrate.c\
  ij_mm.c\
- zboxloop.c\
+ zboxloop.c
+
+HYPRE_UNIT_TESTS =\
+ test_csr_overlap.c
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
@@ -102,8 +105,13 @@ endif
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
+HYPRE_UNIT_EXECS=${HYPRE_UNIT_TESTS:.c=}
 
-all: ${HYPRE_DRIVER_EXECS}
+all: drivers tests
+
+tests: ${HYPRE_UNIT_EXECS}
+
+drivers: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
@@ -120,6 +128,7 @@ distclean: clean
 	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
+	rm -f ${HYPRE_UNIT_EXECS}
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
 	rm -f TEST_ij/*.out*
@@ -209,6 +218,12 @@ test_mp_pcg: test_mp_pcg.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_mp_pcg_3d: test_mp_pcg_3d.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+# Unit tests
+
+test_csr_overlap: test_csr_overlap.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

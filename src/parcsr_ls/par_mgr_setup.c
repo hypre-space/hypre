@@ -136,7 +136,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 #endif
-   char        region_name[1024];
+   char        region_name[1024], level_name[1024];
    char        msg[2048];
 
    /* ----- begin -----*/
@@ -220,9 +220,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       cgrid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
       (mgr_data -> num_coarse_levels) = 0;
 
+      hypre_GpuProfilingPopRange();
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
-      hypre_GpuProfilingPopRange();
-      hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
    }
@@ -1021,9 +1021,9 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* loop over levels of coarsening */
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
-      hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
-      hypre_GpuProfilingPushRange(region_name);
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+      hypre_sprintf(level_name, "%s-%d", "MGR_Level", lev);
+      hypre_GpuProfilingPushRange(level_name);
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", level_name);
 
       /* Check if this is the last level */
       last_level = (lev == (num_coarsening_levs - 1));
@@ -1253,13 +1253,32 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       /* User-prescribed F-solver */
-      if (Frelax_type[lev] == 2  ||
-          Frelax_type[lev] == 29 ||
-          Frelax_type[lev] == 32 ||
-          Frelax_type[lev] == 9  ||
-          Frelax_type[lev] == 99 ||
-          Frelax_type[lev] == 199)
+      if ((Frelax_type[lev] == 2  ||
+           Frelax_type[lev] == 29 ||
+           Frelax_type[lev] == 32 ||
+           Frelax_type[lev] == 9  ||
+           Frelax_type[lev] == 99 ||
+           Frelax_type[lev] == 199) ||
+          (aff_solver && aff_solver[lev]))
       {
+         if (!F_fine_array[lev + 1])
+         {
+            F_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                     hypre_ParCSRMatrixRowStarts(A_FF));
+            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         }
+
+         if (!U_fine_array[lev + 1])
+         {
+            U_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                     hypre_ParCSRMatrixRowStarts(A_FF));
+            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         }
+
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
             if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
@@ -1276,11 +1295,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                   {
                      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                        "F-relaxation solver has not been setup\n");
-                     HYPRE_ANNOTATE_FUNC_END;
-                     hypre_GpuProfilingPopRange();
-                     hypre_GpuProfilingPopRange();
-
-                     return hypre_error_flag;
                   }
                }
                else /* F-relaxation solver prescribed but not set up */
@@ -1380,27 +1394,12 @@ hypre_MGRSetup( void               *mgr_vdata,
          /* Exit early in case of issues */
          if (HYPRE_GetError())
          {
+            hypre_GpuProfilingPopRange();
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", level_name);
+            HYPRE_ANNOTATE_FUNC_END;
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during F-relaxation setup!");
             return hypre_error_flag;
-         }
-
-         /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
-         if (!F_fine_array[lev + 1])
-         {
-            F_fine_array[lev + 1] =
-               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
-         }
-
-         if (!U_fine_array[lev + 1])
-         {
-            U_fine_array[lev + 1] =
-               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
          }
       }
 
@@ -1553,9 +1552,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          use_GSElimSmoother = 1;
       }
 
-      hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
       hypre_GpuProfilingPopRange();
-      HYPRE_ANNOTATE_REGION_END("%s", region_name);
+      HYPRE_ANNOTATE_REGION_END("%s", level_name);
 
       /* check if last level */
       if (last_level)

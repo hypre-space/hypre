@@ -218,7 +218,7 @@ hypre_CSRSpGemmRownnzNoBinDevice( HYPRE_Int  m,
 
 #if defined(HYPRE_USING_SYCL)
          oneapi::dpl::counting_iterator count(0);
-         HYPRE_Int *new_end = hypreSycl_copy_if(
+         HYPRE_Int *new_end = hypre_CopyIfSycl(
                                  count,
                                  count + m,
                                  d_rf,
@@ -328,10 +328,10 @@ hypre_CSRSpGemmRownnzBinnedDevice( HYPRE_Int  m,
 #if defined(HYPRE_USING_SYCL)
          oneapi::dpl::counting_iterator count(0);
          HYPRE_Int *new_end =
-            hypreSycl_copy_if( count,
-                               count + m,
-                               d_rf,
-                               d_rind,
+            hypre_CopyIfSycl( count,
+                              count + m,
+                              d_rf,
+                              d_rind,
          [] (const auto & x) {return x;} );
 #else
          HYPRE_Int *new_end =

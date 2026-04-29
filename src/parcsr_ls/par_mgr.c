@@ -3173,6 +3173,10 @@ hypre_MGRSetGlobalSmootherAtLevel( void         *mgr_vdata,
    {
       smoother_type = 16;
    }
+   else if (setup == (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
+   {
+      smoother_type = 20;
+   }
    else
    {
       smoother_type = -1; /* Unknown smoother */

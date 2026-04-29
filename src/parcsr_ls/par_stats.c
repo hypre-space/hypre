@@ -22,7 +22,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 {
    hypre_GpuProfilingPushRange("AMGSetupStats");
 
-   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
@@ -204,9 +206,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    if (my_id == 0)
    {
-      hypre_printf("\n\n Num MPI tasks = %d\n\n", num_procs);
-      hypre_printf(" Num OpenMP threads = %d\n\n", num_threads);
-      hypre_printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
+      hypre_printf("\n\n Num MPI tasks = %d\n", num_procs);
+      hypre_printf(" Num OpenMP threads = %d\n", num_threads);
+      hypre_printf(" Execution policy = %s\n\n", HYPRE_GetExecutionPolicyName(exec));
       hypre_printf(" Max levels = %d\n", hypre_ParAMGDataMaxLevels(amg_data));
       hypre_printf(" Num levels = %d\n\n", num_levels);
       hypre_printf(" Strength Threshold = %f\n",

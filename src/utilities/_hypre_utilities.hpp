@@ -423,6 +423,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/binary_search.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/reverse_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
@@ -437,6 +438,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/for_each.h>
 #include <thrust/remove.h>
 #include <thrust/version.h>
+#include <thrust/pair.h>
 
 /* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
 #define THRUST_VERSION_NOTFN 200600
@@ -451,6 +453,8 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
 #elif defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
 #endif
 
 using namespace thrust::placeholders;
@@ -463,7 +467,6 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
-#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -563,7 +566,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -584,7 +587,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_HandleComputeStreamNum(hypre_handle) = HYPRE_MAX_NUM_STREAMS - 1;                \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -606,7 +609,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          sycl::range<1> shmem_range(shmem_size);                                             \
          sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -627,7 +630,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -650,7 +653,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -1004,6 +1007,8 @@ struct hypre_DeviceData
    HYPRE_Int                         device;
    HYPRE_Int                         device_uvm;
 #endif
+   HYPRE_Int                         use_gpu_aware_mpi;
+   HYPRE_Int                         gs_method; /* device G-S options */
    hypre_int                         device_max_shmem_per_block[3];
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
@@ -1034,6 +1039,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceUVM(data)                      ((data) -> device_uvm)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
+#define hypre_DeviceDataUseGpuAwareMPI(data)                 ((data) -> use_gpu_aware_mpi)
+#define hypre_DeviceDataGSMethod(data)                       ((data) -> gs_method)
 #define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
 #define hypre_DeviceDataDeviceMaxShmemPerBlockInited(data)  (((data) -> device_max_shmem_per_block)[2])
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
@@ -2147,7 +2154,7 @@ HYPRE_Int hypre_popc(hypre_mask mask)
 static __device__ __forceinline__
 HYPRE_Int hypre_ffs(hypre_mask mask)
 {
-   return (HYPRE_Int) dpct::ffs<HYPRE_Int>(mask);
+   return (HYPRE_Int) (mask == 0) ? 0 : sycl::ctz(mask) + 1;
 }
 
 static __device__ __forceinline__

@@ -1020,7 +1020,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #ifndef ESSL
     char uplo = 'L';
     HYPRE_Int one = 1;
-    HYPRE_Int info;
+    HYPRE_Int info = 0;
 #endif
 
     /* Allocate and initialize full length marker array */
@@ -1228,7 +1228,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     HYPRE_Int pattsize = 1000;
     HYPRE_Int *patt = hypre_TAlloc(HYPRE_Int, pattsize, HYPRE_MEMORY_HOST);
 
-    HYPRE_Int info;
+    HYPRE_Int info = 0;
 
     HYPRE_Int error = 0;
 
