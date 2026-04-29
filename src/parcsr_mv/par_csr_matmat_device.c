@@ -111,8 +111,8 @@ hypre_ParCSRMatMatDiagDevice(hypre_ParCSRMatrix  *A,
 
    /* Set up C_diag_i and C_diag_j */
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclSequence(C_diag_i, C_diag_i + num_rows + 1, 0);
-   hypre_SyclSequence(C_diag_j, C_diag_j + num_rows, 0);
+   hypreSycl_sequence(C_diag_i, C_diag_i + num_rows + 1, 0);
+   hypreSycl_sequence(C_diag_j, C_diag_j + num_rows, 0);
 #else
    HYPRE_THRUST_CALL(sequence, C_diag_i, C_diag_i + num_rows + 1, 0);
    HYPRE_THRUST_CALL(sequence, C_diag_j, C_diag_j + num_rows, 0);

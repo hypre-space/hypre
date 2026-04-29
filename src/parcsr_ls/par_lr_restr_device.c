@@ -99,12 +99,12 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *Cmap = hypre_TAlloc(HYPRE_Int, n_cpts, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   hypre_SyclCopy_if( count,
+   hypreSycl_copy_if( count,
                       count + n_fine,
                       CF_marker,
                       Fmap,
                       is_negative<HYPRE_Int>());
-   hypre_SyclCopy_if( count,
+   hypreSycl_copy_if( count,
                       count + n_fine,
                       CF_marker,
                       Cmap,
@@ -260,7 +260,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg_Z);
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
+      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
                         hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z),
                         Fmap,

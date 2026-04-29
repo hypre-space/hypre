@@ -956,7 +956,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
 
    /* copy CF markers of elements to send to buffer */
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      CF_marker,
@@ -1015,7 +1015,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    big_int_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                     HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      fine_to_coarse,
@@ -1081,19 +1081,19 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_offd_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_offd, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclCopy_if( P_diag_j_temp,
+   hypreSycl_copy_if( P_diag_j_temp,
                       P_diag_j_temp + n_fine,
                       diag_compress_marker,
                       P_diag_j_temp_compressed,
                       equal<HYPRE_Int>(1) );
-   hypre_SyclCopy_if( P_offd_j_temp,
+   hypreSycl_copy_if( P_offd_j_temp,
                       P_offd_j_temp + n_fine,
                       offd_compress_marker,
                       P_offd_j_temp_compressed,
                       equal<HYPRE_Int>(1) );
 
    /* map the diag column indices */
-   hypre_SyclGather( P_diag_j_temp_compressed,
+   hypreSycl_gather( P_diag_j_temp_compressed,
                      P_diag_j_temp_compressed + nnz_diag,
                      fine_to_coarse,
                      P_diag_j );
@@ -1148,7 +1148,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *offd_map_P_to_A = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   hypre_SyclCopy_if( count,
+   hypreSycl_copy_if( count,
                       count + num_cols_A_offd,
                       mark_P_offd_idx,
                       offd_map_P_to_A,
@@ -1169,13 +1169,13 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    hypre_IntFillnDevice( offd_map_A_to_P, num_cols_A_offd, -1 );
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclScatter( count,
+   hypreSycl_scatter( count,
                       count + num_cols_P_offd,
                       offd_map_P_to_A,
                       offd_map_A_to_P );
 
    /* use inverse mapping above to map P_offd_j */
-   hypre_SyclGather( P_offd_j_temp_compressed,
+   hypreSycl_gather( P_offd_j_temp_compressed,
                      P_offd_j_temp_compressed + nnz_offd,
                      offd_map_A_to_P,
                      P_offd_j );
@@ -1200,7 +1200,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    col_map_offd_P_device = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_DEVICE);
    col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclGather( offd_map_P_to_A,
+   hypreSycl_gather( offd_map_P_to_A,
                      offd_map_P_to_A + num_cols_P_offd,
                      fine_to_coarse_offd,
                      col_map_offd_P_device);
@@ -1359,7 +1359,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                                        num_sends),
                      CF_marker,
@@ -1394,7 +1394,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       }
 
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                                           num_sends),
                         dof_func,

@@ -88,7 +88,7 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
       hypre_IntArrayInitialize_v2(*coarse_dof_func_ptr, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclCopy_if( hypre_IntArrayData(dof_func),
+      hypreSycl_copy_if( hypre_IntArrayData(dof_func),
                          hypre_IntArrayData(dof_func) + local_num_variables,
                          hypre_IntArrayData(CF_marker),
                          hypre_IntArrayData(*coarse_dof_func_ptr),
@@ -128,7 +128,7 @@ hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func,
                                   HYPRE_Int  num_functions )
 {
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclSequence(dof_func,
+   hypreSycl_sequence(dof_func,
                       dof_func + local_size,
                       offset);
 

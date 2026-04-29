@@ -571,7 +571,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
          hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-         hypre_SyclGather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+         hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                                              num_sends),
                            cf_marker,
@@ -757,7 +757,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclTransform_if( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
+      hypreSycl_transform_if( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                               std::negate<HYPRE_Real>(),
                               is_negative<HYPRE_Real>() );
       bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,

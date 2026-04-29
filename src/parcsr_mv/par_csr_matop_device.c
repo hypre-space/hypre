@@ -963,8 +963,8 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
    hypre_TMemcpy(e_ii, send_map_def, HYPRE_Int, num_elements,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclSequence(e_j, e_j + num_elements, 0);
-   hypre_SyclStable_sort_by_key(e_ii, e_ii + num_elements, e_j);
+   hypreSycl_sequence(e_j, e_j + num_elements, 0);
+   hypreSycl_stable_sort_by_key(e_ii, e_ii + num_elements, e_j);
 #else
    HYPRE_THRUST_CALL(sequence, e_j, e_j + num_elements);
    HYPRE_THRUST_CALL(stable_sort_by_key, e_ii, e_ii + num_elements, e_j);
@@ -1524,7 +1524,7 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRMatrixCommPkg(A));
 
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclGather( Aext_ii,
+      hypreSycl_gather( Aext_ii,
                         Aext_ii + Aext_nnz,
                         hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(A)),
                         Aext_ii );

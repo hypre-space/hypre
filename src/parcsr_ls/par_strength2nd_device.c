@@ -76,12 +76,12 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_CSRMatrixInitialize_v2(Id, 0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_SyclSequence( hypre_CSRMatrixI(Id),
+   hypreSycl_sequence( hypre_CSRMatrixI(Id),
                        hypre_CSRMatrixI(Id) + hypre_ParCSRMatrixNumRows(S_CX) + 1,
                        0 );
 
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   new_end = hypre_SyclCopy_if( count,
+   new_end = hypreSycl_copy_if( count,
                                 count + hypre_ParCSRMatrixNumCols(S_CX),
                                 CF_marker,
                                 hypre_CSRMatrixJ(Id),

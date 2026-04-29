@@ -92,7 +92,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
 
-   hypre_SyclTransform_if(A0,
+   hypreSycl_transform_if(A0,
                           A0 + N0,
                           X,
                           A0,
@@ -177,7 +177,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
 
-   hypre_SyclTransform_if(A0,
+   hypreSycl_transform_if(A0,
                           A0 + N0,
                           X0,
                           A0,
@@ -219,7 +219,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* remove numerical zeros */
 #if defined(HYPRE_USING_SYCL)
-   auto new_end2 = hypre_SyclCopy_if( oneapi::dpl::make_zip_iterator(I, A),
+   auto new_end2 = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(I, A),
                                       oneapi::dpl::make_zip_iterator(I, A) + Nt,
                                       A,
                                       oneapi::dpl::make_zip_iterator(I0, A0),
@@ -313,7 +313,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       HYPRE_BigInt *indices2    = hypre_TAlloc(HYPRE_BigInt, num_values2, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      hypre_SyclSequence(indices2, indices2 + num_values2, vec_start);
+      hypreSycl_sequence(indices2, indices2 + num_values2, vec_start);
 #else
       HYPRE_THRUST_CALL(sequence, indices2, indices2 + num_values2, vec_start);
 #endif
@@ -461,7 +461,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_data, off_proc_sora);
-         auto new_end1 = hypre_SyclCopy_if( zip_in,  /* first */
+         auto new_end1 = hypreSycl_copy_if( zip_in,  /* first */
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
@@ -470,7 +470,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
          /* remove off-proc entries from stack */
-         auto new_end2 = hypre_SyclRemove_if( zip_in,         /* first */
+         auto new_end2 = hypreSycl_remove_if( zip_in,         /* first */
                                               zip_in + nelms, /* last */
                                               is_on_proc,     /* stencil */
          [] (const auto & x) {return !x;} );

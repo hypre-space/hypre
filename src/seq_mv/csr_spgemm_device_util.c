@@ -287,10 +287,10 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
 
    if (!d_rc_indice_in)
    {
-      hypre_SyclSequence(d_rc_indice, d_rc_indice + m, 0);
+      hypreSycl_sequence(d_rc_indice, d_rc_indice + m, 0);
    }
 
-   hypre_SyclStable_sort_by_key(d_bin_key, d_bin_key + m, d_rc_indice);
+   hypreSycl_stable_sort_by_key(d_bin_key, d_bin_key + m, d_rc_indice);
 
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_bin_key,
