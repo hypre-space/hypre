@@ -123,7 +123,7 @@ hypre_ILUApplyLowerJacIterDevice(hypre_CSRMatrix *A,
    /* Since the initial guess to the jacobi iteration is 0, the result of
       the first L SpMV is 0, so no need to compute.
       However, we still need to compute the transformation */
-   hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, 0.0);
+   hypre_ComplexAxpynDevice(work_data, num_rows, input_data, output_data, 0.0);
 
    /* Do the remaining iterations */
    for (kk = 1; kk < lower_jacobi_iters; kk++)
@@ -132,7 +132,7 @@ hypre_ILUApplyLowerJacIterDevice(hypre_CSRMatrix *A,
       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output, 0.0, work, -2);
 
       /* Transform */
-      hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, -1.0);
+      hypre_ComplexAxpynDevice(work_data, num_rows, input_data, output_data, -1.0);
    }
 
    return hypre_error_flag;
@@ -164,7 +164,7 @@ hypre_ILUApplyUpperJacIterDevice(hypre_CSRMatrix *A,
    /* Since the initial guess to the jacobi iteration is 0,
       the result of the first U SpMV is 0, so no need to compute.
       However, we still need to compute the transformation */
-   hypreDevice_zeqxmydd(num_rows, input_data, 0.0, work_data, output_data, diag_data);
+   hypre_zeqxmyddDevice(num_rows, input_data, 0.0, work_data, output_data, diag_data);
 
    /* Do the remaining iterations */
    for (kk = 1; kk < upper_jacobi_iters; kk++)
@@ -173,7 +173,7 @@ hypre_ILUApplyUpperJacIterDevice(hypre_CSRMatrix *A,
       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output, 0.0, work, 2);
 
       /* transform */
-      hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_data);
+      hypre_zeqxmyddDevice(num_rows, input_data, -1.0, work_data, output_data, diag_data);
    }
 
    return hypre_error_flag;

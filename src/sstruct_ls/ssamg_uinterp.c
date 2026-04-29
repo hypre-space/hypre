@@ -387,7 +387,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_IntFilln(CF_marker, (size_t) hypre_ParCSRMatrixNumRows(A_u), 1);
+         hypre_IntFillnDevice(CF_marker, (size_t) hypre_ParCSRMatrixNumRows(A_u), 1);
       }
       else
 #endif

@@ -35,7 +35,7 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
    //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_GPU)
-   hypreDevice_ComplexFilln( vector_data, total_size, value );
+   hypre_ComplexFillnDevice( vector_data, total_size, value );
 
    hypre_SyncComputeStream();
 
@@ -107,7 +107,7 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
                                               total_size, alpha,
                                               y_data, 1).wait() );
 #else
-   hypreDevice_ComplexScalen( y_data, total_size, y_data, alpha );
+   hypre_ComplexScalenDevice( y_data, total_size, y_data, alpha );
 #endif
 
    hypre_SyncComputeStream();
@@ -154,7 +154,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
                                               total_size, alpha,
                                               x_data, 1, y_data, 1).wait() );
 #else
-   hypreDevice_ComplexAxpyn(x_data, total_size, y_data, y_data, alpha);
+   hypre_ComplexAxpynDevice(x_data, total_size, y_data, y_data, alpha);
 #endif
 
    hypre_SyncComputeStream();
@@ -193,7 +193,7 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
    size_t          total_size  = (size_t)size * (size_t)num_vectors;
 
 #if defined(HYPRE_USING_GPU)
-   hypreDevice_ComplexAxpyzn(total_size, x_data, y_data, z_data, alpha, beta);
+   hypre_ComplexAxpyznDevice(total_size, x_data, y_data, z_data, alpha, beta);
 
    hypre_SyncComputeStream();
 
@@ -237,11 +237,11 @@ hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x,
       {
          if (marker)
          {
-            hypreDevice_IVAXPYMarked(size, b_data, x_data, y_data, marker, marker_val);
+            hypre_IVAXPYMarkedDevice(size, b_data, x_data, y_data, marker, marker_val);
          }
          else
          {
-            hypreDevice_IVAXPY(size, b_data, x_data, y_data);
+            hypre_IVAXPYDevice(size, b_data, x_data, y_data);
          }
       }
 #if !defined(HYPRE_USING_SYCL)
@@ -249,7 +249,7 @@ hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x,
       {
          if (!marker)
          {
-            hypreDevice_IVAMXPMY(num_vectors_x, size, b_data, x_data, y_data);
+            hypre_IVAMXPMYDevice(num_vectors_x, size, b_data, x_data, y_data);
          }
          else
          {
@@ -356,7 +356,7 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
    HYPRE_Complex   sum = 0.0;
 
 #if defined(HYPRE_USING_GPU)
-   sum = hypreDevice_ComplexReduceSum(total_size, data);
+   sum = hypre_ComplexReduceSumDevice(total_size, data);
 
    hypre_SyncComputeStream();
 
@@ -393,8 +393,8 @@ hypre_SeqVectorStridedCopyDevice( hypre_Vector  *vector,
    HYPRE_THRUST_CALL( transform, begin, last,
                       thrust::make_permutation_iterator(v_data,
                                                         thrust::make_transform_iterator(begin,
-                                                                                        hypreFunctor_IndexStrided<HYPRE_Int>(ostride))),
-                      hypreFunctor_ArrayStridedAccess<HYPRE_Complex>(istride, data) );
+                                                                                        hypre_IndexStridedFunctor<HYPRE_Int>(ostride))),
+                      hypre_ArrayStridedAccessFunctor<HYPRE_Complex>(istride, data) );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");

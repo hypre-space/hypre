@@ -1174,7 +1174,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             hypre_CTAlloc(HYPRE_Complex, hypre_SStructMatrixTmpSize(matrix), memory_location);
       }
 
-      hypreDevice_BigIntFilln(hypre_SStructMatrixTmpRowCoordsDevice(matrix), ncoeffs, row_coord);
+      hypre_BigIntFillnDevice(hypre_SStructMatrixTmpRowCoordsDevice(matrix), ncoeffs, row_coord);
 
       hypre_TMemcpy(hypre_SStructMatrixTmpColCoordsDevice(matrix),
                     col_coords, HYPRE_BigInt, ncoeffs,
@@ -1341,7 +1341,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_IntFilln(values_map, num_nonzeros, -1);
+         hypre_IntFillnDevice(values_map, num_nonzeros, -1);
       }
       else
 #endif
@@ -1376,7 +1376,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntFilln(ncols, nrows, 0);
+            hypre_IntFillnDevice(ncols, nrows, 0);
 #if defined(HYPRE_USING_SYCL)
             HYPRE_ONEDPL_CALL( std::transform,
                                oneapi::dpl::counting_iterator<HYPRE_Int>(0),

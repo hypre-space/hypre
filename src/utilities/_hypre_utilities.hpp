@@ -27,18 +27,18 @@ extern "C++" {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_DenseMatrixIdentity
+ * hypre_DenseMatrixIdentityFunctor
  *
  * Functor for generating a dense identity matrix.
  * This assumes that the input array "a" is zeros everywhere
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_DenseMatrixIdentity
+struct hypre_DenseMatrixIdentityFunctor
 {
    HYPRE_Int   n_;
    HYPRE_Real *a_;
 
-   hypreFunctor_DenseMatrixIdentity(HYPRE_Int n, HYPRE_Real *a)
+   hypre_DenseMatrixIdentityFunctor(HYPRE_Int n, HYPRE_Real *a)
    {
       n_ = n;
       a_ = a;
@@ -51,7 +51,7 @@ struct hypreFunctor_DenseMatrixIdentity
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ArrayStridedAccess
+ * hypre_ArrayStridedAccessFunctor
  *
  * Functor for performing strided data access on a templated array.
  *
@@ -62,12 +62,12 @@ struct hypreFunctor_DenseMatrixIdentity
  *--------------------------------------------------------------------------*/
 
 template <typename T>
-struct hypreFunctor_ArrayStridedAccess
+struct hypre_ArrayStridedAccessFunctor
 {
    HYPRE_Int  s_;
    T         *a_;
 
-   hypreFunctor_ArrayStridedAccess(HYPRE_Int s, T *a) : s_(s), a_(a) {}
+   hypre_ArrayStridedAccessFunctor(HYPRE_Int s, T *a) : s_(s), a_(a) {}
 
    __host__ __device__ T operator()(HYPRE_Int i)
    {
@@ -76,7 +76,7 @@ struct hypreFunctor_ArrayStridedAccess
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_IndexStrided
+ * hypre_IndexStridedFunctor
  *
  * This functor multiplies a given index "i" by a specified stride "s_".
  *
@@ -84,11 +84,11 @@ struct hypreFunctor_ArrayStridedAccess
  *--------------------------------------------------------------------------*/
 
 template <typename T>
-struct hypreFunctor_IndexStrided
+struct hypre_IndexStridedFunctor
 {
    T s_;
 
-   hypreFunctor_IndexStrided(T s) : s_(s) {}
+   hypre_IndexStridedFunctor(T s) : s_(s) {}
 
    __host__ __device__ T operator()(const T i) const
    {
@@ -97,14 +97,14 @@ struct hypreFunctor_IndexStrided
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_IndexCycle
+ * hypre_IndexCycleFunctor
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_IndexCycle
+struct hypre_IndexCycleFunctor
 {
    HYPRE_Int cycle_length;
 
-   hypreFunctor_IndexCycle(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+   hypre_IndexCycleFunctor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
 
    __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
    {
@@ -116,11 +116,11 @@ struct hypreFunctor_IndexCycle
  * Functor to check: |x| > tol
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_NonzeroAboveTol
+struct hypre_NonzeroAboveTolFunctor
 {
    HYPRE_Real tol;
 
-   hypreFunctor_NonzeroAboveTol(HYPRE_Real tol_) : tol(tol_) {}
+   hypre_NonzeroAboveTolFunctor(HYPRE_Real tol_) : tol(tol_) {}
 
    __host__ __device__
    bool operator()(const HYPRE_Complex& x) const
@@ -150,7 +150,7 @@ struct hypreFunctor_NonzeroAboveTol
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
- * hyprePred_StridedAccess
+ * hypre_PredStridedAccess
  *
  * This struct defines a predicate for strided access in array-like data.
  *
@@ -160,11 +160,11 @@ struct hypreFunctor_NonzeroAboveTol
  * is part of the strided subset.
  *--------------------------------------------------------------------------*/
 
-struct hyprePred_StridedAccess
+struct hypre_PredStridedAccess
 {
    HYPRE_Int  s_;
 
-   hyprePred_StridedAccess(HYPRE_Int s) : s_(s) {}
+   hypre_PredStridedAccess(HYPRE_Int s) : s_(s) {}
 
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int i) const
    {
@@ -2458,26 +2458,26 @@ dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                            T3 *vals, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortTupleByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                                 T3 *vals1, T4 *vals2, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
+HYPRE_Int hypre_ReduceByTupleKeyDevice(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
                                        T3 *vals_in, T1 *keys1_out, T2 *keys2_out,
                                        T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+HYPRE_Int hypre_ScatterConstantDevice(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
+HYPRE_Int hypre_GenScatterAddDevice(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
                                     HYPRE_Real *y, char *work);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+HYPRE_Int hypre_CsrRowPtrsToIndicesWithRowNumDevice(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 #endif

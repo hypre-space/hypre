@@ -246,14 +246,14 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_IJVectorAssemblePar
+ * hypre_GPUKernelIJVectorAssemblePar
  *
  * y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
+hypre_GPUKernelIJVectorAssemblePar( hypre_DeviceItem &item,
                                     HYPRE_Int         n,
                                     HYPRE_Complex    *x,
                                     HYPRE_BigInt     *map,
@@ -374,10 +374,10 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
-   hypreDevice_CharFilln(stack_sora + stack_elmts_current, num_values, SorA);
+   hypre_CharFillnDevice(stack_sora + stack_elmts_current, num_values, SorA);
    if (num_vectors > 1)
    {
-      hypreDevice_BigIntFilln(stack_voff + stack_elmts_current, num_values,
+      hypre_BigIntFillnDevice(stack_voff + stack_elmts_current, num_values,
                               (HYPRE_BigInt) component * vecstride);
    }
 
@@ -551,7 +551,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* Shift stack_i with multivector component offsets */
       if (num_vectors > 1)
       {
-         hypreDevice_BigIntAxpyn(stack_voff, nelms, stack_i, stack_i, 1);
+         hypre_BigIntAxpynDevice(stack_voff, nelms, stack_i, stack_i, 1);
       }
 
       /* sort and reduce */
@@ -561,7 +561,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJVectorAssemblePar, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelIJVectorAssemblePar, gDim, bDim,
                         new_nnz, new_data, new_i,
                         vec_start, new_sora,
                         data );
@@ -578,14 +578,14 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 }
 
 __global__ void
-hypreCUDAKernel_IJVectorUpdateValues( hypre_DeviceItem    &item,
-                                      HYPRE_Int            n,
-                                      const HYPRE_Complex *x,
-                                      const HYPRE_BigInt  *indices,
-                                      HYPRE_BigInt         start,
-                                      HYPRE_BigInt         stop,
-                                      HYPRE_Int            action,
-                                      HYPRE_Complex       *y )
+hypre_GPUKernelIJVectorUpdateValues( hypre_DeviceItem    &item,
+                                     HYPRE_Int            n,
+                                     const HYPRE_Complex *x,
+                                     const HYPRE_BigInt  *indices,
+                                     HYPRE_BigInt         start,
+                                     HYPRE_BigInt         stop,
+                                     HYPRE_Int            action,
+                                     HYPRE_Complex       *y )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -647,7 +647,7 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
 
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorUpdateValues,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIJVectorUpdateValues,
                      gDim, bDim,
                      num_values, values, indices,
                      vec_start, vec_stop, action,

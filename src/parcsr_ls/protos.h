@@ -819,7 +819,7 @@ HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm, HYPRE_BigInt nx, H
                                                HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value );
 
 /* par_lr_interp.c */
-HYPRE_Int hypreDevice_extendWtoP ( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows,
+HYPRE_Int hypre_extendWtoPDevice ( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows,
                                    HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker,
                                    HYPRE_Int  W_diag_nnz, HYPRE_Int *W_diag_i,
                                    HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data,
