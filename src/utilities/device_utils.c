@@ -861,11 +861,11 @@ hypre_CsrRowPtrsToIndicesDevice( HYPRE_Int  nrows,
 #if defined(HYPRE_USING_SYCL)
 
 /*--------------------------------------------------------------------
- * hypreSYCLKernel_ScatterRowPtr
+ * hypre_SYCLKernelScatterRowPtr
  *--------------------------------------------------------------------*/
 
 void
-hypreSYCLKernel_ScatterRowPtr( hypre_DeviceItem &item,
+hypre_SYCLKernelScatterRowPtr( hypre_DeviceItem &item,
                                HYPRE_Int         nrows,
                                HYPRE_Int        *d_row_ptr,
                                HYPRE_Int        *d_row_ind )
@@ -920,7 +920,7 @@ hypre_CsrRowPtrsToIndicesDevice_v2( HYPRE_Int  nrows,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
    HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
-   HYPRE_GPU_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
+   HYPRE_GPU_LAUNCH( hypre_SYCLKernelScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
 #else
