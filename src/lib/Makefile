@@ -130,6 +130,7 @@ STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_ldbl
 
 UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/mup*.o
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/utilities_mp.o
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/utilities_mp_device.obj
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/printf.o
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/multiprecision.o
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/umpire.obj

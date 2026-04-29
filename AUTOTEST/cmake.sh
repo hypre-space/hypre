@@ -82,59 +82,7 @@ rm -fr src/hypre
 # Configure
 cd $root_dir/build
 eval cmake $copts ../src
-
-# Accept historical make-style build options such as "-j test" and map them
-# to cmake --build syntax. Always build the default target first so the later
-# install step has all requested binaries available, then run any explicit
-# targets such as check/test.
-build_opts=()
-build_targets=()
-
-if [ -n "$mopts" ]; then
-   eval "set -- $mopts"
-   while [ "$#" -gt 0 ]; do
-      case $1 in
-         -j|--parallel)
-            if [ "$#" -gt 1 ] && [[ $2 =~ ^[0-9]+$ ]]; then
-               build_opts+=(--parallel "$2")
-               shift 2
-            else
-               build_opts+=(--parallel)
-               shift
-            fi
-            ;;
-         --target|-t)
-            shift
-            while [ "$#" -gt 0 ] && [[ $1 != -* ]]; do
-               if [ "$1" != "all" ]; then
-                  build_targets+=("$1")
-               fi
-               shift
-            done
-            ;;
-         all)
-            shift
-            ;;
-         -*)
-            build_opts+=("$1")
-            shift
-            ;;
-         *)
-            build_targets+=("$1")
-            shift
-            ;;
-      esac
-   done
-fi
-
-build_cmd=(cmake --build . "${build_opts[@]}")
-"${build_cmd[@]}"
-
-if [ ${#build_targets[@]} -gt 0 ]; then
-   target_build_cmd=(cmake --build . "${build_opts[@]}" --target "${build_targets[@]}")
-   "${target_build_cmd[@]}"
-fi
-
+eval cmake --build . $mopts
 eval cmake --install .
 
 cd $test_dir
