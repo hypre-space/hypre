@@ -136,9 +136,9 @@ hypre_ModmpInitFineToCoarseDevice( HYPRE_Int  n_fine,
                       HYPRE_Int(0) );
 
    hypre_TransformIfSycl( fine_to_coarse,
-                           fine_to_coarse + n_fine,
-                           pass_marker,
-                           fine_to_coarse,
+                          fine_to_coarse + n_fine,
+                          pass_marker,
+                          fine_to_coarse,
    [] (const auto & x) {return -1;},
    [color = color] (const auto & x) {return x != color;} );
 #else
