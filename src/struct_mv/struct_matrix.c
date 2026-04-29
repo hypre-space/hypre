@@ -18,8 +18,11 @@
 #endif
 
 /*--------------------------------------------------------------------------
- * Routines for mapping to/from the data grid:
- * RDF BASE: Add comments here describing the Map/UnMap functions
+ * Routines for mapping to/from the matrix data space:
+ *
+ * The 'Map' routines map from the uniform index space of the matrix grid boxes
+ * to the uniform index space of the matrix data space.  The 'UnMap' routines
+ * map in the reverse direction.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

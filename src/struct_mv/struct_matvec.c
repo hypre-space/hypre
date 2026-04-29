@@ -252,21 +252,18 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 
 /*--------------------------------------------------------------------------
  * The grids for A, x, and y must be compatible with respect to matrix-vector
- * multiply, but the initial grid boxes and strides may differ.  The routines
- * Rebase() and Resize() are called to convert the grid for the vector x to
- * match the domain grid of the matrix A.  As a result, both A and x have the
- * same list of underlying boxes and the domain stride for A is the same as the
- * stride for x.  The grid for y is assumed to match the range grid for A, but
- * with potentially different boxes and strides.  The number of boxes and the
- * corresponding box ids must match, however, so it is not necessary to search.
- * Here are some examples (after Rebase() and Resize() have been called for x):
+ * multiplication.  Resize() is called to ensure that the data space for x is
+ * sufficient to support the multiplication.  The gridboxes for A may live on a
+ * different index space than the gridboxes for x/y/z.  But the grid for x must
+ * match the domain grid of A, and the grids for y/z must match the range grid
+ * for A.  Here are some examples (domain/range strides are given relative to
+ * the grid boxes for A, and 'dstride' is the data stride in the inner BoxLoop):
  *
- *   RangeIsCoarse:                           DomainIsCoarse:
  *   Adstride = 1                             Adstride = 1
  *   xdstride = 3                             xdstride = 1
  *   ydstride = 1                             ydstride = 3
  *
- *   1     6               2 2                5     2     6 6    <-- domain/range strides
+ *   6     6               2 2                2     2     6 6    <-- domain/range strides
  *   | |   |               | | |              | |   |     | | |
  *   |y| = |       A       | | |              | |   |     | |x|
  *   | |   |               | |x|              |y| = |  A  | | |
@@ -274,17 +271,6 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
  *                           | |              | |   |     |
  *                           | |              | |   |     |
  *
- * It is assumed here that the data space for y corresponds to a coarsening of
- * the base index space for A with range stride.  So, we are circumventing the
- * "MapData" routines in the matrix and vector classes to avoid making too many
- * function calls.  We could achieve the same goal by calling MapToCoarse(),
- * MapToFine(), and MapData() in sequence to move base index values first to the
- * range grid for A, then to the base index space and data space for y.
- *
- * RDF TODO: Consider modifications to the current DataMap interfaces to avoid
- * making assumptions like the above.  Look at the Matmult routine as well.
- *
- * RDF BASE - check the above comments for correctness
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

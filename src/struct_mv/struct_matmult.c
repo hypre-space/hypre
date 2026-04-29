@@ -63,31 +63,28 @@
  * The code uses the StMatrix routines to determine if the operation is
  * allowable and to compute the stencil and stencil formulas for M.
  *
- * All of the matrices must be defined on a common base grid (fine index space),
- * and each matrix must have a unitary stride for either its domain or range (or
- * both).  RDF: Need to remove the latter requirement.  Think of P*C for
- * example, where P is interpolation and C is a square matrix on the coarse
- * grid.  Another approach (maybe the most flexible) is to temporarily modify
- * the matrices in this routine so that they have a common fine index space.
- * This will require mapping the matrix strides, the grid extents, and the
- * stencil offsets.  This latter idea is the same as Rebase() for vectors.
+ * All of the matrices must be defined on a common grid (fine index space), and
+ * each matrix must have a unitary stride for either its domain or range (or
+ * both).  RDF: Need to remove the latter requirement (almost there) and also
+ * the use of fine/coarse index spaces (e.g., when implementing Engwer trick).
  *
  * This routines assume there are only two data-map strides in the product.
  * This means that at least two matrices can always be multiplied together
  * (assuming it is a valid stencil matrix multiply), hence longer products can
  * be broken up into smaller components (the latter is not yet implemented).
  * The fine and coarse data-map strides are denoted by fstride and cstride.
- * Note that both fstride and cstride are given on the same base index space and
- * may be equal.  The range and domain strides for M are denoted by ran_stride
- * and dom_stride and are also given on the base index space.  The grid for M is
- * coarsened by factor coarsen_stride, which is the smaller of ran_stride and
- * dom_stride.  The computation for each stencil coefficient of M happens on the
- * base index space with stride loop_stride, which is the larger of ran_stride
- * and dom_stride.  Since we require that either ran_stride or dom_stride is
- * larger than all other matrix strides in the product (this is how we guarantee
- * that M has only one stencil), and since the data-map stride for a matrix is
- * currently the largest of its two strides, then we have loop_stride = cstride.
- * In general, the data strides for the boxloop below are as follows:
+ * They are defined relative to the grid index space and may be equal.  The
+ * range and domain strides for M are denoted by ran_stride and dom_stride and
+ * are also given on the grid index space.  The grid for M is coarsened by
+ * factor coarsen_stride, which is the smaller of ran_stride and dom_stride.
+ * The computation for each stencil coefficient of M happens on the grid index
+ * space (the stencil index space) with stride loop_stride, which is the larger
+ * of ran_stride and dom_stride.  Since we require that either ran_stride or
+ * dom_stride is larger than all other matrix strides in the product (this is
+ * how we guarantee that M has only one stencil), and since the data-map stride
+ * for a matrix is currently the largest of its two strides, then we have
+ * loop_stride = cstride.  In general, the data strides for the innter BoxLoop
+ * are as follows:
  *
  *   Mdstride = stride 1
  *   cdstride = loop_stride / cstride (= stride 1)

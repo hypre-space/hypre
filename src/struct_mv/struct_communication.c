@@ -21,10 +21,10 @@ FILE      *file;
    ( ((((size_t) (1+ne+ne*nv))*sizeof(HYPRE_Int) + ((size_t) ne)*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + (size_t) 1 )
 
 /*--------------------------------------------------------------------------
+ *
  * Create a communication package.  A grid-based description of a communication
- * exchange is passed in.  This description is then compiled into an
- * intermediate processor-based description of the communication.  The
- * intermediate processor-based description is used directly to pack and unpack
+ * exchange is passed in.  This is compiled into an intermediate processor-based
+ * description of the communication, which is used directly to pack and unpack
  * buffers during the communications.
  *
  * The 'orders' argument is a number-of-orders x num_values array of integers.
@@ -37,9 +37,12 @@ FILE      *file;
  *
  * If 'reverse' is > 0, then the meaning of send/recv is reversed
  *
- * RDF BASE: add the following info to this comment block
- *   send_data_space and data_offsets are the same length as grid -> baseboxes
- *   send_boxes (and other comm_info arrays) are the same length as grid -> boxes
+ * The IDs in the 'send_boxes' and 'recv_boxes' arrays contain the boxnums for
+ * the underlying grid baseboxes and corresponding 'data_space' boxes.
+ *
+ * The array lengths of 'send_data_space' and 'data_offsets' are the same as the
+ * grid's baseboxes.  The length of 'send_boxes' (and other 'comm_info' arrays)
+ * is the same as the grid's boxes.  Similarly for 'recv'.
  *
  * RDF NOTE: The buffer size will be too large in the case where a subset of
  * values is communicated using negative order numbers.
