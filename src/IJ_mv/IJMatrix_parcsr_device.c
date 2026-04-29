@@ -1091,7 +1091,7 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_IJMatrixGetValues
+struct hypre_IJMatrixGetValuesFunctor
 {
    HYPRE_BigInt        row_start_, row_end_;
    HYPRE_BigInt        col_start_, col_end_ ;
@@ -1105,7 +1105,7 @@ struct hypreFunctor_IJMatrixGetValues
    HYPRE_Int           zero_out_;
 
    __host__ __device__
-   hypreFunctor_IJMatrixGetValues(HYPRE_BigInt row_start, HYPRE_BigInt row_end,
+   hypre_IJMatrixGetValuesFunctor(HYPRE_BigInt row_start, HYPRE_BigInt row_end,
                                   HYPRE_BigInt col_start, HYPRE_BigInt col_end,
                                   const HYPRE_Int *diag_i, const HYPRE_Int *diag_j,
                                   HYPRE_Complex *diag_a,
@@ -1278,7 +1278,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_counting_iterator(0),
                         thrust::make_counting_iterator(num_nonzeros),
-                        hypreFunctor_IJMatrixGetValues(row_start, row_end,
+                        hypre_IJMatrixGetValuesFunctor(row_start, row_end,
                                                        col_start, col_end,
                                                        diag_i, diag_j, diag_data,
                                                        offd_i, offd_j, offd_data,
@@ -1288,7 +1288,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
       HYPRE_ONEDPL_CALL(for_each,
                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                         oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
-                        hypreFunctor_IJMatrixGetValues(row_start, row_end,
+                        hypre_IJMatrixGetValuesFunctor(row_start, row_end,
                                                        col_start, col_end,
                                                        diag_i, diag_j, diag_data,
                                                        offd_i, offd_j, offd_data,

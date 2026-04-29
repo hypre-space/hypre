@@ -393,8 +393,8 @@ hypre_SeqVectorStridedCopyDevice( hypre_Vector  *vector,
    HYPRE_THRUST_CALL( transform, begin, last,
                       thrust::make_permutation_iterator(v_data,
                                                         thrust::make_transform_iterator(begin,
-                                                                                        hypreFunctor_IndexStrided<HYPRE_Int>(ostride))),
-                      hypreFunctor_ArrayStridedAccess<HYPRE_Complex>(istride, data) );
+                                                                                        hypre_IndexStridedFunctor<HYPRE_Int>(ostride))),
+                      hypre_ArrayStridedAccessFunctor<HYPRE_Complex>(istride, data) );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");

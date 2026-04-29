@@ -169,7 +169,7 @@ hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
                       hypre_IntArrayData(v),
                       hypre_IntArrayData(v) + hypre_IntArraySize(v),
                       hypre_IntArrayData(v),
-                      hypreFunctor_IndexCycle(cycle) );
+                      hypre_IndexCycleFunctor(cycle) );
 
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
