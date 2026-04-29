@@ -113,7 +113,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    /* global nnz has changed, but we do not care about it */
    /*
    hypre_ParCSRMatrixSetNumNonzeros(S_CX);
-   hypre_ParCSRMatrixDNumNonzeros(S_CX) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(S_CX);
+   hypre_ParCSRMatrixDNumNonzeros(S_CX) = (hypre_double)hypre_ParCSRMatrixNumNonzeros(S_CX);
    */
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(S_CX));

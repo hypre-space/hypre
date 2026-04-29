@@ -5913,9 +5913,9 @@ hypre_ILUSetupILUTRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupLDUtoCusparse( hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp )
+hypre_ILUSetupLDUtoVendor( hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupLDUtoCusparse)( L, D, U, LDUp );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupLDUtoVendor)( L, D, U, LDUp );
 }
 
 /*--------------------------------------------------------------------------*/

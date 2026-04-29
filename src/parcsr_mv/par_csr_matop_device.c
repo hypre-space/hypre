@@ -1243,7 +1243,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixDropSmallEntriesDevice(A_offd, tol, elmt_tols_offd);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(A) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A);
 
    /* squeeze out zero columns of A_offd */
    hypre_ParCSRMatrixCompressOffdMapDevice(A);
@@ -1803,7 +1803,7 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    }
 
    hypre_ParCSRMatrixSetNumNonzeros(C);
-   hypre_ParCSRMatrixDNumNonzeros(C) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(C);
+   hypre_ParCSRMatrixDNumNonzeros(C) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(C);
 
    /* create CommPkg of C */
    hypre_MatvecCommPkgCreate(C);

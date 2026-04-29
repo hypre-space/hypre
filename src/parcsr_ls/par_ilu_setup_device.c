@@ -207,7 +207,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_TFree(uend, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixDestroy(parS);
 
-         hypre_ILUSetupLDUtoCusparse(parL, parD, parU, &ALU);
+         hypre_ILUSetupLDUtoVendor(parL, parD, parU, &ALU);
          if ((ilu_type % 10) == 1)
          {
             hypre_TFree(parD, HYPRE_MEMORY_HOST);
