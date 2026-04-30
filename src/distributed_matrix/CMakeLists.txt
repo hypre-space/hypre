@@ -22,8 +22,14 @@ set(REGULAR_SRCS
 )
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
+  set(MUP_SRCS
+    mup_fixed.c
+    mup_functions.c
+    mup_pre.c
+  )
+
   setup_mixed_precision_compilation("distributed_matrix" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
 else()
   target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
 endif()
