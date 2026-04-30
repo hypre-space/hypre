@@ -17,7 +17,6 @@
 
 #include "_hypre_utilities.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_DistributedMatrix:
  *--------------------------------------------------------------------------*/
@@ -58,5 +57,10 @@ typedef struct
  *--------------------------------------------------------------------------*/
 #include "HYPRE_distributed_matrix_mv.h"
 #include "internal_protos.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "HYPRE_distributed_matrix_mv_mup.h"
+#include "internal_protos_mup.h"
+#endif
 
 #endif

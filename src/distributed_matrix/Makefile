@@ -30,6 +30,12 @@ FILES =\
  distributed_matrix_PETSc.c\
  distributed_matrix_parcsr.c
 
+# Mixed precision files
+MP_FILES =\
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c
+
 OBJS = ${FILES:.c=.o}
 
 ifeq (${MP_BUILD}, 1) 
@@ -37,8 +43,9 @@ ifeq (${MP_BUILD}, 1)
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}
 COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+MP_COBJS          = ${MP_FILES:.c=.o}
 
-OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble}
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
 
 endif
 
