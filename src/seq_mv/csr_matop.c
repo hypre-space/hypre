@@ -2495,17 +2495,26 @@ hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix  *A,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixComputeLevelSetsHost
- * *A is a assumed to be a CSR matrix on the host with the diagonal entries as the first in their row
- * XXX_set_offsets are the offsets where the level sets start in the XXX_level_sets buffers
- * low/upp refer to the level sets induced by partitioning for a lower or upper triangular solve
+ *
+ * Computes lower and upper level sets for a CSR matrix A on the host.
+ * XXX_set_offsets are host arrays of length (num_levels+1) allocated inside
+ * this function; entry l is the start index into XXX_level_sets for level l.
+ * low/upp refer to the level sets induced by partitioning for a lower or
+ * upper triangular solve respectively.
+ *
+ * Column ordering within rows does NOT matter: the algorithm only tests
+ * col < row or col > row, so both the diagonal-first hypre storage convention
+ * and standard ascending-sorted CSR produce identical results.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
-                                    HYPRE_Int       *low_set_offsets,
-                                    HYPRE_Int       *low_level_sets,
-                                    HYPRE_Int       *upp_set_offsets,
-                                    HYPRE_Int       *upp_level_sets)
+hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
+                                    HYPRE_Int       **low_set_offsets,
+                                    HYPRE_Int       **low_level_sets,
+                                    HYPRE_Int       **upp_set_offsets,
+                                    HYPRE_Int       **upp_level_sets,
+                                    HYPRE_Int        *num_levels_low,
+                                    HYPRE_Int        *num_levels_upp)
 {
    /* Traverse matrix structure to verify index operations */
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
@@ -2516,7 +2525,7 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
    /* Each row starts in level set 0, then is assigned to max(level[dep]) + 1 */
    HYPRE_Int *row_level_low = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
-   HYPRE_Int num_levels_low = 1;
+   *num_levels_low = 1;
    /* Compute row_level_low which maps every row to a level-set */
    for (HYPRE_Int row_idx = 0; row_idx < num_rows; row_idx++)
    {
@@ -2531,9 +2540,9 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
                row_level_low[row_idx] = row_level_low[col_idx] + 1;
 
                /* Keep track of the amount of level sets */
-               if (row_level_low[row_idx] + 1 > num_levels_low)
+               if (row_level_low[row_idx] + 1 > *num_levels_low)
                {
-                  num_levels_low = row_level_low[row_idx] + 1;
+                  *num_levels_low = row_level_low[row_idx] + 1;
                }
             }
          }
@@ -2543,40 +2552,40 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
    /* TODO: if this function ends up being slow then consider loop fusions on lower/upper and more buffer reuse */
 
    /* Count the number of rows in each level set */
-   HYPRE_Int *low_set_sizes = hypre_CTAlloc(HYPRE_Int, num_levels_low, HYPRE_MEMORY_HOST);
+   HYPRE_Int *low_set_sizes = hypre_CTAlloc(HYPRE_Int, *num_levels_low, HYPRE_MEMORY_HOST);
    for (HYPRE_Int row_idx = 0; row_idx < num_rows; row_idx++)
    {
       low_set_sizes[row_level_low[row_idx]]++;
    }
 
    /* Compute offsets for each level set, this is just a prefix sum of level set sizes*/
-   low_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels_low + 1, HYPRE_MEMORY_HOST);
-   for (HYPRE_Int i = 0; i < num_levels_low; i++)
+   *low_set_offsets = hypre_CTAlloc(HYPRE_Int, *num_levels_low + 1, HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < *num_levels_low; i++)
    {
-      low_set_offsets[i + 1] = low_set_offsets[i] + low_set_sizes[i];
+      (*low_set_offsets)[i + 1] = (*low_set_offsets)[i] + low_set_sizes[i];
    }
 
    /* Fill in the row indices grouped by level set */
-   HYPRE_Int *lower_level_set = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+   *low_level_sets = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
    /* Fill level sets in correct places by starting at offsets and incrementing from there*/
-   HYPRE_Int *fill_pos_low = hypre_CTAlloc(HYPRE_Int, num_levels_low, HYPRE_MEMORY_HOST);
+   HYPRE_Int *fill_pos_low = hypre_CTAlloc(HYPRE_Int, *num_levels_low, HYPRE_MEMORY_HOST);
 
-   for (HYPRE_Int i = 0; i < num_levels_low; i++)
+   for (HYPRE_Int i = 0; i < *num_levels_low; i++)
    {
-      fill_pos_low[i] = low_set_offsets[i];
+      fill_pos_low[i] = (*low_set_offsets)[i];
    }
    for (HYPRE_Int i = 0; i < num_rows; i++)
    {
       HYPRE_Int lvl = row_level_low[i];
-      lower_level_set[fill_pos_low[lvl]++] = i;
+      (*low_level_sets)[fill_pos_low[lvl]++] = i;
    }
 
    /* Compute level sets for the upper triangular part of the matrix */
    /* Traverse rows in reverse: each row depends on rows with higher index */
    HYPRE_Int *row_level_upp = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
-   HYPRE_Int num_levels_upp = 1;
+   *num_levels_upp = 1;
    for (HYPRE_Int row_idx = num_rows - 1; row_idx >= 0; row_idx--)
    {
       for (HYPRE_Int j = A_i[row_idx]; j < A_i[row_idx + 1]; j++)
@@ -2590,9 +2599,9 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
                row_level_upp[row_idx] = row_level_upp[col_idx] + 1;
 
                /* Keep track of the amount of level sets */
-               if (row_level_upp[row_idx] + 1 > num_levels_upp)
+               if (row_level_upp[row_idx] + 1 > *num_levels_upp)
                {
-                  num_levels_upp = row_level_upp[row_idx] + 1;
+                  *num_levels_upp = row_level_upp[row_idx] + 1;
                }
             }
          }
@@ -2600,31 +2609,31 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
    }
 
    /* Count the number of rows in each upper level set */
-   HYPRE_Int *upp_set_sizes = hypre_CTAlloc(HYPRE_Int, num_levels_upp, HYPRE_MEMORY_HOST);
+   HYPRE_Int *upp_set_sizes = hypre_CTAlloc(HYPRE_Int, *num_levels_upp, HYPRE_MEMORY_HOST);
    for (HYPRE_Int row_idx = 0; row_idx < num_rows; row_idx++)
    {
       upp_set_sizes[row_level_upp[row_idx]]++;
    }
 
    /* Compute offsets for each upper level set */
-   upp_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels_upp + 1, HYPRE_MEMORY_HOST);
-   for (HYPRE_Int i = 0; i < num_levels_upp; i++)
+   *upp_set_offsets = hypre_CTAlloc(HYPRE_Int, *num_levels_upp + 1, HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < *num_levels_upp; i++)
    {
-      upp_set_offsets[i + 1] = upp_set_offsets[i] + upp_set_sizes[i];
+      (*upp_set_offsets)[i + 1] = (*upp_set_offsets)[i] + upp_set_sizes[i];
    }
 
    /* Fill in the row indices grouped by upper level set */
-   HYPRE_Int *upper_level_set = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+   *upp_level_sets = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
-   HYPRE_Int *fill_pos_upp = hypre_CTAlloc(HYPRE_Int, num_levels_upp, HYPRE_MEMORY_HOST);
-   for (HYPRE_Int i = 0; i < num_levels_upp; i++)
+   HYPRE_Int *fill_pos_upp = hypre_CTAlloc(HYPRE_Int, *num_levels_upp, HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < *num_levels_upp; i++)
    {
-      fill_pos_upp[i] = upp_set_offsets[i];
+      fill_pos_upp[i] = (*upp_set_offsets)[i];
    }
    for (HYPRE_Int i = 0; i < num_rows; i++)
    {
       HYPRE_Int lvl = row_level_upp[i];
-      upper_level_set[fill_pos_upp[lvl]++] = i;
+      (*upp_level_sets)[fill_pos_upp[lvl]++] = i;
    }
 
    /* Temporary to validate reasonable results. */
@@ -2632,23 +2641,23 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
    FILE *fp = fopen("level_sets.txt", "w");
    if (fp)
    {
-      fprintf(fp, "Number of lower levels: %d\n", num_levels_low);
-      for (HYPRE_Int i = 0; i < num_levels_low; i++)
+      fprintf(fp, "Number of lower levels: %d\n", *num_levels_low);
+      for (HYPRE_Int i = 0; i < *num_levels_low; i++)
       {
          fprintf(fp, "Lower level %d (size %d): ", i, low_set_sizes[i]);
-         for (HYPRE_Int j = low_set_offsets[i]; j < low_set_offsets[i + 1]; j++)
+         for (HYPRE_Int j = (*low_set_offsets)[i]; j < (*low_set_offsets)[i + 1]; j++)
          {
-            fprintf(fp, "%d ", lower_level_set[j]);
+            fprintf(fp, "%d ", (*low_level_sets)[j]);
          }
          fprintf(fp, "\n");
       }
-      fprintf(fp, "Number of upper levels: %d\n", num_levels_upp);
-      for (HYPRE_Int i = 0; i < num_levels_upp; i++)
+      fprintf(fp, "Number of upper levels: %d\n", *num_levels_upp);
+      for (HYPRE_Int i = 0; i < *num_levels_upp; i++)
       {
          fprintf(fp, "Upper level %d (size %d): ", i, upp_set_sizes[i]);
-         for (HYPRE_Int j = upp_set_offsets[i]; j < upp_set_offsets[i + 1]; j++)
+         for (HYPRE_Int j = (*upp_set_offsets)[i]; j < (*upp_set_offsets)[i + 1]; j++)
          {
-            fprintf(fp, "%d ", upper_level_set[j]);
+            fprintf(fp, "%d ", (*upp_level_sets)[j]);
          }
          fprintf(fp, "\n");
       }
