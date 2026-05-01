@@ -145,10 +145,14 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
    hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
-      for (d = 0; d < ndim; d++)
+      /* Only add ghost layers to non-empty grid boxes */
+      if (hypre_BoxVolume(data_box) > 0)
       {
-         hypre_BoxIMinD(data_box, d) -= num_ghost[2 * d];
-         hypre_BoxIMaxD(data_box, d) += num_ghost[2 * d + 1];
+         for (d = 0; d < ndim; d++)
+         {
+            hypre_BoxIMinD(data_box, d) -= num_ghost[2 * d];
+            hypre_BoxIMaxD(data_box, d) += num_ghost[2 * d + 1];
+         }
       }
       hypre_CoarsenBox(data_box, origin, stride);
    }
