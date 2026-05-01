@@ -142,33 +142,18 @@ hypre_COGMRESDestroy( void *cogmres_vdata )
          }
       }
 
-      if ( (cogmres_data -> matvec_data) != NULL )
-      {
-         (*(cogmres_functions->MatvecDestroy))(cogmres_data -> matvec_data);
-      }
+      (*(cogmres_functions->MatvecDestroy))(cogmres_data -> matvec_data);
 
-      if ( (cogmres_data -> r) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> r);
-      }
-      if ( (cogmres_data -> w) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> w);
-      }
-      if ( (cogmres_data -> w_2) != NULL )
-      {
-         (*(cogmres_functions->DestroyVector))(cogmres_data -> w_2);
-      }
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> r);
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> w);
+      (*(cogmres_functions->DestroyVector))(cogmres_data -> w_2);
 
 
       if ( (cogmres_data -> p) != NULL )
       {
          for (i = 0; i < (cogmres_data -> k_dim + 1); i++)
          {
-            if ( (cogmres_data -> p)[i] != NULL )
-            {
-               (*(cogmres_functions->DestroyVector))( (cogmres_data -> p) [i]);
-            }
+            (*(cogmres_functions->DestroyVector))( (cogmres_data -> p) [i]);
          }
          hypre_TFreeF( cogmres_data->p, cogmres_functions );
       }
@@ -359,17 +344,6 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
       norms = (cogmres_data -> norms);
    }
 
-   /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
-   c  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   s  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   if (rel_change) { rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST); }
-
-   rv = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
-
-   hh = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-   uu = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
-
    (*(cogmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
@@ -428,6 +402,17 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
 
       return hypre_error_flag;
    }
+
+   /* initialize work arrays */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
+   c  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   s  = hypre_CTAllocF(HYPRE_Real, k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   if (rel_change) { rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST); }
+
+   rv = hypre_CTAllocF(HYPRE_Real, k_dim + 1, cogmres_functions, HYPRE_MEMORY_HOST);
+
+   hh = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
+   uu = hypre_CTAllocF(HYPRE_Real, (k_dim + 1) * k_dim, cogmres_functions, HYPRE_MEMORY_HOST);
 
    if ( logging > 0 || print_level > 0)
    {

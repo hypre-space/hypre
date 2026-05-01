@@ -686,9 +686,9 @@ hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
       tsize  = hypre_SStructPMatrixNVars(pmatrix);
    }
 
-   for (v = vstart; v < vsize; v++)
+   for (v = vstart; v < (vstart + vsize); v++)
    {
-      for (t = tstart; t < tsize; t++)
+      for (t = tstart; t < (tstart + tsize); t++)
       {
          pmsymmetric[v][t] = symmetric;
       }
@@ -1128,7 +1128,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
                                                   &col_coords[ncoeffs], matrix_type);
 
-            coeffs[ncoeffs] = values[i];
+            coeffs[ncoeffs] = h_values[i];
             ncoeffs++;
          }
       }
