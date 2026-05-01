@@ -1191,6 +1191,10 @@ function(add_hypre_target_distclean)
     \"test/ij\" \"test/struct\" \"test/structmat\"
     \"test/sstruct\" \"test/ams_driver\"
     \"test/struct_migrate\" \"test/ij_assembly\"
+    \"seq_mv/csr_spgemm_device_numer[1-9].c\"
+    \"seq_mv/csr_spgemm_device_numer10.c\"
+    \"seq_mv/csr_spgemm_device_symbl[1-9].c\"
+    \"seq_mv/csr_spgemm_device_symbl10.c\"
   )
   foreach(pat \${patterns})
     file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
