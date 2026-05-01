@@ -80,17 +80,26 @@ CUFILES=\
  memory.c\
  omp_device.c\
  stl_ops.c
-
+ 
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
  mup_functions.c\
- mup_pre.c
+ mup_pre.c\
+ utilities_mp.c
+
+MP_CUFILES=\
+ mup_fixed_gpu.c\
+ mup_functions_gpu.c\
+ mup_pre_gpu.c\
+ utilities_mp_device.c
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c
+MP_CUFILES += umpire.c
 else
 FILES += printf.c multiprecision.c
+CUFILES += umpire.c
 endif
 
 COBJS = ${FILES:.c=.o}
@@ -106,9 +115,10 @@ CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
+MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
 
 endif
 
@@ -121,15 +131,13 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.hpp $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
@@ -154,4 +162,4 @@ libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

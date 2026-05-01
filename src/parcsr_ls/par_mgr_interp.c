@@ -573,7 +573,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(P)) +
                                        hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(P));
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_MatvecCommPkgCreate(P);
    *P_ptr = P;
@@ -912,7 +912,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                  memory_location_P, memory_location_P);
 
    hypre_ParCSRMatrixSetNumNonzeros(P);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
    hypre_MatvecCommPkgCreate(P);
 
    /* Set output pointer */
@@ -2487,6 +2487,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
    if (global_num_coarse % global_num_fine)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_coarse is not evenly divisible by num_fine!");
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -2518,6 +2519,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
    else
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_fine > num_coarse not implemented!");
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -2548,6 +2550,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
    else
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_fine > num_coarse not implemented!");
+      HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }
 
@@ -2627,14 +2630,14 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
                                          };
    hypre_IntArrayArray     *CF_maps;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    /* Sanity check */
    if (block_dim <= 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid block dimension!");
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-------------------------------------------------------
     * 1) b_FF = approx(A_FF)
@@ -2742,14 +2745,14 @@ hypre_MGRBuildRowLumpedInterp(hypre_ParCSRMatrix  *A,
    HYPRE_MemoryLocation     mem_AFF     = hypre_ParCSRMatrixMemoryLocation(A_FF);
    HYPRE_MemoryLocation     mem_AFC     = hypre_ParCSRMatrixMemoryLocation(A_FC);
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    /* Sanity check */
    if (!Wp_ptr || !P_ptr)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid output pointer(s) for row-lumped interpolation");
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Compute row sums of A_FF */
    row_sum = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
@@ -2816,14 +2819,14 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
 
    HYPRE_Int                row_major = 0;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    /* Sanity check */
    if (!Wp_ptr || !P_ptr)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid output pointer(s) for row-lumped prolongation");
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Direct block row-sum approximations (use_abs controls absolute-value sums) */
    hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
@@ -2849,7 +2852,6 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_FF_inv);
-   A_FF_inv = NULL;
    hypre_DenseBlockMatrixDestroy(b_FF);
 
    /* Build P = [Wp I] */

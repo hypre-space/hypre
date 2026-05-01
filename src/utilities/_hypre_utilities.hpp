@@ -129,6 +129,21 @@ struct hypreFunctor_NonzeroAboveTol
    }
 };
 
+/*--------------------------------------------------------------------------
+ * hypreFunctor_ElementCast
+ *
+ * Functor for performing casting data between datatypes
+ *--------------------------------------------------------------------------*/
+
+template <typename T, typename T2>
+struct hypreFunctor_ElementCast
+{
+   __host__ __device__ T2 operator()(T a)
+   {
+      return static_cast<T2>(a);
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */
 /******************************************************************************
@@ -423,6 +438,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/binary_search.h>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/reverse_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
 #include <thrust/functional.h>
@@ -437,6 +453,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/for_each.h>
 #include <thrust/remove.h>
 #include <thrust/version.h>
+#include <thrust/pair.h>
 
 /* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
 #define THRUST_VERSION_NOTFN 200600
@@ -465,7 +482,6 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
-#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -522,6 +538,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *       NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/* unified device stream */
+#if defined(HYPRE_USING_CUDA)
+typedef cudaStream_t hypre_DeviceStream;
+#elif defined(HYPRE_USING_HIP)
+typedef hipStream_t hypre_DeviceStream;
+#elif defined(HYPRE_USING_SYCL)
+typedef sycl::queue* hypre_DeviceStream;
+#endif
+
 #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(); hypre_GetDeviceLastError(); }
 #else
@@ -565,7 +590,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -586,7 +611,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_HandleComputeStreamNum(hypre_handle) = HYPRE_MAX_NUM_STREAMS - 1;                \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -608,7 +633,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          sycl::range<1> shmem_range(shmem_size);                                             \
          sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -629,7 +654,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -652,7 +677,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_DeviceItem item) [[sycl::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
                   shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
                   __VA_ARGS__); });                                                          \
@@ -953,32 +978,45 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device info data structures
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/* unified dense solver handle */
 #if defined(HYPRE_USING_CUSOLVER)
 typedef cusolverDnHandle_t vendorSolverHandle_t;
 #elif defined(HYPRE_USING_ROCSOLVER)
 typedef rocblas_handle     vendorSolverHandle_t;
+#else
+typedef void *     vendorSolverHandle_t;
+#endif
+
+/* unified rand generator */
+#if defined(HYPRE_USING_CURAND)
+typedef curandGenerator_t hypre_DeviceRandGenerator;
+#elif defined(HYPRE_USING_ROCRAND)
+typedef rocrand_generator hypre_DeviceRandGenerator;
+#else
+typedef void * hypre_DeviceRandGenerator;
+#endif
+
+/* unified sparse LA library */
+#if defined(HYPRE_USING_CUSPARSE)
+typedef cusparseHandle_t hypre_DeviceSparseLibHandle;
+#elif defined(HYPRE_USING_ROCSPARSE)
+typedef rocsparse_handle hypre_DeviceSparseLibHandle;
+#else
+typedef void * hypre_DeviceSparseLibHandle;
 #endif
 
 struct hypre_DeviceData
 {
-#if defined(HYPRE_USING_CURAND)
-   curandGenerator_t                 curand_generator;
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-   rocrand_generator                 curand_generator;
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+   hypre_DeviceRandGenerator         curand_generator;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
    cublasHandle_t                    cublas_handle;
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)
-   cusparseHandle_t                  cusparse_handle;
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_handle                  cusparse_handle;
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+   hypre_DeviceSparseLibHandle       cusparse_handle;
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
@@ -987,13 +1025,7 @@ struct hypre_DeviceData
 
    /* TODO (VPM): Change to HYPRE_USING_GPU_STREAMS*/
 #if defined(HYPRE_USING_CUDA_STREAMS)
-#if defined(HYPRE_USING_CUDA)
-   cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];
-#elif defined(HYPRE_USING_HIP)
-   hipStream_t                       streams[HYPRE_MAX_NUM_STREAMS];
-#elif defined(HYPRE_USING_SYCL)
-   sycl::queue*                      streams[HYPRE_MAX_NUM_STREAMS] = {NULL};
-#endif
+   hypre_DeviceStream                streams[HYPRE_MAX_NUM_STREAMS] = {0};
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1060,41 +1092,96 @@ struct hypre_DeviceData
 
 hypre_DeviceData*     hypre_DeviceDataCreate();
 void                  hypre_DeviceDataDestroy(hypre_DeviceData* data);
+hypre_DeviceStream    hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 
-#if defined(HYPRE_USING_CURAND)
-curandGenerator_t     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
+static inline hypre_DeviceStream
+hypre_DeviceDataComputeStream(hypre_DeviceData *data)
+{
+   return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
+}
 
-#if defined(HYPRE_USING_ROCRAND)
-rocrand_generator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
+hypre_DeviceRandGenerator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
+static inline cublasHandle_t
+hypre_DeviceDataCublasHandle(hypre_DeviceData *data)
+{
+   if (data->cublas_handle)
+   {
+      return data->cublas_handle;
+   }
+
+   cublasHandle_t handle;
+   HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cublas_handle = handle;
+
+   return handle;
+}
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
-cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
+static inline hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
 
-#if defined(HYPRE_USING_ROCSPARSE)
-rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+   cusparseHandle_t handle;
+   HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
+#elif defined(HYPRE_USING_ROCSPARSE)
+static inline hypre_DeviceSparseLibHandle
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
+{
+   if (data->cusparse_handle)
+   {
+      return data->cusparse_handle;
+   }
+
+   rocsparse_handle handle;
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_handle(&handle) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cusparse_handle = handle;
+
+   return handle;
+}
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
-vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
+static inline vendorSolverHandle_t
+hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data)
+{
+   if (data->vendor_solver_handle)
+   {
+      return data->vendor_solver_handle;
+   }
+
+#if defined(HYPRE_USING_CUSOLVER)
+   cusolverDnHandle_t handle;
+
+   HYPRE_CUSOLVER_CALL( cusolverDnCreate(&handle) );
+   HYPRE_CUSOLVER_CALL( cusolverDnSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+#else
+   rocblas_handle handle;
+
+   HYPRE_ROCBLAS_CALL( rocblas_create_handle(&handle) );
+   HYPRE_ROCBLAS_CALL( rocblas_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
 #endif
 
-/* TODO (VPM): Create a deviceStream_t to encapsulate all stream types below */
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#elif defined(HYPRE_USING_HIP)
-hipStream_t           hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-hipStream_t           hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+   data->vendor_solver_handle = handle;
+
+   return handle;
+}
 #endif
 
 /* Data structure and accessor routines for Sparse Triangular Matrices */
@@ -2153,7 +2240,7 @@ HYPRE_Int hypre_popc(hypre_mask mask)
 static __device__ __forceinline__
 HYPRE_Int hypre_ffs(hypre_mask mask)
 {
-   return (HYPRE_Int) dpct::ffs<HYPRE_Int>(mask);
+   return (HYPRE_Int) (mask == 0) ? 0 : sycl::ctz(mask) + 1;
 }
 
 static __device__ __forceinline__
@@ -2479,19 +2566,47 @@ template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
+template<typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
 
-cudaDataType hypre_HYPREComplexToCudaDataType();
+static inline cudaDataType
+hypre_HYPREComplexToCudaDataType()
+{
+#if defined(HYPRE_COMPLEX)
+   return CUDA_C_64F;
+#else
+#if defined(HYPRE_SINGLE)
+   hypre_assert(sizeof(HYPRE_Complex) == 4);
+   return CUDA_R_32F;
+#elif defined(HYPRE_LONG_DOUBLE)
+#error "Long Double is not supported on GPUs"
+#else
+   hypre_assert(sizeof(HYPRE_Complex) == 8);
+   return CUDA_R_64F;
+#endif
+#endif
+}
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+static inline cusparseIndexType_t
+hypre_HYPREIntToCusparseIndexType()
+{
+#if defined(HYPRE_BIGINT)
+   hypre_assert(sizeof(HYPRE_Int) == 8);
+   return CUSPARSE_INDEX_64I;
+#else
+   hypre_assert(sizeof(HYPRE_Int) == 4);
+   return CUSPARSE_INDEX_32I;
+#endif
+}
 #endif
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#endif /* #ifndef HYPRE_CUDA_UTILS_H */
+#endif /* #ifndef HYPRE_DEVICE_UTILS_H */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2830,8 +2945,13 @@ struct ReduceSum
       }
       else
       {
+         if (nblocks <= 0)
+         {
+            return init;
+         }
+
          /* 2nd reduction with only *one* block */
-         hypre_assert(nblocks >= 0 && nblocks <= HYPRE_MAX_NTHREADS_BLOCK);
+         hypre_assert(nblocks <= HYPRE_MAX_NTHREADS_BLOCK);
          const dim3 gDim(1), bDim(HYPRE_MAX_NTHREADS_BLOCK);
          HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -2864,6 +2984,7 @@ struct ReduceSum
 #ifndef hypre_MP_BUILD
 #include "_hypre_utilities_mup_undef.h"
 #include "_hypre_utilities_mup.h"
+#include "_hypre_utilities_mup.hpp"
 #endif
 #endif
 

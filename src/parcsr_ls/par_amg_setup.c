@@ -122,7 +122,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_BigInt    coarse_size;
    HYPRE_Int       coarsen_type;
    HYPRE_Int       measure_type;
-   HYPRE_Int       setup_type;
    HYPRE_BigInt    fine_size;
    HYPRE_Int       offset;
    HYPRE_Int       not_finished_coarsening = 1;
@@ -243,6 +242,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Real cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
+   if (hypre_ParAMGDataSetupType(amg_data) == 0) { return hypre_error_flag; }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("AMGsetup");
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup begin", 0);
@@ -259,7 +260,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
-   setup_type = hypre_ParAMGDataSetupType(amg_data);
    debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
    omega = hypre_ParAMGDataOmega(amg_data);
@@ -311,7 +311,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    if (num_procs == 1) { seq_threshold = 0; }
-   if (setup_type == 0) { return hypre_error_flag; }
 
    S = NULL;
 
@@ -343,6 +342,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       /* Verify that the number of vectors held by f and u match */
       if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
       {
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
          return hypre_error_flag;
       }
@@ -714,11 +715,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
 #if defined(HYPRE_USING_SYCL)
          HYPRE_Int *new_end =
-            hypreSycl_copy_if( C_points_marker,
-                               C_points_marker + num_C_points_coarse,
-                               C_points_marker,
-                               C_points_local_marker,
-                               in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+            hypre_CopyIfSycl( C_points_marker,
+                              C_points_marker + num_C_points_coarse,
+                              C_points_marker,
+                              C_points_local_marker,
+                              in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
          HYPRE_ONEDPL_CALL( std::transform,
                             C_points_local_marker,
                             C_points_local_marker + num_C_points_coarse,
@@ -1194,10 +1195,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  hypre_IntArrayData(CF_marker_array[level]),
                                  oneapi::dpl::make_transform_iterator( isolated_F_points_marker,
                [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
-               hypreSycl_transform_if( perm_it,
-                                       perm_it + num_isolated_F_points,
-                                       isolated_F_points_marker,
-                                       perm_it,
+               hypre_TransformIfSycl( perm_it,
+                                      perm_it + num_isolated_F_points,
+                                      isolated_F_points_marker,
+                                      perm_it,
                [] (const auto & x) {return -3;},
                in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
@@ -1248,7 +1249,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
 #ifdef HYPRE_MIXEDINT
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "CGC coarsening is not available in mixedint mode!");
-               return hypre_error_flag;
+               goto cleanup;
 #endif
                hypre_BoomerAMGCoarsenCGCb(S, A_array[level], measure_type, coarsen_type,
                                           cgc_its, debug_flag, &(CF_marker_array[level]));
@@ -1515,10 +1516,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  hypre_IntArrayData(CF_marker_array[level]),
                                  oneapi::dpl::make_transform_iterator( F_points_marker,
                [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
-               hypreSycl_transform_if( perm_it,
-                                       perm_it + num_F_points,
-                                       F_points_marker,
-                                       perm_it,
+               hypre_TransformIfSycl( perm_it,
+                                      perm_it + num_F_points,
+                                      F_points_marker,
+                                      perm_it,
                [] (const auto & x) {return -1;},
                in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
@@ -1588,11 +1589,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         HYPRE_Int(0) );
 
                      /* RL: total local_coarse_size is not computed. I don't think it's needed */
-                     hypreSycl_copy_if( tmp,
-                                        tmp + local_num_vars,
-                                        hypre_IntArrayData(CF_marker_array[level]),
-                                        C_points_local_marker,
-                                        equal<HYPRE_Int>(2) );
+                     hypre_CopyIfSycl( tmp,
+                                       tmp + local_num_vars,
+                                       hypre_IntArrayData(CF_marker_array[level]),
+                                       C_points_local_marker,
+                                       equal<HYPRE_Int>(2) );
 #else
                      HYPRE_THRUST_CALL( exclusive_scan,
                                         thrust::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
@@ -3566,7 +3567,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Schwarz smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
@@ -3610,14 +3611,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #ifdef HYPRE_MIXEDINT
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "Euclid smoothing is not available in mixedint mode!");
-         return hypre_error_flag;
+         goto cleanup;
 #endif
 
          if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Euclid smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          HYPRE_EuclidCreate(comm, &smoother[j]);
@@ -3646,7 +3647,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "FSAI smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          HYPRE_FSAICreate(&smoother[j]);
@@ -3684,7 +3685,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ILU smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          HYPRE_ILUCreate(&smoother[j]);
@@ -3715,14 +3716,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #ifdef HYPRE_MIXEDINT
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "ParaSails smoothing is not available in mixedint mode!");
-         return hypre_error_flag;
+         goto cleanup;
 #endif
 
          if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ParaSails smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
@@ -3740,14 +3741,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #ifdef HYPRE_MIXEDINT
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "Pilut smoothing is not available in mixedint mode!");
-         return hypre_error_flag;
+         goto cleanup;
 #endif
 
          if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Pilut smoothing doesn't support multicomponent vectors");
-            return hypre_error_flag;
+            goto cleanup;
          }
 
          HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
@@ -3807,12 +3808,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (cum_nnz_AP > 0.0)
    {
-      cum_nnz_AP = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
+      cum_nnz_AP = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
       for (j = 0; j < num_levels - 1; j++)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(P_array[j]);
-         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
-         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
+         cum_nnz_AP += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
+         cum_nnz_AP += (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
       }
       hypre_ParAMGDataCumNnzAP(amg_data) = cum_nnz_AP;
    }
@@ -4022,9 +4023,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
+cleanup:
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup end  ", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
-   return (hypre_error_flag);
+   return hypre_error_flag;
 }

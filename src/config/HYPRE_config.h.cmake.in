@@ -5,6 +5,9 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_CONFIG_H
+#define HYPRE_CONFIG_H
+
 #define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
 #define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
 #define HYPRE_RELEASE_NUMBER  @HYPRE_NUMBER@
@@ -206,3 +209,5 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
+
+#endif /* HYPRE_CONFIG_H */

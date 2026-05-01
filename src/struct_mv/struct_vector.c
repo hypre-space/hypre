@@ -1601,7 +1601,6 @@ hypre_StructVectorReadData( FILE               *file,
    }
 
    /* Set vector values */
-   hypre_StructVectorInitialize(vector, 1);
    vi = 0;
    hypre_ForBoxI(i, boxes)
    {
@@ -1725,6 +1724,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
 
    HYPRE_StructVectorCreate(comm, grid, &vector);
    hypre_StructVectorSetNumGhost(vector, num_ghost);  // RDF Is this needed?
+   hypre_StructVectorInitialize(vector, 1);
 
    /*----------------------------------------
     * Read data

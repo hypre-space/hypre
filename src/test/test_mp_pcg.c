@@ -95,6 +95,7 @@ int main (int argc, char *argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   HYPRE_Initialize();
 
    /*! We set up the linear system following ex5. */
    /* Some default problem parameters */
@@ -608,6 +609,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorDestroy_dbl(ijxtmp);
 
    /* Finalize MPI*/
+   HYPRE_Finalize();
    MPI_Finalize();
 
    return (0);

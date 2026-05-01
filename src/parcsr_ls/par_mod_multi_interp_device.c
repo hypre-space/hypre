@@ -294,28 +294,28 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
    /* Fpts; number of F pts */
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   HYPRE_Int *points_end = hypreSycl_copy_if( count,
-                                              count + n_fine,
-                                              CF_marker,
-                                              points_left,
+   HYPRE_Int *points_end = hypre_CopyIfSycl( count,
+                                             count + n_fine,
+                                             CF_marker,
+                                             points_left,
    [] (const auto & x) {return x != 1;} );
    remaining = points_end - points_left;
 
    /* Cpts; number of C pts */
-   HYPRE_Int *pass_end = hypreSycl_copy_if( count,
-                                            count + n_fine,
-                                            CF_marker,
-                                            pass_order,
-                                            equal<HYPRE_Int>(1) );
+   HYPRE_Int *pass_end = hypre_CopyIfSycl( count,
+                                           count + n_fine,
+                                           CF_marker,
+                                           pass_order,
+                                           equal<HYPRE_Int>(1) );
 
    P_diag_size = cnt = pass_end - pass_order;
 
    /* mark C points pass-1; row nnz of C-diag = 1, C-offd = 0 */
    auto zip0 = oneapi::dpl::make_zip_iterator( pass_marker, P_diag_i, P_offd_i );
-   hypreSycl_transform_if( zip0,
-                           zip0 + n_fine,
-                           CF_marker,
-                           zip0,
+   hypre_TransformIfSycl( zip0,
+                          zip0 + n_fine,
+                          CF_marker,
+                          zip0,
    [] (const auto & x) {return std::make_tuple(HYPRE_Int(1), HYPRE_Int(1), HYPRE_Int(0));},
    equal<HYPRE_Int>(1) );
 
@@ -374,7 +374,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+      hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                         dof_func,
                         int_buf_data );
@@ -412,7 +412,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+      hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                         pass_marker,
                         int_buf_data );
@@ -489,10 +489,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          cnt_rem = remaining - (cnt - cnt_old);
 
          auto perm0 = oneapi::dpl::make_permutation_iterator(pass_marker, points_left);
-         hypreSycl_transform_if( perm0,
-                                 perm0 + remaining,
-                                 diag_shifts,
-                                 perm0,
+         hypre_TransformIfSycl( perm0,
+                                perm0 + remaining,
+                                diag_shifts,
+                                perm0,
          [current_pass = current_pass] (const auto & x) {return current_pass + 1;},
          [] (const auto & x) {return x;} );
 
@@ -500,18 +500,18 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                        HYPRE_MEMORY_DEVICE);
 
          HYPRE_Int *new_end;
-         new_end = hypreSycl_copy_if( points_left_old,
-                                      points_left_old + remaining,
-                                      diag_shifts,
-                                      pass_order + cnt_old,
+         new_end = hypre_CopyIfSycl( points_left_old,
+                                     points_left_old + remaining,
+                                     diag_shifts,
+                                     pass_order + cnt_old,
          [] (const auto & x) {return x;} );
 
          hypre_assert(new_end - pass_order == cnt);
 
-         new_end = hypreSycl_copy_if( points_left_old,
-                                      points_left_old + remaining,
-                                      diag_shifts,
-                                      points_left,
+         new_end = hypre_CopyIfSycl( points_left_old,
+                                     points_left_old + remaining,
+                                     diag_shifts,
+                                     points_left,
          [] (const auto & x) {return !x;} );
 #else
          cnt = HYPRE_THRUST_CALL( reduce,
@@ -569,7 +569,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       if (num_procs > 1)
       {
 #if defined(HYPRE_USING_SYCL)
-         hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+         hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                            pass_marker,
                            int_buf_data );
@@ -758,7 +758,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    {
 #if defined(HYPRE_USING_SYCL)
       auto perm1 = oneapi::dpl::make_permutation_iterator( fine_to_coarse, pass_order );
-      hypreSycl_scatter( perm1,
+      hypre_ScatterSycl( perm1,
                          perm1 + pass_starts[1],
                          oneapi::dpl::make_permutation_iterator( P_diag_i, pass_order ),
                          P_diag_j );
@@ -1085,7 +1085,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       globalC_functor functor(c_pts_starts[0]);
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+      hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                         oneapi::dpl::make_transform_iterator(fine_to_coarse, functor),
                         big_buf_data );
@@ -1119,11 +1119,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       col_map_offd_P_dev = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      HYPRE_BigInt *col_map_end = hypreSycl_copy_if( big_convert_offd,
-                                                     big_convert_offd + num_cols_offd_A,
-                                                     pass_marker_offd,
-                                                     col_map_offd_P_dev,
-                                                     equal<HYPRE_Int>(color) );
+      HYPRE_BigInt *col_map_end = hypre_CopyIfSycl( big_convert_offd,
+                                                    big_convert_offd + num_cols_offd_A,
+                                                    pass_marker_offd,
+                                                    col_map_offd_P_dev,
+                                                    equal<HYPRE_Int>(color) );
 #else
       HYPRE_BigInt *col_map_end = HYPRE_THRUST_CALL( copy_if,
                                                      big_convert_offd,
@@ -1373,7 +1373,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       globalC_functor functor(c_pts_starts[0]);
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+      hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                         oneapi::dpl::make_transform_iterator(fine_to_coarse, functor),
                         big_buf_data );
@@ -1407,11 +1407,11 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       col_map_offd_Q_dev = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      HYPRE_BigInt *col_map_end = hypreSycl_copy_if( big_convert_offd,
-                                                     big_convert_offd + num_cols_offd_A,
-                                                     pass_marker_offd,
-                                                     col_map_offd_Q_dev,
-                                                     equal<HYPRE_Int>(color) );
+      HYPRE_BigInt *col_map_end = hypre_CopyIfSycl( big_convert_offd,
+                                                    big_convert_offd + num_cols_offd_A,
+                                                    pass_marker_offd,
+                                                    col_map_offd_Q_dev,
+                                                    equal<HYPRE_Int>(color) );
 #else
       HYPRE_BigInt *col_map_end = HYPRE_THRUST_CALL( copy_if,
                                                      big_convert_offd,
@@ -1597,10 +1597,10 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                       fine_to_coarse,
                       HYPRE_Int(0) );
 
-   hypreSycl_transform_if( fine_to_coarse,
-                           fine_to_coarse + n_fine,
-                           pass_marker,
-                           fine_to_coarse,
+   hypre_TransformIfSycl( fine_to_coarse,
+                          fine_to_coarse + n_fine,
+                          pass_marker,
+                          fine_to_coarse,
    [] (const auto & x) {return -1;},
    [color = color] (const auto & x) {return x != color;} );
 #else

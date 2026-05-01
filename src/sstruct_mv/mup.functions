@@ -45,6 +45,7 @@ HYPRE_SStructMatrixMatmat
 HYPRE_SStructMatrixMatvec
 HYPRE_SStructMatrixPrint
 HYPRE_SStructMatrixRead
+HYPRE_SStructMatrixScale
 HYPRE_SStructMatrixSetBoxValues
 HYPRE_SStructMatrixSetBoxValues2
 HYPRE_SStructMatrixSetConstantEntries
