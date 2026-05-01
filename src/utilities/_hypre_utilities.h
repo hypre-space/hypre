@@ -2417,6 +2417,10 @@ void hypre_GpuProfilingPushRange(const char *name);
 void hypre_GpuProfilingPopRange(void);
 
 /* utilities.c */
+HYPRE_Int
+hypre_gcd(HYPRE_Int a, HYPRE_Int b);
+HYPRE_Int
+hypre_lcm(HYPRE_Int a, HYPRE_Int b);
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);

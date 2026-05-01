@@ -102,33 +102,66 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
 }
 
 /*--------------------------------------------------------------------------
- * Compute a new coarse (origin, stride) pair from an old (origin, stride) pair.
- * This new pair can be used with the RefineBox() function to map back to the
- * finest grid with just one call, i.e., the following two lines of code are
- * equivalent:
+ * Compute tuple (comp_origin, comp_stride) such that (comp_origin, comp_stride)
+ * represents coarsening by (origin1, stride1) then (origin2, stride2).
  *
- *    RefineBox(box, origin_new, stride_new);
- *    RefineBox(box, origin, stride); RefineBox(box, origin_old, stride_old);
+ * The following two lines of code are equivalent:
  *
- * NOTE: Need to check to see if this holds for CoarsenBox() also.
+ *    CoarsenBox(box, comp_origin, comp_stride);
+ *    CoarsenBox(box, origin1, stride1); CoarsenBox(box, origin2, stride2);
+ *
+ * Similarly, the following two lines of code are equivalent:
+ *
+ *    RefineBox(box, comp_origin, comp_stride);
+ *    RefineBox(box, origin2, stride2); RefineBox(box, origin1, stride1);
+ *
+ * NOTE: Coarsening then refining a box may not produce the original box.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputeCoarseOriginStride( hypre_Index     coarse_origin,
-                                 hypre_Index     coarse_stride,
-                                 hypre_IndexRef  origin,
-                                 hypre_Index     stride,
-                                 HYPRE_Int       ndim )
+hypre_ComposeOriginStride( hypre_Index     origin1,  // = comp_origin on output
+                           hypre_Index     stride1,  // = comp_stride on output
+                           hypre_IndexRef  origin2,
+                           hypre_Index     stride2,
+                           HYPRE_Int       ndim )
 {
-   HYPRE_Int d;
+   HYPRE_Int  d;
 
    for (d = 0; d < ndim; d++)
    {
-      if (origin != NULL)
+      if (origin2 != NULL) // RDF: Still using NULL for origin = 0 in some places
       {
-         coarse_origin[d] += origin[d] * coarse_stride[d];
+         origin1[d] = origin1[d] + origin2[d] * stride1[d];
       }
-      coarse_stride[d] *= stride[d];
+      stride1[d] = stride1[d] * stride2[d];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute tuple (origin2, stride2) such that (comp_origin, comp_stride)
+ * represents coarsening by (origin1, stride1) then (origin2, stride2).
+ *
+ * This reverses what hypre_ComposeOriginStride() does above.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DecomposeOriginStride( hypre_Index     origin1,
+                             hypre_Index     stride1,
+                             hypre_IndexRef  origin2,  // = comp_origin on input
+                             hypre_Index     stride2,  // = comp_stride on input
+                             HYPRE_Int       ndim )
+{
+   HYPRE_Int  d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_assert((origin2[d] - origin1[d]) % stride1[d] == 0);  // ensure evenly divisible
+      hypre_assert(stride2[d] % stride1[d] == 0);                 // ensure evenly divisible
+
+      origin2[d] = (origin2[d] - origin1[d]) / stride1[d];
+      stride2[d] = stride2[d] / stride1[d];
    }
 
    return hypre_error_flag;
@@ -427,7 +460,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    HYPRE_Int         i, j, myid, count;
    HYPRE_Int         info_size, max_nentries;
    HYPRE_Int         num_entries;
-   HYPRE_Int        *fids, *cids;
    hypre_Index       new_dist;
    hypre_IndexRef    max_distance;
    HYPRE_Int         proc, id;
@@ -457,7 +489,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* get relevant information from the fine grid */
    fboxes  = hypre_StructGridBoxes(fgrid);
-   fids    = hypre_StructGridIDs(fgrid);
    fboxman = hypre_StructGridBoxMan(fgrid);
    comm    = hypre_StructGridComm(fgrid);
    ndim    = hypre_StructGridNDim(fgrid);
@@ -472,6 +503,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* Set global size to a number different than zero to
       avoid its computation on hypre_StructGridAssemble. */
    hypre_StructGridGlobalSize(cgrid) = -1;
+
+   /* Set up baseboxes, origin, stride */
+   /* RDF: Maybe add reference counting for baseboxes instead of cloning */
+   hypre_StructGridSetBaseBoxes(cgrid, hypre_BoxArrayClone(hypre_StructGridBaseBoxes(fgrid)));
+   hypre_CopyIndex(hypre_StructGridOrigin(fgrid), hypre_StructGridOrigin(cgrid));
+   hypre_CopyIndex(hypre_StructGridStride(fgrid), hypre_StructGridStride(cgrid));
+   hypre_ComposeOriginStride(hypre_StructGridOrigin(cgrid), hypre_StructGridStride(cgrid),
+                             origin, stride, ndim );
 
    /* RDF TODO: Inherit num ghost from fgrid here... */
 
@@ -493,7 +532,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       }
 
       cboxes = hypre_BoxArrayCreate(count, ndim);
-      cids   = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
       count = 0;
       hypre_ForBoxI(i, fboxes)
       {
@@ -502,8 +540,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          if (hypre_BoxVolume(box))
          {
             hypre_CopyBox(box, hypre_BoxArrayBox(cboxes, count));
-            cids[count] = fids[i];
-            hypre_BoxArrayID(cboxes, count) = fids[i];
+            hypre_BoxArrayID(cboxes, count) = hypre_StructGridID(fgrid, i);
             count++;
          }
       }
@@ -514,18 +551,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       /* number of boxes in coarse and fine grids are equal */
       cboxes = hypre_BoxArrayClone(fboxes);
       hypre_CoarsenBoxArray(cboxes, origin, stride);
-      cids   = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(fboxes), HYPRE_MEMORY_HOST);
-      hypre_ForBoxI(i, fboxes)
-      {
-         cids[i] = fids[i];
-      }
    }
 
    /* set coarse grid boxes */
    hypre_StructGridSetBoxes(cgrid, cboxes);
-
-   /* set coarse grid ids */
-   hypre_StructGridSetIDs(cgrid, cids);
 
    /* adjust periodicity and set for the coarse grid */
    hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);

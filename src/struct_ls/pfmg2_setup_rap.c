@@ -329,10 +329,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+   A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+   P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+   R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+   RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -828,10 +828,10 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+   A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+   P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+   R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+   RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -1523,10 +1523,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+   A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+   P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+   R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+   RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -1989,10 +1989,10 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+   A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+   P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+   R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+   RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:

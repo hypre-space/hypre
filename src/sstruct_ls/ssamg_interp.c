@@ -285,7 +285,7 @@ hypre_SSAMGSetupSInterpOp( hypre_SStructMatrix  *A,
 
                      Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1);
                      Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
-                     P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
+                     P_dbox = hypre_StructMatrixBoxDataBox(P_s, ii);
 
                      /* Update compute_box */
                      for (d = 0; d < ndim; d++)

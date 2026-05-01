@@ -306,7 +306,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxArray        *nbor_boxes;
    hypre_BoxArray        *diff_boxes;
    hypre_BoxArray        *tmp_boxes;
-   hypre_BoxArray        *boxes;
+   hypre_BoxArray        *boxes, *baseboxes;
    hypre_Box             *box;
    hypre_Index            varoffset;
    HYPRE_Int              pneighbors_size, vneighbors_size;
@@ -405,6 +405,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
          HYPRE_StructGridSetPeriodic(sgrid, periodic);
 
          hypre_StructGridSetBoxes(sgrid, boxes);
+         /* RDF BASE: For now, just set baseboxes = boxes (change this for Engwer) */
+         baseboxes = hypre_BoxArrayClone(boxes);
+         hypre_StructGridSetBaseBoxes(sgrid, baseboxes);
          HYPRE_StructGridAssemble(sgrid);
          sgrids[t] = sgrid;
       }
@@ -1347,10 +1350,11 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      /* allocate CommInfo arguments if needed */
                      if (cinfo_a[cinfoi] == NULL)
                      {
-                        HYPRE_Int  i_num_boxes = hypre_StructGridNumBoxes(
-                                                    hypre_SStructPGridSGrid(pgrids[pi], vi));
-                        HYPRE_Int  j_num_boxes = hypre_StructGridNumBoxes(
-                                                    hypre_SStructPGridSGrid(pgrids[pj], vj));
+                        hypre_StructGrid  *i_sgrid       = hypre_SStructPGridSGrid(pgrids[pi], vi);
+                        hypre_StructGrid  *j_sgrid       = hypre_SStructPGridSGrid(pgrids[pj], vj);
+                        HYPRE_Int          i_num_boxes   = hypre_StructGridNumBoxes(i_sgrid);
+                        HYPRE_Int          j_num_boxes   = hypre_StructGridNumBoxes(j_sgrid);
+                        HYPRE_Int          k;
 
                         cnum_transforms = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                         ccoords = hypre_CTAlloc(hypre_Index, nvneighbors[pi][vi],
@@ -1360,6 +1364,11 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                         cinfo = hypre_TAlloc(CInfo, 1, HYPRE_MEMORY_HOST);
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
+                        hypre_ForBoxI(k, (cinfo->boxes))
+                        {
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) =
+                              hypre_StructGridBaseBoxnum(i_sgrid, k);
+                        }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(i_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, i_num_boxes,
                                                        HYPRE_MEMORY_HOST);
@@ -1374,6 +1383,11 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                         cinfo = hypre_TAlloc(CInfo, 1, HYPRE_MEMORY_HOST);
                         (cinfo->boxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
+                        hypre_ForBoxI(k, (cinfo->boxes))
+                        {
+                           hypre_BoxArrayArrayID((cinfo->boxes), k) =
+                              hypre_StructGridBaseBoxnum(j_sgrid, k);
+                        }
                         (cinfo->rboxes) = hypre_BoxArrayArrayCreate(j_num_boxes, ndim);
                         (cinfo->procs) = hypre_CTAlloc(HYPRE_Int *, j_num_boxes,
                                                        HYPRE_MEMORY_HOST);

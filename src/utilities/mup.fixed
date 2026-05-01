@@ -203,11 +203,13 @@ hypre_error_code_save
 hypre_error_handler
 hypre_error_handler_clear_messages
 hypre_finalize
+hypre_gcd
 hypre_geterror
 hypre_geterrorarg
 hypre_handle
 hypre_init
 hypre_initialize
+hypre_lcm
 hypre_merge_sort
 hypre_mm_is_valid
 hypre_mm_read_banner
