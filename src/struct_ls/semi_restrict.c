@@ -129,7 +129,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
 
-   HYPRE_Int               Ri;
+   HYPRE_Int               Ri_outer;
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Rp0, *Rp1;
@@ -273,10 +273,10 @@ hypre_SemiRestrict( void               *restrict_vdata,
             if ( constant_coefficient )
             {
                HYPRE_Complex Rp0val, Rp1val;
-               Ri = hypre_CCBoxIndexRank( R_dbox, startc );
+               Ri_outer = hypre_CCBoxIndexRank( R_dbox, startc );
 
-               Rp0val = Rp0[Ri + Rp0_offset];
-               Rp1val = Rp1[Ri];
+               Rp0val = Rp0[Ri_outer + Rp0_offset];
+               Rp1val = Rp1[Ri_outer];
 #define DEVICE_VAR is_device_ptr(rcp,rp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,

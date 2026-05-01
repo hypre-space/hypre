@@ -626,9 +626,9 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
             num_threads_in_group,
             id_in_group);
 
-         HYPRE_Int *temp = in_buf;
+         HYPRE_Int *swap = in_buf;
          in_buf = out_buf;
-         out_buf = temp;
+         out_buf = swap;
       }
 
       *out = in_buf;
@@ -788,9 +788,9 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
             num_threads_in_group,
             id_in_group);
 
-         HYPRE_BigInt *temp = in_buf;
+         HYPRE_BigInt *swap = in_buf;
          in_buf = out_buf;
-         out_buf = temp;
+         out_buf = swap;
       }
 
       *out = in_buf;

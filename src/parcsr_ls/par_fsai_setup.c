@@ -712,7 +712,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Int               max_nnzrow_diag_G; /* Max. number of nonzeros per row in G_diag */
 
    /* Local variables */
-   HYPRE_Int               i, j, jj;
+   HYPRE_Int               iG, jG, jjG;
    char                    msg[512];    /* Warning message */
    HYPRE_Complex          *twspace;     /* shared work space for omp threads */
 
@@ -743,7 +743,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       hypre_Vector   *A_subrow;      /* Vector holding A[i, P] */
       hypre_Vector   *kap_grad;      /* Vector holding the Kaporin gradient values */
       HYPRE_Int      *kg_pos;        /* Indices of nonzero entries of kap_grad */
-      HYPRE_Int      *kg_marker;     /* Marker array with nonzeros pointing to kg_pos */
+      HYPRE_Int      *kg_marker;     /* Marker array with nnzs pointing to kg_pos */
       HYPRE_Int      *marker;        /* Marker array with nonzeros pointing to P */
       HYPRE_Int      *pattern;       /* Array holding column indices of G[i,:] */
       HYPRE_Int       patt_size;     /* Number of entries in current pattern */
@@ -888,14 +888,14 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
 
    /* Reorder array */
    G_i[0] = 0;
-   for (i = 0; i < num_rows_diag_A; i++)
+   for (iG = 0; iG < num_rows_diag_A; iG++)
    {
-      G_i[i + 1] = G_i[i] + G_nnzcnt[i];
-      jj = i * max_nnzrow_diag_G;
-      for (j = G_i[i]; j < G_i[i + 1]; j++)
+      G_i[iG + 1] = G_i[iG] + G_nnzcnt[iG];
+      jjG = iG * max_nnzrow_diag_G;
+      for (jG = G_i[iG]; jG < G_i[iG + 1]; jG++)
       {
-         G_j[j] = G_j[jj];
-         G_a[j] = G_a[jj++];
+         G_j[jG] = G_j[jjG];
+         G_a[jG] = G_a[jjG++];
       }
    }
 
