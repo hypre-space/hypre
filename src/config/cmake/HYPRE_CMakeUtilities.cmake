@@ -956,7 +956,7 @@ function(maybe_build_umpire)
 
   # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
   set(_src_dir "${umpire_SOURCE_DIR}")
-  set(_bld_dir "${CMAKE_BINARY_DIR}/_deps/umpire-build")
+  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
   file(MAKE_DIRECTORY "${_bld_dir}")
   set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
   if(EXISTS "${_umpire_cfg_in}")
@@ -1159,7 +1159,7 @@ function(add_hypre_target_tags)
               --exclude=.git
               --exclude=build
               -o TAGS .
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Generating TAGS file with Universal Ctags"
       VERBATIM
     )
@@ -1168,17 +1168,17 @@ endfunction()
 
 # Function to add a distclean target
 function(add_hypre_target_distclean)
-  set(DISTCLEAN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/DistcleanScript.cmake")
+  set(DISTCLEAN_SCRIPT "${PROJECT_BINARY_DIR}/DistcleanScript.cmake")
 
   file(WRITE ${DISTCLEAN_SCRIPT} "
   # Remove everything in the build directory except .git, .gitignore, and this script
-  file(GLOB build_items RELATIVE \"${CMAKE_BINARY_DIR}\" \"${CMAKE_BINARY_DIR}/*\")
+  file(GLOB build_items RELATIVE \"${PROJECT_BINARY_DIR}\" \"${PROJECT_BINARY_DIR}/*\")
   foreach(item \${build_items})
     if(NOT item STREQUAL \".git\" AND
        NOT item STREQUAL \".gitignore\" AND
        NOT item STREQUAL \"${CMAKE_MATCH_1}\")
-      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${CMAKE_BINARY_DIR}/\${item}\")
-        file(REMOVE_RECURSE \"${CMAKE_BINARY_DIR}/\${item}\")
+      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${PROJECT_BINARY_DIR}/\${item}\")
+        file(REMOVE_RECURSE \"${PROJECT_BINARY_DIR}/\${item}\")
       endif()
     endif()
   endforeach()
@@ -1197,9 +1197,9 @@ function(add_hypre_target_distclean)
     \"seq_mv/csr_spgemm_device_symbl10.c\"
   )
   foreach(pat \${patterns})
-    file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
+    file(GLOB_RECURSE matches RELATIVE \"${PROJECT_SOURCE_DIR}\" \"${PROJECT_SOURCE_DIR}/\${pat}\")
     foreach(m \${matches})
-      file(REMOVE_RECURSE \"${CMAKE_SOURCE_DIR}/\${m}\")
+      file(REMOVE_RECURSE \"${PROJECT_SOURCE_DIR}/\${m}\")
     endforeach()
   endforeach()
 
@@ -1209,7 +1209,7 @@ function(add_hypre_target_distclean)
 
   add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -P ${DISTCLEAN_SCRIPT}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
   )
@@ -1220,7 +1220,7 @@ function(add_hypre_target_uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}"
     COMMAND ${CMAKE_COMMAND} -E echo "Removed installation directory: ${CMAKE_INSTALL_PREFIX}"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Uninstalling HYPRE"
     VERBATIM
   )
@@ -1330,26 +1330,26 @@ macro(setup_mixed_precision_compilation module_name)
   # Set include directories and link libraries for all precision variants
   foreach(precision IN ITEMS flt dbl ldbl)
     target_include_directories(${module_name}_${precision} PRIVATE
-      ${CMAKE_BINARY_DIR}
+      ${PROJECT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}/utilities
-      ${CMAKE_SOURCE_DIR}/blas
-      ${CMAKE_SOURCE_DIR}/lapack
-      ${CMAKE_SOURCE_DIR}/seq_mv
-      ${CMAKE_SOURCE_DIR}/seq_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_ls
-      ${CMAKE_SOURCE_DIR}/IJ_mv
-      ${CMAKE_SOURCE_DIR}/krylov
-      ${CMAKE_SOURCE_DIR}/struct_mv
-      ${CMAKE_SOURCE_DIR}/sstruct_mv
-      ${CMAKE_SOURCE_DIR}/struct_ls
-      ${CMAKE_SOURCE_DIR}/sstruct_ls
-      ${CMAKE_SOURCE_DIR}/distributed_matrix
-      ${CMAKE_SOURCE_DIR}/matrix_matrix
-      ${CMAKE_SOURCE_DIR}/multivector
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_SOURCE_DIR}/utilities
+      ${PROJECT_SOURCE_DIR}/blas
+      ${PROJECT_SOURCE_DIR}/lapack
+      ${PROJECT_SOURCE_DIR}/seq_mv
+      ${PROJECT_SOURCE_DIR}/seq_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_ls
+      ${PROJECT_SOURCE_DIR}/IJ_mv
+      ${PROJECT_SOURCE_DIR}/krylov
+      ${PROJECT_SOURCE_DIR}/struct_mv
+      ${PROJECT_SOURCE_DIR}/sstruct_mv
+      ${PROJECT_SOURCE_DIR}/struct_ls
+      ${PROJECT_SOURCE_DIR}/sstruct_ls
+      ${PROJECT_SOURCE_DIR}/distributed_matrix
+      ${PROJECT_SOURCE_DIR}/matrix_matrix
+      ${PROJECT_SOURCE_DIR}/multivector
     )
 
     # Mixed-precision object libraries compile as standalone targets, so they
