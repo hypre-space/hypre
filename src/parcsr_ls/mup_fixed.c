@@ -6241,6 +6241,38 @@ hypre_MGRBuildRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRCleanup( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanup)( mgr_vdata, num_coarse_levels, cleanup_mode );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupBuildData( void *mgr_vdata, HYPRE_Int num_coarse_levels )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupBuildData)( mgr_vdata, num_coarse_levels );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupPersistentConfig( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupPersistentConfig)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupReusableSolvers( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupReusableSolvers)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCoarseParms)( comm, num_rows, CF_marker, row_starts_cpts, row_starts_fpts );
@@ -6396,6 +6428,30 @@ HYPRE_Int
 hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRGetSubBlock)( A, row_cf_marker, col_cf_marker, debug_flag, A_ff_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseCoarseGridSolver)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRReleaseFSolverAtLevel( void *mgr_vdata, HYPRE_Int level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseFSolverAtLevel)( mgr_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRReleaseLevelSmootherAtLevel( void *mgr_vdata, HYPRE_Int level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseLevelSmootherAtLevel)( mgr_vdata, level );
 }
 
 /*--------------------------------------------------------------------------*/
