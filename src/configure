@@ -10845,7 +10845,7 @@ printf "%s\n" "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_CUDA_SM=90
    fi
 
    HYPRE_CUDA_GENCODE=""
@@ -12764,4 +12764,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-
