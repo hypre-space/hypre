@@ -2973,6 +2973,7 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_BoxArray        *convert_boxa;
    hypre_BoxArray        *pbnd_boxa;
    hypre_BoxArray        *grid_boxes;
+   HYPRE_Int             *grid_box_ids;
    hypre_Box             *box;
    hypre_Box             *grow_box;
    hypre_Box             *grid_box;
@@ -2984,7 +2985,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
    HYPRE_Int              convert_boxaa_size;
-   HYPRE_Int              grid_box_id;
    HYPRE_Int              convert_box_id;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -3008,6 +3008,7 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
          num_boxes  = hypre_StructGridNumBoxes(sgrid);
          grid_boxes = hypre_StructGridBoxes(sgrid);
+         grid_box_ids = hypre_BoxArrayIDs(grid_boxes);
 
          /* Exit this loop if there are no grid boxes */
          if (!num_boxes)
@@ -3022,20 +3023,19 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
          convert_boxaa_size = hypre_min(num_boxes, pbnd_boxaa_size) + 1;
          convert_boxaa[part][var] = hypre_BoxArrayArrayCreate(convert_boxaa_size, ndim);
 
-         k = kk = 0;
+         kk = 0;
          hypre_ForBoxArrayI(i, pbnd_boxaa)
          {
             pbnd_boxa      = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
             convert_box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
-            grid_box_id    = hypre_StructGridID(sgrid, k);
             convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], kk);
 
-            /* Find matching box id */
-            while (convert_box_id != grid_box_id)
+            /* Find matching box id. Some boxes may have been pruned by coarsening,
+             * so part-boundary entries are not guaranteed to exist on this grid. */
+            k = hypre_BinarySearch(grid_box_ids, convert_box_id, num_boxes);
+            if (k < 0)
             {
-               k++;
-               //hypre_assert(k < hypre_StructGridNumBoxes(sgrid));
-               grid_box_id = hypre_StructGridID(sgrid, k);
+               continue;
             }
             grid_box = hypre_BoxArrayBox(grid_boxes, k);
 
