@@ -849,9 +849,9 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray *boxaa, hypre_BoxArray *r
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CommBlockSetEntries( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets )
+hypre_CommBlockSetEntries( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_BoxArrayArray *comm_boxes, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CommBlockSetEntries)( comm_block, boxnums, boxes, orders, stride, data_space, data_offsets );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CommBlockSetEntries)( comm_block, boxnums, boxes, orders, comm_boxes, stride, data_space, data_offsets );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1049,17 +1049,17 @@ hypre_CommStencilSetEntry( hypre_CommStencil *comm_stencil, hypre_Index offset )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputeBoxnums( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_Int **boxnums_ptr )
+hypre_ComposeOriginStride( hypre_Index origin1, hypre_Index stride1, hypre_IndexRef origin2, hypre_Index stride2, HYPRE_Int ndim )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputeBoxnums)( boxes, procs, boxnums_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComposeOriginStride)( origin1, stride1, origin2, stride2, ndim );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ComputeCoarseOriginStride( hypre_Index coarse_origin, hypre_Index coarse_stride, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim )
+hypre_ComputeBoxnums( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_Int **boxnums_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputeCoarseOriginStride)( coarse_origin, coarse_stride, origin, stride, ndim );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ComputeBoxnums)( boxes, procs, boxnums_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1161,9 +1161,9 @@ hypre_CopyToIndex( hypre_Index in_index, HYPRE_Int ndim, hypre_Index out_index )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateCommInfo( hypre_StructGrid *bgrid, hypre_Index stride, hypre_CommStencil *comm_stencil, hypre_CommInfo **comm_info_ptr )
+hypre_CreateCommInfo( hypre_StructGrid *bgrid, hypre_CommStencil *comm_stencil, hypre_CommInfo **comm_info_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfo)( bgrid, stride, comm_stencil, comm_info_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfo)( bgrid, comm_stencil, comm_info_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1177,25 +1177,33 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid *from_grid, hypre_StructGrid *to
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid, hypre_Index stride, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr )
+hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid, HYPRE_Int *num_ghost, hypre_CommInfo **comm_info_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfoFromNumGhost)( grid, stride, num_ghost, comm_info_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfoFromNumGhost)( grid, num_ghost, comm_info_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr )
+hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_CommInfo **comm_info_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfoFromStencil)( grid, stride, stencil, comm_info_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateCommInfoFromStencil)( grid, stencil, comm_info_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateComputeInfo( hypre_StructGrid *grid, hypre_Index stride, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr )
+hypre_CreateComputeInfo( hypre_StructGrid *grid, hypre_StructStencil *stencil, hypre_ComputeInfo **compute_info_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateComputeInfo)( grid, stride, stencil, compute_info_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CreateComputeInfo)( grid, stencil, compute_info_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DecomposeOriginStride( hypre_Index origin1, hypre_Index stride1, hypre_IndexRef origin2, hypre_Index stride2, HYPRE_Int ndim )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_DecomposeOriginStride)( origin1, stride1, origin2, stride2, ndim );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1809,6 +1817,14 @@ hypre_StructGridRef( hypre_StructGrid *grid, hypre_StructGrid **grid_ref )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructGridSetBaseBoxes( hypre_StructGrid *grid, hypre_BoxArray *baseboxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructGridSetBaseBoxes)( grid, baseboxes );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructGridSetBoundingBox( hypre_StructGrid *grid, hypre_Box *new_bb )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructGridSetBoundingBox)( grid, new_bb );
@@ -1836,14 +1852,6 @@ HYPRE_Int
 hypre_StructGridSetExtents( hypre_StructGrid *grid, hypre_Index ilower, hypre_Index iupper )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructGridSetExtents)( grid, ilower, iupper );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructGridSetIDs( hypre_StructGrid *grid, HYPRE_Int *ids )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructGridSetIDs)( grid, ids );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2161,33 +2169,9 @@ hypre_StructMatrixForget( hypre_StructMatrix *matrix )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixGetCStride( hypre_StructMatrix *matrix, hypre_IndexRef *cstride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixGetCStride)( matrix, cstride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix, hypre_IndexRef *stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixGetDataMapStride)( matrix, stride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructMatrixGetDiagonal( hypre_StructMatrix *matrix, hypre_StructVector *diag )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixGetDiagonal)( matrix, diag );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix, hypre_IndexRef *fstride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixGetFStride)( matrix, fstride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2441,6 +2425,14 @@ hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix, HYPRE_Int num_s
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructMatrixSetDataStride( hypre_StructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixSetDataStride)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructMatrixSetDomainStride( hypre_StructMatrix *matrix, hypre_IndexRef domain_stride )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixSetDomainStride)( matrix, domain_stride );
@@ -2593,14 +2585,6 @@ hypre_StructNumGhostFromStencil( hypre_StructStencil *stencil, HYPRE_Int **num_g
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructPartialCopy( hypre_StructVector *x, hypre_StructVector *y, hypre_BoxArrayArray *array_boxes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructPartialCopy)( x, y, array_boxes );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructScale( HYPRE_Complex alpha, hypre_StructVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructScale)( alpha, y );
@@ -2729,9 +2713,9 @@ hypre_StructVectorClone( hypre_StructVector *vector )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorComputeDataSpace( hypre_StructVector *vector, hypre_IndexRef stride, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr )
+hypre_StructVectorComputeDataSpace( hypre_StructVector *vector, hypre_StructGrid *ggrid, HYPRE_Int *num_ghost, hypre_BoxArray **data_space_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorComputeDataSpace)( vector, stride, num_ghost, data_space_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorComputeDataSpace)( vector, ggrid, num_ghost, data_space_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2788,38 +2772,6 @@ HYPRE_Int
 hypre_StructVectorInitializeShell( hypre_StructVector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorInitializeShell)( vector );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapCommInfo( hypre_StructVector *vector, hypre_CommInfo *comm_info )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorMapCommInfo)( vector, comm_info );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapDataBox( hypre_StructVector *vector, hypre_Box *dbox )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorMapDataBox)( vector, dbox );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapDataIndex( hypre_StructVector *vector, hypre_Index dindex )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorMapDataIndex)( vector, dindex );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorMapDataStride( hypre_StructVector *vector, hypre_Index dstride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorMapDataStride)( vector, dstride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2900,14 +2852,6 @@ HYPRE_Int
 hypre_StructVectorReadData( FILE *file, hypre_StructVector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorReadData)( file, vector );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorRebase( hypre_StructVector *vector, hypre_StructGrid *grid, hypre_Index stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorRebase)( vector, grid, stride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2993,41 +2937,9 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector, HYPRE_Int seed )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorSetStride( hypre_StructVector *vector, hypre_IndexRef stride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorSetStride)( vector, stride );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructVectorSetValues( hypre_StructVector *vector, hypre_Index grid_index, HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorSetValues)( vector, grid_index, values, action, boxnum, outside );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataBox( hypre_StructVector *vector, hypre_Box *dbox )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorUnMapDataBox)( vector, dbox );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataIndex( hypre_StructVector *vector, hypre_Index dindex )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorUnMapDataIndex)( vector, dindex );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructVectorUnMapDataStride( hypre_StructVector *vector, hypre_Index dstride )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructVectorUnMapDataStride)( vector, dstride );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3069,6 +2981,7 @@ hypre_doubleBoxVolume( hypre_Box *box )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_doubleBoxVolume)( box );
 }
+
 
 
 #endif

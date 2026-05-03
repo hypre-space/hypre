@@ -76,15 +76,49 @@ set(MUP_SRCS
   mup_functions.c
   mup_pre.c
   printf.c
+  utilities_mp.c
 )
+
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+    utilities_mp_device.c
+  )
+endif()
+
+set(COMMON_SRCS)
+
+if (HYPRE_ENABLE_UMPIRE)
+  list(APPEND COMMON_SRCS umpire.c)
+endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     int_array_device.c
     omp_device.c
   )
+  set(GPU_LANG_SRCS
+    stl_ops.c
+    HYPRE_handle.c
+  )
+  set(GPU_MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+    utilities_mp_device.c
+  )
+  if (HYPRE_ENABLE_UMPIRE)
+    list(APPEND GPU_LANG_SRCS umpire.c)
+  endif()
+  mark_hypre_gpu_sources(${GPU_SRCS})
+  mark_hypre_gpu_sources(${GPU_LANG_SRCS})
+  mark_hypre_gpu_sources(${GPU_MUP_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
-  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
+  convert_filenames_to_full_paths(GPU_LANG_SRCS)
+  convert_filenames_to_full_paths(GPU_MUP_SRCS)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} ${GPU_LANG_SRCS} ${GPU_MUP_SRCS} PARENT_SCOPE)
 endif ()
 
 set(COMPILED_SRCS ${REGULAR_SRCS})
@@ -93,7 +127,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     list(APPEND COMPILED_SRCS ${GPU_SRCS})
   endif()
   setup_mixed_precision_compilation("utilities" SRCS "${COMPILED_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${COMMON_SRCS} ${HDRS})
 else()
   if(HYPRE_USING_GPU)
     list(APPEND COMPILED_SRCS ${GPU_SRCS})
@@ -102,7 +136,7 @@ else()
     multiprecision.c
     printf.c
   )
-  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${COMMON_SRCS} ${HDRS})
 endif()
 
 convert_filenames_to_full_paths(HDRS)

@@ -111,6 +111,7 @@ if (HYPRE_USING_GPU)
     struct_scale.c
     struct_vector.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

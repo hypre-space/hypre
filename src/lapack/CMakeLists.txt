@@ -84,6 +84,12 @@ set(REGULAR_SRCS
   xerbla.c
 )
 
+set(MUP_SRCS
+  mup_fixed.c
+  mup_functions.c
+  mup_pre.c
+)
+
 # Turn optimization off for dlamch.c
 if (MSVC)
   set_source_files_properties (dlamch.c PROPERTIES COMPILE_FLAGS /Od)
@@ -93,7 +99,7 @@ endif ()
 
 if (HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("lapack" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
 else()
   target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
 endif()

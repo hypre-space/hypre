@@ -19,6 +19,53 @@
 #endif
 
 /*--------------------------------------------------------------------------
+ * Compute the greatest common divisor (gcd) of two integers
+ * - uses the Euclidean algorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_gcd(HYPRE_Int a, HYPRE_Int b)
+{
+   HYPRE_Int  t;
+
+   /* first ensure non-negative values */
+   a = hypre_abs(a);
+   b = hypre_abs(b);
+
+   /* now handle potential zero values */
+   if (!a)
+   {
+      return b;
+   }
+   if (!b)
+   {
+      return a;
+   }
+
+   /* Euclidean algorithm */
+   while (b)
+   {
+      a %= b;
+      /* swap a and b */
+      t = a;
+      a = b;
+      b = t;
+   }
+   return a;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute the least common multiple (lcm) of two integers
+ * - uses the identity: lcm = ( abs(a)/gcd(a,b) ) * abs(b)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_lcm(HYPRE_Int a, HYPRE_Int b)
+{
+   return (hypre_abs(a) / hypre_gcd(a, b)) * hypre_abs(b);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_multmod
  *--------------------------------------------------------------------------*/
 
@@ -264,4 +311,12 @@ hypre_ConvertIndicesToString(HYPRE_Int  size,
    hypre_sprintf(pos, "]");
 
    return string;
+}
+
+/*--------------------------------------------------------------------------*
+* hypre_GetSizeOfReal: get size of real (floating point) precision type
+*--------------------------------------------------------------------------*/
+size_t hypre_GetSizeOfReal(void)
+{
+   return sizeof(HYPRE_Real);
 }

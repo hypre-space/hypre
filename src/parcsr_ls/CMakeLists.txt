@@ -150,6 +150,14 @@ set(MUP_SRCS
   HYPRE_parcsr_ls_mp.c
 )
 
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
+
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     ams.c
@@ -179,12 +187,11 @@ if (HYPRE_USING_GPU)
     par_fsai_device.c
     dsuperlu.c
   )
-  convert_filenames_to_full_paths(GPU_SRCS)
-  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
-endif ()
-
-set(COMPILED_SRCS ${REGULAR_SRCS})
-if(HYPRE_USING_GPU)
+  set(GPU_MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
   set(GPU_ONLY_SRCS ${GPU_SRCS})
   list(REMOVE_ITEM GPU_ONLY_SRCS
     ams.c
@@ -194,6 +201,15 @@ if(HYPRE_USING_GPU)
     par_ilu_solve.c
     dsuperlu.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
+  mark_hypre_gpu_sources(${GPU_MUP_SRCS})
+  convert_filenames_to_full_paths(GPU_SRCS)
+  convert_filenames_to_full_paths(GPU_MUP_SRCS)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} ${GPU_MUP_SRCS} PARENT_SCOPE)
+endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+if(HYPRE_USING_GPU)
   list(APPEND COMPILED_SRCS ${GPU_ONLY_SRCS})
 endif()
 

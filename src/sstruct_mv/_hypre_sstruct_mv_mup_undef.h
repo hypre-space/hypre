@@ -242,7 +242,6 @@
 #undef hypre_SStructPVectorSetConstantValues
 #undef hypre_SStructPVectorSetRandomValues
 #undef hypre_SStructPVectorSetValues
-#undef hypre_SStructPartialPCopy
 #undef hypre_SStructScale
 #undef hypre_SStructStencilRef
 #undef hypre_SStructUMatrixAssemble

@@ -24,9 +24,6 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_StructVector *y,
                                     hypre_StructVector *z,
                                     HYPRE_Int           Ab,
-                                    HYPRE_Int           xb,
-                                    HYPRE_Int           yb,
-                                    HYPRE_Int           zb,
                                     HYPRE_Int           transpose,
                                     HYPRE_Int           centry,
                                     HYPRE_Int           nentries,
@@ -34,8 +31,8 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      stride,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
                                     hypre_IndexRef      ran_stride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      Adstride,
                                     hypre_IndexRef      xdstride,
                                     hypre_IndexRef      ydstride,
@@ -59,9 +56,9 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("VCC");
 
-   xp = hypre_StructVectorBoxData(x, xb);
-   yp = hypre_StructVectorBoxData(y, yb);
-   zp = hypre_StructVectorBoxData(z, zb);
+   xp = hypre_StructVectorBaseData(x, Ab);
+   yp = hypre_StructVectorBaseData(y, Ab);
+   zp = hypre_StructVectorBaseData(z, Ab);
 
    hypre_CopyToIndex(start, ndim, Adstart);
 
@@ -78,8 +75,7 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
     * choice, Neg vs Pos, doesn't matter because an offset will be used to index
     * into the vector x (xoff = index - xdstart). */
    hypre_SnapIndexNeg(xdstart, NULL, stride, ndim);
-   hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-   hypre_StructVectorMapDataIndex(x, xdstart);
+   hypre_MapToCoarseIndex(xdstart, NULL, dom_stride, ndim);
    hypre_CopyToIndex(start, ndim, ydstart);
    hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
    hypre_CopyToIndex(start, ndim, zdstart);
@@ -91,7 +87,7 @@ hypre_StructMatvecCompute_core_VCC( HYPRE_Complex       alpha,
    /* Initialize output vector (z = beta * y + alpha * A*x) with a first pass */
    hypre_StructMatvecCompute_core_IVCC(A, x, Ab, depth, alpha, beta, xp, yp, zp,
                                        ndim, transpose, centry, nentries, entries,
-                                       stencil_shape, loop_size, xfstride, start,
+                                       stencil_shape, loop_size, dom_stride, start,
                                        Adstart, xdstart, ydstart, zdstart,
                                        Adstride, xdstride, ydstride, zdstride,
                                        A_data_box, x_data_box, y_data_box, z_data_box);
