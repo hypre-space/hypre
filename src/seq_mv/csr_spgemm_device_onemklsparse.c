@@ -12,25 +12,28 @@
 #if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
-                                  HYPRE_Int                            k,
-                                  HYPRE_Int                            n,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_A,
-                                  HYPRE_Int                            nnzA,
-                                  HYPRE_Int                           *_d_ia,
-                                  HYPRE_Int                           *_d_ja,
-                                  HYPRE_Complex                       *d_a,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_B,
-                                  HYPRE_Int                            nnzB,
-                                  HYPRE_Int                           *_d_ib,
-                                  HYPRE_Int                           *_d_jb,
-                                  HYPRE_Complex                       *d_b,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_C,
-                                  HYPRE_Int                           *nnzC_out,
-                                  HYPRE_Int                          **d_ic_out,
-                                  HYPRE_Int                          **d_jc_out,
-                                  HYPRE_Complex                      **d_c_out)
+hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix  *C,
+                      HYPRE_Int        *nnzC_out,
+                      HYPRE_Int       **d_ic_out,
+                      HYPRE_Int       **d_jc_out,
+                      HYPRE_Complex   **d_c_out)
 {
+   const HYPRE_Int                      m        = hypre_CSRMatrixNumRows(A);
+   const HYPRE_Int                      k        = hypre_CSRMatrixNumCols(A);
+   const HYPRE_Int                      n        = hypre_CSRMatrixNumCols(B);
+   oneapi::mkl::sparse::matrix_handle_t handle_A = hypre_CSRMatrixGPUMatHandle(A);
+   const HYPRE_Int                      nnzA     = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int                           *_d_ia    = hypre_CSRMatrixI(A);
+   HYPRE_Int                           *_d_ja    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex                       *d_a      = hypre_CSRMatrixData(A);
+   oneapi::mkl::sparse::matrix_handle_t handle_B = hypre_CSRMatrixGPUMatHandle(B);
+   const HYPRE_Int                      nnzB     = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Int                           *_d_ib    = hypre_CSRMatrixI(B);
+   HYPRE_Int                           *_d_jb    = hypre_CSRMatrixJ(B);
+   HYPRE_Complex                       *d_b      = hypre_CSRMatrixData(B);
+   oneapi::mkl::sparse::matrix_handle_t handle_C = hypre_CSRMatrixGPUMatHandle(C);
    /* Need these conversions in the case of the bigint build */
 #if defined(HYPRE_BIGINT)
    std::int64_t *d_ia      = reinterpret_cast<std::int64_t*>(_d_ia);

@@ -492,7 +492,6 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    hypre_CommHandle     ***comm_handle;
    hypre_ComputePkg     ***compute_pkgs;
    hypre_ComputeInfo      *compute_info;
-   hypre_Index             ustride;
 
    HYPRE_Real            **bp;
    HYPRE_Real            **xp;
@@ -526,8 +525,6 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    HYPRE_Int               i, j, k, m, s, vi, vj, part;
    HYPRE_Int               nvars;
    HYPRE_Int               set;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -708,7 +705,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
             sstencil_union = hypre_StructStencilCreate(ndim,
                                                        sstencil_union_count,
                                                        sstencil_union_shape);
-            hypre_CreateComputeInfo(sgrid, ustride, sstencil_union, &compute_info);
+            hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
             orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
             orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
             stride = nodeset_strides[set];
@@ -1001,9 +998,9 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                         sb = hypre_SStructPVectorSVector(pb, vi);
                         sx = hypre_SStructPVectorSVector(px, vi);
 
-                        A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-                        b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sb), i);
-                        x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
+                        A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
+                        b_data_box = hypre_StructVectorBoxDataBox(sb, i);
+                        x_data_box = hypre_StructVectorBoxDataBox(sx, i);
 
                         // Implement hypre_StructMatrixDiagData ?
                         stencil = hypre_StructMatrixStencil(sA);
@@ -1116,10 +1113,10 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                      sx = hypre_SStructPVectorSVector(px, 0);
                      st = hypre_SStructPVectorSVector(pt, 0);
 
-                     A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-                     b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sb), i);
-                     x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
-                     t_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(st), i);
+                     A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
+                     b_data_box = hypre_StructVectorBoxDataBox(sb, i);
+                     x_data_box = hypre_StructVectorBoxDataBox(sx, i);
+                     t_data_box = hypre_StructVectorBoxDataBox(st, i);
 
                      hypre_ForBoxI(j, compute_box_a)
                      {
@@ -1214,9 +1211,9 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                   start  = hypre_BoxIMin(compute_box);
                   hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
-                  A_data_box =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
-                  x_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
-                  t_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(st), i);
+                  A_data_box = hypre_StructMatrixBoxDataBox(sA, i);
+                  x_data_box = hypre_StructVectorBoxDataBox(sx, i);
+                  t_data_box = hypre_StructVectorBoxDataBox(st, i);
 
                   Ap = hypre_StructMatrixBoxData(sA, i, stencil_diag);
                   xp = hypre_StructVectorBoxData(sx, i);

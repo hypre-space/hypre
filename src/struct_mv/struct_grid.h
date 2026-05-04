@@ -15,7 +15,19 @@
 #define hypre_STRUCT_GRID_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_StructGrid:
+ * A grid is defined by an index space I('origin', 'stride') intersected with a
+ * set of 'baseboxes'.  The grid maps (coarsens) to form a set of 'boxes' with a
+ * uniform index numbering.
+ *
+ * The following illustrates the relationship between the baseboxes and boxes in
+ * the grid.  The index space for each is denoted by I(s), where s is a stride
+ * (omitting the origin/anchor point for brevity).  The boxes and box numbering
+ * for each are shown (e.g., gb2 is a grid box with box number 2).
+ *
+ * ---------------------------------------  grid (origin, stride, baseboxes):
+ * | bb0 bb1 bb2 bb3 bb4 bb5 bb6 bb7 bb8 |    baseboxes - I(1)
+ * |     gb0 gb1         gb2 gb3     gb4 |    boxes     - I(stride)
+ * ---------------------------------------
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructGrid_struct
@@ -24,8 +36,12 @@ typedef struct hypre_StructGrid_struct
 
    HYPRE_Int            ndim;         /* Number of grid dimensions */
 
-   hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-   HYPRE_Int           *ids;          /* Unique IDs for boxes - RDF TODO: Use boxes IDs instead */
+   hypre_BoxArray      *baseboxes;    /* Array of base boxes in this process */
+   hypre_Index          origin;       /* Origin index for coarsening baseboxes */
+   hypre_Index          stride;       /* Stride index for coarsening baseboxes */
+
+   hypre_BoxArray      *boxes;        /* Array of nonempty coarsened baseboxes */
+
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -53,9 +69,10 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
 #define hypre_StructGridNDim(grid)          ((grid) -> ndim)
+#define hypre_StructGridBaseBoxes(grid)     ((grid) -> baseboxes)
+#define hypre_StructGridOrigin(grid)        ((grid) -> origin)
+#define hypre_StructGridStride(grid)        ((grid) -> stride)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
-#define hypre_StructGridIDs(grid)           ((grid) -> ids)
-#define hypre_StructGridID(grid, i)         ((grid) -> ids[i])
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
 #define hypre_StructGridBoundingBox(grid)   ((grid) -> bounding_box)
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
@@ -70,7 +87,11 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)
 
 #define hypre_StructGridBox(grid, i)        (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridNumBaseBoxes(grid)  (hypre_BoxArraySize(hypre_StructGridBaseBoxes(grid)))
 #define hypre_StructGridNumBoxes(grid)      (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
+#define hypre_StructGridIDs(grid)           (hypre_BoxArrayIDs(hypre_StructGridBoxes(grid)))
+#define hypre_StructGridID(grid, i)         (hypre_BoxArrayID(hypre_StructGridBoxes(grid), i))
+#define hypre_StructGridBaseBoxnum(grid, i) (hypre_StructGridID(grid, i))
 
 #define hypre_StructGridIDPeriod(grid)      hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

@@ -956,7 +956,7 @@ function(maybe_build_umpire)
 
   # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
   set(_src_dir "${umpire_SOURCE_DIR}")
-  set(_bld_dir "${CMAKE_BINARY_DIR}/_deps/umpire-build")
+  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
   file(MAKE_DIRECTORY "${_bld_dir}")
   set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
   if(EXISTS "${_umpire_cfg_in}")
@@ -1034,6 +1034,16 @@ function(add_hypre_subdirectories DIRS)
     add_subdirectory(${DIR})
     target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
   endforeach()
+endfunction()
+
+function(mark_hypre_gpu_sources)
+  if(HYPRE_USING_CUDA)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CUDA)
+  elseif(HYPRE_USING_HIP)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE HIP)
+  elseif(HYPRE_USING_SYCL)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CXX)
+  endif()
 endfunction()
 
 # A function to add an executable to the build with the correct flags, includes, and linkage.
@@ -1149,7 +1159,7 @@ function(add_hypre_target_tags)
               --exclude=.git
               --exclude=build
               -o TAGS .
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Generating TAGS file with Universal Ctags"
       VERBATIM
     )
@@ -1158,17 +1168,17 @@ endfunction()
 
 # Function to add a distclean target
 function(add_hypre_target_distclean)
-  set(DISTCLEAN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/DistcleanScript.cmake")
+  set(DISTCLEAN_SCRIPT "${PROJECT_BINARY_DIR}/DistcleanScript.cmake")
 
   file(WRITE ${DISTCLEAN_SCRIPT} "
   # Remove everything in the build directory except .git, .gitignore, and this script
-  file(GLOB build_items RELATIVE \"${CMAKE_BINARY_DIR}\" \"${CMAKE_BINARY_DIR}/*\")
+  file(GLOB build_items RELATIVE \"${PROJECT_BINARY_DIR}\" \"${PROJECT_BINARY_DIR}/*\")
   foreach(item \${build_items})
     if(NOT item STREQUAL \".git\" AND
        NOT item STREQUAL \".gitignore\" AND
        NOT item STREQUAL \"${CMAKE_MATCH_1}\")
-      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${CMAKE_BINARY_DIR}/\${item}\")
-        file(REMOVE_RECURSE \"${CMAKE_BINARY_DIR}/\${item}\")
+      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${PROJECT_BINARY_DIR}/\${item}\")
+        file(REMOVE_RECURSE \"${PROJECT_BINARY_DIR}/\${item}\")
       endif()
     endif()
   endforeach()
@@ -1181,11 +1191,15 @@ function(add_hypre_target_distclean)
     \"test/ij\" \"test/struct\" \"test/structmat\"
     \"test/sstruct\" \"test/ams_driver\"
     \"test/struct_migrate\" \"test/ij_assembly\"
+    \"seq_mv/csr_spgemm_device_numer[1-9].c\"
+    \"seq_mv/csr_spgemm_device_numer10.c\"
+    \"seq_mv/csr_spgemm_device_symbl[1-9].c\"
+    \"seq_mv/csr_spgemm_device_symbl10.c\"
   )
   foreach(pat \${patterns})
-    file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
+    file(GLOB_RECURSE matches RELATIVE \"${PROJECT_SOURCE_DIR}\" \"${PROJECT_SOURCE_DIR}/\${pat}\")
     foreach(m \${matches})
-      file(REMOVE_RECURSE \"${CMAKE_SOURCE_DIR}/\${m}\")
+      file(REMOVE_RECURSE \"${PROJECT_SOURCE_DIR}/\${m}\")
     endforeach()
   endforeach()
 
@@ -1195,7 +1209,7 @@ function(add_hypre_target_distclean)
 
   add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -P ${DISTCLEAN_SCRIPT}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
   )
@@ -1206,7 +1220,7 @@ function(add_hypre_target_uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}"
     COMMAND ${CMAKE_COMMAND} -E echo "Removed installation directory: ${CMAKE_INSTALL_PREFIX}"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Uninstalling HYPRE"
     VERBATIM
   )
@@ -1284,49 +1298,87 @@ macro(setup_mixed_precision_compilation module_name)
   set(options "")
   set(oneValueArgs "")
   set(multiValueArgs SRCS)
-  cmake_parse_arguments(REGULAR "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_HYPRE_MUP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  if(NOT REGULAR_SRCS)
+  if(NOT _HYPRE_MUP_SRCS)
     message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
   endif()
 
+  set(_regular_srcs_abs "")
+  foreach(_src IN LISTS _HYPRE_MUP_SRCS)
+    if(IS_ABSOLUTE "${_src}")
+      list(APPEND _regular_srcs_abs "${_src}")
+    else()
+      get_filename_component(_src_abs "${_src}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+      list(APPEND _regular_srcs_abs "${_src_abs}")
+    endif()
+  endforeach()
+
   # Create object libraries for each precision
-  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_flt  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_dbl  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_ldbl OBJECT ${_regular_srcs_abs})
 
   # Set precision-specific compile definitions
-  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1)
-  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1)
-  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+  # Keep mixed-precision renaming active for the entire translation unit.
+  # The generated headers only suppress the *_mup_undef.h footer when
+  # hypre_MP_BUILD is already defined at preprocess time.
+  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1 hypre_MP_BUILD=1)
 
   # Set include directories and link libraries for all precision variants
   foreach(precision IN ITEMS flt dbl ldbl)
     target_include_directories(${module_name}_${precision} PRIVATE
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_BINARY_DIR}
+      ${PROJECT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}/utilities
-      ${CMAKE_SOURCE_DIR}/blas
-      ${CMAKE_SOURCE_DIR}/lapack
-      ${CMAKE_SOURCE_DIR}/seq_mv
-      ${CMAKE_SOURCE_DIR}/seq_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_ls
-      ${CMAKE_SOURCE_DIR}/IJ_mv
-      ${CMAKE_SOURCE_DIR}/krylov
-      ${CMAKE_SOURCE_DIR}/struct_mv
-      ${CMAKE_SOURCE_DIR}/sstruct_mv
-      ${CMAKE_SOURCE_DIR}/struct_ls
-      ${CMAKE_SOURCE_DIR}/sstruct_ls
-      ${CMAKE_SOURCE_DIR}/distributed_matrix
-      ${CMAKE_SOURCE_DIR}/matrix_matrix
-      ${CMAKE_SOURCE_DIR}/multivector
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_SOURCE_DIR}/utilities
+      ${PROJECT_SOURCE_DIR}/blas
+      ${PROJECT_SOURCE_DIR}/lapack
+      ${PROJECT_SOURCE_DIR}/seq_mv
+      ${PROJECT_SOURCE_DIR}/seq_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_ls
+      ${PROJECT_SOURCE_DIR}/IJ_mv
+      ${PROJECT_SOURCE_DIR}/krylov
+      ${PROJECT_SOURCE_DIR}/struct_mv
+      ${PROJECT_SOURCE_DIR}/sstruct_mv
+      ${PROJECT_SOURCE_DIR}/struct_ls
+      ${PROJECT_SOURCE_DIR}/sstruct_ls
+      ${PROJECT_SOURCE_DIR}/distributed_matrix
+      ${PROJECT_SOURCE_DIR}/matrix_matrix
+      ${PROJECT_SOURCE_DIR}/multivector
     )
-    # Set position independent code for shared library builds
-    # Object libraries need explicit -fPIC when used in shared libraries
-    if(BUILD_SHARED_LIBS)
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # do not automatically inherit TPL usage requirements from HYPRE.
+    get_target_property(_hypre_include_dirs ${PROJECT_NAME} INCLUDE_DIRECTORIES)
+    if(_hypre_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_include_dirs})
+    endif()
+
+    get_target_property(_hypre_interface_include_dirs ${PROJECT_NAME} INTERFACE_INCLUDE_DIRECTORIES)
+    if(_hypre_interface_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_interface_include_dirs})
+    endif()
+
+    get_target_property(_hypre_compile_defs ${PROJECT_NAME} COMPILE_DEFINITIONS)
+    if(_hypre_compile_defs)
+      target_compile_definitions(${module_name}_${precision} PRIVATE ${_hypre_compile_defs})
+    endif()
+
+    get_target_property(_hypre_compile_opts ${PROJECT_NAME} COMPILE_OPTIONS)
+    if(_hypre_compile_opts)
+      target_compile_options(${module_name}_${precision} PRIVATE ${_hypre_compile_opts})
+    endif()
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # need an explicit PIC property whenever the parent HYPRE target requires it.
+    get_target_property(_hypre_pic ${PROJECT_NAME} POSITION_INDEPENDENT_CODE)
+    get_target_property(_hypre_interface_pic ${PROJECT_NAME} INTERFACE_POSITION_INDEPENDENT_CODE)
+    if(BUILD_SHARED_LIBS OR _hypre_pic OR _hypre_interface_pic)
       set_target_properties(${module_name}_${precision} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
       )

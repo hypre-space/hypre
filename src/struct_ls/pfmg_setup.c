@@ -74,21 +74,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             zero_init;
 
    char                  region_name[1024];
-#if DEBUG
-   char                  filename[255];
-#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_sprintf(region_name, "%s", "PFMG-Init");
    HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
    hypre_GpuProfilingPushRange(region_name);
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "PFMG setup begin", 0);
-
-   /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
-   if (relax_type > 1)
-   {
-      v_memory_mode = 0;
-   }
 
    /* Set flag for initializing matrix/vector entries to zeroes
 

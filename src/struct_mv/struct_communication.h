@@ -30,17 +30,18 @@ typedef struct hypre_CommStencil_struct
 typedef struct hypre_CommInfo_struct
 {
    HYPRE_Int              ndim;
-   hypre_BoxArrayArray   *send_boxes;
+
+   hypre_BoxArrayArray   *send_boxes;        /* BoxArrayArrayIDs are used as base boxnums */
    hypre_Index            send_stride;
    HYPRE_Int            **send_processes;
    HYPRE_Int            **send_rboxnums;
-   hypre_BoxArrayArray   *send_rboxes;  /* send_boxes, some with periodic shift */
+   hypre_BoxArrayArray   *send_rboxes;       /* send_boxes, some with periodic shift */
 
-   hypre_BoxArrayArray   *recv_boxes;
+   hypre_BoxArrayArray   *recv_boxes;        /* BoxArrayArrayIDs are used as base boxnums */
    hypre_Index            recv_stride;
    HYPRE_Int            **recv_processes;
    HYPRE_Int            **recv_rboxnums;
-   hypre_BoxArrayArray   *recv_rboxes;  /* recv_boxes, some with periodic shift */
+   hypre_BoxArrayArray   *recv_rboxes;       /* recv_boxes, some with periodic shift */
 
    HYPRE_Int              num_transforms;  /* may be 0    = identity transform */
    hypre_Index           *coords;          /* may be NULL = identity transform */
@@ -123,11 +124,12 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType      *copy_to_type;
 
    /* needed for setting recv entries after the first communication */
-   HYPRE_Int            num_blocks;        /* arrays below are num_blocks x ... */
-   hypre_Index         *recv_strides;
-   hypre_BoxArray     **recv_data_spaces;  /* recv data dimensions (by box) */
-   HYPRE_Int          **recv_data_offsets; /* offsets into recv data (by box) */
-   HYPRE_Int           *boxes_match;       /* same meaning as in CommInfo */
+   HYPRE_Int            num_blocks;          /* arrays below are num_blocks x ... */
+   hypre_BoxArrayArray**b_recv_boxes;        /* needed only for mapping into data boxes */
+   hypre_Index         *b_recv_stride;
+   hypre_BoxArray     **b_recv_data_space;   /* recv data dimensions (by box) */
+   HYPRE_Int          **b_recv_data_offsets; /* offsets into recv data (by box) */
+   HYPRE_Int           *b_boxes_match;       /* same meaning as in CommInfo */
 
    hypre_Index          identity_coord;
    hypre_Index          identity_dir;
@@ -173,6 +175,7 @@ typedef struct hypre_CommHandle_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_CommInfoNDim(info)           (info -> ndim)
+
 #define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
 #define hypre_CommInfoSendStride(info)     (info -> send_stride)
 #define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
@@ -259,10 +262,11 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
 #define hypre_CommPkgNumBlocks(comm_pkg)       (comm_pkg -> num_blocks)
-#define hypre_CommPkgRecvStrides(comm_pkg)     (comm_pkg -> recv_strides)
-#define hypre_CommPkgRecvDataSpaces(comm_pkg)  (comm_pkg -> recv_data_spaces)
-#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
-#define hypre_CommPkgBoxesMatch(comm_pkg)      (comm_pkg -> boxes_match)
+#define hypre_CommPkgBRecvBoxes(comm_pkg)      (comm_pkg -> b_recv_boxes)
+#define hypre_CommPkgBRecvStride(comm_pkg)     (comm_pkg -> b_recv_stride)
+#define hypre_CommPkgBRecvDataSpace(comm_pkg)  (comm_pkg -> b_recv_data_space)
+#define hypre_CommPkgBRecvDataOffsets(comm_pkg)(comm_pkg -> b_recv_data_offsets)
+#define hypre_CommPkgBBoxesMatch(comm_pkg)     (comm_pkg -> b_boxes_match)
 
 #define hypre_CommPkgIdentityCoord(comm_pkg)   (comm_pkg -> idenditity_coord)
 #define hypre_CommPkgIdentityDir(comm_pkg)     (comm_pkg -> idenditity_dir)

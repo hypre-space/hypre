@@ -38,8 +38,12 @@ hypre_StructGridCreate( MPI_Comm           comm,
 
    hypre_StructGridComm(grid)        = comm;
    hypre_StructGridNDim(grid)        = ndim;
+
+   hypre_StructGridBaseBoxes(grid)   = hypre_BoxArrayCreate(0, ndim);
+   hypre_SetIndex(hypre_StructGridOrigin(grid), 0);
+   hypre_SetIndex(hypre_StructGridStride(grid), 1);
+
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0, ndim);
-   hypre_StructGridIDs(grid)         = NULL;
 
    hypre_SetIndex(hypre_StructGridMaxDistance(grid), 8);
 
@@ -94,9 +98,9 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
       hypre_StructGridRefCount(grid) --;
       if (hypre_StructGridRefCount(grid) == 0)
       {
-         hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
-         hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
+         hypre_BoxArrayDestroy(hypre_StructGridBaseBoxes(grid));
          hypre_BoxArrayDestroy(hypre_StructGridBoxes(grid));
+         hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
 
          hypre_BoxManDestroy(hypre_StructGridBoxMan(grid));
          hypre_TFree( hypre_StructGridPShifts(grid), HYPRE_MEMORY_HOST);
@@ -133,8 +137,23 @@ hypre_StructGridSetExtents( hypre_StructGrid  *grid,
 
    box = hypre_BoxCreate(hypre_StructGridNDim(grid));
    hypre_BoxSetExtents(box, ilower, iupper);
+   hypre_AppendBox(box, hypre_StructGridBaseBoxes(grid));
    hypre_AppendBox(box, hypre_StructGridBoxes(grid));
    hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructGridSetBaseBoxes( hypre_StructGrid *grid,
+                              hypre_BoxArray   *baseboxes )
+{
+
+   hypre_TFree(hypre_StructGridBaseBoxes(grid), HYPRE_MEMORY_HOST);
+   hypre_StructGridBaseBoxes(grid) = baseboxes;
 
    return hypre_error_flag;
 }
@@ -163,19 +182,6 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
    hypre_StructGridBoundingBox(grid) = hypre_BoxClone(new_bb);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructGridSetIDs( hypre_StructGrid *grid,
-                        HYPRE_Int        *ids )
-{
-   hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
-   hypre_StructGridIDs(grid) = ids;
 
    return hypre_error_flag;
 }
@@ -248,7 +254,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int           *num_ghost    = hypre_StructGridNumGhost(grid);
 
    HYPRE_Int            myid, num_procs;
-   HYPRE_Int           *ids = NULL;
    HYPRE_Int            iperiodic, notcenter;
    HYPRE_Int            is_boxman;
    HYPRE_Int            size, ghost_size;
@@ -294,30 +299,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    else
    {
       is_boxman = 1;
-   }
-
-   /* are the ids known? (these may have been set in coarsen)  - if not we need
-      to set them */
-   if (hypre_StructGridIDs(grid) == NULL)
-   {
-      /* TODO: Move IDs to BoxArray data structure */
-      ids = hypre_CTAlloc(HYPRE_Int, num_local_boxes, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_local_boxes; i++)
-      {
-         ids[i] = i;
-      }
-      hypre_StructGridIDs(grid) = ids;
-
-      hypre_BoxArrayIDs(local_boxes) = hypre_TReAlloc(hypre_BoxArrayIDs(local_boxes), HYPRE_Int,
-                                                      num_local_boxes, HYPRE_MEMORY_HOST);
-      for (i = 0; i < num_local_boxes; i++)
-      {
-         hypre_BoxArrayID(local_boxes, i) = i;
-      }
-   }
-   else
-   {
-      ids = hypre_StructGridIDs(grid);
    }
 
    /******** calculate the periodicity information ****************/
@@ -578,7 +559,7 @@ hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
                                 HYPRE_Int        *new_nboxes_ptr,
                                 HYPRE_Int       **new_boxnums_ptr )
 {
-   HYPRE_Int   new_nboxes, *new_boxnums, i, b;
+   HYPRE_Int   new_nboxes, *new_boxnums, i, b, vol;
    hypre_Box  *box;
 
    box = hypre_BoxCreate(hypre_StructGridNDim(grid));
@@ -601,8 +582,12 @@ hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
          b = boxnums[i];
       }
       hypre_CopyBox(hypre_StructGridBox(grid, b), box);
+      vol = hypre_BoxVolume(box);
       hypre_CoarsenBox(box, NULL, stride);
-      if (hypre_BoxVolume(box))
+      // If the original box size is zero, assume it was intended to be kept.
+      // This assumption is necessary to support SMG as currently written.
+      // Otherwise, keep only boxes with nonzero coarse size.
+      if (!vol || hypre_BoxVolume(box))
       {
          new_boxnums[new_nboxes++] = b;
       }
@@ -1126,6 +1111,7 @@ hypre_StructGridRead( MPI_Comm           comm,
    ndim = hypre_BoxArrayNDim(boxes);
    hypre_StructGridCreate(comm, ndim, &grid);
    hypre_StructGridSetBoxes(grid, boxes);
+   hypre_StructGridSetBaseBoxes(grid, hypre_BoxArrayClone(boxes));
 
    /* Read line of the form: "Periodic: <periodic index>\n" */
    hypre_fscanf(file, "\nPeriodic: ");

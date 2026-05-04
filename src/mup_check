@@ -37,6 +37,7 @@ DIRS="\
 
 # RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
 # but this caused some problems for me when I tried it.  Sort out later.
+# DOK: We need a similar build below for GPU-build checks 
 make distclean
 ./configure --enable-debug
 make -s -j
