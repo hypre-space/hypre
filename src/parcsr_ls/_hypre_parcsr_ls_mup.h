@@ -5648,11 +5648,25 @@ HYPRE_Int
 hypre_MGRSetCpointsByPointMarkerArray_long_dbl( void *mgr_vdata, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int **block_coarse_indexes, HYPRE_Int *point_marker_array );
 
 HYPRE_Int
+hypre_MGRSetCycleType_flt( void *mgr_vdata, HYPRE_Int cycle_type );
+HYPRE_Int
+hypre_MGRSetCycleType_dbl( void *mgr_vdata, HYPRE_Int cycle_type );
+HYPRE_Int
+hypre_MGRSetCycleType_long_dbl( void *mgr_vdata, HYPRE_Int cycle_type );
+
+HYPRE_Int
 hypre_MGRSetFRelaxMethod_flt( void *mgr_vdata, HYPRE_Int relax_method );
 HYPRE_Int
 hypre_MGRSetFRelaxMethod_dbl( void *mgr_vdata, HYPRE_Int relax_method );
 HYPRE_Int
 hypre_MGRSetFRelaxMethod_long_dbl( void *mgr_vdata, HYPRE_Int relax_method );
+
+HYPRE_Int
+hypre_MGRSetFRelaxSmoothCycle_flt( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxSmoothCycle_dbl( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxSmoothCycle_long_dbl( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
 
 HYPRE_Int
 hypre_MGRSetFSolverAtLevel_flt( void *mgr_vdata, void *fsolver, HYPRE_Int level );

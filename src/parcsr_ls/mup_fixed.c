@@ -6513,9 +6513,25 @@ hypre_MGRSetCpointsByPointMarkerArray( void *mgr_vdata, HYPRE_Int block_size, HY
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetCycleType)( mgr_vdata, cycle_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetFRelaxMethod)( mgr_vdata, relax_method );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetFRelaxSmoothCycle( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetFRelaxSmoothCycle)( mgr_vdata, frelax_smooth_cycle );
 }
 
 /*--------------------------------------------------------------------------*/

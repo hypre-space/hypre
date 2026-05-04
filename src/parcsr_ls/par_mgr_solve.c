@@ -609,7 +609,7 @@ hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
 #endif
             {
                hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
-                                    fp_zero, &(F_fine_array[coarse_grid]));
+                                   fp_zero, &(F_fine_array[coarse_grid]));
             }
 
             /* Set initial guess to zero */
@@ -645,8 +645,8 @@ hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
 #endif
             {
                hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
-                                    U_fine_array[coarse_grid], fp_one,
-                                    &(U_array[fine_grid]));
+                                   U_fine_array[coarse_grid], fp_one,
+                                   &(U_array[fine_grid]));
             }
          }
       }
@@ -1372,8 +1372,8 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
          else
          {
-            /* For W/F-cycles: lev_counter may allow another down visit */
-            phase = 1;
+            /* W-cycles revisit a coarse branch; V-cycles continue upward. */
+            phase = (lev_counter[level] > 0) ? 1 : 2;
          }
       } /* End interpolate */
       else
