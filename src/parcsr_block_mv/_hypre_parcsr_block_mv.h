@@ -243,7 +243,7 @@ typedef struct
    HYPRE_Int      owns_data;
 
    HYPRE_BigInt   num_nonzeros;
-   HYPRE_Real     d_num_nonzeros;
+   hypre_double   d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    HYPRE_Int     *rowindices;

@@ -162,7 +162,11 @@ typedef HYPRE_Real HYPRE_Complex;
  * mixed precision code. */
 typedef double       hypre_double;
 typedef float        hypre_float;
+#if defined (HYPRE_USING_GPU)
+typedef double  hypre_long_double;
+#else
 typedef long double  hypre_long_double;
+#endif
 
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff

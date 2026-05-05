@@ -1240,24 +1240,6 @@ HYPRE_StructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_StructVe
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructVectorSetStride_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *stride )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return HYPRE_StructVectorSetStride_flt( vector, stride );
-      case HYPRE_REAL_DOUBLE:
-         return HYPRE_StructVectorSetStride_dbl( vector, stride );
-      case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_StructVectorSetStride_long_dbl( vector, stride );
-      default:
-         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_StructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, void *values )
 {
    switch (precision)

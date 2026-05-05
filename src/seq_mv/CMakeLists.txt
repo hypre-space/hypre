@@ -34,7 +34,6 @@ set(REGULAR_SRCS
   vector.c
   vector_batched.c
   csr_matop_device.c
-  csr_matrix_cuda_utils.c
   csr_matvec_device.c
   csr_matvec_oomp.c
   csr_spadd_device.c
@@ -80,26 +79,26 @@ set(MUP_SRCS
   seq_mv_mp.c
 )
 
-# Autogenerate csr_spgemm_device_numer$ files
-file(READ "csr_spgemm_device_numer.in" CONTENTS)
-foreach(number RANGE 1 10)
-  # Check if file exists, then don't recreate
-  set(fn "csr_spgemm_device_numer${number}.c")
-  if (NOT EXISTS ${fn})
-    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND ${fn} "${CONTENTS}")
-  endif (NOT EXISTS ${fn})
-endforeach(number RANGE 1 10)
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
 
-# Autogenerate csr_spgemm_device_symbl$ files
-file(READ "csr_spgemm_device_symbl.in" CONTENTS)
-foreach(number RANGE 1 10)
-  set(fn "csr_spgemm_device_symbl${number}.c")
-  if (NOT EXISTS ${fn})
-    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND ${fn} "${CONTENTS}")
-  endif (NOT EXISTS ${fn})
-endforeach(number RANGE 1 10)
+# Autogenerate csr_spgemm_device_numer$ and csr_spgemm_device_symbl$ files
+set(AUTOGEN_CLEAN_SRCS "")
+foreach(kind IN ITEMS numer symbl)
+  foreach(number RANGE 1 10)
+    set(src_file "csr_spgemm_device_${kind}${number}.c")
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/csr_spgemm_device_${kind}.in" file_content)
+    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "#define HYPRE_SPGEMM_BIN ${number}")
+    file(APPEND "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "${file_content}")
+    list(APPEND AUTOGEN_CLEAN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+  endforeach()
+endforeach()
+set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES "${AUTOGEN_CLEAN_SRCS}")
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("seq_mv" SRCS "${REGULAR_SRCS}")
@@ -111,7 +110,6 @@ endif()
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     csr_matop_device.c
-    csr_matrix_cuda_utils.c
     csr_matvec_device.c
     csr_matvec_oomp.c
     csr_spadd_device.c
@@ -146,8 +144,12 @@ if (HYPRE_USING_GPU)
     csr_spgemm_device_util.c
     csr_spmv_device.c
     csr_sptrans_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
     vector_device.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

@@ -23,9 +23,15 @@ HYPRE_MultiblockMatrixLimitedDestroy
 HYPRE_MultiblockMatrixPrint
 HYPRE_MultiblockMatrixSetNumSubmatrices
 HYPRE_MultiblockMatrixSetSubmatrixType
+HYPRE_VectorAxpy
 HYPRE_VectorCopy
 HYPRE_VectorCreate
 HYPRE_VectorDestroy
 HYPRE_VectorInitialize
 HYPRE_VectorPrint
 HYPRE_VectorRead
+hypre_CSRMatrixCopy
+hypre_CSRMatrixCreate
+hypre_CSRMatrixInitialize_v2
+hypre_CSRMatrixResetData
+hypre_SeqVectorSetData

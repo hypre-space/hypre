@@ -80,7 +80,6 @@
 #undef HYPRE_StructVectorSetConstantValues
 #undef HYPRE_StructVectorSetNumGhost
 #undef HYPRE_StructVectorSetRandomValues
-#undef HYPRE_StructVectorSetStride
 #undef HYPRE_StructVectorSetValues
 #undef hypre_APFillResponseStructAssumedPart
 #undef hypre_APFindMyBoxesInRegions
@@ -211,8 +210,8 @@
 #undef hypre_CommStencilCreateNumGhost
 #undef hypre_CommStencilDestroy
 #undef hypre_CommStencilSetEntry
+#undef hypre_ComposeOriginStride
 #undef hypre_ComputeBoxnums
-#undef hypre_ComputeCoarseOriginStride
 #undef hypre_ComputeInfoCreate
 #undef hypre_ComputeInfoDestroy
 #undef hypre_ComputeInfoProjectComp
@@ -230,6 +229,7 @@
 #undef hypre_CreateCommInfoFromNumGhost
 #undef hypre_CreateCommInfoFromStencil
 #undef hypre_CreateComputeInfo
+#undef hypre_DecomposeOriginStride
 #undef hypre_DeleteBox
 #undef hypre_DeleteMultipleBoxes
 #undef hypre_ExchangeLocalData
@@ -311,11 +311,11 @@
 #undef hypre_StructGridPrintVTK
 #undef hypre_StructGridRead
 #undef hypre_StructGridRef
+#undef hypre_StructGridSetBaseBoxes
 #undef hypre_StructGridSetBoundingBox
 #undef hypre_StructGridSetBoxManager
 #undef hypre_StructGridSetBoxes
 #undef hypre_StructGridSetExtents
-#undef hypre_StructGridSetIDs
 #undef hypre_StructGridSetMaxDistance
 #undef hypre_StructGridSetNumGhost
 #undef hypre_StructGridSetPeriodic
@@ -373,10 +373,7 @@
 #undef hypre_StructMatrixDestroy
 #undef hypre_StructMatrixExtractPointerByIndex
 #undef hypre_StructMatrixForget
-#undef hypre_StructMatrixGetCStride
-#undef hypre_StructMatrixGetDataMapStride
 #undef hypre_StructMatrixGetDiagonal
-#undef hypre_StructMatrixGetFStride
 #undef hypre_StructMatrixGetStSpaces
 #undef hypre_StructMatrixGetStencilSpace
 #undef hypre_StructMatrixGetStencilStride
@@ -408,6 +405,7 @@
 #undef hypre_StructMatrixSetBoxValues
 #undef hypre_StructMatrixSetConstantEntries
 #undef hypre_StructMatrixSetConstantValues
+#undef hypre_StructMatrixSetDataStride
 #undef hypre_StructMatrixSetDomainStride
 #undef hypre_StructMatrixSetGhost
 #undef hypre_StructMatrixSetMemoryLocation
@@ -434,7 +432,6 @@
 #undef hypre_StructMatvecSetup
 #undef hypre_StructMatvecT
 #undef hypre_StructNumGhostFromStencil
-#undef hypre_StructPartialCopy
 #undef hypre_StructScale
 #undef hypre_StructStencilCreate
 #undef hypre_StructStencilDestroy
@@ -459,10 +456,6 @@
 #undef hypre_StructVectorInitialize
 #undef hypre_StructVectorInitializeData
 #undef hypre_StructVectorInitializeShell
-#undef hypre_StructVectorMapCommInfo
-#undef hypre_StructVectorMapDataBox
-#undef hypre_StructVectorMapDataIndex
-#undef hypre_StructVectorMapDataStride
 #undef hypre_StructVectorMigrate
 #undef hypre_StructVectorNeedResize
 #undef hypre_StructVectorPointwiseDivision
@@ -473,7 +466,6 @@
 #undef hypre_StructVectorPrintData
 #undef hypre_StructVectorRead
 #undef hypre_StructVectorReadData
-#undef hypre_StructVectorRebase
 #undef hypre_StructVectorRef
 #undef hypre_StructVectorResize
 #undef hypre_StructVectorRestore
@@ -484,11 +476,7 @@
 #undef hypre_StructVectorSetMemoryMode
 #undef hypre_StructVectorSetNumGhost
 #undef hypre_StructVectorSetRandomValues
-#undef hypre_StructVectorSetStride
 #undef hypre_StructVectorSetValues
-#undef hypre_StructVectorUnMapDataBox
-#undef hypre_StructVectorUnMapDataIndex
-#undef hypre_StructVectorUnMapDataStride
 #undef hypre_SubtractBoxArrays
 #undef hypre_SubtractBoxes
 #undef hypre_SubtractIndexes

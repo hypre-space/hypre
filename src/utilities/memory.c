@@ -1642,7 +1642,6 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
 
    return hypre_error_flag;
 }
-
 #if defined(HYPRE_USING_UMPIRE_HOST)
 
 /*--------------------------------------------------------------------------

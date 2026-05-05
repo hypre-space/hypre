@@ -48,11 +48,11 @@ hypre_StructScale( HYPRE_Complex       alpha,
 
    for (i = 0; i < nboxes; i++)
    {
-      hypre_StructVectorGridBoxCopy(y, i, loop_box);
+      hypre_StructVectorBoxCopy(y, i, loop_box);
       start = hypre_BoxIMin(loop_box);
 
-      y_data_box = hypre_StructVectorGridDataBox(y, i);
-      yp = hypre_StructVectorGridData(y, i);
+      y_data_box = hypre_StructVectorBoxDataBox(y, i);
+      yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetSize(loop_box, loop_size);
 
