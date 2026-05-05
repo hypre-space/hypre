@@ -957,25 +957,17 @@ main( hypre_int  argc,
          HYPRE_StructVectorPrint("zvec-x-resize0", vectors[mv_x], 1);
          HYPRE_StructVectorPrint("zvec-y-resize0", vectors[mv_y], 1);
       }
-      /* Now, test rebase, etc. and add appropriate num_ghost */
+      /* Now, test adding appropriate num_ghost */
       {
          HYPRE_Int       *num_ghost;
          hypre_BoxArray  *data_space;
 
-         hypre_StructVectorRebase(vectors[mv_x], grid, data.vector_strides[mv_x]);
-         hypre_StructVectorRestore(vectors[mv_x]);
-
-         hypre_StructVectorRebase(vectors[mv_x], grid, data.vector_strides[mv_x]);
          hypre_StructNumGhostFromStencil(stencils[mv_A], &num_ghost);
          hypre_StructVectorComputeDataSpace(vectors[mv_x], NULL, num_ghost, &data_space);
          hypre_StructVectorResize(vectors[mv_x], data_space);
          HYPRE_StructVectorPrint("zvec-x-resize1", vectors[mv_x], 1);
          hypre_StructVectorRestore(vectors[mv_x]);
          HYPRE_StructVectorPrint("zvec-x-restore0", vectors[mv_x], 1);
-
-         hypre_StructVectorComputeDataSpace(vectors[mv_x], NULL, num_ghost, &data_space);
-         hypre_StructVectorResize(vectors[mv_x], data_space);
-         HYPRE_StructVectorPrint("zvec-x-resize2", vectors[mv_x], 1);
 
          /* Currently need to add ghost to y (but shouldn't in the future) */
          hypre_StructVectorComputeDataSpace(vectors[mv_y], NULL, num_ghost, &data_space);

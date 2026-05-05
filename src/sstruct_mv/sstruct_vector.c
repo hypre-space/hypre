@@ -341,7 +341,6 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
    HYPRE_Complex         *data;
-   hypre_Index            ustride;
 
    HYPRE_Int              ndim      = hypre_SStructPGridNDim(pgrid);
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
@@ -357,8 +356,6 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
       return hypre_error_flag;
    }
 
-   hypre_SetIndex(ustride, 1);
-
    for (var = 0; var < nvars; var++)
    {
       if (vartypes[var] > 0)
@@ -370,7 +367,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
             num_ghost[2 * d]   = num_ghost[2 * d + 1] = hypre_IndexD(varoffset, d);
          }
 
-         hypre_CreateCommInfoFromNumGhost(sgrid, ustride, num_ghost, &comm_info);
+         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
          hypre_CommPkgDestroy(comm_pkgs[var]);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(svectors[var]),
@@ -690,11 +687,11 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
          nboxes = hypre_StructVectorNBoxes(y);
          for (i = 0; i < nboxes; i++)
          {
-            hypre_StructVectorGridBoxCopy(y, i, loop_box);
+            hypre_StructVectorBoxCopy(y, i, loop_box);
             start = hypre_BoxIMin(loop_box);
 
-            y_data_box = hypre_StructVectorGridDataBox(y, i);
-            yp = hypre_StructVectorGridData(y, i);
+            y_data_box = hypre_StructVectorBoxDataBox(y, i);
+            yp = hypre_StructVectorBoxData(y, i);
 
             hypre_BoxGetSize(loop_box, loop_size);
 
@@ -783,11 +780,11 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
             nboxes = hypre_StructVectorNBoxes(y);
             for (i = 0; i < nboxes; i++)
             {
-               hypre_StructVectorGridBoxCopy(y, i, loop_box);
+               hypre_StructVectorBoxCopy(y, i, loop_box);
                start = hypre_BoxIMin(loop_box);
 
-               y_data_box = hypre_StructVectorGridDataBox(y, i);
-               yp = hypre_StructVectorGridData(y, i);
+               y_data_box = hypre_StructVectorBoxDataBox(y, i);
+               yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(loop_box, loop_size);
 
@@ -931,9 +928,6 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    hypre_SStructPVector   *pvector;
    hypre_StructVector     *svector;
    hypre_SStructPGrid     *pgrid;
-   hypre_StructGrid       *sgrid;
-   hypre_BoxArray         *grid_boxes;
-   hypre_BoxArray         *data_space;
    hypre_Box              *gbox;
    hypre_Box              *dbox;
    hypre_IndexRef          start;
@@ -954,8 +948,7 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    HYPRE_Int               myid;
    HYPRE_Int               i, ndim;
    HYPRE_Int               part, nparts;
-   HYPRE_Int               var, nvars;
-   HYPRE_Int               dbox_volume;
+   HYPRE_Int               var, nvars, nboxes;
 
    /* Initialize some data */
    hypre_SetIndex(stride, 1);
@@ -1009,7 +1002,6 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
       {
          svector = hypre_SStructPVectorSVector(pvector, var);
          vartype = hypre_SStructPGridVarType(pgrid, var);
-         sgrid   = hypre_SStructPGridCellSGrid(pgrid);
 
          /* set the finite element collection based on variable type */
          switch (vartype)
@@ -1038,17 +1030,14 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
             hypre_fprintf(file[vartype], "Ordering: 0\n\n");
          }
 
-         grid_boxes  = hypre_StructGridBoxes(sgrid);
-         data_space  = hypre_StructVectorDataSpace(svector);
-         data        = hypre_StructVectorData(svector);
-         dbox_volume = 0;
-         hypre_ForBoxI(i, grid_boxes)
+         nboxes = hypre_StructVectorNBoxes(svector);
+         for (i = 0; i < nboxes; i++)
          {
-            gbox = hypre_BoxArrayBox(grid_boxes, i);
-            dbox = hypre_BoxArrayBox(data_space, i);
+            gbox = hypre_StructVectorBox(svector, i);
+            dbox = hypre_StructVectorBoxDataBox(svector, i);
+            data = hypre_StructVectorBoxData(svector, i);
 
             start       = hypre_BoxIMin(gbox);
-            dbox_volume = hypre_BoxVolume(dbox);
             hypre_BoxGetSize(gbox, loop_size);
             switch (vartype)
             {
@@ -1064,8 +1053,7 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
                   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO: print node variables");
                   return hypre_error_flag;
             }
-            data += dbox_volume;
-         } /* loop on grid boxes */
+         } /* loop on vector boxes */
       } /* loop on parts */
    } /* loop on variables */
 

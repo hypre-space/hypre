@@ -21,10 +21,10 @@ FILE      *file;
    ( ((((size_t) (1+ne+ne*nv))*sizeof(HYPRE_Int) + ((size_t) ne)*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + (size_t) 1 )
 
 /*--------------------------------------------------------------------------
+ *
  * Create a communication package.  A grid-based description of a communication
- * exchange is passed in.  This description is then compiled into an
- * intermediate processor-based description of the communication.  The
- * intermediate processor-based description is used directly to pack and unpack
+ * exchange is passed in.  This is compiled into an intermediate processor-based
+ * description of the communication, which is used directly to pack and unpack
  * buffers during the communications.
  *
  * The 'orders' argument is a number-of-orders x num_values array of integers.
@@ -36,6 +36,13 @@ FILE      *file;
  * allows a subset of values to be communicated.
  *
  * If 'reverse' is > 0, then the meaning of send/recv is reversed
+ *
+ * The IDs in the 'send_boxes' and 'recv_boxes' arrays contain the boxnums for
+ * the underlying grid baseboxes and corresponding 'data_space' boxes.
+ *
+ * The array lengths of 'send_data_space' and 'data_offsets' are the same as the
+ * grid's baseboxes.  The length of 'send_boxes' (and other 'comm_info' arrays)
+ * is the same as the grid's boxes.  Similarly for 'recv'.
  *
  * RDF NOTE: The buffer size will be too large in the case where a subset of
  * values is communicated using negative order numbers.
@@ -88,7 +95,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
    hypre_IndexRef        send_coord, send_dir;
    HYPRE_Int            *send_order;
 
-   HYPRE_Int             i, j, k, p, m, n, size, p_old, my_proc;
+   HYPRE_Int             i, j, k, p, m, n, id, size, p_old, my_proc;
 
    /*------------------------------------------------------
     *------------------------------------------------------*/
@@ -162,19 +169,18 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
    /* set data_offsets and compute num_boxes */
    data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(send_data_space), HYPRE_MEMORY_HOST);
-   data_offset  = num_boxes = 0;
+   data_offset  = 0;
    hypre_ForBoxI(i, send_data_space)
    {
       data_offsets[i] = data_offset;
       data_box = hypre_BoxArrayBox(send_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
-
-      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
-      if (i < hypre_BoxArrayArraySize(send_boxes))
-      {
-         box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
-         num_boxes += hypre_BoxArraySize(box_array);
-      }
+   }
+   num_boxes = 0;
+   hypre_ForBoxI(i, send_boxes)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
+      num_boxes += hypre_BoxArraySize(box_array);
    }
 
    /* set up comm_boxes_[pij] */
@@ -244,6 +250,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       rbox_array = hypre_BoxArrayArrayBoxArray(send_rboxes, i);
       box  = hypre_BoxArrayBox(box_array, j);
       rbox = hypre_BoxArrayBox(rbox_array, j);
+      id = hypre_BoxArrayArrayID(send_boxes, i);  // databoxnum corresponding to boxnum i
 
       if ((hypre_BoxVolume(box) != 0) && (hypre_BoxVolume(rbox) != 0))
       {
@@ -297,7 +304,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
          hypre_CommTypeBufsize(comm_type)   += (size * num_values);
          comm_bufsize                       += (size * num_values);
          rbox_array = hypre_BoxArrayArrayBoxArray(send_rboxes, i);
-         data_box = hypre_BoxArrayBox(send_data_space, i);
+         data_box = hypre_BoxArrayBox(send_data_space, id);
          if (num_transforms != 0)
          {
             send_coord = coords[send_transforms[i][j]];
@@ -310,7 +317,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
          hypre_CommBlockSetEntry(comm_block, k,
                                  box, send_stride, send_coord, send_dir,
                                  send_order, hypre_CommBlockRemOrder(comm_block, k),
-                                 data_box, data_offsets[i]);
+                                 data_box, data_offsets[id]);
          hypre_CommBlockRemBoxnum(comm_block, k) = send_rboxnums[i][j];
          hypre_CopyBox(hypre_BoxArrayBox(rbox_array, j),
                        hypre_CommBlockRemBox(comm_block, k));
@@ -341,36 +348,40 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       data_offsets[i] = data_offset;
       data_box = hypre_BoxArrayBox(recv_data_space, i);
       data_offset += hypre_BoxVolume(data_box) * num_values;
-
-      /* RDF: This should always be true, but it's not for FAC.  Find out why. */
-      if (i < hypre_BoxArrayArraySize(recv_boxes))
-      {
-         box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
-         num_boxes += hypre_BoxArraySize(box_array);
-      }
+   }
+   /* set data_offsets and compute num_boxes */
+   num_boxes = 0;
+   hypre_ForBoxI(i, recv_boxes)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
+      num_boxes += hypre_BoxArraySize(box_array);
    }
 
    {
-      hypre_Index      *recv_strides;
-      hypre_BoxArray  **recv_data_spaces;
-      HYPRE_Int       **recv_data_offsets;
-      HYPRE_Int        *boxes_match;
+      hypre_BoxArrayArray **b_recv_boxes;
+      hypre_Index          *b_recv_stride;
+      hypre_BoxArray      **b_recv_data_space;
+      HYPRE_Int           **b_recv_data_offsets;
+      HYPRE_Int            *b_boxes_match;
 
-      recv_strides      = hypre_TAlloc(hypre_Index, 1, HYPRE_MEMORY_HOST);
-      recv_data_spaces  = hypre_TAlloc(hypre_BoxArray *, 1, HYPRE_MEMORY_HOST);
-      recv_data_offsets = hypre_TAlloc(HYPRE_Int *, 1, HYPRE_MEMORY_HOST);
-      boxes_match       = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
+      b_recv_boxes        = hypre_TAlloc(hypre_BoxArrayArray *, 1, HYPRE_MEMORY_HOST);
+      b_recv_stride      = hypre_TAlloc(hypre_Index, 1, HYPRE_MEMORY_HOST);
+      b_recv_data_space  = hypre_TAlloc(hypre_BoxArray *, 1, HYPRE_MEMORY_HOST);
+      b_recv_data_offsets = hypre_TAlloc(HYPRE_Int *, 1, HYPRE_MEMORY_HOST);
+      b_boxes_match       = hypre_TAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
 
-      hypre_CopyIndex(recv_stride, recv_strides[0]);
-      recv_data_spaces[0]  = hypre_BoxArrayClone(recv_data_space);
-      recv_data_offsets[0] = data_offsets;
-      boxes_match[0]       = hypre_CommInfoBoxesMatch(comm_info);
+      b_recv_boxes[0]        = hypre_BoxArrayArrayClone(recv_boxes);
+      hypre_CopyIndex(recv_stride, b_recv_stride[0]);
+      b_recv_data_space[0]   = hypre_BoxArrayClone(recv_data_space);
+      b_recv_data_offsets[0] = data_offsets;
+      b_boxes_match[0]       = hypre_CommInfoBoxesMatch(comm_info);
 
-      hypre_CommPkgNumBlocks(comm_pkg)       = 1;
-      hypre_CommPkgRecvStrides(comm_pkg)     = recv_strides;
-      hypre_CommPkgRecvDataSpaces(comm_pkg)  = recv_data_spaces;
-      hypre_CommPkgRecvDataOffsets(comm_pkg) = recv_data_offsets;
-      hypre_CommPkgBoxesMatch(comm_pkg)      = boxes_match;
+      hypre_CommPkgNumBlocks(comm_pkg)        = 1;
+      hypre_CommPkgBRecvBoxes(comm_pkg)       = b_recv_boxes;
+      hypre_CommPkgBRecvStride(comm_pkg)      = b_recv_stride;
+      hypre_CommPkgBRecvDataSpace(comm_pkg)   = b_recv_data_space;
+      hypre_CommPkgBRecvDataOffsets(comm_pkg) = b_recv_data_offsets;
+      hypre_CommPkgBBoxesMatch(comm_pkg)      = b_boxes_match;
    }
 
    /* set up comm_boxes_[pij] */
@@ -481,7 +492,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
                                 hypre_CommBlockRemBoxnums(from_block),
                                 hypre_CommBlockRemBoxes(from_block),
                                 hypre_CommBlockRemOrders(from_block),
-                                recv_stride, recv_data_space, data_offsets);
+                                recv_boxes, recv_stride, recv_data_space, data_offsets);
       hypre_TFree(hypre_CommBlockRemBoxnums(from_block), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_CommBlockRemBoxes(from_block), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_CommBlockRemOrders(from_block), HYPRE_MEMORY_HOST);
@@ -495,7 +506,6 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
    /*------------------------------------------------------
     * Debugging stuff - ONLY WORKS FOR 3D
-    * - Also needs to be updated to use new data structures
     *------------------------------------------------------*/
 
 #if DEBUG
@@ -578,7 +588,8 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 #if DEBUG
    {
       hypre_CommEntry  *comm_entry;
-      HYPRE_Int         offset, ndim;
+      hypre_CommBlock  *comm_block;
+      HYPRE_Int         offset, ndim, b;
       HYPRE_Int        *length;
       HYPRE_Int        *stride;
 
@@ -602,18 +613,23 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
       {
          comm_type = &comm_types[m];
          hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-         hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
-         for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
+         hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+         for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
          {
-            comm_entry = hypre_CommTypeEntry(comm_type, i);
-            offset = hypre_CommEntryOffset(comm_entry);
-            dnim   = hypre_CommEntryNDim(comm_entry);
-            length = hypre_CommEntryLengthArray(comm_entry);
-            stride = hypre_CommEntryStrideArray(comm_entry);
-            hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
-                          i, offset, ndim,
-                          length[0], length[1], length[2], length[3],
-                          stride[0], stride[1], stride[2], stride[3]);
+            comm_block = hypre_CommTypeBlock(comm_type, b);
+            hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+            for (i = 0; i < hypre_CommBlockNumEntries(comm_block); i++)
+            {
+               comm_entry = hypre_CommBlockEntry(comm_block, i);
+               offset = hypre_CommEntryOffset(comm_entry);
+               ndim   = hypre_CommEntryNDim(comm_entry);
+               length = hypre_CommEntryLengthArray(comm_entry);
+               stride = hypre_CommEntryStrideArray(comm_entry);
+               hypre_fprintf(file, "%d,%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+                             b, i, offset, ndim,
+                             length[0], length[1], length[2], length[3],
+                             stride[0], stride[1], stride[2], stride[3]);
+            }
          }
       }
 
@@ -626,25 +642,35 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
       comm_type = &comm_types[0];
       hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-      hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
-      for (i = 0; i < hypre_CommTypeNumEntries(comm_type); i++)
+      hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+      for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
       {
-         comm_entry = hypre_CommTypeEntry(comm_type, i);
-         offset = hypre_CommEntryOffset(comm_entry);
-         ndim   = hypre_CommEntryNDim(comm_entry);
-         length = hypre_CommEntryLengthArray(comm_entry);
-         stride = hypre_CommEntryStrideArray(comm_entry);
-         hypre_fprintf(file, "%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
-                       i, offset, ndim,
-                       length[0], length[1], length[2], length[3],
-                       stride[0], stride[1], stride[2], stride[3]);
+         comm_block = hypre_CommTypeBlock(comm_type, b);
+         hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+         for (i = 0; i < hypre_CommBlockNumEntries(comm_block); i++)
+         {
+            comm_entry = hypre_CommBlockEntry(comm_block, i);
+            offset = hypre_CommEntryOffset(comm_entry);
+            ndim   = hypre_CommEntryNDim(comm_entry);
+            length = hypre_CommEntryLengthArray(comm_entry);
+            stride = hypre_CommEntryStrideArray(comm_entry);
+            hypre_fprintf(file, "%d,%d: %d,%d,(%d,%d,%d,%d),(%d,%d,%d,%d)\n",
+                          b, i, offset, ndim,
+                          length[0], length[1], length[2], length[3],
+                          stride[0], stride[1], stride[2], stride[3]);
+         }
       }
 
       for (m = 1; m < (hypre_CommPkgNumRecvs(comm_pkg) + 1); m++)
       {
          comm_type = &comm_types[m];
          hypre_fprintf(file, "process     = %d\n", hypre_CommTypeProc(comm_type));
-         hypre_fprintf(file, "num_entries = %d\n", hypre_CommTypeNumEntries(comm_type));
+         hypre_fprintf(file, "num_blocks  = %d\n", hypre_CommTypeNumBlocks(comm_type));
+         for (b = 0; b < hypre_CommTypeNumBlocks(comm_type); b++)
+         {
+            comm_block = hypre_CommTypeBlock(comm_type, b);
+            hypre_fprintf(file, "num_entries = %d\n", hypre_CommBlockNumEntries(comm_block));
+         }
       }
 
       fflush(file);
@@ -670,13 +696,14 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CommBlockSetEntries( hypre_CommBlock  *comm_block,
-                           HYPRE_Int        *boxnums,
-                           hypre_Box        *boxes,
-                           HYPRE_Int        *orders,
-                           hypre_Index       stride,
-                           hypre_BoxArray   *data_space,
-                           HYPRE_Int        *data_offsets )
+hypre_CommBlockSetEntries( hypre_CommBlock      *comm_block,
+                           HYPRE_Int            *boxnums,
+                           hypre_Box            *boxes,
+                           HYPRE_Int            *orders,
+                           hypre_BoxArrayArray  *comm_boxes,
+                           hypre_Index           stride,
+                           hypre_BoxArray       *data_space,
+                           HYPRE_Int            *data_offsets )
 {
    HYPRE_Int             ndim        = hypre_CommBlockNDim(comm_block);
    HYPRE_Int             num_values  = hypre_CommBlockNumValues(comm_block);
@@ -685,7 +712,7 @@ hypre_CommBlockSetEntries( hypre_CommBlock  *comm_block,
    hypre_Box            *data_box;
    hypre_Index           coord, dir;
    HYPRE_Int            *order;
-   HYPRE_Int             i, j, k;
+   HYPRE_Int             i, j, k, kd;
 
    /* set identity transform */
    for (i = 0; i < ndim; i++)
@@ -697,12 +724,13 @@ hypre_CommBlockSetEntries( hypre_CommBlock  *comm_block,
    for (j = 0; j < num_entries; j++)
    {
       k = boxnums[j];
+      kd = hypre_BoxArrayArrayID(comm_boxes, k);  // databoxnum corresponding to boxnum k
       box = &boxes[j];
       order = &orders[j * num_values];
-      data_box = hypre_BoxArrayBox(data_space, k);
+      data_box = hypre_BoxArrayBox(data_space, kd);
 
       hypre_CommBlockSetEntry(comm_block, j, box, stride, coord, dir,
-                              order, NULL, data_box, data_offsets[k]);
+                              order, NULL, data_box, data_offsets[kd]);
    }
 
    return hypre_error_flag;
@@ -872,7 +900,7 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
    HYPRE_Int            num_sends   = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int            num_recvs   = hypre_CommPkgNumRecvs(comm_pkg);
    HYPRE_Int            num_blocks  = hypre_CommPkgNumBlocks(comm_pkg);
-   HYPRE_Int           *boxes_match = hypre_CommPkgBoxesMatch(comm_pkg);
+   HYPRE_Int           *b_boxes_match = hypre_CommPkgBBoxesMatch(comm_pkg);
 
    hypre_CommType      *comm_type;
    hypre_CommBlock     *comm_block;
@@ -902,7 +930,7 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
          comm_block  = hypre_CommTypeBlock(comm_type, b);
          num_values  = hypre_CommBlockNumValues(comm_block);
          num_entries = hypre_CommBlockNumEntries(comm_block);
-         if ( !boxes_match[b] )
+         if ( !b_boxes_match[b] )
          {
             num_entries = hypre_CommBlockBufsize(comm_block);
          }
@@ -1184,42 +1212,47 @@ hypre_CommPkgAgglomerate( HYPRE_Int        num_comm_pkgs,
    }
 
    {
-      hypre_Index      *recv_strides,       *in_recv_strides;
-      hypre_BoxArray  **recv_data_spaces,  **in_recv_data_spaces;
-      HYPRE_Int       **recv_data_offsets, **in_recv_data_offsets, size;
-      HYPRE_Int        *boxes_match,        *in_boxes_match;
+      hypre_BoxArrayArray **b_recv_boxes,        **in_b_recv_boxes;
+      hypre_Index          *b_recv_stride,        *in_b_recv_stride;
+      hypre_BoxArray      **b_recv_data_space,   **in_b_recv_data_space;
+      HYPRE_Int           **b_recv_data_offsets, **in_b_recv_data_offsets, size;
+      HYPRE_Int            *b_boxes_match,        *in_b_boxes_match;
 
-      recv_strides      = hypre_TAlloc(hypre_Index, num_blocks, HYPRE_MEMORY_HOST);
-      recv_data_spaces  = hypre_TAlloc(hypre_BoxArray *, num_blocks, HYPRE_MEMORY_HOST);
-      recv_data_offsets = hypre_TAlloc(HYPRE_Int *, num_blocks, HYPRE_MEMORY_HOST);
-      boxes_match       = hypre_TAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST);
+      b_recv_boxes        = hypre_TAlloc(hypre_BoxArrayArray *, num_blocks, HYPRE_MEMORY_HOST);
+      b_recv_stride       = hypre_TAlloc(hypre_Index, num_blocks, HYPRE_MEMORY_HOST);
+      b_recv_data_space   = hypre_TAlloc(hypre_BoxArray *, num_blocks, HYPRE_MEMORY_HOST);
+      b_recv_data_offsets = hypre_TAlloc(HYPRE_Int *, num_blocks, HYPRE_MEMORY_HOST);
+      b_boxes_match       = hypre_TAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_comm_pkgs; i++)
       {
          in_num_blocks = hypre_CommPkgNumBlocks(comm_pkgs[i]);
          for (b = 0; b < in_num_blocks; b++)
          {
-            in_recv_strides      = hypre_CommPkgRecvStrides(comm_pkgs[i]);
-            in_recv_data_spaces  = hypre_CommPkgRecvDataSpaces(comm_pkgs[i]);
-            in_recv_data_offsets = hypre_CommPkgRecvDataOffsets(comm_pkgs[i]);
-            in_boxes_match       = hypre_CommPkgBoxesMatch(comm_pkgs[i]);
+            in_b_recv_boxes        = hypre_CommPkgBRecvBoxes(comm_pkgs[i]);
+            in_b_recv_stride       = hypre_CommPkgBRecvStride(comm_pkgs[i]);
+            in_b_recv_data_space   = hypre_CommPkgBRecvDataSpace(comm_pkgs[i]);
+            in_b_recv_data_offsets = hypre_CommPkgBRecvDataOffsets(comm_pkgs[i]);
+            in_b_boxes_match       = hypre_CommPkgBBoxesMatch(comm_pkgs[i]);
 
             j = block_starts[i] + b;
-            hypre_CopyIndex(in_recv_strides[b], recv_strides[j]);
-            recv_data_spaces[j] = hypre_BoxArrayClone(in_recv_data_spaces[b]);
-            size = hypre_BoxArraySize(in_recv_data_spaces[b]);
+            b_recv_boxes[j] = hypre_BoxArrayArrayClone(in_b_recv_boxes[b]);
+            hypre_CopyIndex(in_b_recv_stride[b], b_recv_stride[j]);
+            b_recv_data_space[j] = hypre_BoxArrayClone(in_b_recv_data_space[b]);
+            size = hypre_BoxArraySize(in_b_recv_data_space[b]);
 
-            recv_data_offsets[j] = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-            hypre_TMemcpy(recv_data_offsets[j], in_recv_data_offsets[b],
+            b_recv_data_offsets[j] = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(b_recv_data_offsets[j], in_b_recv_data_offsets[b],
                           HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-            boxes_match[j] = in_boxes_match[b];
+            b_boxes_match[j] = in_b_boxes_match[b];
          }
       }
-      hypre_CommPkgNumBlocks(agg_comm_pkg)       = num_blocks;
-      hypre_CommPkgRecvStrides(agg_comm_pkg)     = recv_strides;
-      hypre_CommPkgRecvDataSpaces(agg_comm_pkg)  = recv_data_spaces;
-      hypre_CommPkgRecvDataOffsets(agg_comm_pkg) = recv_data_offsets;
-      hypre_CommPkgBoxesMatch(agg_comm_pkg)      = boxes_match;
+      hypre_CommPkgNumBlocks(agg_comm_pkg)        = num_blocks;
+      hypre_CommPkgBRecvBoxes(agg_comm_pkg)       = b_recv_boxes;
+      hypre_CommPkgBRecvStride(agg_comm_pkg)      = b_recv_stride;
+      hypre_CommPkgBRecvDataSpace(agg_comm_pkg)   = b_recv_data_space;
+      hypre_CommPkgBRecvDataOffsets(agg_comm_pkg) = b_recv_data_offsets;
+      hypre_CommPkgBBoxesMatch(agg_comm_pkg)      = b_boxes_match;
    }
 
    /*------------------------------------------------------
@@ -1787,9 +1820,10 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
    HYPRE_Int             num_recvs           = hypre_CommPkgNumRecvs(comm_pkg);
    HYPRE_Int             num_blocks          = hypre_CommPkgNumBlocks(comm_pkg);
    HYPRE_Int             recv_buf_size       = hypre_CommPkgRecvBufsize(comm_pkg);
-   hypre_Index          *recv_strides        = hypre_CommPkgRecvStrides(comm_pkg);
-   hypre_BoxArray      **recv_data_spaces    = hypre_CommPkgRecvDataSpaces(comm_pkg);
-   HYPRE_Int           **recv_data_offsets   = hypre_CommPkgRecvDataOffsets(comm_pkg);
+   hypre_BoxArrayArray **b_recv_boxes        = hypre_CommPkgBRecvBoxes(comm_pkg);
+   hypre_Index          *b_recv_stride       = hypre_CommPkgBRecvStride(comm_pkg);
+   hypre_BoxArray      **b_recv_data_space   = hypre_CommPkgBRecvDataSpace(comm_pkg);
+   HYPRE_Int           **b_recv_data_offsets = hypre_CommPkgBRecvDataOffsets(comm_pkg);
    HYPRE_MemoryLocation  memory_location     = hypre_CommPkgMemoryLocation(comm_pkg);
    HYPRE_MemoryLocation  memory_location_mpi;
 
@@ -1893,9 +1927,10 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
             hypre_CommBlockIMaps(comm_block) =
                hypre_TAlloc(HYPRE_Int, (num_entries * num_values), HYPRE_MEMORY_HOST);
             hypre_CommBlockSetEntries(comm_block, boxnums, boxes, orders,
-                                      recv_strides[b],
-                                      recv_data_spaces[b],
-                                      recv_data_offsets[b]);
+                                      b_recv_boxes[b],
+                                      b_recv_stride[b],
+                                      b_recv_data_space[b],
+                                      b_recv_data_offsets[b]);
 
             /* Shift dptr to the next block */
             dptr += hypre_CommPrefixSize(num_entries, num_values);
@@ -2111,21 +2146,23 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
 HYPRE_Int
 hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 {
-   hypre_CommType    *comm_type;
-   hypre_CommBlock   *comm_block;
-   HYPRE_Int          i, b, num_comms, num_blocks;
-   hypre_Index       *recv_strides;
-   hypre_BoxArray   **recv_data_spaces;
-   HYPRE_Int        **recv_data_offsets;
-   HYPRE_Int         *boxes_match;
+   hypre_CommType       *comm_type;
+   hypre_CommBlock      *comm_block;
+   HYPRE_Int             i, b, num_comms, num_blocks;
+   hypre_BoxArrayArray **b_recv_boxes;
+   hypre_Index          *b_recv_stride;
+   hypre_BoxArray      **b_recv_data_space;
+   HYPRE_Int           **b_recv_data_offsets;
+   HYPRE_Int            *b_boxes_match;
 
    if (comm_pkg)
    {
-      num_blocks        = hypre_CommPkgNumBlocks(comm_pkg);
-      recv_strides      = hypre_CommPkgRecvStrides(comm_pkg);
-      recv_data_spaces  = hypre_CommPkgRecvDataSpaces(comm_pkg);
-      recv_data_offsets = hypre_CommPkgRecvDataOffsets(comm_pkg);
-      boxes_match       = hypre_CommPkgBoxesMatch(comm_pkg);
+      num_blocks          = hypre_CommPkgNumBlocks(comm_pkg);
+      b_recv_boxes        = hypre_CommPkgBRecvBoxes(comm_pkg);
+      b_recv_stride       = hypre_CommPkgBRecvStride(comm_pkg);
+      b_recv_data_space   = hypre_CommPkgBRecvDataSpace(comm_pkg);
+      b_recv_data_offsets = hypre_CommPkgBRecvDataOffsets(comm_pkg);
+      b_boxes_match       = hypre_CommPkgBBoxesMatch(comm_pkg);
 
       /* Send */
       num_comms = hypre_CommPkgNumSends(comm_pkg);
@@ -2190,13 +2227,15 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 
       for (b = 0; b < num_blocks; b++)
       {
-         hypre_BoxArrayDestroy(recv_data_spaces[b]);
-         hypre_TFree(recv_data_offsets[b], HYPRE_MEMORY_HOST);
+         hypre_BoxArrayArrayDestroy(b_recv_boxes[b]);
+         hypre_BoxArrayDestroy(b_recv_data_space[b]);
+         hypre_TFree(b_recv_data_offsets[b], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(recv_strides, HYPRE_MEMORY_HOST);
-      hypre_TFree(recv_data_spaces, HYPRE_MEMORY_HOST);
-      hypre_TFree(recv_data_offsets, HYPRE_MEMORY_HOST);
-      hypre_TFree(boxes_match, HYPRE_MEMORY_HOST);
+      hypre_TFree(b_recv_boxes, HYPRE_MEMORY_HOST);
+      hypre_TFree(b_recv_stride, HYPRE_MEMORY_HOST);
+      hypre_TFree(b_recv_data_space, HYPRE_MEMORY_HOST);
+      hypre_TFree(b_recv_data_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(b_boxes_match, HYPRE_MEMORY_HOST);
 
       hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);
    }

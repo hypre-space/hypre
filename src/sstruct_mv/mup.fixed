@@ -136,7 +136,6 @@ hypre_SStructPVectorSetBoxValues
 hypre_SStructPVectorSetConstantValues
 hypre_SStructPVectorSetRandomValues
 hypre_SStructPVectorSetValues
-hypre_SStructPartialPCopy
 hypre_SStructScale
 hypre_SStructStencilRef
 hypre_SStructUMatrixAssemble

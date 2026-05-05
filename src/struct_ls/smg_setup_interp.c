@@ -100,7 +100,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    HYPRE_Int             compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
    hypre_ComputeInfo    *compute_info;
-   hypre_Index           ustride;
 
    hypre_CommHandle     *comm_handle;
 
@@ -120,8 +119,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    HYPRE_Int             si, sj, d;
    HYPRE_Int             compute_i, i, j;
-
-   hypre_SetIndex(ustride, 1);
 
    /*--------------------------------------------------------
     * Initialize some things
@@ -198,7 +195,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        *-----------------------------------------------------*/
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
-      hypre_CreateComputeInfo(fgrid, ustride, compute_pkg_stencil, &compute_info);
+      hypre_CreateComputeInfo(fgrid, compute_pkg_stencil, &compute_info);
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
       hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
       hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
@@ -235,10 +232,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             compute_box_a =
                hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            x_data_box  =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-            PT_data_box =
-               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+            x_data_box  = hypre_StructVectorBoxDataBox(x, i);
+            PT_data_box = hypre_StructMatrixBoxDataBox(PT, i);
 
             xp  = hypre_StructVectorBoxData(x, i);
             PTp = hypre_StructMatrixBoxData(PT, i, si);
