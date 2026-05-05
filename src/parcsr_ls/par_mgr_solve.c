@@ -880,7 +880,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int              print_level = (mgr_data -> print_level);
 
    HYPRE_Complex         *l1_norms;
-   HYPRE_Int             *CF_marker_data;
 
    hypre_ParCSRMatrix   **A_array    = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array   = (mgr_data -> RT_array);
@@ -898,10 +897,6 @@ hypre_MGRCycle( void              *mgr_vdata,
       (mgr_data -> coarse_grid_solver_solve);
 
    hypre_IntArray       **CF_marker = (mgr_data -> CF_marker_array);
-   HYPRE_Int             *nsweeps = (mgr_data -> num_relax_sweeps);
-   HYPRE_Int              relax_type = (mgr_data -> relax_type);
-   HYPRE_Real             relax_weight = (mgr_data -> relax_weight);
-   HYPRE_Real             omega = (mgr_data -> omega);
    hypre_Vector         **l1_norms_array = (mgr_data -> l1_norms);
    hypre_ParVector       *Vtemp = (mgr_data -> Vtemp);
    hypre_ParVector       *Ztemp = (mgr_data -> Ztemp);
@@ -1024,7 +1019,6 @@ hypre_MGRCycle( void              *mgr_vdata,
          coarse_grid     = level + 1;
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
-         CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
 #if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
@@ -1212,7 +1206,6 @@ hypre_MGRCycle( void              *mgr_vdata,
          coarse_grid     = level;
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
-         CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
 #if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
