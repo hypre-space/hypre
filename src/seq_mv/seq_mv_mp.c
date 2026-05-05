@@ -45,7 +45,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
    xp = hypre_VectorData(x);
    yp = hypre_VectorData(y);
    /* copy data */
-   hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(y),
+   hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(x),
                           hypre_VectorPrecision (y), yp, hypre_VectorMemoryLocation(y), size);
 
    return hypre_error_flag;
