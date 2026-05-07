@@ -9783,7 +9783,6 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
             HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
          }
-         /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
          HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
       }
 
