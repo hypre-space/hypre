@@ -140,10 +140,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
          }
       }
 
-      if ( (gmres_data -> matvec_data) != NULL )
-      {
-         (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
-      }
+      (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
 
       /* Destroy work vectors */
       (*(gmres_functions->DestroyVector))(gmres_data -> r);
@@ -155,10 +152,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
       {
          for (i = 0; i < (gmres_data -> k_dim + 1); i++)
          {
-            if ( (gmres_data -> p)[i] != NULL )
-            {
-               (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
-            }
+            (*(gmres_functions->DestroyVector))( (gmres_data -> p) [i]);
          }
          hypre_TFreeF( gmres_data->p, gmres_functions );
       }
@@ -320,10 +314,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *w_3                = (gmres_data -> w_3);
    void                **p                  = (gmres_data -> p);
 
-   hypre_KrylovPtrToPrecond precond = (gmres_functions -> precond);
-   void                 *precond_data = (gmres_data -> precond_data);
-   // preconditioning matrix
-   void          *precond_Mat = (gmres_data -> precond_Mat) ;
+   hypre_KrylovPtrToPrecond precond         = (gmres_functions -> precond);
+   void                 *precond_data       = (gmres_data -> precond_data);
+   void                 *precond_Mat        = (gmres_data -> precond_Mat);
 
    HYPRE_Int             print_level        = (gmres_data -> print_level);
    HYPRE_Int             logging            = (gmres_data -> logging);
@@ -379,24 +372,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
       norms = (gmres_data -> norms);
    }
 
-   /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   if (rel_change)
-   {
-      rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-   if (print_level > 2)
-   {
-      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
-   }
-
    (*(gmres_functions->CopyVector))(b, p[0]);
 
    /* Compute initial residual */
@@ -437,6 +412,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -468,9 +446,30 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
+   if (rel_change)
+   {
+      rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   }
+   if (print_level > 2)
+   {
+      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   }
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if (logging > 0 || print_level > 0)
@@ -695,7 +694,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
                /* Apply preconditioner to get the correction */
                (*(gmres_functions->ClearVector))(w);
-               precond(precond_data, A, w_3, w);
+               precond(precond_data, precond_Mat, w_3, w);
 
                /* Compute current approximate solution x_i = x_0 + correction */
                (*(gmres_functions->CopyVector))(x, w_3);
