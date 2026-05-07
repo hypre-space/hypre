@@ -6257,17 +6257,17 @@ hypre_MGRCleanupBuildData( void *mgr_vdata, HYPRE_Int num_coarse_levels )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRCleanupPersistentConfig( void *mgr_vdata )
+hypre_MGRCleanupConfig( void *mgr_vdata )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupPersistentConfig)( mgr_vdata );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupConfig)( mgr_vdata );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRCleanupReusableSolvers( void *mgr_vdata )
+hypre_MGRCleanupSolvers( void *mgr_vdata )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupReusableSolvers)( mgr_vdata );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupSolvers)( mgr_vdata );
 }
 
 /*--------------------------------------------------------------------------*/

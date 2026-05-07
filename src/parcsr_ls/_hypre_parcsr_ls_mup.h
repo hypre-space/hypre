@@ -5424,18 +5424,18 @@ HYPRE_Int
 hypre_MGRCleanupBuildData_long_dbl( void *mgr_vdata, HYPRE_Int num_coarse_levels );
 
 HYPRE_Int
-hypre_MGRCleanupPersistentConfig_flt( void *mgr_vdata );
+hypre_MGRCleanupConfig_flt( void *mgr_vdata );
 HYPRE_Int
-hypre_MGRCleanupPersistentConfig_dbl( void *mgr_vdata );
+hypre_MGRCleanupConfig_dbl( void *mgr_vdata );
 HYPRE_Int
-hypre_MGRCleanupPersistentConfig_long_dbl( void *mgr_vdata );
+hypre_MGRCleanupConfig_long_dbl( void *mgr_vdata );
 
 HYPRE_Int
-hypre_MGRCleanupReusableSolvers_flt( void *mgr_vdata );
+hypre_MGRCleanupSolvers_flt( void *mgr_vdata );
 HYPRE_Int
-hypre_MGRCleanupReusableSolvers_dbl( void *mgr_vdata );
+hypre_MGRCleanupSolvers_dbl( void *mgr_vdata );
 HYPRE_Int
-hypre_MGRCleanupReusableSolvers_long_dbl( void *mgr_vdata );
+hypre_MGRCleanupSolvers_long_dbl( void *mgr_vdata );
 
 HYPRE_Int
 hypre_MGRCoarseParms_flt( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );

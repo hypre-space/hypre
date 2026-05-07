@@ -808,8 +808,8 @@ hypre_MGRBuildRestrict
 hypre_MGRBuildRowLumpedInterp
 hypre_MGRCleanup
 hypre_MGRCleanupBuildData
-hypre_MGRCleanupPersistentConfig
-hypre_MGRCleanupReusableSolvers
+hypre_MGRCleanupConfig
+hypre_MGRCleanupSolvers
 hypre_MGRCoarseParms
 hypre_MGRCoarsen
 hypre_MGRColLumpedRestrict

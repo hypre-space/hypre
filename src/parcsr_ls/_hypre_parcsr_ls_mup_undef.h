@@ -1516,8 +1516,8 @@
 #undef hypre_MGRBuildRowLumpedInterp
 #undef hypre_MGRCleanup
 #undef hypre_MGRCleanupBuildData
-#undef hypre_MGRCleanupPersistentConfig
-#undef hypre_MGRCleanupReusableSolvers
+#undef hypre_MGRCleanupConfig
+#undef hypre_MGRCleanupSolvers
 #undef hypre_MGRCoarseParms
 #undef hypre_MGRCoarsen
 #undef hypre_MGRColLumpedRestrict

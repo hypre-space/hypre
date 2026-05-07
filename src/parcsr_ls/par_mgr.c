@@ -316,8 +316,8 @@ hypre_MGRReleaseLevelSmootherAtLevel( void *mgr_vdata,
 /*--------------------------------------------------------------------------
  * This function performs two tasks:
  *   1) Destroy hierarchy-derived matrices, vectors, and temporary setup data.
- *   2) Clear MGR's rebuild-owned bookkeeping while preserving reusable solvers
- *      and persistent user configuration.
+ *   2) Clear MGR's rebuild-owned bookkeeping while preserving solver objects
+ *      and user configuration.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -645,12 +645,12 @@ hypre_MGRCleanupBuildData( void      *mgr_vdata,
 
 /*--------------------------------------------------------------------------
  * This function performs two tasks:
- *   1) Release reusable solver objects owned by MGR.
+ *   1) Release solver objects owned by MGR.
  *   2) Clear the corresponding solver arrays and ownership/type bookkeeping.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRCleanupReusableSolvers( void *mgr_vdata )
+hypre_MGRCleanupSolvers( void *mgr_vdata )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -691,12 +691,12 @@ hypre_MGRCleanupReusableSolvers( void *mgr_vdata )
 
 /*--------------------------------------------------------------------------
  * This function performs two tasks:
- *   1) Destroy persistent user configuration owned by MGR.
+ *   1) Destroy user configuration owned by MGR.
  *   2) Clear the corresponding configuration/bookkeeping pointers.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRCleanupPersistentConfig( void *mgr_vdata )
+hypre_MGRCleanupConfig( void *mgr_vdata )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int i;
@@ -750,7 +750,7 @@ hypre_MGRCleanupPersistentConfig( void *mgr_vdata )
 /*--------------------------------------------------------------------------
  * This function performs two tasks:
  *   1) Destroy hierarchy-derived build data for the current setup.
- *   2) Optionally destroy reusable solvers and persistent configuration when
+ *   2) Optionally destroy solver objects and user configuration when
  *      cleanup_mode requests full teardown.
  *--------------------------------------------------------------------------*/
 
@@ -764,8 +764,8 @@ hypre_MGRCleanup( void      *mgr_vdata,
    hypre_MGRCleanupBuildData(mgr_data, num_coarse_levels);
    if (cleanup_mode == HYPRE_MGR_CLEANUP_DESTROY)
    {
-      hypre_MGRCleanupReusableSolvers(mgr_data);
-      hypre_MGRCleanupPersistentConfig(mgr_data);
+      hypre_MGRCleanupSolvers(mgr_data);
+      hypre_MGRCleanupConfig(mgr_data);
    }
 
    return hypre_error_flag;
