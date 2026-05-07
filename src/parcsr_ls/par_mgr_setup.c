@@ -1070,48 +1070,16 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_ParVectorInitialize(U_fine_array[lev + 1]);
          }
 
-         if (lev == 0 && aff_solver[lev] &&
-             aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER &&
-             aff_solver_type[lev] == HYPRE_MGR_SOLVER_TYPE_USER_FGRID)
+         /* Give preference to user-set aff_solver at a given level. Detect the
+          * legacy HYPRE_MGRSetFSolver() path by the presence of a callback at
+          * level 0 -- legacy callers are restricted to AMG/ILU F-relaxation
+          * and dispatch through the user-provided setup function pointer
+          * instead of the hypre_Solver base. */
+         if (aff_solver[lev] && aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER)
          {
-            if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
-            {
-               if (Frelax_type[lev] == 2 && aff_solver[lev] &&
-                   ((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
-               {
-                  if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
-                  {
-                     /* F-solver hierarchy is already built; store the current A_FF
-                      * as A_ff_array so the MGR solve uses valid matrix data.
-                      * BoomerAMGSolve will update A_array[0] to A_FF at solve time,
-                      * applying the frozen coarse-grid hierarchy to the new matrix. */
-                     /* hypre_ParPrintf(comm, */
-                     /*                 "hypre_MGRSetup: reusing F-solver at level %d" */
-                     /*                 " (skipping setup)\n", lev); */
-                     A_ff_array[lev] = A_FF;
-                  }
-                  else
-                  {
-                     hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                       "F-relaxation solver has not been setup\n");
-                  }
-               }
-               else /* F-relaxation solver prescribed but not set up */
-               {
-                  /* Save A_FF splitting */
-                  A_ff_array[lev] = A_FF;
+            HYPRE_Int legacy_fsolver = (lev == 0 && (mgr_data -> fine_grid_solver_solve));
 
-                  /* Setup F-solver */
-                  /* hypre_ParPrintf(comm, */
-                  /*                 "hypre_MGRSetup: setting up F-solver at level %d\n", lev); */
-                  fgrid_solver_setup(aff_solver[lev],
-                                     A_ff_array[lev],
-                                     F_fine_array[lev + 1],
-                                     U_fine_array[lev + 1]);
-                  aff_solver_type[lev] = HYPRE_MGR_SOLVER_TYPE_USER;
-               }
-            }
-            else if (aff_solver[lev])
+            if (legacy_fsolver && Frelax_type[lev] != 2 && Frelax_type[lev] != 32)
             {
                hypre_sprintf(msg, "Warning!! User-prescribed F-solver for the first level\n\
                              reduction (set in HYPRE_MGRSetFSolver()) only supports AMG\n\
@@ -1119,22 +1087,32 @@ hypre_MGRSetup( void               *mgr_vdata,
                              Frelax_type[lev]);
                hypre_error_w_msg(0, msg);
             }
-         }
-         /* Give preference to user-set aff_solver at a given level */
-         else if (aff_solver[lev] &&
-                  aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER)
-         {
-            /* Save A_FF splitting */
-            A_ff_array[lev] = A_FF;
-
-            aff_base = (hypre_Solver*) aff_solver[lev];
-
-            if (!hypre_SolverSetupIsDone(aff_base))
+            else
             {
-               hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
-                                           (HYPRE_Matrix) A_ff_array[lev],
-                                           (HYPRE_Vector) F_fine_array[lev + 1],
-                                           (HYPRE_Vector) U_fine_array[lev + 1]);
+               /* Save A_FF splitting. BoomerAMG-as-F-solver reuse relies on
+                * BoomerAMGSolve resetting A_array[0] to this A_FF at solve
+                * time, applying the frozen coarse hierarchy to the new matrix. */
+               A_ff_array[lev] = A_FF;
+
+               aff_base = (hypre_Solver*) aff_solver[lev];
+
+               if (!hypre_SolverSetupIsDone(aff_base))
+               {
+                  if (legacy_fsolver)
+                  {
+                     fgrid_solver_setup(aff_solver[lev],
+                                        A_ff_array[lev],
+                                        F_fine_array[lev + 1],
+                                        U_fine_array[lev + 1]);
+                  }
+                  else
+                  {
+                     hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                                 (HYPRE_Matrix) A_ff_array[lev],
+                                                 (HYPRE_Vector) F_fine_array[lev + 1],
+                                                 (HYPRE_Vector) U_fine_array[lev + 1]);
+                  }
+               }
             }
          }
          else

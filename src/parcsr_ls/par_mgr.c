@@ -239,7 +239,7 @@ hypre_MGRReleaseFSolverAtLevel( void *mgr_vdata,
    {
       (mgr_data -> aff_solver_type)[level] = HYPRE_MGR_SOLVER_TYPE_NONE;
    }
-   if (level == 0 && solver_type == HYPRE_MGR_SOLVER_TYPE_USER_FGRID)
+   if (level == 0 && (mgr_data -> fine_grid_solver_solve))
    {
       if ((mgr_data -> A_ff_array))
       {
@@ -482,9 +482,7 @@ hypre_MGRCleanupBuildData( void      *mgr_vdata,
                (mgr_data -> A_ff_array)[i] = NULL;
             }
          }
-         if ((! (mgr_data -> aff_solver_type) ||
-              (mgr_data -> aff_solver_type)[0] != HYPRE_MGR_SOLVER_TYPE_USER_FGRID) &&
-             (mgr_data -> A_ff_array)[0])
+         if (!(mgr_data -> fine_grid_solver_solve) && (mgr_data -> A_ff_array)[0])
          {
             hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[0]);
             (mgr_data -> A_ff_array)[0] = NULL;
@@ -2669,7 +2667,7 @@ hypre_MGRSetFSolver( void       *mgr_vdata,
    /* only allow to set F-solver for the first level */
    aff_solver[0] = (HYPRE_Solver) fsolver;
    (mgr_data -> aff_solver_owner)[0] = HYPRE_MGR_SOLVER_OWNER_USER;
-   (mgr_data -> aff_solver_type)[0] = HYPRE_MGR_SOLVER_TYPE_USER_FGRID;
+   (mgr_data -> aff_solver_type)[0] = HYPRE_MGR_SOLVER_TYPE_USER;
 
    (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
    (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
