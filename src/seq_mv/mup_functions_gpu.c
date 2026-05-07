@@ -28,3 +28,4 @@ hypre_CSRMatrixSpMVAnalysisDevice( hypre_CSRMatrix *matrix )
 #endif
 
 #endif
+

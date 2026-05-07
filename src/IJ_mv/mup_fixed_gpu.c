@@ -92,3 +92,4 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values, 
 #endif
 
 #endif
+

@@ -532,3 +532,4 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
 #endif
 
 #endif
+

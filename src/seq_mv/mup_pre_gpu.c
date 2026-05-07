@@ -37,3 +37,4 @@ hypre_CSRMatrixSpMVAnalysisDevice_pre( HYPRE_Precision precision, hypre_CSRMatri
 #endif
 
 #endif
+

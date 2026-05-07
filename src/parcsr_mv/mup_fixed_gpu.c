@@ -308,3 +308,4 @@ hypre_ParcsrGetExternalRowsDeviceWait( void *vrequest )
 #endif
 
 #endif
+
