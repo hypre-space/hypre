@@ -1241,6 +1241,11 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
+         local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[fine_grid]));
+         hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         hypre_ParVectorSetLocalSize(Ztemp, local_size);
+         hypre_ParVectorSetLocalSize(Utemp, local_size);
+
          /* F-relaxation (post) */
          if (frelax_post)
          {
