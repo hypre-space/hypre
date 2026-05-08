@@ -634,7 +634,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          /* open row j1 and fill ja and a */
          for (k = A_diag_i[j1]; k < A_diag_i[j1 + 1]; k++)
          {
-            HYPRE_Int k1 = A_diag_j[k];
+            k1 = A_diag_j[k];
             if (CF_marker[k1] < 0)
             {
                send_FF2_j[i1] = col_start + k1;
@@ -646,7 +646,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          {
             for (k = A_offd_i[j1]; k < A_offd_i[j1 + 1]; k++)
             {
-               HYPRE_Int k1 = A_offd_j[k];
+               k1 = A_offd_j[k];
                if (CF_marker_offd[k1] < 0)
                {
                   send_FF2_j[i1] = col_map_offd_A[k1];

@@ -1124,14 +1124,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) && num_procs > 1)
    {
-      if (use_commpkg_A)
-      {
-         S_ext = hypre_ParCSRMatrixExtractBExt(S, A, 0);
-      }
-      else
-      {
-         S_ext = hypre_ParCSRMatrixExtractBExt(S, S, 0);
-      }
+      S_ext   = hypre_ParCSRMatrixExtractBExt(S, (use_commpkg_A) ? A : S, 0);
       S_ext_i = hypre_CSRMatrixI(S_ext);
       S_ext_j = hypre_CSRMatrixBigJ(S_ext);
 

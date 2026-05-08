@@ -307,14 +307,14 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -fsingle-precision-constant -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates
       -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -Wimplicit-float-conversion -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -Wimplicit-float-conversion
       -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)

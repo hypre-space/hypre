@@ -1086,7 +1086,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    HYPRE_Int             num_nnzs_AT;
 
    HYPRE_Int             max_col;
-   HYPRE_Int             i, j;
+   HYPRE_Int             iA, jA;
 
    /*--------------------------------------------------------------
     * First, ascertain that num_cols and num_nonzeros has been set.
@@ -1102,13 +1102,13 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    if (num_rows_A && num_nnzs_A && ! num_cols_A)
    {
       max_col = -1;
-      for (i = 0; i < num_rows_A; ++i)
+      for (iA = 0; iA < num_rows_A; ++iA)
       {
-         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         for (jA = A_i[iA]; jA < A_i[iA + 1]; jA++)
          {
-            if (A_j[j] > max_col)
+            if (A_j[jA] > max_col)
             {
-               max_col = A_j[j];
+               max_col = A_j[jA];
             }
          }
       }
