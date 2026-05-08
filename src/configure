@@ -3859,7 +3859,7 @@ fi
 
 if test "x$AR" = "x"
 then
-   AR="ar -rcu"
+   AR="ar -rc"
 fi
 
 
@@ -4013,7 +4013,7 @@ test -n "$CC" || CC=""""
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
+    CFLAGS="-g -Wall -Wshadow -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla"
  elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
@@ -6949,7 +6949,7 @@ then :
   # Autoconf-2.13 could set the ac_cv_exeext variable to `no'.
 # So ignore a value of `no', otherwise this would lead to `EXEEXT = no'
 # in a Makefile.  We should not override ac_cv_exeext if it was cached,
-# so that the user can short-circuit this test for compilers unknown to
+# so that the user can short-circit this test for compilers unknown to
 # Autoconf.
 for ac_file in $ac_files ''
 do
@@ -12764,3 +12764,4 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
+
