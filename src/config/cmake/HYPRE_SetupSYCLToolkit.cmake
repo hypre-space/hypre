@@ -52,18 +52,52 @@ endif()
 
 # Find Intel oneDPL
 if(NOT DEFINED DPLROOT)
-  if(DEFINED ENV{DPLROOT})
-    set(DPLROOT $ENV{DPLROOT})
+  if(DEFINED ENV{DPLROOT} AND EXISTS "$ENV{DPLROOT}")
+    set(DPLROOT "$ENV{DPLROOT}")
   elseif(DEFINED ENV{ONEAPI_ROOT} AND EXISTS "$ENV{ONEAPI_ROOT}/dpl/latest")
-    set(DPLROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
+    set(DPLROOT "$ENV{ONEAPI_ROOT}/dpl/latest")
   endif()
 endif()
-find_package(oneDPL REQUIRED HINTS "$ENV{DPLROOT}/lib/cmake/oneDPL")
-target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
+
+set(HYPRE_ONEDPL_HINTS)
+if(DEFINED DPLROOT AND EXISTS "${DPLROOT}/lib/cmake/oneDPL")
+  list(APPEND HYPRE_ONEDPL_HINTS "${DPLROOT}/lib/cmake/oneDPL")
+endif()
+
+find_package(oneDPL REQUIRED HINTS ${HYPRE_ONEDPL_HINTS})
 
 # Check if DPL is found
 if(NOT oneDPL_FOUND)
   message(FATAL_ERROR "Could not find oneDPL installation. Please set DPLROOT")
+endif()
+
+get_target_property(HYPRE_ONEDPL_INCLUDE_DIRS oneDPL INTERFACE_INCLUDE_DIRECTORIES)
+if(HYPRE_ONEDPL_INCLUDE_DIRS)
+  target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${HYPRE_ONEDPL_INCLUDE_DIRS})
+  foreach(HYPRE_ONEDPL_INCLUDE_DIR IN LISTS HYPRE_ONEDPL_INCLUDE_DIRS)
+    target_compile_options(${PROJECT_NAME} PUBLIC
+      $<$<COMPILE_LANGUAGE:CXX>:-isystem>
+      $<$<COMPILE_LANGUAGE:CXX>:${HYPRE_ONEDPL_INCLUDE_DIR}>)
+  endforeach()
+endif()
+
+get_target_property(HYPRE_ONEDPL_COMPILE_DEFINITIONS oneDPL INTERFACE_COMPILE_DEFINITIONS)
+if(HYPRE_ONEDPL_COMPILE_DEFINITIONS)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>:${HYPRE_ONEDPL_COMPILE_DEFINITIONS}>)
+endif()
+
+get_target_property(HYPRE_ONEDPL_COMPILE_OPTIONS oneDPL INTERFACE_COMPILE_OPTIONS)
+if(HYPRE_ONEDPL_COMPILE_OPTIONS)
+  target_compile_options(${PROJECT_NAME} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>:${HYPRE_ONEDPL_COMPILE_OPTIONS}>)
+endif()
+
+get_target_property(HYPRE_ONEDPL_LINK_LIBS oneDPL INTERFACE_LINK_LIBRARIES)
+if(HYPRE_ONEDPL_LINK_LIBS)
+  foreach(HYPRE_ONEDPL_LINK_ITEM IN LISTS HYPRE_ONEDPL_LINK_LIBS)
+    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:${HYPRE_ONEDPL_LINK_ITEM}>)
+  endforeach()
 endif()
 
 if (HYPRE_ENABLE_ONEMKLSPARSE)
@@ -109,3 +143,26 @@ endif()
 
 # Set GPU warp size
 set(HYPRE_WARP_SIZE 32 CACHE INTERNAL "GPU warp size")
+
+# Patch Umpire's QuickPool C wrapper to use 256-byte alignment for SYCL.
+# oneMKL requires 256-byte aligned USM pointers; Umpire's default is 16.
+function(hypre_patch_umpire_sycl_pool_alignment umpire_src_dir)
+  set(_wrap_rm "${umpire_src_dir}/src/umpire/interface/c_fortran/wrapResourceManager.cpp")
+  if(NOT EXISTS "${_wrap_rm}")
+    message(WARNING "Umpire wrapResourceManager.cpp not found at ${_wrap_rm} — skipping 256-byte alignment patch")
+    return()
+  endif()
+  file(READ "${_wrap_rm}" _content)
+  if(_content MATCHES "256UL")
+    return()
+  endif()
+  set(_old "    *SHCXX_rv = SH_this->makeAllocator<umpire::strategy::QuickPool>(\n        SHCXX_name, *SHCXX_allocator, initial_size, block);\n    SHC_rv->addr = SHCXX_rv;\n    SHC_rv->idtor = 1;\n    return SHC_rv;\n    // splicer end class.ResourceManager.method.make_allocator_quick_pool")
+  set(_new "#if defined(UMPIRE_ENABLE_SYCL)\n    *SHCXX_rv = SH_this->makeAllocator<umpire::strategy::QuickPool>(\n        SHCXX_name, *SHCXX_allocator, initial_size, block, 256UL);\n#else\n    *SHCXX_rv = SH_this->makeAllocator<umpire::strategy::QuickPool>(\n        SHCXX_name, *SHCXX_allocator, initial_size, block);\n#endif\n    SHC_rv->addr = SHCXX_rv;\n    SHC_rv->idtor = 1;\n    return SHC_rv;\n    // splicer end class.ResourceManager.method.make_allocator_quick_pool")
+  string(REPLACE "${_old}" "${_new}" _content "${_content}")
+  if(NOT _content MATCHES "256UL")
+    message(WARNING "Failed to patch QuickPool alignment in ${_wrap_rm} — file format may have changed. Umpire allocations may not meet oneMKL's 256-byte alignment requirement.")
+    return()
+  endif()
+  file(WRITE "${_wrap_rm}" "${_content}")
+  message(STATUS "Patched Umpire wrapResourceManager.cpp: QuickPool SYCL pool alignment set to 256 bytes")
+endfunction()

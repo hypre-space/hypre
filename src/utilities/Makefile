@@ -80,7 +80,7 @@ CUFILES=\
  memory.c\
  omp_device.c\
  stl_ops.c
- 
+
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\
