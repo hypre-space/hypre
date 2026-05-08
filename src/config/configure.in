@@ -2416,7 +2416,7 @@ then
                   Long double data format is not supported on device.
                   For GPU builds, please use the default double precision or --enable-single.
                   ****************************************************************************])
-   else   
+   else
       AC_DEFINE(HYPRE_LONG_DOUBLE, 1, [Define to 1 if using quad precision values for HYPRE_Real])
    fi
 fi
@@ -2626,7 +2626,7 @@ then
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_CUDA_SM=90
    fi
 
    HYPRE_CUDA_GENCODE=""
