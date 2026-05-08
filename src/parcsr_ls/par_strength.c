@@ -2335,9 +2335,9 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
                if (CF_marker_offd[i] > 0)
                {
                   map_cnt = (HYPRE_BigInt) (hypre_BigLowerBound(col_map_offd_C + map_cnt,
-                                                            col_map_offd_C + num_cols_offd_C,
-                                                            fine_to_coarse_offd[i]) -
-                                        col_map_offd_C);
+                                                                col_map_offd_C + num_cols_offd_C,
+                                                                fine_to_coarse_offd[i]) -
+                                            col_map_offd_C);
                   map_S_to_C[i] = (HYPRE_Int) map_cnt++;
                }
                else
