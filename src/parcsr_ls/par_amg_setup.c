@@ -108,7 +108,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *R = NULL;
    hypre_ParCSRMatrix  *A_H;
-   hypre_ParCSRMatrix  *Q = NULL;
    hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
    hypre_ParCSRMatrix  *P2;
@@ -2758,6 +2757,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
             if (ns == 1)
             {
+               hypre_ParCSRMatrix *Q = NULL;
                if (hypre_ParAMGDataModularizedMatMat(amg_data))
                {
                   Q = hypre_ParCSRMatMat(A_array[level], P);
@@ -2782,7 +2782,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (nongalerk_tol_l > 0.0)
                {
                   /* Build Non-Galerkin Coarse Grid */
-                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, NULL,
+                  hypre_ParCSRMatrix *Q_ng = NULL;
+                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q_ng,
                                                                 0.333 * strong_threshold, max_row_sum, num_functions,
                                                                 dof_func_data, hypre_IntArrayData(CF_marker_array[level]),
                                                                 /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
@@ -2812,7 +2813,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (nongalerk_tol_l > 0.0)
                {
                   /* Construct AP, and then RAP */
-                  Q = NULL;
+                  hypre_ParCSRMatrix *Q = NULL;
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      Q = hypre_ParCSRMatMat(A_array[level], P);
@@ -2846,7 +2847,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else if (rap2)
                {
                   /* Use two matrix products to generate A_H */
-                  Q = NULL;
+                  hypre_ParCSRMatrix *Q = NULL;
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      Q = hypre_ParCSRMatMat(A_array[level], P);
@@ -2975,7 +2976,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (nongalerk_tol_l > 0.0)
          {
             /* Construct AP, and then RAP */
-            Q = NULL;
+            hypre_ParCSRMatrix *Q = NULL;
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
                Q = hypre_ParCSRMatMat(A_array[level], P_array[level]);
@@ -3030,7 +3031,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else if (rap2)
          {
             /* Use two matrix products to generate A_H */
-            Q = NULL;
+            hypre_ParCSRMatrix *Q = NULL;
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
                Q = hypre_ParCSRMatMat(A_array[level], P_array[level]);
