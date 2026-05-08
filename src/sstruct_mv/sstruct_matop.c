@@ -31,7 +31,10 @@ hypre_SStructPMatrixComputeRowSum( hypre_SStructPMatrix  *pA,
       for (vj = 0; vj < nvars; vj++)
       {
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
-         hypre_StructMatrixComputeRowSum(sA, type, sv);
+         if (sA != NULL)
+         {
+            hypre_StructMatrixComputeRowSum(sA, type, sv);
+         }
       }
    }
 
@@ -155,6 +158,66 @@ hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix  *A,
    }
 
    *l1_norms_ptr = l1_norms;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPMatrixScale
+ *
+ * Scales SStructP matrix: pA = scalar * pA.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixScale( hypre_SStructPMatrix  *pA,
+                           HYPRE_Complex          scalar)
+{
+   HYPRE_Int nvars = hypre_SStructPMatrixNVars(pA);
+   HYPRE_Int vi, vj;
+
+   hypre_StructMatrix *sA;
+
+   for (vi = 0; vi < nvars; vi++)
+   {
+      for (vj = 0; vj < nvars; vj++)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
+         if (sA)
+         {
+            hypre_StructMatrixScale(sA, scalar);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatrixScale
+ *
+ * Scales SStruct matrix: A = scalar * A.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixScale( hypre_SStructMatrix  *A,
+                          HYPRE_Complex         scalar)
+{
+   HYPRE_Int  object_type = hypre_SStructMatrixObjectType(A);
+   HYPRE_Int  nparts      = hypre_SStructMatrixNParts(A);
+   HYPRE_Int  part;
+
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_STRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         hypre_SStructPMatrixScale(hypre_SStructMatrixPMatrix(A, part), scalar);
+      }
+   }
+
+   if (object_type == HYPRE_SSTRUCT || object_type == HYPRE_PARCSR)
+   {
+      hypre_ParCSRMatrixScale(hypre_SStructMatrixParCSRMatrix(A), scalar);
+   }
 
    return hypre_error_flag;
 }

@@ -4288,20 +4288,19 @@ void HYPRE_LinSysCore::setupPreconAMS()
       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
 
       if( amsG_ == NULL )  {
-
         //Old way of doing things
         //only works for 1 domain per processor (in ALE3D)
         //not compatible with contact
-        HYPRE_AMSFEISetup(HYPrecon_,
+        hypre_AMSFEISetup(HYPrecon_,
                           A_csr,
                           b_csr,
                           x_csr,
-                          AMSData_.EdgeNodeList_,
-                          AMSData_.NodeNumbers_,
-                          AMSData_.numEdges_,
-                          AMSData_.numLocalNodes_,
                           AMSData_.numNodes_,
-                          AMSData_.NodalCoord_);
+                          AMSData_.numLocalNodes_,
+                          AMSData_.NodeNumbers_,
+                          AMSData_.NodalCoord_,
+                          AMSData_.numEdges_,
+                          AMSData_.EdgeNodeList_);
       } else {
         //New Code//
         HYPRE_ParCSRMatrix G_csr;

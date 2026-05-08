@@ -61,11 +61,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
-   hypre_Index             ustride;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -74,7 +71,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
    hypre_ComputeInfoProjectComp(compute_info, findex, stride);
@@ -218,8 +215,8 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
       hypre_StructMapCoarseToFine(startc, cindex, stride, start);
 
-      e_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
-      xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
+      e_dbox  = hypre_StructVectorBoxDataBox(e, fi);
+      xc_dbox = hypre_StructVectorBoxDataBox(xc, ci);
 
       ep  = hypre_StructVectorBoxData(e, fi);
       xcp = hypre_StructVectorBoxData(xc_tmp, ci);
@@ -265,8 +262,8 @@ hypre_SemiInterp( void               *interp_vdata,
       {
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-         e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+         P_dbox = hypre_StructMatrixBoxDataBox(P, fi);
+         e_dbox = hypre_StructVectorBoxDataBox(e, fi);
 
          //RL:PTROFFSET
          HYPRE_Int Pp1_offset = 0, ep0_offset, ep1_offset;

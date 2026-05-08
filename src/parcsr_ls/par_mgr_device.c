@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_onedpl.hpp"
-#include "seq_mv/seq_mv.h"
+#include "seq_mv/_hypre_seq_mv.h"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
@@ -70,7 +70,7 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
 
    /* Initialize interpolation matrix */
    hypre_ParCSRMatrixInitialize_v2(P, HYPRE_MEMORY_DEVICE);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
    P_diag = hypre_ParCSRMatrixDiag(P);
    P_offd = hypre_ParCSRMatrixOffd(P);
 
@@ -299,7 +299,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixNumNonzeros(P) = nC_global;
    }
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_MatvecCommPkgCreate(P);
 

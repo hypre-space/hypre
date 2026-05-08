@@ -1,7 +1,7 @@
 fatal: No names found, cannot describe anything.
 WARNING: unknown Fortran name-mangling scheme
-configure: WARNING: ***************************************************************
+configure: WARNING: [*]*
 configure: WARNING:  Umpire is explicitly disabled while building hypre for GPUs.
 configure: WARNING:  This is not recommended for performance reasons!
 configure: WARNING:  Enable it with --with-umpire.
-configure: WARNING: ***************************************************************
+configure: WARNING: [*]*

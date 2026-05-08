@@ -58,7 +58,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    HYPRE_Int  i, j, k;
 
    HYPRE_Int  one_i = 1;
-   HYPRE_Int  info;
+   HYPRE_Int  info = 0;
    HYPRE_Int  coarse_index;;
    HYPRE_Int  num_coarse_diag;
    HYPRE_Int  num_coarse_offd;

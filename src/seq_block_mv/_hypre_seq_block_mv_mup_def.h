@@ -27,5 +27,6 @@
 #define hypre_DenseBlockMatrixMultiply HYPRE_FIXEDPRECISION_FUNC ( hypre_DenseBlockMatrixMultiply )
 #define hypre_DenseBlockMatrixMultiplyHost HYPRE_FIXEDPRECISION_FUNC ( hypre_DenseBlockMatrixMultiplyHost )
 #define hypre_DenseBlockMatrixPrint HYPRE_FIXEDPRECISION_FUNC ( hypre_DenseBlockMatrixPrint )
+#define hypre_DenseBlockMatrixTranspose HYPRE_FIXEDPRECISION_FUNC ( hypre_DenseBlockMatrixTranspose )
 
 #endif

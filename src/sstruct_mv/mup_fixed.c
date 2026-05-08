@@ -489,6 +489,14 @@ hypre_SStructMatrixRef( hypre_SStructMatrix *matrix, hypre_SStructMatrix **matri
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixScale( hypre_SStructMatrix *A, HYPRE_Complex scalar )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixScale)( A, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixSetBoxValues)( matrix, part, set_box, var, nentries, entries, value_box, values, action );
@@ -865,6 +873,14 @@ hypre_SStructPMatrixRef( hypre_SStructPMatrix *matrix, hypre_SStructPMatrix **ma
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPMatrixScale( hypre_SStructPMatrix *pA, HYPRE_Complex scalar )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixScale)( pA, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix, hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPMatrixSetBoxValues)( pmatrix, set_box, var, nentries, entries, value_box, values, action );
@@ -1100,14 +1116,6 @@ HYPRE_Int
 hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector, hypre_Index index, HYPRE_Int var, HYPRE_Complex *value, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetValues)( pvector, index, var, value, action );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPartialPCopy( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPartialPCopy)( px, py, array_boxes );
 }
 
 /*--------------------------------------------------------------------------*/

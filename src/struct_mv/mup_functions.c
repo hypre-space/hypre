@@ -268,6 +268,15 @@ HYPRE_StructMatrixRead( MPI_Comm comm, const char *filename, HYPRE_Int *num_ghos
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixScale( HYPRE_StructMatrix matrix, hypre_long_double scalar )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatrixScale_pre( precision, matrix, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -614,15 +623,6 @@ HYPRE_StructVectorSetRandomValues( HYPRE_StructVector vector, HYPRE_Int seed )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructVectorSetRandomValues_pre( precision, vector, seed );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_StructVectorSetStride( HYPRE_StructVector vector, HYPRE_Int *stride )
-{
-   HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_StructVectorSetStride_pre( precision, vector, stride );
 }
 
 /*--------------------------------------------------------------------------*/

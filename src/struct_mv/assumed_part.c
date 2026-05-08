@@ -2034,9 +2034,9 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
    /* Compute new coarsening parameters for the AP */
    hypre_CopyIndex(hypre_StructAssumedPartOrigin(ap), hypre_StructAssumedPartOrigin(new_ap));
    hypre_CopyIndex(hypre_StructAssumedPartStride(ap), hypre_StructAssumedPartStride(new_ap));
-   hypre_ComputeCoarseOriginStride(hypre_StructAssumedPartOrigin(new_ap),
-                                   hypre_StructAssumedPartStride(new_ap),
-                                   origin, stride, ndim);
+   hypre_ComposeOriginStride(hypre_StructAssumedPartOrigin(new_ap),
+                             hypre_StructAssumedPartStride(new_ap),
+                             origin, stride, ndim);
 
    /* Copy my partition (at most 2 boxes) */
    hypre_StructAssumedPartMyPartition(new_ap) = hypre_BoxArrayCreate(2, ndim);

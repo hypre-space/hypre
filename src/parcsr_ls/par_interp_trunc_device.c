@@ -652,11 +652,11 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
    if (nnz_diag)
    {
 #if defined(HYPRE_USING_SYCL)
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
-                                        oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
-                                        P_j,
-                                        oneapi::dpl::make_zip_iterator(tmp_rowid, P_diag_j,  P_diag_a),
-                                        is_nonnegative<HYPRE_Int>() );
+      auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+                                       oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
+                                       P_j,
+                                       oneapi::dpl::make_zip_iterator(tmp_rowid, P_diag_j,  P_diag_a),
+                                       is_nonnegative<HYPRE_Int>() );
       new_nnz_diag = std::get<0>(new_end.base()) - tmp_rowid;
 #else
       auto new_end = HYPRE_THRUST_CALL(
@@ -678,11 +678,11 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
    {
       less_than<HYPRE_Int> pred(-1);
 #if defined(HYPRE_USING_SYCL)
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
-                                        oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
-                                        P_j,
-                                        oneapi::dpl::make_zip_iterator(tmp_rowid, P_offd_j,  P_offd_a),
-                                        pred );
+      auto new_end = hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+                                       oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
+                                       P_j,
+                                       oneapi::dpl::make_zip_iterator(tmp_rowid, P_offd_j,  P_offd_a),
+                                       pred );
       new_nnz_offd = std::get<0>(new_end.base()) - tmp_rowid;
 #else
       auto new_end = HYPRE_THRUST_CALL(

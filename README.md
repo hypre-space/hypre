@@ -14,6 +14,8 @@ large, sparse linear systems of equations on massively parallel computers.
 
 For documentation, see our [readthedocs page](https://hypre.readthedocs.io/en/latest/).
 
+For a flexible runtime control of hypre solvers, check out [hypredrive](https://github.com/hypre-space/hypredrive).
+
 For information on code development, build requirements, publications, and more,
 see our [Wiki page](https://github.com/hypre-space/hypre/wiki).
 

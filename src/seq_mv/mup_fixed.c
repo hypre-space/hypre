@@ -112,22 +112,6 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixCopy)( A, B, copy_data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_CSRMatrix *
-hypre_CSRMatrixCreate( HYPRE_Int num_rows, HYPRE_Int num_cols, HYPRE_Int num_nonzeros )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixCreate)( num_rows, num_cols, num_nonzeros );
-}
-
-/*--------------------------------------------------------------------------*/
-
 hypre_CSRMatrix *
 hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol )
 {
@@ -204,14 +188,6 @@ HYPRE_Int
 hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixInitialize)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixInitialize_v2)( matrix, bigInit, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -924,14 +900,6 @@ HYPRE_Int
 hypre_SeqVectorSetConstantValuesHost( hypre_Vector *v, HYPRE_Complex value )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorSetConstantValuesHost)( v, value );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SeqVectorSetData( hypre_Vector *vector, HYPRE_Complex *data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorSetData)( vector, data );
 }
 
 /*--------------------------------------------------------------------------*/

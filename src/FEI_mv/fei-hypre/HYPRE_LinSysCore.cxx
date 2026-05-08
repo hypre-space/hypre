@@ -553,7 +553,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
          // Destroy G and coordinate vectors
          // OLD WAY
          if( amsG_ == NULL ) {
-            HYPRE_AMSFEIDestroy( HYPrecon_ );
+            hypre_AMSFEIDestroy( HYPrecon_ );
          }
          HYPRE_AMSDestroy( HYPrecon_ );
       }

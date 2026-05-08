@@ -1,0 +1,72 @@
+# Output file: io.out.1P
+Iterations = 16
+Final Relative Residual Norm = 5.185152e-07
+
+# Output file: io.out.1RA
+Iterations = 16
+Final Relative Residual Norm = 5.185152e-07
+
+# Output file: io.out.1RAb
+Iterations = 16
+Final Relative Residual Norm = 5.185152e-07
+
+# Output file: io.out.1RAbx
+Iterations = 16
+Final Relative Residual Norm = 5.185152e-07
+
+# Output file: io.out.3P
+Iterations = 15
+Final Relative Residual Norm = 7.006196e-07
+
+# Output file: io.out.3RA
+Iterations = 15
+Final Relative Residual Norm = 7.006196e-07
+
+# Output file: io.out.3RAb
+Iterations = 15
+Final Relative Residual Norm = 7.006196e-07
+
+# Output file: io.out.3RAbx
+Iterations = 15
+Final Relative Residual Norm = 7.006196e-07
+
+# Output file: io.out.4P
+Iterations = 16
+Final Relative Residual Norm = 4.897881e-07
+
+# Output file: io.out.4RA
+Iterations = 16
+Final Relative Residual Norm = 4.897881e-07
+
+# Output file: io.out.4RAb
+Iterations = 16
+Final Relative Residual Norm = 4.897881e-07
+
+# Output file: io.out.4RAbx
+Iterations = 16
+Final Relative Residual Norm = 4.897881e-07
+
+# Output file: io.out.101P
+Iterations = 14
+Final Relative Residual Norm = 8.228245e-07
+
+# Output file: io.out.101RAb
+Iterations = 14
+Final Relative Residual Norm = 8.228245e-07
+
+# Output file: io.out.103P
+Iterations = 14
+Final Relative Residual Norm = 5.777016e-07
+
+# Output file: io.out.103RAb
+Iterations = 14
+Final Relative Residual Norm = 5.777016e-07
+
+# Output file: io.out.104P
+Iterations = 14
+Final Relative Residual Norm = 6.551070e-07
+
+# Output file: io.out.104RAb
+Iterations = 14
+Final Relative Residual Norm = 6.551070e-07
+

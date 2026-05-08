@@ -368,10 +368,10 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
       hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
       hypre_BoxGetSize(cgrid_box, loop_size);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-      P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-      R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-      RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+      A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+      P_dbox   = hypre_StructMatrixBoxDataBox(P, fi);
+      R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+      RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
@@ -780,7 +780,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          cstart = hypre_BoxIMin(cgrid_box);
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-         RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+         RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
          /*--------------------------------------------------------------
           * Computational loop. A loop over stored entries of RAP.

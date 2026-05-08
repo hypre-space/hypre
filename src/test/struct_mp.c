@@ -1878,7 +1878,7 @@ AddValuesVector_mp(hypre_StructGrid   *gridvector,
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
-   char               *values;
+   char               *values; /* use char to allow pointer arithmetic */
    HYPRE_Int            volume, dim;
 
    gridboxes =  hypre_StructGridBoxes(gridvector);
@@ -1959,7 +1959,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
-   char                *values;
+   char                *values; /* use char to allow pointer arithmetic */
    void                *east, *west;
    void                *north, *south;
    void                *top, *bottom;

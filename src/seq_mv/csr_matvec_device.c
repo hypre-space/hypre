@@ -17,6 +17,39 @@
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
+#if defined(HYPRE_USING_CUSPARSE)
+static HYPRE_Int
+hypre_CSRMatrixMatvecCusparse( HYPRE_Int        trans,
+                               HYPRE_Complex    alpha,
+                               hypre_CSRMatrix *A,
+                               hypre_Vector    *x,
+                               HYPRE_Complex    beta,
+                               hypre_Vector    *y,
+                               HYPRE_Int        offset );
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+static HYPRE_Int
+hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
+                                HYPRE_Complex    alpha,
+                                hypre_CSRMatrix *A,
+                                hypre_Vector    *x,
+                                HYPRE_Complex    beta,
+                                hypre_Vector    *y,
+                                HYPRE_Int        offset );
+#endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+static HYPRE_Int
+hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
+                                   HYPRE_Complex    alpha,
+                                   hypre_CSRMatrix *A,
+                                   hypre_Vector    *x,
+                                   HYPRE_Complex    beta,
+                                   hypre_Vector    *y,
+                                   HYPRE_Int        offset );
+#endif
+
 #if CUSPARSE_VERSION >= CUSPARSE_NEWSPMM_VERSION
 #define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG3
@@ -80,15 +113,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 
    if (use_vendor)
    {
-#if defined(HYPRE_USING_CUSPARSE)
-      hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);
-
-#elif defined(HYPRE_USING_ROCSPARSE)
-      hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
-
-#elif defined(HYPRE_USING_ONEMKLSPARSE)
-      hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-#endif
+      hypre_CSRMatrixMatvecVendor(trans, alpha, A, x, beta, y, offset);
    }
    else
 #endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
@@ -171,6 +196,35 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_CSRMatrixMatvecVendor( HYPRE_Int        trans,
+                             HYPRE_Complex    alpha,
+                             hypre_CSRMatrix *A,
+                             hypre_Vector    *x,
+                             HYPRE_Complex    beta,
+                             hypre_Vector    *y,
+                             HYPRE_Int        offset )
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   return hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_ROCSPARSE)
+   return hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   return hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
+#else
+   HYPRE_UNUSED_VAR(trans);
+   HYPRE_UNUSED_VAR(alpha);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(beta);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(offset);
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                     "Attempting to use device sparse matrix library for SpMV without having compiled support for it!\n");
+   return hypre_error_flag;
+#endif
+}
+
 #if defined(HYPRE_USING_CUSPARSE)
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
@@ -182,7 +236,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
  * Note: The descriptor variables are not saved to allow for generic input
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+static HYPRE_Int
 hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      HYPRE_Complex    alpha,
                                      hypre_CSRMatrix *A,
@@ -340,7 +394,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 
 #else // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
-HYPRE_Int
+static HYPRE_Int
 hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
                                      HYPRE_Complex    alpha,
                                      hypre_CSRMatrix *A,
@@ -389,7 +443,7 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
-HYPRE_Int
+static HYPRE_Int
 hypre_CSRMatrixMatvecCusparse( HYPRE_Int        trans,
                                HYPRE_Complex    alpha,
                                hypre_CSRMatrix *A,
@@ -417,7 +471,7 @@ hypre_CSRMatrixMatvecCusparse( HYPRE_Int        trans,
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int
+static HYPRE_Int
 hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Complex    alpha,
                                 hypre_CSRMatrix *A,
@@ -466,7 +520,7 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
-HYPRE_Int
+static HYPRE_Int
 hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
                                    HYPRE_Complex    alpha,
                                    hypre_CSRMatrix *A,

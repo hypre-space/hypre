@@ -1,0 +1,316 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["**"]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+  workflow_dispatch:
+
+jobs:
+  require-label:
+    name: Require Run CI label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Ensure Run CI label is present
+        env:
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'Run CI') }}
+        run: |
+          if [ "${HAS_LABEL}" != "true" ]; then
+            echo "::error::Add the 'Run CI' label to this pull request to trigger CI."
+            exit 1
+          fi
+        shell: bash
+
+  build-and-check:
+    name: Build & Check (${{ matrix.os }}-${{ matrix.mpi }})
+    runs-on: ${{ matrix.os }}
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            mpi: openmpi
+          - os: macos-latest
+            mpi: openmpi
+          - os: windows-latest
+            mpi: msmpi
+          - os: windows-latest
+            mpi: off
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenmpi-dev openmpi-bin
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          brew update
+          brew install open-mpi
+
+      - name: Install dependencies (Windows, MS-MPI)
+        if: runner.os == 'Windows' && matrix.mpi == 'msmpi'
+        shell: powershell
+        run: |
+          # Download MS-MPI runtime and SDK from Microsoft's GitHub releases
+          # Disable progress bar for faster downloads on CI
+          $ProgressPreference = 'SilentlyContinue'
+          $msmpiVersion = "10.1.1"
+          $baseUrl = "https://github.com/microsoft/Microsoft-MPI/releases/download/v$msmpiVersion"
+
+          Write-Host "Downloading MS-MPI runtime..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisetup.exe" -OutFile msmpisetup.exe -UseBasicParsing
+
+          Write-Host "Downloading MS-MPI SDK..."
+          Invoke-WebRequest -Uri "$baseUrl/msmpisdk.msi" -OutFile msmpisdk.msi -UseBasicParsing
+
+          Write-Host "Installing MS-MPI runtime..."
+          Start-Process -FilePath .\msmpisetup.exe -ArgumentList "-unattend" -Wait
+
+          Write-Host "Installing MS-MPI SDK..."
+          Start-Process -FilePath msiexec.exe -ArgumentList "/i msmpisdk.msi /quiet /qn /l*v sdk_install.log" -Wait
+          if (Test-Path sdk_install.log) {
+            Write-Host "SDK install log (last 50 lines):"
+            Get-Content sdk_install.log -Tail 50
+          }
+
+          # SDK installs to a different location - check both
+          $sdkRoot = "C:\Program Files (x86)\Microsoft SDKs\MPI"
+          if (Test-Path "$sdkRoot\Include\mpi.h") {
+            Write-Host "SDK found at: $sdkRoot"
+            # Copy SDK files to runtime location for CMake to find
+            $destRoot = "C:\Program Files\Microsoft MPI"
+            New-Item -ItemType Directory -Path "$destRoot\Include" -Force | Out-Null
+            New-Item -ItemType Directory -Path "$destRoot\Lib\x64" -Force | Out-Null
+            Copy-Item -Path "$sdkRoot\Include\*" -Destination "$destRoot\Include\" -Recurse -Force
+            Copy-Item -Path "$sdkRoot\Lib\x64\*" -Destination "$destRoot\Lib\x64\" -Recurse -Force
+          } else {
+            Write-Host "ERROR: SDK Include not found at expected location"
+            Write-Host "Checking alternative locations..."
+            Get-ChildItem "C:\Program Files (x86)\Microsoft SDKs" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          }
+
+          # Verify installation
+          $msmpiRoot = "C:\Program Files\Microsoft MPI"
+          Write-Host "Verifying MS-MPI installation..."
+          Get-ChildItem "$msmpiRoot" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+          Write-Host "mpi.h exists: $(Test-Path "$msmpiRoot\Include\mpi.h")"
+          Write-Host "msmpi.lib exists: $(Test-Path "$msmpiRoot\Lib\x64\msmpi.lib")"
+
+          # Set environment variables for CMake to find MPI
+          Add-Content $env:GITHUB_ENV "MSMPI_BIN=$msmpiRoot\Bin"
+          Add-Content $env:GITHUB_ENV "MSMPI_INC=$msmpiRoot\Include"
+          Add-Content $env:GITHUB_ENV "MSMPI_LIB64=$msmpiRoot\Lib\x64"
+          Add-Content $env:GITHUB_PATH "$msmpiRoot\Bin"
+
+      - name: Setup MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure (Debug)
+        run: >
+          cmake -S src -B build
+          ${{ runner.os == 'Windows' && '-G Ninja' || '' }}
+          -DHYPRE_BUILD_TESTS=ON
+          -DHYPRE_ENABLE_MPI=${{ matrix.mpi == 'off' && 'OFF' || 'ON' }}
+          -DCMAKE_BUILD_TYPE=Debug
+          ${{ runner.os == 'Windows' && matrix.mpi == 'msmpi' && '-DMPI_GUESS_LIBRARY_NAME=MSMPI -DMPI_C_LIB_NAMES=msmpi -DMPI_msmpi_LIBRARY="C:/Program Files/Microsoft MPI/Lib/x64/msmpi.lib" -DMPI_C_HEADER_DIR="C:/Program Files/Microsoft MPI/Include"' || '' }}
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run check target
+        run: cmake --build build --target check
+
+  code-formatting:
+    name: Check Code Formatting
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y astyle=3.1-3build1
+
+      - name: Check code formatting
+        working-directory: src
+        run: |
+          # Configure git to recognize the workspace
+          git config --global --add safe.directory ${{ github.workspace }}
+
+          # Run astyle-apply.sh to check and apply formatting
+          # This will modify files in place if formatting is needed
+          ./config/astyle-apply.sh .
+
+          # Check if any source files were modified (formatting changes)
+          if ! git diff --exit-code -- '*.c' '*.h' '*.hpp'; then
+            echo "::error::Code formatting check failed. Some source files need formatting."
+            echo "::error::Run './config/astyle-apply.sh .' from the src directory to fix formatting issues."
+            echo "::error::Then commit the formatted files."
+            echo "::error::Modified files:"
+            git diff --name-only -- '*.c' '*.h' '*.hpp'
+            exit 1
+          fi
+          echo "Code formatting check passed"
+
+  mixed-precision-check:
+    name: Check Mixed-Precision Code
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool build-essential libopenmpi-dev openmpi-bin
+
+      - name: Check mixed-precision code
+        working-directory: src
+        run: |
+          # Run mixed-precision check
+          echo "Running mixed-precision code check..."
+          ./mup_check
+          MUP_EXIT_CODE=$?
+
+          if [ $MUP_EXIT_CODE -ne 0 ]; then
+            echo "::error::Mixed-precision code check failed"
+            exit 1
+          fi
+          echo "Mixed-precision code check passed"
+          ./mup_clean
+
+  headers-check:
+    name: Check Headers
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ make autoconf automake libtool build-essential libopenmpi-dev openmpi-bin
+
+      - name: Check headers
+        working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          ./test.sh check-headers.sh "$SRC_DIR"
+          if [ -s check-headers.err ]; then
+            echo "::error::Headers check failed"
+            cat check-headers.err
+            exit 1
+          fi
+          echo "Headers check passed"
+
+  code-checks:
+    name: Code Checks (${{ matrix.check }})
+    runs-on: ubuntu-latest
+    needs: [require-label]
+    if: github.event_name != 'pull_request' || needs.require-label.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - license
+          - integer
+          - double
+          - mpi
+          - memory
+          - case
+          - annotation
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Install code-check dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3 universal-ctags
+
+      - name: Check ${{ matrix.check }}
+        working-directory: AUTOTEST
+        env:
+          AR: "ar -rc"
+        run: |
+          SRC_DIR="${{ github.workspace }}/src"
+          case "${{ matrix.check }}" in
+            license)
+              ./test.sh check-license.sh "$SRC_DIR/.."
+              if [ -s check-license.err ]; then
+                echo "::error::License header check failed"
+                cat check-license.err
+                exit 1
+              fi
+              echo "License header check passed"
+              ;;
+            integer)
+              ./test.sh check-int.sh "$SRC_DIR"
+              if [ -s check-int.err ]; then
+                echo "::error::Integer usage check failed"
+                cat check-int.err
+                exit 1
+              fi
+              echo "Integer usage check passed"
+              ;;
+            double)
+              ./test.sh check-double.sh "$SRC_DIR"
+              if [ -s check-double.err ]; then
+                echo "::error::Double usage check failed"
+                cat check-double.err
+                exit 1
+              fi
+              echo "Double usage check passed"
+              ;;
+            mpi)
+              ./test.sh check-mpi.sh "$SRC_DIR"
+              if [ -s check-mpi.err ]; then
+                echo "::error::MPI usage check failed"
+                cat check-mpi.err
+                exit 1
+              fi
+              echo "MPI usage check passed"
+              ;;
+            memory)
+              ./test.sh check-mem.sh "$SRC_DIR"
+              if [ -s check-mem.err ]; then
+                echo "::error::Memory usage check failed"
+                cat check-mem.err
+                exit 1
+              fi
+              echo "Memory usage check passed"
+              ;;
+            case)
+              ./test.sh check-case.sh "$SRC_DIR/.."
+              if [ -s check-case.err ]; then
+                echo "::error::Case-insensitive filename check failed"
+                cat check-case.err
+                exit 1
+              fi
+              echo "Case-insensitive filename check passed"
+              ;;
+            annotation)
+              python3 "$SRC_DIR/config/check_annotation.py"
+              echo "Annotation check passed"
+              ;;
+          esac

@@ -1,5 +1,7 @@
 ##############################################################################
 #
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+#
 # This file describes the input file for the 'structmat.c' driver.
 #
 # The input file is line-based.  Any line beginning with a '#' character is

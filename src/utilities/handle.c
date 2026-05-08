@@ -233,36 +233,43 @@ hypre_SetGaussSeidelMethod( HYPRE_Int gs_method )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetUserDeviceMalloc
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GetDeviceGSMethod(void)
+{
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   return hypre_HandleDeviceGSMethod(hypre_handle());
+#else
+   return 0;
+#endif
+}
+
+#if defined(HYPRE_USING_GPU)
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetUserDeviceMalloc(GPUMallocFunc func)
 {
-#if defined(HYPRE_USING_GPU)
    hypre_HandleUserDeviceMalloc(hypre_handle()) = func;
-#else
-   HYPRE_UNUSED_VAR(func);
-#endif
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetUserDeviceMfree
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetUserDeviceMfree(GPUMfreeFunc func)
 {
-#if defined(HYPRE_USING_GPU)
    hypre_HandleUserDeviceMfree(hypre_handle()) = func;
-#else
-   HYPRE_UNUSED_VAR(func);
-#endif
 
    return hypre_error_flag;
 }
+
+#endif /* if defined(HYPRE_USING_GPU) */
 
 /*--------------------------------------------------------------------------
  * hypre_SetGpuAwareMPI

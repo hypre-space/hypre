@@ -40,7 +40,7 @@ Final Relative Residual Norm = 7.193490e-05
 Iterations = 7
 PCG_Iterations = 3
 DSCG_Iterations = 4
-Final Relative Residual Norm = 6.677464e-05
+Final Relative Residual Norm = 8.244903e-05
 
 # Output file: solvers_ij.out.10
 Iterations = 6

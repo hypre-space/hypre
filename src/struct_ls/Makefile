@@ -62,7 +62,7 @@ CUFILES =\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
  cyclic_reduction.c\
- diagscale.c\
+ diag_scale.c\
  jacobi.c\
  pfmg2_setup_rap.c\
  pfmg3_setup_rap.c\
@@ -149,4 +149,4 @@ libHYPRE_struct_ls.so libHYPRE_struct_ls.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

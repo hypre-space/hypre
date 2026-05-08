@@ -77,5 +77,5 @@ mpirun -np 4 ./ij -solver 2 -tol 1e-2 -printbin \
 mpirun -np 1 ./ij -printcsr > io.out.200
 mpirun -np 1 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.201
 mpirun -np 3 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.202
-mpirun -np 5 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.203
-mpirun -np 7 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.204
+mpirun -np 4 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.203
+mpirun -np 8 ./ij -fromonecsrfile csr.out.A.D.0 -rhsfromonefile csr.out.b.0 -x0fromonefile csr.out.x0.0 > io.out.204

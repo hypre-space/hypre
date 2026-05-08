@@ -520,6 +520,24 @@ HYPRE_StructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const char
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixScale_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, hypre_long_double scalar )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatrixScale_flt( matrix, (hypre_float)scalar );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatrixScale_dbl( matrix, (hypre_double)scalar );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatrixScale_long_dbl( matrix, (hypre_long_double)scalar );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    switch (precision)
@@ -1214,24 +1232,6 @@ HYPRE_StructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_StructVe
          return HYPRE_StructVectorSetRandomValues_dbl( vector, seed );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_StructVectorSetRandomValues_long_dbl( vector, seed );
-      default:
-         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_StructVectorSetStride_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *stride )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return HYPRE_StructVectorSetStride_flt( vector, stride );
-      case HYPRE_REAL_DOUBLE:
-         return HYPRE_StructVectorSetStride_dbl( vector, stride );
-      case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_StructVectorSetStride_long_dbl( vector, stride );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

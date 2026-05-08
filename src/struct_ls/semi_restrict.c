@@ -61,11 +61,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
-   hypre_Index             ustride;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -74,7 +71,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, findex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
    hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
@@ -229,9 +226,9 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-         R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
-         r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
-         rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
+         R_dbox  = hypre_StructMatrixBoxDataBox(R,  fi);
+         r_dbox  = hypre_StructVectorBoxDataBox(r,  fi);
+         rc_dbox = hypre_StructVectorBoxDataBox(rc, ci);
 
          // RL: PTROFFSET
          HYPRE_Int Rp0_offset = 0, rp0_offset, rp1_offset;

@@ -441,7 +441,10 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
 
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDevice();
+   if (hypre_GetExecPolicy1(hypre_StructMatrixMemoryLocation(smatrix)) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SyncDevice();
+   }
 #endif
 
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
@@ -540,15 +543,12 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
    HYPRE_Complex         *data;
-   hypre_Index            ustride;
 
    /* if values already accumulated, just return */
    if (hypre_SStructPMatrixAccumulated(pmatrix))
    {
       return hypre_error_flag;
    }
-
-   hypre_SetIndex(ustride, 1);
 
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
@@ -570,7 +570,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
             }
 
             /* accumulate values from AddTo */
-            hypre_CreateCommInfoFromNumGhost(sgrid, ustride, num_ghost, &comm_info);
+            hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
             hypre_CommPkgCreate(comm_info,
                                 hypre_StructMatrixDataSpace(smatrix),
                                 hypre_StructMatrixDataSpace(smatrix),
@@ -683,9 +683,9 @@ hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
       tsize  = hypre_SStructPMatrixNVars(pmatrix);
    }
 
-   for (v = vstart; v < vsize; v++)
+   for (v = vstart; v < (vstart + vsize); v++)
    {
-      for (t = tstart; t < tsize; t++)
+      for (t = tstart; t < (tstart + tsize); t++)
       {
          pmsymmetric[v][t] = symmetric;
       }
@@ -1125,7 +1125,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
                                                   &col_coords[ncoeffs], matrix_type);
 
-            coeffs[ncoeffs] = values[i];
+            coeffs[ncoeffs] = h_values[i];
             ncoeffs++;
          }
       }
@@ -1335,7 +1335,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
       values_map   = hypre_TAlloc(HYPRE_Int,      num_nonzeros, memory_location);
 
       /* TODO (VPM): We could wrap this into a separate function */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypreDevice_IntFilln(values_map, num_nonzeros, -1);
@@ -1370,15 +1370,23 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
           * This may result in gaps, but IJSetValues2() is designed for that. */
          nrows = hypre_BoxVolume(box);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypreDevice_IntFilln(ncols, nrows, 0);
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::transform,
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                               row_indexes,
+            [const_val = nentries] (const auto & x) { return x * const_val; } );
+#else
             HYPRE_THRUST_CALL( transform,
                                thrust::counting_iterator<HYPRE_Int>(0),
                                thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                                row_indexes,
                                _1 * nentries );
+#endif
          }
          else
 #endif
@@ -1575,22 +1583,22 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-            HYPRE_THRUST_CALL( for_each,
-                               thrust::make_counting_iterator(0),
-                               thrust::make_counting_iterator(num_nonzeros),
-                               [ = ] __device__ (HYPRE_Int i)
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::for_each,
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                               oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
+                               [ = ] (HYPRE_Int i)
             {
                if (values_map[i] >= 0)
                {
                   values[i] = ijvalues[values_map[i]];
                }
             });
-#elif defined(HYPRE_USING_SYCL)
-            HYPRE_ONEDPL_CALL( for_each,
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
-                               [ = ] (HYPRE_Int i)
+#else
+            HYPRE_THRUST_CALL( for_each,
+                               thrust::make_counting_iterator(0),
+                               thrust::make_counting_iterator(num_nonzeros),
+                               [ = ] __device__ (HYPRE_Int i)
             {
                if (values_map[i] >= 0)
                {
@@ -2219,9 +2227,6 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
 #if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
-#if defined(HYPRE_USING_SYCL)
-      /* WM: todo - sycl */
-#else
       max_num_rownnz = hypre_min(num_rows,
                                  hypre_CSRMatrixNumRownnz(A_ud) +
                                  hypre_CSRMatrixNumRownnz(A_uo));
@@ -2229,12 +2234,21 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
       if (hypre_CSRMatrixRownnz(A_ud) && hypre_CSRMatrixRownnz(A_uo))
       {
          nonzero_rows = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::merge,
+                            hypre_CSRMatrixRownnz(A_ud),
+                            hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
+                            hypre_CSRMatrixRownnz(A_uo),
+                            hypre_CSRMatrixRownnz(A_uo) + hypre_CSRMatrixNumRownnz(A_uo),
+                            nonzero_rows );
+#else
          HYPRE_THRUST_CALL( merge,
                             hypre_CSRMatrixRownnz(A_ud),
                             hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
                             hypre_CSRMatrixRownnz(A_uo),
                             hypre_CSRMatrixRownnz(A_uo) + hypre_CSRMatrixNumRownnz(A_uo),
                             nonzero_rows );
+#endif
       }
       else if (hypre_CSRMatrixRownnz(A_ud))
       {
@@ -2243,17 +2257,26 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
 
       if (nonzero_rows)
       {
+#if defined(HYPRE_USING_SYCL)
+         nonzero_rows_end = HYPRE_ONEDPL_CALL(std::unique,
+                                              nonzero_rows,
+                                              nonzero_rows + max_num_rownnz);
+#else
          nonzero_rows_end = HYPRE_THRUST_CALL(unique,
                                               nonzero_rows,
                                               nonzero_rows + max_num_rownnz);
+#endif
       }
       else
       {
          nonzero_rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+         hypre_SequenceSycl( nonzero_rows, nonzero_rows + num_rows, 0 );
+#else
          HYPRE_THRUST_CALL( sequence, nonzero_rows, nonzero_rows + num_rows );
+#endif
          nonzero_rows_end = nonzero_rows + num_rows;
       }
-#endif
    }
 #endif
 
@@ -2346,7 +2369,34 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                hypre_BoxLoop1End(ii);
 
 #if defined(HYPRE_USING_SYCL)
-               /* WM: todo - sycl */
+               /* Get the nonzero rows for this box */
+               box_nnzrows_end = HYPRE_ONEDPL_CALL( std::copy_if,
+                                                    nonzero_rows,
+                                                    nonzero_rows_end,
+                                                    box_nnzrows,
+                                                    in_range<HYPRE_Int>(offset, offset + volume) );
+               HYPRE_ONEDPL_CALL( std::transform,
+                                  box_nnzrows,
+                                  box_nnzrows_end,
+                                  box_nnzrows,
+               [const_val = offset] (const auto & x) { return x - const_val; } );
+               num_indices = box_nnzrows_end - box_nnzrows;
+
+               /* Gather indices at non-zero rows of A_u */
+               if (ndim > 0)
+               {
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_0, indices_0 );
+               }
+
+               if (ndim > 1)
+               {
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_1, indices_1 );
+               }
+
+               if (ndim > 2)
+               {
+                  hypre_GatherSycl( box_nnzrows, box_nnzrows_end, all_indices_2, indices_2 );
+               }
 #else
                /* Get the nonzero rows for this box */
                box_nnzrows_end = HYPRE_THRUST_CALL( copy_if,
@@ -2584,19 +2634,18 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
+         HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
+         hypre_SequenceSycl( rowidx, rowidx + nrows, 0 );
+         hypre_SequenceSycl( rows, rows + nrows, sizes[0] );
+         hypre_SequenceSycl( cols, cols + nrows, sizes[2] );
+#else
          HYPRE_THRUST_CALL( fill, ncols, ncols + nrows, 1 );
          HYPRE_THRUST_CALL( fill, values, values + nrows, 1.0 );
          HYPRE_THRUST_CALL( sequence, rowidx, rowidx + nrows );
          HYPRE_THRUST_CALL( sequence, rows, rows + nrows, sizes[0] );
          HYPRE_THRUST_CALL( sequence, cols, cols + nrows, sizes[2] );
-
-#elif defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::fill, ncols, ncols + nrows, 1 );
-         HYPRE_ONEDPL_CALL( std::fill, values, values + nrows, 1.0 );
-         hypreSycl_sequence( rowidx, rowidx + nrows, 0 );
-         hypreSycl_sequence( rows, rows + nrows, sizes[0] );
-         hypreSycl_sequence( cols, cols + nrows, sizes[2] );
 #endif
       }
       else

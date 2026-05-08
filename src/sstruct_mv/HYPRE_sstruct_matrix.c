@@ -1734,3 +1734,13 @@ HYPRE_Int HYPRE_SStructMatrixMatmat( HYPRE_SStructMatrix  A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixScale( HYPRE_SStructMatrix  matrix,
+                          HYPRE_Complex        scalar )
+{
+   return hypre_SStructMatrixScale((hypre_SStructMatrix *) matrix, scalar);
+}

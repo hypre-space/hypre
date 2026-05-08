@@ -75,6 +75,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      unroll;
    HYPRE_Int      cgs;

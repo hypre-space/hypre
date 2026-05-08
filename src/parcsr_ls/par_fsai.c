@@ -44,6 +44,14 @@ hypre_FSAICreate( void )
     *-----------------------------------------------------------------------*/
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
+   /* Set base solver function pointers */
+   {
+      hypre_Solver *base      = (hypre_Solver *) fsai_data;
+      hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_FSAISetup;
+      hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_FSAISolve;
+      hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_FSAIDestroy;
+   }
+
    /* setup params */
    local_solve_type = 0;
    max_steps = 3;

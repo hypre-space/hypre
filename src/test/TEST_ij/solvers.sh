@@ -129,6 +129,8 @@ FILES="\
  ${TNAME}.out.121\
  ${TNAME}.out.122\
  ${TNAME}.out.120\
+ ${TNAME}.out.123\
+ ${TNAME}.out.124\
 "
 
 for i in $FILES
