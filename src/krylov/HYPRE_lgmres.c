@@ -283,4 +283,3 @@ HYPRE_Int HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void *residual )
    /* returns a pointer to the residual vector */
    return hypre_LGMRESGetResidual( (void *) solver, (void **) residual );
 }
-

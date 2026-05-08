@@ -20,14 +20,19 @@ typedef struct
    HYPRE_PtrToSolverFcn   solve;
    HYPRE_PtrToDestroyFcn  destroy;
 
+   /* Common parameters */
+   HYPRE_Int              is_setup; /* 1 after a successful Setup call */
 } hypre_Solver;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the hypre_Solver structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_SolverSetup(data)       ((data) -> setup)
-#define hypre_SolverSolve(data)       ((data) -> solve)
-#define hypre_SolverDestroy(data)     ((data) -> destroy)
+#define hypre_SolverSetup(data)          ((data) -> setup)
+#define hypre_SolverSolve(data)          ((data) -> solve)
+#define hypre_SolverDestroy(data)        ((data) -> destroy)
+#define hypre_SolverSetupIsDone(data)    ((data) -> is_setup)
+#define hypre_SolverSetIsSetup(data)     ((data) -> is_setup = 1)
+#define hypre_SolverResetIsSetup(data)   ((data) -> is_setup = 0)
 
 #endif /* HYPRE_BASE_SOLVER_HEADER */
