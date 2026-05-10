@@ -69,10 +69,9 @@ FILES =\
  threading.c\
  timer.c\
  timing.c\
- caliper_instrumentation.c
 
 CUFILES=\
- device_markers.c\
+ annotation.c\
  device_utils.c\
  general.c\
  handle.c\
