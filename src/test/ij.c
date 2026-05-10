@@ -219,6 +219,7 @@ main( hypre_int argc,
    HYPRE_BigInt        first_local_col, last_local_col;
    HYPRE_BigInt       *partitioning = NULL;
    HYPRE_Int           variant, overlap, domain_type;
+   HYPRE_Int           schwarz_local_solver;
    HYPRE_Real          schwarz_rlx_weight;
    HYPRE_Real         *values, val;
 
@@ -2022,6 +2023,7 @@ main( hypre_int argc,
    overlap = 1;  /* 1 layer overlap */
    domain_type = 2; /* through agglomeration */
    schwarz_rlx_weight = 1.;
+   schwarz_local_solver = 0; /* ILU(k) by default */
 
    /* defaults for GMRES */
    k_dim = 5;
@@ -2085,6 +2087,11 @@ main( hypre_int argc,
       {
          arg_index++;
          schwarz_rlx_weight = (HYPRE_Real)atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-oschw_lsolver") == 0 )
+      {
+         arg_index++;
+         schwarz_local_solver = atoi(argv[arg_index++]); /* 0=ILU(k),1=ILUT,2=AMG,3=SuperLU */
       }
       else if ( strcmp(argv[arg_index], "-adroptol") == 0 )
       {
@@ -2724,6 +2731,9 @@ main( hypre_int argc,
          hypre_printf("       80=ILU             81=ILU-GMRES\n");
          hypre_printf("       82=ILU-FlexGMRES  \n");
          hypre_printf("       90=AMG-DD          91=AMG-DD-GMRES\n");
+         hypre_printf("       92=OSchwarz-PCG    94=OSchwarz-GMRES\n");
+         hypre_printf("       95=OSchwarz-FlexGMRES 96=OSchwarz-BiCGSTAB\n");
+         hypre_printf("       52=OSchwarz-LGMRES\n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening\n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random\n");
@@ -2951,7 +2961,11 @@ main( hypre_int argc,
          hypre_printf("  -ov <val>          :over lap:\n");
          hypre_printf("  -dom <val>         :domain type\n");
          hypre_printf("  -use_ns            : use non-symm schwarz smoother\n");
-         hypre_printf("  -var <val>         : schwarz smoother variant (0-3) \n");
+         hypre_printf("  -var <val>         : schwarz smoother variant (0-3); for OSchwarz solvers\n");
+         hypre_printf("                       52/92/94/95/96, 0=RAS and 1=AS\n");
+         hypre_printf("  -oschw_lsolver <0/1/2/3> : OSchwarz local solver (0=ILU(k),1=ILUT,2=AMG,3=SuperLU)\n");
+         hypre_printf("                       OSchwarz ILU knobs use -ilu_lfil, -ilu_max_row_nnz,\n");
+         hypre_printf("                       and -ilu_droptol\n");
          hypre_printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
          hypre_printf("  -nongalerk_tol <val> <list>    : specify the NonGalerkin drop tolerance\n");
          hypre_printf("                                   and list contains the values, where last value\n");
@@ -5177,8 +5191,13 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
       }
-
       hypre_GpuProfilingPopRange();
+
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -5234,7 +5253,6 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          hypre_GpuProfilingPushRange("AMG-Setup-2");
-
          if (solver_id == 0)
          {
             HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
@@ -5243,8 +5261,13 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
          }
-
          hypre_GpuProfilingPopRange();
+
+         if (HYPRE_GetError())
+         {
+            HYPRE_PrintErrorMessages(comm);
+            hypre_MPI_Abort(comm, 1);
+         }
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", comm);
@@ -5461,6 +5484,11 @@ main( hypre_int argc,
       }
 
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -5525,7 +5553,8 @@ main( hypre_int argc,
    if (!lobpcgFlag &&
        (solver_id == 1  || solver_id == 2  || solver_id == 8  ||
         solver_id == 12 || solver_id == 14 || solver_id == 21 ||
-        solver_id == 31 || solver_id == 43 || solver_id == 71))
+        solver_id == 31 || solver_id == 43 || solver_id == 71 ||
+        solver_id == 92))
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("PCG Setup");
@@ -5757,6 +5786,48 @@ main( hypre_int argc,
          HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
          HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
          HYPRE_SchwarzSetNonSymm(pcg_precond, use_nonsymm_schwarz);
+         HYPRE_PCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                             pcg_precond);
+      }
+      else if (solver_id == 92)
+      {
+         /* use Overlapping Schwarz preconditioner */
+         HYPRE_Int oschwarz_variant;
+         if (myid == 0) { hypre_printf("Solver: Schwarz-PCG\n"); }
+
+         if (variant < 0 || variant > 1)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: overlapping Schwarz uses -var 0 for RAS or -var 1 for AS\n");
+            }
+            return (-1);
+         }
+         if (schwarz_local_solver < 0 || schwarz_local_solver > 3)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: -oschw_lsolver must be 0=ILU(k), 1=ILUT, 2=AMG, or 3=SuperLU_dist\n");
+            }
+            return (-1);
+         }
+
+         /* Compute unified variant: base = (local_solver + 1) * 10, + 0 for RAS, + 1 for AS */
+         oschwarz_variant = (schwarz_local_solver + 1) * 10 + variant;
+
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, oschwarz_variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_SchwarzSetMaxIter(pcg_precond, 1);
+         HYPRE_SchwarzSetTol(pcg_precond, pc_tol);
+         HYPRE_SchwarzSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_SchwarzSetLogging(pcg_precond, 0);
+         HYPRE_SchwarzSetILUKLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_SchwarzSetILUTMaxNnzPerRow(pcg_precond, ilu_max_row_nnz);
+         HYPRE_SchwarzSetILUTDroptol(pcg_precond, ilu_droptol);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
@@ -6114,6 +6185,11 @@ main( hypre_int argc,
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                      (HYPRE_Vector) b, (HYPRE_Vector) x);
       hypre_GpuProfilingPopRange();
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
@@ -6154,7 +6230,11 @@ main( hypre_int argc,
 
          HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                         (HYPRE_Vector) b, (HYPRE_Vector) x);
-
+         if (HYPRE_GetError())
+         {
+            HYPRE_PrintErrorMessages(comm);
+            hypre_MPI_Abort(comm, 1);
+         }
          hypre_GpuProfilingPopRange();
 
          hypre_EndTiming(time_index);
@@ -6197,6 +6277,10 @@ main( hypre_int argc,
          HYPRE_ParaSailsDestroy(pcg_precond);
       }
       else if (solver_id == 12)
+      {
+         HYPRE_SchwarzDestroy(pcg_precond);
+      }
+      else if (solver_id == 92)
       {
          HYPRE_SchwarzDestroy(pcg_precond);
       }
@@ -6630,9 +6714,6 @@ main( hypre_int argc,
          {
             hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
          }
-
-         /*      HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_M,
-          *                     (HYPRE_Vector)b, (HYPRE_Vector)x); */
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", comm);
@@ -7283,7 +7364,8 @@ main( hypre_int argc,
 
    if (solver_id == 3  || solver_id == 4  || solver_id == 7  ||
        solver_id == 15 || solver_id == 18 || solver_id == 22 ||
-       solver_id == 44 || solver_id == 81 || solver_id == 91)
+       solver_id == 44 || solver_id == 81 || solver_id == 91 ||
+       solver_id == 94)
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("GMRES Setup");
@@ -7567,6 +7649,48 @@ main( hypre_int argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                                                nonzeros_to_keep );
       }
+      else if (solver_id == 94)
+      {
+         /* use Overlapping Schwarz as preconditioner */
+         HYPRE_Int oschwarz_variant;
+         if (myid == 0) { hypre_printf("Solver: Schwarz-GMRES\n"); }
+
+         if (variant < 0 || variant > 1)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: overlapping Schwarz uses -var 0 for RAS or -var 1 for AS\n");
+            }
+            return (-1);
+         }
+         if (schwarz_local_solver < 0 || schwarz_local_solver > 3)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: -oschw_lsolver must be 0=ILU(k), 1=ILUT, 2=AMG, or 3=SuperLU_dist\n");
+            }
+            return (-1);
+         }
+
+         /* Compute unified variant: base = (local_solver + 1) * 10, + 0 for RAS, + 1 for AS */
+         oschwarz_variant = (schwarz_local_solver + 1) * 10 + variant;
+
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, oschwarz_variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_SchwarzSetMaxIter(pcg_precond, 1);
+         HYPRE_SchwarzSetTol(pcg_precond, pc_tol);
+         HYPRE_SchwarzSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_SchwarzSetLogging(pcg_precond, 0);
+         HYPRE_SchwarzSetILUKLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_SchwarzSetILUTMaxNnzPerRow(pcg_precond, ilu_max_row_nnz);
+         HYPRE_SchwarzSetILUTDroptol(pcg_precond, ilu_droptol);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                               pcg_precond);
+      }
       else if (solver_id == 15)
       {
          /* use GSMG as preconditioner */
@@ -7833,7 +7957,12 @@ main( hypre_int argc,
             hypre_printf("HYPRE_GMRESGetPrecond got good precond\n");
          }
       }
-      HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix) parcsr_M, (HYPRE_Vector) b, (HYPRE_Vector) x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -7940,6 +8069,10 @@ main( hypre_int argc,
       {
          HYPRE_ParChebyDestroy(pcg_precond);
       }
+      else if (solver_id == 94)
+      {
+         HYPRE_SchwarzDestroy(pcg_precond);
+      }
       else if (solver_id == 44)
       {
          HYPRE_EuclidDestroy(pcg_precond);
@@ -7965,7 +8098,7 @@ main( hypre_int argc,
     * Solve the system using LGMRES
     *-----------------------------------------------------------*/
 
-   if (solver_id == 50 || solver_id == 51 )
+   if (solver_id == 50 || solver_id == 51 || solver_id == 52)
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("LGMRES Setup");
@@ -8139,6 +8272,49 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                 pcg_precond);
       }
+      else if (solver_id == 52)
+      {
+         /* use Overlapping Schwarz as preconditioner */
+         HYPRE_Int oschwarz_variant;
+         if (myid == 0) { hypre_printf("Solver: Schwarz-LGMRES\n"); }
+
+         if (variant < 0 || variant > 1)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: overlapping Schwarz uses -var 0 for RAS or -var 1 for AS\n");
+            }
+            return (-1);
+         }
+         if (schwarz_local_solver < 0 || schwarz_local_solver > 3)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: -oschw_lsolver must be 0=ILU(k), 1=ILUT, 2=AMG, or 3=SuperLU_dist\n");
+            }
+            return (-1);
+         }
+
+         /* Compute unified variant: base = (local_solver + 1) * 10, + 0 for RAS, + 1 for AS */
+         oschwarz_variant = (schwarz_local_solver + 1) * 10 + variant;
+
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, oschwarz_variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_SchwarzSetMaxIter(pcg_precond, 1);
+         HYPRE_SchwarzSetTol(pcg_precond, pc_tol);
+         HYPRE_SchwarzSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_SchwarzSetLogging(pcg_precond, 0);
+         HYPRE_SchwarzSetILUKLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_SchwarzSetILUTMaxNnzPerRow(pcg_precond, ilu_max_row_nnz);
+         HYPRE_SchwarzSetILUTDroptol(pcg_precond, ilu_droptol);
+
+         HYPRE_LGMRESSetPrecond(pcg_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                                pcg_precond);
+      }
 
       HYPRE_LGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
@@ -8150,8 +8326,12 @@ main( hypre_int argc,
       {
          hypre_printf("HYPRE_LGMRESGetPrecond got good precond\n");
       }
-      HYPRE_LGMRESSetup
-      (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_LGMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -8161,8 +8341,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("LGMRES Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_LGMRESSolve
-      (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_LGMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", comm);
@@ -8177,6 +8356,10 @@ main( hypre_int argc,
       if (solver_id == 51)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+      else if (solver_id == 52)
+      {
+         HYPRE_SchwarzDestroy(pcg_precond);
       }
 
       if (myid == 0)
@@ -8193,7 +8376,8 @@ main( hypre_int argc,
     * Solve the system using FlexGMRES
     *-----------------------------------------------------------*/
 
-   if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 47)
+   if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 47 ||
+       solver_id == 95)
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
@@ -8521,6 +8705,48 @@ main( hypre_int argc,
                                    (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 95)
+      {
+         /* use Overlapping Schwarz preconditioning */
+         HYPRE_Int oschwarz_variant;
+         if (myid == 0) { hypre_printf("Solver: Schwarz-FlexGMRES\n"); }
+
+         if (variant < 0 || variant > 1)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: overlapping Schwarz uses -var 0 for RAS or -var 1 for AS\n");
+            }
+            return (-1);
+         }
+         if (schwarz_local_solver < 0 || schwarz_local_solver > 3)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: -oschw_lsolver must be 0=ILU(k), 1=ILUT, 2=AMG, or 3=SuperLU_dist\n");
+            }
+            return (-1);
+         }
+
+         /* Compute unified variant: base = (local_solver + 1) * 10, + 0 for RAS, + 1 for AS */
+         oschwarz_variant = (schwarz_local_solver + 1) * 10 + variant;
+
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, oschwarz_variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_SchwarzSetMaxIter(pcg_precond, 1);
+         HYPRE_SchwarzSetTol(pcg_precond, pc_tol);
+         HYPRE_SchwarzSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_SchwarzSetLogging(pcg_precond, 0);
+         HYPRE_SchwarzSetILUKLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_SchwarzSetILUTMaxNnzPerRow(pcg_precond, ilu_max_row_nnz);
+         HYPRE_SchwarzSetILUTDroptol(pcg_precond, ilu_droptol);
+         HYPRE_FlexGMRESSetPrecond(pcg_solver,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                                   (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                                   pcg_precond);
+      }
       else if (solver_id == 60)
       {
          /* use diagonal scaling as preconditioner */
@@ -8551,8 +8777,12 @@ main( hypre_int argc,
       // HYPRE_FlexGMRESSetModifyPC( pcg_solver,
       //                             (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
 
-      HYPRE_FlexGMRESSetup
-      (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_FlexGMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -8578,6 +8808,10 @@ main( hypre_int argc,
       if (solver_id == 61)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+      else if (solver_id == 95)
+      {
+         HYPRE_SchwarzDestroy(pcg_precond);
       }
       else if (solver_id == 72)
       {
@@ -8632,7 +8866,8 @@ main( hypre_int argc,
     * Solve the system using BiCGSTAB
     *-----------------------------------------------------------*/
 
-   if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73)
+   if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73 ||
+       solver_id == 96)
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
@@ -8830,6 +9065,49 @@ main( hypre_int argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                                                nonzeros_to_keep );
       }
+      else if (solver_id == 96)
+      {
+         /* use Overlapping Schwarz preconditioning */
+         HYPRE_Int oschwarz_variant;
+         if (myid == 0) { hypre_printf("Solver: Schwarz-BiCGSTAB\n"); }
+
+         if (variant < 0 || variant > 1)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: overlapping Schwarz uses -var 0 for RAS or -var 1 for AS\n");
+            }
+            return (-1);
+         }
+         if (schwarz_local_solver < 0 || schwarz_local_solver > 3)
+         {
+            if (myid == 0)
+            {
+               hypre_printf("Error: -oschw_lsolver must be 0=ILU(k), 1=ILUT, 2=AMG, or 3=SuperLU_dist\n");
+            }
+            return (-1);
+         }
+
+         /* Compute unified variant: base = (local_solver + 1) * 10, + 0 for RAS, + 1 for AS */
+         oschwarz_variant = (schwarz_local_solver + 1) * 10 + variant;
+
+         HYPRE_SchwarzCreate(&pcg_precond);
+         HYPRE_SchwarzSetVariant(pcg_precond, oschwarz_variant);
+         HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_SchwarzSetMaxIter(pcg_precond, 1);
+         HYPRE_SchwarzSetTol(pcg_precond, pc_tol);
+         HYPRE_SchwarzSetPrintLevel(pcg_precond, ioutdat);
+         HYPRE_SchwarzSetLogging(pcg_precond, 0);
+         HYPRE_SchwarzSetILUKLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_SchwarzSetILUTMaxNnzPerRow(pcg_precond, ilu_max_row_nnz);
+         HYPRE_SchwarzSetILUTDroptol(pcg_precond, ilu_droptol);
+
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                                  pcg_precond);
+      }
       else if (solver_id == 45)
       {
          /* use Euclid preconditioning */
@@ -8957,6 +9235,11 @@ main( hypre_int argc,
 
       HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                           (HYPRE_Vector) b, (HYPRE_Vector) x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -9003,6 +9286,10 @@ main( hypre_int argc,
       if (solver_id == 9)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+      else if (solver_id == 96)
+      {
+         HYPRE_SchwarzDestroy(pcg_precond);
       }
 
       if (solver_id == 11)
@@ -9344,6 +9631,11 @@ main( hypre_int argc,
       }
       HYPRE_COGMRESSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                          (HYPRE_Vector) b, (HYPRE_Vector) x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);
@@ -9589,6 +9881,11 @@ main( hypre_int argc,
       }
       HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                       (HYPRE_Vector) b, (HYPRE_Vector) x);
+      if (HYPRE_GetError())
+      {
+         HYPRE_PrintErrorMessages(comm);
+         hypre_MPI_Abort(comm, 1);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", comm);

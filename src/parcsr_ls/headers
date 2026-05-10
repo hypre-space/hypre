@@ -46,6 +46,7 @@ cat par_fsai.h            >> $INTERNAL_HEADER
 cat ams.h                 >> $INTERNAL_HEADER
 cat par_cheby.h           >> $INTERNAL_HEADER
 cat par_ilu.h             >> $INTERNAL_HEADER
+cat schwarz.h             >> $INTERNAL_HEADER
 cat protos.h              >> $INTERNAL_HEADER
 
 #../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
