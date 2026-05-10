@@ -3238,10 +3238,28 @@ HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver, HYPRE_Int block_size
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetCycleType( HYPRE_Solver solver, HYPRE_Int cycle_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetCycleType_pre( precision, solver, cycle_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_MGRSetFRelaxMethod_pre( precision, solver, relax_method );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetFRelaxSmoothCycle_pre( precision, solver, frelax_smooth_cycle );
 }
 
 /*--------------------------------------------------------------------------*/
