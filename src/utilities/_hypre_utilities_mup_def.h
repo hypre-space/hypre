@@ -200,6 +200,7 @@
 #define hypre_MatrixStatsArrayPrint HYPRE_FIXEDPRECISION_FUNC ( hypre_MatrixStatsArrayPrint )
 #define hypre_MatrixStatsCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_MatrixStatsCreate )
 #define hypre_MatrixStatsDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_MatrixStatsDestroy )
+#define hypre_MatrixStatsReduce HYPRE_FIXEDPRECISION_FUNC ( hypre_MatrixStatsReduce )
 #define hypre_MemPrefetch HYPRE_FIXEDPRECISION_FUNC ( hypre_MemPrefetch )
 #define hypre_Memcpy HYPRE_FIXEDPRECISION_FUNC ( hypre_Memcpy )
 #define hypre_MemoryPrintUsage HYPRE_FIXEDPRECISION_FUNC ( hypre_MemoryPrintUsage )

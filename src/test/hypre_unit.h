@@ -39,8 +39,9 @@
    {                                                                      \
       if ((got) != (expected))                                            \
       {                                                                   \
-         hypre_printf("  %s mismatch: got %lld expected %lld\n",          \
-                      (name), (long long) (got), (long long) (expected)); \
+         hypre_printf("  %s mismatch: got %b expected %b\n",              \
+                      (name), (HYPRE_BigInt) (got),                       \
+                      (HYPRE_BigInt) (expected));                         \
          (error) = 1;                                                     \
       }                                                                   \
    } while (0)
@@ -52,7 +53,8 @@
       if (hypre_unit_diff > (tol))                                        \
       {                                                                   \
          hypre_printf("  %s mismatch: got %.17e expected %.17e\n",        \
-                      (name), (double) (got), (double) (expected));       \
+                      (name), (HYPRE_Real) (got),                         \
+                      (HYPRE_Real) (expected));                           \
          (error) = 1;                                                     \
       }                                                                   \
    } while (0)

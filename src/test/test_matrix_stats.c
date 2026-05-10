@@ -32,7 +32,7 @@ CreateHostParCSRMatrix(HYPRE_Int        num_rows,
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix    *diag;
 
-   A = hypre_ParCSRMatrixCreate(MPI_COMM_SELF, num_rows, num_cols,
+   A = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_SELF, num_rows, num_cols,
                                 row_starts, col_starts, 0, num_nonzeros, 0);
    hypre_ParCSRMatrixInitialize_v2(A, HYPRE_MEMORY_HOST);
    diag = hypre_ParCSRMatrixDiag(A);
