@@ -146,6 +146,7 @@ hypre_MatrixStatsArrayDestroy
 hypre_MatrixStatsArrayPrint
 hypre_MatrixStatsCreate
 hypre_MatrixStatsDestroy
+hypre_MatrixStatsReduce
 hypre_MemPrefetch
 hypre_Memcpy
 hypre_MemoryPrintUsage
