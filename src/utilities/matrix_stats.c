@@ -236,7 +236,7 @@ hypre_MatrixStatsReduce(hypre_MatrixStats *local_stats,
       return hypre_error_flag;
    }
 
-   hypre_MatrixStatsNnzrowMin(global_stats) = (HYPRE_Int) -real_recv[0];
+   hypre_MatrixStatsNnzrowMin(global_stats) = (HYPRE_Int) - real_recv[0];
    hypre_MatrixStatsNnzrowMax(global_stats) = (HYPRE_Int)  real_recv[1];
    hypre_MatrixStatsRowsumMin(global_stats) =             -real_recv[2];
    hypre_MatrixStatsRowsumMax(global_stats) =              real_recv[3];
