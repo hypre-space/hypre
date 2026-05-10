@@ -73,7 +73,8 @@ HYPRE_DRIVERS =\
  zboxloop.c
 
 HYPRE_UNIT_TESTS =\
- test_csr_overlap.c
+ test_csr_overlap.c\
+ test_matrix_stats.c\
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
@@ -224,6 +225,10 @@ test_mp_pcg_3d: test_mp_pcg_3d.o
 # Unit tests
 
 test_csr_overlap: test_csr_overlap.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_matrix_stats: test_matrix_stats.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
