@@ -1247,9 +1247,6 @@ hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix  *A,
                                hypre_ParVector     *utemp)
 {
 
-   // Not sure if I have to / how to deal with permutations for now
-   hypre_assert(perm == NULL);
-
    HYPRE_Int      num_rows    = hypre_ParCSRMatrixNumRows(A);
 
    hypre_Vector  *utemp_local = hypre_ParVectorLocalVector(utemp);
@@ -1272,19 +1269,44 @@ hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix  *A,
    /* Compute residual: ftemp = f - A*u */
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
 
-   hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, num_rows,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   /* Apply permutation: the factorization was computed on the permuted matrix,
+    * so we must permute the residual into the same ordering before the solves. */
+   if (perm)
+   {
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather(perm, perm + num_rows, ftemp_data, utemp_data);
+#else
+      HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
+#endif
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, num_rows,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
-   /* Forward substitution: L * ftemp = utemp  (in-place on utemp) */
+   /* Forward substitution: L * utemp = utemp  (in-place) */
    hypre_CSRMatrixILU0LevelSetLSolve(matLU_d, num_low_levels, low_set_offsets,
                                      d_low_set_rows, utemp_data);
 
-   /* Backward substitution: U * utemp = utemp  (in-place on utemp) */
+   /* Backward substitution: U * utemp = utemp  (in-place) */
    hypre_CSRMatrixILU0LevelSetUSolve(matLU_d, num_upp_levels, upp_set_offsets,
                                      d_upp_set_rows, utemp_data);
 
-   hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, num_rows,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   /* Apply reverse permutation: scatter correction back to original ordering */
+   if (perm)
+   {
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_scatter(utemp_data, utemp_data + num_rows, perm, ftemp_data);
+#else
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
+#endif
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, num_rows,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* Update solution: u = u + ftemp */
    hypre_ParVectorAxpy(beta, ftemp, u);

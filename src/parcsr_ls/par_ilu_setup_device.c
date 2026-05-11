@@ -169,6 +169,9 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          /* Permute A_diag: A_diag = A_diag(perm, qperm) */
          hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rqperm_data, &A_diag);
 
+         /* Move diagonal to first position in each row (required by level-set kernels) */
+         hypre_CSRMatrixReorder(A_diag);
+
          /* Clone to host for level-set computation (structure only) */
          hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixClone_v2(A_diag, 0, HYPRE_MEMORY_HOST);
 
