@@ -704,18 +704,8 @@ hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
          init_resnorm = resnorm;
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
 
-         if (rhs_norm > HYPRE_REAL_EPSILON)
-         {
-            rel_resnorm = init_resnorm / rhs_norm;
-         }
-         else
-         {
-            /* rhs is zero, return a zero solution */
-            hypre_ParVectorSetZeros(U_array[0]);
-            hypre_GpuProfilingPopRange();
-            HYPRE_ANNOTATE_REGION_END("%s", region_name);
-            return hypre_error_flag;
-         }
+         rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (init_resnorm / rhs_norm) : init_resnorm;
+
          if (my_id == 0)
          {
             hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");
@@ -1096,6 +1086,13 @@ hypre_MGRCycle( void              *mgr_vdata,
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
                }
             }
+            else if (level_smooth_type[fine_grid] == 16)
+            {
+               /* HYPRE ILU */
+               HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
+                              A_array[fine_grid], F_array[fine_grid],
+                              U_array[fine_grid]);
+            }
             else if ((mgr_data -> level_smoother)[fine_grid])
             {
                /* Generic smoother object */
@@ -1139,55 +1136,56 @@ hypre_MGRCycle( void              *mgr_vdata,
                                    F_array, U_array, my_id);
          }
 
-         /* Update residual and compute coarse-grid rhs */
-         hypre_sprintf(region_name, "Residual");
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-
-         hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-                                            U_array[fine_grid], fp_one,
-                                            F_array[fine_grid], Vtemp);
-
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-
-         hypre_sprintf(region_name, "Restrict");
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-         if (R_array[fine_grid])
-         {
-            /* no transpose necessary for R */
-            hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
-                                     fp_zero, F_array[coarse_grid]);
-         }
-         else
-         {
-#if defined(HYPRE_USING_GPU)
-            if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
-#else
-            if (restrict_type[fine_grid] > 0)
-#endif
-            {
-               hypre_ParCSRMatrixMatvecT(fp_one, RT_array[fine_grid], Vtemp,
-                                         fp_zero, F_array[coarse_grid]);
-            }
-            else
-            {
-               hypre_MGRAddVectorR(CF_marker[fine_grid], CMRK, fp_one,
-                                   Vtemp, fp_zero, &(F_array[coarse_grid]));
-            }
-         }
-         hypre_GpuProfilingPopRange();
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-         HYPRE_ANNOTATE_REGION_END("%s", level_name);
-
          /* Decrement visit counter and decide next direction */
          --lev_counter[level];
          if (lev_counter[level] >= 0 && level < num_coarse_levels)
          {
             /* Go to next coarser level */
             hypre_ParVectorSetZeros(U_array[coarse_grid]);
+
+            /* Update residual and compute coarse-grid rhs */
+            hypre_sprintf(region_name, "Residual");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+
+            hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
+                                               U_array[fine_grid], fp_one,
+                                               F_array[fine_grid], Vtemp);
+
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
+
+            hypre_sprintf(region_name, "Restrict");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+            if (R_array[fine_grid])
+            {
+               /* no transpose necessary for R */
+               hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
+                                        fp_zero, F_array[coarse_grid]);
+            }
+            else
+            {
+#if defined(HYPRE_USING_GPU)
+               if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
+#else
+               if (restrict_type[fine_grid] > 0)
+#endif
+               {
+                  hypre_ParCSRMatrixMatvecT(fp_one, RT_array[fine_grid], Vtemp,
+                                            fp_zero, F_array[coarse_grid]);
+               }
+               else
+               {
+                  hypre_MGRAddVectorR(CF_marker[fine_grid], CMRK, fp_one,
+                                      Vtemp, fp_zero, &(F_array[coarse_grid]));
+               }
+            }
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", level_name);
+
             ++level;
             lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
             phase = (level == num_coarse_levels) ? 3 : 1;
@@ -1195,6 +1193,8 @@ hypre_MGRCycle( void              *mgr_vdata,
          else
          {
             /* Counter exhausted: turn around and go up */
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", level_name);
             phase = 2;
          }
       }
