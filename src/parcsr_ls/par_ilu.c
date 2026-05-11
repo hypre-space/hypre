@@ -1250,6 +1250,12 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
                       hypre_ParILUDataOperatorComplexity(ilu_data));
          break;
 
+      case 60:
+         hypre_printf("Level-set BJ with ILU0 \n");
+         hypre_printf("Operator Complexity (Fill factor) = %f \n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+         break;
+
       default:
          hypre_printf("Unknown type \n");
          break;
