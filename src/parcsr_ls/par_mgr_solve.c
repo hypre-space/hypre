@@ -704,18 +704,8 @@ hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
          init_resnorm = resnorm;
          rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
 
-         if (rhs_norm > HYPRE_REAL_EPSILON)
-         {
-            rel_resnorm = init_resnorm / rhs_norm;
-         }
-         else
-         {
-            /* rhs is zero, return a zero solution */
-            hypre_ParVectorSetZeros(U_array[0]);
-            hypre_GpuProfilingPopRange();
-            HYPRE_ANNOTATE_REGION_END("%s", region_name);
-            return hypre_error_flag;
-         }
+         rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (init_resnorm / rhs_norm) : init_resnorm;
+
          if (my_id == 0)
          {
             hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");

@@ -2856,14 +2856,23 @@ hypre_MGRSetLevelNumRelaxSweeps( void      *mgr_vdata,
 /*--------------------------------------------------------------------------
  * Set the order of the global smoothing step at each level
  *
- * 1 = Down cycle/ Pre-smoothing (default)
- * 2 = Up cycle/ Post-smoothing
+ * 0 = No global smoothing
+ * 1 = Down cycle / Pre-smoothing (default)
+ * 2 = Up cycle / Post-smoothing
+ * 3 = Both pre- and post-smoothing
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (smooth_cycle < 0 || smooth_cycle > 3)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    (mgr_data -> global_smooth_cycle) = smooth_cycle;
    return hypre_error_flag;
 }
@@ -2882,6 +2891,13 @@ HYPRE_Int
 hypre_MGRSetFRelaxSmoothCycle( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (frelax_smooth_cycle < 0 || frelax_smooth_cycle > 3)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    (mgr_data -> frelax_smooth_cycle) = frelax_smooth_cycle;
    return hypre_error_flag;
 }
@@ -2898,6 +2914,13 @@ HYPRE_Int
 hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (cycle_type != 1 && cycle_type != 2)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    (mgr_data -> cycle_type) = cycle_type;
    return hypre_error_flag;
 }
