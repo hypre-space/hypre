@@ -2609,7 +2609,7 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
                row_level_upp[row_idx] = row_level_upp[col_idx] + 1;
 
                /* Keep track of the amount of level sets */
-               if (row_level_upp[row_idx] + 1 > *num_levels_upp)
+               if (row_level_upp[row_idx] + 1 > num_levels_upp)
                {
                   num_levels_upp = row_level_upp[row_idx] + 1;
                }
@@ -2627,7 +2627,7 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
 
    /* Compute offsets for each upper level set */
    upp_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels_upp + 1, HYPRE_MEMORY_HOST);
-   for (i = 0; i < *num_levels_upp; i++)
+   for (i = 0; i < num_levels_upp; i++)
    {
       upp_set_offsets[i + 1] = upp_set_offsets[i] + upp_set_sizes[i];
    }
