@@ -4231,8 +4231,6 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0_factorize_level_set_kernel
- *
  * In-place ILU0 factorization of rows in a single level set.
  *
  * Parameters:
@@ -4244,15 +4242,17 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
  *   A_data           - CSR values (modified in-place: L factors below diagonal,
  *                      U factors on and above diagonal; diagonal = U pivot,
  *                      not inverted)
+ *
+ * TODO (VPM): use (sub-)warp-per-row execution model instead of thread-per-row
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypre_CSRMatrixILU0_factorize_level_set_kernel(hypre_DeviceItem  &item,
-                                               HYPRE_Int          level_set_size,
-                                               HYPRE_Int         *level_set_rows,
-                                               HYPRE_Int         *A_i,
-                                               HYPRE_Int         *A_j,
-                                               HYPRE_Complex     *A_data)
+hypreGPUKernel_CSRMatrixILU0LevelSetFactorize(hypre_DeviceItem  &item,
+                                              HYPRE_Int          level_set_size,
+                                              HYPRE_Int         *level_set_rows,
+                                              HYPRE_Int         *A_i,
+                                              HYPRE_Int         *A_j,
+                                              HYPRE_Complex     *A_data)
 {
    const HYPRE_Int tid = (HYPRE_Int) hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (tid >= level_set_size)
@@ -4312,8 +4312,6 @@ hypre_CSRMatrixILU0_factorize_level_set_kernel(hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0LevelSetFactorization
- *
  * Computes an in-place ILU0 factorization on the GPU by exploiting
  * level-set parallelism. Serial exeuction of one kernel per level-set.
  *
@@ -4355,7 +4353,7 @@ hypre_CSRMatrixILU0LevelSetFactorization(hypre_CSRMatrix *A,
 
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(level_set_size, "thread", bDim);
 
-      HYPRE_GPU_LAUNCH(hypre_CSRMatrixILU0_factorize_level_set_kernel, gDim, bDim,
+      HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMatrixILU0LevelSetFactorize, gDim, bDim,
                        level_set_size,
                        d_low_level_set_rows + level_offset,
                        A_i, A_j, A_data);
@@ -4368,21 +4366,21 @@ hypre_CSRMatrixILU0LevelSetFactorization(hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0_L_solve_level_set_kernel
- *
  * GPU kernel for one lower-triangular level-set forward substitution step.
  * For correctness all previous level-sets must have been solved.
  * Uses diagonal-first CSR format.
+ *
+ * TODO (VPM): use (sub-)warp-per-row execution model instead of thread-per-row
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypre_CSRMatrixILU0_L_solve_level_set_kernel(hypre_DeviceItem  &item,
-                                             HYPRE_Int          level_set_size,
-                                             HYPRE_Int         *level_set_rows,
-                                             HYPRE_Int         *A_i,
-                                             HYPRE_Int         *A_j,
-                                             HYPRE_Complex     *A_data,
-                                             HYPRE_Complex     *f)
+hypreGPUKernel_CSRMatrixILU0LevelSetLSolve(hypre_DeviceItem  &item,
+                                           HYPRE_Int          level_set_size,
+                                           HYPRE_Int         *level_set_rows,
+                                           HYPRE_Int         *A_i,
+                                           HYPRE_Int         *A_j,
+                                           HYPRE_Complex     *A_data,
+                                           HYPRE_Complex     *f)
 {
    const HYPRE_Int tid = (HYPRE_Int) hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -4410,21 +4408,21 @@ hypre_CSRMatrixILU0_L_solve_level_set_kernel(hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0_U_solve_level_set_kernel
- *
  * GPU kernel for one upper-triangular level-set backward substitution step.
  * For correctness all subsequent level-sets must have been solved.
  * Uses diagonal-first CSR format.
+ *
+ * TODO (VPM): use (sub-)warp-per-row execution model instead of thread-per-row
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypre_CSRMatrixILU0_U_solve_level_set_kernel(hypre_DeviceItem  &item,
-                                             HYPRE_Int          level_set_size,
-                                             HYPRE_Int         *level_set_rows,
-                                             HYPRE_Int         *A_i,
-                                             HYPRE_Int         *A_j,
-                                             HYPRE_Complex     *A_data,
-                                             HYPRE_Complex     *f)
+hypreGPUKernel_CSRMatrixILU0LevelSetUSolve(hypre_DeviceItem  &item,
+                                           HYPRE_Int          level_set_size,
+                                           HYPRE_Int         *level_set_rows,
+                                           HYPRE_Int         *A_i,
+                                           HYPRE_Int         *A_j,
+                                           HYPRE_Complex     *A_data,
+                                           HYPRE_Complex     *f)
 {
    const HYPRE_Int tid = (HYPRE_Int) hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -4437,7 +4435,7 @@ hypre_CSRMatrixILU0_U_solve_level_set_kernel(hypre_DeviceItem  &item,
    const HYPRE_Int row_start = A_i[row];
    const HYPRE_Int row_end   = A_i[row + 1];
 
-   /* For the upper solve we iteratre from the end of the row. */
+   /* For the upper solve we iterate from the end of the row. */
    HYPRE_Complex val = f[row];
    for (HYPRE_Int p = row_end - 1; p > row_start; p--)
    {
@@ -4451,8 +4449,6 @@ hypre_CSRMatrixILU0_U_solve_level_set_kernel(hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0LevelSetLSolve
- *
  * Forward substitution Lx = f (in-place, f is overwritten with x) using
  * level-set parallelism. Processes lower level sets in ascending order so
  * that all dependencies are satisfied before each kernel launch.
@@ -4476,13 +4472,16 @@ hypre_CSRMatrixILU0LevelSetLSolve(hypre_CSRMatrix *A,
    HYPRE_Int      *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Complex  *A_data = hypre_CSRMatrixData(A);
 
+   /* Local variables */
+   HYPRE_Int       lvl, level_offset, level_set_size;
+
    // TODO: autotune the block size
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
-   for (HYPRE_Int lvl = 0; lvl < num_low_levels; lvl++)
+   for (lvl = 0; lvl < num_low_levels; lvl++)
    {
-      const HYPRE_Int level_offset   = low_set_offsets[lvl];
-      const HYPRE_Int level_set_size = low_set_offsets[lvl + 1] - level_offset;
+      level_offset   = low_set_offsets[lvl];
+      level_set_size = low_set_offsets[lvl + 1] - level_offset;
 
       if (level_set_size <= 0)
       {
@@ -4491,7 +4490,7 @@ hypre_CSRMatrixILU0LevelSetLSolve(hypre_CSRMatrix *A,
 
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(level_set_size, "thread", bDim);
 
-      HYPRE_GPU_LAUNCH(hypre_CSRMatrixILU0_L_solve_level_set_kernel, gDim, bDim,
+      HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMatrixILU0LevelSetLSolve, gDim, bDim,
                        level_set_size,
                        d_low_level_set_rows + level_offset,
                        A_i, A_j, A_data, f);
@@ -4503,8 +4502,6 @@ hypre_CSRMatrixILU0LevelSetLSolve(hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixILU0LevelSetUSolve
- *
  * Backward substitution Ux = f (in-place, f is overwritten with x) using
  * level-set parallelism. Processes upper level sets in ascending order
  * (level 0 = rows with no upper-triangular dependencies, solved first).
@@ -4528,13 +4525,16 @@ hypre_CSRMatrixILU0LevelSetUSolve(hypre_CSRMatrix *A,
    HYPRE_Int      *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Complex  *A_data = hypre_CSRMatrixData(A);
 
+   /* Local variables */
+   HYPRE_Int       lvl, level_offset, level_set_size;
+
    // TODO: autotune the block size
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
-   for (HYPRE_Int lvl = 0; lvl < num_upp_levels; lvl++)
+   for (lvl = 0; lvl < num_upp_levels; lvl++)
    {
-      const HYPRE_Int level_offset   = upp_set_offsets[lvl];
-      const HYPRE_Int level_set_size = upp_set_offsets[lvl + 1] - level_offset;
+      level_offset   = upp_set_offsets[lvl];
+      level_set_size = upp_set_offsets[lvl + 1] - level_offset;
 
       if (level_set_size <= 0)
       {
@@ -4543,7 +4543,8 @@ hypre_CSRMatrixILU0LevelSetUSolve(hypre_CSRMatrix *A,
 
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(level_set_size, "thread", bDim);
 
-      HYPRE_GPU_LAUNCH(hypre_CSRMatrixILU0_U_solve_level_set_kernel, gDim, bDim,
+
+      HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMatrixILU0LevelSetUSolve, gDim, bDim,
                        level_set_size,
                        d_upp_level_set_rows + level_offset,
                        A_i, A_j, A_data, f);
