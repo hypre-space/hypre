@@ -184,6 +184,11 @@ hypre_ILUDestroy( void *data )
       hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataADiagDiag(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataSDiagDiag(ilu_data) );
+
+      hypre_TFree( hypre_ParILUDataLowLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
+      hypre_TFree( hypre_ParILUDataDLowLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
+      hypre_TFree( hypre_ParILUDataUppLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
+      hypre_TFree( hypre_ParILUDataDUppLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
 #endif
 
       /* final residual vector */
