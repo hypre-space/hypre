@@ -6,11 +6,14 @@
 import argparse
 import os
 
-def extract_files_from_section(input_text, section_start):
+def extract_files_from_section(input_text, section_starts):
     files = []
+    if isinstance(section_starts, str):
+        section_starts = [section_starts]
     collect_files = False
     for line in input_text.splitlines():
-        if line.strip().startswith(section_start):
+        stripped = line.strip()
+        if any(stripped.startswith(s) for s in section_starts):
             collect_files = True
             continue
 
@@ -103,7 +106,7 @@ def main():
         return
 
     # Process source files
-    process(args, "FILES =", "set(SRCS")
+    process(args, "FILES =", ["set(REGULAR_SRCS", "set(SRCS"])
 
     # Process GPU source files
     process(args, "CUFILES =", "set(GPU_SRCS")

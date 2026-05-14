@@ -48,11 +48,12 @@ FILES =\
  sstruct_matmult.c\
  sstruct_matop.c\
  sstruct_scale.c\
- sstruct_stencil.c
-
-CUFILES =\
+ sstruct_stencil.c\
  sstruct_matrix.c\
  sstruct_vector.c
+
+CUFILES =\
+ 
 
 # Mixed precision files
 MP_FILES = \
@@ -62,9 +63,13 @@ MP_FILES = \
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
+ifeq (${CUCC}, )
+OBJS = ${COBJS}
+else
 OBJS = ${COBJS} ${CUOBJS}
+endif
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}
@@ -75,7 +80,9 @@ CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+endif
 
 endif
 
