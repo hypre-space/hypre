@@ -40,6 +40,7 @@ hypre_SStructMatmat
 hypre_SStructMatmult
 hypre_SStructMatmultCommunicate
 hypre_SStructMatmultCompute
+hypre_SStructMatmultComputePairwise
 hypre_SStructMatmultComputeS
 hypre_SStructMatmultComputeU
 hypre_SStructMatmultCreate

@@ -1297,6 +1297,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    /* Add to entries in S with entries from U where the sparsity pattern permits. */
+   /* WM: why is this guard here? Is there a reason for not doing this on the GPU? */
 #if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_HOST)
 #endif
@@ -1311,22 +1312,22 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * Iterative multiplication of SStructMatrices A_i (i=1,...,n) computed as
+ * Iterative multiplication of SStructMatrices M = A_0 * A_1 * ... A_{N-1} computed as
  *
- * M_1 = A_1           = (sA_1 + uA_1)
- * M_2 = A_2 * M_1     = (sA_2 + uA_2) * (sM_1 + uM_1)
- *                     = sA_2*sM_1 + (sA_2*uM_1 + uA_2 * (sM_1 + uM_1))
- *                          \.../                 \.../
- *                           \./                   \./
- *                            |                     |
- *                     =    sM_2   +              uM_2
+ * M_{N-1} = A_{N-1}           = (sA_{N_1} + uA_{N_1})
+ * M_{N-2} = A_{N-2} * M_{N-1} = (sA_{N-2} + uA_{N-2}) * (sM_{N-1} + uM_{N-1})
+ *                             = sA_{N-2} * sM_{N-1} + (sA_{N-2} * uM_{N-1} + uA_{N-2} * (sM_{N-1} + uM_{N-1}))
+ *                               |_______   _______|   |__________   _________________________________________|
+ *                                       \./                      \./
+ *                                        |                        |
+ *                             =       sM_{N-2}      +          uM_{N-2}
  * ...
- * M_n = A_n * M_{n-1} = (sA_n + uA_n) * (sM_{n-1} + uM_{n-1})
- *                     = sA_n*sM_{n-1} + (sA_n*uM_{n-1} + uA_n * (sM_{n-1} + uM_{n-1}))
- *                           \.../                         \.../
- *                            \./                           \./
- *                             |                             |
- *                     =    sM_n       +                   uM_n
+ * M = A_0 * M_1 = (sA_0 + uA_0) * (sM_1 + uM_1)
+ *               = sA_0 * sM_1 + (sA_0 * uM_1 + uA_0 * (sM_1 + uM_1))
+ *                 |___   ___|   |_______   ________________________|
+ *                     \./               \./
+ *                      |                 |
+ *               =    sM_n     +        uM_n
  *
  * Notes:
  *         1) A is transposed in each call to hypre_ParTMatmul. This operation
@@ -1343,6 +1344,196 @@ hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata,
 
    /* Computes the unstructured component */
    hypre_SStructMatmultComputeU(mmdata, M);
+}
+
+HYPRE_Int
+hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
+                                     hypre_SStructMatrix      *M )
+{
+   HYPRE_Int                nmatrices = (mmdata -> nmatrices);
+   HYPRE_Int                nterms    = (mmdata -> nterms);
+   HYPRE_Int               *terms     = (mmdata -> terms);
+   HYPRE_Int               *trans     = (mmdata -> transposes);
+   hypre_SStructMatrix    **matrices  = (mmdata -> matrices);
+
+   /* M matrix variables */
+   hypre_IJMatrix          *ij_M;
+
+   /* Temporary variables */
+   hypre_SStructGraph      *graph;
+   hypre_SStructGrid       *grid;
+   hypre_ParCSRMatrix     **parcsr_tmp;
+   hypre_ParCSRMatrix      *parcsr_sA;
+   hypre_ParCSRMatrix      *parcsr_uA;
+   hypre_ParCSRMatrix      *parcsr_sM = NULL;
+   hypre_ParCSRMatrix      *parcsr_uM;
+   hypre_ParCSRMatrix      *parcsr_uMold;
+   hypre_ParCSRMatrix      *parcsr_sMold;
+   hypre_IJMatrix          *ijmatrix;
+   hypre_IJMatrix          *ij_tmp = NULL;
+   hypre_IJMatrix         **ij_sA;
+
+   HYPRE_Int                m, t;
+
+   if (nterms != 2)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "hypre_SStructMatmultComputePairwise() must be called with only 2 terms\n");
+   }
+   /* WM: todo - do I need to include guards for the case for when one/both of the unstructured components are trivial? */
+   /* WM: todo - go through and do a bunch of renaming... since we are pairwise, can just use M = A * B */
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Temporary work matrices */
+   parcsr_tmp = hypre_TAlloc(hypre_ParCSRMatrix *, 3, HYPRE_MEMORY_HOST);
+   ij_sA = hypre_TAlloc(hypre_IJMatrix *, nmatrices, HYPRE_MEMORY_HOST);
+   for (m = 0; m < nmatrices; m++)
+   {
+      ij_sA[m] = NULL;
+   }
+
+   /* Set initial data */
+   m = terms[nterms - 1];
+   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
+   ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+
+   HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
+
+#if defined(DEBUG_MATMULT)
+   char matname[64];
+
+   hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uP");
+   hypre_ParCSRMatrixPrintIJ(parcsr_sMold, 0, 0, "parcsr_sP");
+#endif
+
+   /* Computes the structured component */
+   hypre_SStructMatmultComputeS(mmdata, M);
+
+   /* Compute uM */
+   /* WM: todo - can get rid of t, which was the loop index previously */
+   t = nterms - 2;
+   m = terms[t];
+
+   /* Convert sA_n to IJMatrix */
+   /* WM: todo - converting the whole matrix for now to be safe... */
+   ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+   HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_sA_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_sA, 0, 0, matname);
+#endif
+
+   /* 1) Compute sA_n*uMold */
+   if (trans[t])
+   {
+      parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+   }
+   else
+   {
+      parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+   }
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_0a_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_tmp[0], 0, 0, matname);
+#endif
+
+   /* 2) Compute uA_n*uMold */
+   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_uA_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, matname);
+#endif
+   if (trans[t])
+   {
+      parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+   }
+   else
+   {
+      parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+   }
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_1_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_tmp[1], 0, 0, matname);
+#endif
+
+   /* 3) Compute (sA_n*uMold + uA_n*uMold) */
+   hypre_ParCSRMatrixAdd(1.0, parcsr_tmp[0], 1.0, parcsr_tmp[1], &parcsr_tmp[2]);
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_2_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_tmp[2], 0, 0, matname);
+#endif
+
+   /* Free sA_n*uMold and uA_n*uMold */
+   hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
+   hypre_ParCSRMatrixDestroy(parcsr_tmp[1]);
+
+   /* 4) Compute uA_n*sMold */
+   if (trans[t])
+   {
+      parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+   }
+   else
+   {
+      parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+   }
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_0b_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_tmp[0], 0, 0, matname);
+#endif
+
+   /* 5) Compute (uA_n*uMold + sA_n*uMold + uA_n*uMold) */
+   hypre_ParCSRMatrixAdd(1.0, parcsr_tmp[0], 1.0, parcsr_tmp[2], &parcsr_uM);
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_uM_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);
+#endif
+
+   /* Free temporary work matrices */
+   hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
+   hypre_ParCSRMatrixDestroy(parcsr_tmp[2]);
+
+   /* 6) Compute sA_n*sMold */
+   if (trans[t])
+   {
+      parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+   }
+   else
+   {
+      parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+   }
+#if defined(DEBUG_MATMULT)
+   hypre_sprintf(matname, "parcsr_sM_%d", t);
+   hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
+#endif
+
+   /* Free temporary work matrices */
+   hypre_TFree(parcsr_tmp, HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixDestroy(parcsr_sM);
+   for (m = 0; m < nmatrices; m++)
+   {
+      if (ij_sA[m] != NULL)
+      {
+         HYPRE_IJMatrixDestroy(ij_sA[m]);
+      }
+   }
+   hypre_TFree(ij_sA, HYPRE_MEMORY_HOST);
+
+   /* Update pointer to unstructured matrix component of M */
+   ij_M = hypre_SStructMatrixIJMatrix(M);
+   hypre_IJMatrixDestroyParCSR(ij_M);
+   hypre_IJMatrixSetObject(ij_M, parcsr_uM);
+   hypre_SStructMatrixParCSRMatrix(M) = parcsr_uM;
+   hypre_IJMatrixAssembleFlag(ij_M) = 1;
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+
+   /* Add to entries in S with entries from U where the sparsity pattern permits. */
+   hypre_SStructMatrixCompressUToS(M, 1);
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -1360,12 +1551,76 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
                      hypre_SStructMatrix **M_ptr )
 {
    hypre_SStructMatmultData *mmdata;
+   hypre_SStructMatrix *M_prev;
+   hypre_SStructMatrix *M_next;
+   hypre_SStructMatrix **pw_matrices = hypre_CTAlloc(hypre_SStructMatrix*, 2, HYPRE_MEMORY_HOST);
+   HYPRE_Int pw_terms[2] = {0, 1};
+   HYPRE_Int pw_trans[2] = {trans[nterms - 2], trans[nterms - 1]};
+   HYPRE_Int t;
 
+#if 0
+   /*---------------------------------------------------------------------------
+    * All-at-once product:
+    * M = A_0 * A_1 * ... A_{N-1}
+    *
+    * This strategy attempts to save memory by computing the entire product
+    * at once rather than computing and storing intermediate products. This
+    * should save on memory (since intermediate products are not stored), but
+    * requires more computation compared to sequential, pairwise multiplication.
+    * Note that computing the parcsr component of M is still done sequentially
+    * since there is no all-at-once matrix product routine for parcsr. See
+    * hypre_SStructMatmultComputeU(). The general matmult here is not
+    * currently efficient since we do not have efficient routines for finding
+    * the minimal set of rows of the structured components to convert to parcsr.
+    * Thus to ensure correctness, the entire struct matrix is converted to
+    * parcsr, which is extremely inefficient.
+    *-------------------------------------------------------------------------*/
    hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_SStructMatmultInitialize(mmdata, M_ptr);
    hypre_SStructMatmultCommunicate(mmdata);
    hypre_SStructMatmultCompute(mmdata, *M_ptr);
    hypre_SStructMatmultDestroy(mmdata);
+#else
+   /*---------------------------------------------------------------------------
+    * Sequential pairwise products:
+    * M_{N-1} = A_{N-1}
+    * M_{N-2} = A_{N-2} * M_{N-1}
+    * M_{N-3} = A_{N-3} * M_{N-2}
+    * ...
+    * M = A_0 * M_1
+    *
+    * This strategy attempts to save computation at the cost of extra memory
+    * since intermediate matrix products, M_{N-2}, M_{N-3}, ... , are
+    * explicitly computed and stored. This eliminates some repeated computations
+    * compared to the all-at-once strategy above, however, so it should be
+    * cheaper in terms of compute. It also greatly simplifies the issue of finding
+    * the required rows of struct matrices that need to be converted to parcsr
+    * in order to obtain the unstructured components of the sstruct matrix products.
+    *-------------------------------------------------------------------------*/
+   M_prev = matrices[nterms - 1];
+   for (t = (nterms - 2); t >= 0; t--)
+   {
+      pw_matrices[0] = matrices[t];
+      pw_matrices[1] = M_prev;
+      if (t < nterms - 2)
+      {
+         pw_trans[0] = trans[t];
+         pw_trans[1] = 0;
+      }
+      hypre_SStructMatmultCreate(2, pw_matrices, 2, pw_terms, pw_trans, &mmdata);
+      hypre_SStructMatmultInitialize(mmdata, &M_next);
+      hypre_SStructMatmultCommunicate(mmdata);
+      hypre_SStructMatmultCompute(mmdata, M_next);
+      /* hypre_SStructMatmultComputePairwise(mmdata, *M_tmp); */
+      hypre_SStructMatmultDestroy(mmdata);
+      if (t < nterms - 2)
+      {
+         HYPRE_SStructMatrixDestroy(M_prev);
+      }
+      M_prev = M_next;
+   }
+   *M_ptr = M_next;
+#endif
 
    HYPRE_SStructMatrixAssemble(*M_ptr);
 
@@ -1384,7 +1639,7 @@ hypre_SStructMatmat( hypre_SStructMatrix  *A,
    HYPRE_Int            nmatrices   = 2;
    HYPRE_SStructMatrix  matrices[2] = {A, B};
    HYPRE_Int            nterms      = 2;
-   HYPRE_Int            terms[3]    = {0, 1};
+   HYPRE_Int            terms[2]    = {0, 1};
    HYPRE_Int            trans[2]    = {0, 0};
 
    hypre_SStructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
