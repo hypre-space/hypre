@@ -255,7 +255,9 @@ target_link_libraries(HYPRE PUBLIC ${CUDA_LIBS})
 message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 
 # Set additional CUDA compiler flags
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+endif()
 
 # Ensure LTO-specific flags are included
 if (HYPRE_ENABLE_LTO AND CUDAToolkit_VERSION VERSION_LESS 11.2)
