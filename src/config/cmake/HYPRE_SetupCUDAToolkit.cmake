@@ -84,21 +84,8 @@ if (NOT MSVC)
   set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "CXX compiler used by CUDA" FORCE)
 endif()
 
-# Ensure CUDA language is enabled when available
-include(CheckLanguage)
-check_language(CUDA)
-if(DEFINED CMAKE_CUDA_COMPILER)
-  enable_language(CUDA)
-else()
-  message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
-endif()
-
-# Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
-if(NOT TARGET cuda)
-  add_library(cuda INTERFACE)
-endif()
-
-# Detection CUDA architecture if not given by the user
+# Detection CUDA architecture if not given by the user. This must happen before
+# enable_language(CUDA) so Clang CUDA compiler detection can use a supported arch.
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
    CMAKE_CUDA_ARCHITECTURES MATCHES "^[ \t\r\n]*$" OR
    CMAKE_CUDA_ARCHITECTURES STREQUAL "52")  # CMake's default
@@ -152,9 +139,9 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR
       list(REMOVE_DUPLICATES CUDA_ARCHS)
 
       if(CUDA_ARCHS)
+        set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCHS}" CACHE STRING "Detected CUDA architectures" FORCE)
         string(REPLACE ";" "," CUDA_ARCHS_STR "${CUDA_ARCHS}")
-        set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCHS_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
-        message(STATUS "Detected CUDA GPU architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+        message(STATUS "Detected CUDA GPU architectures: ${CUDA_ARCHS_STR}")
       else()
         message(WARNING "No GPUs detected. Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
         set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
@@ -167,6 +154,81 @@ else()
   list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
   set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_LIST}" CACHE STRING "Detected CUDA architectures" FORCE)
   message(STATUS "CMAKE_CUDA_ARCHITECTURES is already set to: ${CMAKE_CUDA_ARCHITECTURES}")
+endif()
+
+set(HYPRE_CUDA_COMPILER_IS_CLANG OFF)
+if(DEFINED CMAKE_CUDA_COMPILER)
+  execute_process(
+    COMMAND ${CMAKE_CUDA_COMPILER} --version
+    OUTPUT_VARIABLE HYPRE_CUDA_COMPILER_VERSION_OUTPUT
+    ERROR_VARIABLE HYPRE_CUDA_COMPILER_VERSION_ERROR
+    RESULT_VARIABLE HYPRE_CUDA_COMPILER_VERSION_RESULT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE
+  )
+
+  if(HYPRE_CUDA_COMPILER_VERSION_RESULT EQUAL 0 AND
+     HYPRE_CUDA_COMPILER_VERSION_OUTPUT MATCHES "[Cc]lang")
+    set(HYPRE_CUDA_COMPILER_IS_CLANG ON)
+  endif()
+endif()
+
+if(HYPRE_CUDA_COMPILER_IS_CLANG)
+  set(HYPRE_CUDA_FLAGS_FOR_DETECTION "${CMAKE_CUDA_FLAGS_INIT} ${CMAKE_CUDA_FLAGS}")
+
+  if(NOT HYPRE_CUDA_FLAGS_FOR_DETECTION MATCHES "(^| )--cuda-path(=| )")
+    if(CUDAToolkit_ROOT)
+      set(HYPRE_CUDA_TOOLKIT_ROOT "${CUDAToolkit_ROOT}")
+    elseif(CUDAToolkit_BIN_DIR)
+      get_filename_component(HYPRE_CUDA_TOOLKIT_ROOT "${CUDAToolkit_BIN_DIR}" DIRECTORY)
+    elseif(CUDA_DIR)
+      set(HYPRE_CUDA_TOOLKIT_ROOT "${CUDA_DIR}")
+    endif()
+
+    if(HYPRE_CUDA_TOOLKIT_ROOT)
+      string(APPEND CMAKE_CUDA_FLAGS_INIT " --cuda-path=${HYPRE_CUDA_TOOLKIT_ROOT}")
+    endif()
+  endif()
+
+  if(NOT HYPRE_CUDA_FLAGS_FOR_DETECTION MATCHES "(^| )--cuda-gpu-arch(=| )")
+    set(HYPRE_CUDA_ARCHITECTURES_LIST "${CMAKE_CUDA_ARCHITECTURES}")
+    list(GET HYPRE_CUDA_ARCHITECTURES_LIST 0 HYPRE_CUDA_ARCHITECTURE_FOR_CLANG)
+    string(REGEX MATCH "^[0-9]+" HYPRE_CUDA_ARCHITECTURE_FOR_CLANG
+      "${HYPRE_CUDA_ARCHITECTURE_FOR_CLANG}")
+
+    if(HYPRE_CUDA_ARCHITECTURE_FOR_CLANG)
+      string(APPEND CMAKE_CUDA_FLAGS_INIT
+        " --cuda-gpu-arch=sm_${HYPRE_CUDA_ARCHITECTURE_FOR_CLANG}")
+    endif()
+  endif()
+
+  if(NOT HYPRE_CUDA_FLAGS_FOR_DETECTION MATCHES "(^| )--no-cuda-version-check( |$)")
+    string(APPEND CMAKE_CUDA_FLAGS_INIT " --no-cuda-version-check")
+  endif()
+
+  if(NOT HYPRE_CUDA_FLAGS_FOR_DETECTION MATCHES "(^| )-Wno-unknown-cuda-version( |$)")
+    string(APPEND CMAKE_CUDA_FLAGS_INIT " -Wno-unknown-cuda-version")
+  endif()
+
+  if(NOT HYPRE_CUDA_FLAGS_FOR_DETECTION MATCHES "(^| )-Wno-pass-failed( |$)")
+    string(APPEND CMAKE_CUDA_FLAGS_INIT " -Wno-pass-failed")
+  endif()
+
+  message(STATUS "Using Clang CUDA compiler flags: ${CMAKE_CUDA_FLAGS_INIT}")
+endif()
+
+# Ensure CUDA language is enabled when available
+include(CheckLanguage)
+check_language(CUDA)
+if(DEFINED CMAKE_CUDA_COMPILER)
+  enable_language(CUDA)
+else()
+  message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
+endif()
+
+# Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
+if(NOT TARGET cuda)
+  add_library(cuda INTERFACE)
 endif()
 
 # Set the CUDA architectures to the HYPRE target
@@ -255,7 +317,9 @@ target_link_libraries(HYPRE PUBLIC ${CUDA_LIBS})
 message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 
 # Set additional CUDA compiler flags
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+endif()
 
 # Ensure LTO-specific flags are included
 if (HYPRE_ENABLE_LTO AND CUDAToolkit_VERSION VERSION_LESS 11.2)

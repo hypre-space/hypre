@@ -15,7 +15,7 @@
 
 #ifdef HYPRE_MEMORY_DMALLOC
 
-#include "memory.h"
+#include "memory_header.h"
 #include <dmalloc.h>
 
 char dmalloc_logpath_memory[256];
