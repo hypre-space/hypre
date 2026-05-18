@@ -23,8 +23,8 @@ case $1 in
           -h|-help      prints this usage information and exits
 
    This script uses cmake to configure and compile the source in {root_dir}/src, then
-   optionally runs driver and example tests. Phase logs and CMake diagnostics are
-   saved in cmake.dir.
+   optionally runs driver and example tests. Phase logs and diagnostics are saved
+   in cmake.dir using configure/make/install names.
 
    Example usage: $0 .. -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
 
@@ -68,8 +68,8 @@ done
 test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
-mkdir -p $output_dir
-set > $output_dir/sh.env
+mkdir -p $output_dir/configure.dir $output_dir/make.dir $output_dir/install.dir
+set > $output_dir/configure.dir/sh.env
 cd $root_dir
 root_dir=`pwd`
 
@@ -96,11 +96,26 @@ save_build_diagnostics()
 
    for file in CMakeCache.txt install_manifest.txt \
       CMakeFiles/CMakeOutput.log CMakeFiles/CMakeError.log \
-      test/*.err test/*.fil Testing/Temporary/* test/Testing/Temporary/*
+      test/*.out test/*.err test/*.fil test/CMakeFiles/check.dir/build.make \
+      Testing/Temporary/* test/Testing/Temporary/*
    do
       if [ -f $file ]; then
-         mkdir -p $output_dir/build/`dirname $file`
-         cp -f $file $output_dir/build/$file
+         case $file in
+            CMakeCache.txt|CMakeFiles/*)
+               save_file=$output_dir/configure.dir/$file
+               ;;
+            install_manifest.txt)
+               save_file=$output_dir/install.dir/$file
+               ;;
+            test/*)
+               save_file=$output_dir/make.dir/${file#test/}
+               ;;
+            *)
+               save_file=$output_dir/make.dir/$file
+               ;;
+         esac
+         mkdir -p `dirname $save_file`
+         cp -f $file $save_file
       fi
    done
 }
@@ -110,7 +125,12 @@ run_phase()
    phase=$1
    shift
 
-   echo "$*" > $output_dir/$phase.cmd
+   {
+      echo "#!/bin/bash"
+      echo "cd $root_dir/build"
+      echo "$*"
+   } > $output_dir/$phase.sh
+   chmod +x $output_dir/$phase.sh
    eval "$*" > $output_dir/$phase.out 2> $output_dir/$phase.err
    status=$?
    if [ $status != 0 ]; then
@@ -131,12 +151,12 @@ rm -fr src/hypre
 cd $root_dir/build
 run_phase configure cmake $copts ../src
 if [ $? = 0 ]; then
-   run_phase build cmake --build . -- $mopts
+   run_phase make cmake --build . -- $mopts
    build_status=$?
 else
    build_status=1
-   echo "Skipping build because configure failed" > $output_dir/build.out
-   touch $output_dir/build.err
+   echo "Skipping make because configure failed" > $output_dir/make.out
+   touch $output_dir/make.err
 fi
 
 save_build_diagnostics
