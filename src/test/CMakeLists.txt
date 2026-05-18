@@ -77,8 +77,35 @@ else ()
   set(HYPRE_CHECK_MPI_COMMAND "")
 endif ()
 
+string(JOIN " " HYPRE_CHECK_SCRIPT
+  "status=0;"
+  "mpi_cmd=\"$1\";"
+  "shift;"
+  "echo 'Checking the library...';"
+  "for driver in \"$@\"; do"
+  "name=$(basename \"$driver\");"
+  "outfile=\"$name.out\";"
+  "errfile=\"$name.err\";"
+  "rm -f \"$outfile\" \"$errfile\";"
+  "if [ -n \"$mpi_cmd\" ]; then"
+  "eval \"$mpi_cmd 1 \\\"$driver\\\"\" > \"$outfile\" 2> \"$errfile\";"
+  "else"
+  "\"$driver\" > \"$outfile\" 2> \"$errfile\";"
+  "fi;"
+  "driver_status=$?;"
+  "if [ $driver_status != 0 ] && [ $status = 0 ]; then"
+  "status=$driver_status;"
+  "fi;"
+  "done;"
+  "echo 'Test output files:';"
+  "cat ij.out struct.out sstruct.out;"
+  "echo 'Test error files:';"
+  "cat ij.err struct.err sstruct.err;"
+  "exit $status"
+)
+
 add_custom_target(check
-  COMMAND ${BASH_PROGRAM} -c "status=0; mpi_cmd=\"$1\"; shift; echo 'Checking the library...'; for driver in \"$@\"; do errfile=`basename \"$driver\"`.err; rm -f \"$errfile\"; if [ -n \"$mpi_cmd\" ]; then eval \"$mpi_cmd 1 \\\"$driver\\\"\" 2> \"$errfile\"; else \"$driver\" 2> \"$errfile\"; fi; driver_status=$?; if [ $driver_status != 0 ] && [ $status = 0 ]; then status=$driver_status; fi; done; echo 'Test error files:'; cat ij.err struct.err sstruct.err; exit $status"
+  COMMAND ${BASH_PROGRAM} -c "${HYPRE_CHECK_SCRIPT}"
           check "${HYPRE_CHECK_MPI_COMMAND}"
           $<TARGET_FILE:ij> $<TARGET_FILE:struct> $<TARGET_FILE:sstruct>
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
