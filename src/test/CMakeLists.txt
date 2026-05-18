@@ -72,32 +72,20 @@ set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 # Define HYPRE's check target (this will override any existing check target)
 if (HYPRE_ENABLE_MPI)
-  add_custom_target(check
-    COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:ij> 2> ij.err
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:struct> 2> struct.err
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:sstruct> 2> sstruct.err
-    COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
-    COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ij struct sstruct
-    COMMENT "Running basic library check"
-    VERBATIM
-  )
+  set(HYPRE_CHECK_MPI_COMMAND "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}")
 else ()
-  add_custom_target(check
-    COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
-    COMMAND $<TARGET_FILE:ij> 2> ij.err
-    COMMAND $<TARGET_FILE:struct> 2> struct.err
-    COMMAND $<TARGET_FILE:sstruct> 2> sstruct.err
-    COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
-    COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ij struct sstruct
-    COMMENT "Running basic library check"
-    VERBATIM
-  )
+  set(HYPRE_CHECK_MPI_COMMAND "")
 endif ()
+
+add_custom_target(check
+  COMMAND ${BASH_PROGRAM} -c "status=0; mpi_cmd=\"$1\"; shift; echo 'Checking the library...'; for driver in \"$@\"; do errfile=`basename \"$driver\"`.err; rm -f \"$errfile\"; if [ -n \"$mpi_cmd\" ]; then eval \"$mpi_cmd 1 \\\"$driver\\\"\" 2> \"$errfile\"; else \"$driver\" 2> \"$errfile\"; fi; driver_status=$?; if [ $driver_status != 0 ] && [ $status = 0 ]; then status=$driver_status; fi; done; echo 'Test error files:'; cat ij.err struct.err sstruct.err; exit $status"
+          check "${HYPRE_CHECK_MPI_COMMAND}"
+          $<TARGET_FILE:ij> $<TARGET_FILE:struct> $<TARGET_FILE:sstruct>
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ij struct sstruct
+  COMMENT "Running basic library check"
+  VERBATIM
+)
 
 # Add checkpar target for parallel testing
 add_custom_target(checkpar

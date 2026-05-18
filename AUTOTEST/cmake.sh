@@ -23,7 +23,8 @@ case $1 in
           -h|-help      prints this usage information and exits
 
    This script uses cmake to configure and compile the source in {root_dir}/src, then
-   optionally runs driver and example tests.
+   optionally runs driver and example tests. Phase logs and CMake diagnostics are
+   saved in cmake.dir.
 
    Example usage: $0 .. -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
 
@@ -68,8 +69,55 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
+set > $output_dir/sh.env
 cd $root_dir
 root_dir=`pwd`
+
+filter_error_file()
+{
+   errfile=$1
+
+   if [ -e $test_dir/$testname.filters ] && [ -s $errfile ]; then
+      if (egrep -f $test_dir/$testname.filters $errfile > /dev/null) ; then
+         original=`dirname $errfile`/`basename $errfile .err`.fil
+         echo "This file contains the original $errfile before filtering" \
+            > $original
+         cat $errfile >> $original
+         mv $errfile $errfile.tmp
+         egrep -v -f $test_dir/$testname.filters $errfile.tmp > $errfile
+         rm -f $errfile.tmp
+      fi
+   fi
+}
+
+save_build_diagnostics()
+{
+   cd $root_dir/build
+
+   for file in CMakeCache.txt install_manifest.txt \
+      CMakeFiles/CMakeOutput.log CMakeFiles/CMakeError.log \
+      test/*.err test/*.fil Testing/Temporary/* test/Testing/Temporary/*
+   do
+      if [ -f $file ]; then
+         mkdir -p $output_dir/build/`dirname $file`
+         cp -f $file $output_dir/build/$file
+      fi
+   done
+}
+
+run_phase()
+{
+   phase=$1
+   shift
+
+   echo "$*" > $output_dir/$phase.cmd
+   eval "$*" > $output_dir/$phase.out 2> $output_dir/$phase.err
+   status=$?
+   if [ $status != 0 ]; then
+      echo "$phase failed with exit code $status" >> $output_dir/$phase.err
+   fi
+   return $status
+}
 
 # Clean up the build directories (do it from root_dir as a precaution)
 cd $root_dir
@@ -81,9 +129,26 @@ rm -fr src/hypre
 
 # Configure
 cd $root_dir/build
-eval cmake $copts ../src
-eval cmake --build . -- $mopts
-eval cmake --install .
+run_phase configure cmake $copts ../src
+if [ $? = 0 ]; then
+   run_phase build cmake --build . -- $mopts
+   build_status=$?
+else
+   build_status=1
+   echo "Skipping build because configure failed" > $output_dir/build.out
+   touch $output_dir/build.err
+fi
+
+save_build_diagnostics
+
+if [ $build_status = 0 ]; then
+   run_phase install cmake --install .
+else
+   echo "Skipping install because build failed" > $output_dir/install.out
+   touch $output_dir/install.err
+fi
+
+save_build_diagnostics
 
 cd $test_dir
 
@@ -100,9 +165,12 @@ if [ -n "$eset" ]; then
 fi
 
 # Echo to stderr all nonempty error files in $output_dir
-for errfile in $( find $output_dir ! -size 0 -name "*.err" )
+for errfile in $( find $output_dir -name "*.err" )
 do
-   echo $errfile >&2
+   filter_error_file $errfile
+   if [ -s $errfile ]; then
+      echo $errfile >&2
+   fi
 done
 
 # Clean up
