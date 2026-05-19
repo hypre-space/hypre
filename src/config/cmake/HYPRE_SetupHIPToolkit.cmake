@@ -26,16 +26,20 @@ list(APPEND CMAKE_PREFIX_PATH "${HIP_PATH};${HIP_PATH}/lib/cmake;${HIP_PATH}/llv
 if(NOT DEFINED CMAKE_HIP_STANDARD)
   set(CMAKE_HIP_STANDARD ${CMAKE_CXX_STANDARD} CACHE STRING "C++ standard for HIP" FORCE)
 endif()
-set(CMAKE_HIP_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard for HIP" FORCE)
+if(NOT DEFINED CMAKE_HIP_STANDARD_REQUIRED)
+  set(CMAKE_HIP_STANDARD_REQUIRED ON CACHE BOOL "Require C++ standard for HIP" FORCE)
+endif()
 
-# Check if HIP is available and enable it if found
-set(CMAKE_HIP_COMPILER "${HIP_PATH}/llvm/bin/clang++" CACHE FILEPATH "Path to HIP compiler")
-include(CheckLanguage)
-check_language(HIP)
-if(CMAKE_HIP_COMPILER)
-  enable_language(HIP)
-else()
-  message(FATAL_ERROR "HIP language not found. Please check your HIP/ROCm installation.")
+if(NOT CMAKE_HIP_COMPILER)
+  # Check if HIP is available and enable it if found
+  set(CMAKE_HIP_COMPILER "${HIP_PATH}/llvm/bin/clang++" CACHE FILEPATH "Path to HIP compiler")
+  include(CheckLanguage)
+  check_language(HIP)
+  if(CMAKE_HIP_COMPILER)
+    enable_language(HIP)
+  else()
+    message(FATAL_ERROR "HIP language not found. Please check your HIP/ROCm installation.")
+  endif()
 endif()
 
 # Find HIP package
