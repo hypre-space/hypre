@@ -2878,7 +2878,7 @@ hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetFRelaxSmoothCycle
+ * hypre_MGRSetFRelaxCycle
  *
  * Set when F-relaxation is applied during the cycle:
  *   0 = no F-relaxation
@@ -2888,17 +2888,17 @@ hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetFRelaxSmoothCycle( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle )
+hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (frelax_smooth_cycle < 0 || frelax_smooth_cycle > 3)
+   if (frelax_cycle < 0 || frelax_cycle > 3)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   (mgr_data -> frelax_smooth_cycle) = frelax_smooth_cycle;
+   (mgr_data -> frelax_smooth_cycle) = frelax_cycle;
    return hypre_error_flag;
 }
 
@@ -4561,4 +4561,3 @@ hypre_MGRDirectSolverDestroy(void *solver)
    return hypre_error_flag;
 #endif
 }
-

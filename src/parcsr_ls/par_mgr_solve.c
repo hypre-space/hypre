@@ -192,7 +192,11 @@ hypre_MGRSolve( void               *mgr_vdata,
    while ((rel_resnorm >= tol || iter < 1) && iter < max_iter)
    {
       /* Do one cycle of reduction solve on A*e = r */
-      hypre_MGRCycle(mgr_data, F_array, U_array);
+      if (hypre_MGRCycle(mgr_data, F_array, U_array))
+      {
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
 
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -1130,10 +1134,19 @@ hypre_MGRCycle( void              *mgr_vdata,
          } /* End global pre-smoothing */
 
          /* F-relaxation (pre) */
-         if (frelax_pre)
+         if (frelax_pre && level < num_coarse_levels)
          {
-            hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
-                                   F_array, U_array, my_id);
+            if (hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
+                                       F_array, U_array, my_id))
+            {
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_REGION_END("%s", level_name);
+               hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+               HYPRE_ANNOTATE_FUNC_END;
+               hypre_GpuProfilingPopRange();
+
+               return hypre_error_flag;
+            }
          }
 
          /* Decrement visit counter and decide next direction */
@@ -1249,12 +1262,21 @@ hypre_MGRCycle( void              *mgr_vdata,
          /* F-relaxation (post) */
          if (frelax_post)
          {
-            hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
-                                   F_array, U_array, my_id);
+            if (hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
+                                       F_array, U_array, my_id))
+            {
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_REGION_END("%s", level_name);
+               hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+               HYPRE_ANNOTATE_FUNC_END;
+               hypre_GpuProfilingPopRange();
+
+               return hypre_error_flag;
+            }
          }
 
          /* Global post smoothing sweeps */
-         if (post_smoothing & (level_smooth_iters[fine_grid] > 0))
+         if (post_smoothing && (level_smooth_iters[fine_grid] > 0))
          {
             hypre_sprintf(region_name, "Global-Relax");
             hypre_GpuProfilingPushRange(region_name);

@@ -3247,19 +3247,19 @@ HYPRE_MGRSetCycleType( HYPRE_Solver solver, HYPRE_Int cycle_type )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver, HYPRE_Int frelax_cycle )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_MGRSetFRelaxMethod_pre( precision, solver, relax_method );
+   return HYPRE_MGRSetFRelaxCycle_pre( precision, solver, frelax_cycle );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle )
+HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
-   return HYPRE_MGRSetFRelaxSmoothCycle_pre( precision, solver, frelax_smooth_cycle );
+   return HYPRE_MGRSetFRelaxMethod_pre( precision, solver, relax_method );
 }
 
 /*--------------------------------------------------------------------------*/

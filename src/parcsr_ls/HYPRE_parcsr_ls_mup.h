@@ -3309,6 +3309,15 @@ HYPRE_Int
 HYPRE_MGRSetCycleType( HYPRE_Solver solver, HYPRE_Int cycle_type );
 
 HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_flt( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_dbl( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_long_dbl( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_flt( HYPRE_Solver solver, HYPRE_Int relax_method );
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_dbl( HYPRE_Solver solver, HYPRE_Int relax_method );
@@ -3316,15 +3325,6 @@ HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_long_dbl( HYPRE_Solver solver, HYPRE_Int relax_method );
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method );
-
-HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle_flt( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle );
-HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle_dbl( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle );
-HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle_long_dbl( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle );
-HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle );
 
 HYPRE_Int
 HYPRE_MGRSetFSolver_flt( HYPRE_Solver solver, HYPRE_PtrToParSolverFcn fine_grid_solver_solve, HYPRE_PtrToParSolverFcn fine_grid_solver_setup, HYPRE_Solver fsolver );
@@ -7070,10 +7070,10 @@ HYPRE_Int
 HYPRE_MGRSetCycleType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int cycle_type );
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int relax_method );
+HYPRE_MGRSetFRelaxCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_cycle );
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle );
+HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int relax_method );
 
 HYPRE_Int
 HYPRE_MGRSetFSolver_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_PtrToParSolverFcn fine_grid_solver_solve, HYPRE_PtrToParSolverFcn fine_grid_solver_setup, HYPRE_Solver fsolver );

@@ -384,8 +384,8 @@ HYPRE_MGRSetCpointsByBlock
 HYPRE_MGRSetCpointsByContiguousBlock
 HYPRE_MGRSetCpointsByPointMarkerArray
 HYPRE_MGRSetCycleType
+HYPRE_MGRSetFRelaxCycle
 HYPRE_MGRSetFRelaxMethod
-HYPRE_MGRSetFRelaxSmoothCycle
 HYPRE_MGRSetFSolver
 HYPRE_MGRSetFSolverAtLevel
 HYPRE_MGRSetFrelaxPrintLevel

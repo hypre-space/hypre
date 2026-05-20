@@ -6478,6 +6478,24 @@ HYPRE_MGRSetCycleType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_cycle )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MGRSetFRelaxCycle_flt( solver, frelax_cycle );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MGRSetFRelaxCycle_dbl( solver, frelax_cycle );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MGRSetFRelaxCycle_long_dbl( solver, frelax_cycle );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    switch (precision)
@@ -6488,24 +6506,6 @@ HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HY
          return HYPRE_MGRSetFRelaxMethod_dbl( solver, relax_method );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_MGRSetFRelaxMethod_long_dbl( solver, relax_method );
-      default:
-         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_smooth_cycle )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return HYPRE_MGRSetFRelaxSmoothCycle_flt( solver, frelax_smooth_cycle );
-      case HYPRE_REAL_DOUBLE:
-         return HYPRE_MGRSetFRelaxSmoothCycle_dbl( solver, frelax_smooth_cycle );
-      case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_MGRSetFRelaxSmoothCycle_long_dbl( solver, frelax_smooth_cycle );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

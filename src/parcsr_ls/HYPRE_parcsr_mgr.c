@@ -878,7 +878,7 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetFRelaxSmoothCycle
+ * HYPRE_MGRSetFRelaxCycle
  *
  * Controls when F-relaxation sweeps are applied:
  *   0 - no F-relaxation
@@ -888,8 +888,8 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver,
-                               HYPRE_Int    frelax_smooth_cycle )
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver,
+                         HYPRE_Int    frelax_cycle )
 {
    if (!solver)
    {
@@ -897,7 +897,7 @@ HYPRE_MGRSetFRelaxSmoothCycle( HYPRE_Solver solver,
       return hypre_error_flag;
    }
 
-   return hypre_MGRSetFRelaxSmoothCycle(solver, frelax_smooth_cycle);
+   return hypre_MGRSetFRelaxCycle(solver, frelax_cycle);
 }
 
 /*--------------------------------------------------------------------------

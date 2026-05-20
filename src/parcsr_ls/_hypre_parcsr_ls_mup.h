@@ -5655,18 +5655,18 @@ HYPRE_Int
 hypre_MGRSetCycleType_long_dbl( void *mgr_vdata, HYPRE_Int cycle_type );
 
 HYPRE_Int
+hypre_MGRSetFRelaxCycle_flt( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxCycle_dbl( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxCycle_long_dbl( void *mgr_vdata, HYPRE_Int frelax_cycle );
+
+HYPRE_Int
 hypre_MGRSetFRelaxMethod_flt( void *mgr_vdata, HYPRE_Int relax_method );
 HYPRE_Int
 hypre_MGRSetFRelaxMethod_dbl( void *mgr_vdata, HYPRE_Int relax_method );
 HYPRE_Int
 hypre_MGRSetFRelaxMethod_long_dbl( void *mgr_vdata, HYPRE_Int relax_method );
-
-HYPRE_Int
-hypre_MGRSetFRelaxSmoothCycle_flt( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
-HYPRE_Int
-hypre_MGRSetFRelaxSmoothCycle_dbl( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
-HYPRE_Int
-hypre_MGRSetFRelaxSmoothCycle_long_dbl( void *mgr_vdata, HYPRE_Int frelax_smooth_cycle );
 
 HYPRE_Int
 hypre_MGRSetFSolverAtLevel_flt( void *mgr_vdata, void *fsolver, HYPRE_Int level );
