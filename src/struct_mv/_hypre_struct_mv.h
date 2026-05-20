@@ -139,15 +139,21 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_IndexDInBox(index, d, box) \
 ( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
   hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
+
 #define hypre_BoxSpanIndex(box, index)\
+HYPRE_DIAGNOSTIC_PUSH \
+HYPRE_DIAGNOSTIC_IGNORE_WSHADOW \
 {\
-   HYPRE_Int __d;\
-   for (__d = 0; __d < hypre_BoxNDim(box); __d++)\
+   HYPRE_Int d;\
+   for (d = 0; d < hypre_BoxNDim(box); d++)\
    {\
-      hypre_BoxIMinD(box, __d) = hypre_min(hypre_BoxIMinD(box, __d), hypre_IndexD(index, __d));\
-      hypre_BoxIMaxD(box, __d) = hypre_max(hypre_BoxIMaxD(box, __d), hypre_IndexD(index, __d));\
+      hypre_BoxIMinD(box, d) =\
+         hypre_min(hypre_BoxIMinD(box, d), hypre_IndexD(index, d));\
+      hypre_BoxIMaxD(box, d) =\
+         hypre_max(hypre_BoxIMaxD(box, d), hypre_IndexD(index, d));\
    }\
-}
+} \
+HYPRE_DIAGNOSTIC_POP
 
 /* The first hypre_CCBoxIndexRank is better style because it is similar to
    hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
