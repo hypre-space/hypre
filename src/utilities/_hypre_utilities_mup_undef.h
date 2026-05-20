@@ -197,6 +197,7 @@
 #undef hypre_MatrixStatsArrayPrint
 #undef hypre_MatrixStatsCreate
 #undef hypre_MatrixStatsDestroy
+#undef hypre_MatrixStatsReduce
 #undef hypre_MemPrefetch
 #undef hypre_Memcpy
 #undef hypre_MemoryPrintUsage
