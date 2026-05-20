@@ -279,7 +279,7 @@ hypre_MatrixStatsReduce(hypre_MatrixStats *local_stats,
                  (HYPRE_Real) hypre_MatrixStatsNumCols(global_stats);
    hypre_MatrixStatsSparsity(global_stats) = global_size > 0.0 ?
                                              100.0 * (1.0 - (HYPRE_Real) global_num_nonzeros /
-                                                     global_size) :
+                                                      global_size) :
                                              0.0;
 
    hypre_MatrixStatsNnzrowMin(global_stats) = (HYPRE_Int) - extrema_recv[0];
