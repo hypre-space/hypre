@@ -20,10 +20,6 @@ HYPRE_Int hypre_ParCSRMatrixStatsComputePassTwoLocalDevice(hypre_ParCSRMatrix *A
                                                            hypre_MatrixStats  *stats);
 #endif
 
-/* Shortcuts */
-#define sendbuffer(i, j, lda) sendbuffer[i * lda + j]
-#define recvbuffer(i, j, lda) recvbuffer[i * lda + j]
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixStatsComputePassOneLocalHost
  *--------------------------------------------------------------------------*/
@@ -86,12 +82,12 @@ hypre_ParCSRMatrixStatsComputePassOneLocalHost(hypre_ParCSRMatrix   *A,
    for (i = 0; i < num_threads; i++)
    {
       actual_nonzeros[i] = 0ULL;
-      nnzrow_min[i]      = hypre_pow2(30);
+      nnzrow_min[i]      = HYPRE_INT_MAX;
       nnzrow_max[i]      = 0;
-      rowsum_min[i]      = hypre_pow(2, 100);
-      rowsum_max[i]      = - hypre_pow(2, 100);
+      rowsum_min[i]      = HYPRE_REAL_MAX;
+      rowsum_max[i]      = -HYPRE_REAL_MAX;
       rowsum_avg[i]      = 0.0;
-      absrowsum_min[i]   = hypre_pow(2, 100);
+      absrowsum_min[i]   = HYPRE_REAL_MAX;
       absrowsum_max[i]   = 0.0;
       absrowsum_avg[i]   = 0.0;
    }
@@ -376,7 +372,7 @@ hypre_ParCSRMatrixStatsComputeLocal(hypre_ParCSRMatrix *A,
    hypre_CSRMatrix *diag;
    hypre_CSRMatrix *offd;
    HYPRE_Int        local_num_rows;
-   HYPRE_BigInt     local_num_cols;
+   HYPRE_BigInt     global_num_cols;
    HYPRE_Int        local_num_nonzeros;
    HYPRE_Real       local_size;
 
@@ -397,11 +393,13 @@ hypre_ParCSRMatrixStatsComputeLocal(hypre_ParCSRMatrix *A,
    offd = hypre_ParCSRMatrixOffd(A);
 
    local_num_rows     = hypre_ParCSRMatrixNumRows(A);
-   local_num_cols     = hypre_ParCSRMatrixGlobalNumCols(A);
+   /* MatrixStatsNumCols is the matrix dimension. The ParCSR diag block only
+    * stores the rank-local column partition, so use the global column count. */
+   global_num_cols    = hypre_ParCSRMatrixGlobalNumCols(A);
    local_num_nonzeros = hypre_CSRMatrixNumNonzeros(diag) + hypre_CSRMatrixNumNonzeros(offd);
 
    hypre_MatrixStatsNumRows(stats)     = local_num_rows;
-   hypre_MatrixStatsNumCols(stats)     = local_num_cols;
+   hypre_MatrixStatsNumCols(stats)     = global_num_cols;
    hypre_MatrixStatsNumNonzeros(stats) = local_num_nonzeros;
 
    if (local_num_rows == 0)
@@ -439,7 +437,7 @@ hypre_ParCSRMatrixStatsComputeLocal(hypre_ParCSRMatrix *A,
    hypre_MatrixStatsAbsrowsumAvg(stats) = hypre_MatrixStatsAbsrowsumAvg(stats) /
                                           (HYPRE_Real) local_num_rows;
 
-   local_size = (HYPRE_Real) local_num_rows * (HYPRE_Real) local_num_cols;
+   local_size = (HYPRE_Real) local_num_rows * (HYPRE_Real) global_num_cols;
    hypre_MatrixStatsSparsity(stats) = local_size > 0.0 ?
                                       100.0 * (1.0 - (HYPRE_Real) local_num_nonzeros / local_size) :
                                       0.0;
@@ -465,20 +463,9 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
                                     hypre_ParCSRMatrix     **matrices,
                                     hypre_MatrixStatsArray  *stats_array)
 {
-   hypre_MatrixStats     *stats;
-
-   /* MPI buffers */
-   HYPRE_Real            *recvbuffer;
-   HYPRE_Real            *sendbuffer;
-
-   /* Local variables */
-   MPI_Comm               comm;
-   hypre_CSRMatrix       *diag;
-   hypre_CSRMatrix       *offd;
-   HYPRE_Int              i;
-   HYPRE_Int              local_num_rows;
-   HYPRE_BigInt           global_num_rows;
-   HYPRE_Real             global_size;
+   hypre_MatrixStats *local_stats;
+   hypre_MatrixStats *global_stats;
+   HYPRE_Int          i;
 
    /* Sanity check */
    if (num_matrices < 1)
@@ -486,171 +473,22 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
       return hypre_error_flag;
    }
 
-   /* We assume all MPI communicators are equal */
-   comm = hypre_ParCSRMatrixComm(matrices[0]);
-
-   /* Allocate MPI buffers */
-   recvbuffer = hypre_CTAlloc(HYPRE_Real, 6 * num_matrices, HYPRE_MEMORY_HOST);
-   sendbuffer = hypre_CTAlloc(HYPRE_Real, 6 * num_matrices, HYPRE_MEMORY_HOST);
-
-   /* Set matrix dimensions */
    for (i = 0; i < num_matrices; i++)
    {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
+      local_stats  = hypre_MatrixStatsCreate();
+      global_stats = hypre_MatrixStatsArrayEntry(stats_array, i);
 
-      hypre_MatrixStatsNumRows(stats) = hypre_ParCSRMatrixGlobalNumRows(matrices[i]);
-      hypre_MatrixStatsNumCols(stats) = hypre_ParCSRMatrixGlobalNumCols(matrices[i]);
+      hypre_ParCSRMatrixStatsComputeLocal(matrices[i], local_stats);
+      hypre_MatrixStatsReduce(local_stats, global_stats,
+                              hypre_ParCSRMatrixComm(matrices[i]));
+
+      hypre_ParCSRMatrixNumNonzeros(matrices[i]) =
+         (HYPRE_Int) hypre_MatrixStatsNumNonzeros(global_stats);
+      hypre_ParCSRMatrixDNumNonzeros(matrices[i]) =
+         (hypre_double) hypre_MatrixStatsNumNonzeros(global_stats);
+
+      hypre_MatrixStatsDestroy(local_stats);
    }
-
-   /*-------------------------------------------------
-    *  First pass for computing statistics
-    *-------------------------------------------------*/
-
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-
-      hypre_ParCSRMatrixStatsComputePassOneLocal(matrices[i], stats);
-   }
-
-   /*-------------------------------------------------
-    *  Global reduce for min/max quantities
-    *-------------------------------------------------*/
-
-   /* Pack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-      local_num_rows = hypre_ParCSRMatrixNumRows(matrices[i]);
-
-      if (local_num_rows > 0)
-      {
-         sendbuffer(i, 0, 6) = (HYPRE_Real) - hypre_MatrixStatsNnzrowMin(stats);
-         sendbuffer(i, 1, 6) = (HYPRE_Real)   hypre_MatrixStatsNnzrowMax(stats);
-         sendbuffer(i, 2, 6) = (HYPRE_Real) - hypre_MatrixStatsRowsumMin(stats);
-         sendbuffer(i, 3, 6) = (HYPRE_Real)   hypre_MatrixStatsRowsumMax(stats);
-         sendbuffer(i, 4, 6) = (HYPRE_Real) - hypre_MatrixStatsAbsrowsumMin(stats);
-         sendbuffer(i, 5, 6) = (HYPRE_Real)   hypre_MatrixStatsAbsrowsumMax(stats);
-      }
-      else
-      {
-         sendbuffer(i, 0, 6) = -HYPRE_REAL_MAX;
-         sendbuffer(i, 1, 6) = -HYPRE_REAL_MAX;
-         sendbuffer(i, 2, 6) = -HYPRE_REAL_MAX;
-         sendbuffer(i, 3, 6) = -HYPRE_REAL_MAX;
-         sendbuffer(i, 4, 6) = -HYPRE_REAL_MAX;
-         sendbuffer(i, 5, 6) = -HYPRE_REAL_MAX;
-      }
-   }
-
-   hypre_MPI_Reduce(sendbuffer, recvbuffer, 6 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_MAX, 0, comm);
-
-   /* Unpack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-
-      hypre_MatrixStatsNnzrowMin(stats)    = (HYPRE_Int)  - recvbuffer(i, 0, 6);
-      hypre_MatrixStatsNnzrowMax(stats)    = (HYPRE_Int)    recvbuffer(i, 1, 6);
-      hypre_MatrixStatsRowsumMin(stats)    = (HYPRE_Real) - recvbuffer(i, 2, 6);
-      hypre_MatrixStatsRowsumMax(stats)    = (HYPRE_Real)   recvbuffer(i, 3, 6);
-      hypre_MatrixStatsAbsrowsumMin(stats) = (HYPRE_Real) - recvbuffer(i, 4, 6);
-      hypre_MatrixStatsAbsrowsumMax(stats) = (HYPRE_Real)   recvbuffer(i, 5, 6);
-   }
-
-   /*-------------------------------------------------
-    *  Global reduce for summation quantities
-    *-------------------------------------------------*/
-
-   /* Pack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-      diag  = hypre_ParCSRMatrixDiag(matrices[i]);
-      offd  = hypre_ParCSRMatrixOffd(matrices[i]);
-
-      sendbuffer(i, 0, 4) = (HYPRE_Real) (hypre_CSRMatrixNumNonzeros(diag) +
-                                          hypre_CSRMatrixNumNonzeros(offd));
-      sendbuffer(i, 1, 4) = (HYPRE_Real)  hypre_MatrixStatsActualNonzeros(stats);
-      sendbuffer(i, 2, 4) = (HYPRE_Real)  hypre_MatrixStatsRowsumAvg(stats);
-      sendbuffer(i, 3, 4) = (HYPRE_Real)  hypre_MatrixStatsAbsrowsumAvg(stats);
-   }
-
-   hypre_MPI_Reduce(sendbuffer, recvbuffer, 4 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
-
-   /* Unpack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-      global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrices[i]);
-      global_size     = hypre_squared((HYPRE_Real) global_num_rows);
-
-      hypre_MatrixStatsNumNonzeros(stats)    = (hypre_ulonglongint) recvbuffer(i, 0, 4);
-      hypre_MatrixStatsActualNonzeros(stats) = (hypre_ulonglongint) recvbuffer(i, 1, 4);
-      hypre_MatrixStatsRowsumAvg(stats)      = (HYPRE_Real)         recvbuffer(i, 2, 4) /
-                                               (HYPRE_Real)         global_num_rows;
-      hypre_MatrixStatsAbsrowsumAvg(stats)   = (HYPRE_Real)         recvbuffer(i, 3, 4) /
-                                               (HYPRE_Real)         global_num_rows;
-      hypre_MatrixStatsNnzrowAvg(stats)      = (HYPRE_Real)         recvbuffer(i, 0, 4) /
-                                               (HYPRE_Real)         global_num_rows;
-
-      hypre_MatrixStatsSparsity(stats)       = 100.0 * (1.0 - recvbuffer(i, 0, 4) / global_size);
-
-      hypre_ParCSRMatrixNumNonzeros(matrices[i]) = (HYPRE_Int) recvbuffer(i, 0, 4);
-      hypre_ParCSRMatrixDNumNonzeros(matrices[i]) = (hypre_double) recvbuffer(i, 0, 4);
-   }
-
-   /*-------------------------------------------------
-    *  Second pass for computing statistics
-    *-------------------------------------------------*/
-
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-
-      hypre_ParCSRMatrixStatsComputePassTwoLocal(matrices[i], stats);
-   }
-
-   /*-------------------------------------------------
-    *  Global reduce for summation quantities
-    *-------------------------------------------------*/
-
-   /* Pack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-
-      sendbuffer(i, 0, 3) = hypre_MatrixStatsNnzrowSqsum(stats);
-      sendbuffer(i, 1, 3) = hypre_MatrixStatsRowsumSqsum(stats);
-      sendbuffer(i, 2, 3) = hypre_MatrixStatsAbsrowsumSqsum(stats);
-   }
-
-   hypre_MPI_Reduce(sendbuffer, recvbuffer, 3 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
-
-   /* Unpack MPI buffers */
-   for (i = 0; i < num_matrices; i++)
-   {
-      stats = hypre_MatrixStatsArrayEntry(stats_array, i);
-      global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrices[i]);
-
-      hypre_MatrixStatsNnzrowSqsum(stats)    = recvbuffer(i, 0, 3);
-      hypre_MatrixStatsRowsumSqsum(stats)    = recvbuffer(i, 1, 3);
-      hypre_MatrixStatsAbsrowsumSqsum(stats) = recvbuffer(i, 2, 3);
-
-      hypre_MatrixStatsNnzrowStDev(stats) = hypre_sqrt(recvbuffer(i, 0, 3) /
-                                                       (HYPRE_Real) global_num_rows);
-      hypre_MatrixStatsRowsumStDev(stats) = hypre_sqrt(recvbuffer(i, 1, 3) /
-                                                       (HYPRE_Real) global_num_rows);
-      hypre_MatrixStatsAbsrowsumStDev(stats) = hypre_sqrt(recvbuffer(i, 2, 3) /
-                                                          (HYPRE_Real) global_num_rows);
-   }
-
-   /* Free MPI buffers */
-   hypre_TFree(recvbuffer, HYPRE_MEMORY_HOST);
-   hypre_TFree(sendbuffer, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

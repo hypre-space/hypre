@@ -10,6 +10,43 @@
 
 #include "_hypre_utilities.h"
 
+#define HYPRE_UNIT_TEST_SETUP(comm, min_procs, test_comm, test_my_id)     \
+   do                                                                     \
+   {                                                                      \
+      HYPRE_Int hypre_unit_my_id;                                         \
+      HYPRE_Int hypre_unit_num_procs;                                     \
+      hypre_MPI_Comm_rank((comm), &hypre_unit_my_id);                     \
+      hypre_MPI_Comm_size((comm), &hypre_unit_num_procs);                 \
+      if (hypre_unit_num_procs >= (min_procs))                            \
+      {                                                                   \
+         HYPRE_Int hypre_unit_part =                                     \
+            (hypre_unit_my_id < (min_procs)) ? 1 : hypre_MPI_UNDEFINED;   \
+         hypre_MPI_Comm_split((comm), hypre_unit_part, hypre_unit_my_id,  \
+                              &(test_comm));                              \
+      }                                                                   \
+      else                                                                \
+      {                                                                   \
+         if (hypre_unit_my_id == 0)                                       \
+         {                                                                \
+            hypre_printf("%s: Skipping (requires at least %d processors)\n", \
+                         __func__, (HYPRE_Int) (min_procs));              \
+         }                                                                \
+         hypre_MPI_Barrier((comm));                                       \
+         return 0;                                                        \
+      }                                                                   \
+      if ((test_comm) == hypre_MPI_COMM_NULL)                             \
+      {                                                                   \
+         hypre_MPI_Barrier((comm));                                       \
+         return 0;                                                        \
+      }                                                                   \
+      hypre_MPI_Comm_rank((test_comm), &(test_my_id));                    \
+      if ((test_my_id) == 0)                                              \
+      {                                                                   \
+         hypre_printf("%s (%d procs): ", __func__,                       \
+                      (HYPRE_Int) (min_procs));                           \
+      }                                                                   \
+   } while (0)
+
 #define HYPRE_UNIT_PRINT_TEST_RESULT(my_id, error, comm)                  \
    do                                                                     \
    {                                                                      \

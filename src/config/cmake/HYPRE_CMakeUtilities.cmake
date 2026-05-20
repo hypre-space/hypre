@@ -1052,37 +1052,32 @@ endfunction()
 
 # A function to add an executable to the build with the correct flags, includes, and linkage.
 function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
-  get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
-  if (DEP_SRC_FILE)
-    get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
-  endif ()
-
   # If CUDA is enabled, tag source files to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CUDA)
     if (DEP_SRC_FILE)
-      set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+      set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CUDA)
     endif ()
   endif ()
 
   # If HIP is enabled, tag source files to be compiled with hipcc/clang
   if (HYPRE_USING_HIP)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE HIP)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE HIP)
     endif ()
   endif ()
 
   # If SYCL is enabled, tag source files to be compiled with dpcpp.
   if (HYPRE_USING_SYCL)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CXX)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CXX)
     endif ()
   endif ()
 
   # Get executable name
-  string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
+  get_filename_component(EXE_NAME ${SRC_FILE} NAME_WE)
 
   # Add the executable, including DEP_SRC_FILE if provided
   if (DEP_SRC_FILE)
