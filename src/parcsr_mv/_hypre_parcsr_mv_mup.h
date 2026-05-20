@@ -1020,6 +1020,13 @@ hypre_ParCSRMatrixStatsArrayCompute_dbl( HYPRE_Int num_matrices, hypre_ParCSRMat
 HYPRE_Int
 hypre_ParCSRMatrixStatsArrayCompute_long_dbl( HYPRE_Int num_matrices, hypre_ParCSRMatrix **matrices, hypre_MatrixStatsArray *stats_array );
 
+HYPRE_Int
+hypre_ParCSRMatrixStatsComputeLocal_flt( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
+HYPRE_Int
+hypre_ParCSRMatrixStatsComputeLocal_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
+HYPRE_Int
+hypre_ParCSRMatrixStatsComputeLocal_long_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
+
 hypre_CSRMatrix *
 hypre_ParCSRMatrixToCSRMatrixAll_flt( hypre_ParCSRMatrix *par_matrix );
 hypre_CSRMatrix *

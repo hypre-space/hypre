@@ -212,6 +212,7 @@
 #undef hypre_ParCSRMatrixSortColMapOffd
 #undef hypre_ParCSRMatrixSortColMapOffdHost
 #undef hypre_ParCSRMatrixStatsArrayCompute
+#undef hypre_ParCSRMatrixStatsComputeLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalHost
 #undef hypre_ParCSRMatrixStatsComputePassTwoLocal
