@@ -438,7 +438,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
       HYPRE_BigInt row_starts[2] = {0, num_extended_rows};
       HYPRE_BigInt col_starts[2] = {0, num_cols_local};
 
-      A_local_parcsr = hypre_ParCSRMatrixCreate(MPI_COMM_SELF,
+      A_local_parcsr = hypre_ParCSRMatrixCreate(hypre_MPI_COMM_SELF,
                                                 num_extended_rows,
                                                 num_cols_local,
                                                 row_starts,
@@ -639,9 +639,9 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
       HYPRE_BigInt u_partitioning[2] = {0, num_cols_local};
 
       hypre_SchwarzDataFLocalPar(schwarz_data) =
-         hypre_ParVectorCreate(MPI_COMM_SELF, num_extended_rows, f_partitioning);
+         hypre_ParVectorCreate(hypre_MPI_COMM_SELF, num_extended_rows, f_partitioning);
       hypre_SchwarzDataULocalPar(schwarz_data) =
-         hypre_ParVectorCreate(MPI_COMM_SELF, num_cols_local, u_partitioning);
+         hypre_ParVectorCreate(hypre_MPI_COMM_SELF, num_cols_local, u_partitioning);
 
       hypre_ParVectorInitialize(hypre_SchwarzDataFLocalPar(schwarz_data));
       hypre_ParVectorInitialize(hypre_SchwarzDataULocalPar(schwarz_data));
