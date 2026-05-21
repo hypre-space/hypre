@@ -34,5 +34,7 @@ typedef struct
 #define hypre_SolverSetupIsDone(data)    ((data) -> is_setup)
 #define hypre_SolverSetIsSetup(data)     ((data) -> is_setup = 1)
 #define hypre_SolverResetIsSetup(data)   ((data) -> is_setup = 0)
+#define hypre_SolverSetSetupReuse(data)  ((data) -> is_setup = 2)
+#define hypre_SolverSetupReuseRequested(data) ((data) -> is_setup > 1)
 
 #endif /* HYPRE_BASE_SOLVER_HEADER */

@@ -37,7 +37,6 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            max_iter = (mgr_data -> max_iter);
    HYPRE_Real          *norms = (mgr_data -> rel_res_norms);
    hypre_ParVector     *Vtemp = (mgr_data -> Vtemp);
-   //   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
    hypre_ParVector     *residual = NULL;
 
    HYPRE_Complex        fp_zero = 0.0;
@@ -529,6 +528,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
  * Performs F-relaxation at a given MGR level. Called from both the down
  * cycle (pre-F-relax) and the up cycle (post-F-relax). After the call,
  * U_array[fine_grid] has been updated with the F-point correction.
+ * The shared Vtemp/Ztemp work vectors must be sized for A_array[fine_grid].
  *--------------------------------------------------------------------------*/
 
 static HYPRE_Int
@@ -801,8 +801,10 @@ hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
       /* Exit early in case of issues */
       if (HYPRE_GetError())
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "Detected issue during F-relaxation application!");
+         hypre_sprintf(msg, "[%d]: Error from F-relaxation %d at MGR level %d\n",
+                       my_id, Frelax_type[fine_grid], fine_grid);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+         HYPRE_ClearAllErrors();
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
          return hypre_error_flag;
@@ -935,6 +937,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 
    /* Cycle type: 1=V-cycle (default), 2=W-cycle */
    cycle_type  = (mgr_data -> cycle_type);
+   hypre_assert(cycle_type == 1 || cycle_type == 2);
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_coarse_levels + 1, HYPRE_MEMORY_HOST);
 
    /* Initialize level counters (mirrors par_cycle.c):
@@ -1360,7 +1363,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             else
             {
                /* Generic relaxation interface */
-               for (i = 0; i < level_smooth_iters[level]; i++)
+               for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                        NULL, level_smooth_type[fine_grid], 0,
