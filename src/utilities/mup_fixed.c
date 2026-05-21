@@ -1184,6 +1184,14 @@ hypre_MatrixStatsDestroy( hypre_MatrixStats *stats )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MatrixStatsReduce)( local_stats, global_stats, comm );
+}
+
+/*--------------------------------------------------------------------------*/
+
 void
 hypre_MemPrefetch( void *ptr, size_t size, HYPRE_MemoryLocation location )
 {

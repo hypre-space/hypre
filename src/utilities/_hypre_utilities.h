@@ -555,6 +555,13 @@ typedef struct hypre_MatrixStats_struct
    HYPRE_Real          rowsum_avg;
    HYPRE_Real          rowsum_stdev;
    HYPRE_Real          rowsum_sqsum;
+
+   /* Absolute row sum statistics */
+   HYPRE_Real          absrowsum_min;
+   HYPRE_Real          absrowsum_max;
+   HYPRE_Real          absrowsum_avg;
+   HYPRE_Real          absrowsum_stdev;
+   HYPRE_Real          absrowsum_sqsum;
 } hypre_MatrixStats;
 
 /*--------------------------------------------------------------------------
@@ -580,6 +587,12 @@ typedef struct hypre_MatrixStats_struct
 #define hypre_MatrixStatsRowsumAvg(data)             ((data) -> rowsum_avg)
 #define hypre_MatrixStatsRowsumStDev(data)           ((data) -> rowsum_stdev)
 #define hypre_MatrixStatsRowsumSqsum(data)           ((data) -> rowsum_sqsum)
+
+#define hypre_MatrixStatsAbsrowsumMin(data)          ((data) -> absrowsum_min)
+#define hypre_MatrixStatsAbsrowsumMax(data)          ((data) -> absrowsum_max)
+#define hypre_MatrixStatsAbsrowsumAvg(data)          ((data) -> absrowsum_avg)
+#define hypre_MatrixStatsAbsrowsumStDev(data)        ((data) -> absrowsum_stdev)
+#define hypre_MatrixStatsAbsrowsumSqsum(data)        ((data) -> absrowsum_sqsum)
 
 /******************************************************************************
  *
@@ -641,7 +654,7 @@ typedef struct hypre_MatrixStatsArray_struct
    HYPRE_PRINT_INDENT(n)                            \
    hypre_printf(__VA_ARGS__)
 
-#define HYPRE_NDIGITS_SIZE 12
+#define HYPRE_NDIGITS_SIZE 16
 
 #endif /* hypre_MATRIX_STATS_HEADER */
 /******************************************************************************
@@ -2159,6 +2172,9 @@ HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_p
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
 HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
+HYPRE_Int hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats,
+                                   hypre_MatrixStats *global_stats,
+                                   MPI_Comm comm );
 hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
 HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
 HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,

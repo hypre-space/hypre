@@ -25,7 +25,7 @@ HEADERS =\
  _hypre_fortran_matrix.h\
  general.h\
  int_array.h\
- memory.h\
+ memory_header.h\
  memory_tracker.h\
  multiprecision.h\
  HYPRE_utilities.h\

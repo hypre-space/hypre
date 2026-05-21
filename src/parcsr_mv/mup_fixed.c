@@ -1160,6 +1160,14 @@ hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices, hypre_ParCSRMatrix 
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ParCSRMatrixStatsComputeLocal( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixStatsComputeLocal)( A, stats );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_CSRMatrix *
 hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix *par_matrix )
 {

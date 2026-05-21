@@ -763,6 +763,15 @@ hypre_MGRCleanup( void      *mgr_vdata,
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
+   /* On full destroy, A_ff_array[0] is owned by MGR.
+    * This clears the callback marker before build-data
+    * cleanup so A_ff_array[0] is not skipped and leaked. */
+   if (cleanup_mode == HYPRE_MGR_CLEANUP_DESTROY)
+   {
+      (mgr_data -> fine_grid_solver_setup) = NULL;
+      (mgr_data -> fine_grid_solver_solve) = NULL;
+   }
+
    hypre_MGRCleanupBuildData(mgr_data, num_coarse_levels);
    if (cleanup_mode == HYPRE_MGR_CLEANUP_DESTROY)
    {
