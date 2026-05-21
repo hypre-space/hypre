@@ -73,7 +73,7 @@ typedef struct
    /* Common parameters */
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;
-   HYPRE_Int      overlap;           /* For domain-based: minimal overlap; For overlapping: order (delta) */
+   HYPRE_Int      overlap;           /* minimal overlap (domain-based); delta (overlap) */
    HYPRE_Int      num_functions;
    HYPRE_Int      use_nonsymm;
    HYPRE_Real     relax_weight;
@@ -98,9 +98,9 @@ typedef struct
 
    /* Overlapping Schwarz setup-time data */
    hypre_ParCSRMatrix *A;               /* Original matrix reference */
-   hypre_OverlapData *overlap_data;     /* Overlap computation data */
-   HYPRE_Int       num_cols_local;       /* Number of local columns */
-   HYPRE_Int      *row_to_col_map;      /* Map: extended row -> local col for u */
+   hypre_OverlapData  *overlap_data;    /* Overlap computation data */
+   HYPRE_Int           num_cols_local;  /* Number of local columns */
+   HYPRE_Int          *row_to_col_map;  /* Map: extended row -> local col for u */
 
    /* Local solver */
    HYPRE_Solver    local_solver;

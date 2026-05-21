@@ -1048,7 +1048,7 @@ hypre_SchwarzOverlapSolve(hypre_SchwarzData       *schwarz_data,
          }
 
          comm_handle = hypre_ParCSRCommHandleCreate(1, overlap_comm_pkg, restrict_send_buf,
-                                                     restrict_recv_buf);
+                                                    restrict_recv_buf);
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
          {
@@ -1129,7 +1129,7 @@ hypre_SchwarzOverlapSolve(hypre_SchwarzData       *schwarz_data,
             }
 
             comm_handle = hypre_ParCSRCommHandleCreate(2, overlap_comm_pkg, as_send_buf,
-                                                        as_recv_buf);
+                                                       as_recv_buf);
             hypre_ParCSRCommHandleDestroy(comm_handle);
 
             for (i = 0; i < as_num_recv_vals; i++)
@@ -1359,9 +1359,9 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
       if (variant > 1)
       {
          hypre_ParAMGCreateDomainDof(A,
-                                      domain_type, overlap,
-                                      num_functions, dof_func,
-                                      &domain_structure, &pivots, use_nonsymm);
+                                     domain_type, overlap,
+                                     num_functions, dof_func,
+                                     &domain_structure, &pivots, use_nonsymm);
 
          if (domain_structure)
          {

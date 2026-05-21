@@ -1631,7 +1631,7 @@ typedef struct
    /* Common parameters */
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;
-   HYPRE_Int      overlap;           /* For domain-based: minimal overlap; For overlapping: order (delta) */
+   HYPRE_Int      overlap;           /* minimal overlap (domain-based); delta (overlap) */
    HYPRE_Int      num_functions;
    HYPRE_Int      use_nonsymm;
    HYPRE_Real     relax_weight;
@@ -1656,11 +1656,9 @@ typedef struct
 
    /* Overlapping Schwarz setup-time data */
    hypre_ParCSRMatrix *A;               /* Original matrix reference */
-   hypre_OverlapData *overlap_data;     /* Overlap computation data */
-   hypre_CSRMatrix *A_local;             /* Extended local matrix */
-   HYPRE_BigInt   *col_map;             /* Map: local col -> global col */
-   HYPRE_Int       num_cols_local;       /* Number of local columns */
-   HYPRE_Int      *row_to_col_map;      /* Map: extended row -> local col for u */
+   hypre_OverlapData  *overlap_data;    /* Overlap computation data */
+   HYPRE_Int           num_cols_local;  /* Number of local columns */
+   HYPRE_Int          *row_to_col_map;  /* Map: extended row -> local col for u */
 
    /* Local solver */
    HYPRE_Solver    local_solver;
@@ -1716,8 +1714,6 @@ typedef struct
 /* Overlapping Schwarz setup-time data accessors */
 #define hypre_SchwarzDataA(schwarz_data)                 ((schwarz_data)->A)
 #define hypre_SchwarzDataOverlapData(schwarz_data)       ((schwarz_data)->overlap_data)
-#define hypre_SchwarzDataALocal(schwarz_data)            ((schwarz_data)->A_local)
-#define hypre_SchwarzDataColMap(schwarz_data)            ((schwarz_data)->col_map)
 #define hypre_SchwarzDataNumColsLocal(schwarz_data)      ((schwarz_data)->num_cols_local)
 #define hypre_SchwarzDataRowToColMap(schwarz_data)       ((schwarz_data)->row_to_col_map)
 #define hypre_SchwarzDataLocalSolver(schwarz_data)       ((schwarz_data)->local_solver)
@@ -3992,3 +3988,4 @@ HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
 #endif
 
 #endif
+

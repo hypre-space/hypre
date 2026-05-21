@@ -541,7 +541,7 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
       }
 
       hypre_MPI_Allreduce(&ext_count, &global_ext_count, 1, HYPRE_MPI_INT,
-                           hypre_MPI_SUM, comm);
+                          hypre_MPI_SUM, comm);
 
       if (global_ext_count > 0)
       {
