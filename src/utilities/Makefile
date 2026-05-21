@@ -64,7 +64,6 @@ FILES =\
  handle.c\
  memory.c\
  unique.c\
- stl_ops.c\
  device_markers.c\
  device_utils.c\
  utilities.c\
@@ -79,7 +78,8 @@ FILES =\
 
 CUFILES=\
  int_array_device.c\
- omp_device.c
+ omp_device.c\
+ stl_ops.c
 
 # Mixed precision files
 MP_FILES = \
@@ -96,10 +96,20 @@ MP_CUFILES=\
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c
-MP_CUFILES += umpire.c
+ifeq (${HYPRE_USING_UMPIRE}, 1)
+MP_FILES += umpire.c
+endif
 else
 FILES += printf.c multiprecision.c
-CUFILES += umpire.c
+ifeq (${HYPRE_USING_UMPIRE}, 1)
+FILES += umpire.c
+endif
+endif
+
+ifeq (${CUCC}, )
+FILES := ${FILES} $(filter-out %_device.c,$(CUFILES))
+CUFILES =
+MP_CUFILES =
 endif
 
 COBJS = ${FILES:.c=.o}

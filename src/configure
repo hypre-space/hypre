@@ -674,6 +674,7 @@ HYPRE_CUDA_GENCODE
 HYPRE_UMPIRE_LIB
 HYPRE_UMPIRE_INCLUDE
 HYPRE_UMPIRE_LIB_DIR
+HYPRE_USING_UMPIRE
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_INCLUDE
 HYPRE_KOKKOS_LIB_DIR
@@ -10802,6 +10803,7 @@ fi
 
 if test "x$hypre_using_umpire" = "xyes"
 then
+   HYPRE_USING_UMPIRE=1
 
 printf "%s\n" "#define HYPRE_USING_UMPIRE 1" >>confdefs.h
 
@@ -10828,6 +10830,8 @@ Provide the following flags as appropriate:
 To opt out (not recommended), configure with --without-umpire.
 ===============================================================" "$LINENO" 5
    fi
+else
+   HYPRE_USING_UMPIRE=0
 fi
 
 if test "$hypre_using_cuda" = "yes"

@@ -5,6 +5,8 @@
 
 include ../config/Makefile.config
 
+# Some object files are only produced for certain CUCC/MP configurations;
+# filter optional patterns so builds do not pass unmatched wildcards to ar/link.
 wildcard_if_any = $(wildcard $(1))
 
 # Redefine AR to allow for files with the same name (but in different directories)
@@ -17,7 +19,7 @@ FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 ifeq (${MP_BUILD}, 1) 
 
 IJMVFILES           = ${HYPRE_SRC_TOP_DIR}/IJ_mv/mup*.o
-IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/mup*.obj
+IJMVFILES          += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/IJ_mv/mup*.obj)
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_flt
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_dbl
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_ldbl
@@ -57,7 +59,7 @@ MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/*.o_ldbl
 
 PARCSRLSFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/mup*.o
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/HYPRE_parcsr_ls_mp.o
-PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/mup*.obj
+PARCSRLSFILES      += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/parcsr_ls/mup*.obj)
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_flt
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_dbl
 PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o_ldbl
@@ -68,7 +70,7 @@ PARCSRLSFILES      += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.ob
 PARCSRMVFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/mup*.o
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/parcsr_mv_mp.o
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/HYPRE_parcsr_mv_mp.o
-PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/mup*.obj
+PARCSRMVFILES      += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/parcsr_mv/mup*.obj)
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_flt
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_dbl
 PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o_ldbl
@@ -82,7 +84,7 @@ PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o_ldbl
 
 SEQMVFILES          = ${HYPRE_SRC_TOP_DIR}/seq_mv/mup*.o
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/seq_mv_mp.o
-SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/mup*.obj
+SEQMVFILES         += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/seq_mv/mup*.obj)
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_flt
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_dbl
 SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o_ldbl
@@ -132,11 +134,13 @@ STRUCTMVFILES      += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/struct_mv/*.ob
 
 UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/mup*.o
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/utilities_mp.o
-UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/utilities_mp_device.obj
+UTILITIESFILES     += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/utilities/utilities_mp_device.obj)
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/printf.o
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/multiprecision.o
-UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/umpire.obj
-UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/mup*.obj
+ifeq (${HYPRE_USING_UMPIRE}, 1)
+UTILITIESFILES     += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/utilities/umpire.o)
+endif
+UTILITIESFILES     += $(call wildcard_if_any,${HYPRE_SRC_TOP_DIR}/utilities/mup*.obj)
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_flt
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_dbl
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/*.o_ldbl

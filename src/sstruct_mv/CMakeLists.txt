@@ -62,9 +62,6 @@ if (HYPRE_USING_GPU)
 endif ()
 
 set(COMPILED_SRCS ${REGULAR_SRCS})
-if(HYPRE_USING_GPU)
-  list(APPEND COMPILED_SRCS ${GPU_SRCS})
-endif()
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("sstruct_mv" SRCS "${COMPILED_SRCS}")

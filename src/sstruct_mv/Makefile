@@ -48,12 +48,16 @@ FILES =\
  sstruct_matmult.c\
  sstruct_matop.c\
  sstruct_scale.c\
- sstruct_stencil.c\
+ sstruct_stencil.c
+
+CUFILES =\
  sstruct_matrix.c\
  sstruct_vector.c
 
-CUFILES =\
- 
+ifeq (${CUCC}, )
+FILES := ${FILES} ${CUFILES}
+CUFILES =
+endif
 
 # Mixed precision files
 MP_FILES = \
