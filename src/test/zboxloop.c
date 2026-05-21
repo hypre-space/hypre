@@ -32,7 +32,7 @@ main( hypre_int argc,
    HYPRE_Int         num_procs, myid;
    HYPRE_Int         dim;
    HYPRE_Int         rep, reps, fail, sum;
-   HYPRE_Int         size, boxloop0_idx;
+   HYPRE_Int         size, xi1;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
@@ -348,13 +348,13 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-      boxloop0_idx = 0;
+      xi1 = 0;
 #undef HYPRE_OMP_CLAUSE
-#define HYPRE_OMP_CLAUSE firstprivate(boxloop0_idx)
+#define HYPRE_OMP_CLAUSE firstprivate(xi1)
       zypre_BoxLoop0Begin(dim, loop_size);
       {
-         xp1[boxloop0_idx] += xp1[boxloop0_idx];
-         boxloop0_idx++;
+         xp1[xi1] += xp1[xi1];
+         xi1++;
       }
       zypre_BoxLoop0End();
    }
