@@ -848,6 +848,8 @@ hypre_MGRSetCoarseSolver
 hypre_MGRSetCpointsByBlock
 hypre_MGRSetCpointsByContiguousBlock
 hypre_MGRSetCpointsByPointMarkerArray
+hypre_MGRSetCycleType
+hypre_MGRSetFRelaxCycle
 hypre_MGRSetFRelaxMethod
 hypre_MGRSetFSolver
 hypre_MGRSetFSolverAtLevel
