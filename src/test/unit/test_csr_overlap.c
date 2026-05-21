@@ -24,20 +24,13 @@
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_utilities.h"
 #include "_hypre_parcsr_mv.h"
+#include "hypre_unit.h"
 
 #define CHECK_TOLERANCE 1.0e-10
 
 /*--------------------------------------------------------------------------
  * Macros for test infrastructure
  *--------------------------------------------------------------------------*/
-#define PRINT_TEST_RESULT(my_id, error, comm) \
-   do { \
-      HYPRE_Int global_error = 0; \
-      hypre_MPI_Allreduce(&(error), &global_error, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm); \
-      if ((my_id) == 0) hypre_printf("%s\n", global_error ? "FAILED" : "PASSED"); \
-      (error) = global_error; \
-   } while (0)
-
 #define TEST_VARS() \
    hypre_ParCSRMatrix *A; hypre_OverlapData *overlap_data; hypre_CSRMatrix *A_local, *A_expected = NULL; \
    HYPRE_BigInt *col_map; HYPRE_Int num_cols_local, error = 0, test_my_id, my_id, num_procs; \
@@ -68,7 +61,7 @@
    if (col_map) hypre_TFree(col_map, HYPRE_MEMORY_HOST); \
    if (overlap_data) hypre_OverlapDataDestroy(overlap_data); \
    if (A) hypre_ParCSRMatrixDestroy(A); \
-   if (test_comm != hypre_MPI_COMM_NULL) { PRINT_TEST_RESULT(test_my_id, error, test_comm); hypre_MPI_Comm_free(&test_comm); } \
+   if (test_comm != hypre_MPI_COMM_NULL) { HYPRE_UNIT_PRINT_TEST_RESULT(test_my_id, error, test_comm); hypre_MPI_Comm_free(&test_comm); } \
    hypre_MPI_Barrier(comm); return error;
 
 #define TEST_PRINT_MATRICES(tag) \
@@ -1019,7 +1012,6 @@ main(hypre_int argc, char *argv[])
       error += Test7_Grid2D_Part2D_Overlap3(comm, print_matrices);
       error += Test8_Grid3D_Part3D_Overlap1(comm, print_matrices);
       error += Test9_Grid3D_Part3D_Overlap6(comm, print_matrices);
-
       if (my_id == 0)
       {
          hypre_printf("\n");
