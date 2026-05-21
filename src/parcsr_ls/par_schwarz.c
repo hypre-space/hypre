@@ -419,7 +419,6 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
 
    /* Map extended rows to column indices in the local matrix */
    {
-      HYPRE_BigInt *extended_rows = hypre_OverlapDataExtendedRowIndices(overlap_data);
       HYPRE_Int *row_to_col_map = hypre_TAlloc(HYPRE_Int, num_extended_rows, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < num_extended_rows; i++)
@@ -792,7 +791,6 @@ hypre_SchwarzOverlapSolve(hypre_SchwarzData       *schwarz_data,
    hypre_Vector         *f_local_vec;
    hypre_Vector         *u_local_vec;
 
-   HYPRE_Real           *f_data;
    HYPRE_Real           *u_data;
    HYPRE_Real           *f_local_data;
    HYPRE_Real           *u_local_data;
@@ -876,7 +874,6 @@ hypre_SchwarzOverlapSolve(hypre_SchwarzData       *schwarz_data,
    f_local_vec = hypre_ParVectorLocalVector(f_local_par);
    u_local_vec = hypre_ParVectorLocalVector(u_local_par);
 
-   f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    f_local_data = hypre_VectorData(f_local_vec);
    u_local_data = hypre_VectorData(u_local_vec);
