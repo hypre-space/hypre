@@ -4961,7 +4961,7 @@ HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver,
                          HYPRE_Int frelax_cycle );
 
 /**
- * (Optional) Set the multigrid cycling strategy.
+ * (Optional) Set MGR's cycling strategy.
  * Options for \e cycle_type are:
  *    - 1 : V-cycle (default)
  *    - 2 : W-cycle
