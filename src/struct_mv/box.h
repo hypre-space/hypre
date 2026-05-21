@@ -193,7 +193,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 #define zypre_BoxLoopDeclare() \
 HYPRE_Int  hypre__tot, hypre__div, hypre__mod;\
 HYPRE_Int  hypre__block, hypre__num_blocks;\
-HYPRE_Int  hypre__d, hypre__ndim;\
+HYPRE_Int  hypre__d, hypre__ndim, hypre__ik;\
 HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN;\
 HYPRE_Int  hypre__i[HYPRE_MAXDIM+1], hypre__n[HYPRE_MAXDIM+1]
 
@@ -205,6 +205,7 @@ HYPRE_Int  hypre__sk##k[HYPRE_MAXDIM], hypre__ikinc##k[HYPRE_MAXDIM+1]
 hypre__ndim = ndim;\
 hypre__n[0] = loop_size[0];\
 hypre__tot = 1;\
+HYPRE_UNUSED_VAR(hypre__ik);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
    hypre__n[hypre__d] = loop_size[hypre__d];\
