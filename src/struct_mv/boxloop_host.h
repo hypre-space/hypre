@@ -59,7 +59,7 @@
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -93,8 +93,8 @@
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -133,9 +133,9 @@
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -178,10 +178,10 @@
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopDeclareK(4);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, hypre__ik);                  \
-   zypre_BoxLoopInitK(4, dbox4, start4, stride4, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -305,7 +305,7 @@
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -330,8 +330,8 @@
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \

@@ -228,16 +228,16 @@ else\
    hypre__mod = 0;\
 }
 
-#define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
+#define zypre_BoxLoopInitK(k, dboxk, startk, stridek) \
 hypre__sk##k[0] = stridek[0];\
 hypre__ikinc##k[0] = 0;\
-ik = hypre_BoxSizeD(dboxk, 0); /* temporarily use ik */\
+hypre__ik = hypre_BoxSizeD(dboxk, 0);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__sk##k[hypre__d] = ik*stridek[hypre__d];\
+   hypre__sk##k[hypre__d] = hypre__ik*stridek[hypre__d];\
    hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
       hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
-   ik *= hypre_BoxSizeD(dboxk, hypre__d);\
+   hypre__ik *= hypre_BoxSizeD(dboxk, hypre__d);\
 }\
 hypre__i0inc##k = hypre__sk##k[0];\
 hypre__ikinc##k[hypre__ndim] = 0;\

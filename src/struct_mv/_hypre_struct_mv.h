@@ -249,16 +249,16 @@ else\
    hypre__mod = 0;\
 }
 
-#define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
+#define zypre_BoxLoopInitK(k, dboxk, startk, stridek) \
 hypre__sk##k[0] = stridek[0];\
 hypre__ikinc##k[0] = 0;\
-ik = hypre_BoxSizeD(dboxk, 0); /* temporarily use ik */\
+hypre__ik = hypre_BoxSizeD(dboxk, 0);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__sk##k[hypre__d] = ik*stridek[hypre__d];\
+   hypre__sk##k[hypre__d] = hypre__ik*stridek[hypre__d];\
    hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
       hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
-   ik *= hypre_BoxSizeD(dboxk, hypre__d);\
+   hypre__ik *= hypre_BoxSizeD(dboxk, hypre__d);\
 }\
 hypre__i0inc##k = hypre__sk##k[0];\
 hypre__ikinc##k[hypre__ndim] = 0;\
@@ -3369,7 +3369,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3403,8 +3403,8 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3443,9 +3443,9 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3488,10 +3488,10 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopDeclareK(4);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, hypre__ik);                  \
-   zypre_BoxLoopInitK(4, dbox4, start4, stride4, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3615,7 +3615,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3640,8 +3640,8 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, hypre__ik);                  \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, hypre__ik);                  \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
@@ -3738,4 +3738,3 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #endif
 
 #endif
-
