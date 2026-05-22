@@ -856,6 +856,12 @@ HYPRE_MGRSetLevelSmoothType( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalSmoothCycle
+ *
+ * Controls when global (level) smoothing sweeps are applied:
+ *   0 - no global smoothing
+ *   1 - pre-smoothing only  (default)
+ *   2 - post-smoothing only
+ *   3 - both pre- and post-smoothing (V(1,1))
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -869,6 +875,50 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
    }
 
    return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFRelaxCycle
+ *
+ * Controls when F-relaxation sweeps are applied:
+ *   0 - no F-relaxation
+ *   1 - pre-relaxation only (default, applied on the way down)
+ *   2 - post-relaxation only (applied on the way up, after coarse correction)
+ *   3 - both pre- and post-relaxation
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver,
+                         HYPRE_Int    frelax_cycle )
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetFRelaxCycle(solver, frelax_cycle);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCycleType
+ *
+ * Set MGR's cycling strategy:
+ *   1 = V-cycle (default)
+ *   2 = W-cycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCycleType( HYPRE_Solver solver,
+                       HYPRE_Int    cycle_type )
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetCycleType(solver, cycle_type);
 }
 
 /*--------------------------------------------------------------------------

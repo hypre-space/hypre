@@ -944,19 +944,22 @@ function(maybe_build_umpire)
 
   # Fetch Umpire with its submodules using FetchContent (populate only)
   set(FETCHCONTENT_QUIET OFF)
-  FetchContent_Declare(
+  set(_src_dir "${PROJECT_BINARY_DIR}/_deps/umpire-src")
+  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
+  set(_subbuild_dir "${PROJECT_BINARY_DIR}/_deps/umpire-subbuild")
+  FetchContent_Populate(
     umpire
+    SOURCE_DIR     "${_src_dir}"
+    BINARY_DIR     "${_bld_dir}"
+    SUBBUILD_DIR   "${_subbuild_dir}"
     GIT_REPOSITORY https://github.com/LLNL/Umpire.git
     GIT_TAG        ${_umpire_tag}
     GIT_SHALLOW    TRUE
     GIT_SUBMODULES blt;src/tpl/umpire/camp;src/tpl/umpire/fmt
     GIT_PROGRESS   TRUE
   )
-  FetchContent_Populate(umpire)
 
   # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
-  set(_src_dir "${umpire_SOURCE_DIR}")
-  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
   file(MAKE_DIRECTORY "${_bld_dir}")
   set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
   if(EXISTS "${_umpire_cfg_in}")
@@ -987,7 +990,17 @@ function(maybe_build_umpire)
   endif()
 
   # Add Umpire as a subproject now that sources are sanitized
+  if(DEFINED CMAKE_WARN_DEPRECATED)
+    set(_hypre_saved_CMAKE_WARN_DEPRECATED "${CMAKE_WARN_DEPRECATED}")
+  endif()
+  set(CMAKE_WARN_DEPRECATED OFF)
   add_subdirectory("${_src_dir}" "${_bld_dir}")
+  if(DEFINED _hypre_saved_CMAKE_WARN_DEPRECATED)
+    set(CMAKE_WARN_DEPRECATED "${_hypre_saved_CMAKE_WARN_DEPRECATED}")
+    unset(_hypre_saved_CMAKE_WARN_DEPRECATED)
+  else()
+    unset(CMAKE_WARN_DEPRECATED)
+  endif()
 
   # Fix up CUDA runtime linkage to use CUDA::cudart instead of legacy cuda_runtime
   fixup_umpire_cuda_runtime()
