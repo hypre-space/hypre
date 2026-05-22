@@ -139,7 +139,7 @@ co="${aco} --without-MPI --without-umpire --enable-unified-memory --with-cuda --
 # 6A) GCC 13.3.1 + CUDA 12.9.1 with Umpire
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
 UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/install-umpire_2025.09.0-cuda_12.9_sm90-gcc_13.3
-co="${aco} --with-cuda --with-gpu-arch=90 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs='umpire camp' --with-print-errors"
+co="${aco} --with-cuda --with-gpu-arch=90 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=\\"umpire camp\\" --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-bench
 
