@@ -23,25 +23,6 @@
 
 static HYPRE_Int hypre_SchwarzOverlapVariantIsRAS(HYPRE_Int variant);
 
-#ifdef HYPRE_USING_DSUPERLU
-#include "dsuperlu.h"
-
-/*--------------------------------------------------------------------------
- * Wrapper for hypre_SLUDistSolve to match HYPRE_PtrToSolverFcn signature.
- * Keep a local wrapper so the Schwarz code can store the same function
- * pointer type for all local solvers.
- *--------------------------------------------------------------------------*/
-
-static HYPRE_Int
-hypre_SchwarzSLUDistSolveWrapper(void               *solver,
-                                 hypre_ParCSRMatrix *A,
-                                 hypre_ParVector    *b,
-                                 hypre_ParVector    *x)
-{
-   return hypre_SLUDistSolve(solver, A, b, x);
-}
-#endif /* HYPRE_USING_DSUPERLU */
-
 /*==========================================================================
  * Internal functions for Overlapping Schwarz implementation
  *==========================================================================*/
@@ -600,7 +581,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
          hypre_SchwarzDataLocalSolver(schwarz_data) = slu_solver;
          hypre_SchwarzDataLocalSolverSetup(schwarz_data) = NULL;  /* Already set up */
          hypre_SchwarzDataLocalSolverSolve(schwarz_data) = (HYPRE_PtrToSolverFcn)
-                                                           hypre_SchwarzSLUDistSolveWrapper;
+                                                           hypre_SLUDistSolve;
          hypre_SchwarzDataLocalSolverDestroy(schwarz_data) = (HYPRE_PtrToDestroyFcn)
                                                              hypre_SLUDistDestroy;
          hypre_SchwarzDataLocalSolverOwner(schwarz_data) = 1;
