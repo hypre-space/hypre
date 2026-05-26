@@ -11,10 +11,7 @@
  *
  *****************************************************************************/
 
-#if defined(HYPRE_USING_GPU)
 #include "_hypre_onedpl.hpp"
-#endif
-
 #include "_hypre_parcsr_mv.h"
 
 #if defined(HYPRE_USING_GPU)
