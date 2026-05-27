@@ -35,6 +35,7 @@ hypre_Finalized
 hypre_Free
 hypre_GetDevice
 hypre_GetDeviceCount
+hypre_GetDeviceGSMethod
 hypre_GetDeviceLastError
 hypre_GetDeviceMaxShmemSize
 hypre_GetExecPolicy1
@@ -100,12 +101,15 @@ hypre_MPI_Comm_group
 hypre_MPI_Comm_rank
 hypre_MPI_Comm_size
 hypre_MPI_Comm_split
+hypre_MPI_Comm_split_type
 hypre_MPI_Finalize
 hypre_MPI_Gather
 hypre_MPI_Gatherv
 hypre_MPI_Get_count
 hypre_MPI_Group_free
 hypre_MPI_Group_incl
+hypre_MPI_Info_create
+hypre_MPI_Info_free
 hypre_MPI_Init
 hypre_MPI_Iprobe
 hypre_MPI_Irecv
@@ -142,6 +146,7 @@ hypre_MatrixStatsArrayDestroy
 hypre_MatrixStatsArrayPrint
 hypre_MatrixStatsCreate
 hypre_MatrixStatsDestroy
+hypre_MatrixStatsReduce
 hypre_MemPrefetch
 hypre_Memcpy
 hypre_MemoryPrintUsage
@@ -170,8 +175,6 @@ hypre_SetSpGemmUseVendor
 hypre_SetSpMVUseVendor
 hypre_SetSpTransUseVendor
 hypre_SetUseGpuRand
-hypre_SetUserDeviceMalloc
-hypre_SetUserDeviceMfree
 hypre_UniqueIntArrayND
 hypre_UnorderedBigIntMapCreate
 hypre_UnorderedBigIntMapDestroy
@@ -201,11 +204,13 @@ hypre_error_code_save
 hypre_error_handler
 hypre_error_handler_clear_messages
 hypre_finalize
+hypre_gcd
 hypre_geterror
 hypre_geterrorarg
 hypre_handle
 hypre_init
 hypre_initialize
+hypre_lcm
 hypre_merge_sort
 hypre_mm_is_valid
 hypre_mm_read_banner

@@ -98,6 +98,15 @@ number of other information sources for hypre are available.
   demonstrate various features of the hypre library.  Associated documentation
   may be accessed by viewing the ``README.html`` file in that same directory.
 
+* **hypredrive:** Users who want runtime-configurable solver setups may benefit from
+  `hypredrive <https://hypredrive.readthedocs.io/en/latest/>`_, a
+  high-level interface library built on top of hypre.  It provides both a standalone
+  driver for matrix/vector files and a lightweight C API that accepts YAML input from
+  file or in-memory string. This is useful for prototyping, benchmarking,
+  and fine-tuning hypre solver and preconditioner configurations without
+  recompiling application code. See `hypredrive documentation <https://hypredrive.readthedocs.io/en/latest/>`_
+  for more details.
+
 * **Papers, Presentations, etc.:** Articles and presentations related to the
   hypre software library and the solvers available in the library are available
   from the hypre web page at `http://www.llnl.gov/CASC/hypre/`_.

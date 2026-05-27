@@ -1131,7 +1131,7 @@ hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
-   if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
+   if (hypre_GetDeviceGSMethod() == 0)
    {
       exec = HYPRE_EXEC_HOST;
    }

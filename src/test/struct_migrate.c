@@ -54,6 +54,14 @@ main( hypre_int argc,
 
    HYPRE_Real          check;
 
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation     memory_location     = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy    default_exec_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation     memory_location     = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy    default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -67,16 +75,31 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
-   HYPRE_DeviceInitialize();
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      HYPRE_DeviceInitialize();
+   }
+
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_KOKKOS)
-   Kokkos::initialize (argc, argv);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      Kokkos::initialize (argc, argv);
+   }
 #endif
 
    /*-----------------------------------------------------------
@@ -421,7 +444,10 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(check_vector);
 
 #if defined(HYPRE_USING_KOKKOS)
-   Kokkos::finalize ();
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      Kokkos::finalize();
+   }
 #endif
 
    /* Finalize Hypre */

@@ -58,7 +58,7 @@ Final Relative Residual Norm = 9.810361e-09
 
 # Output file: coarsening.out.11
 BoomerAMG Iterations = 20
-Final Relative Residual Norm = 9.665671e-09
+Final Relative Residual Norm = 9.665672e-09
 
 # Output file: coarsening.out.12
 BoomerAMG Iterations = 15

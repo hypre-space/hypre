@@ -656,6 +656,102 @@ function(setup_tpl_or_internal LIB_NAME)
   endif()
 endfunction()
 
+# Verify external LAPACK integer ABI is compatible with HYPRE_ENABLE_BIGINT.
+# This check compiles and runs a tiny dgetrf() probe using 64-bit integers.
+function(check_bigint_external_lapack_abi)
+  if(NOT HYPRE_ENABLE_BIGINT)
+    return()
+  endif()
+
+  if(HYPRE_ENABLE_HYPRE_LAPACK)
+    return()
+  endif()
+
+  if(HYPRE_ALLOW_BIGINT_WITH_LP64_BLAS)
+    message(WARNING "Skipping BIGINT/external LAPACK ABI check because HYPRE_ALLOW_BIGINT_WITH_LP64_BLAS=ON")
+    return()
+  endif()
+
+  # Resolve LAPACK symbol name from configured mangling.
+  if(HYPRE_FMANGLE_LAPACK EQUAL 1)
+    set(_lapack_dgetrf_symbol "dgetrf")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 2 OR HYPRE_FMANGLE_LAPACK EQUAL 0)
+    set(_lapack_dgetrf_symbol "dgetrf_")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 3)
+    set(_lapack_dgetrf_symbol "dgetrf__")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 4)
+    set(_lapack_dgetrf_symbol "DGETRF")
+  elseif(HYPRE_FMANGLE_LAPACK EQUAL 5)
+    set(_lapack_dgetrf_symbol "_dgetrf_")
+  else()
+    set(_lapack_dgetrf_symbol "dgetrf_")
+  endif()
+
+  # Mirror the same external link line used by HYPRE for LAPACK/BLAS.
+  # Support both variable-based discovery and imported-target discovery.
+  set(_abi_required_libs)
+  if(TPL_LAPACK_LIBRARIES)
+    list(APPEND _abi_required_libs ${TPL_LAPACK_LIBRARIES})
+  elseif(TARGET LAPACK::LAPACK)
+    list(APPEND _abi_required_libs LAPACK::LAPACK)
+  elseif(LAPACK_LIBRARIES)
+    list(APPEND _abi_required_libs ${LAPACK_LIBRARIES})
+  endif()
+
+  if(TPL_BLAS_LIBRARIES)
+    list(APPEND _abi_required_libs ${TPL_BLAS_LIBRARIES})
+  elseif(TARGET BLAS::BLAS)
+    list(APPEND _abi_required_libs BLAS::BLAS)
+  elseif(BLAS_LIBRARIES)
+    list(APPEND _abi_required_libs ${BLAS_LIBRARIES})
+  endif()
+
+  if(_abi_required_libs)
+    list(REMOVE_DUPLICATES _abi_required_libs)
+  else()
+    message(FATAL_ERROR
+      "Unable to determine LAPACK libraries for BIGINT ABI check. "
+      "Set TPL_LAPACK_LIBRARIES/TPL_BLAS_LIBRARIES, or ensure LAPACK::LAPACK "
+      "(and optionally BLAS::BLAS) is discoverable, or use internal LAPACK.")
+  endif()
+
+  include(CheckCSourceRuns)
+
+  set(_old_required_libs "${CMAKE_REQUIRED_LIBRARIES}")
+  set(CMAKE_REQUIRED_LIBRARIES "${_abi_required_libs}")
+
+  set(_abi_probe_code
+"extern void ${_lapack_dgetrf_symbol}(const long long *m, const long long *n, double *a,
+                                      const long long *lda, long long *ipiv, long long *info);
+int main(void)
+{
+  long long m = 2, n = 2, lda = 2, info = 0;
+  double a[4] = {1.0, 3.0, 2.0, 4.0};
+  long long ipiv[2] = {0, 0};
+  ${_lapack_dgetrf_symbol}(&m, &n, a, &lda, ipiv, &info);
+  if (info != 0) { return 11; }
+  /* For this matrix, both pivots should be 2 with a 64-bit integer ABI. */
+  return (ipiv[0] == 2 && ipiv[1] == 2) ? 0 : 12;
+}")
+
+  check_c_source_runs("${_abi_probe_code}" HYPRE_EXTERNAL_LAPACK_ILP64_OK)
+
+  set(CMAKE_REQUIRED_LIBRARIES "${_old_required_libs}")
+
+  if(NOT HYPRE_EXTERNAL_LAPACK_ILP64_OK)
+    message(FATAL_ERROR
+      "Incompatible external LAPACK integer ABI for HYPRE_ENABLE_BIGINT=ON.\n"
+      "The configured external LAPACK appears to use LP64 integers (32-bit), "
+      "but BIGINT requires an ILP64-compatible BLAS/LAPACK integer interface.\n"
+      "Use one of:\n"
+      "  1) Provide ILP64 BLAS/LAPACK libraries\n"
+      "  2) Set -DHYPRE_ENABLE_MIXEDINT=ON (recommended for external LP64 BLAS/LAPACK)\n"
+      "  3) Use internal BLAS/LAPACK: -DHYPRE_ENABLE_HYPRE_BLAS=ON -DHYPRE_ENABLE_HYPRE_LAPACK=ON\n")
+  endif()
+
+  message(STATUS "Verified: external LAPACK integer ABI is compatible with HYPRE_ENABLE_BIGINT.")
+endfunction()
+
 # Verify that Umpire provides the C interface headers by compiling a tiny C program
 function(check_umpire_c_interface)
   if(NOT HYPRE_ENABLE_UMPIRE)
@@ -811,7 +907,7 @@ function(maybe_build_umpire)
   set(_umpire_tag "${HYPRE_UMPIRE_VERSION}")
   if(_umpire_tag STREQUAL "latest")
     # Default to a recent release if auto-detection is not desired here
-    set(_umpire_tag "v2025.09.0")
+    set(_umpire_tag "v2025.12.0")
   endif()
 
   # Configure Umpire build options according to hypre needs (one canonical block)
@@ -821,9 +917,9 @@ function(maybe_build_umpire)
   set(ENABLE_EXAMPLES              OFF CACHE BOOL "Disable Umpire examples" FORCE)
   set(ENABLE_DOCS                  OFF CACHE BOOL "Disable Umpire docs" FORCE)
   set(ENABLE_TESTS                 OFF CACHE BOOL "Disable Umpire tests" FORCE)
-  set(ENABLE_CUDA ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
-  set(ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
-  set(ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
+  set(ENABLE_CUDA        ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
+  set(ENABLE_HIP         ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
+  set(UMPIRE_ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
 
   # Rename Umpire's 'check' target to 'umpire_check' to avoid conflicts
   set(BLT_CODE_CHECK_TARGET_NAME "umpire_check" CACHE STRING "Rename Umpire's check target" FORCE)
@@ -848,19 +944,22 @@ function(maybe_build_umpire)
 
   # Fetch Umpire with its submodules using FetchContent (populate only)
   set(FETCHCONTENT_QUIET OFF)
-  FetchContent_Declare(
+  set(_src_dir "${PROJECT_BINARY_DIR}/_deps/umpire-src")
+  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
+  set(_subbuild_dir "${PROJECT_BINARY_DIR}/_deps/umpire-subbuild")
+  FetchContent_Populate(
     umpire
+    SOURCE_DIR     "${_src_dir}"
+    BINARY_DIR     "${_bld_dir}"
+    SUBBUILD_DIR   "${_subbuild_dir}"
     GIT_REPOSITORY https://github.com/LLNL/Umpire.git
     GIT_TAG        ${_umpire_tag}
     GIT_SHALLOW    TRUE
     GIT_SUBMODULES blt;src/tpl/umpire/camp;src/tpl/umpire/fmt
     GIT_PROGRESS   TRUE
   )
-  FetchContent_Populate(umpire)
 
   # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
-  set(_src_dir "${umpire_SOURCE_DIR}")
-  set(_bld_dir "${CMAKE_BINARY_DIR}/_deps/umpire-build")
   file(MAKE_DIRECTORY "${_bld_dir}")
   set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
   if(EXISTS "${_umpire_cfg_in}")
@@ -886,8 +985,22 @@ function(maybe_build_umpire)
     endif()
   endif()
 
+  if(HYPRE_ENABLE_SYCL)
+    hypre_patch_umpire_sycl_pool_alignment("${_src_dir}")
+  endif()
+
   # Add Umpire as a subproject now that sources are sanitized
+  if(DEFINED CMAKE_WARN_DEPRECATED)
+    set(_hypre_saved_CMAKE_WARN_DEPRECATED "${CMAKE_WARN_DEPRECATED}")
+  endif()
+  set(CMAKE_WARN_DEPRECATED OFF)
   add_subdirectory("${_src_dir}" "${_bld_dir}")
+  if(DEFINED _hypre_saved_CMAKE_WARN_DEPRECATED)
+    set(CMAKE_WARN_DEPRECATED "${_hypre_saved_CMAKE_WARN_DEPRECATED}")
+    unset(_hypre_saved_CMAKE_WARN_DEPRECATED)
+  else()
+    unset(CMAKE_WARN_DEPRECATED)
+  endif()
 
   # Fix up CUDA runtime linkage to use CUDA::cudart instead of legacy cuda_runtime
   fixup_umpire_cuda_runtime()
@@ -940,39 +1053,44 @@ function(add_hypre_subdirectories DIRS)
   endforeach()
 endfunction()
 
+function(mark_hypre_gpu_sources)
+  if(HYPRE_USING_CUDA)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CUDA)
+  elseif(HYPRE_USING_HIP)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE HIP)
+  elseif(HYPRE_USING_SYCL)
+    set_source_files_properties(${ARGN} PROPERTIES LANGUAGE CXX)
+  endif()
+endfunction()
+
 # A function to add an executable to the build with the correct flags, includes, and linkage.
 function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
-  get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
-  if (DEP_SRC_FILE)
-    get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
-  endif ()
-
   # If CUDA is enabled, tag source files to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CUDA)
     if (DEP_SRC_FILE)
-      set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+      set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CUDA)
     endif ()
   endif ()
 
   # If HIP is enabled, tag source files to be compiled with hipcc/clang
   if (HYPRE_USING_HIP)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE HIP)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE HIP)
     endif ()
   endif ()
 
   # If SYCL is enabled, tag source files to be compiled with dpcpp.
   if (HYPRE_USING_SYCL)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CXX)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CXX)
     endif ()
   endif ()
 
   # Get executable name
-  string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
+  get_filename_component(EXE_NAME ${SRC_FILE} NAME_WE)
 
   # Add the executable, including DEP_SRC_FILE if provided
   if (DEP_SRC_FILE)
@@ -1053,7 +1171,7 @@ function(add_hypre_target_tags)
               --exclude=.git
               --exclude=build
               -o TAGS .
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
       COMMENT "Generating TAGS file with Universal Ctags"
       VERBATIM
     )
@@ -1062,17 +1180,17 @@ endfunction()
 
 # Function to add a distclean target
 function(add_hypre_target_distclean)
-  set(DISTCLEAN_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/DistcleanScript.cmake")
+  set(DISTCLEAN_SCRIPT "${PROJECT_BINARY_DIR}/DistcleanScript.cmake")
 
   file(WRITE ${DISTCLEAN_SCRIPT} "
   # Remove everything in the build directory except .git, .gitignore, and this script
-  file(GLOB build_items RELATIVE \"${CMAKE_BINARY_DIR}\" \"${CMAKE_BINARY_DIR}/*\")
+  file(GLOB build_items RELATIVE \"${PROJECT_BINARY_DIR}\" \"${PROJECT_BINARY_DIR}/*\")
   foreach(item \${build_items})
     if(NOT item STREQUAL \".git\" AND
        NOT item STREQUAL \".gitignore\" AND
        NOT item STREQUAL \"${CMAKE_MATCH_1}\")
-      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${CMAKE_BINARY_DIR}/\${item}\")
-        file(REMOVE_RECURSE \"${CMAKE_BINARY_DIR}/\${item}\")
+      if(NOT \"${DISTCLEAN_SCRIPT}\" STREQUAL \"${PROJECT_BINARY_DIR}/\${item}\")
+        file(REMOVE_RECURSE \"${PROJECT_BINARY_DIR}/\${item}\")
       endif()
     endif()
   endforeach()
@@ -1085,11 +1203,15 @@ function(add_hypre_target_distclean)
     \"test/ij\" \"test/struct\" \"test/structmat\"
     \"test/sstruct\" \"test/ams_driver\"
     \"test/struct_migrate\" \"test/ij_assembly\"
+    \"seq_mv/csr_spgemm_device_numer[1-9].c\"
+    \"seq_mv/csr_spgemm_device_numer10.c\"
+    \"seq_mv/csr_spgemm_device_symbl[1-9].c\"
+    \"seq_mv/csr_spgemm_device_symbl10.c\"
   )
   foreach(pat \${patterns})
-    file(GLOB_RECURSE matches RELATIVE \"${CMAKE_SOURCE_DIR}\" \"${CMAKE_SOURCE_DIR}/\${pat}\")
+    file(GLOB_RECURSE matches RELATIVE \"${PROJECT_SOURCE_DIR}\" \"${PROJECT_SOURCE_DIR}/\${pat}\")
     foreach(m \${matches})
-      file(REMOVE_RECURSE \"${CMAKE_SOURCE_DIR}/\${m}\")
+      file(REMOVE_RECURSE \"${PROJECT_SOURCE_DIR}/\${m}\")
     endforeach()
   endforeach()
 
@@ -1099,7 +1221,7 @@ function(add_hypre_target_distclean)
 
   add_custom_target(distclean
     COMMAND ${CMAKE_COMMAND} -P ${DISTCLEAN_SCRIPT}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
   )
@@ -1110,7 +1232,7 @@ function(add_hypre_target_uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}"
     COMMAND ${CMAKE_COMMAND} -E echo "Removed installation directory: ${CMAKE_INSTALL_PREFIX}"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Uninstalling HYPRE"
     VERBATIM
   )
@@ -1188,49 +1310,87 @@ macro(setup_mixed_precision_compilation module_name)
   set(options "")
   set(oneValueArgs "")
   set(multiValueArgs SRCS)
-  cmake_parse_arguments(REGULAR "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_HYPRE_MUP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  if(NOT REGULAR_SRCS)
+  if(NOT _HYPRE_MUP_SRCS)
     message(FATAL_ERROR "SRCS argument is required for setup_mixed_precision_compilation")
   endif()
 
+  set(_regular_srcs_abs "")
+  foreach(_src IN LISTS _HYPRE_MUP_SRCS)
+    if(IS_ABSOLUTE "${_src}")
+      list(APPEND _regular_srcs_abs "${_src}")
+    else()
+      get_filename_component(_src_abs "${_src}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+      list(APPEND _regular_srcs_abs "${_src_abs}")
+    endif()
+  endforeach()
+
   # Create object libraries for each precision
-  add_library(${module_name}_flt  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_dbl  OBJECT ${REGULAR_SRCS})
-  add_library(${module_name}_ldbl OBJECT ${REGULAR_SRCS})
+  add_library(${module_name}_flt  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_dbl  OBJECT ${_regular_srcs_abs})
+  add_library(${module_name}_ldbl OBJECT ${_regular_srcs_abs})
 
   # Set precision-specific compile definitions
-  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1)
-  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1)
-  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1)
+  # Keep mixed-precision renaming active for the entire translation unit.
+  # The generated headers only suppress the *_mup_undef.h footer when
+  # hypre_MP_BUILD is already defined at preprocess time.
+  target_compile_definitions(${module_name}_flt  PRIVATE MP_BUILD_SINGLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_dbl  PRIVATE MP_BUILD_DOUBLE=1 hypre_MP_BUILD=1)
+  target_compile_definitions(${module_name}_ldbl PRIVATE MP_BUILD_LONGDOUBLE=1 hypre_MP_BUILD=1)
 
   # Set include directories and link libraries for all precision variants
   foreach(precision IN ITEMS flt dbl ldbl)
     target_include_directories(${module_name}_${precision} PRIVATE
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_BINARY_DIR}
+      ${PROJECT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}
-      ${CMAKE_SOURCE_DIR}/utilities
-      ${CMAKE_SOURCE_DIR}/blas
-      ${CMAKE_SOURCE_DIR}/lapack
-      ${CMAKE_SOURCE_DIR}/seq_mv
-      ${CMAKE_SOURCE_DIR}/seq_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_block_mv
-      ${CMAKE_SOURCE_DIR}/parcsr_ls
-      ${CMAKE_SOURCE_DIR}/IJ_mv
-      ${CMAKE_SOURCE_DIR}/krylov
-      ${CMAKE_SOURCE_DIR}/struct_mv
-      ${CMAKE_SOURCE_DIR}/sstruct_mv
-      ${CMAKE_SOURCE_DIR}/struct_ls
-      ${CMAKE_SOURCE_DIR}/sstruct_ls
-      ${CMAKE_SOURCE_DIR}/distributed_matrix
-      ${CMAKE_SOURCE_DIR}/matrix_matrix
-      ${CMAKE_SOURCE_DIR}/multivector
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_SOURCE_DIR}/utilities
+      ${PROJECT_SOURCE_DIR}/blas
+      ${PROJECT_SOURCE_DIR}/lapack
+      ${PROJECT_SOURCE_DIR}/seq_mv
+      ${PROJECT_SOURCE_DIR}/seq_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_block_mv
+      ${PROJECT_SOURCE_DIR}/parcsr_ls
+      ${PROJECT_SOURCE_DIR}/IJ_mv
+      ${PROJECT_SOURCE_DIR}/krylov
+      ${PROJECT_SOURCE_DIR}/struct_mv
+      ${PROJECT_SOURCE_DIR}/sstruct_mv
+      ${PROJECT_SOURCE_DIR}/struct_ls
+      ${PROJECT_SOURCE_DIR}/sstruct_ls
+      ${PROJECT_SOURCE_DIR}/distributed_matrix
+      ${PROJECT_SOURCE_DIR}/matrix_matrix
+      ${PROJECT_SOURCE_DIR}/multivector
     )
-    # Set position independent code for shared library builds
-    # Object libraries need explicit -fPIC when used in shared libraries
-    if(BUILD_SHARED_LIBS)
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # do not automatically inherit TPL usage requirements from HYPRE.
+    get_target_property(_hypre_include_dirs ${PROJECT_NAME} INCLUDE_DIRECTORIES)
+    if(_hypre_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_include_dirs})
+    endif()
+
+    get_target_property(_hypre_interface_include_dirs ${PROJECT_NAME} INTERFACE_INCLUDE_DIRECTORIES)
+    if(_hypre_interface_include_dirs)
+      target_include_directories(${module_name}_${precision} PRIVATE ${_hypre_interface_include_dirs})
+    endif()
+
+    get_target_property(_hypre_compile_defs ${PROJECT_NAME} COMPILE_DEFINITIONS)
+    if(_hypre_compile_defs)
+      target_compile_definitions(${module_name}_${precision} PRIVATE ${_hypre_compile_defs})
+    endif()
+
+    get_target_property(_hypre_compile_opts ${PROJECT_NAME} COMPILE_OPTIONS)
+    if(_hypre_compile_opts)
+      target_compile_options(${module_name}_${precision} PRIVATE ${_hypre_compile_opts})
+    endif()
+
+    # Mixed-precision object libraries compile as standalone targets, so they
+    # need an explicit PIC property whenever the parent HYPRE target requires it.
+    get_target_property(_hypre_pic ${PROJECT_NAME} POSITION_INDEPENDENT_CODE)
+    get_target_property(_hypre_interface_pic ${PROJECT_NAME} INTERFACE_POSITION_INDEPENDENT_CODE)
+    if(BUILD_SHARED_LIBS OR _hypre_pic OR _hypre_interface_pic)
       set_target_properties(${module_name}_${precision} PROPERTIES
         POSITION_INDEPENDENT_CODE ON
       )

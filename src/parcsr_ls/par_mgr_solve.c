@@ -37,7 +37,6 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            max_iter = (mgr_data -> max_iter);
    HYPRE_Real          *norms = (mgr_data -> rel_res_norms);
    hypre_ParVector     *Vtemp = (mgr_data -> Vtemp);
-   //   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
    hypre_ParVector     *residual = NULL;
 
    HYPRE_Complex        fp_zero = 0.0;
@@ -192,7 +191,11 @@ hypre_MGRSolve( void               *mgr_vdata,
    while ((rel_resnorm >= tol || iter < 1) && iter < max_iter)
    {
       /* Do one cycle of reduction solve on A*e = r */
-      hypre_MGRCycle(mgr_data, F_array, U_array);
+      if (hypre_MGRCycle(mgr_data, F_array, U_array))
+      {
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
 
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -276,7 +279,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
 {
    hypre_ParAMGData    *Frelax_data = (hypre_ParAMGData*) Frelax_vdata;
 
-   HYPRE_Int            Not_Finished = 0;
+   HYPRE_Int            not_done = 0;
    HYPRE_Int            level = 0;
    HYPRE_Int            cycle_param = 1;
    HYPRE_Int            j, Solve_err_flag, coarse_grid, fine_grid;
@@ -384,10 +387,10 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
    /* coarse grids exist */
    if (num_c_levels > 0)
    {
-      Not_Finished = 1;
+      not_done = 1;
    }
 
-   while (Not_Finished)
+   while (not_done)
    {
       if (cycle_param == 1)
       {
@@ -511,12 +514,342 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
       }
       else
       {
-         Not_Finished = 0;
+         not_done = 0;
       }
    }
    HYPRE_ANNOTATE_FUNC_END;
 
    return Solve_err_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRFRelaxAtLevel
+ *
+ * Performs F-relaxation at a given MGR level. Called from both the down
+ * cycle (pre-F-relax) and the up cycle (post-F-relax). After the call,
+ * U_array[fine_grid] has been updated with the F-point correction.
+ * The shared Vtemp/Ztemp work vectors must be sized for A_array[fine_grid].
+ *--------------------------------------------------------------------------*/
+
+static HYPRE_Int
+hypre_MGRFRelaxAtLevel( hypre_ParMGRData *mgr_data,
+                        HYPRE_Int         fine_grid,
+                        HYPRE_Int         coarse_grid,
+                        hypre_ParVector **F_array,
+                        hypre_ParVector **U_array,
+                        HYPRE_Int         my_id )
+{
+   /* Arrays extracted from mgr_data */
+   hypre_ParCSRMatrix  **A_array    = (mgr_data -> A_array);
+   hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
+   hypre_ParVector     **U_fine_array = (mgr_data -> U_fine_array);
+   hypre_ParVector     **F_fine_array = (mgr_data -> F_fine_array);
+   hypre_IntArray      **CF_marker  = (mgr_data -> CF_marker_array);
+   HYPRE_Int            *Frelax_type     = (mgr_data -> Frelax_type);
+   HYPRE_Int            *nsweeps         = (mgr_data -> num_relax_sweeps);
+   HYPRE_Int            *interp_type     = (mgr_data -> interp_type);
+   HYPRE_Int            *blk_size        = (mgr_data -> blk_size);
+   HYPRE_Int             relax_type      = (mgr_data -> relax_type);
+   HYPRE_Real            relax_weight    = (mgr_data -> relax_weight);
+   HYPRE_Real            omega           = (mgr_data -> omega);
+   hypre_Vector        **l1_norms_array  = (mgr_data -> l1_norms);
+   HYPRE_Real          **frelax_diaginv  = (mgr_data -> frelax_diaginv);
+   hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);
+   HYPRE_Int             frelax_print_level = (mgr_data -> frelax_print_level);
+   hypre_ParVector      *Vtemp  = (mgr_data -> Vtemp);
+   hypre_ParVector      *Ztemp  = (mgr_data -> Ztemp);
+#if defined(HYPRE_USING_GPU)
+   hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
+   hypre_ParCSRMatrix  **B_FF_array = (mgr_data -> B_FF_array);
+#endif
+
+   /* Derived locals */
+   HYPRE_Complex    *l1_norms     = l1_norms_array[fine_grid] ?
+                                    hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
+   HYPRE_Int        *CF_marker_data = hypre_IntArrayData(CF_marker[fine_grid]);
+   HYPRE_Int         i;
+   HYPRE_Int         relax_points = -1;
+   hypre_Solver     *aff_base;
+   char              region_name[1024];
+   char              msg[1024];
+
+   HYPRE_Complex     fp_zero    = 0.0;
+   HYPRE_Complex     fp_one     = 1.0;
+   HYPRE_Complex     fp_neg_one = -fp_one;
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
+   HYPRE_ExecutionPolicy exec            = hypre_GetExecPolicy1(memory_location);
+#endif
+
+   hypre_sprintf(region_name, "F-Relax");
+   hypre_GpuProfilingPushRange(region_name);
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+
+   if (Frelax_type[fine_grid] == 0)
+   {
+      /* (single level) Block-relaxation for A_ff */
+      if (interp_type[fine_grid] == 12)
+      {
+         HYPRE_Int  nrows     = hypre_ParCSRMatrixNumRows(A_ff_array[fine_grid]);
+         HYPRE_Int  n_block   = nrows / blk_size[fine_grid];
+         HYPRE_Int  left_size = nrows - n_block * blk_size[fine_grid];
+
+         for (i = 0; i < nsweeps[fine_grid]; i++)
+         {
+            /* F-relaxation is reducing the global residual, thus recompute it */
+            hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
+                                               U_array[fine_grid], fp_one,
+                                               F_array[fine_grid], Vtemp);
+
+            /* Restrict to F points */
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
+                                         fp_zero, F_fine_array[coarse_grid]);
+            }
+            else
+#endif
+            {
+               hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
+                                   fp_zero, &(F_fine_array[coarse_grid]));
+            }
+
+            /* Set initial guess to zero */
+            hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
+
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_MGRBlockRelaxSolveDevice(B_FF_array[fine_grid],
+                                              A_ff_array[fine_grid],
+                                              F_fine_array[coarse_grid],
+                                              U_fine_array[coarse_grid],
+                                              Vtemp, fp_one);
+            }
+            else
+#endif
+            {
+               hypre_MGRBlockRelaxSolve(A_ff_array[fine_grid], F_fine_array[coarse_grid],
+                                        U_fine_array[coarse_grid], blk_size[fine_grid],
+                                        n_block, left_size, 0, frelax_diaginv[fine_grid],
+                                        Vtemp);
+            }
+
+            /* Interpolate the solution back to the fine grid level */
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
+                                        U_fine_array[coarse_grid], fp_one,
+                                        U_fine_array[fine_grid]);
+            }
+            else
+#endif
+            {
+               hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
+                                   U_fine_array[coarse_grid], fp_one,
+                                   &(U_array[fine_grid]));
+            }
+         }
+      }
+      else
+      {
+         if (relax_type == 18)
+         {
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               for (i = 0; i < nsweeps[fine_grid]; i++)
+               {
+                  hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
+                                               CF_marker_data, relax_points, relax_weight,
+                                               l1_norms, U_array[fine_grid], Vtemp);
+               }
+            }
+            else
+#endif
+            {
+               for (i = 0; i < nsweeps[fine_grid]; i++)
+               {
+                  hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
+                                              CF_marker_data, relax_points, relax_weight,
+                                              l1_norms, U_array[fine_grid], Vtemp);
+               }
+            }
+         }
+         else
+         {
+            for (i = 0; i < nsweeps[fine_grid]; i++)
+            {
+               hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
+                                    CF_marker_data, relax_type, relax_points,
+                                    relax_weight, omega, l1_norms,
+                                    U_array[fine_grid], Vtemp, Ztemp);
+            }
+         }
+      }
+   }
+   else if (Frelax_type[fine_grid] == 1)
+   {
+      /* V-cycle smoother for A_ff */
+      HYPRE_Real resnorm = 0.0, init_resnorm;
+      HYPRE_Real rhs_norm = 0.0, old_resnorm;
+      HYPRE_Real rel_resnorm = fp_one;
+      HYPRE_Real conv_factor = fp_one;
+      if (frelax_print_level > 1)
+      {
+         hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
+                                            U_array[fine_grid], fp_one,
+                                            F_array[fine_grid], Vtemp);
+
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         init_resnorm = resnorm;
+         rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
+
+         rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (init_resnorm / rhs_norm) : init_resnorm;
+
+         if (my_id == 0)
+         {
+            hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");
+            hypre_printf("                                            relative\n");
+            hypre_printf("               residual        factor       residual\n");
+            hypre_printf("               --------        ------       --------\n");
+            hypre_printf("    Initial    %e                 %e\n", init_resnorm,
+                         rel_resnorm);
+         }
+      }
+
+      for (i = 0; i < nsweeps[fine_grid]; i++)
+      {
+         hypre_MGRFrelaxVcycle(FrelaxVcycleData[fine_grid],
+                               F_array[fine_grid],
+                               U_array[fine_grid]);
+
+         if (frelax_print_level > 1)
+         {
+            old_resnorm = resnorm;
+            hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
+                                               U_array[fine_grid], fp_one,
+                                               F_array[fine_grid], Vtemp);
+            resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+            conv_factor = (old_resnorm > HYPRE_REAL_EPSILON) ?
+                          (resnorm / old_resnorm) : resnorm;
+            rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (resnorm / rhs_norm) : resnorm;
+
+            if (my_id == 0)
+            {
+               hypre_printf("\n    V-Cycle %2d   %e    %f     %e \n", i,
+                            resnorm, conv_factor, rel_resnorm);
+            }
+         }
+      }
+      if (my_id == 0 && frelax_print_level > 1)
+      {
+         hypre_printf("End F-relaxation: V-Cycle Smoother \n\n");
+      }
+   }
+   else if (Frelax_type[fine_grid] == 2  ||
+            Frelax_type[fine_grid] == 29 ||
+            Frelax_type[fine_grid] == 32 ||
+            Frelax_type[fine_grid] == 9  ||
+            Frelax_type[fine_grid] == 99 ||
+            Frelax_type[fine_grid] == 199 ||
+            ((mgr_data -> aff_solver) && (mgr_data -> aff_solver)[fine_grid]))
+   {
+      /* We need to compute the residual first to ensure that
+         F-relaxation is reducing the global residual */
+      hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
+                                         U_array[fine_grid], fp_one,
+                                         F_array[fine_grid], Vtemp);
+
+      /* Restrict to F points */
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
+                                   fp_zero, F_fine_array[coarse_grid]);
+      }
+      else
+#endif
+      {
+         hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
+                             fp_zero, &(F_fine_array[coarse_grid]));
+      }
+
+      /* Set initial guess to zeros */
+      hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
+
+      if (Frelax_type[fine_grid] == 2 || Frelax_type[fine_grid] == 29 ||
+          Frelax_type[fine_grid] == 32 ||
+          ((mgr_data -> aff_solver) && (mgr_data -> aff_solver)[fine_grid]))
+      {
+         aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[fine_grid];
+         hypre_SolverSolve(aff_base)((mgr_data -> aff_solver)[fine_grid],
+                                     (HYPRE_Matrix) A_ff_array[fine_grid],
+                                     (HYPRE_Vector) F_fine_array[coarse_grid],
+                                     (HYPRE_Vector) U_fine_array[coarse_grid]);
+      }
+      else
+      {
+         /* Do F-relaxation using Gaussian Elimination */
+         hypre_GaussElimSolve((mgr_data -> GSElimData)[fine_grid],
+                              fine_grid, Frelax_type[fine_grid]);
+      }
+
+      /* Exit early in case of issues */
+      if (HYPRE_GetError())
+      {
+         hypre_sprintf(msg, "[%d]: Error from F-relaxation %d at MGR level %d\n",
+                       my_id, Frelax_type[fine_grid], fine_grid);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+         HYPRE_ClearAllErrors();
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
+         return hypre_error_flag;
+      }
+
+      /* Interpolate the solution back to the fine grid level */
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
+                                  U_fine_array[coarse_grid], fp_one,
+                                  U_array[fine_grid]);
+      }
+      else
+#endif
+      {
+         hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
+                             U_fine_array[coarse_grid], fp_one,
+                             &(U_array[fine_grid]));
+      }
+   }
+   else
+   {
+      for (i = 0; i < nsweeps[fine_grid]; i++)
+      {
+         hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
+                              CF_marker_data, Frelax_type[fine_grid],
+                              relax_points, relax_weight, omega, l1_norms,
+                              U_array[fine_grid], Vtemp, Ztemp);
+      }
+   }
+
+   /* Error checking */
+   if (HYPRE_GetError())
+   {
+      hypre_sprintf(msg, "[%d]: Error from F-relaxation %d at MGR level %d\n",
+                    my_id, Frelax_type[fine_grid], fine_grid);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      HYPRE_ClearAllErrors();
+   }
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_REGION_END("%s", region_name);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -530,19 +863,19 @@ hypre_MGRCycle( void              *mgr_vdata,
 {
    MPI_Comm               comm;
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   hypre_Solver          *aff_base;
 
    HYPRE_Int              local_size;
    HYPRE_Int              level;
    HYPRE_Int              coarse_grid;
    HYPRE_Int              fine_grid;
-   HYPRE_Int              Not_Finished;
-   HYPRE_Int              cycle_type;
+   HYPRE_Int              not_done;
+   HYPRE_Int              phase;       /* 1=down, 2=up, 3=coarse solve */
+   HYPRE_Int              cycle_type;  /* 1=V-cycle, 2=W-cycle */
+   HYPRE_Int             *lev_counter; /* visit counter per level (W-cycle support) */
+   HYPRE_Int              k;
    HYPRE_Int              print_level = (mgr_data -> print_level);
-   HYPRE_Int              frelax_print_level = (mgr_data -> frelax_print_level);
 
    HYPRE_Complex         *l1_norms;
-   HYPRE_Int             *CF_marker_data;
 
    hypre_ParCSRMatrix   **A_array    = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array   = (mgr_data -> RT_array);
@@ -550,8 +883,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParCSRMatrix   **R_array    = (mgr_data -> R_array);
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
-   hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
-   hypre_ParCSRMatrix   **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix    *RAP        = (mgr_data -> RAP);
    HYPRE_Int              use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
@@ -560,43 +891,34 @@ hypre_MGRCycle( void              *mgr_vdata,
       (mgr_data -> coarse_grid_solver_solve);
 
    hypre_IntArray       **CF_marker = (mgr_data -> CF_marker_array);
-   HYPRE_Int             *nsweeps = (mgr_data -> num_relax_sweeps);
-   HYPRE_Int              relax_type = (mgr_data -> relax_type);
-   HYPRE_Real             relax_weight = (mgr_data -> relax_weight);
-   HYPRE_Real             omega = (mgr_data -> omega);
    hypre_Vector         **l1_norms_array = (mgr_data -> l1_norms);
    hypre_ParVector       *Vtemp = (mgr_data -> Vtemp);
    hypre_ParVector       *Ztemp = (mgr_data -> Ztemp);
    hypre_ParVector       *Utemp = (mgr_data -> Utemp);
 
-   hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
-   hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
-   hypre_ParCSRMatrix   **A_ff_array   = (mgr_data -> A_ff_array);
-
-   HYPRE_Int              i, relax_points;
+   HYPRE_Int              i;
    HYPRE_Int              num_coarse_levels = (mgr_data -> num_coarse_levels);
 
    HYPRE_Complex          fp_zero = 0.0;
    HYPRE_Complex          fp_one = 1.0;
    HYPRE_Complex          fp_neg_one = - fp_one;
 
-   HYPRE_Int             *Frelax_type = (mgr_data -> Frelax_type);
    HYPRE_Int             *interp_type = (mgr_data -> interp_type);
-   hypre_ParAMGData     **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);
-   HYPRE_Real           **frelax_diaginv = (mgr_data -> frelax_diaginv);
-   HYPRE_Int             *blk_size = (mgr_data -> blk_size);
    HYPRE_Int              block_size = (mgr_data -> block_size);
    HYPRE_Int             *block_num_coarse_indexes = (mgr_data -> block_num_coarse_indexes);
-   /* TODO (VPM): refactor names blk_size and block_size */
 
    HYPRE_Int             *level_smooth_type = (mgr_data -> level_smooth_type);
    HYPRE_Int             *level_smooth_iters = (mgr_data -> level_smooth_iters);
 
    HYPRE_Int             *restrict_type  = (mgr_data -> restrict_type);
-   HYPRE_Int              pre_smoothing  = (mgr_data -> global_smooth_cycle) == 1 ? 1 : 0;
-   HYPRE_Int              post_smoothing = (mgr_data -> global_smooth_cycle) == 2 ? 1 : 0;
+   HYPRE_Int              gsc            = (mgr_data -> global_smooth_cycle);
+   HYPRE_Int              pre_smoothing  = (gsc == 1 || gsc == 3) ? 1 : 0;
+   HYPRE_Int              post_smoothing = (gsc == 2 || gsc == 3) ? 1 : 0;
+   HYPRE_Int              fsc            = (mgr_data -> frelax_smooth_cycle);
+   HYPRE_Int              frelax_pre     = (fsc == 1 || fsc == 3) ? 1 : 0;
+   HYPRE_Int              frelax_post    = (fsc == 2 || fsc == 3) ? 1 : 0;
    HYPRE_Int              my_id;
-   char                   region_name[1024];
+   char                   region_name[1024], level_name[1024];
    char                   msg[1024];
 
 #if defined(HYPRE_USING_GPU)
@@ -611,12 +933,27 @@ hypre_MGRCycle( void              *mgr_vdata,
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   Not_Finished = 1;
-   cycle_type = 1;
-   level = 0;
+   /* Cycle type: 1=V-cycle (default), 2=W-cycle */
+   cycle_type  = (mgr_data -> cycle_type);
+   hypre_assert(cycle_type == 1 || cycle_type == 2);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_coarse_levels + 1, HYPRE_MEMORY_HOST);
+
+   /* Initialize level counters (mirrors par_cycle.c):
+    *   lev_counter[0]   = 1            (root visited once)
+    *   lev_counter[k>0] = cycle_type   (V: once, W: twice)
+    */
+   lev_counter[0] = 1;
+   for (k = 1; k <= num_coarse_levels; k++)
+   {
+      lev_counter[k] = cycle_type;
+   }
+
+   not_done = 1;
+   phase    = 1;   /* start on down cycle */
+   level    = 0;
 
    /***** Main loop ******/
-   while (Not_Finished)
+   while (not_done)
    {
       /* Update scratch vector sizes */
       local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
@@ -625,12 +962,12 @@ hypre_MGRCycle( void              *mgr_vdata,
       hypre_ParVectorSetLocalSize(Utemp, local_size);
 
       /* Do coarse grid correction solve */
-      if (cycle_type == 3)
+      if (phase == 3)
       {
          /* call coarse grid solver here (default is BoomerAMG) */
-         hypre_sprintf(region_name, "%s-%d", "MGR_Level", level);
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+         hypre_sprintf(level_name, "%s-%d", "MGR_Level", level);
+         hypre_GpuProfilingPushRange(level_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", level_name);
 
          coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
          if (use_default_cgrid_solver)
@@ -664,29 +1001,28 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
 
          /**** cycle up ***/
-         cycle_type = 2;
+         phase = 2;
 
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", level_name);
       }
       /* Down cycle */
-      else if (cycle_type == 1)
+      else if (phase == 1)
       {
          /* Set fine/coarse grid level indices */
          fine_grid       = level;
          coarse_grid     = level + 1;
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
-         CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
 #if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
 #endif
 
-         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+         hypre_sprintf(level_name, "%s-%d", "MGR_Level", fine_grid);
+         hypre_GpuProfilingPushRange(level_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", level_name);
 
          /* Global pre smoothing sweeps */
          if (pre_smoothing && (level_smooth_iters[fine_grid] > 0))
@@ -755,6 +1091,13 @@ hypre_MGRCycle( void              *mgr_vdata,
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
                }
             }
+            else if (level_smooth_type[fine_grid] == 16)
+            {
+               /* HYPRE ILU */
+               HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
+                              A_array[fine_grid], F_array[fine_grid],
+                              U_array[fine_grid]);
+            }
             else if ((mgr_data -> level_smoother)[fine_grid])
             {
                /* Generic smoother object */
@@ -772,7 +1115,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                        NULL, level_smooth_type[fine_grid],
-                                       0, fp_one, fp_one, l1_norms, //NULL,
+                                       0, fp_one, fp_one, l1_norms,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
             }
@@ -791,373 +1134,101 @@ hypre_MGRCycle( void              *mgr_vdata,
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
          } /* End global pre-smoothing */
 
-         /* F-relaxation */
-         relax_points = -1;
-         hypre_sprintf(region_name, "F-Relax");
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-
-         if (Frelax_type[fine_grid] == 0)
+         /* F-relaxation (pre) */
+         if (frelax_pre && level < num_coarse_levels)
          {
-            /* (single level) Block-relaxation for A_ff */
-            if (interp_type[fine_grid] == 12)
+            if (hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
+                                       F_array, U_array, my_id))
             {
-               HYPRE_Int  nrows     = hypre_ParCSRMatrixNumRows(A_ff_array[fine_grid]);
-               HYPRE_Int  n_block   = nrows / blk_size[fine_grid];
-               HYPRE_Int  left_size = nrows - n_block * blk_size[fine_grid];
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_REGION_END("%s", level_name);
+               hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+               HYPRE_ANNOTATE_FUNC_END;
+               hypre_GpuProfilingPopRange();
 
-               for (i = 0; i < nsweeps[fine_grid]; i++)
-               {
-                  /* F-relaxation is reducing the global residual, thus recompute it */
-                  hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-                                                     U_array[fine_grid], fp_one,
-                                                     F_array[fine_grid], Vtemp);
-
-                  /* Restrict to F points */
-#if defined(HYPRE_USING_GPU)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
-                                               fp_zero, F_fine_array[coarse_grid]);
-                  }
-                  else
-#endif
-                  {
-                     hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
-                                         fp_zero, &(F_fine_array[coarse_grid]));
-                  }
-
-                  /* Set initial guess to zero */
-                  hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
-
-#if defined(HYPRE_USING_GPU)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     hypre_MGRBlockRelaxSolveDevice(B_FF_array[fine_grid],
-                                                    A_ff_array[fine_grid],
-                                                    F_fine_array[coarse_grid],
-                                                    U_fine_array[coarse_grid],
-                                                    Vtemp, fp_one);
-                  }
-                  else
-#endif
-                  {
-                     hypre_MGRBlockRelaxSolve(A_ff_array[fine_grid], F_fine_array[coarse_grid],
-                                              U_fine_array[coarse_grid], blk_size[fine_grid],
-                                              n_block, left_size, 0, frelax_diaginv[fine_grid],
-                                              Vtemp);
-                  }
-
-                  /* Interpolate the solution back to the fine grid level */
-#if defined(HYPRE_USING_GPU)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
-                                              U_fine_array[coarse_grid], fp_one,
-                                              U_fine_array[fine_grid]);
-                  }
-                  else
-#endif
-                  {
-                     hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
-                                         U_fine_array[coarse_grid], fp_one,
-                                         &(U_array[fine_grid]));
-                  }
-               }
-            }
-            else
-            {
-               if (relax_type == 18)
-               {
-#if defined(HYPRE_USING_GPU)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     for (i = 0; i < nsweeps[fine_grid]; i++)
-                     {
-                        hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
-                                                     CF_marker_data, relax_points, relax_weight,
-                                                     l1_norms, U_array[fine_grid], Vtemp);
-                     }
-                  }
-                  else
-#endif
-                  {
-                     for (i = 0; i < nsweeps[fine_grid]; i++)
-                     {
-                        hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
-                                                    CF_marker_data, relax_points, relax_weight,
-                                                    l1_norms, U_array[fine_grid], Vtemp);
-                     }
-                  }
-               }
-               else
-               {
-                  for (i = 0; i < nsweeps[fine_grid]; i++)
-                  {
-                     hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
-                                          CF_marker_data, relax_type, relax_points,
-                                          relax_weight, omega, l1_norms,
-                                          U_array[fine_grid], Vtemp, Ztemp);
-                  }
-               }
+               return hypre_error_flag;
             }
          }
-         else if (Frelax_type[fine_grid] == 1)
+
+         /* Decrement visit counter and decide next direction */
+         --lev_counter[level];
+         if (lev_counter[level] >= 0 && level < num_coarse_levels)
          {
-            /* V-cycle smoother for A_ff */
-            //HYPRE_Real convergence_factor_frelax;
-            // compute residual before solve
-            // hypre_ParCSRMatrixMatvecOutOfPlace(-fp_one, A_array[fine_grid],
-            //                                    U_array[fine_grid], fp_one,
-            //                                    F_array[fine_grid], Vtemp);
-            //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+            /* Go to next coarser level */
+            hypre_ParVectorSetZeros(U_array[coarse_grid]);
 
-            HYPRE_Real resnorm = 0.0, init_resnorm;
-            HYPRE_Real rhs_norm = 0.0, old_resnorm;
-            HYPRE_Real rel_resnorm = fp_one;
-            HYPRE_Real conv_factor = fp_one;
-            if (frelax_print_level > 1)
-            {
-               hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-                                                  U_array[fine_grid], fp_one,
-                                                  F_array[fine_grid], Vtemp);
+            /* Update residual and compute coarse-grid rhs */
+            hypre_sprintf(region_name, "Residual");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-               resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-               init_resnorm = resnorm;
-               rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
-
-               if (rhs_norm > HYPRE_REAL_EPSILON)
-               {
-                  rel_resnorm = init_resnorm / rhs_norm;
-               }
-               else
-               {
-                  /* rhs is zero, return a zero solution */
-                  hypre_ParVectorSetZeros(U_array[0]);
-
-                  HYPRE_ANNOTATE_FUNC_END;
-                  hypre_GpuProfilingPopRange();
-
-                  return hypre_error_flag;
-               }
-               if (my_id == 0 && frelax_print_level > 1)
-               {
-                  hypre_printf("\nBegin F-relaxation: V-Cycle Smoother \n");
-                  hypre_printf("                                            relative\n");
-                  hypre_printf("               residual        factor       residual\n");
-                  hypre_printf("               --------        ------       --------\n");
-                  hypre_printf("    Initial    %e                 %e\n", init_resnorm,
-                               rel_resnorm);
-               }
-            }
-
-            for (i = 0; i < nsweeps[fine_grid]; i++)
-            {
-               hypre_MGRFrelaxVcycle(FrelaxVcycleData[fine_grid],
-                                     F_array[fine_grid],
-                                     U_array[fine_grid]);
-
-               if (frelax_print_level > 1)
-               {
-                  old_resnorm = resnorm;
-                  hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-                                                     U_array[fine_grid], fp_one,
-                                                     F_array[fine_grid], Vtemp);
-                  resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-                  conv_factor = (old_resnorm > HYPRE_REAL_EPSILON) ?
-                                (resnorm / old_resnorm) : resnorm;
-                  rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (resnorm / rhs_norm) : resnorm;
-
-                  if (my_id == 0)
-                  {
-                     hypre_printf("\n    V-Cycle %2d   %e    %f     %e \n", i,
-                                  resnorm, conv_factor, rel_resnorm);
-                  }
-               }
-            }
-            if (my_id == 0 && frelax_print_level > 1)
-            {
-               hypre_printf("End F-relaxation: V-Cycle Smoother \n\n");
-            }
-            // compute residual after solve
-            //hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-            //                                   U_array[fine_grid], fp_one,
-            //                                   F_array[fine_grid], Vtemp);
-            //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
-            //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
-         }
-         else if (Frelax_type[level] == 2  ||
-                  Frelax_type[level] == 29 ||
-                  Frelax_type[level] == 32 ||
-                  Frelax_type[level] == 9  ||
-                  Frelax_type[level] == 99 ||
-                  Frelax_type[level] == 199)
-         {
-            /* We need to compute the residual first to ensure that
-               F-relaxation is reducing the global residual */
             hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
                                                U_array[fine_grid], fp_one,
                                                F_array[fine_grid], Vtemp);
 
-            /* Restrict to F points */
-#if defined(HYPRE_USING_GPU)
-            if (exec == HYPRE_EXEC_DEVICE)
-            {
-               hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
-                                         fp_zero, F_fine_array[coarse_grid]);
-            }
-            else
-#endif
-            {
-               hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
-                                   fp_zero, &(F_fine_array[coarse_grid]));
-            }
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
-            /* Set initial guess to zeros */
-            hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
-
-            if (Frelax_type[level] == 2 || Frelax_type[level] == 32)
+            hypre_sprintf(region_name, "Restrict");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+            if (R_array[fine_grid])
             {
-               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
-
-               hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
-                                           (HYPRE_Matrix) A_ff_array[level],
-                                           (HYPRE_Vector) F_fine_array[coarse_grid],
-                                           (HYPRE_Vector) U_fine_array[coarse_grid]);
-            }
-            else if (Frelax_type[level] == 29)
-            {
-               hypre_MGRDirectSolverSolve((mgr_data -> aff_solver)[level],
-                                          A_ff_array[level],
-                                          F_fine_array[coarse_grid],
-                                          U_fine_array[coarse_grid]);
+               /* no transpose necessary for R */
+               hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
+                                        fp_zero, F_array[coarse_grid]);
             }
             else
             {
-               /* Do F-relaxation using Gaussian Elimination */
-               hypre_GaussElimSolve((mgr_data -> GSElimData)[fine_grid],
-                                    level, Frelax_type[level]);
-            }
-
-            /* Exit early in case of issues */
-            if (HYPRE_GetError())
-            {
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                 "Detected issue during F-relaxation application!");
-               return hypre_error_flag;
-            }
-
-            /* Interpolate the solution back to the fine grid level */
 #if defined(HYPRE_USING_GPU)
-            if (exec == HYPRE_EXEC_DEVICE)
-            {
-               hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
-                                        U_fine_array[coarse_grid], fp_one,
-                                        U_array[fine_grid]);
-            }
-            else
-#endif
-            {
-               hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
-                                   U_fine_array[coarse_grid], fp_one,
-                                   &(U_array[fine_grid]));
-            }
-         }
-         else
-         {
-            for (i = 0; i < nsweeps[fine_grid]; i++)
-            {
-               hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
-                                    CF_marker_data, Frelax_type[fine_grid],
-                                    relax_points, relax_weight, omega, l1_norms,
-                                    U_array[fine_grid], Vtemp, Ztemp);
-            }
-         }
-
-         /* Error checking */
-         if (HYPRE_GetError())
-         {
-            hypre_sprintf(msg, "[%d]: Error from F-relaxation %d at MGR level %d\n",
-                          my_id, Frelax_type[fine_grid], fine_grid);
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
-            HYPRE_ClearAllErrors();
-         }
-
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-
-         /* Update residual and compute coarse-grid rhs */
-         hypre_sprintf(region_name, "Residual");
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-
-         hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
-                                            U_array[fine_grid], fp_one,
-                                            F_array[fine_grid], Vtemp);
-
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-
-         hypre_sprintf(region_name, "Restrict");
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-         if (R_array[fine_grid])
-         {
-            /* no transpose necessary for R */
-            hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
-                                     fp_zero, F_array[coarse_grid]);
-         }
-         else
-         {
-#if defined(HYPRE_USING_GPU)
-            if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
+               if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
 #else
-            if (restrict_type[fine_grid] > 0)
+               if (restrict_type[fine_grid] > 0)
 #endif
-            {
-               hypre_ParCSRMatrixMatvecT(fp_one, RT_array[fine_grid], Vtemp,
-                                         fp_zero, F_array[coarse_grid]);
+               {
+                  hypre_ParCSRMatrixMatvecT(fp_one, RT_array[fine_grid], Vtemp,
+                                            fp_zero, F_array[coarse_grid]);
+               }
+               else
+               {
+                  hypre_MGRAddVectorR(CF_marker[fine_grid], CMRK, fp_one,
+                                      Vtemp, fp_zero, &(F_array[coarse_grid]));
+               }
             }
-            else
-            {
-               hypre_MGRAddVectorR(CF_marker[fine_grid], CMRK, fp_one,
-                                   Vtemp, fp_zero, &(F_array[coarse_grid]));
-            }
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", level_name);
+
+            ++level;
+            lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
+            phase = (level == num_coarse_levels) ? 3 : 1;
          }
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-
-         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
-         hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
-
-         /* Initialize coarse grid solution array (VPM: double-check this for multiple cycles)*/
-         hypre_ParVectorSetZeros(U_array[coarse_grid]);
-
-         ++level;
-         if (level == num_coarse_levels)
+         else
          {
-            cycle_type = 3;
+            /* Counter exhausted: turn around and go up */
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END("%s", level_name);
+            phase = 2;
          }
       }
       /* Up cycle */
-      else if (level != 0)
+      else if (phase == 2 && level != 0)
       {
          /* Set fine/coarse grid level indices */
          fine_grid       = level - 1;
          coarse_grid     = level;
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
-         CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
 #if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
 #endif
 
-         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
-         hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+         hypre_sprintf(level_name, "%s-%d", "MGR_Level", fine_grid);
+         hypre_GpuProfilingPushRange(level_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", level_name);
 
          /* Interpolate */
          hypre_sprintf(region_name, "Prolongate");
@@ -1184,8 +1255,29 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
+         local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[fine_grid]));
+         hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         hypre_ParVectorSetLocalSize(Ztemp, local_size);
+         hypre_ParVectorSetLocalSize(Utemp, local_size);
+
+         /* F-relaxation (post) */
+         if (frelax_post)
+         {
+            if (hypre_MGRFRelaxAtLevel(mgr_data, fine_grid, coarse_grid,
+                                       F_array, U_array, my_id))
+            {
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_REGION_END("%s", level_name);
+               hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+               HYPRE_ANNOTATE_FUNC_END;
+               hypre_GpuProfilingPopRange();
+
+               return hypre_error_flag;
+            }
+         }
+
          /* Global post smoothing sweeps */
-         if (post_smoothing & (level_smooth_iters[fine_grid] > 0))
+         if (post_smoothing && (level_smooth_iters[fine_grid] > 0))
          {
             hypre_sprintf(region_name, "Global-Relax");
             hypre_GpuProfilingPushRange(region_name);
@@ -1269,7 +1361,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             else
             {
                /* Generic relaxation interface */
-               for (i = 0; i < level_smooth_iters[level]; i++)
+               for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                        NULL, level_smooth_type[fine_grid], 0,
@@ -1291,17 +1383,28 @@ hypre_MGRCycle( void              *mgr_vdata,
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
          } /* End post-smoothing */
 
-         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END("%s", region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", level_name);
 
          --level;
+         if (level == 0)
+         {
+            not_done = 0;
+         }
+         else
+         {
+            /* W-cycles revisit a coarse branch; V-cycles continue upward. */
+            phase = (lev_counter[level] > 0) ? 1 : 2;
+         }
       } /* End interpolate */
       else
       {
-         Not_Finished = 0;
+         not_done = 0;
       }
    }
+
+   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
 

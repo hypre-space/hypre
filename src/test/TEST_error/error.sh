@@ -31,9 +31,10 @@ do
 done > ${TNAME}.out
 
 # Remove the "hypre error" lines from '.err' file and append them to '.out'
+# Also replace the line numbers with '###' to reduce the need to update the saved file
 mv ${TNAME}.err ${TNAME}.tmp
-egrep    "hypre error" ${TNAME}.tmp | sort >> ${TNAME}.out
-egrep -v "hypre error" ${TNAME}.tmp        >  ${TNAME}.err
+egrep    "hypre error" ${TNAME}.tmp | sed 's/line [0-9]\+/line ###/' | sort >> ${TNAME}.out
+egrep -v "hypre error" ${TNAME}.tmp                                         >  ${TNAME}.err
 
 #=============================================================================
 # remove temporary files

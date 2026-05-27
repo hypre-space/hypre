@@ -54,10 +54,6 @@ main( hypre_int  argc,
    HYPRE_Int                 arg_index;
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
-   HYPRE_MemoryLocation      memory_location;
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy     default_exec_policy;
-#endif
    char                      memory_location_name[8];
    HYPRE_Int                 nrows;
    HYPRE_BigInt              num_nonzeros;
@@ -86,23 +82,62 @@ main( hypre_int  argc,
    HYPRE_Int                 early_assemble = 0;
    HYPRE_Real                grow_factor = -1.0;
 
+   /* default execution policy and memory space */
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
+   /* Check memory location and exec policy */
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+   }
+
    /*-----------------------------------------------------------------
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   }
 
-   /* Initialize Hypre */
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
+
    HYPRE_Initialize();
-   HYPRE_DeviceInitialize();
+   HYPRE_SetMemoryLocation(memory_location);
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      HYPRE_DeviceInitialize();
+   }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -115,24 +150,21 @@ main( hypre_int  argc,
    Py = 1;
    Pz = 1;
 
-   nx = 100;
-   ny = 101;
-   nz = 102;
+   nx = 50;
+   ny = 51;
+   nz = 52;
 
    cx = 1.0;
    cy = 2.0;
    cz = 3.0;
 
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   default_exec_policy = HYPRE_EXEC_DEVICE;
-#endif
-   memory_location     = HYPRE_MEMORY_DEVICE;
-   mode                = (1 << 7) - 1;
-   option              = 1;
-   nchunks             = 3;
-   base                = 0;
-   print_matrix        = 0;
-   stencil             = 7;
+   mode    = (1 << 7) - 1;
+   option  = 1;
+   nchunks = 3;
+   base    = 0;
+   stencil = 7;
+
+   print_matrix = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -141,12 +173,7 @@ main( hypre_int  argc,
    arg_index = 1;
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-memory_location") == 0 )
-      {
-         arg_index++;
-         memory_location = (HYPRE_MemoryLocation) atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      if ( strcmp(argv[arg_index], "-P") == 0 )
       {
          arg_index++;
          Px = atoi(argv[arg_index++]);
@@ -297,9 +324,11 @@ main( hypre_int  argc,
       hypre_printf("\n");
    }
 
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-#endif
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
+   /* default execution policy */
+   HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_OPENMP)
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST)
@@ -550,7 +579,7 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    hypre_ResetDevice();
 #endif
 
@@ -852,7 +881,7 @@ test_all(MPI_Comm             comm,
 
    chunk_size = nrows / nchunks;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    hypre_SyncDevice();
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
@@ -931,7 +960,7 @@ test_all(MPI_Comm             comm,
       }
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    hypre_SyncDevice();
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();

@@ -1,0 +1,20 @@
+# Output file: solvers.out.0
+Iterations = 4
+Final Relative Residual Norm = 7.846564e-07
+
+# Output file: solvers.out.1
+Iterations = 8
+Final Relative Residual Norm = 5.298596e-07
+
+# Output file: solvers.out.2
+Iterations = 20
+Final Relative Residual Norm = 6.913376e-07
+
+# Output file: solvers.out.3
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+# Output file: solvers.out.4
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+

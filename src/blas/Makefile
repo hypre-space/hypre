@@ -83,4 +83,4 @@ distclean: clean
 # Rules
 ##################################################################
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

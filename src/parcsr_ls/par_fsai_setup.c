@@ -956,6 +956,8 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) fsai_vdata);
+
    /* Create and initialize work vectors used in the solve phase */
    r_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
    z_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
@@ -1044,6 +1046,11 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) fsai_vdata);
+   }
+
    return hypre_error_flag;
 }
 
@@ -1080,8 +1087,8 @@ hypre_FSAIPrintStats( void *fsai_vdata,
    /* Compute density */
    hypre_ParCSRMatrixSetDNumNonzeros(G);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
-   density = hypre_ParCSRMatrixDNumNonzeros(G) /
-             hypre_ParCSRMatrixDNumNonzeros(A);
+   density = (HYPRE_Real)(hypre_ParCSRMatrixDNumNonzeros(G) /
+                          hypre_ParCSRMatrixDNumNonzeros(A));
    hypre_ParFSAIDataDensity(fsai_data) = density;
 
    if (!my_id)

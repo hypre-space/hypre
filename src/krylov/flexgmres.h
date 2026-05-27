@@ -54,7 +54,7 @@ typedef struct
    hypre_KrylovPtrToMatvecCreate       MatvecCreate;
    hypre_KrylovPtrToMatvec             Matvec;
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy;
-   hypre_KrylovPtrToInnerProd          InnerProd;
+   hypre_KrylovPtrToInnerProdTagged    InnerProd;
    hypre_KrylovPtrToCopyVector         CopyVector;
    hypre_KrylovPtrToClearVector        ClearVector;
    hypre_KrylovPtrToScaleVector        ScaleVector;
@@ -71,6 +71,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      k_dim;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
@@ -133,7 +136,7 @@ hypre_FlexGMRESFunctionsCreate(
    hypre_KrylovPtrToMatvecCreate       MatvecCreate,
    hypre_KrylovPtrToMatvec             Matvec,
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
-   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
    hypre_KrylovPtrToCopyVector         CopyVector,
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,

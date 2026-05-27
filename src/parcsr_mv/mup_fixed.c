@@ -320,6 +320,22 @@ hypre_NumbersQuery( hypre_NumbersNode *node, const HYPRE_Int n )
 
 /*--------------------------------------------------------------------------*/
 
+hypre_OverlapData*
+hypre_OverlapDataCreate( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_OverlapDataCreate)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_OverlapDataDestroy( hypre_OverlapData *overlap_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_OverlapDataDestroy)( overlap_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
 void
 hypre_ParAat_RowSizes( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i, HYPRE_Int *B_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_BigInt *A_col_map_offd, HYPRE_Int *A_ext_i, HYPRE_BigInt *A_ext_j, HYPRE_BigInt *A_ext_row_map, HYPRE_Int *C_diag_size, HYPRE_Int *C_offd_size, HYPRE_Int num_rows_diag_A, HYPRE_Int num_cols_offd_A, HYPRE_Int num_rows_A_ext, HYPRE_BigInt first_col_diag_A, HYPRE_BigInt first_row_index_A )
 {
@@ -632,10 +648,10 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE
 
 /*--------------------------------------------------------------------------*/
 
-hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data )
+HYPRE_Int
+hypre_ParCSRMatrixBlockRowSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major, HYPRE_Int num_rows_block, HYPRE_Int num_cols_block, HYPRE_Int use_abs, hypre_DenseBlockMatrix **B_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixClone)( A, copy_data );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixBlockRowSum)( A, row_major, num_rows_block, num_cols_block, use_abs, B_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -665,17 +681,17 @@ hypre_ParCSRMatrixCompressOffdMap( hypre_ParCSRMatrix *A )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type, HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags, HYPRE_Int *tags, hypre_ParVector **scaling_ptr )
+hypre_ParCSRMatrixComputeOverlap( hypre_ParCSRMatrix *A, HYPRE_Int overlap_order, hypre_OverlapData **overlap_data_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixComputeScalingTagged)( A, type, memloc_tags, num_tags, tags, scaling_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixComputeOverlap)( A, overlap_order, overlap_data_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data )
+hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type, HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags, HYPRE_Int *tags, hypre_ParVector **scaling_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCopy)( A, B, copy_data );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixComputeScalingTagged)( A, type, memloc_tags, num_tags, tags, scaling_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -704,18 +720,18 @@ hypre_ParCSRMatrixCopy_C( hypre_ParCSRMatrix *P, hypre_ParCSRMatrix *C, HYPRE_In
 
 /*--------------------------------------------------------------------------*/
 
-hypre_ParCSRMatrix *
-hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd )
+HYPRE_Int
+hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCreate)( comm, global_num_rows, global_num_cols, row_starts_in, col_starts_in, num_cols_offd, num_nonzeros_diag, num_nonzeros_offd );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCreateAssumedPartition)( matrix );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix )
+hypre_ParCSRMatrixCreateExtendedMatrix( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data, hypre_CSRMatrix **A_local_ptr, HYPRE_BigInt **col_map_ptr, HYPRE_Int *num_cols_local_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCreateAssumedPartition)( matrix );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixCreateExtendedMatrix)( A, overlap_data, A_local_ptr, col_map_ptr, num_cols_local_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -889,6 +905,14 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixGetExternalMatrix( hypre_ParCSRMatrix *A, hypre_OverlapData *overlap_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixGetExternalMatrix)( A, overlap_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix, HYPRE_BigInt *row_start, HYPRE_BigInt *row_end, HYPRE_BigInt *col_start, HYPRE_BigInt *col_end )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixGetLocalRange)( matrix, row_start, row_end, col_start, col_end );
@@ -916,14 +940,6 @@ HYPRE_Int
 hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixInitialize)( matrix );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixInitialize_v2)( matrix, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1048,6 +1064,14 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm comm, const char *filename, HYPRE_Int *base_i
 
 /*--------------------------------------------------------------------------*/
 
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixRef( hypre_ParCSRMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRef)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixReorder( hypre_ParCSRMatrix *A )
 {
@@ -1121,9 +1145,25 @@ hypre_ParCSRMatrixSetPatternOnly( hypre_ParCSRMatrix *matrix, HYPRE_Int pattern_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixSortColMapOffd( hypre_ParCSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixSortColMapOffd)( A );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices, hypre_ParCSRMatrix **matrices, hypre_MatrixStatsArray *stats_array )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixStatsArrayCompute)( num_matrices, matrices, stats_array );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixStatsComputeLocal( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixStatsComputeLocal)( A, stats );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -22,7 +22,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 {
    hypre_GpuProfilingPushRange("AMGSetupStats");
 
-   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
@@ -204,9 +206,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    if (my_id == 0)
    {
-      hypre_printf("\n\n Num MPI tasks = %d\n\n", num_procs);
-      hypre_printf(" Num OpenMP threads = %d\n\n", num_threads);
-      hypre_printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
+      hypre_printf("\n\n Num MPI tasks = %d\n", num_procs);
+      hypre_printf(" Num OpenMP threads = %d\n", num_threads);
+      hypre_printf(" Execution policy = %s\n\n", HYPRE_GetExecutionPolicyName(exec));
       hypre_printf(" Max levels = %d\n", hypre_ParAMGDataMaxLevels(amg_data));
       hypre_printf(" Num levels = %d\n\n", num_levels);
       hypre_printf(" Strength Threshold = %f\n",
@@ -463,7 +465,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else
       {
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
+         global_nonzeros = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
          ndigits[2] = hypre_max(hypre_ndigits((HYPRE_BigInt) global_nonzeros / fine_size ), ndigits[2]);
       }
 
@@ -512,7 +514,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]);
 
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[level]);
-         global_nonzeros = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[level]);
+         global_nonzeros = (HYPRE_Real)hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[level]);
          num_coeffs[level] = global_nonzeros;
          num_mem[level] = global_nonzeros;
          num_variables[level] = (HYPRE_Real) fine_size;
@@ -593,7 +595,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
+         global_nonzeros = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
          num_coeffs[level] = global_nonzeros;
          if (level == 0)
          {
@@ -753,7 +755,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[level]);
          coarse_size = hypre_ParCSRBlockMatrixGlobalNumCols(P_block_array[level]);
-         global_nonzeros = hypre_ParCSRBlockMatrixDNumNonzeros(P_block_array[level]);
+         global_nonzeros = (HYPRE_Real)hypre_ParCSRBlockMatrixDNumNonzeros(P_block_array[level]);
          num_mem[level] += global_nonzeros;
 
          min_weight = 1.0;
@@ -877,7 +879,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
          coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
          hypre_ParCSRMatrixSetDNumNonzeros(P_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(P_array[level]);
+         global_nonzeros = (HYPRE_Real)hypre_ParCSRMatrixDNumNonzeros(P_array[level]);
          num_mem[level] += (HYPRE_Real) global_nonzeros;
 
          min_weight = 1.0;

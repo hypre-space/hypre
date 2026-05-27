@@ -24,3 +24,4 @@
 #undef hypre_DenseBlockMatrixMultiply
 #undef hypre_DenseBlockMatrixMultiplyHost
 #undef hypre_DenseBlockMatrixPrint
+#undef hypre_DenseBlockMatrixTranspose

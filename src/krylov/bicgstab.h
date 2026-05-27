@@ -70,6 +70,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      stop_crit;
@@ -138,8 +141,8 @@ hypre_BiCGSTABFunctionsCreate(
    hypre_KrylovPtrToScaleVector   ScaleVector,
    hypre_KrylovPtrToAxpy          Axpy,
    hypre_KrylovPtrToCommInfo      CommInfo,
-   hypre_KrylovPtrToPrecond       Precond,
-   hypre_KrylovPtrToPrecondSetup  PrecondSetup
+   hypre_KrylovPtrToPrecondSetup  PrecondSetup,
+   hypre_KrylovPtrToPrecond       Precond
 );
 
 /**

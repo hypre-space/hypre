@@ -313,6 +313,14 @@ hypre_GetDeviceCount( hypre_int *device_count )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_GetDeviceGSMethod( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDeviceGSMethod)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_GetDeviceLastError( void )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GetDeviceLastError)( );
@@ -817,6 +825,14 @@ hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m, hypre_MPI_C
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Comm_split_type)( comm, split_type, key, info, newcomm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MPI_Finalize( void )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Finalize)( );
@@ -860,6 +876,22 @@ HYPRE_Int
 hypre_MPI_Group_incl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks, hypre_MPI_Group *newgroup )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Group_incl)( group, n, ranks, newgroup );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Info_create)( info );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MPI_Info_free)( info );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1152,6 +1184,14 @@ hypre_MatrixStatsDestroy( hypre_MatrixStats *stats )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MatrixStatsReduce)( local_stats, global_stats, comm );
+}
+
+/*--------------------------------------------------------------------------*/
+
 void
 hypre_MemPrefetch( void *ptr, size_t size, HYPRE_MemoryLocation location )
 {
@@ -1377,22 +1417,6 @@ hypre_SetUseGpuRand( HYPRE_Int use_gpurand )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SetUserDeviceMalloc( GPUMallocFunc func )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetUserDeviceMalloc)( func );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SetUserDeviceMfree( GPUMfreeFunc func )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetUserDeviceMfree)( func );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_UniqueIntArrayND( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_UniqueIntArrayND)( ndim, size, array );
@@ -1592,10 +1616,26 @@ hypre_error_handler_clear_messages( void )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_gcd( HYPRE_Int a, HYPRE_Int b )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_gcd)( a, b );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_Handle*
 hypre_handle( void )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_handle)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_lcm( HYPRE_Int a, HYPRE_Int b )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_lcm)( a, b );
 }
 
 /*--------------------------------------------------------------------------*/

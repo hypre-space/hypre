@@ -143,13 +143,19 @@ main (hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
+   }
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
-   HYPRE_DeviceInitialize();
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
@@ -158,17 +164,20 @@ main (hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 11000
-   /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
-   HYPRE_SetSpMVUseVendor(0);
+      /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
+      HYPRE_SetSpMVUseVendor(0);
 #endif
-   /* use vendor implementation for SpGEMM */
-   HYPRE_SetSpGemmUseVendor(0);
+      /* use vendor implementation for SpGEMM */
+      HYPRE_SetSpGemmUseVendor(0);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SetSpGemmUseVendor(1);
+      HYPRE_SetSpGemmUseVendor(1);
 #endif
-   /* use cuRand for PMIS */
-   HYPRE_SetUseGpuRand(1);
+      /* use cuRand for PMIS */
+      HYPRE_SetUseGpuRand(1);
+   }
 #endif
 
    /* Set defaults */

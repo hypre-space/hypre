@@ -162,7 +162,11 @@ typedef HYPRE_Real HYPRE_Complex;
  * mixed precision code. */
 typedef double       hypre_double;
 typedef float        hypre_float;
+#if defined (HYPRE_USING_GPU)
+typedef double  hypre_long_double;
+#else
 typedef long double  hypre_long_double;
+#endif
 
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff
@@ -747,6 +751,17 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
+/* Base public solver APIs */
+HYPRE_Int HYPRE_SolverSetup(HYPRE_Solver solver,
+                            HYPRE_Matrix A,
+                            HYPRE_Vector b,
+                            HYPRE_Vector x);
+HYPRE_Int HYPRE_SolverSolve(HYPRE_Solver solver,
+                            HYPRE_Matrix A,
+                            HYPRE_Vector b,
+                            HYPRE_Vector x);
+HYPRE_Int HYPRE_SolverDestroy(HYPRE_Solver solver);
 
 /*===== END 3 - IGNORE CODE IN DOCS =====*/  /*! \endcond */
 

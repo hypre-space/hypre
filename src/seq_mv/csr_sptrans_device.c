@@ -11,7 +11,7 @@
 
 #if defined(HYPRE_USING_CUSPARSE)
 
-HYPRE_Int
+static HYPRE_Int
 hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                                HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                                HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
@@ -87,7 +87,7 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
 
 #if defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int
+static HYPRE_Int
 hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
                                 HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
                                 HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
@@ -146,6 +146,32 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
 }
 
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
+
+#if defined(HYPRE_USING_GPU)
+
+HYPRE_Int
+hypre_CSRSpTransVendor(HYPRE_Int   m,
+                       HYPRE_Int   n,
+                       HYPRE_Int   nnzA,
+                       HYPRE_Int  *d_ia,
+                       HYPRE_Int  *d_ja,
+                       HYPRE_Complex  *d_aa,
+                       HYPRE_Int **d_ic_out,
+                       HYPRE_Int **d_jc_out,
+                       HYPRE_Complex **d_ac_out,
+                       HYPRE_Int   want_data)
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   return hypreDevice_CSRSpTransCusparse(m, n, nnzA, d_ia, d_ja, d_aa,
+                                         d_ic_out, d_jc_out, d_ac_out, want_data);
+#elif defined(HYPRE_USING_ROCSPARSE)
+   return hypreDevice_CSRSpTransRocsparse(m, n, nnzA, d_ia, d_ja, d_aa,
+                                          d_ic_out, d_jc_out, d_ac_out, want_data);
+#else
+   return hypreDevice_CSRSpTrans(m, n, nnzA, d_ia, d_ja, d_aa,
+                                 d_ic_out, d_jc_out, d_ac_out, want_data);
+#endif
+}
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -221,6 +247,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_GPU */
 
 #if defined(HYPRE_USING_SYCL)
 HYPRE_Int

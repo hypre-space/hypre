@@ -63,31 +63,28 @@
  * The code uses the StMatrix routines to determine if the operation is
  * allowable and to compute the stencil and stencil formulas for M.
  *
- * All of the matrices must be defined on a common base grid (fine index space),
- * and each matrix must have a unitary stride for either its domain or range (or
- * both).  RDF: Need to remove the latter requirement.  Think of P*C for
- * example, where P is interpolation and C is a square matrix on the coarse
- * grid.  Another approach (maybe the most flexible) is to temporarily modify
- * the matrices in this routine so that they have a common fine index space.
- * This will require mapping the matrix strides, the grid extents, and the
- * stencil offsets.  This latter idea is the same as Rebase() for vectors.
+ * All of the matrices must be defined on a common grid (fine index space), and
+ * each matrix must have a unitary stride for either its domain or range (or
+ * both).  RDF: Need to remove the latter requirement (almost there) and also
+ * the use of fine/coarse index spaces (e.g., when implementing Engwer trick).
  *
  * This routines assume there are only two data-map strides in the product.
  * This means that at least two matrices can always be multiplied together
  * (assuming it is a valid stencil matrix multiply), hence longer products can
  * be broken up into smaller components (the latter is not yet implemented).
  * The fine and coarse data-map strides are denoted by fstride and cstride.
- * Note that both fstride and cstride are given on the same base index space and
- * may be equal.  The range and domain strides for M are denoted by ran_stride
- * and dom_stride and are also given on the base index space.  The grid for M is
- * coarsened by factor coarsen_stride, which is the smaller of ran_stride and
- * dom_stride.  The computation for each stencil coefficient of M happens on the
- * base index space with stride loop_stride, which is the larger of ran_stride
- * and dom_stride.  Since we require that either ran_stride or dom_stride is
- * larger than all other matrix strides in the product (this is how we guarantee
- * that M has only one stencil), and since the data-map stride for a matrix is
- * currently the largest of its two strides, then we have loop_stride = cstride.
- * In general, the data strides for the boxloop below are as follows:
+ * They are defined relative to the grid index space and may be equal.  The
+ * range and domain strides for M are denoted by ran_stride and dom_stride and
+ * are also given on the grid index space.  The grid for M is coarsened by
+ * factor coarsen_stride, which is the smaller of ran_stride and dom_stride.
+ * The computation for each stencil coefficient of M happens on the grid index
+ * space (the stencil index space) with stride loop_stride, which is the larger
+ * of ran_stride and dom_stride.  Since we require that either ran_stride or
+ * dom_stride is larger than all other matrix strides in the product (this is
+ * how we guarantee that M has only one stencil), and since the data-map stride
+ * for a matrix is currently the largest of its two strides, then we have
+ * loop_stride = cstride.  In general, the data strides for the innter BoxLoop
+ * are as follows:
  *
  *   Mdstride = stride 1
  *   cdstride = loop_stride / cstride (= stride 1)
@@ -645,7 +642,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    hypre_StructGrid          *grid;
    hypre_IndexRef             stride;
    HYPRE_Int                  nboxes;
-   HYPRE_Int                 *boxnums;
    hypre_Box                 *box;
    HYPRE_Int                 *symm;
 
@@ -684,11 +680,11 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
-   hypre_StructMatrixGetDataMapStride(matrices[0], &fstride);
+   fstride = hypre_StructMatrixDataStride(matrices[0]);
    cstride = fstride;
    for (m = 1; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -710,7 +706,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices + 1, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
-      hypre_StructMatrixGetDataMapStride(matrices[m], &stride);
+      stride = hypre_StructMatrixDataStride(matrices[m]);
       for (d = 0; d < ndim; d++)
       {
          if (stride[d] > fstride[d])
@@ -989,7 +985,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       HYPRE_Int   *num_ghost;
 
       HYPRE_StructVectorCreate(comm, grid, &mask);
-      HYPRE_StructVectorSetStride(mask, fstride); /* same stride as fine data-map stride */
       hypre_CommStencilCreateNumGhost(comm_stencils[nmatrices], &num_ghost);
       hypre_StructVectorComputeDataSpace(mask, NULL, num_ghost, &data_spaces[nmatrices]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
@@ -1075,30 +1070,28 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
     * couplings in the unstructured matrix until then. */
    if (need_mask)
    {
+      hypre_Index  ustride;
+
+      hypre_SetIndex(ustride, 1);
+
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
       hypre_StructVectorInitialize(mask, 1);
 
       nboxes  = hypre_StructVectorNBoxes(mask);
-      boxnums = hypre_StructVectorBoxnums(mask);
-      stride  = hypre_StructVectorStride(mask);
 
-      loop_stride = stride;
+      loop_stride = ustride;
       hypre_CopyToIndex(loop_stride, ndim, fdstride);
-      hypre_StructVectorMapDataStride(mask, fdstride);
-      for (j = 0; j < nboxes; j++)
+      for (b = 0; b < nboxes; b++)
       {
-         b = boxnums[j];
-
          box = hypre_StructGridBox(grid, b);
          hypre_CopyBox(box, loop_box);
          hypre_ProjectBox(loop_box, NULL, loop_stride);
          loop_start = hypre_BoxIMin(loop_box);
          hypre_BoxGetStrideSize(loop_box, loop_stride, loop_size);
 
-         fdbox = hypre_BoxArrayBox(fdata_space, b);
+         fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
          hypre_CopyToIndex(loop_start, ndim, fdstart);
-         hypre_StructVectorMapDataIndex(mask, fdstart);
 
          maskptr = hypre_StructVectorBoxData(mask, b);
 
@@ -1133,7 +1126,6 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 {
    HYPRE_Int             nmatrices     = (mmdata -> nmatrices);
    hypre_StructMatrix  **matrices      = (mmdata -> matrices);
-   hypre_IndexRef        fstride       = (mmdata -> fstride);
    hypre_StructVector   *mask          = (mmdata -> mask);
    hypre_CommPkg        *comm_pkg      = (mmdata -> comm_pkg);
    HYPRE_Complex       **comm_data     = (mmdata -> comm_data);
@@ -1176,7 +1168,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
 
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
-            hypre_CreateCommInfo(grid, fstride, comm_stencils[m], &comm_info);
+            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
             hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
                                             &comm_data_a[num_comm_pkgs]);
             num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
@@ -1187,8 +1179,7 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
       /* Compute mask communications */
       if (mask != NULL)
       {
-         hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
-         hypre_StructVectorMapCommInfo(mask, comm_info);
+         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
@@ -1427,7 +1418,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Set Mstride */
-   hypre_StructMatrixGetDataMapStride(M, &stride);
+   stride = hypre_StructMatrixDataStride(M);
    hypre_CopyToIndex(stride, ndim, Mstride);                    /* M's index space */
    hypre_MapToFineIndex(Mstride, NULL, coarsen_stride, ndim);   /* base index space */
 
@@ -1468,9 +1459,9 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
        * that neither MatrixMapDataIndex nor VectorMapDataIndex is used here,
        * because we want to use both matrices and vectors in one boxloop.  This
        * is accounted for when setting the data pointer values a.tptrs[] below. */
-      Mdbox = hypre_BoxArrayBox(Mdata_space, Mb);
-      fdbox = hypre_BoxArrayBox(fdata_space, b);
-      cdbox = hypre_BoxArrayBox(cdata_space, b);
+      Mdbox = hypre_BoxArrayBox(Mdata_space, hypre_StructGridBaseBoxnum(Mgrid, Mb));
+      fdbox = hypre_BoxArrayBox(fdata_space, hypre_StructGridBaseBoxnum(grid, b));
+      cdbox = hypre_BoxArrayBox(cdata_space, hypre_StructGridBaseBoxnum(grid, b));
       hypre_CopyToIndex(loop_start, ndim, Mdstart);
       hypre_MapToCoarseIndex(Mdstart, NULL, Mstride, ndim);   /* at loop_start */
       hypre_CopyToIndex(hypre_BoxIMin(fdbox), ndim, fdstart); /* at beginning of databox */
@@ -1524,7 +1515,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                      offsetref = hypre_StructStencilOffset(stencil, entry);
                      hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   }
-                  hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +

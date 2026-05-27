@@ -36,6 +36,9 @@ HYPRE_Int
 hypre_DenseBlockMatrixMigrate( hypre_DenseBlockMatrix *A,
                                HYPRE_MemoryLocation    memory_location );
 HYPRE_Int
+hypre_DenseBlockMatrixTranspose( hypre_DenseBlockMatrix  *A,
+                                 hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int
 hypre_DenseBlockMatrixPrint( MPI_Comm                comm,
                              hypre_DenseBlockMatrix *A,
                              const char*             filename );

@@ -10,9 +10,12 @@
 
 #define hypre_gselim(A,x,n)                                            \
 {                                                                      \
-   HYPRE_Int  __j, __k, __m;                                           \
+   HYPRE_DIAGNOSTIC_PUSH                                               \
+   HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                     \
+   HYPRE_Int  j, k, m;                                                 \
    HYPRE_Real factor;                                                  \
    HYPRE_Real divA;                                                    \
+   HYPRE_DIAGNOSTIC_POP                                                \
    if (n == 1)  /* A is 1x1 */                                         \
    {                                                                   \
       if (A[0] != 0.0)                                                 \
@@ -22,36 +25,36 @@
    }                                                                   \
    else/* A is nxn. Forward elimination */                             \
    {                                                                   \
-      for (__k = 0; __k < n - 1; __k++)                                \
+      for (k = 0; k < n - 1; k++)                                      \
       {                                                                \
-         if (A[__k * n + __k] != 0.0)                                  \
+         if (A[k * n + k] != 0.0)                                      \
          {                                                             \
-            divA = 1.0/A[__k * n + __k];                               \
-            for (__j = __k + 1; __j < n; __j++)                        \
+            divA = 1.0/A[k * n + k];                                   \
+            for (j = k + 1; j < n; j++)                                \
             {                                                          \
-               if (A[__j * n + __k] != 0.0)                            \
+               if (A[j * n + k] != 0.0)                                \
                {                                                       \
-                  factor = A[__j * n + __k] * divA;                    \
-                  for (__m = __k + 1; __m < n; __m++)                  \
+                  factor = A[j * n + k] * divA;                        \
+                  for (m = k + 1; m < n; m++)                          \
                   {                                                    \
-                     A[__j * n + __m]  -= factor * A[__k * n + __m];   \
+                     A[j * n + m]  -= factor * A[k * n + m];           \
                   }                                                    \
-                  x[__j] -= factor * x[__k];                           \
+                  x[j] -= factor * x[k];                               \
                }                                                       \
             }                                                          \
          }                                                             \
       }                                                                \
       /* Back Substitution  */                                         \
-      for (__k = n - 1; __k > 0; --__k)                                \
+      for (k = n - 1; k > 0; --k)                                      \
       {                                                                \
-         if (A[__k * n + __k] != 0.0)                                  \
+         if (A[k * n + k] != 0.0)                                      \
          {                                                             \
-            x[__k] /= A[__k * n + __k];                                \
-            for (__j = 0; __j < __k; __j++)                            \
+            x[k] /= A[k * n + k];                                      \
+            for (j = 0; j < k; j++)                                    \
             {                                                          \
-               if (A[__j * n + __k] != 0.0)                            \
+               if (A[j * n + k] != 0.0)                                \
                {                                                       \
-                  x[__j] -= x[__k] * A[__j * n + __k];                 \
+                  x[j] -= x[k] * A[j * n + k];                         \
                }                                                       \
             }                                                          \
          }                                                             \

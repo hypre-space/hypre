@@ -51,7 +51,7 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
-/* diagscale.c */
+/* diag_scale.c */
 HYPRE_Int hypre_StructDiagScale( hypre_StructMatrix *A, hypre_StructVector *y,
                                  hypre_StructVector *x );
 

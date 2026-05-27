@@ -1,0 +1,21 @@
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+cff-version: 1.2.0
+message: >-
+  If you use hypre, please cite it using the metadata from this file. If
+  specific algorithms or features in hypre are essential to your work, please
+  also cite the relevant publications.
+type: software
+title: "hypre: High performance preconditioners"
+authors:
+  - name: "HYPRE Project Developers"
+url: "https://llnl.gov/casc/hypre"
+repository-code: "https://github.com/hypre-space/hypre"
+license: "Apache-2.0 OR MIT"
+abstract: >-
+  hypre is a library of high performance preconditioners and solvers featuring
+  multigrid methods for the solution of large, sparse linear systems of
+  equations on massively parallel computers.

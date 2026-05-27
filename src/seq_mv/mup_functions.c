@@ -232,6 +232,15 @@ HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, HYPRE_Int
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_VectorAxpy( hypre_long_double alpha, HYPRE_Vector xvec, HYPRE_Vector yvec )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_VectorAxpy_pre( precision, alpha, xvec, yvec );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_VectorCopy( HYPRE_Vector xvec, HYPRE_Vector yvec )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -283,6 +292,51 @@ HYPRE_VectorRead( char *file_name )
    return HYPRE_VectorRead_pre( precision, file_name );
 }
 
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_CSRMatrixCopy_pre( precision, A, B, copy_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix *
+hypre_CSRMatrixCreate( HYPRE_Int num_rows, HYPRE_Int num_cols, HYPRE_Int num_nonzeros )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_CSRMatrixCreate_pre( precision, num_rows, num_cols, num_nonzeros );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_CSRMatrixInitialize_v2_pre( precision, matrix, bigInit, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixResetData( hypre_CSRMatrix *matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_CSRMatrixResetData_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetData( hypre_Vector *vector, void *data )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_SeqVectorSetData_pre( precision, vector, data );
+}
 
 
 #endif

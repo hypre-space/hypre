@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 #include "../utilities/_hypre_utilities.h"
-#include "../seq_mv/seq_mv.h"
+#include "../seq_mv/_hypre_seq_mv.h"
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 #include "../parcsr_ls/_hypre_parcsr_ls.h"
 #include "../krylov/_hypre_krylov.h"

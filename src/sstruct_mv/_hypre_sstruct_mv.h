@@ -1178,10 +1178,12 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA, HYPRE_Int type,
                                               hypre_SStructPVector *prowsum );
+HYPRE_Int hypre_SStructPMatrixScale ( hypre_SStructPMatrix *pA, HYPRE_Complex scalar );
 HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A, HYPRE_Int type,
                                              hypre_SStructVector **rowsum_ptr );
 HYPRE_Int hypre_SStructMatrixComputeL1Norms ( hypre_SStructMatrix *A, HYPRE_Int option,
                                               hypre_SStructVector **l1_norms_ptr );
+HYPRE_Int hypre_SStructMatrixScale ( hypre_SStructMatrix *A, HYPRE_Complex scalar );
 
 /* sstruct_scale.c */
 HYPRE_Int hypre_SStructPScale ( HYPRE_Complex alpha, hypre_SStructPVector *py );

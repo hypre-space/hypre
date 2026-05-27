@@ -20,24 +20,22 @@
 
 hypre_LGMRESFunctions *
 hypre_LGMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
-   HYPRE_Int    (*Free)          ( void *ptr ),
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
-                                   HYPRE_Int   *num_procs ),
-   void *       (*CreateVector)  ( void *vector ),
-   void *       (*CreateVectorArray)  ( HYPRE_Int size, void *vectors ),
-   HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void *       (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
-                                   void *x, HYPRE_Complex beta, void *y ),
-   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
-   HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   hypre_KrylovPtrToCAlloc             CAlloc,
+   hypre_KrylovPtrToFree               Free,
+   hypre_KrylovPtrToCommInfo           CommInfo,
+   hypre_KrylovPtrToCreateVector       CreateVector,
+   hypre_KrylovPtrToCreateVectorArray  CreateVectorArray,
+   hypre_KrylovPtrToDestroyVector      DestroyVector,
+   hypre_KrylovPtrToMatvecCreate       MatvecCreate,
+   hypre_KrylovPtrToMatvec             Matvec,
+   hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
+   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToCopyVector         CopyVector,
+   hypre_KrylovPtrToClearVector        ClearVector,
+   hypre_KrylovPtrToScaleVector        ScaleVector,
+   hypre_KrylovPtrToAxpy               Axpy,
+   hypre_KrylovPtrToPrecondSetup       PrecondSetup,
+   hypre_KrylovPtrToPrecond            Precond
 )
 {
    hypre_LGMRESFunctions * lgmres_functions;
@@ -73,11 +71,20 @@ void *
 hypre_LGMRESCreate( hypre_LGMRESFunctions *lgmres_functions )
 {
    hypre_LGMRESData *lgmres_data;
+   hypre_Solver     *base;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    lgmres_data = hypre_CTAllocF(hypre_LGMRESData, 1, lgmres_functions, HYPRE_MEMORY_HOST);
    lgmres_data->functions = lgmres_functions;
+
+   /* Set base solver pointer */
+   base = (hypre_Solver*) lgmres_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  hypre_LGMRESSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  hypre_LGMRESSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) hypre_LGMRESDestroy;
 
    /* set defaults */
    (lgmres_data -> k_dim)          = 20;
@@ -131,33 +138,18 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
          }
       }
 
-      if ( (lgmres_data -> matvec_data) != NULL )
-      {
-         (*(lgmres_functions->MatvecDestroy))(lgmres_data -> matvec_data);
-      }
+      (*(lgmres_functions->MatvecDestroy))(lgmres_data -> matvec_data);
 
-      if ( (lgmres_data -> r) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> r);
-      }
-      if ( (lgmres_data -> w) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> w);
-      }
-      if ( (lgmres_data -> w_2) != NULL )
-      {
-         (*(lgmres_functions->DestroyVector))(lgmres_data -> w_2);
-      }
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> r);
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> w);
+      (*(lgmres_functions->DestroyVector))(lgmres_data -> w_2);
 
 
       if ( (lgmres_data -> p) != NULL )
       {
          for (i = 0; i < (lgmres_data -> k_dim + 1); i++)
          {
-            if ( (lgmres_data -> p)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> p) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> p) [i]);
          }
          hypre_TFreeF( lgmres_data->p, lgmres_functions );
       }
@@ -167,10 +159,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
       {
          for (i = 0; i < (lgmres_data -> aug_dim + 1); i++)
          {
-            if ( (lgmres_data -> aug_vecs)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> aug_vecs) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> aug_vecs) [i]);
          }
          hypre_TFreeF( lgmres_data->aug_vecs, lgmres_functions );
       }
@@ -178,10 +167,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
       {
          for (i = 0; i < (lgmres_data -> aug_dim); i++)
          {
-            if ( (lgmres_data -> a_aug_vecs)[i] != NULL )
-            {
-               (*(lgmres_functions->DestroyVector))( (lgmres_data -> a_aug_vecs) [i]);
-            }
+            (*(lgmres_functions->DestroyVector))( (lgmres_data -> a_aug_vecs) [i]);
          }
          hypre_TFreeF( lgmres_data->a_aug_vecs, lgmres_functions );
       }
@@ -227,7 +213,7 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    HYPRE_Int            k_dim            = (lgmres_data -> k_dim);
    HYPRE_Int            max_iter         = (lgmres_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (lgmres_functions->precond_setup);
+   hypre_KrylovPtrToPrecondSetup precond_setup = (lgmres_functions->precond_setup);
    void          *precond_data     = (lgmres_data -> precond_data);
 
    HYPRE_Int            rel_change       = (lgmres_data -> rel_change);
@@ -236,6 +222,8 @@ hypre_LGMRESSetup( void *lgmres_vdata,
    HYPRE_Int            aug_dim          = (lgmres_data -> aug_dim);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SolverResetIsSetup((hypre_Solver *) lgmres_vdata);
 
    (lgmres_data -> A) = A;
 
@@ -313,6 +301,11 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) lgmres_vdata);
+   }
+
    return hypre_error_flag;
 }
 
@@ -356,7 +349,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    HYPRE_Real      tmp_norm, r_norm_last;
    /*---*/
 
-   HYPRE_Int              (*precond)(void*, void*, void*, void*)   = (lgmres_functions -> precond);
+   hypre_KrylovPtrToPrecond precond      = (lgmres_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(lgmres_data -> precond_data);
 
    HYPRE_Int             print_level    = (lgmres_data -> print_level);
@@ -396,18 +389,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       norms          = (lgmres_data -> norms);
       /* not used yet      log_file_name  = (lgmres_data -> log_file_name);*/
       /* fp = fopen(log_file_name,"w"); */
-   }
-
-   /* initialize work arrays  - lgmres includes aug_dim*/
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1 + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
-
-   /* lgmres mod. - need non-modified hessenberg to avoid aug_dim matvecs */
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + aug_dim + 1, lgmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + aug_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
    }
 
    (*(lgmres_functions->CopyVector))(b, p[0]);
@@ -466,6 +447,18 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays  - lgmres includes aug_dim*/
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1 + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+
+   /* lgmres mod. - need non-modified hessenberg to avoid aug_dim matvecs */
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + aug_dim + 1, lgmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + aug_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if ( logging > 0 || print_level > 0)
@@ -1174,8 +1167,8 @@ hypre_LGMRESGetStopCrit( void   *lgmres_vdata,
 
 HYPRE_Int
 hypre_LGMRESSetPrecond( void  *lgmres_vdata,
-                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                        hypre_KrylovPtrToPrecond precond,
+                        hypre_KrylovPtrToPrecondSetup precond_setup,
                         void  *precond_data )
 {
    hypre_LGMRESData *lgmres_data = (hypre_LGMRESData *)lgmres_vdata;

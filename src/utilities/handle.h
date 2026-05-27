@@ -26,10 +26,12 @@
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif /* defined(HYPRE_USING_UMPIRE) */
 
+#if defined(HYPRE_USING_GPU)
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 typedef void (*GPUMallocFunc)(void **, size_t);
 typedef void (*GPUMfreeFunc)(void *);
+#endif
 
 typedef struct
 {
@@ -45,19 +47,13 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* GPU MPI */
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int              use_gpu_aware_mpi;
-#endif
-
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   HYPRE_Int              device_gs_method; /* device G-S options */
-#endif
 
    /* user malloc/free function pointers */
    GPUMallocFunc          user_device_malloc;
    GPUMfreeFunc           user_device_free;
+#endif
 
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -69,10 +65,15 @@ typedef struct
    size_t                 umpire_host_pool_size;
    size_t                 umpire_pinned_pool_size;
    size_t                 umpire_block_size;
-   HYPRE_Int              own_umpire_device_pool;
-   HYPRE_Int              own_umpire_um_pool;
-   HYPRE_Int              own_umpire_host_pool;
-   HYPRE_Int              own_umpire_pinned_pool;
+   HYPRE_Int              umpire_device_id;
+   HYPRE_Int              umpire_device_pool_owns;
+   HYPRE_Int              umpire_um_pool_owns;
+   HYPRE_Int              umpire_host_pool_owns;
+   HYPRE_Int              umpire_pinned_pool_owns;
+   umpire_allocator       umpire_device_pool;
+   umpire_allocator       umpire_um_pool;
+   umpire_allocator       umpire_host_pool;
+   umpire_allocator       umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
 
@@ -93,21 +94,15 @@ typedef struct
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
-#define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
-#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
-
+#define hypre_HandleDeviceGSMethod(hypre_handle)                 hypre_DeviceDataGSMethod(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 hypre_DeviceDataUseGpuAwareMPI(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_DeviceDataCusparseHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleVendorSolverHandle(hypre_handle)             hypre_DeviceDataVendorSolverHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStream(hypre_handle)                  hypre_DeviceDataComputeStream(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubBinGrowth(hypre_handle)                   hypre_DeviceDataCubBinGrowth(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMinBin(hypre_handle)                      hypre_DeviceDataCubMinBin(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMaxBin(hypre_handle)                      hypre_DeviceDataCubMaxBin(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubMaxCachedBytes(hypre_handle)              hypre_DeviceDataCubMaxCachedBytes(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubDevAllocator(hypre_handle)                hypre_DeviceDataCubDevAllocator(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_DeviceDataCubUvmAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDevice(hypre_handle)                         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceUVM(hypre_handle)                      hypre_DeviceDataDeviceUVM(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxWorkGroupSize(hypre_handle)         hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlockInited(hypre_handle)   hypre_DeviceDataDeviceMaxShmemPerBlockInited(hypre_HandleDeviceData(hypre_handle))
@@ -131,19 +126,36 @@ typedef struct
 #define hypre_HandleUserDeviceMfree(hypre_handle)                ((hypre_handle) -> user_device_free)
 
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
-#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
-#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
-#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
-#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 #define hypre_HandleUmpireBlockSize(hypre_handle)                ((hypre_handle) -> umpire_block_size)
+#define hypre_HandleUmpireDeviceId(hypre_handle)                 ((hypre_handle) -> umpire_device_id)
+
+#define hypre_HandleUmpireDevicePool(hypre_handle)               ((hypre_handle) -> umpire_device_pool)
+#define hypre_HandleUmpireDeviceAllocatorAddress(hypre_handle)   ((hypre_handle) -> umpire_device_pool.addr)
+#define hypre_HandleUmpireDeviceAllocatorId(hypre_handle)        ((hypre_handle) -> umpire_device_pool.idtor)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
 #define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireOwnDevicePool(hypre_handle)            ((hypre_handle) -> umpire_device_pool_owns)
+
+#define hypre_HandleUmpireUMPool(hypre_handle)                   ((hypre_handle) -> umpire_um_pool)
+#define hypre_HandleUmpireUMAllocatorAddress(hypre_handle)       ((hypre_handle) -> umpire_um_pool.addr)
+#define hypre_HandleUmpireUMAllocatorId(hypre_handle)            ((hypre_handle) -> umpire_um_pool.idtor)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
 #define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireOwnUMPool(hypre_handle)                ((hypre_handle) -> umpire_um_pool_owns)
+
+#define hypre_HandleUmpireHostPool(hypre_handle)                 ((hypre_handle) -> umpire_host_pool)
+#define hypre_HandleUmpireHostAllocatorAddress(hypre_handle)     ((hypre_handle) -> umpire_host_pool.addr)
+#define hypre_HandleUmpireHostAllocatorId(hypre_handle)          ((hypre_handle) -> umpire_host_pool.idtor)
 #define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpireOwnHostPool(hypre_handle)              ((hypre_handle) -> umpire_host_pool_owns)
+
+#define hypre_HandleUmpirePinnedPool(hypre_handle)               ((hypre_handle) -> umpire_pinned_pool)
+#define hypre_HandleUmpirePinnedAllocatorAddress(hypre_handle)   ((hypre_handle) -> umpire_pinned_pool.addr)
+#define hypre_HandleUmpirePinnedAllocatorId(hypre_handle)        ((hypre_handle) -> umpire_pinned_pool.idtor)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 #define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
-#define hypre_HandleOwnUmpireDevicePool(hypre_handle)            ((hypre_handle) -> own_umpire_device_pool)
-#define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
-#define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
-#define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+#define hypre_HandleUmpireOwnPinnedPool(hypre_handle)            ((hypre_handle) -> umpire_pinned_pool_owns)
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 

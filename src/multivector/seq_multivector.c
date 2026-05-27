@@ -53,8 +53,9 @@ hypre_SeqMultivectorInitialize( hypre_Multivector *mvector )
    num_vectors = hypre_MultivectorNumVectors(mvector);
 
    if (NULL == hypre_MultivectorData(mvector))
+      /* Cast to size_t before multiplication to avoid integer overflow when HYPRE_Int is 32-bit */
       hypre_MultivectorData(mvector) =
-         hypre_TAlloc(HYPRE_Complex, size * num_vectors, HYPRE_MEMORY_HOST);
+         hypre_TAlloc(HYPRE_Complex, (size_t)size * (size_t)num_vectors, HYPRE_MEMORY_HOST);
 
    /* now we create a "mask" of "active" vectors; initially all active */
    if (NULL == mvector->active_indices)

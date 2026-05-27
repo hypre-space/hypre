@@ -2320,24 +2320,25 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
       if (num_cols_offd_S)
       {
          map_S_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_S, HYPRE_MEMORY_HOST);
+         HYPRE_BigInt map_cnt;
 
 #ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel private(i, cnt)
+         #pragma omp parallel private(i, map_cnt)
 #endif
          {
             HYPRE_Int i_begin, i_end;
             hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_S);
 
-            cnt = 0;
+            map_cnt = 0;
             for (i = i_begin; i < i_end; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
-                  cnt = (HYPRE_BigInt) (hypre_BigLowerBound(col_map_offd_C + cnt,
-                                                            col_map_offd_C + num_cols_offd_C,
-                                                            fine_to_coarse_offd[i]) -
-                                        col_map_offd_C);
-                  map_S_to_C[i] = (HYPRE_Int) cnt++;
+                  map_cnt = (HYPRE_BigInt) (hypre_BigLowerBound(col_map_offd_C + map_cnt,
+                                                                col_map_offd_C + num_cols_offd_C,
+                                                                fine_to_coarse_offd[i]) -
+                                            col_map_offd_C);
+                  map_S_to_C[i] = (HYPRE_Int) map_cnt++;
                }
                else
                {
@@ -2958,6 +2959,10 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
          } /* for each row */
       } /* num_paths > 1 */
    } /* omp parallel */
+
+   /* In serial builds these aliases point into the marker arrays above. */
+   S_marker = NULL;
+   S_marker_offd = NULL;
 
    S2 = hypre_ParCSRMatrixCreate(comm, global_num_coarse,
                                  global_num_coarse, coarse_row_starts,

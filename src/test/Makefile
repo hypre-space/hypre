@@ -14,6 +14,7 @@ CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
+ -I$(srcdir)/unit\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
@@ -70,7 +71,11 @@ HYPRE_DRIVERS =\
  ams_driver.c\
  struct_migrate.c\
  ij_mm.c\
- zboxloop.c\
+ zboxloop.c
+
+HYPRE_UNIT_TESTS =\
+ unit/test_csr_overlap.c\
+ unit/test_matrix_stats.c\
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
@@ -102,8 +107,13 @@ endif
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
+HYPRE_UNIT_EXECS=${notdir ${HYPRE_UNIT_TESTS:.c=}}
 
-all: ${HYPRE_DRIVER_EXECS}
+all: drivers tests
+
+tests: ${HYPRE_UNIT_EXECS}
+
+drivers: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
@@ -113,6 +123,7 @@ install:
 
 clean:
 	rm -f *.o *.obj *.csv
+	rm -f unit/*.o unit/*.obj
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -120,6 +131,7 @@ distclean: clean
 	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
+	rm -f ${HYPRE_UNIT_EXECS}
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
 	rm -f TEST_ij/*.out*
@@ -209,6 +221,19 @@ test_mp_pcg: test_mp_pcg.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_mp_pcg_3d: test_mp_pcg_3d.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+# Unit tests
+
+unit/%.o: unit/%.c
+	${CC} ${CFLAGS} -c $< -o $@
+
+test_csr_overlap: unit/test_csr_overlap.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_matrix_stats: unit/test_matrix_stats.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
