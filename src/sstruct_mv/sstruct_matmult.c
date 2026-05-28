@@ -367,6 +367,11 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
             hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
 
+            /* Set the PMatrix domain and range strides */
+            /* WM: note that this is setting this for each vi, vj in the loop, assuming they are all the same */
+            hypre_SStructPMatrixSetDomainStride(pM, hypre_StructMatrixDomStride(sM));
+            hypre_SStructPMatrixSetRangeStride(pM, hypre_StructMatrixRanStride(sM));
+
             /* Replace the struct stencil for the (vi,vj)-block with actual stencils */
             stencil = hypre_StructMatrixStencil(sM);
             hypre_SStructPMatrixSStencil(pM, vi, vj) = hypre_StructStencilRef(stencil);
@@ -767,6 +772,7 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* M matrix variables */
    hypre_SStructMatrix        *M;
    hypre_SStructGrid          *Mgrid;
+   hypre_SStructGrid          *Mdom_grid;
    hypre_SStructGraph         *Mgraph;
    hypre_SStructPMatrix       *pM;
    hypre_SStructStencil       *stencil;
@@ -776,6 +782,8 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    HYPRE_Int                ***splits;
    HYPRE_Int                  *sentries;
    HYPRE_Int                  *uentries;
+   hypre_Index                 zero;
+   hypre_Index                *periodic;
 
    /* Unstructured component variables */
    hypre_IJMatrix             *ij_M;
@@ -799,6 +807,8 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* Initialize variables */
    comm   = hypre_SStructMatrixComm(matrices[0]);
    ndim   = hypre_SStructMatrixNDim(matrices[0]);
+
+   periodic = hypre_CTAlloc(hypre_Index, nparts, HYPRE_MEMORY_HOST);
 
    /* Create the grid for M */
    HYPRE_SStructGridCreate(comm, ndim, nparts, &Mgrid);
@@ -850,6 +860,10 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
       /* Update part matrix of M */
       hypre_SStructMatrixPMatrix(M, part) = pM;
 
+      /* Update domain and range strides of M */
+      HYPRE_SStructMatrixSetDomainStride(M, part, hypre_SStructPMatrixDomainStride(pM));
+      HYPRE_SStructMatrixSetRangeStride(M, part, hypre_SStructPMatrixRangeStride(pM));
+
       /* Update part grid of M */
       hypre_SStructPGridDestroy(pgrid);
       pgrid = hypre_SStructPMatrixPGrid(pM);
@@ -896,6 +910,19 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
 
    /* Assemble semi-struct grid */
    HYPRE_SStructGridAssemble(Mgrid);
+
+   /* Get the domain grid by coarsening */
+   /* WM: todo - what is the origin below? Passing zero for now. */
+   hypre_SetIndex(zero, 0);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(Mgrid, part);
+      hypre_CopyIndex(hypre_StructGridPeriodic(hypre_SStructPGridCellSGrid(pgrid)),
+                      periodic[part]);
+   }
+   hypre_SStructGridCoarsen(Mgrid, zero, hypre_SStructMatrixDomainStride(M), periodic, &Mdom_grid);
+   HYPRE_SStructGraphSetDomainGrid(Mgraph, Mdom_grid);
+   hypre_TFree(periodic, HYPRE_MEMORY_HOST);
 
    /* Set row bounds of the unstructured matrix component */
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[terms[0]]);
@@ -1061,6 +1088,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
+   HYPRE_Int special_case_PTAP = 0;
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation     memory_location;
    HYPRE_ExecutionPolicy    exec;
@@ -1068,25 +1097,32 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   m = terms[2];
-   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
-   num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+   if (nterms == 3)
+   {
+      m = terms[2];
+      ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
+      num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
 #if defined(HYPRE_USING_GPU)
-   memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
-   exec  = hypre_GetExecPolicy1(memory_location);
+      memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
+      exec  = hypre_GetExecPolicy1(memory_location);
 #endif
 
-   /* The following ensures that NumNonzeros is initialized (a negative value
-    * means uninitialized).  RDF: Not sure if this is needed for anything other
-    * than matching the subsequent if test for the special PtAP case. */
-   if (num_nonzeros_uP < 0)
-   {
-      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
-      num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+      /* The following ensures that NumNonzeros is initialized (a negative value
+       * means uninitialized).  RDF: Not sure if this is needed for anything other
+       * than matching the subsequent if test for the special PtAP case. */
+      if (num_nonzeros_uP < 0)
+      {
+         hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
+         num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+      }
+      if (num_nonzeros_uP == 0)
+      {
+         special_case_PTAP = 1;
+      }
    }
 
-   if (nterms == 3 && (num_nonzeros_uP == 0))
+   if (special_case_PTAP)
    {
       /* Specialization for RAP when P has only the structured component.
        *
@@ -1558,7 +1594,7 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
    HYPRE_Int pw_trans[2] = {trans[nterms - 2], trans[nterms - 1]};
    HYPRE_Int t;
 
-#if 0
+#if 1
    /*---------------------------------------------------------------------------
     * All-at-once product:
     * M = A_0 * A_1 * ... A_{N-1}
@@ -1597,16 +1633,25 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
     * the required rows of struct matrices that need to be converted to parcsr
     * in order to obtain the unstructured components of the sstruct matrix products.
     *-------------------------------------------------------------------------*/
-   M_prev = matrices[nterms - 1];
+   M_prev = matrices[ terms[nterms - 1] ];
    for (t = (nterms - 2); t >= 0; t--)
    {
-      pw_matrices[0] = matrices[t];
+      /* hypre_printf("WM: debug - t = %d\n", t); */
+      pw_matrices[0] = matrices[ terms[t] ];
       pw_matrices[1] = M_prev;
       if (t < nterms - 2)
       {
          pw_trans[0] = trans[t];
          pw_trans[1] = 0;
       }
+
+      /* WM: debug */
+      char filename[256];
+      hypre_sprintf(filename, "A_%d", t);
+      HYPRE_SStructMatrixPrint(filename, pw_matrices[0], 0);
+      hypre_sprintf(filename, "B_%d", t);
+      HYPRE_SStructMatrixPrint(filename, pw_matrices[1], 0);
+
       hypre_SStructMatmultCreate(2, pw_matrices, 2, pw_terms, pw_trans, &mmdata);
       hypre_SStructMatmultInitialize(mmdata, &M_next);
       hypre_SStructMatmultCommunicate(mmdata);
@@ -1618,6 +1663,9 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
          HYPRE_SStructMatrixDestroy(M_prev);
       }
       M_prev = M_next;
+      /* WM: debug */
+      hypre_sprintf(filename, "C_%d", t);
+      HYPRE_SStructMatrixPrint(filename, M_next, 0);
    }
    *M_ptr = M_next;
 #endif
