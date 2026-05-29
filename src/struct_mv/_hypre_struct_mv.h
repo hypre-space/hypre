@@ -849,6 +849,7 @@ typedef struct hypre_StructGrid_struct
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
    HYPRE_Int            ref_count;
+   HYPRE_Int            is_assembled; /* flag indicating whether grid is assembled */
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
    HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
@@ -876,6 +877,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridPShifts(grid)       ((grid) -> pshifts)
 #define hypre_StructGridPShift(grid, i)     ((grid) -> pshifts[i])
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
+#define hypre_StructGridIsAssembled(grid)   ((grid) -> is_assembled)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
 #define hypre_StructGridBoxMan(grid)        ((grid) -> boxman)

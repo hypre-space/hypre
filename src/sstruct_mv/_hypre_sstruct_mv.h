@@ -1150,6 +1150,9 @@ HYPRE_Int
 hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata,
                              hypre_SStructMatrix      *M );
 HYPRE_Int
+hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
+                                     hypre_SStructMatrix      *M );
+HYPRE_Int
 hypre_SStructMatmult(HYPRE_Int             nmatrices,
                      hypre_SStructMatrix **matrices,
                      HYPRE_Int             nterms,

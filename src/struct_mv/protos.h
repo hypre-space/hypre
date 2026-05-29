@@ -476,9 +476,6 @@ HYPRE_Int
 hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                             HYPRE_Int                 iM );
 HYPRE_Int
-hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
-                                     hypre_SStructMatrix      *M );
-HYPRE_Int
 hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
                                          HYPRE_Int    na,
                                          HYPRE_Int    nterms,
