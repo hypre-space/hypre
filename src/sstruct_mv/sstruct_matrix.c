@@ -1255,6 +1255,14 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
  *   cols        = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
  *   ijvalues    = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
  *   entry       = c e n     c w e n   c w n     c e s     c w e s   c w s
+ *
+ *   WM: todo - this function does not work for matrices with coarse range as
+ *              opposed to coarse domain. Probably want to store a RanGrid in
+ *              hypre_SStructGraph similar to what is done for DomGrid and use
+ *              that here just like we do for DomGrid. Likely should go through
+ *              the rest of the code to see where hypre_SStructGraphDomGrid(graph)
+ *              is used and make sure we aren't assuming coarse domain and
+ *              fine range defined by hypre_SStructGraphGrid(graph).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

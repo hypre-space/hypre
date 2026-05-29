@@ -1380,12 +1380,16 @@ hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata,
 
    /* Computes the unstructured component */
    hypre_SStructMatmultComputeU(mmdata, M);
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
                                      hypre_SStructMatrix      *M )
 {
+/* WM: todo - this is just starter code for now */
+#if 0
    HYPRE_Int                nmatrices = (mmdata -> nmatrices);
    HYPRE_Int                nterms    = (mmdata -> nterms);
    HYPRE_Int               *terms     = (mmdata -> terms);
@@ -1570,6 +1574,7 @@ hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
+#endif
 
    return hypre_error_flag;
 }
@@ -1594,7 +1599,7 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
    HYPRE_Int pw_trans[2] = {trans[nterms - 2], trans[nterms - 1]};
    HYPRE_Int t;
 
-#if 1
+#if 0
    /*---------------------------------------------------------------------------
     * All-at-once product:
     * M = A_0 * A_1 * ... A_{N-1}
@@ -1611,11 +1616,21 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
     * Thus to ensure correctness, the entire struct matrix is converted to
     * parcsr, which is extremely inefficient.
     *-------------------------------------------------------------------------*/
+   /* WM: debug */
+   char filename[256];
+   hypre_sprintf(filename, "A");
+   HYPRE_SStructMatrixPrint(filename, matrices[0], 0);
+   hypre_sprintf(filename, "B");
+   HYPRE_SStructMatrixPrint(filename, matrices[1], 0);
+
    hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
    hypre_SStructMatmultInitialize(mmdata, M_ptr);
    hypre_SStructMatmultCommunicate(mmdata);
    hypre_SStructMatmultCompute(mmdata, *M_ptr);
    hypre_SStructMatmultDestroy(mmdata);
+   /* WM: debug */
+   hypre_sprintf(filename, "C");
+   HYPRE_SStructMatrixPrint(filename, *M_ptr, 0);
 #else
    /*---------------------------------------------------------------------------
     * Sequential pairwise products:
@@ -1636,7 +1651,6 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
    M_prev = matrices[ terms[nterms - 1] ];
    for (t = (nterms - 2); t >= 0; t--)
    {
-      /* hypre_printf("WM: debug - t = %d\n", t); */
       pw_matrices[0] = matrices[ terms[t] ];
       pw_matrices[1] = M_prev;
       if (t < nterms - 2)
@@ -1646,11 +1660,13 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
       }
 
       /* WM: debug */
-      char filename[256];
-      hypre_sprintf(filename, "A_%d", t);
-      HYPRE_SStructMatrixPrint(filename, pw_matrices[0], 0);
-      hypre_sprintf(filename, "B_%d", t);
-      HYPRE_SStructMatrixPrint(filename, pw_matrices[1], 0);
+      /* char filename[256]; */
+      /* hypre_sprintf(filename, "A_%d", t); */
+      /* HYPRE_SStructMatrixPrint(filename, pw_matrices[0], 0); */
+      /* hypre_sprintf(filename, "B_%d", t); */
+      /* HYPRE_SStructMatrixPrint(filename, pw_matrices[1], 0); */
+      /* hypre_printf("WM: debug - pw_terms = %d %d\n", pw_terms[0], pw_terms[1]); */
+      /* hypre_printf("WM: debug - pw_trans = %d %d\n", pw_trans[0], pw_trans[1]); */
 
       hypre_SStructMatmultCreate(2, pw_matrices, 2, pw_terms, pw_trans, &mmdata);
       hypre_SStructMatmultInitialize(mmdata, &M_next);
@@ -1664,8 +1680,8 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
       }
       M_prev = M_next;
       /* WM: debug */
-      hypre_sprintf(filename, "C_%d", t);
-      HYPRE_SStructMatrixPrint(filename, M_next, 0);
+      /* hypre_sprintf(filename, "C_%d", t); */
+      /* HYPRE_SStructMatrixPrint(filename, M_next, 0); */
    }
    *M_ptr = M_next;
 #endif
