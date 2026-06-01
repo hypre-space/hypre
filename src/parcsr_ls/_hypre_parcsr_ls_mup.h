@@ -5410,6 +5410,34 @@ HYPRE_Int
 hypre_MGRBuildRowLumpedInterp_long_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC, hypre_IntArray *CF_marker, HYPRE_Int use_abs, hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
 
 HYPRE_Int
+hypre_MGRCleanup_flt( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode );
+HYPRE_Int
+hypre_MGRCleanup_dbl( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode );
+HYPRE_Int
+hypre_MGRCleanup_long_dbl( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode );
+
+HYPRE_Int
+hypre_MGRCleanupBuildData_flt( void *mgr_vdata, HYPRE_Int num_coarse_levels );
+HYPRE_Int
+hypre_MGRCleanupBuildData_dbl( void *mgr_vdata, HYPRE_Int num_coarse_levels );
+HYPRE_Int
+hypre_MGRCleanupBuildData_long_dbl( void *mgr_vdata, HYPRE_Int num_coarse_levels );
+
+HYPRE_Int
+hypre_MGRCleanupConfig_flt( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRCleanupConfig_dbl( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRCleanupConfig_long_dbl( void *mgr_vdata );
+
+HYPRE_Int
+hypre_MGRCleanupSolvers_flt( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRCleanupSolvers_dbl( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRCleanupSolvers_long_dbl( void *mgr_vdata );
+
+HYPRE_Int
 hypre_MGRCoarseParms_flt( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );
 HYPRE_Int
 hypre_MGRCoarseParms_dbl( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );
@@ -5550,6 +5578,27 @@ HYPRE_Int
 hypre_MGRGetSubBlock_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
 
 HYPRE_Int
+hypre_MGRReleaseCoarseGridSolver_flt( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRReleaseCoarseGridSolver_dbl( void *mgr_vdata );
+HYPRE_Int
+hypre_MGRReleaseCoarseGridSolver_long_dbl( void *mgr_vdata );
+
+HYPRE_Int
+hypre_MGRReleaseFSolverAtLevel_flt( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_MGRReleaseFSolverAtLevel_dbl( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_MGRReleaseFSolverAtLevel_long_dbl( void *mgr_vdata, HYPRE_Int level );
+
+HYPRE_Int
+hypre_MGRReleaseLevelSmootherAtLevel_flt( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_MGRReleaseLevelSmootherAtLevel_dbl( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_MGRReleaseLevelSmootherAtLevel_long_dbl( void *mgr_vdata, HYPRE_Int level );
+
+HYPRE_Int
 hypre_MGRSetBlockJacobiBlockSize_flt( void *mgr_vdata, HYPRE_Int blk_size );
 HYPRE_Int
 hypre_MGRSetBlockJacobiBlockSize_dbl( void *mgr_vdata, HYPRE_Int blk_size );
@@ -5597,6 +5646,20 @@ HYPRE_Int
 hypre_MGRSetCpointsByPointMarkerArray_dbl( void *mgr_vdata, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int **block_coarse_indexes, HYPRE_Int *point_marker_array );
 HYPRE_Int
 hypre_MGRSetCpointsByPointMarkerArray_long_dbl( void *mgr_vdata, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int **block_coarse_indexes, HYPRE_Int *point_marker_array );
+
+HYPRE_Int
+hypre_MGRSetCycleType_flt( void *mgr_vdata, HYPRE_Int cycle_type );
+HYPRE_Int
+hypre_MGRSetCycleType_dbl( void *mgr_vdata, HYPRE_Int cycle_type );
+HYPRE_Int
+hypre_MGRSetCycleType_long_dbl( void *mgr_vdata, HYPRE_Int cycle_type );
+
+HYPRE_Int
+hypre_MGRSetFRelaxCycle_flt( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxCycle_dbl( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int
+hypre_MGRSetFRelaxCycle_long_dbl( void *mgr_vdata, HYPRE_Int frelax_cycle );
 
 HYPRE_Int
 hypre_MGRSetFRelaxMethod_flt( void *mgr_vdata, HYPRE_Int relax_method );

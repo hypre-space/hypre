@@ -806,6 +806,10 @@ hypre_MGRBuildRFromWr
 hypre_MGRBuildRFromWrHost
 hypre_MGRBuildRestrict
 hypre_MGRBuildRowLumpedInterp
+hypre_MGRCleanup
+hypre_MGRCleanupBuildData
+hypre_MGRCleanupConfig
+hypre_MGRCleanupSolvers
 hypre_MGRCoarseParms
 hypre_MGRCoarsen
 hypre_MGRColLumpedRestrict
@@ -833,6 +837,9 @@ hypre_MGRGetRestrictionName
 hypre_MGRGetSubBlock
 hypre_MGRNonGalerkinTruncate
 hypre_MGRPrintCoarseSystem
+hypre_MGRReleaseCoarseGridSolver
+hypre_MGRReleaseFSolverAtLevel
+hypre_MGRReleaseLevelSmootherAtLevel
 hypre_MGRSetBlockJacobiBlockSize
 hypre_MGRSetBlockSize
 hypre_MGRSetCoarseGridMethod
@@ -841,6 +848,8 @@ hypre_MGRSetCoarseSolver
 hypre_MGRSetCpointsByBlock
 hypre_MGRSetCpointsByContiguousBlock
 hypre_MGRSetCpointsByPointMarkerArray
+hypre_MGRSetCycleType
+hypre_MGRSetFRelaxCycle
 hypre_MGRSetFRelaxMethod
 hypre_MGRSetFSolver
 hypre_MGRSetFSolverAtLevel

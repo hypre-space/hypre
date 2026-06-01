@@ -917,9 +917,9 @@ function(maybe_build_umpire)
   set(ENABLE_EXAMPLES              OFF CACHE BOOL "Disable Umpire examples" FORCE)
   set(ENABLE_DOCS                  OFF CACHE BOOL "Disable Umpire docs" FORCE)
   set(ENABLE_TESTS                 OFF CACHE BOOL "Disable Umpire tests" FORCE)
-  set(ENABLE_CUDA ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
-  set(ENABLE_HIP  ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
-  set(ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
+  set(ENABLE_CUDA        ${HYPRE_ENABLE_CUDA} CACHE BOOL "Enable CUDA in Umpire" FORCE)
+  set(ENABLE_HIP         ${HYPRE_ENABLE_HIP}  CACHE BOOL "Enable HIP in Umpire" FORCE)
+  set(UMPIRE_ENABLE_SYCL ${HYPRE_ENABLE_SYCL} CACHE BOOL "Enable SYCL in Umpire" FORCE)
 
   # Rename Umpire's 'check' target to 'umpire_check' to avoid conflicts
   set(BLT_CODE_CHECK_TARGET_NAME "umpire_check" CACHE STRING "Rename Umpire's check target" FORCE)
@@ -944,19 +944,22 @@ function(maybe_build_umpire)
 
   # Fetch Umpire with its submodules using FetchContent (populate only)
   set(FETCHCONTENT_QUIET OFF)
-  FetchContent_Declare(
+  set(_src_dir "${PROJECT_BINARY_DIR}/_deps/umpire-src")
+  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
+  set(_subbuild_dir "${PROJECT_BINARY_DIR}/_deps/umpire-subbuild")
+  FetchContent_Populate(
     umpire
+    SOURCE_DIR     "${_src_dir}"
+    BINARY_DIR     "${_bld_dir}"
+    SUBBUILD_DIR   "${_subbuild_dir}"
     GIT_REPOSITORY https://github.com/LLNL/Umpire.git
     GIT_TAG        ${_umpire_tag}
     GIT_SHALLOW    TRUE
     GIT_SUBMODULES blt;src/tpl/umpire/camp;src/tpl/umpire/fmt
     GIT_PROGRESS   TRUE
   )
-  FetchContent_Populate(umpire)
 
   # Sanitize version placeholders in config.hpp.in to avoid leading-zero octal (e.g., 09)
-  set(_src_dir "${umpire_SOURCE_DIR}")
-  set(_bld_dir "${PROJECT_BINARY_DIR}/_deps/umpire-build")
   file(MAKE_DIRECTORY "${_bld_dir}")
   set(_umpire_cfg_in "${_src_dir}/src/umpire/config.hpp.in")
   if(EXISTS "${_umpire_cfg_in}")
@@ -982,8 +985,22 @@ function(maybe_build_umpire)
     endif()
   endif()
 
+  if(HYPRE_ENABLE_SYCL)
+    hypre_patch_umpire_sycl_pool_alignment("${_src_dir}")
+  endif()
+
   # Add Umpire as a subproject now that sources are sanitized
+  if(DEFINED CMAKE_WARN_DEPRECATED)
+    set(_hypre_saved_CMAKE_WARN_DEPRECATED "${CMAKE_WARN_DEPRECATED}")
+  endif()
+  set(CMAKE_WARN_DEPRECATED OFF)
   add_subdirectory("${_src_dir}" "${_bld_dir}")
+  if(DEFINED _hypre_saved_CMAKE_WARN_DEPRECATED)
+    set(CMAKE_WARN_DEPRECATED "${_hypre_saved_CMAKE_WARN_DEPRECATED}")
+    unset(_hypre_saved_CMAKE_WARN_DEPRECATED)
+  else()
+    unset(CMAKE_WARN_DEPRECATED)
+  endif()
 
   # Fix up CUDA runtime linkage to use CUDA::cudart instead of legacy cuda_runtime
   fixup_umpire_cuda_runtime()
@@ -1048,37 +1065,32 @@ endfunction()
 
 # A function to add an executable to the build with the correct flags, includes, and linkage.
 function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
-  get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
-  if (DEP_SRC_FILE)
-    get_filename_component(DEP_SRC_FILENAME ${DEP_SRC_FILE} NAME)
-  endif ()
-
   # If CUDA is enabled, tag source files to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CUDA)
     if (DEP_SRC_FILE)
-      set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+      set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CUDA)
     endif ()
   endif ()
 
   # If HIP is enabled, tag source files to be compiled with hipcc/clang
   if (HYPRE_USING_HIP)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE HIP)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE HIP)
     endif ()
   endif ()
 
   # If SYCL is enabled, tag source files to be compiled with dpcpp.
   if (HYPRE_USING_SYCL)
-    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+    set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CXX)
     if (DEP_SRC_FILE)
-       set_source_files_properties(${DEP_SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+       set_source_files_properties(${DEP_SRC_FILE} PROPERTIES LANGUAGE CXX)
     endif ()
   endif ()
 
   # Get executable name
-  string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
+  get_filename_component(EXE_NAME ${SRC_FILE} NAME_WE)
 
   # Add the executable, including DEP_SRC_FILE if provided
   if (DEP_SRC_FILE)

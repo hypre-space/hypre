@@ -158,10 +158,15 @@ typedef struct
    size_t                 umpire_host_pool_size;
    size_t                 umpire_pinned_pool_size;
    size_t                 umpire_block_size;
-   HYPRE_Int              own_umpire_device_pool;
-   HYPRE_Int              own_umpire_um_pool;
-   HYPRE_Int              own_umpire_host_pool;
-   HYPRE_Int              own_umpire_pinned_pool;
+   HYPRE_Int              umpire_device_id;
+   HYPRE_Int              umpire_device_pool_owns;
+   HYPRE_Int              umpire_um_pool_owns;
+   HYPRE_Int              umpire_host_pool_owns;
+   HYPRE_Int              umpire_pinned_pool_owns;
+   umpire_allocator       umpire_device_pool;
+   umpire_allocator       umpire_um_pool;
+   umpire_allocator       umpire_host_pool;
+   umpire_allocator       umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
 
@@ -214,19 +219,36 @@ typedef struct
 #define hypre_HandleUserDeviceMfree(hypre_handle)                ((hypre_handle) -> user_device_free)
 
 #define hypre_HandleUmpireResourceMan(hypre_handle)              ((hypre_handle) -> umpire_rm)
-#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
-#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
-#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
-#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 #define hypre_HandleUmpireBlockSize(hypre_handle)                ((hypre_handle) -> umpire_block_size)
+#define hypre_HandleUmpireDeviceId(hypre_handle)                 ((hypre_handle) -> umpire_device_id)
+
+#define hypre_HandleUmpireDevicePool(hypre_handle)               ((hypre_handle) -> umpire_device_pool)
+#define hypre_HandleUmpireDeviceAllocatorAddress(hypre_handle)   ((hypre_handle) -> umpire_device_pool.addr)
+#define hypre_HandleUmpireDeviceAllocatorId(hypre_handle)        ((hypre_handle) -> umpire_device_pool.idtor)
+#define hypre_HandleUmpireDevicePoolSize(hypre_handle)           ((hypre_handle) -> umpire_device_pool_size)
 #define hypre_HandleUmpireDevicePoolName(hypre_handle)           ((hypre_handle) -> umpire_device_pool_name)
+#define hypre_HandleUmpireOwnDevicePool(hypre_handle)            ((hypre_handle) -> umpire_device_pool_owns)
+
+#define hypre_HandleUmpireUMPool(hypre_handle)                   ((hypre_handle) -> umpire_um_pool)
+#define hypre_HandleUmpireUMAllocatorAddress(hypre_handle)       ((hypre_handle) -> umpire_um_pool.addr)
+#define hypre_HandleUmpireUMAllocatorId(hypre_handle)            ((hypre_handle) -> umpire_um_pool.idtor)
+#define hypre_HandleUmpireUMPoolSize(hypre_handle)               ((hypre_handle) -> umpire_um_pool_size)
 #define hypre_HandleUmpireUMPoolName(hypre_handle)               ((hypre_handle) -> umpire_um_pool_name)
+#define hypre_HandleUmpireOwnUMPool(hypre_handle)                ((hypre_handle) -> umpire_um_pool_owns)
+
+#define hypre_HandleUmpireHostPool(hypre_handle)                 ((hypre_handle) -> umpire_host_pool)
+#define hypre_HandleUmpireHostAllocatorAddress(hypre_handle)     ((hypre_handle) -> umpire_host_pool.addr)
+#define hypre_HandleUmpireHostAllocatorId(hypre_handle)          ((hypre_handle) -> umpire_host_pool.idtor)
 #define hypre_HandleUmpireHostPoolName(hypre_handle)             ((hypre_handle) -> umpire_host_pool_name)
+#define hypre_HandleUmpireHostPoolSize(hypre_handle)             ((hypre_handle) -> umpire_host_pool_size)
+#define hypre_HandleUmpireOwnHostPool(hypre_handle)              ((hypre_handle) -> umpire_host_pool_owns)
+
+#define hypre_HandleUmpirePinnedPool(hypre_handle)               ((hypre_handle) -> umpire_pinned_pool)
+#define hypre_HandleUmpirePinnedAllocatorAddress(hypre_handle)   ((hypre_handle) -> umpire_pinned_pool.addr)
+#define hypre_HandleUmpirePinnedAllocatorId(hypre_handle)        ((hypre_handle) -> umpire_pinned_pool.idtor)
+#define hypre_HandleUmpirePinnedPoolSize(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_size)
 #define hypre_HandleUmpirePinnedPoolName(hypre_handle)           ((hypre_handle) -> umpire_pinned_pool_name)
-#define hypre_HandleOwnUmpireDevicePool(hypre_handle)            ((hypre_handle) -> own_umpire_device_pool)
-#define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
-#define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
-#define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+#define hypre_HandleUmpireOwnPinnedPool(hypre_handle)            ((hypre_handle) -> umpire_pinned_pool_owns)
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
@@ -474,15 +496,22 @@ typedef struct
    HYPRE_PtrToSolverFcn   solve;
    HYPRE_PtrToDestroyFcn  destroy;
 
+   /* Common parameters */
+   HYPRE_Int              is_setup; /* 1 after a successful Setup call */
 } hypre_Solver;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the hypre_Solver structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_SolverSetup(data)       ((data) -> setup)
-#define hypre_SolverSolve(data)       ((data) -> solve)
-#define hypre_SolverDestroy(data)     ((data) -> destroy)
+#define hypre_SolverSetup(data)          ((data) -> setup)
+#define hypre_SolverSolve(data)          ((data) -> solve)
+#define hypre_SolverDestroy(data)        ((data) -> destroy)
+#define hypre_SolverSetupIsDone(data)    ((data) -> is_setup)
+#define hypre_SolverSetIsSetup(data)     ((data) -> is_setup = 1)
+#define hypre_SolverResetIsSetup(data)   ((data) -> is_setup = 0)
+#define hypre_SolverSetSetupReuse(data)  ((data) -> is_setup = 2)
+#define hypre_SolverSetupReuseRequested(data) ((data) -> is_setup > 1)
 
 #endif /* HYPRE_BASE_SOLVER_HEADER */
 /******************************************************************************
@@ -526,6 +555,13 @@ typedef struct hypre_MatrixStats_struct
    HYPRE_Real          rowsum_avg;
    HYPRE_Real          rowsum_stdev;
    HYPRE_Real          rowsum_sqsum;
+
+   /* Absolute row sum statistics */
+   HYPRE_Real          absrowsum_min;
+   HYPRE_Real          absrowsum_max;
+   HYPRE_Real          absrowsum_avg;
+   HYPRE_Real          absrowsum_stdev;
+   HYPRE_Real          absrowsum_sqsum;
 } hypre_MatrixStats;
 
 /*--------------------------------------------------------------------------
@@ -551,6 +587,12 @@ typedef struct hypre_MatrixStats_struct
 #define hypre_MatrixStatsRowsumAvg(data)             ((data) -> rowsum_avg)
 #define hypre_MatrixStatsRowsumStDev(data)           ((data) -> rowsum_stdev)
 #define hypre_MatrixStatsRowsumSqsum(data)           ((data) -> rowsum_sqsum)
+
+#define hypre_MatrixStatsAbsrowsumMin(data)          ((data) -> absrowsum_min)
+#define hypre_MatrixStatsAbsrowsumMax(data)          ((data) -> absrowsum_max)
+#define hypre_MatrixStatsAbsrowsumAvg(data)          ((data) -> absrowsum_avg)
+#define hypre_MatrixStatsAbsrowsumStDev(data)        ((data) -> absrowsum_stdev)
+#define hypre_MatrixStatsAbsrowsumSqsum(data)        ((data) -> absrowsum_sqsum)
 
 /******************************************************************************
  *
@@ -612,7 +654,7 @@ typedef struct hypre_MatrixStatsArray_struct
    HYPRE_PRINT_INDENT(n)                            \
    hypre_printf(__VA_ARGS__)
 
-#define HYPRE_NDIGITS_SIZE 12
+#define HYPRE_NDIGITS_SIZE 16
 
 #endif /* hypre_MATRIX_STATS_HEADER */
 /******************************************************************************
@@ -2130,6 +2172,9 @@ HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_p
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
 HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
+HYPRE_Int hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats,
+                                   hypre_MatrixStats *global_stats,
+                                   MPI_Comm comm );
 hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
 HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
 HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,

@@ -397,6 +397,8 @@
 #undef HYPRE_MGRSetCpointsByBlock
 #undef HYPRE_MGRSetCpointsByContiguousBlock
 #undef HYPRE_MGRSetCpointsByPointMarkerArray
+#undef HYPRE_MGRSetCycleType
+#undef HYPRE_MGRSetFRelaxCycle
 #undef HYPRE_MGRSetFRelaxMethod
 #undef HYPRE_MGRSetFSolver
 #undef HYPRE_MGRSetFSolverAtLevel
@@ -1514,6 +1516,10 @@
 #undef hypre_MGRBuildRFromWrHost
 #undef hypre_MGRBuildRestrict
 #undef hypre_MGRBuildRowLumpedInterp
+#undef hypre_MGRCleanup
+#undef hypre_MGRCleanupBuildData
+#undef hypre_MGRCleanupConfig
+#undef hypre_MGRCleanupSolvers
 #undef hypre_MGRCoarseParms
 #undef hypre_MGRCoarsen
 #undef hypre_MGRColLumpedRestrict
@@ -1541,6 +1547,9 @@
 #undef hypre_MGRGetSubBlock
 #undef hypre_MGRNonGalerkinTruncate
 #undef hypre_MGRPrintCoarseSystem
+#undef hypre_MGRReleaseCoarseGridSolver
+#undef hypre_MGRReleaseFSolverAtLevel
+#undef hypre_MGRReleaseLevelSmootherAtLevel
 #undef hypre_MGRSetBlockJacobiBlockSize
 #undef hypre_MGRSetBlockSize
 #undef hypre_MGRSetCoarseGridMethod
@@ -1549,6 +1558,8 @@
 #undef hypre_MGRSetCpointsByBlock
 #undef hypre_MGRSetCpointsByContiguousBlock
 #undef hypre_MGRSetCpointsByPointMarkerArray
+#undef hypre_MGRSetCycleType
+#undef hypre_MGRSetFRelaxCycle
 #undef hypre_MGRSetFRelaxMethod
 #undef hypre_MGRSetFSolver
 #undef hypre_MGRSetFSolverAtLevel

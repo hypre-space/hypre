@@ -6241,6 +6241,38 @@ hypre_MGRBuildRowLumpedInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRCleanup( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanup)( mgr_vdata, num_coarse_levels, cleanup_mode );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupBuildData( void *mgr_vdata, HYPRE_Int num_coarse_levels )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupBuildData)( mgr_vdata, num_coarse_levels );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupConfig( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupConfig)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRCleanupSolvers( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCleanupSolvers)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker, HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRCoarseParms)( comm, num_rows, CF_marker, row_starts_cpts, row_starts_fpts );
@@ -6401,6 +6433,30 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseCoarseGridSolver)( mgr_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRReleaseFSolverAtLevel( void *mgr_vdata, HYPRE_Int level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseFSolverAtLevel)( mgr_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRReleaseLevelSmootherAtLevel( void *mgr_vdata, HYPRE_Int level )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRReleaseLevelSmootherAtLevel)( mgr_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRSetBlockJacobiBlockSize( void *mgr_vdata, HYPRE_Int blk_size )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetBlockJacobiBlockSize)( mgr_vdata, blk_size );
@@ -6452,6 +6508,22 @@ HYPRE_Int
 hypre_MGRSetCpointsByPointMarkerArray( void *mgr_vdata, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int **block_coarse_indexes, HYPRE_Int *point_marker_array )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetCpointsByPointMarkerArray)( mgr_vdata, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes, point_marker_array );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetCycleType)( mgr_vdata, cycle_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetFRelaxCycle)( mgr_vdata, frelax_cycle );
 }
 
 /*--------------------------------------------------------------------------*/

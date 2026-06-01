@@ -865,6 +865,9 @@ typedef struct
 
 typedef struct hypre_ParFSAIData_struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    /* FSAI Setup input data */
    HYPRE_Int             algo_type;        /* FSAI algorithm type */
    HYPRE_Int             local_solve_type; /* Local linear solver type */
@@ -3033,6 +3036,13 @@ HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
                                HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
                                void *fsolver );
 HYPRE_Int hypre_MGRSetFSolverAtLevel( void *mgr_vdata, void *fsolver, HYPRE_Int level );
+HYPRE_Int hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata );
+HYPRE_Int hypre_MGRReleaseFSolverAtLevel( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int hypre_MGRReleaseLevelSmootherAtLevel( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int hypre_MGRCleanupBuildData( void *mgr_vdata, HYPRE_Int num_coarse_levels );
+HYPRE_Int hypre_MGRCleanupSolvers( void *mgr_vdata );
+HYPRE_Int hypre_MGRCleanupConfig( void *mgr_vdata );
+HYPRE_Int hypre_MGRCleanup( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode );
 HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
                           hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,
@@ -3077,6 +3087,8 @@ HYPRE_Int hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method );
+HYPRE_Int hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method );
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
