@@ -2452,6 +2452,61 @@ hypre_MGRBuildRFromWr(hypre_IntArray       *C_map,
  * hypre_MGRColLumpedRestrict
  *--------------------------------------------------------------------------*/
 
+static hypre_ParCSRMatrix*
+hypre_MGRCreateUnbalancedColLumpedWr(hypre_ParCSRMatrix *A_CF,
+                                     hypre_ParVector    *b_CF,
+                                     hypre_ParVector    *b_FF)
+{
+   MPI_Comm              comm            = hypre_ParCSRMatrixComm(A_CF);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A_CF);
+   HYPRE_BigInt          global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A_CF);
+   HYPRE_BigInt          global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A_CF);
+   HYPRE_BigInt         *row_starts      = hypre_ParCSRMatrixRowStarts(A_CF);
+   HYPRE_BigInt         *col_starts      = hypre_ParCSRMatrixColStarts(A_CF);
+   HYPRE_Int             num_rows        = hypre_ParCSRMatrixNumRows(A_CF);
+   HYPRE_Int             num_cols        = hypre_ParCSRMatrixNumCols(A_CF);
+   HYPRE_Int             num_nonzeros    = hypre_min(num_rows, num_cols);
+
+   hypre_Vector         *b_CF_local      = hypre_ParVectorLocalVector(b_CF);
+   hypre_Vector         *b_FF_local      = hypre_ParVectorLocalVector(b_FF);
+   HYPRE_Complex        *b_CF_data       = hypre_VectorData(b_CF_local);
+   HYPRE_Complex        *b_FF_data       = hypre_VectorData(b_FF_local);
+   HYPRE_Int             b_CF_size       = hypre_VectorSize(b_CF_local);
+   HYPRE_Int             b_FF_size       = hypre_VectorSize(b_FF_local);
+
+   hypre_ParCSRMatrix   *Wr;
+   hypre_CSRMatrix      *Wr_diag;
+   HYPRE_Int            *Wr_diag_i;
+   HYPRE_Int            *Wr_diag_j;
+   HYPRE_Complex        *Wr_diag_a;
+   HYPRE_Int             i;
+
+   num_nonzeros = hypre_min(num_nonzeros, b_CF_size);
+   num_nonzeros = hypre_min(num_nonzeros, b_FF_size);
+
+   Wr = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
+                                 row_starts, col_starts, 0, num_nonzeros, 0);
+   hypre_ParCSRMatrixInitialize_v2(Wr, memory_location);
+
+   Wr_diag   = hypre_ParCSRMatrixDiag(Wr);
+   Wr_diag_i = hypre_CSRMatrixI(Wr_diag);
+   Wr_diag_j = hypre_CSRMatrixJ(Wr_diag);
+   Wr_diag_a = hypre_CSRMatrixData(Wr_diag);
+
+   for (i = 0; i < num_rows + 1; i++)
+   {
+      Wr_diag_i[i] = hypre_min(i, num_nonzeros);
+   }
+
+   for (i = 0; i < num_nonzeros; i++)
+   {
+      Wr_diag_j[i] = i;
+      Wr_diag_a[i] = (b_FF_data[i] != 0.0) ? -b_CF_data[i] / b_FF_data[i] : 0.0;
+   }
+
+   return Wr;
+}
+
 HYPRE_Int
 hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
                            hypre_ParCSRMatrix  *A,
@@ -2484,7 +2539,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
 
    /* Sanity check */
    block_dim = global_num_coarse / global_num_fine;
-   if (global_num_coarse % global_num_fine)
+   if (global_num_coarse % global_num_fine && colsum_type != 0)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_coarse is not evenly divisible by num_fine!");
       HYPRE_ANNOTATE_FUNC_END;
@@ -2558,22 +2613,30 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
     * 3) Wr = - approx(A_CF) * inv(approx(A_FF))
     *-------------------------------------------------------*/
 
-   r_CF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
-                                hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                                hypre_ParCSRMatrixRowStarts(A_CF));
-   hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
-   hypre_ParVectorPointwiseDivpy(b_CF, b_FF, r_CF);
-   hypre_ParVectorScale(-1.0, r_CF);
-   Wr = hypre_ParCSRMatrixCreateFromParVector(r_CF,
-                                              hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                                              hypre_ParCSRMatrixGlobalNumCols(A_CF),
-                                              hypre_ParCSRMatrixRowStarts(A_CF),
-                                              hypre_ParCSRMatrixColStarts(A_CF));
+   if (colsum_type == 0 && global_num_coarse != global_num_fine)
+   {
+      Wr = hypre_MGRCreateUnbalancedColLumpedWr(A_CF, b_CF, b_FF);
+   }
+   else
+   {
+      r_CF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
+                                   hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                   hypre_ParCSRMatrixRowStarts(A_CF));
+      hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
+      hypre_ParVectorPointwiseDivpy(b_CF, b_FF, r_CF);
+      hypre_ParVectorScale(-1.0, r_CF);
+      Wr = hypre_ParCSRMatrixCreateFromParVector(r_CF,
+                                                 hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                                 hypre_ParCSRMatrixGlobalNumCols(A_CF),
+                                                 hypre_ParCSRMatrixRowStarts(A_CF),
+                                                 hypre_ParCSRMatrixColStarts(A_CF));
+   }
 
    /* Free memory */
    hypre_ParVectorDestroy(b_FF);
    hypre_ParVectorDestroy(b_CF);
    hypre_ParVectorDestroy(r_CF);
+   hypre_DenseBlockMatrixDestroy(B_CF);
 
    /*-------------------------------------------------------
     * 4) Build Restriction
