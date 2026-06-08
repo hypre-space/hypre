@@ -3207,18 +3207,10 @@ main( hypre_int argc,
    else if ( build_matrix_type == 4 )
    {
       BuildParLaplacian27pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
-
-#if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
-#endif
    }
    else if ( build_matrix_type == 5 )
    {
       BuildParLaplacian125pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
-
-#if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
-#endif
    }
    else if ( build_matrix_type == 6 )
    {
@@ -3278,6 +3270,11 @@ main( hypre_int argc,
       local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
       local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
+#endif
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Generate Matrix", comm);
    hypre_FinalizeTiming(time_index);
