@@ -754,6 +754,13 @@ main( hypre_int argc,
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-fromMMfile") == 0 )
+      {
+         arg_index++;
+         /* Matrix Market format (MM) */
+         build_matrix_type      = -3;
+         build_matrix_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-flexamg_cycle_struct") == 0 )
       {
          arg_index++;
@@ -2635,6 +2642,8 @@ main( hypre_int argc,
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
          hypre_printf("matrix read from multiple binary files (IJ format)\n");
+         hypre_printf("  -frommmfile <filename>     : ");
+         hypre_printf("matrix read from a Matrix-Market file (MM format)\n");
          hypre_printf("  -fromparcsrfile <filename> : ");
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
          hypre_printf("  -fromonecsrfile <filename> : ");
@@ -3184,6 +3193,16 @@ main( hypre_int argc,
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+   }
+   else if ( build_matrix_type == -3 )
+   {
+      ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
+                                   HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix in MM format!\n");
          hypre_MPI_Abort(comm, 1);
       }
    }
@@ -10025,7 +10044,7 @@ final:
 
    HYPRE_ParVectorDestroy(x0_save);
 
-   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2)
+   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2 || build_matrix_type == -3)
    {
       if (ij_A)
       {
