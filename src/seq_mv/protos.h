@@ -334,6 +334,8 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+HYPRE_Int hypre_CSRMatrixSpMVAnalysisRocsparseDevice(hypre_CSRMatrix *matrix,
+                                                     HYPRE_Int        offset);
 
 /* vector_device.c */
 #if defined(HYPRE_USING_CUSPARSE)  ||\

@@ -4411,6 +4411,9 @@ HYPRE_Int
 hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
 {
 #if defined(HYPRE_USING_ROCSPARSE)
+#if (ROCSPARSE_VERSION >= 200000)
+   return hypre_CSRMatrixSpMVAnalysisRocsparseDevice(matrix, 0);
+#else
    HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
    rocsparse_handle       handle = hypre_HandleCusparseHandle(hypre_handle());
 
@@ -4427,6 +4430,7 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
                                                            hypre_CSRMatrixJ(matrix),
                                                            hypre_CSRMatrixGPUMatInfo(matrix)) );
    }
+#endif
 #else
    HYPRE_UNUSED_VAR(matrix);
 #endif /* #if defined(HYPRE_USING_ROCSPARSE) */

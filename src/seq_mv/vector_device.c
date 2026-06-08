@@ -696,10 +696,16 @@ hypre_VectorGetRocsparseDnVecDescr(hypre_Vector       *vector,
    hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
 
    if (hypre_GpuVecDataDnVecDescr(vec) &&
-       hypre_GpuVecDataCachedPtr(vec) == data &&
        hypre_GpuVecDataCachedSize(vec) == size &&
        hypre_GpuVecDataCachedType(vec) == type)
    {
+      if (hypre_GpuVecDataCachedPtr(vec) != data)
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_dnvec_set_values(hypre_GpuVecDataDnVecDescr(vec),
+                                                          data) );
+         hypre_GpuVecDataCachedPtr(vec) = data;
+      }
+
       return hypre_GpuVecDataDnVecDescr(vec);
    }
 
