@@ -2642,7 +2642,7 @@ main( hypre_int argc,
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
          hypre_printf("matrix read from multiple binary files (IJ format)\n");
-         hypre_printf("  -frommmfile <filename>     : ");
+         hypre_printf("  -fromMMfile <filename>     : ");
          hypre_printf("matrix read from a Matrix-Market file (MM format)\n");
          hypre_printf("  -fromparcsrfile <filename> : ");
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
