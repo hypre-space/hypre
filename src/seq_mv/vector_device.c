@@ -547,4 +547,180 @@ hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+
+/*--------------------------------------------------------------------------
+ * hypre_GpuVecDataCreate
+ *--------------------------------------------------------------------------*/
+
+hypre_GpuVecData *
+hypre_GpuVecDataCreate()
+{
+   hypre_GpuVecData *data = hypre_CTAlloc(hypre_GpuVecData, 1, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   hypre_GpuVecDataDnVecDescr(data) = NULL;
+   hypre_GpuVecDataCachedPtr(data) = NULL;
+   hypre_GpuVecDataCachedSize(data) = 0;
+   hypre_GpuVecDataCachedType(data) = hypre_HYPREComplexToCudaDataType();
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+   hypre_GpuVecDataDnVecDescr(data) = NULL;
+   hypre_GpuVecDataCachedPtr(data) = NULL;
+   hypre_GpuVecDataCachedSize(data) = 0;
+#endif
+
+   return data;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GpuVecDataInvalidate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuVecDataInvalidate(hypre_GpuVecData *data)
+{
+   if (data)
+   {
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+      if (hypre_GpuVecDataDnVecDescr(data))
+      {
+         HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(hypre_GpuVecDataDnVecDescr(data)) );
+         hypre_GpuVecDataDnVecDescr(data) = NULL;
+      }
+      hypre_GpuVecDataCachedPtr(data) = NULL;
+      hypre_GpuVecDataCachedSize(data) = 0;
+      hypre_GpuVecDataCachedType(data) = hypre_HYPREComplexToCudaDataType();
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+      if (hypre_GpuVecDataDnVecDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_dnvec_descr(hypre_GpuVecDataDnVecDescr(data)) );
+         hypre_GpuVecDataDnVecDescr(data) = NULL;
+      }
+      hypre_GpuVecDataCachedPtr(data) = NULL;
+      hypre_GpuVecDataCachedSize(data) = 0;
+#endif
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GpuVecDataDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
+{
+   if (data)
+   {
+      hypre_GpuVecDataInvalidate(data);
+      hypre_TFree(data, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_VectorGetGPUVecData
+ *--------------------------------------------------------------------------*/
+
+hypre_GpuVecData *
+hypre_VectorGetGPUVecData(hypre_Vector *vector)
+{
+   if (!hypre_VectorGPUVecData(vector))
+   {
+      hypre_VectorGPUVecData(vector) = hypre_GpuVecDataCreate();
+   }
+
+   return hypre_VectorGPUVecData(vector);
+}
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+
+/*--------------------------------------------------------------------------
+ * hypre_VectorGetCusparseDnVecDescr
+ *--------------------------------------------------------------------------*/
+
+cusparseDnVecDescr_t
+hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
+                                  HYPRE_Int     offset,
+                                  HYPRE_Int     size)
+{
+   hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
+   void             *ptr = hypre_VectorData(vector) + offset;
+   cudaDataType      type = hypre_HYPREComplexToCudaDataType();
+
+   if (hypre_GpuVecDataDnVecDescr(vec) &&
+       hypre_GpuVecDataCachedPtr(vec) == ptr &&
+       hypre_GpuVecDataCachedSize(vec) == size &&
+       hypre_GpuVecDataCachedType(vec) == type)
+   {
+      return hypre_GpuVecDataDnVecDescr(vec);
+   }
+
+   if (hypre_GpuVecDataDnVecDescr(vec))
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(hypre_GpuVecDataDnVecDescr(vec)) );
+   }
+
+   HYPRE_CUSPARSE_CALL( cusparseCreateDnVec(&hypre_GpuVecDataDnVecDescr(vec),
+                                            size,
+                                            ptr,
+                                            type) );
+   hypre_GpuVecDataCachedPtr(vec) = ptr;
+   hypre_GpuVecDataCachedSize(vec) = size;
+   hypre_GpuVecDataCachedType(vec) = type;
+
+   return hypre_GpuVecDataDnVecDescr(vec);
+}
+
+#endif /* HYPRE_USING_CUSPARSE && CUSPARSE_NEWAPI_VERSION */
+
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+
+/*--------------------------------------------------------------------------
+ * hypre_VectorGetRocsparseDnVecDescr
+ *--------------------------------------------------------------------------*/
+
+rocsparse_dnvec_descr
+hypre_VectorGetRocsparseDnVecDescr(hypre_Vector       *vector,
+                                   int64_t             size,
+                                   void               *data,
+                                   rocsparse_datatype  type)
+{
+   hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
+
+   if (hypre_GpuVecDataDnVecDescr(vec) &&
+       hypre_GpuVecDataCachedPtr(vec) == data &&
+       hypre_GpuVecDataCachedSize(vec) == size &&
+       hypre_GpuVecDataCachedType(vec) == type)
+   {
+      return hypre_GpuVecDataDnVecDescr(vec);
+   }
+
+   if (hypre_GpuVecDataDnVecDescr(vec))
+   {
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_dnvec_descr(hypre_GpuVecDataDnVecDescr(vec)) );
+   }
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_dnvec_descr(&hypre_GpuVecDataDnVecDescr(vec),
+                                                      size,
+                                                      data,
+                                                      type) );
+   hypre_GpuVecDataCachedPtr(vec) = data;
+   hypre_GpuVecDataCachedSize(vec) = size;
+   hypre_GpuVecDataCachedType(vec) = type;
+
+   return hypre_GpuVecDataDnVecDescr(vec);
+}
+
+#endif /* HYPRE_USING_ROCSPARSE && ROCSPARSE_VERSION >= 200000 */
+
+#endif /* vendor sparse */
+
 #endif

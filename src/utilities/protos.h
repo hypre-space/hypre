@@ -381,6 +381,7 @@ HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
+HYPRE_Int hypre_SetSpMVAlgorithm( HYPRE_Int algorithm );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 HYPRE_Int hypre_GetDeviceGSMethod( void );
 HYPRE_Int hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );

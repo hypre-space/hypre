@@ -241,6 +241,13 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix,
       }
    }
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   if (hypre_CSRMatrixGPUMatData(matrix))
+   {
+      hypre_GpuMatDataInvalidateSpMVCache(hypre_CSRMatrixGPUMatData(matrix));
+   }
+#endif
+
    return 0;
 }
 

@@ -336,6 +336,7 @@ main( hypre_int argc,
 #else
    HYPRE_Int  spmv_use_vendor = 1;
 #endif
+   HYPRE_Int  spmv_alg = 0;
    HYPRE_Int  use_curand = 1;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;
@@ -1862,6 +1863,11 @@ main( hypre_int argc,
          arg_index++;
          spmv_use_vendor = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-spmv_alg") == 0 )
+      {
+         arg_index++;
+         spmv_alg = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
       {
          arg_index++;
@@ -3046,6 +3052,7 @@ main( hypre_int argc,
          hypre_printf("  -exec2_device              : use device execution policy for the second setup/solve\n");
          hypre_printf("  -gpu_mpi <0/1>             : use GPU-aware MPI with device buffers (default 0)\n");
          hypre_printf("  -mv_vendor <0/1>           : use vendor SpMV implementation\n");
+         hypre_printf("  -spmv_alg <val>            : set rocSPARSE SpMV algorithm (0 = default)\n");
          hypre_printf("  -mm_vendor <0/1>           : use vendor SpGEMM implementation\n");
          hypre_printf("  -spgemm_alg <val>          : set SpGEMM algorithm (1-3)\n");
          hypre_printf("  -spgemm_binned <0/1>       : use binned SpGEMM kernels\n");
@@ -3135,6 +3142,7 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    ierr = HYPRE_SetSpMVUseVendor(spmv_use_vendor); hypre_assert(ierr == 0);
+   ierr = HYPRE_SetSpMVAlgorithm(spmv_alg); hypre_assert(ierr == 0);
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);

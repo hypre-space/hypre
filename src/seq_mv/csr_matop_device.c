@@ -169,6 +169,16 @@ hypre_GpuMatDataCreate()
 
    hypre_GpuMatDataMatDescr(data) = mat_descr;
    hypre_GpuMatDataMatInfo(data) = info;
+   /* initialize cached SpMV resources */
+   hypre_GpuMatDataSpMVSpMatDescr(data) = NULL;
+   hypre_GpuMatDataSpMVBuffer(data) = NULL;
+   hypre_GpuMatDataSpMVBufferSize(data) = 0;
+   hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
+   hypre_GpuMatDataSpMVPreprocessXPtr(data) = NULL;
+   hypre_GpuMatDataSpMVPreprocessYPtr(data) = NULL;
+#if (ROCSPARSE_VERSION >= 400002)
+   hypre_GpuMatDataSpMVDescr(data) = NULL;
+#endif
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle;
@@ -216,6 +226,40 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_GpuMatDataInvalidateSpMVCache
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data)
+{
+#if defined(HYPRE_USING_ROCSPARSE)
+   if (data)
+   {
+      if (hypre_GpuMatDataSpMVSpMatDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmat_descr(
+                                  (rocsparse_spmat_descr) hypre_GpuMatDataSpMVSpMatDescr(data)) );
+         hypre_GpuMatDataSpMVSpMatDescr(data) = NULL;
+      }
+#if (ROCSPARSE_VERSION >= 400002)
+      if (hypre_GpuMatDataSpMVDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmv_descr(hypre_GpuMatDataSpMVDescr(data)) );
+         hypre_GpuMatDataSpMVDescr(data) = NULL;
+      }
+#endif
+      hypre_GpuMatDataSpMVPreprocessXPtr(data) = NULL;
+      hypre_GpuMatDataSpMVPreprocessYPtr(data) = NULL;
+      hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
+   }
+#else
+   HYPRE_UNUSED_VAR(data);
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_GpuMatDataDestroy
  *--------------------------------------------------------------------------*/
 
@@ -231,6 +275,19 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 #elif defined(HYPRE_USING_ROCSPARSE)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDescr(data)) );
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
+      /* destroy cached spmv resources */
+      if (hypre_GpuMatDataSpMVSpMatDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmat_descr((rocsparse_spmat_descr)
+                                                             hypre_GpuMatDataSpMVSpMatDescr(data)) );
+      }
+#if (ROCSPARSE_VERSION >= 400002)
+      if (hypre_GpuMatDataSpMVDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmv_descr(hypre_GpuMatDataSpMVDescr(data)) );
+      }
+#endif
+      hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
       HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::release_matrix_handle(*hypre_HandleComputeStream(

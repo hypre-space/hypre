@@ -84,6 +84,33 @@ hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetSpMVAlgorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetSpMVAlgorithm( HYPRE_Int algorithm )
+{
+   if (algorithm < 0)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   if (algorithm <= 9)
+   {
+      hypre_HandleSpMVAlgorithm(hypre_handle()) = algorithm;
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SetSpGemmUseVendor
  *--------------------------------------------------------------------------*/
 

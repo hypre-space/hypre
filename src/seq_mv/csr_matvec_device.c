@@ -374,12 +374,8 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 
    /* Free memory */
    HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
-   if (num_vectors == 1)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
-   }
-   else
+   /* For SpMV, vecX and vecY are cached on their hypre_Vector and owned by hypre_GpuVecData. */
+   if (num_vectors > 1)
    {
       HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matX) );
       HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matY) );
@@ -481,8 +477,6 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                 HYPRE_Int        offset )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
-   rocsparse_mat_info info = hypre_CSRMatrixGPUMatInfo(A);
 
    hypre_CSRMatrix *B;
 
@@ -494,6 +488,239 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
    {
       B = A;
    }
+
+#if ROCSPARSE_VERSION >= 200000
+   {
+      rocsparse_const_spmat_descr cached_mat;
+      rocsparse_const_dnvec_descr vecX = NULL;
+      rocsparse_dnvec_descr vecY = NULL;
+      rocsparse_datatype compute_type;
+      hypre_GpuMatData *gpu_mat;
+      const void *x_ptr = hypre_VectorData(x);
+      void       *y_ptr = hypre_VectorData(y) + offset;
+
+#if defined(HYPRE_SINGLE)
+      hypre_float alpha_v = (hypre_float) alpha;
+      hypre_float beta_v = (hypre_float) beta;
+      compute_type = rocsparse_datatype_f32_r;
+#else
+      hypre_double alpha_v = (hypre_double) alpha;
+      hypre_double beta_v = (hypre_double) beta;
+      compute_type = rocsparse_datatype_f64_r;
+#endif
+
+#if defined(HYPRE_BIGINT)
+      rocsparse_indextype idx_type = rocsparse_indextype_i64;
+#else
+      rocsparse_indextype idx_type = rocsparse_indextype_i32;
+#endif
+
+      gpu_mat = hypre_CSRMatrixGetGPUMatData(B);
+      cached_mat = hypre_GpuMatDataSpMVSpMatDescr(gpu_mat);
+
+      vecX = (rocsparse_const_dnvec_descr) hypre_VectorGetRocsparseDnVecDescr(
+                x,
+                (int64_t) hypre_CSRMatrixNumCols(B),
+                (void *) x_ptr,
+                compute_type);
+      vecY = hypre_VectorGetRocsparseDnVecDescr(y,
+                                                (int64_t)(hypre_CSRMatrixNumRows(B) - offset),
+                                                y_ptr,
+                                                compute_type);
+
+      if (!cached_mat)
+      {
+         rocsparse_const_spmat_descr new_mat = NULL;
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_create_const_csr_descr(&new_mat,
+                                                                (int64_t)(hypre_CSRMatrixNumRows(B) - offset),
+                                                                (int64_t) hypre_CSRMatrixNumCols(B),
+                                                                (int64_t) hypre_CSRMatrixNumNonzeros(B),
+                                                                (const void *)(hypre_CSRMatrixI(B) + offset),
+                                                                (const void *) hypre_CSRMatrixJ(B),
+                                                                (const void *) hypre_CSRMatrixData(B),
+                                                                idx_type,
+                                                                idx_type,
+                                                                rocsparse_index_base_zero,
+                                                                compute_type) );
+         hypre_GpuMatDataSpMVSpMatDescr(gpu_mat) = new_mat;
+         cached_mat = new_mat;
+      }
+
+      rocsparse_spmv_alg alg = (rocsparse_spmv_alg) hypre_HandleSpMVAlgorithm(hypre_handle());
+
+#if ROCSPARSE_VERSION >= 400002
+      {
+         /* rocsparse v2_spmv (rocSPARSE >= 4.0.2) */
+         rocsparse_spmv_descr spmv_descr = hypre_GpuMatDataSpMVDescr(gpu_mat);
+         HYPRE_Int analysis_alg = hypre_GpuMatDataSpMVPreprocessAlg(gpu_mat);
+         size_t buffer_size;
+         const rocsparse_const_dnvec_descr vecY_const =
+            (rocsparse_const_dnvec_descr) vecY;
+
+         if (analysis_alg < 0 || analysis_alg != (HYPRE_Int) alg ||
+             hypre_GpuMatDataSpMVPreprocessXPtr(gpu_mat) != x_ptr ||
+             hypre_GpuMatDataSpMVPreprocessYPtr(gpu_mat) != y_ptr)
+         {
+            size_t analysis_buffer_size = 0;
+            size_t compute_buffer_size = 0;
+            const rocsparse_operation spmv_operation = rocsparse_operation_none;
+
+            if (spmv_descr)
+            {
+               HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmv_descr(spmv_descr) );
+               spmv_descr = NULL;
+            }
+
+            HYPRE_ROCSPARSE_CALL( rocsparse_create_spmv_descr(&spmv_descr) );
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv_set_input(handle, spmv_descr,
+                                                           rocsparse_spmv_input_alg,
+                                                           &alg, sizeof(alg), NULL) );
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv_set_input(handle, spmv_descr,
+                                                           rocsparse_spmv_input_operation,
+                                                           &spmv_operation,
+                                                           sizeof(spmv_operation), NULL) );
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv_set_input(handle, spmv_descr,
+                                                           rocsparse_spmv_input_scalar_datatype,
+                                                           &compute_type,
+                                                           sizeof(compute_type), NULL) );
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv_set_input(handle, spmv_descr,
+                                                           rocsparse_spmv_input_compute_datatype,
+                                                           &compute_type,
+                                                           sizeof(compute_type), NULL) );
+
+            HYPRE_ROCSPARSE_CALL( rocsparse_v2_spmv_buffer_size(handle, spmv_descr,
+                                                                cached_mat, vecX, vecY_const,
+                                                                rocsparse_v2_spmv_stage_analysis,
+                                                                &analysis_buffer_size, NULL) );
+            HYPRE_ROCSPARSE_CALL( rocsparse_v2_spmv_buffer_size(handle, spmv_descr,
+                                                                cached_mat, vecX, vecY_const,
+                                                                rocsparse_v2_spmv_stage_compute,
+                                                                &compute_buffer_size, NULL) );
+
+            buffer_size = analysis_buffer_size > compute_buffer_size ?
+                          analysis_buffer_size : compute_buffer_size;
+
+            if (buffer_size > hypre_GpuMatDataSpMVBufferSize(gpu_mat))
+            {
+               hypre_TFree(hypre_GpuMatDataSpMVBuffer(gpu_mat), HYPRE_MEMORY_DEVICE);
+               hypre_GpuMatDataSpMVBuffer(gpu_mat) = NULL;
+               hypre_GpuMatDataSpMVBufferSize(gpu_mat) = 0;
+               if (buffer_size > 0)
+               {
+                  hypre_GpuMatDataSpMVBuffer(gpu_mat) = hypre_TAlloc(char, buffer_size,
+                                                                     HYPRE_MEMORY_DEVICE);
+                  hypre_GpuMatDataSpMVBufferSize(gpu_mat) = buffer_size;
+               }
+            }
+
+            HYPRE_ROCSPARSE_CALL( rocsparse_v2_spmv(handle, spmv_descr,
+                                                    (const void *) &alpha_v,
+                                                    cached_mat, vecX,
+                                                    (const void *) &beta_v,
+                                                    vecY,
+                                                    rocsparse_v2_spmv_stage_analysis,
+                                                    buffer_size,
+                                                    hypre_GpuMatDataSpMVBuffer(gpu_mat),
+                                                    NULL) );
+
+            hypre_GpuMatDataSpMVDescr(gpu_mat) = spmv_descr;
+            hypre_GpuMatDataSpMVPreprocessAlg(gpu_mat) = (HYPRE_Int) alg;
+            hypre_GpuMatDataSpMVPreprocessXPtr(gpu_mat) = x_ptr;
+            hypre_GpuMatDataSpMVPreprocessYPtr(gpu_mat) = y_ptr;
+         }
+         else
+         {
+            spmv_descr = hypre_GpuMatDataSpMVDescr(gpu_mat);
+            buffer_size = hypre_GpuMatDataSpMVBufferSize(gpu_mat);
+         }
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_v2_spmv(handle, spmv_descr,
+                                                 (const void *) &alpha_v,
+                                                 cached_mat, vecX,
+                                                 (const void *) &beta_v,
+                                                 vecY,
+                                                 rocsparse_v2_spmv_stage_compute,
+                                                 buffer_size,
+                                                 hypre_GpuMatDataSpMVBuffer(gpu_mat),
+                                                 NULL) );
+      }
+#else
+      {
+         /* rocsparse_spmv (rocSPARSE >= 2.0.0, < 4.0.2) */
+         size_t needed_buffer_size = 0;
+         HYPRE_Int preprocess_alg = hypre_GpuMatDataSpMVPreprocessAlg(gpu_mat);
+
+         if (preprocess_alg < 0 || preprocess_alg != (HYPRE_Int) alg ||
+             hypre_GpuMatDataSpMVPreprocessXPtr(gpu_mat) != x_ptr ||
+             hypre_GpuMatDataSpMVPreprocessYPtr(gpu_mat) != y_ptr)
+         {
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv(handle,
+                                                 rocsparse_operation_none,
+                                                 (const void *) &alpha_v,
+                                                 cached_mat,
+                                                 vecX,
+                                                 (const void *) &beta_v,
+                                                 vecY,
+                                                 compute_type,
+                                                 alg,
+                                                 rocsparse_spmv_stage_buffer_size,
+                                                 &needed_buffer_size,
+                                                 NULL) );
+
+            if (needed_buffer_size > hypre_GpuMatDataSpMVBufferSize(gpu_mat))
+            {
+               hypre_TFree(hypre_GpuMatDataSpMVBuffer(gpu_mat), HYPRE_MEMORY_DEVICE);
+               hypre_GpuMatDataSpMVBuffer(gpu_mat) = NULL;
+               hypre_GpuMatDataSpMVBufferSize(gpu_mat) = 0;
+               if (needed_buffer_size > 0)
+               {
+                  hypre_GpuMatDataSpMVBuffer(gpu_mat) = hypre_TAlloc(char, needed_buffer_size,
+                                                                     HYPRE_MEMORY_DEVICE);
+                  hypre_GpuMatDataSpMVBufferSize(gpu_mat) = needed_buffer_size;
+               }
+            }
+
+            HYPRE_ROCSPARSE_CALL( rocsparse_spmv(handle,
+                                                 rocsparse_operation_none,
+                                                 (const void *) &alpha_v,
+                                                 cached_mat,
+                                                 vecX,
+                                                 (const void *) &beta_v,
+                                                 vecY,
+                                                 compute_type,
+                                                 alg,
+                                                 rocsparse_spmv_stage_preprocess,
+                                                 &needed_buffer_size,
+                                                 hypre_GpuMatDataSpMVBuffer(gpu_mat)) );
+            hypre_GpuMatDataSpMVPreprocessAlg(gpu_mat) = (HYPRE_Int) alg;
+            hypre_GpuMatDataSpMVPreprocessXPtr(gpu_mat) = x_ptr;
+            hypre_GpuMatDataSpMVPreprocessYPtr(gpu_mat) = y_ptr;
+         }
+         else
+         {
+            needed_buffer_size = hypre_GpuMatDataSpMVBufferSize(gpu_mat);
+         }
+
+         HYPRE_ROCSPARSE_CALL( rocsparse_spmv(handle,
+                                              rocsparse_operation_none,
+                                              (const void *) &alpha_v,
+                                              cached_mat,
+                                              vecX,
+                                              (const void *) &beta_v,
+                                              vecY,
+                                              compute_type,
+                                              alg,
+                                              rocsparse_spmv_stage_compute,
+                                              &needed_buffer_size,
+                                              hypre_GpuMatDataSpMVBuffer(gpu_mat)) );
+      }
+#endif /* ROCSPARSE_VERSION >= 400002 */
+   }
+#else
+   /* Legacy rocSPARSE SpMV path */
+   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+   rocsparse_mat_info info = hypre_CSRMatrixGPUMatInfo(A);
 
    HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv(handle,
                                                rocsparse_operation_none,
@@ -509,6 +736,7 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                                hypre_VectorData(x),
                                                &beta,
                                                hypre_VectorData(y) + offset) );
+#endif /* ROCSPARSE_VERSION >= 200000 */
 
    if (trans)
    {
