@@ -491,7 +491,7 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
 
 #if ROCSPARSE_VERSION >= 200000
    {
-      rocsparse_const_spmat_descr cached_mat;
+      rocsparse_spmat_descr cached_mat;
       rocsparse_const_dnvec_descr vecX = NULL;
       rocsparse_dnvec_descr vecY = NULL;
       rocsparse_datatype compute_type;
@@ -530,19 +530,35 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
 
       if (!cached_mat)
       {
-         rocsparse_const_spmat_descr new_mat = NULL;
+         rocsparse_spmat_descr new_mat = NULL;
 
-         HYPRE_ROCSPARSE_CALL( rocsparse_create_const_csr_descr(&new_mat,
-                                                                (int64_t)(hypre_CSRMatrixNumRows(B) - offset),
-                                                                (int64_t) hypre_CSRMatrixNumCols(B),
-                                                                (int64_t) hypre_CSRMatrixNumNonzeros(B),
-                                                                (const void *)(hypre_CSRMatrixI(B) + offset),
-                                                                (const void *) hypre_CSRMatrixJ(B),
-                                                                (const void *) hypre_CSRMatrixData(B),
-                                                                idx_type,
-                                                                idx_type,
-                                                                rocsparse_index_base_zero,
-                                                                compute_type) );
+#if (ROCSPARSE_VERSION >= 300000)
+         HYPRE_ROCSPARSE_CALL( rocsparse_create_const_csr_descr(
+                                  (rocsparse_const_spmat_descr *) &new_mat,
+                                  (int64_t)(hypre_CSRMatrixNumRows(B) - offset),
+                                  (int64_t) hypre_CSRMatrixNumCols(B),
+                                  (int64_t) hypre_CSRMatrixNumNonzeros(B),
+                                  (const void *)(hypre_CSRMatrixI(B) + offset),
+                                  (const void *) hypre_CSRMatrixJ(B),
+                                  (const void *) hypre_CSRMatrixData(B),
+                                  idx_type,
+                                  idx_type,
+                                  rocsparse_index_base_zero,
+                                  compute_type) );
+#else
+         HYPRE_ROCSPARSE_CALL( rocsparse_create_csr_descr(
+                                  &new_mat,
+                                  (int64_t)(hypre_CSRMatrixNumRows(B) - offset),
+                                  (int64_t) hypre_CSRMatrixNumCols(B),
+                                  (int64_t) hypre_CSRMatrixNumNonzeros(B),
+                                  hypre_CSRMatrixI(B) + offset,
+                                  hypre_CSRMatrixJ(B),
+                                  hypre_CSRMatrixData(B),
+                                  idx_type,
+                                  idx_type,
+                                  rocsparse_index_base_zero,
+                                  compute_type) );
+#endif
          hypre_GpuMatDataSpMVSpMatDescr(gpu_mat) = new_mat;
          cached_mat = new_mat;
       }

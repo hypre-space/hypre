@@ -174,6 +174,11 @@ using hypre_DeviceItem = void*;
 #if !defined(ROCSPARSE_VERSION)
 #define ROCSPARSE_VERSION (ROCSPARSE_VERSION_MAJOR * 100000 + ROCSPARSE_VERSION_MINOR * 100 + ROCSPARSE_VERSION_PATCH)
 #endif
+/* rocSPARSE < 3.0.0 exposes only non-const descriptor typedefs */
+#if (ROCSPARSE_VERSION < 300000)
+typedef rocsparse_spmat_descr rocsparse_const_spmat_descr;
+typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
+#endif
 #endif
 
 #if defined(HYPRE_USING_ROCSOLVER)
@@ -1014,15 +1019,17 @@ struct hypre_GpuMatData
    rocsparse_mat_descr                  mat_descr;
    rocsparse_mat_info                   mat_info;
 
+#if (ROCSPARSE_VERSION >= 200000)
    /* Cached SpMV resources for rocsparse multi-stage API */
    char                                *spmv_buffer;
    size_t                               spmv_buffer_size;
-   rocsparse_const_spmat_descr          spmv_spmat_descr;
+   rocsparse_spmat_descr                spmv_spmat_descr;
    HYPRE_Int                            spmv_preprocess_alg; /* -1 = not preprocessed */
    const void                          *spmv_preprocess_x_ptr;
    void                                *spmv_preprocess_y_ptr;
 #if (ROCSPARSE_VERSION >= 400002)
    rocsparse_spmv_descr                 spmv_descr;
+#endif
 #endif
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
@@ -1033,6 +1040,7 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatDescr(data)            ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)             ((data) -> mat_info)
 #define hypre_GpuMatDataMatHandle(data)           ((data) -> mat_handle)
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
 #define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
 #define hypre_GpuMatDataSpMVBufferSize(data)      ((data) -> spmv_buffer_size)
 #define hypre_GpuMatDataSpMVSpMatDescr(data)      ((data) -> spmv_spmat_descr)
@@ -1041,6 +1049,7 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataSpMVPreprocessYPtr(data)  ((data) -> spmv_preprocess_y_ptr)
 #if (ROCSPARSE_VERSION >= 400002)
 #define hypre_GpuMatDataSpMVDescr(data)           ((data) -> spmv_descr)
+#endif
 #endif
 
 struct hypre_GpuVecData
