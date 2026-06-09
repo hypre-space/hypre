@@ -883,8 +883,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParCSRMatrix   **R_array    = (mgr_data -> R_array);
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
-   hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
-   hypre_ParCSRMatrix   **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix    *RAP        = (mgr_data -> RAP);
    HYPRE_Int              use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);

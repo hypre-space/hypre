@@ -465,6 +465,7 @@ hypre_HostFree(void *ptr)
 static inline void
 hypre_DeviceFree(void *ptr)
 {
+   HYPRE_UNUSED_VAR(ptr);
 #if defined(HYPRE_USING_GPU)
    if ( hypre_HandleUserDeviceMfree(hypre_handle()) )
    {

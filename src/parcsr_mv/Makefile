@@ -60,6 +60,7 @@ FILES =\
  par_vector_batched.c
 
 CUFILES =\
+ par_csr_matrix_stats_device.c\
  par_csr_fffc_device.c\
  par_csr_filter_device.c\
  par_csr_matop_device.c\
