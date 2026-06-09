@@ -447,7 +447,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
    {
       case HYPRE_SCHWARZ_LOCAL_SOLVER_ILUK:
       {
-         void *ilu_solver = hypre_ILUCreate();
+         HYPRE_Solver ilu_solver = (HYPRE_Solver) hypre_ILUCreate();
 
          hypre_ILUSetType(ilu_solver, 0);     /* BJ with ILU(k) */
          hypre_ILUSetLevelOfFill(ilu_solver, hypre_SchwarzDataILUKLevelOfFill(schwarz_data));
@@ -485,7 +485,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
 
       case HYPRE_SCHWARZ_LOCAL_SOLVER_ILUT:
       {
-         void *ilu_solver = hypre_ILUCreate();
+         HYPRE_Solver ilu_solver = (HYPRE_Solver) hypre_ILUCreate();
 
          hypre_ILUSetType(ilu_solver, 1);     /* BJ with ILUT */
          hypre_ILUSetMaxNnzPerRow(ilu_solver, hypre_SchwarzDataILUTMaxNnzRow(schwarz_data));
@@ -524,7 +524,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
 
       case HYPRE_SCHWARZ_LOCAL_SOLVER_AMG:
       {
-         void *amg_solver = hypre_BoomerAMGCreate();
+         HYPRE_Solver amg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
 
          hypre_BoomerAMGSetMaxIter(amg_solver, 1);
          hypre_BoomerAMGSetTol(amg_solver, 0.0);
