@@ -6824,6 +6824,20 @@ HYPRE_Int
 hypre_SchwarzDestroy_long_dbl( void *data );
 
 HYPRE_Int
+hypre_SchwarzGetFinalResidualNorm_flt( void *data, hypre_float *norm );
+HYPRE_Int
+hypre_SchwarzGetFinalResidualNorm_dbl( void *data, hypre_double *norm );
+HYPRE_Int
+hypre_SchwarzGetFinalResidualNorm_long_dbl( void *data, hypre_long_double *norm );
+
+HYPRE_Int
+hypre_SchwarzGetNumIterations_flt( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int
+hypre_SchwarzGetNumIterations_dbl( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int
+hypre_SchwarzGetNumIterations_long_dbl( void *data, HYPRE_Int *num_iterations );
+
+HYPRE_Int
 hypre_SchwarzReScale_flt( void *data, HYPRE_Int size, hypre_float value );
 HYPRE_Int
 hypre_SchwarzReScale_dbl( void *data, HYPRE_Int size, hypre_double value );
@@ -6852,6 +6866,48 @@ HYPRE_Int
 hypre_SchwarzSetDomainType_long_dbl( void *data, HYPRE_Int domain_type );
 
 HYPRE_Int
+hypre_SchwarzSetILUKLevelOfFill_flt( void *data, HYPRE_Int level_of_fill );
+HYPRE_Int
+hypre_SchwarzSetILUKLevelOfFill_dbl( void *data, HYPRE_Int level_of_fill );
+HYPRE_Int
+hypre_SchwarzSetILUKLevelOfFill_long_dbl( void *data, HYPRE_Int level_of_fill );
+
+HYPRE_Int
+hypre_SchwarzSetILUTDroptol_flt( void *data, hypre_float droptol );
+HYPRE_Int
+hypre_SchwarzSetILUTDroptol_dbl( void *data, hypre_double droptol );
+HYPRE_Int
+hypre_SchwarzSetILUTDroptol_long_dbl( void *data, hypre_long_double droptol );
+
+HYPRE_Int
+hypre_SchwarzSetILUTMaxNnzPerRow_flt( void *data, HYPRE_Int max_nnz_row );
+HYPRE_Int
+hypre_SchwarzSetILUTMaxNnzPerRow_dbl( void *data, HYPRE_Int max_nnz_row );
+HYPRE_Int
+hypre_SchwarzSetILUTMaxNnzPerRow_long_dbl( void *data, HYPRE_Int max_nnz_row );
+
+HYPRE_Int
+hypre_SchwarzSetLocalSolverType_flt( void *data, HYPRE_Int local_solver_type );
+HYPRE_Int
+hypre_SchwarzSetLocalSolverType_dbl( void *data, HYPRE_Int local_solver_type );
+HYPRE_Int
+hypre_SchwarzSetLocalSolverType_long_dbl( void *data, HYPRE_Int local_solver_type );
+
+HYPRE_Int
+hypre_SchwarzSetLogging_flt( void *data, HYPRE_Int logging );
+HYPRE_Int
+hypre_SchwarzSetLogging_dbl( void *data, HYPRE_Int logging );
+HYPRE_Int
+hypre_SchwarzSetLogging_long_dbl( void *data, HYPRE_Int logging );
+
+HYPRE_Int
+hypre_SchwarzSetMaxIter_flt( void *data, HYPRE_Int max_iter );
+HYPRE_Int
+hypre_SchwarzSetMaxIter_dbl( void *data, HYPRE_Int max_iter );
+HYPRE_Int
+hypre_SchwarzSetMaxIter_long_dbl( void *data, HYPRE_Int max_iter );
+
+HYPRE_Int
 hypre_SchwarzSetNonSymm_flt( void *data, HYPRE_Int value );
 HYPRE_Int
 hypre_SchwarzSetNonSymm_dbl( void *data, HYPRE_Int value );
@@ -6873,6 +6929,13 @@ HYPRE_Int
 hypre_SchwarzSetOverlap_long_dbl( void *data, HYPRE_Int overlap );
 
 HYPRE_Int
+hypre_SchwarzSetPrintLevel_flt( void *data, HYPRE_Int print_level );
+HYPRE_Int
+hypre_SchwarzSetPrintLevel_dbl( void *data, HYPRE_Int print_level );
+HYPRE_Int
+hypre_SchwarzSetPrintLevel_long_dbl( void *data, HYPRE_Int print_level );
+
+HYPRE_Int
 hypre_SchwarzSetRelaxWeight_flt( void *data, hypre_float relax_weight );
 HYPRE_Int
 hypre_SchwarzSetRelaxWeight_dbl( void *data, hypre_double relax_weight );
@@ -6885,6 +6948,13 @@ HYPRE_Int
 hypre_SchwarzSetScale_dbl( void *data, hypre_double *scale );
 HYPRE_Int
 hypre_SchwarzSetScale_long_dbl( void *data, hypre_long_double *scale );
+
+HYPRE_Int
+hypre_SchwarzSetTol_flt( void *data, hypre_float tol );
+HYPRE_Int
+hypre_SchwarzSetTol_dbl( void *data, hypre_double tol );
+HYPRE_Int
+hypre_SchwarzSetTol_long_dbl( void *data, hypre_long_double tol );
 
 HYPRE_Int
 hypre_SchwarzSetVariant_flt( void *data, HYPRE_Int variant );
