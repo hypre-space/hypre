@@ -338,6 +338,25 @@ typedef uint64_t               hypre_uint64;
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)
 
+/* Macro for emitting pragmas from macros */
+#define HYPRE_PRAGMA_STRINGIFY(...) #__VA_ARGS__
+#if defined(WIN32) && defined(_MSC_VER)
+#define HYPRE_PRAGMA(...) __pragma(__VA_ARGS__)
+#else
+#define HYPRE_PRAGMA(...) _Pragma(HYPRE_PRAGMA_STRINGIFY(__VA_ARGS__))
+#endif
+
+/* Macros for controlling compiler diagnostics */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_DIAGNOSTIC_PUSH           HYPRE_PRAGMA(GCC diagnostic push)
+#define HYPRE_DIAGNOSTIC_POP            HYPRE_PRAGMA(GCC diagnostic pop)
+#define HYPRE_DIAGNOSTIC_IGNORE_WSHADOW HYPRE_PRAGMA(GCC diagnostic ignored "-Wshadow")
+#else
+#define HYPRE_DIAGNOSTIC_PUSH
+#define HYPRE_DIAGNOSTIC_POP
+#define HYPRE_DIAGNOSTIC_IGNORE_WSHADOW
+#endif
+
 /* Macro for marking deprecated functions */
 #define HYPRE_DEPRECATED(reason) _Pragma(reason)
 
@@ -1992,60 +2011,62 @@ extern "C++"
 #ifndef HYPRE_GSELIM_H
 #define HYPRE_GSELIM_H
 
-#define hypre_gselim(A,x,n)                            \
-{                                                      \
-   HYPRE_Int    j,k,m;                                 \
-   HYPRE_Real factor;                                  \
-   HYPRE_Real divA;                                    \
-   if (n == 1)  /* A is 1x1 */                         \
-   {                                                   \
-      if (A[0] != 0.0)                                 \
-      {                                                \
-         x[0] = x[0]/A[0];                             \
-      }                                                \
-   }                                                   \
-   else/* A is nxn. Forward elimination */             \
-   {                                                   \
-      for (k = 0; k < n-1; k++)                        \
-      {                                                \
-         if (A[k*n+k] != 0.0)                          \
-         {                                             \
-            divA = 1.0/A[k*n+k];                       \
-            for (j = k+1; j < n; j++)                  \
-            {                                          \
-               if (A[j*n+k] != 0.0)                    \
-               {                                       \
-                  factor = A[j*n+k]*divA;              \
-                  for (m = k+1; m < n; m++)            \
-                  {                                    \
-                     A[j*n+m]  -= factor * A[k*n+m];   \
-                  }                                    \
-                  x[j] -= factor * x[k];               \
-               }                                       \
-            }                                          \
-         }                                             \
-      }                                                \
-      /* Back Substitution  */                         \
-      for (k = n-1; k > 0; --k)                        \
-      {                                                \
-         if (A[k*n+k] != 0.0)                          \
-         {                                             \
-            x[k] /= A[k*n+k];                          \
-            for (j = 0; j < k; j++)                    \
-            {                                          \
-               if (A[j*n+k] != 0.0)                    \
-               {                                       \
-                  x[j] -= x[k] * A[j*n+k];             \
-               }                                       \
-            }                                          \
-         }                                             \
-      }                                                \
-      if (A[0] != 0.0) x[0] /= A[0];                   \
-   }                                                   \
+#define hypre_gselim(A,x,n)                                            \
+{                                                                      \
+   HYPRE_DIAGNOSTIC_PUSH                                               \
+   HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                     \
+   HYPRE_Int  j, k, m;                                                 \
+   HYPRE_Real factor;                                                  \
+   HYPRE_Real divA;                                                    \
+   HYPRE_DIAGNOSTIC_POP                                                \
+   if (n == 1)  /* A is 1x1 */                                         \
+   {                                                                   \
+      if (A[0] != 0.0)                                                 \
+      {                                                                \
+         x[0] = x[0]/A[0];                                             \
+      }                                                                \
+   }                                                                   \
+   else/* A is nxn. Forward elimination */                             \
+   {                                                                   \
+      for (k = 0; k < n - 1; k++)                                      \
+      {                                                                \
+         if (A[k * n + k] != 0.0)                                      \
+         {                                                             \
+            divA = 1.0/A[k * n + k];                                   \
+            for (j = k + 1; j < n; j++)                                \
+            {                                                          \
+               if (A[j * n + k] != 0.0)                                \
+               {                                                       \
+                  factor = A[j * n + k] * divA;                        \
+                  for (m = k + 1; m < n; m++)                          \
+                  {                                                    \
+                     A[j * n + m]  -= factor * A[k * n + m];           \
+                  }                                                    \
+                  x[j] -= factor * x[k];                               \
+               }                                                       \
+            }                                                          \
+         }                                                             \
+      }                                                                \
+      /* Back Substitution  */                                         \
+      for (k = n - 1; k > 0; --k)                                      \
+      {                                                                \
+         if (A[k * n + k] != 0.0)                                      \
+         {                                                             \
+            x[k] /= A[k * n + k];                                      \
+            for (j = 0; j < k; j++)                                    \
+            {                                                          \
+               if (A[j * n + k] != 0.0)                                \
+               {                                                       \
+                  x[j] -= x[k] * A[j * n + k];                         \
+               }                                                       \
+            }                                                          \
+         }                                                             \
+      }                                                                \
+      if (A[0] != 0.0) x[0] /= A[0];                                   \
+   }                                                                   \
 }
 
 #endif /* #ifndef HYPRE_GSELIM_H */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

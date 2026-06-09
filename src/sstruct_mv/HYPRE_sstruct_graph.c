@@ -856,13 +856,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          HYPRE_Int    *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
          hypre_Index  *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
          hypre_Index   offset;
-         HYPRE_Int     s, iv, jv, d, nvars, entry;
+         HYPRE_Int     s, iv, jv, d_local, nvars_local, entry_local;
          HYPRE_Int    *stencil_sizes;
          hypre_Index **stencil_offsets;
          HYPRE_Int   **stencil_vars;
 
          pgrid = hypre_SStructGridPGrid(grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
+         nvars_local = hypre_SStructPGridNVars(pgrid);
 
          /* build default full sparsity pattern if nothing set by user */
          if (fem_nsparse < 0)
@@ -888,10 +888,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          fem_entries = hypre_CTAlloc(HYPRE_Int, fem_nsparse, HYPRE_MEMORY_HOST);
          hypre_SStructGraphFEMPEntries(graph, part) = fem_entries;
 
-         stencil_sizes   = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
-         stencil_offsets = hypre_CTAlloc(hypre_Index *, nvars, HYPRE_MEMORY_HOST);
-         stencil_vars    = hypre_CTAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
-         for (iv = 0; iv < nvars; iv++)
+         stencil_sizes   = hypre_CTAlloc(HYPRE_Int, nvars_local, HYPRE_MEMORY_HOST);
+         stencil_offsets = hypre_CTAlloc(hypre_Index *, nvars_local, HYPRE_MEMORY_HOST);
+         stencil_vars    = hypre_CTAlloc(HYPRE_Int *, nvars_local, HYPRE_MEMORY_HOST);
+         for (iv = 0; iv < nvars_local; iv++)
          {
             stencil_offsets[iv] = hypre_CTAlloc(hypre_Index, fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
             stencil_vars[iv]    = hypre_CTAlloc(HYPRE_Int, fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
@@ -905,33 +905,33 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             jv = fem_vars[j];
 
             /* shift off-diagonal offset by diagonal */
-            for (d = 0; d < ndim; d++)
+            for (d_local = 0; d_local < ndim; d_local++)
             {
-               offset[d] = fem_offsets[j][d] - fem_offsets[i][d];
+               offset[d_local] = fem_offsets[j][d_local] - fem_offsets[i][d_local];
             }
 
             /* search stencil_offsets */
-            for (entry = 0; entry < stencil_sizes[iv]; entry++)
+            for (entry_local = 0; entry_local < stencil_sizes[iv]; entry_local++)
             {
                /* if offset is already in the stencil, break */
-               if ( hypre_IndexesEqual(offset, stencil_offsets[iv][entry], ndim)
-                    && (jv == stencil_vars[iv][entry]) )
+               if ( hypre_IndexesEqual(offset, stencil_offsets[iv][entry_local], ndim)
+                    && (jv == stencil_vars[iv][entry_local]) )
                {
                   break;
                }
             }
             /* if this is a new stencil offset, add it to the stencil */
-            if (entry == stencil_sizes[iv])
+            if (entry_local == stencil_sizes[iv])
             {
-               for (d = 0; d < ndim; d++)
+               for (d_local = 0; d_local < ndim; d_local++)
                {
-                  stencil_offsets[iv][entry][d] = offset[d];
+                  stencil_offsets[iv][entry_local][d_local] = offset[d_local];
                }
-               stencil_vars[iv][entry] = jv;
+               stencil_vars[iv][entry_local] = jv;
                stencil_sizes[iv]++;
             }
 
-            fem_entries[s] = entry;
+            fem_entries[s] = entry_local;
          }
 
          /* set up the stencils */
@@ -940,11 +940,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             HYPRE_SStructStencilDestroy(stencils[part][iv]);
             HYPRE_SStructStencilCreate(ndim, stencil_sizes[iv],
                                        &stencils[part][iv]);
-            for (entry = 0; entry < stencil_sizes[iv]; entry++)
+            for (entry_local = 0; entry_local < stencil_sizes[iv]; entry_local++)
             {
-               HYPRE_SStructStencilSetEntry(stencils[part][iv], entry,
-                                            stencil_offsets[iv][entry],
-                                            stencil_vars[iv][entry]);
+               HYPRE_SStructStencilSetEntry(stencils[part][iv], entry_local,
+                                            stencil_offsets[iv][entry_local],
+                                            stencil_vars[iv][entry_local]);
             }
          }
 

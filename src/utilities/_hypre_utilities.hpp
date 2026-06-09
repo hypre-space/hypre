@@ -446,6 +446,7 @@ typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #include <thrust/iterator/reverse_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
 #include <thrust/scan.h>
