@@ -843,7 +843,6 @@ BenchmarkMatMat(MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
 
    /* Gather statistics */
    {
-      HYPRE_Int i;
       HYPRE_Int *local_nnz = hypre_TAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
       HYPRE_Int *local_rows = hypre_TAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
       HYPRE_Int nnz_local = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(A_power)) +

@@ -397,6 +397,8 @@
 #undef HYPRE_MGRSetCpointsByBlock
 #undef HYPRE_MGRSetCpointsByContiguousBlock
 #undef HYPRE_MGRSetCpointsByPointMarkerArray
+#undef HYPRE_MGRSetCycleType
+#undef HYPRE_MGRSetFRelaxCycle
 #undef HYPRE_MGRSetFRelaxMethod
 #undef HYPRE_MGRSetFSolver
 #undef HYPRE_MGRSetFSolverAtLevel
@@ -1556,6 +1558,8 @@
 #undef hypre_MGRSetCpointsByBlock
 #undef hypre_MGRSetCpointsByContiguousBlock
 #undef hypre_MGRSetCpointsByPointMarkerArray
+#undef hypre_MGRSetCycleType
+#undef hypre_MGRSetFRelaxCycle
 #undef hypre_MGRSetFRelaxMethod
 #undef hypre_MGRSetFSolver
 #undef hypre_MGRSetFSolverAtLevel

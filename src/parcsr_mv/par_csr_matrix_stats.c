@@ -400,7 +400,7 @@ hypre_ParCSRMatrixStatsComputeLocal(hypre_ParCSRMatrix *A,
 
    hypre_MatrixStatsNumRows(stats)     = local_num_rows;
    hypre_MatrixStatsNumCols(stats)     = global_num_cols;
-   hypre_MatrixStatsNumNonzeros(stats) = local_num_nonzeros;
+   hypre_MatrixStatsNumNonzeros(stats) = (hypre_ulonglongint) local_num_nonzeros;
 
    if (local_num_rows == 0)
    {

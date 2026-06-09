@@ -6460,6 +6460,42 @@ HYPRE_MGRSetCpointsByPointMarkerArray_pre( HYPRE_Precision precision, HYPRE_Solv
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetCycleType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int cycle_type )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MGRSetCycleType_flt( solver, cycle_type );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MGRSetCycleType_dbl( solver, cycle_type );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MGRSetCycleType_long_dbl( solver, cycle_type );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_cycle )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MGRSetFRelaxCycle_flt( solver, frelax_cycle );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MGRSetFRelaxCycle_dbl( solver, frelax_cycle );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MGRSetFRelaxCycle_long_dbl( solver, frelax_cycle );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    switch (precision)

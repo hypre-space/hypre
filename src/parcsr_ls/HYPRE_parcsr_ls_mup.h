@@ -3300,6 +3300,24 @@ HYPRE_Int
 HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *num_block_coarse_points, HYPRE_Int **lvl_block_coarse_indexes, HYPRE_Int *point_marker_array );
 
 HYPRE_Int
+HYPRE_MGRSetCycleType_flt( HYPRE_Solver solver, HYPRE_Int cycle_type );
+HYPRE_Int
+HYPRE_MGRSetCycleType_dbl( HYPRE_Solver solver, HYPRE_Int cycle_type );
+HYPRE_Int
+HYPRE_MGRSetCycleType_long_dbl( HYPRE_Solver solver, HYPRE_Int cycle_type );
+HYPRE_Int
+HYPRE_MGRSetCycleType( HYPRE_Solver solver, HYPRE_Int cycle_type );
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_flt( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_dbl( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_long_dbl( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver, HYPRE_Int frelax_cycle );
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_flt( HYPRE_Solver solver, HYPRE_Int relax_method );
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_dbl( HYPRE_Solver solver, HYPRE_Int relax_method );
@@ -7047,6 +7065,12 @@ HYPRE_MGRSetCpointsByContiguousBlock_pre( HYPRE_Precision precision, HYPRE_Solve
 
 HYPRE_Int
 HYPRE_MGRSetCpointsByPointMarkerArray_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int block_size, HYPRE_Int max_num_levels, HYPRE_Int *num_block_coarse_points, HYPRE_Int **lvl_block_coarse_indexes, HYPRE_Int *point_marker_array );
+
+HYPRE_Int
+HYPRE_MGRSetCycleType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int cycle_type );
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int frelax_cycle );
 
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int relax_method );

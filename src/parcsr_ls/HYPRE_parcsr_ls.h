@@ -4939,12 +4939,37 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
 /**
  * (Optional) Set the cycle for global smoothing.
  * Options for \e global_smooth_cycle are:
- *    - 1 : Pre-smoothing - Down cycle (default)
- *    - 2 : Post-smoothing - Up cycle
+ *    - 0 : no global smoothing
+ *    - 1 : pre-smoothing only - down cycle (default)
+ *    - 2 : post-smoothing only - up cycle
+ *    - 3 : both pre- and post-smoothing (V(1,1))
  **/
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
                                HYPRE_Int global_smooth_cycle );
+
+/**
+ * (Optional) Controls when F-relaxation sweeps are applied during the cycle.
+ * Options for \e frelax_cycle are:
+ *    - 0 : no F-relaxation
+ *    - 1 : pre-relaxation only (default, applied on the way down)
+ *    - 2 : post-relaxation only (applied on the way up, after coarse correction)
+ *    - 3 : both pre- and post-relaxation
+ **/
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver,
+                         HYPRE_Int frelax_cycle );
+
+/**
+ * (Optional) Set MGR's cycling strategy.
+ * Options for \e cycle_type are:
+ *    - 1 : V-cycle (default)
+ *    - 2 : W-cycle
+ * Note: F-cycles are not supported.
+ **/
+HYPRE_Int
+HYPRE_MGRSetCycleType( HYPRE_Solver solver,
+                       HYPRE_Int cycle_type );
 
 /**
  * (Optional) Determines type of global smoother.
