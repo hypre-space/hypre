@@ -231,20 +231,6 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice_long_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
 
 HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassOneLocalDevice_flt( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassOneLocalDevice_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassOneLocalDevice_long_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassTwoLocalDevice_flt( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassTwoLocalDevice_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassTwoLocalDevice_long_dbl( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats );
-
-HYPRE_Int
 hypre_ParCSRMatrixTransposeDevice_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr, HYPRE_Int data );
 HYPRE_Int
 hypre_ParCSRMatrixTransposeDevice_dbl( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr, HYPRE_Int data );
@@ -316,3 +302,4 @@ extern "C++" {
 #endif
 
 #endif
+

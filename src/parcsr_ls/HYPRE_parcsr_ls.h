@@ -4305,6 +4305,12 @@ HYPRE_Int HYPRE_SchwarzCreate(HYPRE_Solver *solver);
 
 HYPRE_Int HYPRE_SchwarzDestroy(HYPRE_Solver solver);
 
+/**
+ * Set up a Schwarz solver.
+ *
+ * Overlapping Schwarz variants (10+) currently require host-resident ParCSR
+ * matrices and vectors.
+ **/
 HYPRE_Int HYPRE_SchwarzSetup(HYPRE_Solver       solver,
                              HYPRE_ParCSRMatrix A,
                              HYPRE_ParVector    b,
@@ -4338,6 +4344,83 @@ HYPRE_Int HYPRE_SchwarzSetDofFunc(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_SchwarzSetNonSymm(HYPRE_Solver solver,
                                   HYPRE_Int    use_nonsymm);
+
+/**
+ * Set the local solver type for new overlapping Schwarz variants (10+).
+ * If the solver is still on the default Schwarz variant 0, this call selects
+ * the corresponding RAS overlapping Schwarz variant.
+ *
+ * @param solver [IN] Schwarz solver
+ * @param local_solver_type [IN]
+ *   - 0 = ILU(k) (default)
+ *   - 1 = ILUT
+ *   - 2 = AMG
+ *   - 3 = SuperLU_dist
+ **/
+HYPRE_Int HYPRE_SchwarzSetLocalSolverType(HYPRE_Solver solver,
+                                          HYPRE_Int    local_solver_type);
+
+/**
+ * Set the level of fill for ILU(k) local solver. Default is 0.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetILUKLevelOfFill(HYPRE_Solver solver,
+                                          HYPRE_Int    level_of_fill);
+
+/**
+ * Set the max nonzeros per row for ILUT local solver. Default is 1000.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetILUTMaxNnzPerRow(HYPRE_Solver solver,
+                                           HYPRE_Int    max_nnz_row);
+
+/**
+ * Set the drop tolerance for ILUT local solver. Default is 1e-2.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetILUTDroptol(HYPRE_Solver solver,
+                                      HYPRE_Real   droptol);
+
+/**
+ * Set maximum number of iterations. Default is 1.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetMaxIter(HYPRE_Solver solver,
+                                  HYPRE_Int    max_iter);
+
+/**
+ * Set convergence tolerance. Default is 0.0 (no convergence checking).
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetTol(HYPRE_Solver solver,
+                              HYPRE_Real   tol);
+
+/**
+ * Set print level. 0=none (default), 1=summary, 2=per-iteration.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetPrintLevel(HYPRE_Solver solver,
+                                     HYPRE_Int    print_level);
+
+/**
+ * Set logging level. 0=none (default), 1=store residual norms.
+ * (Overlapping Schwarz variants 10+ only)
+ **/
+HYPRE_Int HYPRE_SchwarzSetLogging(HYPRE_Solver solver,
+                                  HYPRE_Int    logging);
+
+/**
+ * Get the number of iterations performed.
+ **/
+HYPRE_Int HYPRE_SchwarzGetNumIterations(HYPRE_Solver solver,
+                                        HYPRE_Int   *num_iterations);
+
+/**
+ * Get the final residual norm.
+ **/
+HYPRE_Int HYPRE_SchwarzGetFinalResidualNorm(HYPRE_Solver solver,
+                                            HYPRE_Real  *norm);
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
