@@ -85,6 +85,15 @@ HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid, HYPRE_Int part, H
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid, HYPRE_Int *num_ghost );
 HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry, hypre_Index index,
                                                   HYPRE_BigInt *rank_ptr, HYPRE_Int type );
+
+/* WM: todo - new protos */
+HYPRE_Int hypre_SStructGridIndicesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int **num_indices,
+                                                 hypre_Index ***indices, HYPRE_BigInt **global_ranks_ptr);
+HYPRE_Int hypre_SStructGridGlobalRanksToIndices( hypre_SStructGrid *grid, HYPRE_BigInt *global_ranks,
+                                                 hypre_Index ****indices_ptr, HYPRE_Int ***num_indices_ptr);
+
+
+
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry, hypre_Index strides,
                                                HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum,

@@ -1011,6 +1011,27 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Complex       *values);
 
 /**
+ * Set an arbitrary array of matrix values in a given part/var at once.
+ * The \e indices array has length \e nrows and lists the indices of the
+ * rows where values will be set. The \e nentries array also has lenght
+ * \e nrows and lists the number of entries that will be set in each row
+ * (note that this enables setting different numbers of entries in each row).
+ * The \e entries array has length equal to the number of nonzeros being set
+ * (i.e. the sum of the \e nentries array) and lists the entries to be
+ * set in each row. Finally, the \e values array has length equal to the
+ * number of nonzero entries being set, and holds the matrix values.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetRowValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int            var,
+                                HYPRE_Int            nrows,
+                                HYPRE_Int          **indices,
+                                HYPRE_Int           *nentries,
+                                HYPRE_Int           *entries,
+                                HYPRE_Complex       *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 HYPRE_Int

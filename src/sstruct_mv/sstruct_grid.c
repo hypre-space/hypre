@@ -2139,6 +2139,37 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
 }
 
 /*--------------------------------------------------------------------------
+ * Convert from sstruct grid indices to global ranks for parcsr.
+ * Inputs:
+ *    num_indices[part][var] = (number of indices in each part, var)
+ *    indices[part][var][dim][i] = (indices to be converted)
+ * Output:
+ *    global_ranks_ptr = (pointer to array of global ranks)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructGridIndicesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int **num_indices,
+                                                 hypre_Index ****indices, HYPRE_BigInt **global_ranks_ptr)
+{
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert from sstruct grid indices to global ranks for parcsr.
+ * Inputs:
+ *    global_ranks[i] = (array of global ranks to be converted)
+ * Output:
+ *    num_indices_ptr = (pointer to num_indices[part][var],
+ *                       the resulting number of indices in each part, var)
+ *    indices_ptr = (pointer to indices[part][var][dim][i], the resulting indices)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructGridGlobalRanksToIndices( hypre_SStructGrid *grid, HYPRE_BigInt *global_ranks,
+                                                 hypre_Index *****indices_ptr, HYPRE_Int ***num_indices_ptr);
+{
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * GEC1002 a function that will select the right way to calculate the strides
  * depending on the matrix type. It is an extension to the usual strides
  *--------------------------------------------------------------------------*/
