@@ -1450,6 +1450,7 @@ hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
    /* Get parcsr_sB (convert appropriate rows of structured component) */
    /* WM: todo - converting whole matrix for now to be safe */
    ijmatrix = hypre_SStructMatrixToUMatrix(matrices[terms[1]], 0);
+   /* ijmatrix = hypre_SStructMatmatRightMatrixToUMatrix(matrices[0], matrices[1]); */
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sB);
 
 #if defined(DEBUG_MATMULT)
