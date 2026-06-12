@@ -2732,64 +2732,54 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 hypre_IJMatrix*
-hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix  A, HYPRE_SStructMatrix B )
+hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B )
 {
    HYPRE_Int                ndim            = hypre_SStructMatrixNDim(B);
    HYPRE_Int                nparts          = hypre_SStructMatrixNParts(B);
    HYPRE_IJMatrix           ij_A            = hypre_SStructMatrixIJMatrix(A);
    HYPRE_IJMatrix           ij_B            = hypre_SStructMatrixIJMatrix(B);
-   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(ij_B);
    hypre_SStructGraph      *graph           = hypre_SStructMatrixGraph(B);
    hypre_SStructGrid       *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                type            = hypre_SStructMatrixObjectType(B);
    hypre_SStructPGrid      *pgrid;
-   hypre_StructGrid        *sgrid;
-   HYPRE_Int                i, j, part, var, nvars;
+   HYPRE_Int                d, i, part, var, nvars, npartvars;
    HYPRE_Int                num_col_ind, num_send_map_elmts, num_global_ranks;
    HYPRE_Int               *col_ind;
    HYPRE_Int               *send_map_elmts;
+   HYPRE_BigInt             offset;
    HYPRE_BigInt            *global_ranks;
+   HYPRE_Int               *global_rank_part_var_ptr;
    HYPRE_Real               threshold = 0.8;
 
-   HYPRE_Int            ****convert_indices; // convert_indices[part][var][ndim][i]
-   HYPRE_Int              **num_indices;
+   hypre_BoxManager        *manager;
+   hypre_BoxManEntry       *entry;
+   hypre_SStructBoxManInfo *entry_info;
+
+   HYPRE_Int              **convert_indexes;
+   HYPRE_Int                num_ranks;
    hypre_BoxArray        ***convert_boxa;
 
    hypre_ParCSRMatrix      *parcsr_uA;
-   hypre_ParCSRCommPkg     *comm_pkg      = hypre_ParCSRMatrixCommPkg(parcsr_uA);
+   hypre_ParCSRMatrix      *parcsr_uB;
+   hypre_ParCSRCommPkg     *comm_pkg;
    hypre_IJMatrix          *ij_Bhat = NULL;
 #if defined(HYPRE_USING_GPU)
    /* WM: todo - think about how to do all this on the GPU... */
+   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(ij_B);
    HYPRE_ExecutionPolicy    exec  = hypre_GetExecPolicy1(memory_location);
 #endif
 
    HYPRE_IJMatrixGetObject(ij_A, (void **) &parcsr_uA);
+   HYPRE_IJMatrixGetObject(ij_B, (void **) &parcsr_uB);
+   comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_uA);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("SStructMatmatRightMatrixToUMatrix");
 
-   /* Initialize convert_boxa and convert_indices */
-   convert_indices = hypre_TAlloc(HYPRE_Int***, nparts, HYPRE_MEMORY_HOST);
-   num_indices = hypre_TAlloc(HYPRE_Int*, nparts, HYPRE_MEMORY_HOST);
-   convert_boxa = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
-   for (part = 0; part < nparts; part++)
-   {
-      pgrid = hypre_SStructGridPGrid(grid, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      convert_indices[part] = hypre_TAlloc(HYPRE_Int**, nvars, HYPRE_MEMORY_HOST);
-      num_indices = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
-      convert_boxa[part] = hypre_TAlloc(hypre_BoxArray *, nvars, HYPRE_MEMORY_HOST);
-      for (var = 0; var < nvars; var++)
-      {
-         sgrid      = hypre_SStructPGridSGrid(pgrid, var);
-         convert_indices[part][var] = hypre_CTAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
-         convert_boxa[part][var] = hypre_BoxArrayCreate(0, ndim);
-      }
-   }
-
-   /* Local rows that need to be converted: map column indices of uA diag to grid dofs */
+   /* Local rows that need to be converted: map column indexes of uA diag to grid dofs */
    /* Rows needed by other processors: map send_map_elmts of uA to grid dofs */
 
-   /* Sort and unique the column indices */
+   /* Sort and unique the column indexes */
    num_col_ind = hypre_ParCSRMatrixNumNonzeros(parcsr_uA);
    col_ind = hypre_TAlloc(HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(col_ind, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(parcsr_uA)),
@@ -2800,8 +2790,8 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix  A, HYPRE_SStructMa
    /* Sort and unique the send map elements */
    if (!comm_pkg)
    {
-      hypre_MatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      hypre_MatvecCommPkgCreate(parcsr_uA);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_uA);
    }
    num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
    send_map_elmts = hypre_TAlloc(HYPRE_Int, num_send_map_elmts, HYPRE_MEMORY_HOST);
@@ -2819,31 +2809,83 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix  A, HYPRE_SStructMa
    for (i = 0; i < num_send_map_elmts; i++)
    {
       global_ranks[num_col_ind + i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) + (HYPRE_BigInt) send_map_elmts[i];
+   }
 
+   /* Sort the global ranks */
    /* WM: todo - should I unique the global ranks also? Probably doesn't much matter? */
+   /* WM: todo - should I create a routine that does the sort and generates the global_rank_part_var_ptr? */
+   /*            I think I'll need this in other places as well. */
+   hypre_BigQsort0(global_ranks, 0, num_global_ranks - 1);
 
-   /* Map global_ranks to grid dofs to get convert_indices */
-   /* hypre_SStructGridGlobalRanksToIndices(grid, global_ranks, &convert_indices, &num_indices); */
-
-   /* Generate convert_boxa from convert_indices */
+   /* Get pointers to the start of each part/var block in the global ranks */
+   /* WM: NOTE - the implementation below assumes all the global ranks are owned by this processor */
+   npartvars = 0;
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
       for (var = 0; var < nvars; var++)
       {
-         if (num_indices[part][var])
+         npartvars++;
+      }
+   }
+   global_rank_part_var_ptr = hypre_TAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
+   npartvars = 0;
+   i = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         manager = hypre_SStructGridBoxManager(grid, part, var);
+         /* WM: todo - is the below right for getting the correct boxman entry? */
+         entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);
+         hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+         if (type == HYPRE_PARCSR)
          {
-            /* WM: note - inidces passed to hypre_BoxArrayCreateFromIndices() are indices[dim][i] */
-            hypre_BoxArrayCreateFromIndices(ndim, num_indices[part][var], convert_indices[part][var],
-                                            threshold, &indices_boxa);
-            hypre_ForBoxI(i, indices_boxa)
-            {
-               hypre_AppendBox(hypre_BoxArrayBox(indices_boxa, i), convert_boxa[part][var]);
-            }
-            hypre_BoxArrayDestroy(indices_boxa);
-            indices_boxa = NULL;
+            offset = hypre_SStructBoxManInfoOffset(entry_info);
          }
+         else if (type == HYPRE_SSTRUCT)
+         {
+            offset = hypre_SStructBoxManInfoGhoffset(entry_info);
+         }
+         while (global_ranks[i] < offset)
+         {
+            i++;
+         }
+         global_rank_part_var_ptr[npartvars] = i;
+      }
+   }
+   global_rank_part_var_ptr[npartvars] = hypre_ParCSRMatrixLastRowIndex(parcsr_uB);
+
+   /* Generate convert_boxa from global ranks */
+   convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
+   npartvars = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
+      for (var = 0; var < nvars; var++)
+      {
+         num_ranks = global_rank_part_var_ptr[npartvars + 1] - global_rank_part_var_ptr[npartvars];
+         if (num_ranks)
+         {
+            /* Map global_ranks to grid dofs to get convert_indexes */
+            hypre_SStructGridGlobalRanksToIndexes(grid, part, var, num_ranks,
+                                                  &(global_ranks[global_rank_part_var_ptr[npartvars]]),
+                                                  &convert_indexes, type);
+            /* WM: note - inidces passed to hypre_BoxArrayCreateFromIndices() are indexes[dim][i] */
+            /* WM: todo - change hypre_BoxArrayCreateFromIndices() to hypre_BoxArrayCreateFromIndexes() */
+            hypre_BoxArrayCreateFromIndices(ndim, num_ranks, convert_indexes,
+                                            threshold, &(convert_boxa[part][var]));
+            for (d = 0; d < ndim; d++)
+            {
+               hypre_TFree(convert_indexes[d], HYPRE_MEMORY_HOST);
+            }
+         }
+         npartvars++;
       }
    }
 
@@ -2858,11 +2900,6 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix  A, HYPRE_SStructMa
       for (var = 0; var < nvars; var++)
       {
          hypre_BoxArrayDestroy(convert_boxa[part][var]);
-
-         for (j = 0; j < ndim; j++)
-         {
-            hypre_TFree(convert_indices[j], memory_location);
-         }
       }
       hypre_TFree(convert_boxa[part], HYPRE_MEMORY_HOST);
    }
