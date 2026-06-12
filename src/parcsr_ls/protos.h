@@ -1191,6 +1191,16 @@ HYPRE_Int hypre_SchwarzSetDomainStructure ( void *data, hypre_CSRMatrix *domain_
 HYPRE_Int hypre_SchwarzSetScale ( void *data, HYPRE_Real *scale );
 HYPRE_Int hypre_SchwarzReScale ( void *data, HYPRE_Int size, HYPRE_Real value );
 HYPRE_Int hypre_SchwarzSetDofFunc ( void *data, HYPRE_Int *dof_func );
+HYPRE_Int hypre_SchwarzSetLocalSolverType ( void *data, HYPRE_Int local_solver_type );
+HYPRE_Int hypre_SchwarzSetILUKLevelOfFill ( void *data, HYPRE_Int level_of_fill );
+HYPRE_Int hypre_SchwarzSetILUTMaxNnzPerRow ( void *data, HYPRE_Int max_nnz_row );
+HYPRE_Int hypre_SchwarzSetILUTDroptol ( void *data, HYPRE_Real droptol );
+HYPRE_Int hypre_SchwarzSetMaxIter ( void *data, HYPRE_Int max_iter );
+HYPRE_Int hypre_SchwarzSetTol ( void *data, HYPRE_Real tol );
+HYPRE_Int hypre_SchwarzSetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_SchwarzSetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_SchwarzGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SchwarzGetFinalResidualNorm ( void *data, HYPRE_Real *norm );
 
 /* par_stats.c */
 HYPRE_Int hypre_BoomerAMGSetupStats ( void *amg_vdata, hypre_ParCSRMatrix *A );
@@ -1529,6 +1539,8 @@ HYPRE_Int hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method );
+HYPRE_Int hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method );
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );

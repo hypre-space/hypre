@@ -97,7 +97,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParVector     **U_fine_array = (mgr_data -> U_fine_array);
 
    HYPRE_Int (*fgrid_solver_setup)(void*, void*, void*, void*);
-   HYPRE_Int (*fgrid_solver_solve)(void*, void*, void*, void*);
 
    hypre_ParVector    **F_array = (mgr_data -> F_array);
    hypre_ParVector    **U_array = (mgr_data -> U_array);
@@ -647,16 +646,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    else
    {
       fgrid_solver_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
-      (mgr_data -> fine_grid_solver_setup) = fgrid_solver_setup;
-   }
-   if ((mgr_data -> fine_grid_solver_solve) != NULL)
-   {
-      fgrid_solver_solve = (mgr_data -> fine_grid_solver_solve);
-   }
-   else
-   {
-      fgrid_solver_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
-      (mgr_data -> fine_grid_solver_solve) = fgrid_solver_solve;
    }
 
    /* Set up solution and rhs arrays for Frelax */
@@ -781,10 +770,9 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_Solver *smoother_base = (hypre_Solver*) level_smoother[lev];
 
-            /* Generic reuse: skip setup when the solver reports it is already
-             * built (is_setup == 1). This flag is set inside the solver's own
-             * Setup function and reset when the solver is destroyed or rebuilt. */
-            if (!hypre_SolverSetupIsDone(smoother_base))
+            /* User-owned child solvers are refreshed by default. Applications
+             * that explicitly reuse a child setup mark it with setup-reuse. */
+            if (!hypre_SolverSetupReuseRequested(smoother_base))
             {
                hypre_SolverSetup(smoother_base)((HYPRE_Solver) level_smoother[lev],
                                                 (HYPRE_Matrix) A_array[lev],
@@ -1077,7 +1065,9 @@ hypre_MGRSetup( void               *mgr_vdata,
           * instead of the hypre_Solver base. */
          if (aff_solver[lev] && aff_solver_owner[lev] == HYPRE_MGR_SOLVER_OWNER_USER)
          {
-            HYPRE_Int legacy_fsolver = (lev == 0 && (mgr_data -> fine_grid_solver_solve));
+            HYPRE_Int legacy_fsolver = (lev == 0 &&
+                                        (mgr_data -> fine_grid_solver_solve) &&
+                                        (mgr_data -> fine_grid_solver_setup));
 
             if (legacy_fsolver && Frelax_type[lev] != 2 && Frelax_type[lev] != 32)
             {
@@ -1096,22 +1086,25 @@ hypre_MGRSetup( void               *mgr_vdata,
 
                aff_base = (hypre_Solver*) aff_solver[lev];
 
-               if (!hypre_SolverSetupIsDone(aff_base))
+               if (hypre_SolverSetupReuseRequested(aff_base))
                {
-                  if (legacy_fsolver)
-                  {
-                     fgrid_solver_setup(aff_solver[lev],
-                                        A_ff_array[lev],
-                                        F_fine_array[lev + 1],
-                                        U_fine_array[lev + 1]);
-                  }
-                  else
-                  {
-                     hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
-                                                 (HYPRE_Matrix) A_ff_array[lev],
-                                                 (HYPRE_Vector) F_fine_array[lev + 1],
-                                                 (HYPRE_Vector) U_fine_array[lev + 1]);
-                  }
+                  /* Reuse explicitly requested by the application. Keep the
+                   * existing child solver setup and only update A_FF above so
+                   * the solve path has the current F-block matrix pointer. */
+               }
+               else if (legacy_fsolver)
+               {
+                  fgrid_solver_setup(aff_solver[lev],
+                                     A_ff_array[lev],
+                                     F_fine_array[lev + 1],
+                                     U_fine_array[lev + 1]);
+               }
+               else
+               {
+                  hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                              (HYPRE_Matrix) A_ff_array[lev],
+                                              (HYPRE_Vector) F_fine_array[lev + 1],
+                                              (HYPRE_Vector) U_fine_array[lev + 1]);
                }
             }
          }
@@ -1438,7 +1431,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    {
       if (use_default_cgrid_solver ||
-          !hypre_SolverSetupIsDone((hypre_Solver *)(mgr_data -> coarse_grid_solver)))
+          !hypre_SolverSetupReuseRequested((hypre_Solver *)(mgr_data -> coarse_grid_solver)))
       {
          cgrid_solver_setup((mgr_data -> coarse_grid_solver),
                             A_array[num_c_levels],

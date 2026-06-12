@@ -769,7 +769,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
          intersected box into the Box Manager */
 
       hypre_SStructNeighbor    *vneighbor;
-      HYPRE_Int                 b, i;
+      HYPRE_Int                 b_local, i;
       hypre_Box                *vbox;
       HYPRE_Int               **nvneighbors = hypre_SStructGridNVNeighbors(grid);
       hypre_SStructNeighbor  ***vneighbors  = hypre_SStructGridVNeighbors(grid);
@@ -811,9 +811,9 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
                hypre_BoxGrowByIndex(grow_box, max_distance);
 
                /* loop through neighbors */
-               for (b = 0; b < nvneighbors[part][var]; b++)
+               for (b_local = 0; b_local < nvneighbors[part][var]; b_local++)
                {
-                  vneighbor = &vneighbors[part][var][b];
+                  vneighbor = &vneighbors[part][var][b_local];
                   vbox = hypre_SStructNeighborBox(vneighbor);
 
                   /* grow neighbor box by 1 to account for shared parts */
@@ -947,9 +947,9 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
             hypre_CopyToCleanIndex( hypre_BoxIMin(bounding_box), ndim, min_index);
             hypre_CopyToCleanIndex( hypre_BoxIMax(bounding_box), ndim, max_index);
 
-            for (b = 0; b < nvneighbors[part][var]; b++)
+            for (b_local = 0; b_local < nvneighbors[part][var]; b_local++)
             {
-               vneighbor = &vneighbors[part][var][b];
+               vneighbor = &vneighbors[part][var][b_local];
                vbox = hypre_SStructNeighborBox(vneighbor);
                /* find min and max box extents */
                for (d = 0; d < ndim; d++)
@@ -2136,6 +2136,161 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
    {
       hypre_SStructBoxManEntryGetGlobalGhrank(entry, index, rank_ptr);
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert from sstruct grid indexes to global ranks for parcsr.
+ * Inputs:
+ *    grid/part/var where the indexes live
+ *    num_indexes = (number of indexes to be converted)
+ *    indexes[dim][i] = (indexes to be converted)
+ *    type = HYPRE_SSTRUCT or HYPRE_PARCSR, determines whether to
+ *           account for ghosts in the mapping
+ *           WM: todo - want to move towards ghosts NEVER being
+ *                      involved in [part,var,index] <=> global rank
+ * Output:
+ *    global_ranks_ptr = (pointer to array of global ranks)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_indexes, HYPRE_Int **indexes,
+                                                 HYPRE_BigInt **global_ranks_ptr, HYPRE_Int type)
+{
+   HYPRE_Int            ndim = hypre_SStructGridNDim(grid);
+   HYPRE_Int            i, d;
+   hypre_Index          index;
+   hypre_BoxManEntry   *boxman_entry;
+
+   /* WM: todo - GPU port */
+   HYPRE_BigInt *global_ranks = hypre_TAlloc(HYPRE_BigInt, num_indexes, HYPRE_MEMORY_HOST);
+
+   /* Loop over indexes */
+   for (i = 0; i < num_indexes; i++)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         hypre_IndexD(index, d) = indexes[d][i];
+      }
+      /* WM: todo - is calling hypre_SStructGridFindBoxManEntry() for each index efficient enough? */
+      hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
+      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &(global_ranks[i]), type);
+   }
+
+   *global_ranks_ptr = global_ranks;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Convert from sstruct grid indexes to global ranks for parcsr.
+ * Note that global indexes are assumed to belong to the given par/var.
+ * Inputs:
+ *    grid/part/var where the indexes live
+ *    num_ranks = (number of global ranks to be converted)
+ *    global_ranks[i] = (array of global ranks to be converted)
+ *    type = HYPRE_SSTRUCT or HYPRE_PARCSR, determines whether to
+ *           account for ghosts in the mapping
+ *           WM: todo - want to move towards ghosts NEVER being
+ *                      involved in [part,var,index] <=> global rank
+ * Output:
+ *    indexes_ptr = (pointer to indexes[dim][i], the resulting indexes)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
+                                                 HYPRE_Int ***indexes_ptr, HYPRE_Int type)
+{
+   hypre_BoxManEntry         *entry;
+   hypre_SStructBoxManInfo   *entry_info;
+   hypre_Index                index;
+   HYPRE_BigInt              *start_offsets;
+   HYPRE_BigInt              *end_offsets;
+   HYPRE_Int                  i, d, local_rank;
+   HYPRE_Int                  entry_num = 0;
+   HYPRE_Int                **indexes;
+
+   /* WM: todo - do I need to consider the hypre_SStructGridNborBoxManagers? */
+   HYPRE_Int                  ndim      = hypre_SStructGridNDim(grid);
+   hypre_BoxManager          *manager   = hypre_SStructGridBoxManager(grid, part, var);
+   HYPRE_Int                  nentries  = hypre_BoxManNEntries(manager);
+   hypre_Box                 *box       = hypre_BoxCreate(ndim);
+   hypre_BoxArray            *box_a     = hypre_BoxArrayCreate(nentries, ndim);
+
+   /* WM: todo - GPU port */
+   indexes = hypre_TAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
+   for (d = 0; d < ndim; d++)
+   {
+      indexes[d] = hypre_TAlloc(HYPRE_Int, num_ranks, HYPRE_MEMORY_HOST);
+   }
+
+   /* Sort global ranks */
+   /* WM: todo - or should I assume sorted? */
+
+   /* Get start_offsets, end_offsets, and box array for boxes in the box manager */
+   start_offsets = hypre_TAlloc(HYPRE_BigInt, nentries, HYPRE_MEMORY_HOST);
+   end_offsets = hypre_TAlloc(HYPRE_BigInt, nentries, HYPRE_MEMORY_HOST);
+   for (i = 0; i < nentries; i++)
+   {
+      entry = &(hypre_BoxManEntries(manager)[i]);
+      hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+      /* WM: todo - Is the type stuff below correct? */
+      if (type == HYPRE_PARCSR)
+      {
+         start_offsets[i] = hypre_SStructBoxManInfoOffset(entry_info);
+         hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry), hypre_BoxManEntryIMax(entry));
+         hypre_AppendBox(box, box_a);
+         end_offsets[i] = start_offsets[i] + hypre_BoxVolume(box);
+      }
+      else if (type == HYPRE_SSTRUCT)
+      {
+         start_offsets[i] = hypre_SStructBoxManInfoGhoffset(entry_info);
+         hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry), hypre_BoxManEntryIMax(entry));
+         /* WM: todo - is this grow correct? */
+         hypre_BoxGrowByArray(box, hypre_BoxManEntryNumGhost(entry));
+         hypre_AppendBox(box, box_a);
+         end_offsets[i] = start_offsets[i] + hypre_BoxVolume(box);
+      }
+   }
+   hypre_BoxDestroy(box);
+
+   /* Loop over subsets of global_ranks for each box */
+   for (i = 0; i < num_ranks; i++)
+   {
+      /* Find appropriate offsets and box */
+      while (global_ranks[i] >= end_offsets[entry_num])
+      {
+         entry_num++;
+      }
+      /* Ensure global_rank[i] is in the current box */
+      if (global_ranks[i] < start_offsets[entry_num])
+      {
+         /* WM: todo - what kind of behavior do we want here? */
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Global rank is not contained within the box manager entries.\n");
+         continue;
+      }
+      box = hypre_BoxArrayBox(box_a, entry_num);
+
+      /* Subtract offset for part/var/box, then can do local rank to box index mapping */
+      local_rank = (HYPRE_Int) (global_ranks[i] - start_offsets[entry_num]);
+      hypre_BoxRankIndex(box, local_rank, index);
+
+      /* Set indexes output array */
+      for (d = 0; d < ndim; d++)
+      {
+         indexes[d][i] = hypre_IndexD(index, d);
+      }
+   }
+
+   /* Un-sort to recover original ordering of the global_indexes */
+   /* WM: todo */
+
+   *indexes_ptr = indexes;
+
+   /* Clean up memory */
+   hypre_BoxArrayDestroy(box_a);
 
    return hypre_error_flag;
 }

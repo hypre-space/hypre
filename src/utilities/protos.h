@@ -59,6 +59,9 @@ HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_p
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
 HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
+HYPRE_Int hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats,
+                                   hypre_MatrixStats *global_stats,
+                                   MPI_Comm comm );
 hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
 HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
 HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,
