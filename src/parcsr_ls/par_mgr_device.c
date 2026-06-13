@@ -850,6 +850,7 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
                                                         (std::int64_t) work_size ).wait() );
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+   HYPRE_ANNOTATE_FUNC_END;
    return hypre_error_flag;
 #endif
 
