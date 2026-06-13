@@ -818,22 +818,22 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
 #elif defined(HYPRE_USING_ONEMKLBLAS)
    HYPRE_ONEMKL_CALL( work_sizes[0] =
                          oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
-                                                                                            hypre_handle()),
-                                                                                         blk_size,
-                                                                                         blk_size,
-                                                                                         blk_size,
-                                                                                         bs2,
-                                                                                         blk_size,
-                                                                                         num_blocks ) );
+                                                                                             hypre_handle()),
+                                                                                          blk_size,
+                                                                                          blk_size,
+                                                                                          blk_size,
+                                                                                          bs2,
+                                                                                          blk_size,
+                                                                                          num_blocks ) );
 
    HYPRE_ONEMKL_CALL( work_sizes[1] =
                          oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
-                                                                                            hypre_handle()),
-                                                                                         (std::int64_t) blk_size,
-                                                                                         (std::int64_t) blk_size,
-                                                                                         (std::int64_t) bs2,
-                                                                                         (std::int64_t) blk_size,
-                                                                                         (std::int64_t) num_blocks ) );
+                                                                                             hypre_handle()),
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) bs2,
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) num_blocks ) );
    work_size  = hypre_max(work_sizes[0], work_sizes[1]);
    scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
 
