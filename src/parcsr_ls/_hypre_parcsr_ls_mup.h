@@ -1413,13 +1413,6 @@ HYPRE_Int
 hypre_Bisection_long_dbl( HYPRE_Int n, hypre_long_double *diag, hypre_long_double *offd, hypre_long_double y, hypre_long_double z, hypre_long_double tol, HYPRE_Int k, hypre_long_double *ev_ptr );
 
 HYPRE_Int
-hypre_BlockDiagInvDevice_flt( hypre_float *diag, HYPRE_Int N, HYPRE_Int blk_size );
-HYPRE_Int
-hypre_BlockDiagInvDevice_dbl( hypre_double *diag, HYPRE_Int N, HYPRE_Int blk_size );
-HYPRE_Int
-hypre_BlockDiagInvDevice_long_dbl( hypre_long_double *diag, HYPRE_Int N, HYPRE_Int blk_size );
-
-HYPRE_Int
 hypre_BlockDiagInvLapack_flt( hypre_float *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int
 hypre_BlockDiagInvLapack_dbl( hypre_double *diag, HYPRE_Int N, HYPRE_Int blk_size );

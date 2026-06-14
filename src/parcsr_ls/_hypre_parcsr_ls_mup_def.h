@@ -930,7 +930,6 @@
 #define hypre_AmgCGCGraphAssemble HYPRE_FIXEDPRECISION_FUNC ( hypre_AmgCGCGraphAssemble )
 #define hypre_AmgCGCPrepare HYPRE_FIXEDPRECISION_FUNC ( hypre_AmgCGCPrepare )
 #define hypre_Bisection HYPRE_FIXEDPRECISION_FUNC ( hypre_Bisection )
-#define hypre_BlockDiagInvDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BlockDiagInvDevice )
 #define hypre_BlockDiagInvLapack HYPRE_FIXEDPRECISION_FUNC ( hypre_BlockDiagInvLapack )
 #define hypre_BlockTridiagCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_BlockTridiagCreate )
 #define hypre_BlockTridiagDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_BlockTridiagDestroy )

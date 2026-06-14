@@ -927,7 +927,6 @@
 #undef hypre_AmgCGCGraphAssemble
 #undef hypre_AmgCGCPrepare
 #undef hypre_Bisection
-#undef hypre_BlockDiagInvDevice
 #undef hypre_BlockDiagInvLapack
 #undef hypre_BlockTridiagCreate
 #undef hypre_BlockTridiagDestroy
