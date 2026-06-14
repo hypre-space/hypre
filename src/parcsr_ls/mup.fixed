@@ -207,6 +207,7 @@ hypre_AmgCGCChoose
 hypre_AmgCGCGraphAssemble
 hypre_AmgCGCPrepare
 hypre_Bisection
+hypre_BlockDiagInvDevice
 hypre_BlockDiagInvLapack
 hypre_BlockTridiagCreate
 hypre_BlockTridiagDestroy

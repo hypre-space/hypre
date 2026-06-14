@@ -1673,6 +1673,14 @@ hypre_Bisection( HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd, HYPRE_Real y, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BlockDiagInvDevice( HYPRE_Complex *diag, HYPRE_Int N, HYPRE_Int blk_size )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BlockDiagInvDevice)( diag, N, blk_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BlockDiagInvLapack( HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BlockDiagInvLapack)( diag, N, blk_size );
