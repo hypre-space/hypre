@@ -2295,6 +2295,86 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid,
+                                           HYPRE_BigInt      *global_ranks,
+                                           HYPRE_Int        **global_ranks_part_var_ptr_ptr,
+                                           HYPRE_Int          type,
+                                           HYPRE_Int          last )
+{
+   /* WM: todo - GPU port */
+   HYPRE_Int                  i, part, var, nvars, npartvars;
+   HYPRE_BigInt               offset;
+   hypre_SStructPGrid        *pgrid;
+   hypre_BoxManEntry         *entry;
+   hypre_SStructBoxManInfo   *entry_info;
+   hypre_BoxManager          *manager;
+   HYPRE_Int                 *global_ranks_part_var_ptr;
+
+   HYPRE_Int                  nparts = hypre_SStructGridNParts(grid);
+   
+   /* Sort the global ranks */
+   /* WM: todo - actually, I think I'll assume the sorting happens outside... */
+   /*            I think that for most use cases, the global ranks should be sorted already */
+   /* hypre_BigQsort0(global_ranks, 0, num_global_ranks - 1); */
+
+   /* Get pointers to the start of each part/var block in the global ranks */
+   /* WM: NOTE - the implementation below assumes all the global ranks are owned by this processor */
+   npartvars = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         npartvars++;
+      }
+   }
+   global_ranks_part_var_ptr = hypre_TAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
+   npartvars = 0;
+   i = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         manager = hypre_SStructGridBoxManager(grid, part, var);
+         /* WM: todo - is the below right for getting the correct boxman entry? */
+         entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);
+         hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+         if (type == HYPRE_PARCSR)
+         {
+            offset = hypre_SStructBoxManInfoOffset(entry_info);
+         }
+         else if (type == HYPRE_SSTRUCT)
+         {
+            offset = hypre_SStructBoxManInfoGhoffset(entry_info);
+         }
+         while (global_ranks[i] < offset)
+         {
+            i++;
+         }
+         global_ranks_part_var_ptr[npartvars] = i;
+      }
+   }
+   /* WM: todo - I don't want to have to pass a matrix or vector here... how do I get the last entry? 
+    *            Might be nice to store the first/last global rank belonging to this processor in the hypre_SStructGrid?
+    *            For now, I guess I'll just pass this last value... */
+   /* global_ranks_part_var_ptr[npartvars] = hypre_ParCSRMatrixLastRowIndex(parcsr_uB); */
+   global_ranks_part_var_ptr[npartvars] = last;
+
+   *global_ranks_part_var_ptr_ptr = global_ranks_part_var_ptr;
+
+   return hypre_error_flag;
+}
+
+
+
+
+
+
+
 /*--------------------------------------------------------------------------
  * GEC1002 a function that will select the right way to calculate the strides
  * depending on the matrix type. It is an extension to the usual strides
