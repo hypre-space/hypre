@@ -966,10 +966,12 @@ HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry, hypr
                                                   HYPRE_BigInt *rank_ptr, HYPRE_Int type );
 HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
                                                  HYPRE_Int num_indexes, HYPRE_Int **indexes,
-                                                 HYPRE_BigInt **global_ranks_ptr, HYPRE_Int type);
+                                                 HYPRE_BigInt **global_ranks_ptr, HYPRE_Int type );
 HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
                                                  HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
-                                                 HYPRE_Int ***indexes_ptr, HYPRE_Int type);
+                                                 HYPRE_Int ***indexes_ptr, HYPRE_Int type );
+HYPRE_Int hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid, HYPRE_BigInt *global_ranks,
+                                           HYPRE_Int **global_ranks_part_var_ptr_ptr, HYPRE_Int type, HYPRE_Int last );
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry, hypre_Index strides,
                                                HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum,
