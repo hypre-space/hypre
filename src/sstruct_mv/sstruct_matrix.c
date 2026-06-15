@@ -2746,14 +2746,9 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
    HYPRE_Int                num_col_ind, num_send_map_elmts, num_global_ranks;
    HYPRE_Int               *col_ind;
    HYPRE_Int               *send_map_elmts;
-   HYPRE_BigInt             offset;
    HYPRE_BigInt            *global_ranks;
-   HYPRE_Int               *global_rank_part_var_ptr;
+   HYPRE_Int               *global_ranks_part_var_ptr;
    HYPRE_Real               threshold = 0.8;
-
-   hypre_BoxManager        *manager;
-   hypre_BoxManEntry       *entry;
-   hypre_SStructBoxManInfo *entry_info;
 
    HYPRE_Int              **convert_indexes;
    HYPRE_Int                num_ranks;
@@ -2811,53 +2806,11 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
       global_ranks[num_col_ind + i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) + (HYPRE_BigInt) send_map_elmts[i];
    }
 
-   /* Sort the global ranks */
    /* WM: todo - should I unique the global ranks also? Probably doesn't much matter? */
-   /* WM: todo - should I create a routine that does the sort and generates the global_rank_part_var_ptr? */
-   /*            I think I'll need this in other places as well. */
-   hypre_BigQsort0(global_ranks, 0, num_global_ranks - 1);
 
    /* Get pointers to the start of each part/var block in the global ranks */
-   /* WM: NOTE - the implementation below assumes all the global ranks are owned by this processor */
-   npartvars = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      pgrid = hypre_SStructGridPGrid(grid, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      for (var = 0; var < nvars; var++)
-      {
-         npartvars++;
-      }
-   }
-   global_rank_part_var_ptr = hypre_TAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
-   npartvars = 0;
-   i = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      pgrid = hypre_SStructGridPGrid(grid, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      for (var = 0; var < nvars; var++)
-      {
-         manager = hypre_SStructGridBoxManager(grid, part, var);
-         /* WM: todo - is the below right for getting the correct boxman entry? */
-         entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);
-         hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
-         if (type == HYPRE_PARCSR)
-         {
-            offset = hypre_SStructBoxManInfoOffset(entry_info);
-         }
-         else if (type == HYPRE_SSTRUCT)
-         {
-            offset = hypre_SStructBoxManInfoGhoffset(entry_info);
-         }
-         while (global_ranks[i] < offset)
-         {
-            i++;
-         }
-         global_rank_part_var_ptr[npartvars] = i;
-      }
-   }
-   global_rank_part_var_ptr[npartvars] = hypre_ParCSRMatrixLastRowIndex(parcsr_uB);
+   hypre_SStructGridGetGlobalRanksPartVarPtr(grid, global_ranks, &global_ranks_part_var_ptr,
+                                             type, hypre_ParCSRMatrixLastRowIndex(parcsr_uB));
 
    /* Generate convert_boxa from global ranks */
    convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
@@ -2869,12 +2822,12 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
       convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
-         num_ranks = global_rank_part_var_ptr[npartvars + 1] - global_rank_part_var_ptr[npartvars];
+         num_ranks = global_ranks_part_var_ptr[npartvars + 1] - global_ranks_part_var_ptr[npartvars];
          if (num_ranks)
          {
             /* Map global_ranks to grid dofs to get convert_indexes */
             hypre_SStructGridGlobalRanksToIndexes(grid, part, var, num_ranks,
-                                                  &(global_ranks[global_rank_part_var_ptr[npartvars]]),
+                                                  &(global_ranks[global_ranks_part_var_ptr[npartvars]]),
                                                   &convert_indexes, type);
             /* WM: note - inidces passed to hypre_BoxArrayCreateFromIndices() are indexes[dim][i] */
             /* WM: todo - change hypre_BoxArrayCreateFromIndices() to hypre_BoxArrayCreateFromIndexes() */
@@ -2904,6 +2857,7 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
       hypre_TFree(convert_boxa[part], HYPRE_MEMORY_HOST);
    }
    hypre_TFree(convert_boxa, HYPRE_MEMORY_HOST);
+   hypre_TFree(global_ranks_part_var_ptr, HYPRE_MEMORY_HOST);
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
