@@ -118,7 +118,10 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_IndexDInBox(index, d, box) \
 ( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
   hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
+
 #define hypre_BoxSpanIndex(box, index)\
+HYPRE_DIAGNOSTIC_PUSH \
+HYPRE_DIAGNOSTIC_IGNORE_WSHADOW \
 {\
    HYPRE_Int d;\
    for (d = 0; d < hypre_BoxNDim(box); d++)\
@@ -128,7 +131,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
       hypre_BoxIMaxD(box, d) =\
          hypre_max(hypre_BoxIMaxD(box, d), hypre_IndexD(index, d));\
    }\
-}
+} \
+HYPRE_DIAGNOSTIC_POP
 
 /* The first hypre_CCBoxIndexRank is better style because it is similar to
    hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
@@ -189,7 +193,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 #define zypre_BoxLoopDeclare() \
 HYPRE_Int  hypre__tot, hypre__div, hypre__mod;\
 HYPRE_Int  hypre__block, hypre__num_blocks;\
-HYPRE_Int  hypre__d, hypre__ndim;\
+HYPRE_Int  hypre__d, hypre__ndim, hypre__ik;\
 HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN;\
 HYPRE_Int  hypre__i[HYPRE_MAXDIM+1], hypre__n[HYPRE_MAXDIM+1]
 
@@ -201,6 +205,7 @@ HYPRE_Int  hypre__sk##k[HYPRE_MAXDIM], hypre__ikinc##k[HYPRE_MAXDIM+1]
 hypre__ndim = ndim;\
 hypre__n[0] = loop_size[0];\
 hypre__tot = 1;\
+HYPRE_UNUSED_VAR(hypre__ik);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
    hypre__n[hypre__d] = loop_size[hypre__d];\
@@ -223,16 +228,16 @@ else\
    hypre__mod = 0;\
 }
 
-#define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
+#define zypre_BoxLoopInitK(k, dboxk, startk, stridek) \
 hypre__sk##k[0] = stridek[0];\
 hypre__ikinc##k[0] = 0;\
-ik = hypre_BoxSizeD(dboxk, 0); /* temporarily use ik */\
+hypre__ik = hypre_BoxSizeD(dboxk, 0);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__sk##k[hypre__d] = ik*stridek[hypre__d];\
+   hypre__sk##k[hypre__d] = hypre__ik*stridek[hypre__d];\
    hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
       hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
-   ik *= hypre_BoxSizeD(dboxk, hypre__d);\
+   hypre__ik *= hypre_BoxSizeD(dboxk, hypre__d);\
 }\
 hypre__i0inc##k = hypre__sk##k[0];\
 hypre__ikinc##k[hypre__ndim] = 0;\

@@ -245,7 +245,6 @@
 #define hypre_SStructPVectorSetConstantValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructPVectorSetConstantValues )
 #define hypre_SStructPVectorSetRandomValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructPVectorSetRandomValues )
 #define hypre_SStructPVectorSetValues HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructPVectorSetValues )
-#define hypre_SStructPartialPCopy HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructPartialPCopy )
 #define hypre_SStructScale HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructScale )
 #define hypre_SStructStencilRef HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructStencilRef )
 #define hypre_SStructUMatrixAssemble HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructUMatrixAssemble )

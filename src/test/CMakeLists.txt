@@ -23,7 +23,8 @@ set(TEST_SRCS
   ams_driver.c
   struct_migrate.c
   ij_assembly.c
-  test_csr_overlap.c
+  unit/test_csr_overlap.c
+  unit/test_matrix_stats.c
 )
 
 # Collect targets derived from source file names
@@ -54,8 +55,8 @@ add_hypre_executables("${TEST_SRCS}")
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
 add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
 
-# Ensure test executables land in the top-level build test directory
-set_target_properties(${HYPRE_TEST_DRIVER_TARGETS} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
+# Ensure test executables land in hypre's build test directory
+set_target_properties(${HYPRE_TEST_DRIVER_TARGETS} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/test)
 
 # Install test drivers in ${CMAKE_INSTALL_PREFIX}/bin when tests are enabled
 install(TARGETS ${HYPRE_TEST_DRIVER_TARGETS} RUNTIME DESTINATION bin)
@@ -200,7 +201,7 @@ if(BUILD_TESTING)
   )
   set_tests_properties(test_unit PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS test_csr_overlap
+    DEPENDS "test_csr_overlap;test_matrix_stats"
     FAIL_REGULAR_EXPRESSION "Failed"
   )
 endif()
@@ -215,7 +216,7 @@ add_custom_target(unit_tests
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS test_csr_overlap
+  DEPENDS test_csr_overlap test_matrix_stats
   COMMENT "Running unit tests"
   VERBATIM
 )
@@ -231,8 +232,8 @@ if(HYPRE_ENABLE_FORTRAN)
   # Common include dirs for mixed-language linking
   foreach(wlib IN ITEMS hypre_fstruct_wrappers hypre_fsstruct_wrappers hypre_fparcsr_wrappers hypre_fij_wrappers)
     target_include_directories(${wlib} PRIVATE
-      ${CMAKE_SOURCE_DIR}
-      ${CMAKE_BINARY_DIR}
+      ${PROJECT_SOURCE_DIR}
+      ${PROJECT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}
     )
     if(HYPRE_ENABLE_MPI)

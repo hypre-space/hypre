@@ -1184,6 +1184,14 @@ hypre_MatrixStatsDestroy( hypre_MatrixStats *stats )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_MatrixStatsReduce( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MatrixStatsReduce)( local_stats, global_stats, comm );
+}
+
+/*--------------------------------------------------------------------------*/
+
 void
 hypre_MemPrefetch( void *ptr, size_t size, HYPRE_MemoryLocation location )
 {
@@ -1608,10 +1616,26 @@ hypre_error_handler_clear_messages( void )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_gcd( HYPRE_Int a, HYPRE_Int b )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_gcd)( a, b );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_Handle*
 hypre_handle( void )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_handle)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_lcm( HYPRE_Int a, HYPRE_Int b )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_lcm)( a, b );
 }
 
 /*--------------------------------------------------------------------------*/

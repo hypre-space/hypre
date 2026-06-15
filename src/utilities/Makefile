@@ -25,7 +25,7 @@ HEADERS =\
  _hypre_fortran_matrix.h\
  general.h\
  int_array.h\
- memory.h\
+ memory_header.h\
  memory_tracker.h\
  multiprecision.h\
  HYPRE_utilities.h\
@@ -80,7 +80,7 @@ CUFILES=\
  memory.c\
  omp_device.c\
  stl_ops.c
- 
+
 # Mixed precision files
 MP_FILES = \
  mup_fixed.c\

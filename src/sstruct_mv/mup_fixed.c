@@ -1121,14 +1121,6 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector, hypre_Index index,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPartialPCopy( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPartialPCopy)( px, py, array_boxes );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_SStructScale( HYPRE_Complex alpha, hypre_SStructVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructScale)( alpha, y );

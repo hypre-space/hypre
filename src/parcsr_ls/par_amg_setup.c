@@ -94,6 +94,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
+   hypre_SolverResetIsSetup((hypre_Solver *) amg_vdata);
+
    /* Local variables */
    HYPRE_Int           *CF_marker;
    hypre_IntArray      *CFN_marker = NULL;
@@ -231,6 +233,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int      *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
    HYPRE_Int       ns = num_grid_sweeps[1];
+   HYPRE_Int     **grid_relax_points;
    HYPRE_Real      wall_time = 0.0;   /* for debugging instrumentation */
    HYPRE_Int       add_end;
 
@@ -1690,8 +1693,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              * coarsest solve to be a single sweep of default smoother or smoother set by user */
             if ((coarse_size == 0) || (coarse_size == fine_size))
             {
-               HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
-               HYPRE_Int **grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+               num_grid_sweeps   = hypre_ParAMGDataNumGridSweeps(amg_data);
+               grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
                if (grid_relax_type[3] ==  9 || grid_relax_type[3] == 99 ||
                    grid_relax_type[3] == 19 || grid_relax_type[3] == 98)
                {
@@ -1699,9 +1702,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   num_grid_sweeps[3] = 1;
                   if (grid_relax_points) { grid_relax_points[3][0] = 0; }
                }
-               if (S) { hypre_ParCSRMatrixDestroy(S); }
-               if (SN) { hypre_ParCSRMatrixDestroy(SN); }
-               if (AN) { hypre_ParCSRMatrixDestroy(AN); }
+               hypre_ParCSRMatrixDestroy(S);
+               hypre_ParCSRMatrixDestroy(SN);
+               hypre_ParCSRMatrixDestroy(AN);
                //hypre_TFree(CF_marker, HYPRE_MEMORY_HOST);
                if (level > 0)
                {
@@ -2496,8 +2499,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        * coarsest solve to be a single sweep of Jacobi */
       if ( (coarse_size == 0) || (coarse_size == fine_size) )
       {
-         HYPRE_Int   *num_grid_sweeps   = hypre_ParAMGDataNumGridSweeps(amg_data);
-         HYPRE_Int  **grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+         num_grid_sweeps   = hypre_ParAMGDataNumGridSweeps(amg_data);
+         grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
 
          if (grid_relax_type[3] == 9  || grid_relax_type[3] == 99 ||
              grid_relax_type[3] == 19 || grid_relax_type[3] == 98)
@@ -2779,8 +2782,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (nongalerk_tol_l > 0.0)
                {
                   /* Build Non-Galerkin Coarse Grid */
-                  hypre_ParCSRMatrix *Q = NULL;
-                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+                  hypre_ParCSRMatrix *Q_ng = NULL;
+                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q_ng,
                                                                 0.333 * strong_threshold, max_row_sum, num_functions,
                                                                 dof_func_data, hypre_IntArrayData(CF_marker_array[level]),
                                                                 /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
@@ -4022,6 +4025,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }
 #endif
+
+   hypre_SolverSetIsSetup((hypre_Solver *) amg_vdata);
 
 cleanup:
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "AMG setup end  ", 0);

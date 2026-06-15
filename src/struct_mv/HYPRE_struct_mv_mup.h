@@ -634,15 +634,6 @@ HYPRE_Int
 HYPRE_StructVectorSetRandomValues( HYPRE_StructVector vector, HYPRE_Int seed );
 
 HYPRE_Int
-HYPRE_StructVectorSetStride_flt( HYPRE_StructVector vector, HYPRE_Int *stride );
-HYPRE_Int
-HYPRE_StructVectorSetStride_dbl( HYPRE_StructVector vector, HYPRE_Int *stride );
-HYPRE_Int
-HYPRE_StructVectorSetStride_long_dbl( HYPRE_StructVector vector, HYPRE_Int *stride );
-HYPRE_Int
-HYPRE_StructVectorSetStride( HYPRE_StructVector vector, HYPRE_Int *stride );
-
-HYPRE_Int
 HYPRE_StructVectorSetValues_flt( HYPRE_StructVector vector, HYPRE_Int *index, hypre_float *values );
 HYPRE_Int
 HYPRE_StructVectorSetValues_dbl( HYPRE_StructVector vector, HYPRE_Int *index, hypre_double *values );
@@ -856,9 +847,6 @@ HYPRE_StructVectorSetNumGhost_pre( HYPRE_Precision precision, HYPRE_StructVector
 
 HYPRE_Int
 HYPRE_StructVectorSetRandomValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int seed );
-
-HYPRE_Int
-HYPRE_StructVectorSetStride_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *stride );
 
 HYPRE_Int
 HYPRE_StructVectorSetValues_pre( HYPRE_Precision precision, HYPRE_StructVector vector, HYPRE_Int *index, void *values );

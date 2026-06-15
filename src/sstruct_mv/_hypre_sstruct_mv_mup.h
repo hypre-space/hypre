@@ -986,13 +986,6 @@ HYPRE_Int
 hypre_SStructPVectorSetValues_long_dbl( hypre_SStructPVector *pvector, hypre_Index index, HYPRE_Int var, hypre_long_double *value, HYPRE_Int action );
 
 HYPRE_Int
-hypre_SStructPartialPCopy_flt( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes );
-HYPRE_Int
-hypre_SStructPartialPCopy_dbl( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes );
-HYPRE_Int
-hypre_SStructPartialPCopy_long_dbl( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes );
-
-HYPRE_Int
 hypre_SStructScale_flt( hypre_float alpha, hypre_SStructVector *y );
 HYPRE_Int
 hypre_SStructScale_dbl( hypre_double alpha, hypre_SStructVector *y );

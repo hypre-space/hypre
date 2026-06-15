@@ -87,26 +87,18 @@ if(HYPRE_USING_GPU)
   )
 endif()
 
-# Autogenerate csr_spgemm_device_numer$ files
-file(READ "csr_spgemm_device_numer.in" CONTENTS)
-foreach(number RANGE 1 10)
-  # Check if file exists, then don't recreate
-  set(fn "csr_spgemm_device_numer${number}.c")
-  if (NOT EXISTS ${fn})
-    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND ${fn} "${CONTENTS}")
-  endif (NOT EXISTS ${fn})
-endforeach(number RANGE 1 10)
-
-# Autogenerate csr_spgemm_device_symbl$ files
-file(READ "csr_spgemm_device_symbl.in" CONTENTS)
-foreach(number RANGE 1 10)
-  set(fn "csr_spgemm_device_symbl${number}.c")
-  if (NOT EXISTS ${fn})
-    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND ${fn} "${CONTENTS}")
-  endif (NOT EXISTS ${fn})
-endforeach(number RANGE 1 10)
+# Autogenerate csr_spgemm_device_numer$ and csr_spgemm_device_symbl$ files
+set(AUTOGEN_CLEAN_SRCS "")
+foreach(kind IN ITEMS numer symbl)
+  foreach(number RANGE 1 10)
+    set(src_file "csr_spgemm_device_${kind}${number}.c")
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/csr_spgemm_device_${kind}.in" file_content)
+    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "#define HYPRE_SPGEMM_BIN ${number}")
+    file(APPEND "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "${file_content}")
+    list(APPEND AUTOGEN_CLEAN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+  endforeach()
+endforeach()
+set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES "${AUTOGEN_CLEAN_SRCS}")
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("seq_mv" SRCS "${REGULAR_SRCS}")

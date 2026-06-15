@@ -31,7 +31,10 @@ hypre_SStructPMatrixComputeRowSum( hypre_SStructPMatrix  *pA,
       for (vj = 0; vj < nvars; vj++)
       {
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
-         hypre_StructMatrixComputeRowSum(sA, type, sv);
+         if (sA != NULL)
+         {
+            hypre_StructMatrixComputeRowSum(sA, type, sv);
+         }
       }
    }
 

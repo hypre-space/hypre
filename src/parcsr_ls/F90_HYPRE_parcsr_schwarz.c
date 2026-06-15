@@ -196,6 +196,126 @@ hypre_F90_IFACE(hypre_schwarzsetdoffunc, HYPRE_SCHWARZSETDOFFUNC)
                hypre_F90_PassObj (HYPRE_Solver, solver),
                hypre_F90_PassIntArray (dof_func)  ));
 }
+
+void
+hypre_F90_IFACE(hypre_schwarzsetlocalsolvertype, HYPRE_SCHWARZSETLOCALSOLVERTYPE)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *local_solver_type,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetLocalSolverType(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (local_solver_type)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetilukleveloffill, HYPRE_SCHWARZSETILUKLEVELOFFILL)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *level_of_fill,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetILUKLevelOfFill(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (level_of_fill)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetilutmaxnnzperrow, HYPRE_SCHWARZSETILUTMAXNNZPERROW)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *max_nnz_row,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetILUTMaxNnzPerRow(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (max_nnz_row)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetilutdroptol, HYPRE_SCHWARZSETILUTDROPTOL)
+(hypre_F90_Obj *solver,
+ hypre_F90_Real *droptol,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetILUTDroptol(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassReal (droptol)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetmaxiter, HYPRE_SCHWARZSETMAXITER)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *max_iter,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetMaxIter(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (max_iter)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsettol, HYPRE_SCHWARZSETTOL)
+(hypre_F90_Obj *solver,
+ hypre_F90_Real *tol,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetTol(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassReal (tol)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetprintlevel, HYPRE_SCHWARZSETPRINTLEVEL)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *print_level,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetPrintLevel(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (print_level)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzsetlogging, HYPRE_SCHWARZSETLOGGING)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *logging,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzSetLogging(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (logging)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzgetnumiterations, HYPRE_SCHWARZGETNUMITERATIONS)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *num_iterations,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzGetNumIterations(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassIntRef (num_iterations)));
+}
+
+void
+hypre_F90_IFACE(hypre_schwarzgetfinalresidualnorm, HYPRE_SCHWARZGETFINALRESIDUALNORM)
+(hypre_F90_Obj *solver,
+ hypre_F90_Real *norm,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SchwarzGetFinalResidualNorm(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassRealRef (norm)));
+}
 #ifdef __cplusplus
 }
 #endif
