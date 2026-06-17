@@ -57,6 +57,8 @@
 #undef hypre_ParCSRMatrixCopy
 #undef hypre_ParCSRMatrixCreate
 #undef hypre_ParCSRMatrixInitialize_v2
+#undef hypre_ParVectorCloneDeep_v2
+#undef hypre_ParVectorCreate
 #undef hypre_AssumedPartitionCreate
 #undef hypre_AssumedPartitionDestroy
 #undef hypre_BooleanGenerateDiagAndOffd
@@ -237,10 +239,8 @@
 #undef hypre_ParTMatmul
 #undef hypre_ParVectorAxpy
 #undef hypre_ParVectorAxpyz
-#undef hypre_ParVectorCloneDeep_v2
 #undef hypre_ParVectorCloneShallow
 #undef hypre_ParVectorCopy
-#undef hypre_ParVectorCreate
 #undef hypre_ParVectorCreateAssumedPartition
 #undef hypre_ParVectorDestroy
 #undef hypre_ParVectorGetValues

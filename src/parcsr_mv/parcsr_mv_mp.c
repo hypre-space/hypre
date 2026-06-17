@@ -50,6 +50,31 @@ hypre_ParVectorAxpy_mp( hypre_long_double    alpha,
 }
 
 /*--------------------------------------------------------------------------
+ * Mixed-Precision hypre_ParVectorClone
+ *--------------------------------------------------------------------------*/
+hypre_ParVector *
+hypre_ParVectorClone_mp(hypre_ParVector *v, HYPRE_Precision new_precision)
+{
+   HYPRE_MemoryLocation memory_location = hypre_ParVectorMemoryLocation(v);
+
+   if (hypre_ParVectorPrecision(v) == new_precision)
+   {
+      return hypre_ParVectorCloneDeep_v2_pre(hypre_ParVectorPrecision(v), v, memory_location);
+   }
+
+   hypre_ParVector *w =
+      hypre_ParVectorCreate_pre(new_precision, hypre_ParVectorComm(v), hypre_ParVectorGlobalSize(v),
+                            hypre_ParVectorPartitioning(v));
+
+   hypre_ParVectorOwnsData(w) = 1;
+   hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(w) );
+   hypre_ParVectorLocalVector(w) = hypre_SeqVectorClone_mp( hypre_ParVectorLocalVector(v), new_precision );
+   hypre_ParVectorFirstIndex(w) = hypre_ParVectorFirstIndex(v);
+
+   return w;
+}
+
+/*--------------------------------------------------------------------------
  * Mixed-Precision Vector conversion
  *--------------------------------------------------------------------------*/
 

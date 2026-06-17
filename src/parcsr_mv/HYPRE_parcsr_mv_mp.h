@@ -33,6 +33,8 @@ HYPRE_ParCSRMatrix HYPRE_ParCSRMatrixClone_mp(HYPRE_ParCSRMatrix   A,
 
 HYPRE_Int HYPRE_ParCSRMatrixCopy_mp( HYPRE_ParCSRMatrix A, HYPRE_ParCSRMatrix B );
 
+HYPRE_ParVector HYPRE_ParVectorClone_mp(HYPRE_ParVector   v, HYPRE_Precision new_precision);
+
 #ifdef __cplusplus
 }
 #endif
