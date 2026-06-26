@@ -101,7 +101,9 @@ hypre_MGRCreate(void)
    (mgr_data -> level_smoother) = NULL;
    (mgr_data -> level_smoother_owner) = NULL;
    (mgr_data -> level_smoother_type) = NULL;
-   (mgr_data -> global_smooth_cycle) = 1; // Pre = 1 or Post  = 2 global smoothing
+   (mgr_data -> global_smooth_cycle) = 1; /* 0=none, 1=pre, 2=post, 3=both */
+   (mgr_data -> frelax_smooth_cycle) = 1; /* 0=none, 1=pre, 2=post, 3=both */
+   (mgr_data -> cycle_type)          = 1; /* 1=V-cycle, 2=W-cycle */
 
    (mgr_data -> logging) = 0;
    (mgr_data -> print_level) = 0;
@@ -2863,15 +2865,72 @@ hypre_MGRSetLevelNumRelaxSweeps( void      *mgr_vdata,
 /*--------------------------------------------------------------------------
  * Set the order of the global smoothing step at each level
  *
- * 1 = Down cycle/ Pre-smoothing (default)
- * 2 = Up cycle/ Post-smoothing
+ * 0 = No global smoothing
+ * 1 = Down cycle / Pre-smoothing (default)
+ * 2 = Up cycle / Post-smoothing
+ * 3 = Both pre- and post-smoothing
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int smooth_cycle )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (smooth_cycle < 0 || smooth_cycle > 3)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    (mgr_data -> global_smooth_cycle) = smooth_cycle;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetFRelaxCycle
+ *
+ * Set when F-relaxation is applied during the cycle:
+ *   0 = no F-relaxation
+ *   1 = pre-relaxation (default, applied on the way down)
+ *   2 = post-relaxation (applied on the way up, after coarse correction)
+ *   3 = both pre- and post-relaxation
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (frelax_cycle < 0 || frelax_cycle > 3)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (mgr_data -> frelax_smooth_cycle) = frelax_cycle;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetCycleType
+ *
+ * Set the multigrid cycling strategy:
+ *   1 = V-cycle (default)
+ *   2 = W-cycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (cycle_type != 1 && cycle_type != 2)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (mgr_data -> cycle_type) = cycle_type;
    return hypre_error_flag;
 }
 

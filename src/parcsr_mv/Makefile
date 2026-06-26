@@ -64,6 +64,7 @@ CUFILES =\
  par_csr_filter_device.c\
  par_csr_matop_device.c\
  par_csr_matmat_device.c\
+ par_csr_matrix_stats_device.c \
  par_csr_matvec_device.c\
  par_csr_triplemat_device.c\
  par_vector_device.c
@@ -100,7 +101,7 @@ OBJS = ${COBJS} ${CUOBJS}
 
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

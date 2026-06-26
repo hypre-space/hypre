@@ -763,20 +763,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp1[i] = atoi(val_ptr);
+            tmp1[cycle_arg] = atoi(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            cycle_struct_flexible[j] = tmp1[j];
+            cycle_struct_flexible[cycle_entry] = tmp1[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -799,20 +799,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp1[i] = atoi(val_ptr);
+            tmp1[cycle_arg] = atoi(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          relax_types_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            relax_types_flexible[j] = tmp1[j];
+            relax_types_flexible[cycle_entry] = tmp1[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -835,20 +835,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp1[i] = atoi(val_ptr);
+            tmp1[cycle_arg] = atoi(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            relax_orders_flexible[j] = tmp1[j];
+            relax_orders_flexible[cycle_entry] = tmp1[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -871,20 +871,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp2[i] = atof(val_ptr);
+            tmp2[cycle_arg] = atof(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            outer_weights_flexible[j] = tmp2[j];
+            outer_weights_flexible[cycle_entry] = tmp2[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -907,20 +907,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp2[i] = atof(val_ptr);
+            tmp2[cycle_arg] = atof(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            relax_weights_flexible[j] = tmp2[j];
+            relax_weights_flexible[cycle_entry] = tmp2[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -943,20 +943,20 @@ main( hypre_int argc,
          // parse flexible amg cycle parameters
          arg_ptr = argv[arg_index++];
          val_ptr = strtok(arg_ptr, ",");
-         HYPRE_Int i = 0;
+         HYPRE_Int cycle_arg = 0;
          while (val_ptr != NULL)
          {
-            tmp2[i] = atof(val_ptr);
+            tmp2[cycle_arg] = atof(val_ptr);
             val_ptr = strtok(NULL, ",");
-            i++;
+            cycle_arg++;
          }
 
-         len_cycle = i;
+         len_cycle = cycle_arg;
          cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
 
-         for (HYPRE_Int j = 0; j < len_cycle; j++)
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
          {
-            cgc_scaling_factors_flexible[j] = tmp2[j];
+            cgc_scaling_factors_flexible[cycle_entry] = tmp2[cycle_entry];
          }
 
          if (length_cycle_flexible == 0)
@@ -2620,10 +2620,11 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("Usage: %s [<options>]\n", argv[0]);
          hypre_printf("\n");
-         hypre_printf("  -ll                        : hypre's log level. \n");
+         hypre_printf("  -ll <val>                  : hypre's log level. \n");
          hypre_printf("      0 = (default) No messaging.\n");
          hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
          hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
+         hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
@@ -3032,14 +3033,37 @@ main( hypre_int argc,
          hypre_printf("       2=W-cycle  \n");
          hypre_printf("       3=F-cycle  \n");
          /* end AMG-DD options */
+#if defined(HYPRE_USING_GPU)
+         /* GPU options */
+         hypre_printf("GPU options:\n");
+         hypre_printf("  -lazy_device_init <0/1>    : delay device initialization until first use (default 0)\n");
+         hypre_printf("  -device_id <val>           : bind this MPI rank to a specific GPU device (default auto)\n");
+         hypre_printf("  -memory_host               : use host memory for IJ matrix/vector data\n");
+         hypre_printf("  -memory_device             : use device memory for IJ matrix/vector data\n");
+         hypre_printf("  -exec_host                 : use host execution policy\n");
+         hypre_printf("  -exec_device               : use device execution policy\n");
+         hypre_printf("  -exec2_host                : use host execution policy for the second setup/solve\n");
+         hypre_printf("  -exec2_device              : use device execution policy for the second setup/solve\n");
+         hypre_printf("  -gpu_mpi <0/1>             : use GPU-aware MPI with device buffers (default 0)\n");
+         hypre_printf("  -mv_vendor <0/1>           : use vendor SpMV implementation\n");
+         hypre_printf("  -mm_vendor <0/1>           : use vendor SpGEMM implementation\n");
+         hypre_printf("  -spgemm_alg <val>          : set SpGEMM algorithm (1-3)\n");
+         hypre_printf("  -spgemm_binned <0/1>       : use binned SpGEMM kernels\n");
+         hypre_printf("  -spgemm_rowest <val>       : set SpGEMM row-nnz estimate method (1-3)\n");
+         hypre_printf("  -spgemm_rowestmult <val>   : set SpGEMM row-nnz estimate multiplier\n");
+         hypre_printf("  -spgemm_rowestnsamples <val> : set SpGEMM row-nnz estimate sample count\n");
+         hypre_printf("  -use_curand <0/1>          : use GPU random number generation\n");
+         /* end GPU options */
+#endif
 #if defined (HYPRE_USING_UMPIRE)
-         /* hypre umpire options */
+         /* UMPIRE options */
          hypre_printf("  -umpire_dev_pool_size <val>      : device memory pool size (GiB)\n");
          hypre_printf("  -umpire_uvm_pool_size <val>      : device unified virtual memory pool size (GiB)\n");
          hypre_printf("  -umpire_pinned_pool_size <val>   : pinned memory pool size (GiB)\n");
          hypre_printf("  -umpire_host_pool_size <val>     : host memory pool size (GiB)\n");
-         /* end umpire options */
+         /* end UMPIRE options */
 #endif
+
       }
 
       goto final;

@@ -441,6 +441,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/iterator/reverse_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
 #include <thrust/scan.h>
@@ -454,6 +455,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/remove.h>
 #include <thrust/version.h>
 #include <thrust/pair.h>
+#include <thrust/tuple.h>
 
 /* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
 #define THRUST_VERSION_NOTFN 200600

@@ -115,7 +115,7 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
 {
   START_FUNC_DH
   HYPRE_Real *vals = v->vals;
-  HYPRE_Int pe, i, m = v->n;
+  HYPRE_Int pe, i, j, m = v->n;
   FILE *fp;
 
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
@@ -144,8 +144,6 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
    * case 2: single mpi task, multiple subdomains
    *--------------------------------------------------------*/
   else if (np_dh == 1) {
-    HYPRE_Int i, j;
-
     fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
 
     for (i=0; i<sg->blocks; ++i) {
