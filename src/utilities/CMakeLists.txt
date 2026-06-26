@@ -35,13 +35,13 @@ set(REGULAR_SRCS
   HYPRE_handle.c
   HYPRE_version.c
   amg_linklist.c
+  annotation.c
   binsearch.c
   exchange_data.c
   fortran_matrix.c
   ap.c
   log.c
   complex.c
-  device_markers.c
   device_utils.c
   error.c
   int_array.c
@@ -68,7 +68,6 @@ set(REGULAR_SRCS
   memory.c
   omp_device.c
   stl_ops.c
-  caliper_instrumentation.c
 )
 
 # Mixed precision sources
