@@ -315,7 +315,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    HYPRE_THRUST_CALL( lower_bound,
                       d_bin_key,
                       d_bin_key + m,
-                      thrust::make_counting_iterator(1),
+                      thrust::make_counting_iterator((HYPRE_Int) 1),
                       thrust::make_counting_iterator(num_bins + 2),
                       d_bin_ptr );
 #endif

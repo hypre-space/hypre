@@ -142,7 +142,7 @@ hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func,
                       dof_func,
                       dof_func + local_size,
                       offset,
-                      1 );
+                      (HYPRE_Int) 1 );
 
    HYPRE_THRUST_CALL( transform,
                       dof_func,

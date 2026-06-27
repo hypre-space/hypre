@@ -9,7 +9,10 @@
 #include "_hypre_seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUSPARSE)
+/* cuSPARSE's csr2csc only supports 32-bit indices, so it is disabled for
+ * bigint; hypre_CSRSpTransVendor routes bigint builds to the generic
+ * thrust-based hypreDevice_CSRSpTrans below (which handles 64-bit indices). */
+#if defined(HYPRE_USING_CUSPARSE) && !defined(HYPRE_BIGINT)
 
 static HYPRE_Int
 hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
@@ -161,7 +164,7 @@ hypre_CSRSpTransVendor(HYPRE_Int   m,
                        HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
-#if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) && !defined(HYPRE_BIGINT)
    return hypreDevice_CSRSpTransCusparse(m, n, nnzA, d_ia, d_ja, d_aa,
                                          d_ic_out, d_jc_out, d_ac_out, want_data);
 #elif defined(HYPRE_USING_ROCSPARSE)

@@ -32,7 +32,7 @@ hypreGPUKernel_CompileFlagSafetyCheck(hypre_DeviceItem &item,
 static HYPRE_Int
 cuda_compile_flag_check_local(void)
 {
-   HYPRE_Int device;
+   hypre_int device;
    hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;

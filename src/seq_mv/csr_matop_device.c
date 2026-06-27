@@ -436,7 +436,7 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL( for_each,
-                         thrust::make_counting_iterator(0),
+                         thrust::make_counting_iterator((HYPRE_Int) 0),
                          thrust::make_counting_iterator(nrows_A),
                          [ = ] __device__ (HYPRE_Int i)
       {
@@ -479,7 +479,7 @@ hypre_CSRMatrixDeleteZerosDevice( hypre_CSRMatrix *A,
       auto B_row_indices_end = B_row_indices + num_nonzeros_B;
       HYPRE_THRUST_CALL( fill, B_i, B_i + 1, 0 );
       HYPRE_THRUST_CALL( transform,
-                         thrust::make_counting_iterator(0),
+                         thrust::make_counting_iterator((HYPRE_Int) 0),
                          thrust::make_counting_iterator(nrows_A),
                          B_i + 1,
                          [ = ] __device__ (HYPRE_Int i)
@@ -3091,7 +3091,7 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
    HYPRE_THRUST_CALL(gather,
                      perm,
                      perm + num_rows,
-                     thrust::make_transform_iterator(thrust::make_counting_iterator(0), adj_functor(A_i)),
+                     thrust::make_transform_iterator(thrust::make_counting_iterator((HYPRE_Int) 0), adj_functor(A_i)),
                      B_i);
 #endif
    hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
@@ -3112,7 +3112,7 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                      oneapi::dpl::make_zip_iterator(B_j, B_a));
 #else
    HYPRE_THRUST_CALL(for_each,
-                     thrust::make_counting_iterator(0),
+                     thrust::make_counting_iterator((HYPRE_Int) 0),
                      thrust::make_counting_iterator(num_nonzeros),
                      bii_functor(perm, A_i, B_i, B_ii));
 
@@ -3225,7 +3225,7 @@ hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A )
    /* Count number of non-empty rows in A */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    irownnz = HYPRE_THRUST_CALL( count_if,
-                                thrust::make_counting_iterator(0),
+                                thrust::make_counting_iterator((HYPRE_Int) 0),
                                 thrust::make_counting_iterator(num_rows),
                                 is_non_empty_row(A_i) );
 
@@ -3251,7 +3251,7 @@ hypre_CSRMatrixSetRownnzDevice( hypre_CSRMatrix *A )
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL( copy_if,
-                         thrust::make_counting_iterator(0),
+                         thrust::make_counting_iterator((HYPRE_Int) 0),
                          thrust::make_counting_iterator(num_rows),
                          Arownnz,
                          is_non_empty_row(A_i) );
@@ -3447,6 +3447,39 @@ hypre_SortCSRCusparse( HYPRE_Int            n,
    hypre_GpuProfilingPushRange("SortCSRCusparse");
 
    HYPRE_CUSPARSE_CALL( cusparseCreateCsru2csrInfo(&sortInfoA) );
+
+#if defined(HYPRE_BIGINT)
+   /* The legacy cusparse csru2csr API requires 32-bit (int) row/column index
+      arrays. Make int copies of the index arrays, run the sort on them, and
+      copy the reordered column indices back afterwards.
+      Debug guard against silent 64->32 bit truncation: row-pointer values reach
+      nnzA and column indices are bounded by the column count m. */
+   hypre_assert(nnzA <= (HYPRE_Int) INT_MAX);
+   hypre_assert(m    <= (HYPRE_Int) INT_MAX);
+   hypre_int *d_ia_int = hypre_TAlloc(hypre_int, n + 1, HYPRE_MEMORY_DEVICE);
+   hypre_int *d_ja_int = hypre_TAlloc(hypre_int, nnzA,  HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( copy, d_ia, d_ia + n + 1, d_ia_int );
+   HYPRE_THRUST_CALL( copy, d_ja_sorted, d_ja_sorted + nnzA, d_ja_int );
+
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csru2csr_bufferSizeExt(cusparsehandle,
+                                                              n, m, nnzA,
+                                                              d_a_sorted, d_ia_int, d_ja_int,
+                                                              sortInfoA, &pBufferSizeInBytes) );
+
+   pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csru2csr(cusparsehandle,
+                                                n, m, nnzA, descrA,
+                                                d_a_sorted, d_ia_int, d_ja_int,
+                                                sortInfoA, pBuffer) );
+
+   /* csru2csr reorders the column indices together with the values; copy the
+      reordered int column indices back into the original array */
+   HYPRE_THRUST_CALL( copy, d_ja_int, d_ja_int + nnzA, d_ja_sorted );
+
+   hypre_TFree(d_ia_int, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_ja_int, HYPRE_MEMORY_DEVICE);
+#else
    HYPRE_CUSPARSE_CALL( hypre_cusparse_csru2csr_bufferSizeExt(cusparsehandle,
                                                               n, m, nnzA,
                                                               d_a_sorted, d_ia, d_ja_sorted,
@@ -3457,6 +3490,7 @@ hypre_SortCSRCusparse( HYPRE_Int            n,
                                                 n, m, nnzA, descrA,
                                                 d_a_sorted, d_ia, d_ja_sorted,
                                                 sortInfoA, pBuffer) );
+#endif
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
@@ -4128,7 +4162,7 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
    cusparseSolvePolicy_t     analysis_policy  = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
    cusparseSolvePolicy_t     solve_policy     = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
    cusparseStatus_t          status;
-   HYPRE_Int                 buffer_size;
+   hypre_int                 buffer_size;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info        matA_info        = NULL;
@@ -4141,7 +4175,7 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 #endif
 
    void                     *buffer           = NULL;
-   HYPRE_Int                 zero_pivot;
+   hypre_int                 zero_pivot;
    char                      errmsg[1024];
 
    /* Sanity check */
@@ -4160,6 +4194,22 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 
    hypre_CSRMatrixSortRow(A);
 
+#if defined(HYPRE_USING_CUSPARSE) && defined(HYPRE_BIGINT)
+   /* The legacy cusparse csrilu02 API requires 32-bit (int) row/column index
+      arrays. ilu02 only reads them, so plain int copies of the (sorted) index
+      arrays suffice.
+      Debug guard against silent 64->32 bit truncation: row-pointer values reach
+      num_nonzeros and column indices are < num_rows (the matrix is square). */
+   hypre_assert(num_nonzeros <= (HYPRE_Int) INT_MAX);
+   hypre_assert(num_rows     <= (HYPRE_Int) INT_MAX);
+   hypre_int *A_i_int = hypre_TAlloc(hypre_int, num_rows + 1, HYPRE_MEMORY_DEVICE);
+   hypre_int *A_j_int = hypre_TAlloc(hypre_int, num_nonzeros, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( copy, A_i, A_i + num_rows + 1, A_i_int );
+   HYPRE_THRUST_CALL( copy, A_j, A_j + num_nonzeros, A_j_int );
+#endif
+
+
    /*-------------------------------------------------------------------------------------
     * 2. Create info for ilu setup and solve
     *-------------------------------------------------------------------------------------*/
@@ -4177,9 +4227,15 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
     *-------------------------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_BIGINT)
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, num_rows, num_nonzeros,
+                                                          descr, A_data, A_i_int, A_j_int,
+                                                          matA_info, &buffer_size));
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, num_rows, num_nonzeros,
                                                           descr, A_data, A_i, A_j,
                                                           matA_info, &buffer_size));
+#endif
 #elif defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_buffer_size(handle, num_rows, num_nonzeros,
                                                             descr, A_data, A_i, A_j,
@@ -4198,9 +4254,15 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 
    hypre_GpuProfilingPushRange("Analysis");
 #if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_BIGINT)
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, num_rows, num_nonzeros,
+                                                        descr, A_data, A_i_int, A_j_int,
+                                                        matA_info, analysis_policy, buffer));
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, num_rows, num_nonzeros,
                                                         descr, A_data, A_i, A_j,
                                                         matA_info, analysis_policy, buffer));
+#endif
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_analysis(handle, num_rows, num_nonzeros,
@@ -4263,9 +4325,15 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 
    hypre_GpuProfilingPushRange("Factorization");
 #if defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_BIGINT)
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, num_rows, num_nonzeros,
+                                               descr, A_data, A_i_int, A_j_int,
+                                               matA_info, solve_policy, buffer));
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, num_rows, num_nonzeros,
                                                descr, A_data, A_i, A_j,
                                                matA_info, solve_policy, buffer));
+#endif
 #elif defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0(handle, num_rows, num_nonzeros,
                                                 descr, A_data, A_i, A_j,
@@ -4329,6 +4397,11 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL(rocsparse_destroy_mat_info(matA_info));
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) && defined(HYPRE_BIGINT)
+   hypre_TFree(A_i_int, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(A_j_int, HYPRE_MEMORY_DEVICE);
 #endif
 
    /* Free buffer */

@@ -1253,7 +1253,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL(for_each,
-                        thrust::make_counting_iterator(0),
+                        thrust::make_counting_iterator((HYPRE_Int) 0),
                         thrust::make_counting_iterator(nrows),
                         [ = ] __device__ (HYPRE_Int i)
       {
@@ -1282,7 +1282,7 @@ hypre_IJMatrixGetValuesParCSRDevice( hypre_IJMatrix *matrix,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       HYPRE_THRUST_CALL(for_each,
-                        thrust::make_counting_iterator(0),
+                        thrust::make_counting_iterator((HYPRE_Int) 0),
                         thrust::make_counting_iterator(num_nonzeros),
                         hypreFunctor_IJMatrixGetValues(row_start, row_end,
                                                        col_start, col_end,

@@ -1596,7 +1596,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             });
 #else
             HYPRE_THRUST_CALL( for_each,
-                               thrust::make_counting_iterator(0),
+                               thrust::make_counting_iterator((HYPRE_Int) 0),
                                thrust::make_counting_iterator(num_nonzeros),
                                [ = ] __device__ (HYPRE_Int i)
             {

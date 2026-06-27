@@ -202,10 +202,14 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                             oneapi::dpl::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
                             oneapi::dpl::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
 #else
+      /* The number of failed rows is bounded by m (fits in 32 bits). Reduce with
+       * a 32-bit accumulator: a 64-bit (bigint) thrust::reduce over a
+       * transform_iterator with the device-allocator policy fails on some
+       * CUDA/CUB versions (cudaErrorInvalidDevice). */
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
-                            thrust::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
-                            thrust::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+                            thrust::make_transform_iterator(d_rf,     type_cast<char, hypre_int>()),
+                            thrust::make_transform_iterator(d_rf + m, type_cast<char, hypre_int>()) );
 #endif
 
       if (num_failed_rows)
@@ -227,7 +231,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 #else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
-                               thrust::make_counting_iterator(0),
+                               thrust::make_counting_iterator((HYPRE_Int) 0),
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,
@@ -313,10 +317,14 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                             oneapi::dpl::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
                             oneapi::dpl::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
 #else
+      /* The number of failed rows is bounded by m (fits in 32 bits). Reduce with
+       * a 32-bit accumulator: a 64-bit (bigint) thrust::reduce over a
+       * transform_iterator with the device-allocator policy fails on some
+       * CUDA/CUB versions (cudaErrorInvalidDevice). */
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
-                            thrust::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
-                            thrust::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+                            thrust::make_transform_iterator(d_rf,     type_cast<char, hypre_int>()),
+                            thrust::make_transform_iterator(d_rf + m, type_cast<char, hypre_int>()) );
 #endif
 
       if (num_failed_rows)
@@ -336,7 +344,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 #else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
-                               thrust::make_counting_iterator(0),
+                               thrust::make_counting_iterator((HYPRE_Int) 0),
                                thrust::make_counting_iterator(m),
                                d_rf,
                                d_rind,

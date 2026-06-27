@@ -387,7 +387,7 @@ hypre_SeqVectorStridedCopyDevice( hypre_Vector  *vector,
    HYPRE_Complex  *v_data = hypre_VectorData(vector);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   auto begin = thrust::make_counting_iterator(0);
+   auto begin = thrust::make_counting_iterator((HYPRE_Int) 0);
    auto last  = thrust::make_counting_iterator(size / istride);
 
    HYPRE_THRUST_CALL( transform, begin, last,

@@ -93,7 +93,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                       0  );
 
    new_end = HYPRE_THRUST_CALL( copy_if,
-                                thrust::make_counting_iterator(0),
+                                thrust::make_counting_iterator((HYPRE_Int) 0),
                                 thrust::make_counting_iterator(hypre_ParCSRMatrixNumCols(S_CX)),
                                 CF_marker,
                                 hypre_CSRMatrixJ(Id),

@@ -111,13 +111,13 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                      is_positive<HYPRE_Int>());
 #else
    HYPRE_THRUST_CALL( copy_if,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(n_fine),
                       CF_marker,
                       Fmap,
                       is_negative<HYPRE_Int>());
    HYPRE_THRUST_CALL( copy_if,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(n_fine),
                       CF_marker,
                       Cmap,
@@ -148,11 +148,11 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       hypre_CSRMatrixJ(Dinv_diag) );
 #else
    HYPRE_THRUST_CALL( copy,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag) + 1),
                       hypre_CSRMatrixI(Dinv_diag) );
    HYPRE_THRUST_CALL( copy,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag)),
                       hypre_CSRMatrixJ(Dinv_diag) );
 #endif
@@ -320,7 +320,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_THRUST_CALL( transform,
                       Z_diag_i,
                       Z_diag_i + n_cpts + 1,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       R_diag_i,
                       thrust::plus<HYPRE_Int>() );
 #endif

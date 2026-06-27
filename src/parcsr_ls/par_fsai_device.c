@@ -291,7 +291,7 @@ hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
                             HYPRE_Complex    *sol_data,
                             HYPRE_Complex    *rhs_data,
                             HYPRE_Complex    *scaling,
-                            HYPRE_Int        *info )
+                            hypre_int        *info )
 {
    HYPRE_Int      i, j;
    HYPRE_Complex  val;
@@ -761,7 +761,7 @@ hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
                          HYPRE_Complex  *sol_data,
                          HYPRE_Complex  *rhs_data,
                          HYPRE_Complex  *scaling,
-                         HYPRE_Int      *info )
+                         hypre_int      *info )
 {
    /* trivial case */
    if (num_rows <= 0)
@@ -902,12 +902,12 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* TODO: Move to fsai_data? */
    HYPRE_Complex          *scaling;
-   HYPRE_Int              *info;
-   HYPRE_Int              *h_info;
+   hypre_int              *info;
+   hypre_int              *h_info;
 
    /* Error code array for FSAI */
-   info   = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-   h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+   info   = hypre_CTAlloc(hypre_int, num_rows, HYPRE_MEMORY_DEVICE);
+   h_info = hypre_TAlloc(hypre_int, num_rows, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------
     *  Sanity checks
@@ -1137,7 +1137,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange(); /* Factorization */
 
 #if defined (HYPRE_DEBUG)
-      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+      hypre_TMemcpy(h_info, info, hypre_int, num_rows,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (HYPRE_Int k = 0; k < num_rows; k++)
       {
@@ -1197,7 +1197,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange(); /* Solve */
 
 #if defined (HYPRE_DEBUG)
-      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+      hypre_TMemcpy(h_info, info, hypre_int, num_rows,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (HYPRE_Int k = 0; k < num_rows; k++)
       {

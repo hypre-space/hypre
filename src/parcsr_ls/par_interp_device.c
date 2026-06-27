@@ -1349,7 +1349,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                      equal<HYPRE_Int>(1) );
 #else
    HYPRE_THRUST_CALL( copy_if,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(num_cols_A_offd),
                       mark_P_offd_idx,
                       offd_map_P_to_A,
@@ -1375,7 +1375,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                      P_offd_j );
 #else
    HYPRE_THRUST_CALL( scatter,
-                      thrust::make_counting_iterator(0),
+                      thrust::make_counting_iterator((HYPRE_Int) 0),
                       thrust::make_counting_iterator(num_cols_P_offd),
                       offd_map_P_to_A,
                       offd_map_A_to_P );

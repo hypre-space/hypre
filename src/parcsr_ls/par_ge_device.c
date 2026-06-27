@@ -29,15 +29,15 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    hypre_ParCSRMatrix  *par_A           = hypre_ParAMGDataAArray(amg_data)[level];
    HYPRE_BigInt         global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_A);
    HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(par_A);
-   HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
+   hypre_int           *A_piv           = (hypre_int *) hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
    HYPRE_BigInt         global_size     = hypre_squared(global_num_rows);
 
    /* Local variables */
-   HYPRE_Int            buffer_size     = 0;
-   HYPRE_Int            ierr            = 0;
-   HYPRE_Int           *d_ierr          = NULL;
+   hypre_int            buffer_size     = 0;
+   hypre_int            ierr            = 0;
+   hypre_int           *d_ierr          = NULL;
    char                 msg[1024];
 
    /* Sanity checks */
@@ -60,7 +60,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 
 #elif defined(HYPRE_USING_CUSOLVER)
    /* Allocate space for device error code */
-   d_ierr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+   d_ierr = hypre_CTAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
 
    /* Compute buffer size */
    HYPRE_CUSOLVER_CALL(hypre_cusolver_dngetrf_bs(hypre_HandleVendorSolverHandle(hypre_handle()),
@@ -89,7 +89,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                                               d_ierr));
 
    /* Move error code to host */
-   hypre_TMemcpy(&ierr, d_ierr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&ierr, d_ierr, hypre_int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
 #elif defined(HYPRE_USING_ROCSOLVER)
 
@@ -156,7 +156,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 
 #elif defined(HYPRE_USING_CUSOLVER)
       /* Allocate space for device error code */
-      d_ierr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+      d_ierr = hypre_CTAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
 
       /* Create identity dense matrix */
       hypre_Memset((void*) A_work, 0,
@@ -228,12 +228,12 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    HYPRE_Real           *b_vec              = hypre_ParAMGDataBVec(amg_data);
    HYPRE_Real           *u_vec              = hypre_ParAMGDataUVec(amg_data);
    HYPRE_Real           *A_mat              = hypre_ParAMGDataAMat(amg_data);
-   HYPRE_Int            *A_piv              = hypre_ParAMGDataAPiv(amg_data);
+   hypre_int            *A_piv              = (hypre_int *) hypre_ParAMGDataAPiv(amg_data);
 
    /* Local variables */
    HYPRE_Real           *work;
-   HYPRE_Int            *d_ierr = NULL;
-   HYPRE_Int             ierr   = 0;
+   hypre_int            *d_ierr = NULL;
+   hypre_int             ierr   = 0;
    HYPRE_Int             i_one  = 1;
    HYPRE_Complex         d_one  = 1.0;
    HYPRE_Complex         zero   = 0.0;
@@ -277,7 +277,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
 #elif defined(HYPRE_USING_CUSOLVER) && defined(HYPRE_USING_CUBLAS)
    if (solver_type == 98 || solver_type == 99)
    {
-      d_ierr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+      d_ierr = hypre_CTAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
       HYPRE_CUSOLVER_CALL(hypre_cusolver_dngetrs(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                  CUBLAS_OP_N,
                                                  global_num_rows,
@@ -288,7 +288,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
                                                  b_vec,
                                                  global_num_rows,
                                                  d_ierr));
-      hypre_TMemcpy(&ierr, d_ierr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&ierr, d_ierr, hypre_int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
    else if (solver_type == 198 || solver_type == 199)
    {

@@ -738,15 +738,15 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
    std::int64_t          work_size;
    HYPRE_Complex        *scratchpad;
 #else
-   HYPRE_Int            *pivots;
+   hypre_int            *pivots;
    HYPRE_Complex       **tmpdiag_aop;
-   HYPRE_Int            *info;
+   hypre_int            *info;
 #endif
    HYPRE_Complex        *tmpdiag;
    HYPRE_Complex       **diag_aop;
 
 #if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_Int            *h_info;
+   hypre_int            *h_info;
    HYPRE_Int             k, myid;
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -777,11 +777,11 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
 #if defined(HYPRE_USING_ONEMKLBLAS)
    pivots      = hypre_CTAlloc(std::int64_t, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
 #else
-   pivots      = hypre_CTAlloc(HYPRE_Int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
+   pivots      = hypre_CTAlloc(hypre_int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
    tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
-   info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
+   info        = hypre_CTAlloc(hypre_int, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
-   h_info      = hypre_TAlloc(HYPRE_Int,  num_blocks, HYPRE_MEMORY_HOST);
+   h_info      = hypre_TAlloc(hypre_int,  num_blocks, HYPRE_MEMORY_HOST);
 #endif
 
    /* Use diag_aop to store factors; getri reads tmpdiag_aop and writes diag */
@@ -855,7 +855,7 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
 #endif
 
 #if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
-   hypre_TMemcpy(h_info, info, HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(h_info, info, hypre_int, num_blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    for (k = 0; k < num_blocks; k++)
    {
       if (h_info[k] != 0)

@@ -329,7 +329,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 #else
    /* Fpts; number of F pts */
    HYPRE_Int *points_end = HYPRE_THRUST_CALL( copy_if,
-                                              thrust::make_counting_iterator(0),
+                                              thrust::make_counting_iterator((HYPRE_Int) 0),
                                               thrust::make_counting_iterator(n_fine),
                                               CF_marker,
                                               points_left,
@@ -338,7 +338,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    /* Cpts; number of C pts */
    HYPRE_Int *pass_end = HYPRE_THRUST_CALL( copy_if,
-                                            thrust::make_counting_iterator(0),
+                                            thrust::make_counting_iterator((HYPRE_Int) 0),
                                             thrust::make_counting_iterator(n_fine),
                                             CF_marker,
                                             pass_order,

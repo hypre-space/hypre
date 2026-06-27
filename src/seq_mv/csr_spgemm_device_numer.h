@@ -11,6 +11,14 @@
 #include "_hypre_seq_mv.h"
 #include "csr_spgemm_device.h"
 
+/* In bigint builds the 8-byte hash keys double the shared-memory footprint of
+ * the SpGEMM hash tables, exceeding the 48 KB static shared-memory limit. Use
+ * dynamic shared memory for all bins (opting in to larger sizes via
+ * cudaFuncSetAttribute), as the SYCL path already does unconditionally. */
+#if defined(HYPRE_BIGINT) && !defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+#define HYPRE_SPGEMM_DEVICE_USE_DSHMEM
+#endif
+
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Numerical Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -65,7 +73,12 @@ hypre_spgemm_hash_insert_numer(
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
+#if defined(HYPRE_BIGINT)
+      old = (HYPRE_Int) atomicCAS((unsigned long long int *)(HashKeys + j),
+                                  (unsigned long long int) -1, (unsigned long long int) key);
+#else
       old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
+#endif
 #endif
 
       if (old == -1 || old == key)
@@ -128,7 +141,12 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
+#if defined(HYPRE_BIGINT)
+      old = (HYPRE_Int) atomicCAS((unsigned long long int *)(HashKeys + j),
+                                  (unsigned long long int) -1, (unsigned long long int) key);
+#else
       old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
+#endif
 #endif
 
       if (old == -1 || old == key)
@@ -852,11 +870,27 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
                           hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, HASH_TYPE, false>,
                           cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
-      /*
-         HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, HASH_TYPE, false>,
-         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
-      */
+      /* HAS_RIND == false is the default (non-binned) numeric path. Unlike the
+       * symbolic kernel (whose CAN_FAIL is constant), here FAILED_SYMBL
+       * (= !exact_rownnz) and HAS_GHASH are both data-dependent, so all four
+       * instantiations below can actually launch and each needs the
+       * dynamic-shared-memory opt-in; otherwise the launch fails with
+       * cudaErrorInvalidValue once the hash table exceeds 48 KB (always for bigint). */
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, HASH_TYPE, true>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, HASH_TYPE, false>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, true, HASH_TYPE, true>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, true, HASH_TYPE, false>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
    }
 #endif
 #endif
