@@ -607,8 +607,6 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                                        num_nonzeros_diag,
                                        num_nonzeros_offd);
 
-         hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
-
          hypre_ParCSRMatrixOwnsData(Pi) = 1;
          hypre_ParCSRMatrixInitialize(Pi);
       }

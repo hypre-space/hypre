@@ -337,9 +337,9 @@ hypre_MGRCleanupBuildData( void      *mgr_vdata,
       per-matrix ownership test is needed. */
    if ((mgr_data -> user_coarse_grid_matrix))
    {
-      for (L = 0; L < (mgr_data -> max_num_coarse_levels); L++)
+      for (lvl = 0; lvl < (mgr_data -> max_num_coarse_levels); lvl++)
       {
-         hypre_ParCSRMatrix *user_mat = (mgr_data -> user_coarse_grid_matrix)[L];
+         hypre_ParCSRMatrix *user_mat = (mgr_data -> user_coarse_grid_matrix)[lvl];
 
          if (!user_mat)
          {
