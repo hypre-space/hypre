@@ -149,6 +149,10 @@ hypre_MGRCreate(void)
 
    (mgr_data -> GSElimData) = NULL;
 
+   /* PCD coarse grid correction data is allocated up front and stays inert
+    * until the user supplies the pressure operators; owned by this MGR. */
+   (mgr_data -> pcd_data) = (hypre_MGRPCDData *) hypre_MGRPCDCreate();
+
    return (void *) mgr_data;
 }
 
@@ -692,6 +696,14 @@ hypre_MGRCleanupSolvers( void *mgr_vdata )
    HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
 
    hypre_MGRReleaseCoarseGridSolver(mgr_data);
+
+   /* Free the PCD coarse grid correction data (owned by MGR; the coarse
+    * solver release above registers it with owner NONE and never frees it) */
+   if ((mgr_data -> pcd_data))
+   {
+      hypre_MGRPCDDestroy((mgr_data -> pcd_data));
+      (mgr_data -> pcd_data) = NULL;
+   }
 
    if ((mgr_data -> aff_solver))
    {
@@ -4646,3 +4658,4 @@ hypre_MGRDirectSolverDestroy(void *solver)
    return hypre_error_flag;
 #endif
 }
+

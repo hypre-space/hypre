@@ -150,6 +150,66 @@ HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
 #endif
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPCDOperators
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPCDOperators( HYPRE_Solver solver,
+                                    HYPRE_ParCSRMatrix Fp,
+                                    HYPRE_ParCSRMatrix Ap,
+                                    HYPRE_ParCSRMatrix Mp )
+{
+   return ( hypre_MGRSetCoarseGridPCDOperators( (void *) solver,
+                                                (hypre_ParCSRMatrix *) Fp,
+                                                (hypre_ParCSRMatrix *) Ap,
+                                                (hypre_ParCSRMatrix *) Mp ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPCDApSolver
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPCDApSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver ap_solver )
+{
+   return ( hypre_MGRSetCoarseGridPCDApSolver( (void *) solver, ap_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPCDMpSolver
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPCDMpSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver mp_solver )
+{
+   return ( hypre_MGRSetCoarseGridPCDMpSolver( (void *) solver, mp_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPCDApplyOrder
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPCDApplyOrder( HYPRE_Solver solver,
+                                     HYPRE_Int    apply_order )
+{
+   return ( hypre_MGRSetCoarseGridPCDApplyOrder( (void *) solver, apply_order ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridPCDMassInvType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridPCDMassInvType( HYPRE_Solver solver,
+                                      HYPRE_Int    mass_inv_type )
+{
+   return ( hypre_MGRSetCoarseGridPCDMassInvType( (void *) solver, mass_inv_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCpointsByContiguousBlock
  *--------------------------------------------------------------------------*/
 

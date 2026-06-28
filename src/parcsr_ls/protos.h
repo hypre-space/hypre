@@ -1585,6 +1585,21 @@ HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations 
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
 
+/* par_mgr_pcd.c */
+void *hypre_MGRPCDCreate( void );
+HYPRE_Int hypre_MGRPCDDestroy( void *pcd_vdata );
+HYPRE_Int hypre_MGRPCDSetup( void *pcd_vdata, hypre_ParCSRMatrix *A,
+                             hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_MGRPCDSolve( void *pcd_vdata, hypre_ParCSRMatrix *A,
+                             hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_MGRSetCoarseGridPCDOperators( void *mgr_vdata, hypre_ParCSRMatrix *Fp,
+                                              hypre_ParCSRMatrix *Ap,
+                                              hypre_ParCSRMatrix *Mp );
+HYPRE_Int hypre_MGRSetCoarseGridPCDApSolver( void *mgr_vdata, HYPRE_Solver ap_solver );
+HYPRE_Int hypre_MGRSetCoarseGridPCDMpSolver( void *mgr_vdata, HYPRE_Solver mp_solver );
+HYPRE_Int hypre_MGRSetCoarseGridPCDApplyOrder( void *mgr_vdata, HYPRE_Int apply_order );
+HYPRE_Int hypre_MGRSetCoarseGridPCDMassInvType( void *mgr_vdata, HYPRE_Int mass_inv_type );
+
 /* par_mgr_interp.c */
 HYPRE_Int hypre_MGRBuildInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                 hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *S,
