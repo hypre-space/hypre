@@ -10,7 +10,7 @@
  *
  * See hypre_MGRPCDData in par_mgr.h for a description of the method. The data
  * object is created by hypre_MGRCreate and owned by the parent MGR solver;
- * users configure it through the HYPRE_MGRSetCoarseGridPCD* interface.
+ * users configure it through the HYPRE_MGRPCD* interface.
  *--------------------------------------------------------------------------*/
 
 #include "_hypre_parcsr_ls.h"
@@ -125,7 +125,7 @@ hypre_MGRPCDDestroy(void *pcd_vdata)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetCoarseGridPCDOperators
+ * hypre_MGRPCDSetOperators
  *
  * Sets the pressure-space operators and enables the PCD coarse grid
  * correction. The matrices are not owned and must remain valid through
@@ -133,10 +133,10 @@ hypre_MGRPCDDestroy(void *pcd_vdata)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetCoarseGridPCDOperators( void                *mgr_vdata,
-                                    hypre_ParCSRMatrix  *Fp,
-                                    hypre_ParCSRMatrix  *Ap,
-                                    hypre_ParCSRMatrix  *Mp )
+hypre_MGRPCDSetOperators( void                *mgr_vdata,
+                          hypre_ParCSRMatrix  *Fp,
+                          hypre_ParCSRMatrix  *Ap,
+                          hypre_ParCSRMatrix  *Mp )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData *) mgr_vdata;
    hypre_MGRPCDData  *pcd_data;
@@ -156,7 +156,7 @@ hypre_MGRSetCoarseGridPCDOperators( void                *mgr_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetCoarseGridPCDApSolver
+ * hypre_MGRPCDSetApSolver
  *
  * Injects a caller-owned solver for the pressure Laplacian (Ap) solves.
  * The solver is set up on Ap during MGR setup unless its base hypre_Solver
@@ -166,7 +166,7 @@ hypre_MGRSetCoarseGridPCDOperators( void                *mgr_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetCoarseGridPCDApSolver( void *mgr_vdata, HYPRE_Solver ap_solver )
+hypre_MGRPCDSetApSolver( void *mgr_vdata, HYPRE_Solver ap_solver )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData *) mgr_vdata;
    hypre_MGRPCDData  *pcd_data;
@@ -208,16 +208,16 @@ hypre_MGRSetCoarseGridPCDApSolver( void *mgr_vdata, HYPRE_Solver ap_solver )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetCoarseGridPCDMpSolver
+ * hypre_MGRPCDSetMpSolver
  *
  * Injects a caller-owned solver for the pressure mass matrix (Mp) solves,
  * with the same setup-reuse semantics as the Ap solver. Passing a NULL
  * solver reverts to the internal default ((lumped) mass diagonal scaling,
- * see hypre_MGRSetCoarseGridPCDMassInvType).
+ * see hypre_MGRPCDSetMassInvType).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetCoarseGridPCDMpSolver( void *mgr_vdata, HYPRE_Solver mp_solver )
+hypre_MGRPCDSetMpSolver( void *mgr_vdata, HYPRE_Solver mp_solver )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData *) mgr_vdata;
    hypre_MGRPCDData  *pcd_data;
@@ -250,11 +250,11 @@ hypre_MGRSetCoarseGridPCDMpSolver( void *mgr_vdata, HYPRE_Solver mp_solver )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetCoarseGridPCDApplyOrder
+ * hypre_MGRPCDSetApplyOrder
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetCoarseGridPCDApplyOrder( void *mgr_vdata, HYPRE_Int apply_order )
+hypre_MGRPCDSetApplyOrder( void *mgr_vdata, HYPRE_Int apply_order )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData *) mgr_vdata;
 
@@ -269,11 +269,11 @@ hypre_MGRSetCoarseGridPCDApplyOrder( void *mgr_vdata, HYPRE_Int apply_order )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRSetCoarseGridPCDMassInvType
+ * hypre_MGRPCDSetMassInvType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetCoarseGridPCDMassInvType( void *mgr_vdata, HYPRE_Int mass_inv_type )
+hypre_MGRPCDSetMassInvType( void *mgr_vdata, HYPRE_Int mass_inv_type )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData *) mgr_vdata;
 

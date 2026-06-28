@@ -1398,7 +1398,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> num_coarse_levels) = num_c_levels;
 
    /* Wire the PCD coarse grid correction when pressure operators have been
-    * provided (HYPRE_MGRSetCoarseGridPCDOperators) and the user has not
+    * provided (HYPRE_MGRPCDSetOperators) and the user has not
     * installed an explicit coarse solver via HYPRE_MGRSetCoarseSolver. */
    {
       hypre_MGRPCDData *pcd = (mgr_data -> pcd_data);

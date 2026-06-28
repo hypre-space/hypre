@@ -14,7 +14,7 @@
  * Internal data for MGR's PCD (pressure convection-diffusion) coarse grid
  * correction, created by hypre_MGRCreate and owned/destroyed by the parent
  * MGR solver. It stays inert until the user supplies the pressure operators
- * via HYPRE_MGRSetCoarseGridPCDOperators.
+ * via HYPRE_MGRPCDSetOperators.
  *
  * Approximates the action of the inverse of MGR's coarse grid matrix
  * (a Schur complement approximation for incompressible Navier-Stokes
@@ -28,8 +28,8 @@
  * as MGR's coarsest grid.
  *
  * The Ap^{-1} and Mp^{-1} actions are pluggable: users may inject arbitrary
- * (caller-owned) solver objects via HYPRE_MGRSetCoarseGridPCDApSolver and
- * HYPRE_MGRSetCoarseGridPCDMpSolver. Injected solvers are set up on the
+ * (caller-owned) solver objects via HYPRE_MGRPCDSetApSolver and
+ * HYPRE_MGRPCDSetMpSolver. Injected solvers are set up on the
  * corresponding operator unless their base hypre_Solver setup-reuse flag is
  * raised, which lets callers preserve, e.g., the Ap AMG hierarchy across
  * MGR rebuilds. Defaults when not injected: BoomerAMG for Ap (owned) and a

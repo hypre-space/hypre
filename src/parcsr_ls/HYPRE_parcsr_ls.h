@@ -5151,7 +5151,7 @@ HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
  * PCD approximates the inverse of MGR's coarse grid matrix (a Schur
  * complement approximation for incompressible Navier-Stokes systems reduced
  * onto the pressure unknowns) by \f$ S^{-1} \approx M_p^{-1} F_p A_p^{-1} \f$
- * (see \e HYPRE_MGRSetCoarseGridPCDApplyOrder), applied in residual-correction
+ * (see \e HYPRE_MGRPCDSetApplyOrder), applied in residual-correction
  * form. The matrices are not owned by MGR and must remain valid through setup
  * and solve; they must be distributed according to MGR's coarse grid
  * partitioning. An explicit coarse solver installed via
@@ -5163,10 +5163,10 @@ HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
  * @param Ap [IN] pressure Laplacian matrix.
  * @param Mp [IN] pressure mass matrix.
  **/
-HYPRE_Int HYPRE_MGRSetCoarseGridPCDOperators( HYPRE_Solver solver,
-                                              HYPRE_ParCSRMatrix Fp,
-                                              HYPRE_ParCSRMatrix Ap,
-                                              HYPRE_ParCSRMatrix Mp );
+HYPRE_Int HYPRE_MGRPCDSetOperators( HYPRE_Solver solver,
+                                    HYPRE_ParCSRMatrix Fp,
+                                    HYPRE_ParCSRMatrix Ap,
+                                    HYPRE_ParCSRMatrix Mp );
 
 /**
  * (Optional) Set a caller-owned solver for the pressure Laplacian
@@ -5176,21 +5176,21 @@ HYPRE_Int HYPRE_MGRSetCoarseGridPCDOperators( HYPRE_Solver solver,
  * @param solver [IN] MGR solver/preconditioner object.
  * @param ap_solver [IN] solver object (caller-owned).
  **/
-HYPRE_Int HYPRE_MGRSetCoarseGridPCDApSolver( HYPRE_Solver solver,
-                                             HYPRE_Solver ap_solver );
+HYPRE_Int HYPRE_MGRPCDSetApSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver ap_solver );
 
 /**
  * (Optional) Set a caller-owned solver for the pressure mass matrix
  * (\f$M_p\f$) solves of the PCD coarse grid correction, with the same
- * setup-reuse semantics as \e HYPRE_MGRSetCoarseGridPCDApSolver. When absent,
+ * setup-reuse semantics as \e HYPRE_MGRPCDSetApSolver. When absent,
  * a (lumped) mass diagonal scaling is used (see
- * \e HYPRE_MGRSetCoarseGridPCDMassInvType).
+ * \e HYPRE_MGRPCDSetMassInvType).
  *
  * @param solver [IN] MGR solver/preconditioner object.
  * @param mp_solver [IN] solver object (caller-owned).
  **/
-HYPRE_Int HYPRE_MGRSetCoarseGridPCDMpSolver( HYPRE_Solver solver,
-                                             HYPRE_Solver mp_solver );
+HYPRE_Int HYPRE_MGRPCDSetMpSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver mp_solver );
 
 /**
  * (Optional) Set the application order of the PCD coarse grid correction:
@@ -5198,8 +5198,8 @@ HYPRE_Int HYPRE_MGRSetCoarseGridPCDMpSolver( HYPRE_Solver solver,
  *    - 0 : \f$ u \mathrel{+}= M_p^{-1} F_p A_p^{-1} (f - A u) \f$ (default)
  *    - 1 : \f$ u \mathrel{+}= A_p^{-1} F_p M_p^{-1} (f - A u) \f$
  **/
-HYPRE_Int HYPRE_MGRSetCoarseGridPCDApplyOrder( HYPRE_Solver solver,
-                                               HYPRE_Int apply_order );
+HYPRE_Int HYPRE_MGRPCDSetApplyOrder( HYPRE_Solver solver,
+                                     HYPRE_Int apply_order );
 
 /**
  * (Optional) Set the type of approximate mass matrix inverse used when no
@@ -5208,8 +5208,8 @@ HYPRE_Int HYPRE_MGRSetCoarseGridPCDApplyOrder( HYPRE_Solver solver,
  *    - 0 : lumped mass (row sums of \f$M_p\f$, default)
  *    - 1 : diagonal of \f$M_p\f$
  **/
-HYPRE_Int HYPRE_MGRSetCoarseGridPCDMassInvType( HYPRE_Solver solver,
-                                                HYPRE_Int mass_inv_type );
+HYPRE_Int HYPRE_MGRPCDSetMassInvType( HYPRE_Solver solver,
+                                      HYPRE_Int mass_inv_type );
 
 /**
  * (Optional) Return the number of MGR iterations.

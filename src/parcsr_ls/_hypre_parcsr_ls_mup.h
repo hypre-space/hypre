@@ -5613,6 +5613,13 @@ HYPRE_Int
 hypre_MGRSetBlockSize_long_dbl( void *mgr_vdata, HYPRE_Int bsize );
 
 HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_flt( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
+HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_dbl( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
+HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_long_dbl( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
+
+HYPRE_Int
 hypre_MGRSetCoarseGridMethod_flt( void *mgr_vdata, HYPRE_Int *cg_method );
 HYPRE_Int
 hypre_MGRSetCoarseGridMethod_dbl( void *mgr_vdata, HYPRE_Int *cg_method );

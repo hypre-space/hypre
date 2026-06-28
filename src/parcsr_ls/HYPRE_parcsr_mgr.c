@@ -150,63 +150,63 @@ HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
 #endif
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCoarseGridPCDOperators
+ * HYPRE_MGRPCDSetOperators
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPCDOperators( HYPRE_Solver solver,
-                                    HYPRE_ParCSRMatrix Fp,
-                                    HYPRE_ParCSRMatrix Ap,
-                                    HYPRE_ParCSRMatrix Mp )
+HYPRE_MGRPCDSetOperators( HYPRE_Solver solver,
+                          HYPRE_ParCSRMatrix Fp,
+                          HYPRE_ParCSRMatrix Ap,
+                          HYPRE_ParCSRMatrix Mp )
 {
-   return ( hypre_MGRSetCoarseGridPCDOperators( (void *) solver,
-                                                (hypre_ParCSRMatrix *) Fp,
-                                                (hypre_ParCSRMatrix *) Ap,
-                                                (hypre_ParCSRMatrix *) Mp ) );
+   return ( hypre_MGRPCDSetOperators( (void *) solver,
+                                      (hypre_ParCSRMatrix *) Fp,
+                                      (hypre_ParCSRMatrix *) Ap,
+                                      (hypre_ParCSRMatrix *) Mp ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCoarseGridPCDApSolver
+ * HYPRE_MGRPCDSetApSolver
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPCDApSolver( HYPRE_Solver solver,
-                                   HYPRE_Solver ap_solver )
+HYPRE_MGRPCDSetApSolver( HYPRE_Solver solver,
+                         HYPRE_Solver ap_solver )
 {
-   return ( hypre_MGRSetCoarseGridPCDApSolver( (void *) solver, ap_solver ) );
+   return ( hypre_MGRPCDSetApSolver( (void *) solver, ap_solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCoarseGridPCDMpSolver
+ * HYPRE_MGRPCDSetMpSolver
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPCDMpSolver( HYPRE_Solver solver,
-                                   HYPRE_Solver mp_solver )
+HYPRE_MGRPCDSetMpSolver( HYPRE_Solver solver,
+                         HYPRE_Solver mp_solver )
 {
-   return ( hypre_MGRSetCoarseGridPCDMpSolver( (void *) solver, mp_solver ) );
+   return ( hypre_MGRPCDSetMpSolver( (void *) solver, mp_solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCoarseGridPCDApplyOrder
+ * HYPRE_MGRPCDSetApplyOrder
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPCDApplyOrder( HYPRE_Solver solver,
-                                     HYPRE_Int    apply_order )
+HYPRE_MGRPCDSetApplyOrder( HYPRE_Solver solver,
+                           HYPRE_Int    apply_order )
 {
-   return ( hypre_MGRSetCoarseGridPCDApplyOrder( (void *) solver, apply_order ) );
+   return ( hypre_MGRPCDSetApplyOrder( (void *) solver, apply_order ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCoarseGridPCDMassInvType
+ * HYPRE_MGRPCDSetMassInvType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPCDMassInvType( HYPRE_Solver solver,
-                                      HYPRE_Int    mass_inv_type )
+HYPRE_MGRPCDSetMassInvType( HYPRE_Solver solver,
+                            HYPRE_Int    mass_inv_type )
 {
-   return ( hypre_MGRSetCoarseGridPCDMassInvType( (void *) solver, mass_inv_type ) );
+   return ( hypre_MGRPCDSetMassInvType( (void *) solver, mass_inv_type ) );
 }
 
 /*--------------------------------------------------------------------------

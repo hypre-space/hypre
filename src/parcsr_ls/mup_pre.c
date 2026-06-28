@@ -6352,6 +6352,24 @@ HYPRE_MGRSetBlockSize_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_MGRSetCoarseGridMatrixAtLevel_flt( solver, level, coarse_matrix );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_MGRSetCoarseGridMatrixAtLevel_dbl( solver, level, coarse_matrix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_MGRSetCoarseGridMatrixAtLevel_long_dbl( solver, level, coarse_matrix );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cg_method )
 {
    switch (precision)
