@@ -226,7 +226,7 @@ typedef struct
    hypre_ParAMGData    **GSElimData;
 
    /* PCD (pressure convection-diffusion) coarse grid correction data;
-    * created on demand by HYPRE_MGRSetCoarseGridPCD*, owned by MGR */
+    * created by hypre_MGRCreate, configured via HYPRE_MGRPCDSet*, owned by MGR */
    hypre_MGRPCDData     *pcd_data;
 } hypre_ParMGRData;
 

@@ -3123,8 +3123,15 @@ hypre_MGRSetCoarseGridMatrixAtLevel( void               *mgr_vdata,
                                      hypre_ParCSRMatrix *coarse_matrix )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int         max_lvls = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int         max_lvls;
 
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   max_lvls = (mgr_data -> max_num_coarse_levels);
    if (level < 0 || level >= max_lvls)
    {
       hypre_error_in_arg(2);

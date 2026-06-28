@@ -359,9 +359,6 @@ hypre_MGRPCDSetup( void                *pcd_vdata,
 
    if (rebuild_vec)
    {
-      hypre_ParVector *keep_none = NULL;
-      HYPRE_UNUSED_VAR(keep_none);
-
       if ((pcd_data -> ap_solver) && (pcd_data -> ap_solver_owned))
       {
          hypre_BoomerAMGDestroy((void *) (pcd_data -> ap_solver));
@@ -392,7 +389,9 @@ hypre_MGRPCDSetup( void                *pcd_vdata,
       hypre_ParVectorInitialize_v2(pcd_data -> w_work, memory_location);
    }
 
-   /* Mp solver: injected (honoring setup reuse) or (lumped) mass diagonal */
+   /* Mp solver: injected (honoring setup reuse) or (lumped) mass diagonal.
+    * mass_diag is always kept current so that reverting to diagonal scaling via
+    * SetMpSolver(NULL) between setups does not produce stale zeros. */
    if (pcd_data -> mp_solver)
    {
       if ((pcd_data -> mp_setup) &&
@@ -402,7 +401,7 @@ hypre_MGRPCDSetup( void                *pcd_vdata,
                                 pcd_data -> r_work, pcd_data -> z_work);
       }
    }
-   else if (rebuild_mp)
+   if (rebuild_mp)
    {
       if ((pcd_data -> mass_inv_type) == 1)
       {
