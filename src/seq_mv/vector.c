@@ -38,6 +38,11 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    hypre_VectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   hypre_VectorGPUVecData(vector) = NULL;
+#endif
+
    return vector;
 }
 
@@ -74,6 +79,11 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector), memory_location);
       }
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+      hypre_GpuVecDataDestroy(hypre_VectorGPUVecData(vector));
+#endif
 
       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
@@ -130,6 +140,14 @@ hypre_SeqVectorSetData( hypre_Vector  *vector,
 
    /* Remove data pointer ownership */
    hypre_VectorOwnsData(vector) = 0;
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   if (hypre_VectorGPUVecData(vector))
+   {
+      hypre_GpuVecDataInvalidate(hypre_VectorGPUVecData(vector));
+   }
+#endif
 
    return hypre_error_flag;
 }
@@ -407,6 +425,14 @@ hypre_SeqVectorResize( hypre_Vector *vector,
       hypre_VectorVectorStride(vector) = 1;
       hypre_VectorIndexStride(vector)  = num_vectors;
    }
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   if (hypre_VectorGPUVecData(vector))
+   {
+      hypre_GpuVecDataInvalidate(hypre_VectorGPUVecData(vector));
+   }
+#endif
 
    return hypre_error_flag;
 }
@@ -872,6 +898,14 @@ hypre_SeqVectorMigrate(hypre_Vector         *x,
                        memory_location, old_memory_location);
          hypre_VectorData(x) = new_data;
          hypre_VectorOwnsData(x) = 1;
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+         if (hypre_VectorGPUVecData(x))
+         {
+            hypre_GpuVecDataInvalidate(hypre_VectorGPUVecData(x));
+         }
+#endif
 
          /* Free old data */
          hypre_TFree(data, old_memory_location);

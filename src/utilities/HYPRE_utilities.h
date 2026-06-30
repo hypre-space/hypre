@@ -660,6 +660,19 @@ HYPRE_Int HYPRE_SetSpTransUseVendor(HYPRE_Int use_vendor);
 HYPRE_Int HYPRE_SetSpMVUseVendor(HYPRE_Int use_vendor);
 
 /**
+ * Select the SpMV algorithm used for device SpMV.
+ *
+ * The integer value corresponds to the rocSPARSE rocsparse_spmv_alg_*
+ * enumeration. Use 0 for the vendor default. This setting is currently used
+ * only by the rocSPARSE SpMV path; cuSPARSE uses HYPRE's configured
+ * cuSPARSE algorithm and oneMKL ignores this setting.
+ *
+ * @param algorithm rocSPARSE algorithm identifier (0 = default, valid range 0-9)
+ * @return hypre global error code (0 = success)
+ */
+HYPRE_Int HYPRE_SetSpMVAlgorithm(HYPRE_Int algorithm);
+
+/**
  * Specifies the algorithm used for sparse matrix/matrix multiplication in device builds.
  *
  * The following options are available for \e use_vendor:

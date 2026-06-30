@@ -324,6 +324,7 @@ HYPRE_Int hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
 HYPRE_Int hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 HYPRE_Int hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+HYPRE_Int hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 
 #define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDescr(hypre_CSRMatrixGetGPUMatData(matrix)) )
@@ -333,8 +334,17 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+HYPRE_Int hypre_CSRMatrixSpMVAnalysisRocsparseDevice(hypre_CSRMatrix *matrix,
+                                                     HYPRE_Int        offset);
 
 /* vector_device.c */
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+hypre_GpuVecData* hypre_GpuVecDataCreate();
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+HYPRE_Int hypre_GpuVecDataInvalidate(hypre_GpuVecData *data);
+hypre_GpuVecData* hypre_VectorGetGPUVecData(hypre_Vector *vector);
+#endif
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector *vector, HYPRE_Complex *values );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
