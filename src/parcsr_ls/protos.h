@@ -1545,6 +1545,8 @@ HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_metho
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
 HYPRE_Int hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method );
+HYPRE_Int hypre_MGRSetCoarseGridMatrixAtLevel( void *mgr_vdata, HYPRE_Int level,
+                                               hypre_ParCSRMatrix *coarse_matrix );
 HYPRE_Int hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts );
 HYPRE_Int hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts );
 HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrictType );

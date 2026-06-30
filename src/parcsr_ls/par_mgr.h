@@ -38,6 +38,7 @@ typedef struct
    hypre_ParCSRMatrix  **R_array;
    hypre_ParCSRMatrix  **RT_array;
    hypre_ParCSRMatrix   *RAP;
+   hypre_ParCSRMatrix  **user_coarse_grid_matrix; /* User-provided Schur complement */
    hypre_IntArray      **CF_marker_array;
    HYPRE_Int           **coarse_indices_lvls;
    hypre_ParVector     **F_array;
