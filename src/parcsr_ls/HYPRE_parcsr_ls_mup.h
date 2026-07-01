@@ -3228,6 +3228,51 @@ HYPRE_Int
 HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
+HYPRE_MGRPCDSetApSolver_flt( HYPRE_Solver solver, HYPRE_Solver ap_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetApSolver_dbl( HYPRE_Solver solver, HYPRE_Solver ap_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetApSolver_long_dbl( HYPRE_Solver solver, HYPRE_Solver ap_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetApSolver( HYPRE_Solver solver, HYPRE_Solver ap_solver );
+
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder_flt( HYPRE_Solver solver, HYPRE_Int apply_order );
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder_dbl( HYPRE_Solver solver, HYPRE_Int apply_order );
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder_long_dbl( HYPRE_Solver solver, HYPRE_Int apply_order );
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder( HYPRE_Solver solver, HYPRE_Int apply_order );
+
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType_flt( HYPRE_Solver solver, HYPRE_Int mass_inv_type );
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType_dbl( HYPRE_Solver solver, HYPRE_Int mass_inv_type );
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType_long_dbl( HYPRE_Solver solver, HYPRE_Int mass_inv_type );
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType( HYPRE_Solver solver, HYPRE_Int mass_inv_type );
+
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver_flt( HYPRE_Solver solver, HYPRE_Solver mp_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver_dbl( HYPRE_Solver solver, HYPRE_Solver mp_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver_long_dbl( HYPRE_Solver solver, HYPRE_Solver mp_solver );
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver( HYPRE_Solver solver, HYPRE_Solver mp_solver );
+
+HYPRE_Int
+HYPRE_MGRPCDSetOperators_flt( HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp );
+HYPRE_Int
+HYPRE_MGRPCDSetOperators_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp );
+HYPRE_Int
+HYPRE_MGRPCDSetOperators_long_dbl( HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp );
+HYPRE_Int
+HYPRE_MGRPCDSetOperators( HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp );
+
+HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize_flt( HYPRE_Solver solver, HYPRE_Int blk_size );
 HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize_dbl( HYPRE_Solver solver, HYPRE_Int blk_size );
@@ -7140,6 +7185,21 @@ HYPRE_MGRGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solv
 
 HYPRE_Int
 HYPRE_MGRGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
+
+HYPRE_Int
+HYPRE_MGRPCDSetApSolver_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver ap_solver );
+
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int apply_order );
+
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int mass_inv_type );
+
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver mp_solver );
+
+HYPRE_Int
+HYPRE_MGRPCDSetOperators_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp );
 
 HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int blk_size );

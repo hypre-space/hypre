@@ -389,6 +389,11 @@
 #undef HYPRE_MGRGetCoarseGridConvergenceFactor
 #undef HYPRE_MGRGetFinalRelativeResidualNorm
 #undef HYPRE_MGRGetNumIterations
+#undef HYPRE_MGRPCDSetApSolver
+#undef HYPRE_MGRPCDSetApplyOrder
+#undef HYPRE_MGRPCDSetMassInvType
+#undef HYPRE_MGRPCDSetMpSolver
+#undef HYPRE_MGRPCDSetOperators
 #undef HYPRE_MGRSetBlockJacobiBlockSize
 #undef HYPRE_MGRSetBlockSize
 #undef HYPRE_MGRSetCoarseGridMatrixAtLevel
@@ -1557,6 +1562,15 @@
 #undef hypre_MGRGetRestrictionName
 #undef hypre_MGRGetSubBlock
 #undef hypre_MGRNonGalerkinTruncate
+#undef hypre_MGRPCDCreate
+#undef hypre_MGRPCDDestroy
+#undef hypre_MGRPCDSetApSolver
+#undef hypre_MGRPCDSetApplyOrder
+#undef hypre_MGRPCDSetMassInvType
+#undef hypre_MGRPCDSetMpSolver
+#undef hypre_MGRPCDSetOperators
+#undef hypre_MGRPCDSetup
+#undef hypre_MGRPCDSolve
 #undef hypre_MGRPrintCoarseSystem
 #undef hypre_MGRReleaseCoarseGridSolver
 #undef hypre_MGRReleaseFSolverAtLevel
@@ -2296,6 +2310,7 @@
 #undef hypreGPUKernel_pass_order_count
 #undef hypreGPUKernel_populate_big_P_offd_j
 #undef hypre_BatchedGaussJordanSolveDevice
+#undef hypre_BlockDiagInvDevice
 #undef hypre_BoomerAMGBuildDirInterpDevice
 #undef hypre_BoomerAMGBuildDirInterp_getcoef
 #undef hypre_BoomerAMGBuildDirInterp_getcoef_v2
