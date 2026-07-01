@@ -28,6 +28,13 @@ HYPRE_Int
 hypreDevice_extendWtoP_long_dbl( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_long_double *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_long_double *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
 
 HYPRE_Int
+hypre_BlockDiagInvDevice_flt( hypre_float *diag, HYPRE_Int N, HYPRE_Int blk_size );
+HYPRE_Int
+hypre_BlockDiagInvDevice_dbl( hypre_double *diag, HYPRE_Int N, HYPRE_Int blk_size );
+HYPRE_Int
+hypre_BlockDiagInvDevice_long_dbl( hypre_long_double *diag, HYPRE_Int N, HYPRE_Int blk_size );
+
+HYPRE_Int
 hypre_BoomerAMGBuildDirInterpDevice_flt( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, hypre_float trunc_factor, HYPRE_Int max_elmts, HYPRE_Int interp_type, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int
 hypre_BoomerAMGBuildDirInterpDevice_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, hypre_double trunc_factor, HYPRE_Int max_elmts, HYPRE_Int interp_type, hypre_ParCSRMatrix **P_ptr );

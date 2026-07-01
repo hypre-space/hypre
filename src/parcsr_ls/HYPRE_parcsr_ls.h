@@ -4746,6 +4746,21 @@ HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
                              HYPRE_Int *cg_method );
 
 /**
+ * (Optional) Provide an application-assembled coarse-grid (e.g. Schur-complement)
+ * operator for a given MGR reduction level, used in place of the Galerkin RAP
+ * product when that level's coarse_grid_method is 6. MGR uses the matrix in place:
+ * it never frees the matrix and never alters its entries. If the matrix has no
+ * communication package, MGR creates one during setup, which is reclaimed when the
+ * application destroys the matrix. The matrix's row/column partitioning must match
+ * the compressed coarse (C-point) space for that level. Call once per level as
+ * needed.
+ **/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel(HYPRE_Solver solver,
+                                    HYPRE_Int level,
+                                    HYPRE_ParCSRMatrix coarse_matrix );
+
+/**
  * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
  * operator computed in the Non-Galerkin approach. Options for \e max_elmts are:
  *
@@ -5127,6 +5142,74 @@ HYPRE_Int
 HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
                                    HYPRE_Solver  smoother,
                                    HYPRE_Int     level );
+
+/**
+ * Set the pressure-space operators for MGR's PCD (pressure
+ * convection-diffusion) coarse grid correction and enable it as the coarse
+ * grid solver.
+ *
+ * PCD approximates the inverse of MGR's coarse grid matrix (a Schur
+ * complement approximation for incompressible Navier-Stokes systems reduced
+ * onto the pressure unknowns) by \f$ S^{-1} \approx M_p^{-1} F_p A_p^{-1} \f$
+ * (see \e HYPRE_MGRPCDSetApplyOrder), applied in residual-correction
+ * form. The matrices are not owned by MGR and must remain valid through setup
+ * and solve; they must be distributed according to MGR's coarse grid
+ * partitioning. An explicit coarse solver installed via
+ * \e HYPRE_MGRSetCoarseSolver takes precedence over PCD.
+ *
+ * @param solver [IN] MGR solver/preconditioner object.
+ * @param Fp [IN] pressure convection-diffusion matrix
+ *                \f$F_p = M_p/\Delta t + N_p(u) + \nu A_p\f$.
+ * @param Ap [IN] pressure Laplacian matrix.
+ * @param Mp [IN] pressure mass matrix.
+ **/
+HYPRE_Int HYPRE_MGRPCDSetOperators( HYPRE_Solver solver,
+                                    HYPRE_ParCSRMatrix Fp,
+                                    HYPRE_ParCSRMatrix Ap,
+                                    HYPRE_ParCSRMatrix Mp );
+
+/**
+ * (Optional) Set a caller-owned solver for the pressure Laplacian
+ * (\f$A_p\f$) solves of the PCD coarse grid correction. When not set,
+ * an internal BoomerAMG hierarchy with default options is used (single V-cycle).
+ *
+ * @param solver [IN] MGR solver/preconditioner object.
+ * @param ap_solver [IN] solver object (caller-owned).
+ **/
+HYPRE_Int HYPRE_MGRPCDSetApSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver ap_solver );
+
+/**
+ * (Optional) Set a caller-owned solver for the pressure mass matrix
+ * (\f$M_p\f$) solves of the PCD coarse grid correction, with the same
+ * setup-reuse semantics as \e HYPRE_MGRPCDSetApSolver. When absent,
+ * a (lumped) mass diagonal scaling is used (see
+ * \e HYPRE_MGRPCDSetMassInvType).
+ *
+ * @param solver [IN] MGR solver/preconditioner object.
+ * @param mp_solver [IN] solver object (caller-owned).
+ **/
+HYPRE_Int HYPRE_MGRPCDSetMpSolver( HYPRE_Solver solver,
+                                   HYPRE_Solver mp_solver );
+
+/**
+ * (Optional) Set the application order of the PCD coarse grid correction:
+ *
+ *    - 0 : \f$ u \mathrel{+}= M_p^{-1} F_p A_p^{-1} (f - A u) \f$ (default)
+ *    - 1 : \f$ u \mathrel{+}= A_p^{-1} F_p M_p^{-1} (f - A u) \f$
+ **/
+HYPRE_Int HYPRE_MGRPCDSetApplyOrder( HYPRE_Solver solver,
+                                     HYPRE_Int apply_order );
+
+/**
+ * (Optional) Set the type of approximate mass matrix inverse used when no
+ * \f$M_p\f$ solver is injected:
+ *
+ *    - 0 : lumped mass (row sums of \f$M_p\f$, default)
+ *    - 1 : diagonal of \f$M_p\f$
+ **/
+HYPRE_Int HYPRE_MGRPCDSetMassInvType( HYPRE_Solver solver,
+                                      HYPRE_Int mass_inv_type );
 
 /**
  * (Optional) Return the number of MGR iterations.

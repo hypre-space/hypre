@@ -639,6 +639,31 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       RAP = *A_CC_ptr;
       *A_CC_ptr = NULL;
    }
+   else if (method == 6)
+   {
+      /* Application-provided coarse-grid operator (e.g. an externally assembled
+         Schur-complement). MGR uses it in place: it does NOT own it (see the
+         function hypre_MGRCleanupBuildData) and never alters its entries (the
+         truncation below is skipped for method 6). If the matrix lacks a
+         communication package, MGR creates one further below; that is reclaimed
+         when the application destroys the matrix. Its row/column partitioning must
+         match the compressed coarse (C-point) space that hypre_MGRCoarseParms produces
+         for this level. The index is bounded by max_num_coarse_levels, so an unset or
+         out-of-range level falls through to the error path rather than reading
+         past the array. */
+      RAP = ((mgr_data -> user_coarse_grid_matrix) &&
+             level < (mgr_data -> max_num_coarse_levels)) ?
+            (mgr_data -> user_coarse_grid_matrix)[level] : NULL;
+      if (!RAP)
+      {
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "MGR coarse_grid_method 6 requires a coarse matrix set via "
+                           "HYPRE_MGRSetCoarseGridMatrixAtLevel() at this level");
+         return hypre_error_flag;
+      }
+   }
    else
    {
       /* Non-Galerkin path */
@@ -647,8 +672,9 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
                                               ordering, method, max_elmts, &RAP);
    }
 
-   /* Truncate coarse level matrix based on input threshold */
-   if (threshold > 0.0)
+   /* Truncate coarse level matrix based on input threshold
+      (never on an application-provided matrix). */
+   if (threshold > 0.0 && method != 6)
    {
 #if defined (HYPRE_USING_GPU)
       HYPRE_MemoryLocation rap_memory_location = hypre_ParCSRMatrixMemoryLocation(RAP);

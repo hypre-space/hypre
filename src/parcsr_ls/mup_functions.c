@@ -3166,6 +3166,51 @@ HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRPCDSetApSolver( HYPRE_Solver solver, HYPRE_Solver ap_solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRPCDSetApSolver_pre( precision, solver, ap_solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRPCDSetApplyOrder( HYPRE_Solver solver, HYPRE_Int apply_order )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRPCDSetApplyOrder_pre( precision, solver, apply_order );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRPCDSetMassInvType( HYPRE_Solver solver, HYPRE_Int mass_inv_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRPCDSetMassInvType_pre( precision, solver, mass_inv_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRPCDSetMpSolver( HYPRE_Solver solver, HYPRE_Solver mp_solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRPCDSetMpSolver_pre( precision, solver, mp_solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRPCDSetOperators( HYPRE_Solver solver, HYPRE_ParCSRMatrix Fp, HYPRE_ParCSRMatrix Ap, HYPRE_ParCSRMatrix Mp )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRPCDSetOperators_pre( precision, solver, Fp, Ap, Mp );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, HYPRE_Int blk_size )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -3179,6 +3224,15 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_MGRSetBlockSize_pre( precision, solver, bsize );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetCoarseGridMatrixAtLevel_pre( precision, solver, level, coarse_matrix );
 }
 
 /*--------------------------------------------------------------------------*/
