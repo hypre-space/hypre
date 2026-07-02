@@ -2152,9 +2152,9 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
  *    global_ranks_ptr = (pointer to array of global ranks)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
+HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_Int part, HYPRE_Int var,
                                                  HYPRE_Int num_indexes, HYPRE_Int **indexes,
-                                                 HYPRE_BigInt **global_ranks_ptr, HYPRE_Int type)
+                                                 HYPRE_BigInt **global_ranks_ptr)
 {
    HYPRE_Int            ndim = hypre_SStructGridNDim(grid);
    HYPRE_Int            i, d;
@@ -2173,6 +2173,23 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_
       }
       /* WM: todo - is calling hypre_SStructGridFindBoxManEntry() for each index efficient enough? */
       hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
+      /* WM: todo - I don't really understand hypre_SStructGridFindNborBoxManEntry()... is it necessary? */
+      /* if not local, check neighbors */
+      if (boxman_entry == NULL)
+      {
+         hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
+      }
+      /* WM: todo - do I want to throw an error here or just set to -1 or something like that? */
+      if (boxman_entry == NULL)
+      {
+         hypre_error_in_arg(1);
+         hypre_error_in_arg(2);
+         hypre_error_in_arg(4);
+
+         HYPRE_ANNOTATE_FUNC_END;
+
+         return hypre_error_flag;
+      }
       hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &(global_ranks[i]), type);
    }
 
@@ -2196,9 +2213,9 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_
  *    indexes_ptr = (pointer to indexes[dim][i], the resulting indexes)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
+HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_Int part, HYPRE_Int var,
                                                  HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
-                                                 HYPRE_Int ***indexes_ptr, HYPRE_Int type)
+                                                 HYPRE_Int ***indexes_ptr)
 {
    hypre_BoxManEntry         *entry;
    hypre_SStructBoxManInfo   *entry_info;
@@ -2209,7 +2226,8 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
    HYPRE_Int                  entry_num = 0;
    HYPRE_Int                **indexes;
 
-   /* WM: todo - do I need to consider the hypre_SStructGridNborBoxManagers? */
+   /* WM: todo - do I need to consider the hypre_SStructGridNborBoxManagers?
+    *            do I need this function to work for global ranks not owned by this proc? */
    HYPRE_Int                  ndim      = hypre_SStructGridNDim(grid);
    hypre_BoxManager          *manager   = hypre_SStructGridBoxManager(grid, part, var);
    HYPRE_Int                  nentries  = hypre_BoxManNEntries(manager);
@@ -2293,12 +2311,16 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * Given an array of global ranks, generate a pointer array listing the
+ * starting indexes for each part/var chunk of the global ranks array.
+ *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid,
-                                           HYPRE_BigInt      *global_ranks,
-                                           HYPRE_Int        **global_ranks_part_var_ptr_ptr,
-                                           HYPRE_Int          type,
-                                           HYPRE_Int          last )
+hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
+                                              HYPRE_Int          type,
+                                              HYPRE_Int          num_ranks,
+                                              HYPRE_BigInt      *global_ranks,
+                                              HYPRE_Int        **global_ranks_part_var_starts_ptr )
 {
    /* WM: todo - GPU port */
    HYPRE_Int                  i, part, var, nvars, npartvars;
@@ -2307,7 +2329,7 @@ hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid,
    hypre_BoxManEntry         *entry;
    hypre_SStructBoxManInfo   *entry_info;
    hypre_BoxManager          *manager;
-   HYPRE_Int                 *global_ranks_part_var_ptr;
+   HYPRE_Int                 *global_ranks_part_var_starts;
 
    HYPRE_Int                  nparts = hypre_SStructGridNParts(grid);
    
@@ -2328,7 +2350,7 @@ hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid,
          npartvars++;
       }
    }
-   global_ranks_part_var_ptr = hypre_TAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
+   global_ranks_part_var_starts = hypre_CTAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
    npartvars = 0;
    i = 0;
    for (part = 0; part < nparts; part++)
@@ -2349,29 +2371,20 @@ hypre_SStructGridGetGlobalRanksPartVarPtr( hypre_SStructGrid *grid,
          {
             offset = hypre_SStructBoxManInfoGhoffset(entry_info);
          }
-         while (global_ranks[i] < offset)
+         while (i < num_ranks && global_ranks[i] < offset)
          {
             i++;
          }
-         global_ranks_part_var_ptr[npartvars] = i;
+         global_ranks_part_var_starts[npartvars] = i;
+         npartvars++;
       }
    }
-   /* WM: todo - I don't want to have to pass a matrix or vector here... how do I get the last entry? 
-    *            Might be nice to store the first/last global rank belonging to this processor in the hypre_SStructGrid?
-    *            For now, I guess I'll just pass this last value... */
-   /* global_ranks_part_var_ptr[npartvars] = hypre_ParCSRMatrixLastRowIndex(parcsr_uB); */
-   global_ranks_part_var_ptr[npartvars] = last;
+   global_ranks_part_var_starts[npartvars] = num_ranks;
 
-   *global_ranks_part_var_ptr_ptr = global_ranks_part_var_ptr;
+   *global_ranks_part_var_starts_ptr = global_ranks_part_var_starts;
 
    return hypre_error_flag;
 }
-
-
-
-
-
-
 
 /*--------------------------------------------------------------------------
  * GEC1002 a function that will select the right way to calculate the strides
