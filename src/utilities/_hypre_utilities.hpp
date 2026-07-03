@@ -731,6 +731,58 @@ typedef sycl::queue* hypre_DeviceStream;
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  GPU Graph capture type and macros (CUDA and HIP only)
+ *
+ *  Graph capture is a feature that can reduce overhead associated with
+ *  launching a known pattern of GPU kernels. If a sequence of kernels
+ *  is known to repeat, then capturing it the first time and subsequently
+ *  only launching the graph can improve performance.
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+struct hypre_GPUGraphHandler
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaGraph_t     graph;
+   cudaGraphExec_t graph_exec;
+#else  /* HIP */
+   hipGraph_t      graph;
+   hipGraphExec_t  graph_exec;
+#endif
+   HYPRE_Int       is_ready; /* 0 = not yet captured, 1 = ready for graph launch */
+};
+
+#if defined(HYPRE_USING_CUDA)
+#define hypre_GraphStreamBeginCapture(stream) \
+   HYPRE_CUDA_CALL( cudaStreamBeginCapture((stream), cudaStreamCaptureModeThreadLocal) )
+#define hypre_GraphStreamEndCapture(stream, graph) \
+   HYPRE_CUDA_CALL( cudaStreamEndCapture((stream), (graph)) )
+#define hypre_GraphInstantiate(graph_exec, graph) \
+   HYPRE_CUDA_CALL( cudaGraphInstantiate((graph_exec), (graph), 0) )
+#define hypre_GraphLaunch(graph_exec, stream) \
+   HYPRE_CUDA_CALL( cudaGraphLaunch((graph_exec), (stream)) )
+#define hypre_GraphDestroy(graph) \
+   HYPRE_CUDA_CALL( cudaGraphDestroy(graph) )
+#define hypre_GraphExecDestroy(graph_exec) \
+   HYPRE_CUDA_CALL( cudaGraphExecDestroy(graph_exec) )
+#else  /* HIP */
+#define hypre_GraphStreamBeginCapture(stream) \
+   HYPRE_HIP_CALL( hipStreamBeginCapture((stream), hipStreamCaptureModeThreadLocal) )
+#define hypre_GraphStreamEndCapture(stream, graph) \
+   HYPRE_HIP_CALL( hipStreamEndCapture((stream), (graph)) )
+#define hypre_GraphInstantiate(graph_exec, graph) \
+   HYPRE_HIP_CALL( hipGraphInstantiate((graph_exec), (graph), NULL, NULL, 0) )
+#define hypre_GraphLaunch(graph_exec, stream) \
+   HYPRE_HIP_CALL( hipGraphLaunch((graph_exec), (stream)) )
+#define hypre_GraphDestroy(graph) \
+   HYPRE_HIP_CALL( hipGraphDestroy(graph) )
+#define hypre_GraphExecDestroy(graph_exec) \
+   HYPRE_HIP_CALL( hipGraphExecDestroy(graph_exec) )
+#endif  /* CUDA vs HIP */
+
+#endif  /* HYPRE_USING_CUDA || HYPRE_USING_HIP */
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping vendor library calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
