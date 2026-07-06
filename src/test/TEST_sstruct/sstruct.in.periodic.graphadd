@@ -45,8 +45,8 @@ GraphSetStencil: 0 0 0
 #   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
 #   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
 #   index_map[ndim] entry value
-GridAddEntries: 0 (1- 1- 1-) (2+ 2+ 1-) [1 1 1] 0 0 (1- 1- 2+) (2+ 2+ 2+) [1 1 1] 0 [0 1 2] 7 -1.0
-GridAddEntries: 0 (1- 1- 2+) (2+ 2+ 2+) [1 1 1] 0 0 (1- 1- 1-) (2+ 2+ 1-) [1 1 1] 0 [0 1 2] 7 -1.0
+GraphAddEntries: 0 (1- 1- 1-) (2+ 2+ 1-) [1 1 1] 0 0 (1- 1- 2+) (2+ 2+ 2+) [1 1 1] 0 [0 1 2] 7 -1.0
+GraphAddEntries: 0 (1- 1- 2+) (2+ 2+ 2+) [1 1 1] 0 0 (1- 1- 1-) (2+ 2+ 1-) [1 1 1] 0 [0 1 2] 7 -1.0
 
 ###########################################################
 
