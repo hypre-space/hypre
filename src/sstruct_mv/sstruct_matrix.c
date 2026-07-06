@@ -1279,6 +1279,8 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    HYPRE_Int            *vars        = hypre_SStructStencilVars(stencil);
    hypre_Index          *shape       = hypre_SStructStencilShape(stencil);
    HYPRE_Int             size        = hypre_SStructStencilSize(stencil);
+   /* WM: todo - I don't think this routine works for matrices with coarse range, just coarse domain or square.
+    *            Double check and see how to fix this. */
    hypre_IndexRef        dom_stride  = hypre_SStructPMatrixDomainStride(pmatrix);
    HYPRE_MemoryLocation  memory_location = hypre_IJMatrixMemoryLocation(ijmatrix);
 
@@ -1299,6 +1301,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    hypre_Box            *map_vbox;
    hypre_Index           index;
    hypre_Index           unit_stride;
+   hypre_Index           zero_offset;
    hypre_Index           loop_size;
    hypre_Index           mstart;
    hypre_IndexRef        vstart;
@@ -1312,33 +1315,76 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("SStructUMatrixSetBoxValuesHelper");
 
-   /*------------------------------------------
-    * all stencil entries
-    *------------------------------------------*/
-
    hypre_SetIndex(unit_stride, 1);
-   if (entries[0] < size)
+   hypre_SetIndex(zero_offset, 0);
+   box      = hypre_BoxCreate(ndim);
+   to_box   = hypre_BoxCreate(ndim);
+   map_box  = hypre_BoxCreate(ndim);
+   int_box  = hypre_BoxCreate(ndim);
+   map_vbox = hypre_BoxCreate(ndim);
+
+   nrows        = hypre_BoxVolume(set_box);
+   num_nonzeros = nrows * nentries;
+   ncols        = hypre_CTAlloc(HYPRE_Int,     nrows,        memory_location);
+   rows         = hypre_CTAlloc(HYPRE_BigInt,  nrows,        memory_location);
+   row_indexes  = hypre_CTAlloc(HYPRE_Int,     nrows + 1,    memory_location);
+   cols         = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, memory_location);
+   ijvalues     = hypre_TAlloc(HYPRE_Complex,  num_nonzeros, memory_location);
+   values_map   = hypre_TAlloc(HYPRE_Int,      num_nonzeros, memory_location);
+
+   /* TODO (VPM): We could wrap this into a separate function */
+#if defined(HYPRE_USING_GPU)
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      box      = hypre_BoxCreate(ndim);
-      to_box   = hypre_BoxCreate(ndim);
-      map_box  = hypre_BoxCreate(ndim);
-      int_box  = hypre_BoxCreate(ndim);
-      map_vbox = hypre_BoxCreate(ndim);
+      hypreDevice_IntFilln(values_map, num_nonzeros, -1);
+   }
+   else
+#endif
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         values_map[i] = -1;
+      }
+   }
 
-      nrows        = hypre_BoxVolume(set_box);
-      num_nonzeros = nrows * nentries;
-      ncols        = hypre_CTAlloc(HYPRE_Int,     nrows,        memory_location);
-      rows         = hypre_CTAlloc(HYPRE_BigInt,  nrows,        memory_location);
-      row_indexes  = hypre_CTAlloc(HYPRE_Int,     nrows + 1,    memory_location);
-      cols         = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, memory_location);
-      ijvalues     = hypre_TAlloc(HYPRE_Complex,  num_nonzeros, memory_location);
-      values_map   = hypre_TAlloc(HYPRE_Int,      num_nonzeros, memory_location);
+   hypre_SStructGridIntersect(grid, part, var, set_box, -1,
+                              &boxman_entries, &nboxman_entries);
 
-      /* TODO (VPM): We could wrap this into a separate function */
+   for (ii = 0; ii < nboxman_entries; ii++)
+   {
+      hypre_SStructBoxManEntryGetStrides(boxman_entries[ii], rs, matrix_type);
+
+      hypre_BoxManEntryGetExtents(boxman_entries[ii],
+                                  hypre_BoxIMin(map_box),
+                                  hypre_BoxIMax(map_box));
+      hypre_IntersectBoxes(set_box, map_box, int_box);
+      hypre_CopyBox(int_box, box);
+
+      /* For each index in 'box', compute a row of length <= nentries and
+       * insert it into an nentries-length segment of 'cols' and 'ijvalues'.
+       * This may result in gaps, but IJSetValues2() is designed for that. */
+      nrows = hypre_BoxVolume(box);
+
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_IntFilln(values_map, num_nonzeros, -1);
+         hypreDevice_IntFilln(ncols, nrows, 0);
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform,
+                            oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                            oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                            row_indexes,
+         [const_val = nentries] (const auto & x) { return x * const_val; } );
+#else
+         HYPRE_THRUST_CALL( transform,
+                            thrust::counting_iterator<HYPRE_Int>(0),
+                            thrust::counting_iterator<HYPRE_Int>(nrows + 1),
+                            row_indexes,
+                            _1 * nentries );
+#endif
       }
       else
 #endif
@@ -1346,70 +1392,45 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for (i = 0; i < num_nonzeros; i++)
+         for (i = 0; i < nrows; i++)
          {
-            values_map[i] = -1;
+            ncols[i] = 0;
+            row_indexes[i] = i * nentries;
          }
       }
 
-      hypre_SStructGridIntersect(grid, part, var, set_box, -1,
-                                 &boxman_entries, &nboxman_entries);
-
-      for (ii = 0; ii < nboxman_entries; ii++)
+      for (ei = 0; ei < nentries; ei++)
       {
-         hypre_SStructBoxManEntryGetStrides(boxman_entries[ii], rs, matrix_type);
+         entry  = entries[ei];
 
-         hypre_BoxManEntryGetExtents(boxman_entries[ii],
-                                     hypre_BoxIMin(map_box),
-                                     hypre_BoxIMax(map_box));
-         hypre_IntersectBoxes(set_box, map_box, int_box);
-         hypre_CopyBox(int_box, box);
-
-         /* For each index in 'box', compute a row of length <= nentries and
-          * insert it into an nentries-length segment of 'cols' and 'ijvalues'.
-          * This may result in gaps, but IJSetValues2() is designed for that. */
-         nrows = hypre_BoxVolume(box);
-
-#if defined(HYPRE_USING_GPU)
-         if (exec == HYPRE_EXEC_DEVICE)
+         /* Stencil entries */
+         /* WM: todo - do I want to do stenci/non-stenil entries separately or together here? */
+         /* if (entry < size) */
          {
-            hypreDevice_IntFilln(ncols, nrows, 0);
-#if defined(HYPRE_USING_SYCL)
-            HYPRE_ONEDPL_CALL( std::transform,
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
-                               row_indexes,
-            [const_val = nentries] (const auto & x) { return x * const_val; } );
-#else
-            HYPRE_THRUST_CALL( transform,
-                               thrust::counting_iterator<HYPRE_Int>(0),
-                               thrust::counting_iterator<HYPRE_Int>(nrows + 1),
-                               row_indexes,
-                               _1 * nentries );
-#endif
-         }
-         else
-#endif
-         {
-#ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-            for (i = 0; i < nrows; i++)
+
+            /* WM: TODO - I'm wondering whether it is worth the effort to completely port this to GPU... 
+             *            It may be effective enough to do rows and ijvalues directly on the GPU, but 
+             *            build an array of non-stenil column indices on the host, then copy to device and
+             *            scatter to the appropriate locations in cols? */
+
+
+            /* WM: todo - if non-stenil, we want no offset? Does the code below still go through
+             * and make sense at least for the rows and values? Will have to do special work to get
+             * the right column indices. */
+            if (entry < size)
             {
-               ncols[i] = 0;
-               row_indexes[i] = i * nentries;
+               offset = shape[entry];
             }
-         }
-
-         for (ei = 0; ei < nentries; ei++)
-         {
-            entry  = entries[ei];
-            offset = shape[entry];
+            else
+            {
+               offset = zero_offset;
+            }
 
             hypre_CopyBox(box, to_box);
             hypre_BoxShiftPos(to_box, offset);
             hypre_CoarsenBox(to_box, NULL, dom_stride);
 
+            /* WM: todo - for non-stencil, what do we do for vars[entry] below??? */
             hypre_SStructGridIntersect(dom_grid, part, vars[entry], to_box, -1,
                                        &boxman_to_entries, &nboxman_to_entries);
 
@@ -1539,125 +1560,141 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             } /* end loop through boxman to entries */
 
             hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
-
-         } /* end of ei nentries loop */
-
-         if (action > 0)
-         {
-            HYPRE_IJMatrixAddToValues2(ijmatrix, nrows, ncols,
-                                       (const HYPRE_BigInt *) rows,
-                                       (const HYPRE_Int *) row_indexes,
-                                       (const HYPRE_BigInt *) cols,
-                                       (const HYPRE_Complex *) ijvalues);
          }
-         else if (action > -1)
-         {
-            HYPRE_IJMatrixSetValues2(ijmatrix, nrows, ncols,
-                                     (const HYPRE_BigInt *) rows,
-                                     (const HYPRE_Int *) row_indexes,
-                                     (const HYPRE_BigInt *) cols,
-                                     (const HYPRE_Complex *) ijvalues);
-         }
+
+
+
+         /* Non-stenil entries */
+#if 0
          else
          {
-            if (action == -2)
+
+
+
+
+            /* non-stencil entries */
+            entry -= size;
+            /* WM: todo - the below call is non-trivial and called per individual index... how to do this for a box of indices? */
+            hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
+
+            if (Uverank > -1)
             {
-               /* Zero out entries gotten */
-               HYPRE_IJMatrixGetValuesAndZeroOut(ijmatrix, nrows, ncols,
-                                                 rows, row_indexes, cols, ijvalues);
+               Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
+
+               /* Sanity check */
+               //hypre_assert(entry < hypre_SStructUVEntryNUEntries(Uventry));
+
+               /* Set column number and coefficient */
+               col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);
+               coeffs[ncoeffs] = h_values[i];
+               ncoeffs++;
             }
-            else
-            {
-               HYPRE_IJMatrixGetValues2(ijmatrix, nrows, ncols,
-                                        rows, row_indexes, cols, ijvalues);
-            }
+#endif
+
+
+
+
+
+
          }
+      } /* end of ei nentries loop */
 
-      } /* end loop through boxman entries */
-
-      /* WM: do backwards mapping from ijvalues to values if doing a get */
-      /* WM: todo - put this in a boxloop to avoid unnecessary copies? */
-      nrows = hypre_BoxVolume(set_box);
-      if (action < 0)
+      if (action > 0)
       {
-#if defined(HYPRE_USING_GPU)
-         if (exec == HYPRE_EXEC_DEVICE)
+         HYPRE_IJMatrixAddToValues2(ijmatrix, nrows, ncols,
+                                    (const HYPRE_BigInt *) rows,
+                                    (const HYPRE_Int *) row_indexes,
+                                    (const HYPRE_BigInt *) cols,
+                                    (const HYPRE_Complex *) ijvalues);
+      }
+      else if (action > -1)
+      {
+         HYPRE_IJMatrixSetValues2(ijmatrix, nrows, ncols,
+                                  (const HYPRE_BigInt *) rows,
+                                  (const HYPRE_Int *) row_indexes,
+                                  (const HYPRE_BigInt *) cols,
+                                  (const HYPRE_Complex *) ijvalues);
+      }
+      else
+      {
+         if (action == -2)
          {
-#if defined(HYPRE_USING_SYCL)
-            HYPRE_ONEDPL_CALL( std::for_each,
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                               oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
-                               [ = ] (HYPRE_Int i)
-            {
-               if (values_map[i] >= 0)
-               {
-                  values[i] = ijvalues[values_map[i]];
-               }
-            });
-#else
-            HYPRE_THRUST_CALL( for_each,
-                               thrust::make_counting_iterator(0),
-                               thrust::make_counting_iterator(num_nonzeros),
-                               [ = ] __device__ (HYPRE_Int i)
-            {
-               if (values_map[i] >= 0)
-               {
-                  values[i] = ijvalues[values_map[i]];
-               }
-            });
-#endif
+            /* Zero out entries gotten */
+            HYPRE_IJMatrixGetValuesAndZeroOut(ijmatrix, nrows, ncols,
+                                              rows, row_indexes, cols, ijvalues);
          }
          else
-#endif
          {
-            for (i = 0; i < num_nonzeros; i++)
-            {
-               if (values_map[i] >= 0)
-               {
-                  values[i] = ijvalues[values_map[i]];
-               }
-            }
+            HYPRE_IJMatrixGetValues2(ijmatrix, nrows, ncols,
+                                     rows, row_indexes, cols, ijvalues);
          }
       }
 
-      hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
+   } /* end loop through boxman entries */
 
-      hypre_TFree(ncols, memory_location);
-      hypre_TFree(rows, memory_location);
-      hypre_TFree(row_indexes, memory_location);
-      hypre_TFree(cols, memory_location);
-      hypre_TFree(ijvalues, memory_location);
-      hypre_TFree(values_map, memory_location);
+   /* WM: do backwards mapping from ijvalues to values if doing a get */
+   /* WM: todo - put this in a boxloop to avoid unnecessary copies? */
+   nrows = hypre_BoxVolume(set_box);
+   if (action < 0)
+   {
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::for_each,
+                            oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                            oneapi::dpl::counting_iterator<HYPRE_Int>(num_nonzeros),
+                            [ = ] (HYPRE_Int i)
+         {
+            if (values_map[i] >= 0)
+            {
+               values[i] = ijvalues[values_map[i]];
+            }
+         });
+#else
+         HYPRE_THRUST_CALL( for_each,
+                            thrust::make_counting_iterator(0),
+                            thrust::make_counting_iterator(num_nonzeros),
+                            [ = ] __device__ (HYPRE_Int i)
+         {
+            if (values_map[i] >= 0)
+            {
+               values[i] = ijvalues[values_map[i]];
+            }
+         });
+#endif
+      }
+      else
+#endif
+      {
+         for (i = 0; i < num_nonzeros; i++)
+         {
+            if (values_map[i] >= 0)
+            {
+               values[i] = ijvalues[values_map[i]];
+            }
+         }
+      }
+   }
 
-      hypre_BoxDestroy(box);
-      hypre_BoxDestroy(to_box);
-      hypre_BoxDestroy(map_box);
-      hypre_BoxDestroy(int_box);
-      hypre_BoxDestroy(map_vbox);
+   hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(ncols, memory_location);
+   hypre_TFree(rows, memory_location);
+   hypre_TFree(row_indexes, memory_location);
+   hypre_TFree(cols, memory_location);
+   hypre_TFree(ijvalues, memory_location);
+   hypre_TFree(values_map, memory_location);
+
+   hypre_BoxDestroy(box);
+   hypre_BoxDestroy(to_box);
+   hypre_BoxDestroy(map_box);
+   hypre_BoxDestroy(int_box);
+   hypre_BoxDestroy(map_vbox);
 
 #if defined(DEBUG_SETBOX)
-      hypre_printf("%s: num_nonzeros: %d\n", __func__, num_nonzeros);
+   hypre_printf("%s: num_nonzeros: %d\n", __func__, num_nonzeros);
 #endif
-   }
-
-   /*------------------------------------------
-    * non-stencil entries
-    *------------------------------------------*/
-
-   else
-   {
-      /* RDF: THREAD (Check safety on UMatrixSetValues call) */
-      hypre_BoxGetSize(set_box, loop_size);
-      hypre_SerialBoxLoop0Begin(ndim, loop_size);
-      {
-         zypre_BoxLoopGetIndex(index);
-         hypre_AddIndexes(index, hypre_BoxIMin(set_box), ndim, index);
-         hypre_SStructUMatrixSetValues(matrix, part, index, var,
-                                       nentries, entries, values, action);
-         values += nentries;
-      }
-      hypre_SerialBoxLoop0End();
-   }
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
