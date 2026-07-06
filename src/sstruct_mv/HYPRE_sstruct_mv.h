@@ -1022,14 +1022,14 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
  * number of nonzero entries being set, and holds the matrix values.
  **/
 HYPRE_Int
-HYPRE_SStructMatrixSetRowValues(HYPRE_SStructMatrix  matrix,
-                                HYPRE_Int            part,
-                                HYPRE_Int            var,
-                                HYPRE_Int            nrows,
-                                HYPRE_Int          **indices,
-                                HYPRE_Int           *nentries,
-                                HYPRE_Int           *entries,
-                                HYPRE_Complex       *values);
+HYPRE_SStructMatrixSetArrayValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nrows,
+                                  HYPRE_Int          **indices,
+                                  HYPRE_Int           *nentries,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Complex       *values);
 
 /**
  * Finalize the construction of the matrix before using.
