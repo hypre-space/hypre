@@ -125,7 +125,7 @@ main( hypre_int argc,
    HYPRE_Int           num_components = 1;
    HYPRE_Int           solver_id;
    HYPRE_Int           solver_type = 1;
-   HYPRE_Int           recompute_res = 0;   /* What should be the default here? */
+   HYPRE_Int           recompute_res = 1;   /* What should be the default here? */
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
    HYPRE_Int           poutusr = 0; /* if user selects pout */
