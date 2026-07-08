@@ -3080,26 +3080,33 @@ main( hypre_int argc,
       else if (solver_id == 0)
       {
          /* use diagonal scaling as preconditioner */
+         pcg_precond = NULL;
          if (myid == 0) {
             if(solver_precision == HYPRE_REAL_SINGLE)
             {
                hypre_printf("Solver: SINGLE PRECISION DS-PCG\n"); 
+               HYPRE_PCGSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_flt,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_flt,
+                             pcg_precond);
             }
             else if(solver_precision == HYPRE_REAL_DOUBLE)
             {
                hypre_printf("Solver: DOUBLE PRECISION DS-PCG\n"); 
+               HYPRE_PCGSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_dbl,
+                             pcg_precond);
             }
             else
             {
                hypre_printf("Solver: LONG DOUBLE PRECISION DS-PCG\n"); 
-            }
-         }         
-         pcg_precond = NULL;
-
-         HYPRE_PCGSetPrecond_pre(solver_precision, pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+               HYPRE_PCGSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_long_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_long_dbl,
                              pcg_precond);
+            }
+         }
       }
       HYPRE_PCGGetPrecond_pre(solver_precision, pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten !=  pcg_precond)
@@ -3248,26 +3255,33 @@ main( hypre_int argc,
       else if (solver_id == 10)
       {
          /* use diagonal scaling as preconditioner */
+         pcg_precond = NULL;
          if (myid == 0) {
             if(solver_precision == HYPRE_REAL_SINGLE)
             {
                hypre_printf("Solver: SINGLE PRECISION DS-GMRES\n"); 
+               HYPRE_GMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_flt,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_flt,
+                             pcg_precond);
             }
             else if(solver_precision == HYPRE_REAL_DOUBLE)
             {
                hypre_printf("Solver: DOUBLE PRECISION DS-GMRES\n"); 
+               HYPRE_GMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_dbl,
+                             pcg_precond);
             }
             else
             {
                hypre_printf("Solver: LONG DOUBLE PRECISION DS-GMRES\n"); 
-            }
-         }         
-         pcg_precond = NULL;
-
-         HYPRE_GMRESSetPrecond_pre(solver_precision, pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+               HYPRE_GMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_long_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_long_dbl,
                              pcg_precond);
+            }
+         }
       }
       HYPRE_GMRESGetPrecond_pre(solver_precision, pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten !=  pcg_precond)
@@ -3382,26 +3396,33 @@ main( hypre_int argc,
       else if (solver_id == 20)
       {
          /* use diagonal scaling as preconditioner */
+         pcg_precond = NULL;
          if (myid == 0) {
             if(solver_precision == HYPRE_REAL_SINGLE)
             {
                hypre_printf("Solver: SINGLE PRECISION DS-FlexGMRES\n"); 
+               HYPRE_FlexGMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_flt,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_flt,
+                             pcg_precond);
             }
             else if(solver_precision == HYPRE_REAL_DOUBLE)
             {
                hypre_printf("Solver: DOUBLE PRECISION DS-FlexGMRES\n"); 
+               HYPRE_FlexGMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_dbl,
+                             pcg_precond);
             }
             else
             {
                hypre_printf("Solver: LONG DOUBLE PRECISION DS-FlexGMRES\n"); 
-            }
-         }         
-         pcg_precond = NULL;
-
-         HYPRE_FlexGMRESSetPrecond_pre(solver_precision, pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+               HYPRE_FlexGMRESSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_long_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_long_dbl,
                              pcg_precond);
+            }
+         }
       }
 
       HYPRE_FlexGMRESGetPrecond_pre(solver_precision, pcg_solver, &pcg_precond_gotten);
@@ -3518,26 +3539,33 @@ main( hypre_int argc,
       else if (solver_id == 30)
       {
          /* use diagonal scaling as preconditioner */
+         pcg_precond = NULL;
          if (myid == 0) {
             if(solver_precision == HYPRE_REAL_SINGLE)
             {
                hypre_printf("Solver: SINGLE PRECISION DS-BiCGSTAB\n"); 
+               HYPRE_BiCGSTABSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_flt,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_flt,
+                             pcg_precond);
             }
             else if(solver_precision == HYPRE_REAL_DOUBLE)
             {
                hypre_printf("Solver: DOUBLE PRECISION DS-BiCGSTAB\n"); 
+               HYPRE_BiCGSTABSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_dbl,
+                             pcg_precond);
             }
             else
             {
                hypre_printf("Solver: LONG DOUBLE PRECISION DS-BiCGSTAB\n"); 
-            }
-         }         
-         pcg_precond = NULL;
-
-         HYPRE_BiCGSTABSetPrecond_pre(solver_precision, pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+               HYPRE_BiCGSTABSetPrecond_pre(solver_precision, pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale_long_dbl,
+                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup_long_dbl,
                              pcg_precond);
+            }
+         }
       }
 
       HYPRE_BiCGSTABGetPrecond_pre(solver_precision, pcg_solver, &pcg_precond_gotten);
