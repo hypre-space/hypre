@@ -189,6 +189,30 @@ HYPRE_FlexGMRESGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FlexGMRESSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix( HYPRE_Solver  solver,
+                             HYPRE_Matrix precond_matrix)
+{
+   return ( hypre_FlexGMRESSetPrecondMatrix( (void *)     solver,
+                                         (void *) precond_matrix) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FlexGMRESGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix( HYPRE_Solver  solver,
+                             HYPRE_Matrix *precond_matrix_ptr )
+{
+   return ( hypre_FlexGMRESGetPrecondMatrix( (void *)     solver,
+                                         (HYPRE_Matrix *) precond_matrix_ptr ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FlexGMRESSetPrintLevel, HYPRE_FlexGMRESGetPrintLevel
  *--------------------------------------------------------------------------*/
 

@@ -615,6 +615,13 @@ HYPRE_Int
 hypre_FlexGMRESGetPrecond_long_dbl( void *fgmres_vdata, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
+hypre_FlexGMRESGetPrecondMatrix_flt( void *fgmres_vdata, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int
+hypre_FlexGMRESGetPrecondMatrix_dbl( void *fgmres_vdata, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int
+hypre_FlexGMRESGetPrecondMatrix_long_dbl( void *fgmres_vdata, HYPRE_Matrix *precond_matrix_ptr );
+
+HYPRE_Int
 hypre_FlexGMRESGetPrintLevel_flt( void *fgmres_vdata, HYPRE_Int *level );
 HYPRE_Int
 hypre_FlexGMRESGetPrintLevel_dbl( void *fgmres_vdata, HYPRE_Int *level );
@@ -704,6 +711,13 @@ HYPRE_Int
 hypre_FlexGMRESSetPrecond_dbl( void *fgmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data );
 HYPRE_Int
 hypre_FlexGMRESSetPrecond_long_dbl( void *fgmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void *precond_data );
+
+HYPRE_Int
+hypre_FlexGMRESSetPrecondMatrix_flt( void *fgmres_vdata, void *precond_matrix );
+HYPRE_Int
+hypre_FlexGMRESSetPrecondMatrix_dbl( void *fgmres_vdata, void *precond_matrix );
+HYPRE_Int
+hypre_FlexGMRESSetPrecondMatrix_long_dbl( void *fgmres_vdata, void *precond_matrix );
 
 HYPRE_Int
 hypre_FlexGMRESSetPrintLevel_flt( void *fgmres_vdata, HYPRE_Int level );

@@ -965,6 +965,7 @@ typedef struct
 
    void    *matvec_data;
    void    *precond_data;
+   void    *precond_Mat;
 
    hypre_FlexGMRESFunctions * functions;
 
@@ -1394,6 +1395,8 @@ hypre_FlexGMRESSetPrecond ( void *fgmres_vdata,
                             hypre_KrylovPtrToPrecondSetup precond_setup,
                             void *precond_data );
 HYPRE_Int hypre_FlexGMRESGetPrecond ( void *fgmres_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_FlexGMRESSetPrecondMatrix ( void *fgmres_vdata, void *precond_matrix );
+HYPRE_Int hypre_FlexGMRESGetPrecondMatrix ( void *fgmres_vdata, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int hypre_FlexGMRESSetPrintLevel ( void *fgmres_vdata, HYPRE_Int level );
 HYPRE_Int hypre_FlexGMRESGetPrintLevel ( void *fgmres_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_FlexGMRESSetLogging ( void *fgmres_vdata, HYPRE_Int level );

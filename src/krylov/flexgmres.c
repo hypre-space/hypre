@@ -101,6 +101,7 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions )
    (fgmres_data -> stop_crit)      = 0; /* rel. residual norm */
    (fgmres_data -> converged)      = 0;
    (fgmres_data -> precond_data)   = NULL;
+   (fgmres_data -> precond_Mat)    = NULL;
    (fgmres_data -> print_level)    = 0;
    (fgmres_data -> logging)        = 0;
    (fgmres_data -> p)              = NULL;
@@ -202,6 +203,7 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
    HYPRE_Int            max_iter         = (fgmres_data -> max_iter);
    hypre_KrylovPtrToPrecondSetup precond_setup = (fgmres_functions->precond_setup);
    void          *precond_data     = (fgmres_data -> precond_data);
+   void          *precond_Mat     = (fgmres_data -> precond_Mat);
 
    HYPRE_Int            rel_change       = (fgmres_data -> rel_change);
 
@@ -210,6 +212,12 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
    hypre_SolverResetIsSetup((hypre_Solver *) fgmres_vdata);
 
    (fgmres_data -> A) = A;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    /*--------------------------------------------------
     * The arguments for NewVector are important to
@@ -247,7 +255,7 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
       (fgmres_data -> matvec_data) = (*(fgmres_functions->MatvecCreate))(A, x);
    }
 
-   precond_setup(precond_data, A, b, x);
+   precond_setup(precond_data, precond_Mat, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -311,6 +319,8 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    hypre_KrylovPtrToPrecond precond      = (fgmres_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(fgmres_data -> precond_data);
 
+   void             *precond_Mat  = (fgmres_data -> precond_Mat);
+
    HYPRE_Int             print_level    = (fgmres_data -> print_level);
    HYPRE_Int             logging        = (fgmres_data -> logging);
 
@@ -341,6 +351,12 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    /* We are not checking rel. change for now... */
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   // if a preconditioning matrix has not been set, use A
+   if (precond_Mat == NULL)
+   {
+      precond_Mat = A;
+   }
 
    (fgmres_data -> converged) = 0;
    /*-----------------------------------------------------------------------
@@ -567,7 +583,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          modify_pc(precond_data, iter, r_norm / den_norm );
 
          /*apply preconditioner and store in pre_vecs */
-         precond(precond_data, A, p[i - 1], pre_vecs[i - 1]);
+         precond(precond_data, precond_Mat, p[i - 1], pre_vecs[i - 1]);
          /*apply operator and store in p */
          (*(fgmres_functions->Matvec))(matvec_data, 1.0, A, pre_vecs[i - 1], 0.0, p[i]);
 
@@ -1063,6 +1079,32 @@ hypre_FlexGMRESGetPrecond( void         *fgmres_vdata,
 
    return hypre_error_flag;
 }
+
+
+/*--------------------------------------------------------------------------
+ * hypre_FlexGMRESSetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_FlexGMRESSetPrecondMatrix( void  *fgmres_vdata,  void  *precond_matrix )
+{
+   hypre_FlexGMRESData  *fgmres_data     =  (hypre_FlexGMRESData *)fgmres_vdata;
+   (fgmres_data -> precond_Mat)  = precond_matrix;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FlexGMRESGetPrecondMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_FlexGMRESGetPrecondMatrix( void  *fgmres_vdata,  HYPRE_Matrix *precond_matrix_ptr )
+{
+   hypre_FlexGMRESData  *fgmres_data     =  (hypre_FlexGMRESData *)fgmres_vdata;
+   *precond_matrix_ptr = (HYPRE_Matrix)(fgmres_data -> precond_Mat) ;
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_FlexGMRESSetPrintLevel, hypre_FlexGMRESGetPrintLevel
