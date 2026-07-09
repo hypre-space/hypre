@@ -305,7 +305,7 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
       copy_ranks_part_var_starts = hypre_SStructMatrixDomCopyRanksPartVarStarts(A);
       copy_indexes = hypre_SStructMatrixDomCopyIndexes(A);
    }
-   tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp));
+   tmp_data = hypre_ParVectorLocalData(tmp);
 
    /* Loop over part/vars and copy from sstruct vector, x, into tmp par vector */
    npartvars = 0;
@@ -374,7 +374,7 @@ hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A,
       copy_ranks_part_var_starts = hypre_SStructMatrixRanCopyRanksPartVarStarts(A);
       copy_indexes = hypre_SStructMatrixRanCopyIndexes(A);
    }
-   tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp));
+   tmp_data = hypre_ParVectorLocalData(tmp);
 
    /* Loop over part/vars and add values from tmp par vector to sstruct vector, y */
    npartvars = 0;
@@ -472,18 +472,24 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       hypre_SStructMatrixDomTmp(A) = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(parcsr_A),
                                                          hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
                                                          hypre_ParCSRMatrixColStarts(parcsr_A));
+      hypre_ParVectorInitialize_v2(hypre_SStructMatrixDomTmp(A), memory_location);
       hypre_SStructMatrixRanTmp(A) = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(parcsr_A),
                                                          hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
                                                          hypre_ParCSRMatrixRowStarts(parcsr_A));
+      hypre_ParVectorInitialize_v2(hypre_SStructMatrixRanTmp(A), memory_location);
 
       /* Get the dom_copy_ranks (comprised by the sorted and uniqued
        * local column indices and send map elements of parcsr_A) */
-      /* WM: todo - when does the parcsr comm pkg stuff get setup?
-       *            Is it guaranteed to exist here? What about the device send map elements? */
       comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_A);
-      num_col_ind = hypre_ParCSRMatrixNumNonzeros(parcsr_A);
+      if (!comm_pkg)
+      {
+         hypre_MatvecCommPkgCreate(parcsr_A);
+         comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_A);
+      }
+      num_col_ind = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(parcsr_A));
       num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
-      dom_copy_ranks = hypre_TAlloc(HYPRE_Int, num_col_ind + num_send_map_elmts, memory_location);
+      dom_copy_ranks_size = num_col_ind + num_send_map_elmts;
+      dom_copy_ranks = hypre_TAlloc(HYPRE_Int, dom_copy_ranks_size, memory_location);
       /* WM: todo - use device send map elmts when on GPU? */
       hypre_TMemcpy(dom_copy_ranks, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(parcsr_A)),
                     HYPRE_Int, num_col_ind, memory_location, memory_location);
@@ -532,7 +538,8 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       /* WM: todo - do I have to worry about rownnz not being set here? */
       diag_num_rownnz = hypre_CSRMatrixNumRownnz(hypre_ParCSRMatrixDiag(parcsr_A));
       offd_num_rownnz = hypre_CSRMatrixNumRownnz(hypre_ParCSRMatrixOffd(parcsr_A));
-      ran_copy_ranks = hypre_TAlloc(HYPRE_Int, diag_num_rownnz + offd_num_rownnz, memory_location);
+      ran_copy_ranks_size = diag_num_rownnz + offd_num_rownnz;
+      ran_copy_ranks = hypre_TAlloc(HYPRE_Int, ran_copy_ranks_size, memory_location);
       hypre_TMemcpy(ran_copy_ranks, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixDiag(parcsr_A)),
                     HYPRE_Int, diag_num_rownnz, memory_location, memory_location);
       hypre_TMemcpy(ran_copy_ranks + diag_num_rownnz, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixOffd(parcsr_A)),
@@ -572,9 +579,9 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
          }
       }
       hypre_TFree(ran_copy_global_ranks, memory_location);
-      hypre_SStructMatrixDomCopyRanks(A) = ran_copy_ranks;
-      hypre_SStructMatrixDomCopyRanksPartVarStarts(A) = ran_copy_ranks_part_var_starts;
-      hypre_SStructMatrixDomCopyIndexes(A) = ran_copy_indexes;
+      hypre_SStructMatrixRanCopyRanks(A) = ran_copy_ranks;
+      hypre_SStructMatrixRanCopyRanksPartVarStarts(A) = ran_copy_ranks_part_var_starts;
+      hypre_SStructMatrixRanCopyIndexes(A) = ran_copy_indexes;
    }
 #endif
 

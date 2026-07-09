@@ -141,14 +141,14 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 
    hypre_SStructMatrixIJMatrix(matrix)           = NULL;
    hypre_SStructMatrixParCSRMatrix(matrix)       = NULL;
-   hypre_SStructMatrixDomTmp(matrix)               = NULL;
-   hypre_SStructMatrixRanTmp(matrix)               = NULL;
-   hypre_SStructMatrixDomCopyRanks(matrix)         = NULL;
-   hypre_SStructMatrixRanCopyRanks(matrix)         = NULL;
+   hypre_SStructMatrixDomTmp(matrix)             = NULL;
+   hypre_SStructMatrixRanTmp(matrix)             = NULL;
+   hypre_SStructMatrixDomCopyRanks(matrix)       = NULL;
+   hypre_SStructMatrixRanCopyRanks(matrix)       = NULL;
    hypre_SStructMatrixDomCopyRanksPartVarStarts(matrix) = NULL;
    hypre_SStructMatrixRanCopyRanksPartVarStarts(matrix) = NULL;
-   hypre_SStructMatrixDomCopyIndexes(matrix)       = NULL;
-   hypre_SStructMatrixRanCopyIndexes(matrix)       = NULL;
+   hypre_SStructMatrixDomCopyIndexes(matrix)     = NULL;
+   hypre_SStructMatrixRanCopyIndexes(matrix)     = NULL;
    hypre_SStructMatrixSEntries(matrix)           = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixUEntries(matrix)           = hypre_TAlloc(HYPRE_Int, usize, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixEntriesSize(matrix)        = usize;
@@ -207,6 +207,40 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          ran_stride      = hypre_SStructMatrixRangeStride(matrix);
          memory_location = hypre_SStructMatrixMemoryLocation(matrix);
 
+         if (hypre_SStructMatrixDomTmp(matrix))
+         {
+            hypre_ParVectorDestroy(hypre_SStructMatrixDomTmp(matrix));
+            hypre_ParVectorDestroy(hypre_SStructMatrixRanTmp(matrix));
+
+            hypre_TFree(hypre_SStructMatrixDomCopyRanks(matrix), memory_location);
+            hypre_TFree(hypre_SStructMatrixRanCopyRanks(matrix), memory_location);
+
+            hypre_TFree(hypre_SStructMatrixDomCopyRanksPartVarStarts(matrix), memory_location);
+            hypre_TFree(hypre_SStructMatrixRanCopyRanksPartVarStarts(matrix), memory_location);
+
+            for (part = 0; part < nparts; part++)
+            {
+               nvars = hypre_SStructPMatrixNVars(pmatrices[part]);
+               for (vi = 0; vi < nvars; vi++)
+               {
+                  if (hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi])
+                  {
+                     for (d = 0; d < ndim; d++)
+                     {
+                        hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi][d], memory_location);
+                        hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi][d], memory_location);
+                     }
+                  }
+                  hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi], HYPRE_MEMORY_HOST);
+                  hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi], HYPRE_MEMORY_HOST);
+               }
+               hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part], HYPRE_MEMORY_HOST);
+               hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part], HYPRE_MEMORY_HOST);
+            }
+            hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix), HYPRE_MEMORY_HOST);
+            hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix), HYPRE_MEMORY_HOST);
+         }
+
          for (part = 0; part < nparts; part++)
          {
             nvars = hypre_SStructPMatrixNVars(pmatrices[part]);
@@ -236,46 +270,6 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(centries, HYPRE_MEMORY_HOST);
          hypre_TFree(dom_stride, HYPRE_MEMORY_HOST);
          hypre_TFree(ran_stride, HYPRE_MEMORY_HOST);
-         if (hypre_SStructMatrixDomTmp(matrix))
-         {
-            hypre_ParVectorDestroy(hypre_SStructMatrixDomTmp(matrix));
-            hypre_ParVectorDestroy(hypre_SStructMatrixRanTmp(matrix));
-
-            hypre_TFree(hypre_SStructMatrixDomCopyRanks(matrix), memory_location);
-            hypre_TFree(hypre_SStructMatrixRanCopyRanks(matrix), memory_location);
-
-            hypre_TFree(hypre_SStructMatrixDomCopyRanksPartVarStarts(matrix), memory_location);
-            hypre_TFree(hypre_SStructMatrixRanCopyRanksPartVarStarts(matrix), memory_location);
-
-            for (part = 0; part < nparts; part++)
-            {
-               nvars = hypre_SStructPMatrixNVars(pmatrices[part]);
-               for (vi = 0; vi < nvars; vi++)
-               {
-                  for (d = 0; d < ndim; d++)
-                  {
-                     hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi][d], memory_location);
-                  }
-                  hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi], HYPRE_MEMORY_HOST);
-               }
-               hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part], HYPRE_MEMORY_HOST);
-            }
-            hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix), HYPRE_MEMORY_HOST);
-            for (part = 0; part < nparts; part++)
-            {
-               nvars = hypre_SStructPMatrixNVars(pmatrices[part]);
-               for (vi = 0; vi < nvars; vi++)
-               {
-                  for (d = 0; d < ndim; d++)
-                  {
-                     hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi][d], memory_location);
-                  }
-                  hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi], HYPRE_MEMORY_HOST);
-               }
-               hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part], HYPRE_MEMORY_HOST);
-            }
-            hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix), HYPRE_MEMORY_HOST);
-         }
          hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
