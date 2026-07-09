@@ -268,6 +268,143 @@ hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
+                                           HYPRE_Int transpose,
+                                           hypre_SStructVector *x )
+{
+   HYPRE_Int                 ndim        = hypre_SStructMatrixNDim(A);
+   HYPRE_Int                 nparts      = hypre_SStructMatrixNParts(A);
+
+   hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid       *pgrid;
+
+   hypre_ParVector          *tmp;
+   HYPRE_Complex            *tmp_data;
+   HYPRE_Int                *copy_ranks;
+   HYPRE_Int                *copy_ranks_part_var_starts;
+   HYPRE_Int             ****copy_indexes;
+
+   HYPRE_Int                 nvars, npartvars, num_ranks;
+   HYPRE_Int                 part, var, i, j, d;
+   HYPRE_Complex             val;
+   HYPRE_Int                 index[HYPRE_MAXDIM];
+
+   /* Get tmp vector and copy info in either the domain or range depending on transpose */
+   if (transpose)
+   {
+      tmp = hypre_SStructMatrixRanTmp(A);
+      copy_ranks = hypre_SStructMatrixRanCopyRanks(A);
+      copy_ranks_part_var_starts = hypre_SStructMatrixRanCopyRanksPartVarStarts(A);
+      copy_indexes = hypre_SStructMatrixRanCopyIndexes(A);
+   }
+   else
+   {
+      tmp = hypre_SStructMatrixDomTmp(A);
+      copy_ranks = hypre_SStructMatrixDomCopyRanks(A);
+      copy_ranks_part_var_starts = hypre_SStructMatrixDomCopyRanksPartVarStarts(A);
+      copy_indexes = hypre_SStructMatrixDomCopyIndexes(A);
+   }
+   tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp));
+
+   /* Loop over part/vars and copy from sstruct vector, x, into tmp par vector */
+   npartvars = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         /* WM: todo - GPU */
+         num_ranks = copy_ranks_part_var_starts[npartvars + 1] - copy_ranks_part_var_starts[npartvars];
+         for (i = 0, j = copy_ranks_part_var_starts[npartvars]; i < num_ranks; i++, j++)
+         {
+            for (d = 0; d < ndim; d++)
+            {
+               index[d] = copy_indexes[part][var][d][i];
+            }
+            HYPRE_SStructVectorGetValues(x, part, index, var, &val);
+            tmp_data[ copy_ranks[j] ] = val;
+         }
+         npartvars++;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A,
+                                 HYPRE_Int transpose,
+                                 hypre_SStructVector *y )
+{
+   HYPRE_Int                 ndim        = hypre_SStructMatrixNDim(A);
+   HYPRE_Int                 nparts      = hypre_SStructMatrixNParts(A);
+
+   hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid       *pgrid;
+
+   hypre_ParVector          *tmp;
+   HYPRE_Complex            *tmp_data;
+   HYPRE_Int                *copy_ranks;
+   HYPRE_Int                *copy_ranks_part_var_starts;
+   HYPRE_Int             ****copy_indexes;
+
+   HYPRE_Int                 nvars, npartvars, num_ranks;
+   HYPRE_Int                 part, var, i, j, d;
+   HYPRE_Complex             val;
+   HYPRE_Int                 index[HYPRE_MAXDIM];
+
+   /* Get tmp vector and copy info in either the domain or range depending on transpose */
+   if (transpose)
+   {
+      tmp = hypre_SStructMatrixDomTmp(A);
+      copy_ranks = hypre_SStructMatrixDomCopyRanks(A);
+      copy_ranks_part_var_starts = hypre_SStructMatrixDomCopyRanksPartVarStarts(A);
+      copy_indexes = hypre_SStructMatrixDomCopyIndexes(A);
+   }
+   else
+   {
+      tmp = hypre_SStructMatrixRanTmp(A);
+      copy_ranks = hypre_SStructMatrixRanCopyRanks(A);
+      copy_ranks_part_var_starts = hypre_SStructMatrixRanCopyRanksPartVarStarts(A);
+      copy_indexes = hypre_SStructMatrixRanCopyIndexes(A);
+   }
+   tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp));
+
+   /* Loop over part/vars and add values from tmp par vector to sstruct vector, y */
+   npartvars = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         /* WM: todo - GPU */
+         num_ranks = copy_ranks_part_var_starts[npartvars + 1] - copy_ranks_part_var_starts[npartvars];
+         for (i = 0, j = copy_ranks_part_var_starts[npartvars]; i < num_ranks; i++, j++)
+         {
+            for (d = 0; d < ndim; d++)
+            {
+               index[d] = copy_indexes[part][var][d][i];
+            }
+            val = tmp_data[ copy_ranks[j] ];
+            HYPRE_SStructVectorAddToValues(y, part, index, var, &val);
+         }
+         npartvars++;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatvecSetup( void                *matvec_vdata,
                           hypre_SStructMatrix *A,
@@ -276,20 +413,25 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    hypre_SStructMatvecData  *matvec_data = (hypre_SStructMatvecData   *)matvec_vdata;
    HYPRE_Int                 transpose   = (matvec_data -> transpose);
 
-   hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
-   hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
-   hypre_SStructPGrid       *pgrid;
-
-   HYPRE_Int                 nparts, nvars, npartvars, num_ranks;
-   HYPRE_Int                 part, var, i;
+   HYPRE_Int                 nparts;
+   HYPRE_Int                 part;
    void                    **pmatvec_data;
    hypre_SStructPMatrix     *pA;
    hypre_SStructPVector     *px;
+
+#if defined(HYPRE_SSTRUCT_MATVEC_COPY)
+   hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
+   hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid       *pgrid;
 
    HYPRE_Int                 object_type     = hypre_SStructMatrixObjectType(A);
    hypre_ParCSRMatrix       *parcsr_A        = hypre_SStructMatrixParCSRMatrix(A);
    HYPRE_MemoryLocation      memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_A);
    hypre_ParCSRCommPkg      *comm_pkg;
+
+   HYPRE_Int                 nvars, npartvars, num_ranks;
+   HYPRE_Int                 var, i;
+
    HYPRE_Int                 num_col_ind, num_send_map_elmts;
    HYPRE_Int                 diag_num_rownnz, offd_num_rownnz;
 
@@ -302,6 +444,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    HYPRE_Int                *ran_copy_global_ranks;
    HYPRE_Int             ****dom_copy_indexes;
    HYPRE_Int             ****ran_copy_indexes;
+#endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -320,6 +463,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    (matvec_data -> pmatvec_data) = pmatvec_data;
 
 
+#if defined(HYPRE_SSTRUCT_MATVEC_COPY)
    /* If necessary, setup the temporary vectors and copy info
     * needed for parcsr component of the matvec*/
    if (object_type == HYPRE_SSTRUCT && !hypre_SStructMatrixDomTmp(A))
@@ -389,9 +533,9 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       diag_num_rownnz = hypre_CSRMatrixNumRownnz(hypre_ParCSRMatrixDiag(parcsr_A));
       offd_num_rownnz = hypre_CSRMatrixNumRownnz(hypre_ParCSRMatrixOffd(parcsr_A));
       ran_copy_ranks = hypre_TAlloc(HYPRE_Int, diag_num_rownnz + offd_num_rownnz, memory_location);
-      hypre_TMemcpy(row_nnz_tmp_size, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixDiag(parcsr_A)),
+      hypre_TMemcpy(ran_copy_ranks, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixDiag(parcsr_A)),
                     HYPRE_Int, diag_num_rownnz, memory_location, memory_location);
-      hypre_TMemcpy(row_nnz_tmp_size + diag_num_rownnz, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixOffd(parcsr_A)),
+      hypre_TMemcpy(ran_copy_ranks + diag_num_rownnz, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixOffd(parcsr_A)),
                     HYPRE_Int, offd_num_rownnz, memory_location, memory_location);
       hypre_UniqueIntArrayND(1, &ran_copy_ranks_size, &ran_copy_ranks);
       ran_copy_ranks = hypre_TReAlloc(ran_copy_ranks, HYPRE_Int, ran_copy_ranks_size, memory_location);
@@ -432,6 +576,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       hypre_SStructMatrixDomCopyRanksPartVarStarts(A) = ran_copy_ranks_part_var_starts;
       hypre_SStructMatrixDomCopyIndexes(A) = ran_copy_indexes;
    }
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -499,13 +644,42 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
       {
          /* do U-matrix computations */
 
-         /* WM: TODO - HYPRE_SStructVectorGetValues() in a loop with dom_copy_indexes
-          *            put this in a subroutine? */
+#if defined(HYPRE_SSTRUCT_MATVEC_COPY)
+         /* Fill appropriate domain/range tmp par vector with values from x */
+         hypre_SStructMatvecCopyToParCSR(A, transpose, x);
 
+         /* Do the parcsr matvec */
+         if (transpose)
+         {
+            hypre_ParCSRMatrixMatvecT(alpha,
+                                      parcsrA,
+                                      hypre_SStructMatrixRanTmp(A),
+                                      0.0,
+                                      hypre_SStructMatrixDomTmp(A));
+         }
+         else
+         {
+            hypre_ParCSRMatrixMatvec(alpha,
+                                     parcsrA,
+                                     hypre_SStructMatrixDomTmp(A),
+                                     1.0,
+                                     hypre_SStructMatrixRanTmp(A));
+         }
+
+         /* Add the matvec result to y */
+         hypre_SStructMatvecAddToSStruct(A, transpose, y);
+#else
+         /* GEC1002 the data chunk pointed by the local-parvectors
+          *  inside the semistruct vectors x and y is now identical to the
+          *  data chunk of the structure vectors x and y. The role of the function
+          *  convert is to pass the addresses of the data chunk
+          *  to the parx and pary. */
+
+         hypre_SStructVectorConvert(x, &parx);
+         hypre_SStructVectorConvert(y, &pary);
 
          if (transpose)
          {
-            /* WM: TODO - what about transpose? Just need to reverse all x/y...? */
             hypre_ParCSRMatrixMatvecT(alpha, parcsrA, parx, 1.0, pary);
          }
          else
@@ -513,8 +687,10 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
             hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
          }
 
-         /* WM: TODO - HYPRE_SStructVectorAddToValues() in a loop with ran_copy_indexes
-          *            put this in a subroutine? */
+         /* dummy functions since there is nothing to restore  */
+         hypre_SStructVectorRestore(x, parx);
+         hypre_SStructVectorRestore(y, pary);
+#endif
 
       }
       hypre_GpuProfilingPopRange();

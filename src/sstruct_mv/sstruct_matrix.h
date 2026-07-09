@@ -14,6 +14,9 @@
 #ifndef hypre_SSTRUCT_MATRIX_HEADER
 #define hypre_SSTRUCT_MATRIX_HEADER
 
+/* WM: macro for turning on new matvec strategy with copying to/from tmp par vectors */
+#define HYPRE_SSTRUCT_MATVEC_COPY
+
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrix:
  *--------------------------------------------------------------------------*/

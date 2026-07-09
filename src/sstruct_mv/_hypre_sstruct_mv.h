@@ -571,6 +571,9 @@ typedef struct hypre_SStructGraph_struct
 #ifndef hypre_SSTRUCT_MATRIX_HEADER
 #define hypre_SSTRUCT_MATRIX_HEADER
 
+/* WM: macro for turning on new matvec strategy with copying to/from tmp par vectors */
+#define HYPRE_SSTRUCT_MATVEC_COPY
+
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrix:
  *--------------------------------------------------------------------------*/
@@ -1098,6 +1101,8 @@ HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha, hypre_SStructPMatrix *pA,
                                  hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata, HYPRE_Int  transpose );
+HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A, HYPRE_Int transpose, hypre_SStructVector *x );
+HYPRE_Int hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A, HYPRE_Int transpose, hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata, hypre_SStructMatrix *A,
                                      hypre_SStructVector *x );
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata, HYPRE_Complex alpha,
