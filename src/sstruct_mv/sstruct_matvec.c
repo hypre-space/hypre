@@ -669,7 +669,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
             hypre_ParCSRMatrixMatvec(alpha,
                                      parcsrA,
                                      hypre_SStructMatrixDomTmp(A),
-                                     1.0,
+                                     0.0,
                                      hypre_SStructMatrixRanTmp(A));
          }
 
