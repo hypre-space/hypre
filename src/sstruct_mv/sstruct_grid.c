@@ -2232,7 +2232,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
    hypre_BoxManager          *manager   = hypre_SStructGridBoxManager(grid, part, var);
    HYPRE_Int                  nentries  = hypre_BoxManNEntries(manager);
    hypre_Box                 *box       = hypre_BoxCreate(ndim);
-   hypre_BoxArray            *box_a     = hypre_BoxArrayCreate(nentries, ndim);
+   hypre_BoxArray            *box_a     = hypre_BoxArrayCreate(0, ndim);
 
    /* WM: todo - GPU port */
    indexes = hypre_TAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
