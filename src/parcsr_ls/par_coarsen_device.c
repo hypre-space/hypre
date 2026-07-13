@@ -371,14 +371,6 @@ hypreGPUKernel_PMISCoarseningInit(hypre_DeviceItem &item,
    if (CF_marker_i == 0 && measure_diag[i] < 1.0)
    {
       CF_marker_i = F_PT;
-   }
-
-   /* Keep points selected by the initial HMIS pass out of subsequent
-    * independent sets.  These points are not included in graph_diag, so a
-    * nonzero measure would allow a neighboring graph point to reset their
-    * marker to zero without adding them back to the graph. */
-   if (CF_marker_i != 0)
-   {
       measure_diag[i] = 0.0;
    }
 
