@@ -259,22 +259,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hyp
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassOneLocalDevice( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixStatsComputePassOneLocalDevice)( A, stats );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixStatsComputePassTwoLocalDevice( hypre_ParCSRMatrix *A, hypre_MatrixStats *stats )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixStatsComputePassTwoLocalDevice)( A, stats );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr, HYPRE_Int data )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixTransposeDevice)( A, AT_ptr, data );
@@ -324,3 +308,4 @@ hypre_ParcsrGetExternalRowsDeviceWait( void *vrequest )
 #endif
 
 #endif
+

@@ -214,10 +214,8 @@
 #undef hypre_ParCSRMatrixStatsArrayCompute
 #undef hypre_ParCSRMatrixStatsComputeLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocal
-#undef hypre_ParCSRMatrixStatsComputePassOneLocalDevice
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalHost
 #undef hypre_ParCSRMatrixStatsComputePassTwoLocal
-#undef hypre_ParCSRMatrixStatsComputePassTwoLocalDevice
 #undef hypre_ParCSRMatrixStatsComputePassTwoLocalHost
 #undef hypre_ParCSRMatrixToCSRMatrixAll
 #undef hypre_ParCSRMatrixToCSRMatrixAll_v2
@@ -368,6 +366,8 @@
 #undef hypre_ParCSRMatrixMatvecTDevice
 #undef hypre_ParCSRMatrixMatvecT_unpack
 #undef hypre_ParCSRMatrixRAPKTDevice
+#undef hypre_ParCSRMatrixStatsComputePassOneLocalDevice
+#undef hypre_ParCSRMatrixStatsComputePassTwoLocalDevice
 #undef hypre_ParCSRMatrixTransposeDevice
 #undef hypre_ParCSRTMatMatKTDevice
 #undef hypre_ParCSRTMatMatPartialAddDevice
