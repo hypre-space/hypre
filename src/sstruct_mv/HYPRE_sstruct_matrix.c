@@ -228,6 +228,12 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
                      for (d = 0; d < ndim; d++)
                      {
                         hypre_TFree(hypre_SStructMatrixDomCopyIndexes(matrix)[part][vi][d], memory_location);
+                     }
+                  }
+                  if (hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi])
+                  {
+                     for (d = 0; d < ndim; d++)
+                     {
                         hypre_TFree(hypre_SStructMatrixRanCopyIndexes(matrix)[part][vi][d], memory_location);
                      }
                   }

@@ -472,6 +472,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
                              HYPRE_Int           boxnum,    // grid boxnum (not base boxnum)
                              HYPRE_Int           outside    )
 {
+   /* hypre_printf("WM: debug - in hypre_StructVectorSetValues(), grid_index = (%d %d), action = %d, boxnum = %d, outside = %d\n", grid_index[0], grid_index[1], action, boxnum, outside); */
    hypre_Box           *grid_box;
    HYPRE_Complex       *vecp;
    HYPRE_Int            i, istart, istop;
@@ -536,6 +537,7 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
             else /* action < 0 */
             {
                *values = *vecp;
+               /* hypre_printf("WM: debug - setting value = %e\n", *vecp); */
             }
          }
       }
