@@ -425,6 +425,9 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
 #if defined(HYPRE_SSTRUCT_MATVEC_COPY)
    hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
+   /* WM: todo - There is no explicitly stored range grid?
+    *            Is the range grid always assumed to be the same as grid above? */
+   hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomGrid(graph);
    hypre_SStructPGrid       *pgrid;
 
    HYPRE_Int                 object_type     = hypre_SStructMatrixObjectType(A);
@@ -508,7 +511,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       {
          dom_copy_global_ranks[i] = hypre_ParCSRMatrixFirstColDiag(parcsr_A) + (HYPRE_BigInt) dom_copy_ranks[i];
       }
-      hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
+      hypre_SStructGridGetGlobalRanksPartVarStarts(dom_grid,
                                                    object_type,
                                                    dom_copy_ranks_size,
                                                    dom_copy_global_ranks,
@@ -517,7 +520,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       dom_copy_indexes = hypre_CTAlloc(HYPRE_Int***, nparts, HYPRE_MEMORY_HOST);
       for (part = 0; part < nparts; part++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, part);
+         pgrid = hypre_SStructGridPGrid(dom_grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
          dom_copy_indexes[part] = hypre_CTAlloc(HYPRE_Int**, nvars, HYPRE_MEMORY_HOST);
          for (var = 0; var < nvars; var++)
@@ -525,7 +528,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
             num_ranks = dom_copy_ranks_part_var_starts[npartvars + 1] - dom_copy_ranks_part_var_starts[npartvars];
             if (num_ranks)
             {
-               hypre_SStructGridGlobalRanksToIndexes(grid, object_type, part, var, num_ranks,
+               hypre_SStructGridGlobalRanksToIndexes(dom_grid, object_type, part, var, num_ranks,
                                                      &(dom_copy_global_ranks[dom_copy_ranks_part_var_starts[npartvars]]),
                                                      &(dom_copy_indexes[part][var]));
             }
@@ -555,7 +558,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       ran_copy_global_ranks = hypre_TAlloc(HYPRE_BigInt, ran_copy_ranks_size, memory_location);
       for (i = 0; i < ran_copy_ranks_size; i++)
       {
-         ran_copy_global_ranks[i] = hypre_ParCSRMatrixFirstColDiag(parcsr_A) + (HYPRE_BigInt) ran_copy_ranks[i];
+         ran_copy_global_ranks[i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_A) + (HYPRE_BigInt) ran_copy_ranks[i];
       }
       hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
                                                    object_type,
