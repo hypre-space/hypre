@@ -2323,7 +2323,7 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
                                               HYPRE_Int        **global_ranks_part_var_starts_ptr )
 {
    /* WM: todo - GPU port */
-   HYPRE_Int                  i, part, var, nvars, npartvars;
+   HYPRE_Int                  i, j, part, var, nvars, npartvars, n_empty_partvars;
    HYPRE_BigInt               offset;
    hypre_SStructPGrid        *pgrid;
    hypre_BoxManEntry         *entry;
@@ -2351,6 +2351,7 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
       }
    }
    global_ranks_part_var_starts = hypre_CTAlloc(HYPRE_Int, npartvars + 1, HYPRE_MEMORY_HOST);
+   n_empty_partvars = 0;
    npartvars = 0;
    i = 0;
    for (part = 0; part < nparts; part++)
@@ -2361,25 +2362,40 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
       {
          manager = hypre_SStructGridBoxManager(grid, part, var);
          /* WM: todo - is the below right for getting the correct boxman entry? */
-         entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);
-         hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
-         if (type == HYPRE_PARCSR)
+         if (hypre_BoxManFirstLocal(manager) > -1)
          {
-            offset = hypre_SStructBoxManInfoOffset(entry_info);
+            entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);
+            hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+            if (type == HYPRE_PARCSR)
+            {
+               offset = hypre_SStructBoxManInfoOffset(entry_info);
+            }
+            else if (type == HYPRE_SSTRUCT)
+            {
+               offset = hypre_SStructBoxManInfoGhoffset(entry_info);
+            }
+            while (i < num_ranks && global_ranks[i] < offset)
+            {
+               i++;
+            }
+            for (j = 0; j < n_empty_partvars + 1; j++)
+            {
+               global_ranks_part_var_starts[npartvars] = i;
+               npartvars++;
+            }
+            n_empty_partvars = 0;
          }
-         else if (type == HYPRE_SSTRUCT)
+         else
          {
-            offset = hypre_SStructBoxManInfoGhoffset(entry_info);
+            n_empty_partvars++;
          }
-         while (i < num_ranks && global_ranks[i] < offset)
-         {
-            i++;
-         }
-         global_ranks_part_var_starts[npartvars] = i;
-         npartvars++;
       }
    }
-   global_ranks_part_var_starts[npartvars] = num_ranks;
+   for (j = 0; j < n_empty_partvars + 1; j++)
+   {
+      global_ranks_part_var_starts[npartvars] = num_ranks;
+      npartvars++;
+   }
 
    *global_ranks_part_var_starts_ptr = global_ranks_part_var_starts;
 
