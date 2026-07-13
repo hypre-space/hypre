@@ -328,7 +328,6 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
             }
             HYPRE_SStructVectorGetValues(x, part, index, var, &val);
             tmp_data[ copy_ranks[j] ] = val;
-            /* hypre_printf("WM: debug - copy_ranks[%d] = %d, val = %e, part = %d, var = %d, index = (%d %d)\n", j, copy_ranks[j], val, part, var, index[0], index[1]); */
          }
          npartvars++;
       }
@@ -448,11 +447,6 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
    HYPRE_Int                *ran_copy_global_ranks;
    HYPRE_Int             ****dom_copy_indexes;
    HYPRE_Int             ****ran_copy_indexes;
-   /* WM: debug */
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_SStructGridComm(grid), &myid);
-   /* WM: debug */
-   /* HYPRE_SStructMatrixPrint("sstruct.out.matvec_A", A, 0); */
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -510,17 +504,10 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       /* Convert local to global ranks, get the part/var starts,
        * then map to part/var/index to obtain dom_copy_indexes */
       dom_copy_global_ranks = hypre_TAlloc(HYPRE_BigInt, dom_copy_ranks_size, memory_location);
-      if (myid == 0)
-      {
-         /* hypre_printf("WM: debug - num_col_ind = %d, num_send_map_elmts = %d\n", num_col_ind, num_send_map_elmts); */
-         /* hypre_printf("WM: debug - dom_copy_global_ranks = "); */
-      }
       for (i = 0; i < dom_copy_ranks_size; i++)
       {
          dom_copy_global_ranks[i] = hypre_ParCSRMatrixFirstColDiag(parcsr_A) + (HYPRE_BigInt) dom_copy_ranks[i];
-         /* if (myid == 0) hypre_printf("%b ", dom_copy_global_ranks[i]); */
       }
-      /* if (myid == 0) hypre_printf("\n"); */
       hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
                                                    object_type,
                                                    dom_copy_ranks_size,
@@ -542,15 +529,6 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                                                      &(dom_copy_global_ranks[dom_copy_ranks_part_var_starts[npartvars]]),
                                                      &(dom_copy_indexes[part][var]));
             }
-            /* if (myid == 0) */
-            /* { */
-            /*    hypre_printf("WM: debug - dom_copy_indexes[%d][%d] = ", part, var); */
-            /*    for (i = 0; i < num_ranks; i++) */
-            /*    { */
-            /*       hypre_printf("(%d %d) ", dom_copy_indexes[part][var][0][i], dom_copy_indexes[part][var][1][i]); */
-            /*    } */
-            /*    hypre_printf("\n"); */
-            /* } */
             npartvars++;
          }
       }
@@ -575,13 +553,10 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       /* Convert local to global ranks, get the part/var starts,
        * then map to part/var/index to obtain ran_copy_indexes */
       ran_copy_global_ranks = hypre_TAlloc(HYPRE_BigInt, ran_copy_ranks_size, memory_location);
-      /* if (myid == 0) hypre_printf("WM: debug - ran_copy_global_ranks = "); */
       for (i = 0; i < ran_copy_ranks_size; i++)
       {
          ran_copy_global_ranks[i] = hypre_ParCSRMatrixFirstColDiag(parcsr_A) + (HYPRE_BigInt) ran_copy_ranks[i];
-         /* if (myid == 0) hypre_printf("%b ", ran_copy_global_ranks[i]); */
       }
-      /* if (myid == 0) hypre_printf("\n"); */
       hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
                                                    object_type,
                                                    ran_copy_ranks_size,
@@ -603,15 +578,6 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                                                      &(ran_copy_global_ranks[ran_copy_ranks_part_var_starts[npartvars]]),
                                                      &(ran_copy_indexes[part][var]));
             }
-            /* if (myid == 0) */
-            /* { */
-            /*    hypre_printf("WM: debug - ran_copy_indexes[%d][%d] = ", part, var); */
-            /*    for (i = 0; i < num_ranks; i++) */
-            /*    { */
-            /*       hypre_printf("(%d %d) ", ran_copy_indexes[part][var][0][i], ran_copy_indexes[part][var][1][i]); */
-            /*    } */
-            /*    hypre_printf("\n"); */
-            /* } */
             npartvars++;
          }
       }
@@ -640,7 +606,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
                             hypre_SStructVector *b,
                             hypre_SStructVector *y )
 {
-   /* hypre_printf("WM: debug - CALLING MATVEC\n"); */
    hypre_SStructMatvecData  *matvec_data  = (hypre_SStructMatvecData   *)matvec_vdata;
    HYPRE_Int                 nparts       = (matvec_data -> nparts);
    HYPRE_Int                 transpose    = (matvec_data -> transpose);
@@ -692,8 +657,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 #if defined(HYPRE_SSTRUCT_MATVEC_COPY)
          /* Fill appropriate domain/range tmp par vector with values from x */
          hypre_SStructMatvecCopyToParCSR(A, transpose, x);
-         /* WM: debug */
-         hypre_ParVectorPrint(hypre_SStructMatrixDomTmp(A), "sstruct.out.x_copy_in");
 
          /* Do the parcsr matvec */
          if (transpose)
@@ -715,8 +678,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          /* Add the matvec result to y */
          hypre_SStructMatvecAddToSStruct(A, transpose, y);
-         /* WM: debug */
-         hypre_ParVectorPrint(hypre_SStructMatrixRanTmp(A), "sstruct.out.y_copy_out");
 #else
          /* GEC1002 the data chunk pointed by the local-parvectors
           *  inside the semistruct vectors x and y is now identical to the
@@ -726,8 +687,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          hypre_SStructVectorConvert(x, &parx);
          hypre_SStructVectorConvert(y, &pary);
-         /* WM: debug */
-         hypre_ParVectorPrint(parx, "sstruct.out.x_copy_in");
 
          if (transpose)
          {
@@ -735,10 +694,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          }
          else
          {
-            /* WM: debug */
-            hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 0.0, pary);
-            hypre_ParVectorPrint(pary, "sstruct.out.y_copy_out");
-            /* hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary); */
+            hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
          }
 
          /* dummy functions since there is nothing to restore  */

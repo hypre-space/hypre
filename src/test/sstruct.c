@@ -4460,12 +4460,8 @@ main( hypre_int argc,
       if (print_system)
       {
          HYPRE_SStructVectorCopy(b, r);
-         HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
          HYPRE_SStructMatrixMatvec(-1.0, A, x, 1.0, r);
          HYPRE_SStructVectorPrint("sstruct.out.r0", r, 0);
-         /* WM: debug */
-         /* hypre_MPI_Finalize(); */
-         /* exit(0); */
       }
 
       hypre_EndTiming(time_index);
