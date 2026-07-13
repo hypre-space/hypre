@@ -229,6 +229,11 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 
 /*--------------------------------------------------------------------------
  * hypre_GpuMatDataInvalidateSpMVCache
+ *
+ * Invalidate pointer-dependent SpMV setup after a matrix's CSR storage
+ * changes. The rocSPARSE descriptors and preprocessing state must be rebuilt
+ * before the next SpMV, but the pointer-independent workspace is retained for
+ * reuse. Other vendor backends currently have no cached setup to invalidate.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2633,6 +2638,10 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
       return hypre_error_flag;
    }
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_CSRMatrixInvalidateSpMVCache(A);
+#endif
+
    new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
    new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
 
@@ -2885,6 +2894,10 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
       hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_CSRMatrixInvalidateSpMVCache(A);
+#endif
 
    hypre_CSRMatrixNumNonzeros(A) = new_nnz;
    if (!A_ii)

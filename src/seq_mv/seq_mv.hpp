@@ -17,6 +17,14 @@
 extern "C" {
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+hypre_GpuVecData* hypre_GpuVecDataCreate();
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+HYPRE_Int hypre_GpuVecDataInvalidate(hypre_GpuVecData *data);
+hypre_GpuVecData* hypre_VectorGetGPUVecData(hypre_Vector *vector);
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 cusparseDnVecDescr_t hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
                                                        HYPRE_Int offset,
@@ -27,6 +35,8 @@ rocsparse_dnvec_descr hypre_VectorGetRocsparseDnVecDescr(hypre_Vector *vector,
                                                          int64_t size,
                                                          void *data,
                                                          rocsparse_datatype type);
+HYPRE_Int hypre_CSRMatrixSpMVAnalysisRocsparseDevice(hypre_CSRMatrix *matrix,
+                                                     HYPRE_Int offset);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION

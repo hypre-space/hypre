@@ -2374,6 +2374,9 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    if (!hypre_CSRMatrixData(A))
    {
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+      hypre_CSRMatrixInvalidateSpMVCache(A);
+#endif
       hypre_CSRMatrixData(A) = hypre_TAlloc(HYPRE_Complex, nnz, hypre_CSRMatrixMemoryLocation(A));
    }
 

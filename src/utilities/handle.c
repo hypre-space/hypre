@@ -90,18 +90,33 @@ hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 HYPRE_Int
 hypre_SetSpMVAlgorithm( HYPRE_Int algorithm )
 {
-   if (algorithm < 0)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
 #if defined(HYPRE_USING_ROCSPARSE)
-   if (algorithm <= 9)
+   HYPRE_Int valid_algorithm =
+      algorithm == (HYPRE_Int) rocsparse_spmv_alg_default ||
+      algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_adaptive;
+
+#if (ROCSPARSE_VERSION >= 400100)
+   valid_algorithm |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_rowsplit;
+#else
+   valid_algorithm |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_stream;
+#endif
+#if (ROCSPARSE_VERSION >= 300100)
+   valid_algorithm |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_lrb;
+#endif
+#if (ROCSPARSE_VERSION >= 400100)
+   valid_algorithm |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_nnzsplit;
+#endif
+
+   if (valid_algorithm)
    {
       hypre_HandleSpMVAlgorithm(hypre_handle()) = algorithm;
    }
    else
+   {
+      hypre_error_in_arg(1);
+   }
+#else
+   if (algorithm < 0)
    {
       hypre_error_in_arg(1);
    }

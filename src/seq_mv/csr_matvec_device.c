@@ -749,18 +749,6 @@ hypre_CSRMatrixSpMVAnalysisRocsparseDevice( hypre_CSRMatrix *matrix,
                                             rocsparse_spmv_stage_preprocess,
                                             &needed_buffer_size,
                                             hypre_GpuMatDataSpMVBuffer(gpu_mat)) );
-#else
-       HYPRE_ROCSPARSE_CALL( rocsparse_spmv(handle,
-                                            rocsparse_operation_none,
-                                            (const void *) &alpha_v,
-                                            cached_mat,
-                                            vecX,
-                                            (const void *) &beta_v,
-                                            vecY,
-                                            compute_type,
-                                            alg,
-                                            &needed_buffer_size,
-                                            hypre_GpuMatDataSpMVBuffer(gpu_mat)) );
 #endif
    }
 #endif

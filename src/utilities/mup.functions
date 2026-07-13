@@ -26,6 +26,7 @@ HYPRE_SetMemoryLocation
 HYPRE_SetPrintErrorMode
 HYPRE_SetPrintErrorVerbosity
 HYPRE_SetSpGemmUseVendor
+HYPRE_SetSpMVAlgorithm
 HYPRE_SetSpMVUseVendor
 HYPRE_SetSpTransUseVendor
 HYPRE_SetUseGpuRand

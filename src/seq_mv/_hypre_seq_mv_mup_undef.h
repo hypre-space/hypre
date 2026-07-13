@@ -240,6 +240,7 @@
 #undef hypre_CSRMatrixSortDevice
 #undef hypre_CSRMatrixSortRow
 #undef hypre_CSRMatrixSortRowOutOfPlace
+#undef hypre_CSRMatrixSpMVAnalysisRocsparseDevice
 #undef hypre_CSRMatrixSpMVDevice
 #undef hypre_CSRMatrixSplitDevice
 #undef hypre_CSRMatrixSplitDevice_core
@@ -257,6 +258,10 @@
 #undef hypre_GPUMatDataSetCSRData
 #undef hypre_GpuMatDataCreate
 #undef hypre_GpuMatDataDestroy
+#undef hypre_GpuMatDataInvalidateSpMVCache
+#undef hypre_GpuVecDataCreate
+#undef hypre_GpuVecDataDestroy
+#undef hypre_GpuVecDataInvalidate
 #undef hypre_SeqVectorAxpyDevice
 #undef hypre_SeqVectorAxpyzDevice
 #undef hypre_SeqVectorInnerProdDevice
@@ -273,5 +278,8 @@
 #undef hypre_SpGemmCreateBins
 #undef hypre_SpGemmCreateGlobalHashTable
 #undef hypre_SpGemmGhashSize
+#undef hypre_VectorGetCusparseDnVecDescr
+#undef hypre_VectorGetGPUVecData
+#undef hypre_VectorGetRocsparseDnVecDescr
 #undef hypre_create_ija
 #undef hypre_expdistfromuniform
