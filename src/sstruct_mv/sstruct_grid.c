@@ -2171,7 +2171,6 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_
       {
          hypre_IndexD(index, d) = indexes[d][i];
       }
-      /* WM: todo - is calling hypre_SStructGridFindBoxManEntry() for each index efficient enough? */
       hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
       /* WM: todo - I don't really understand hypre_SStructGridFindNborBoxManEntry()... is it necessary? */
       /* if not local, check neighbors */
@@ -2200,7 +2199,8 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_
 
 /*--------------------------------------------------------------------------
  * Convert from sstruct grid indexes to global ranks for parcsr.
- * Note that global indexes are assumed to belong to the given par/var.
+ * Note that global indexes are assumed to belong to the given par/var
+ * and must be sorted when passed to this function.
  * Inputs:
  *    grid/part/var where the indexes live
  *    num_ranks = (number of global ranks to be converted)
@@ -2241,9 +2241,6 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
       indexes[d] = hypre_TAlloc(HYPRE_Int, num_ranks, HYPRE_MEMORY_HOST);
    }
 
-   /* Sort global ranks */
-   /* WM: todo - or should I assume sorted? */
-
    /* Get start_offsets, end_offsets, and box array for boxes in the box manager */
    start_offsets = hypre_TAlloc(HYPRE_BigInt, nentries, HYPRE_MEMORY_HOST);
    end_offsets = hypre_TAlloc(HYPRE_BigInt, nentries, HYPRE_MEMORY_HOST);
@@ -2251,7 +2248,6 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
    {
       entry = &(hypre_BoxManEntries(manager)[i]);
       hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
-      /* WM: todo - Is the type stuff below correct? */
       if (type == HYPRE_PARCSR)
       {
          start_offsets[i] = hypre_SStructBoxManInfoOffset(entry_info);
@@ -2263,7 +2259,6 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
       {
          start_offsets[i] = hypre_SStructBoxManInfoGhoffset(entry_info);
          hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry), hypre_BoxManEntryIMax(entry));
-         /* WM: todo - is this grow correct? */
          hypre_BoxGrowByArray(box, hypre_BoxManEntryNumGhost(entry));
          hypre_AppendBox(box, box_a);
          end_offsets[i] = start_offsets[i] + hypre_BoxVolume(box);
@@ -2300,12 +2295,11 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
       }
    }
 
-   /* Un-sort to recover original ordering of the global_indexes */
-   /* WM: todo */
-
    *indexes_ptr = indexes;
 
    /* Clean up memory */
+   hypre_TFree(start_offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(end_offsets, HYPRE_MEMORY_HOST);
    hypre_BoxArrayDestroy(box_a);
 
    return hypre_error_flag;
@@ -2314,6 +2308,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
 /*--------------------------------------------------------------------------
  * Given an array of global ranks, generate a pointer array listing the
  * starting indexes for each part/var chunk of the global ranks array.
+ * Note that the global_ranks array must be sorted.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
@@ -2333,13 +2328,8 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
 
    HYPRE_Int                  nparts = hypre_SStructGridNParts(grid);
    
-   /* Sort the global ranks */
-   /* WM: todo - actually, I think I'll assume the sorting happens outside... */
-   /*            I think that for most use cases, the global ranks should be sorted already */
-   /* hypre_BigQsort0(global_ranks, 0, num_global_ranks - 1); */
-
    /* Get pointers to the start of each part/var block in the global ranks */
-   /* WM: NOTE - the implementation below assumes all the global ranks are owned by this processor */
+   /* NOTE - the implementation below assumes all the global ranks are owned by this processor */
    npartvars = 0;
    for (part = 0; part < nparts; part++)
    {
@@ -2361,7 +2351,6 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid,
       for (var = 0; var < nvars; var++)
       {
          manager = hypre_SStructGridBoxManager(grid, part, var);
-         /* WM: todo - is the below right for getting the correct boxman entry? */
          if (hypre_BoxManFirstLocal(manager) > -1)
          {
             entry = &(hypre_BoxManEntries(manager)[ hypre_BoxManFirstLocal(manager) ]);

@@ -993,7 +993,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_
                                                  HYPRE_Int ***indexes_ptr );
 HYPRE_Int hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid, HYPRE_Int type,
                                                         HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
-                                                        HYPRE_Int **global_ranks_part_var_ptr_ptr);
+                                                        HYPRE_Int **global_ranks_part_var_starts_ptr);
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry, hypre_Index strides,
                                                HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum,
