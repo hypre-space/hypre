@@ -343,6 +343,13 @@ hypreGPUKernel_PMISCoarseningInit(hypre_DeviceItem &item,
       {
          measure_diag[i] = 0.0;
       }
+
+      /* Retained HMIS C-points are excluded from graph_diag.  Clear their
+       * measures so subsequent independent sets cannot reset their markers. */
+      if (CF_marker_i > 0)
+      {
+         measure_diag[i] = 0.0;
+      }
    }
    else
    {
