@@ -47,7 +47,7 @@ hypre_DeviceDataCreate()
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
    hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) HYPRE_CUSPARSE_SPMV_CSR_ALG2;
 #elif defined(HYPRE_USING_ROCSPARSE) && ROCSPARSE_VERSION >= 400100
-   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_nnzsplit; /* vendor default */
+   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_rowsplit;
 #else
    hypre_DeviceDataSpMVAlgorithm(data)    = 0; /* vendor default */
 #endif
