@@ -157,6 +157,9 @@ hypre_GpuMatDataCreate()
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
    hypre_GpuMatDataMatDescr(data) = mat_descr;
+   hypre_GpuMatDataSpMVBuffer(data) = NULL;
+   hypre_GpuMatDataSpMVBufferAlg(data) = -1;
+   hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr mat_descr;
@@ -230,16 +233,25 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 /*--------------------------------------------------------------------------
  * hypre_GpuMatDataInvalidateSpMVCache
  *
- * Invalidate pointer-dependent SpMV setup after a matrix's CSR storage
- * changes. The rocSPARSE descriptors and preprocessing state must be rebuilt
- * before the next SpMV, but the pointer-independent workspace is retained for
- * reuse. Other vendor backends currently have no cached setup to invalidate.
+ * Invalidate cached vendor SpMV state after a matrix's CSR storage changes.
+ * rocSPARSE descriptors and preprocessing state must be rebuilt before the next
+ * SpMV, but its pointer-independent workspace is retained for reuse. The
+ * cuSPARSE workspace is released because its required size can depend on the
+ * matrix structure and selected algorithm.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data)
 {
-#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+#if defined(HYPRE_USING_CUSPARSE)
+   if (data)
+   {
+      hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
+      hypre_GpuMatDataSpMVBuffer(data) = NULL;
+      hypre_GpuMatDataSpMVBufferAlg(data) = -1;
+      hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
+   }
+#elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
    if (data)
    {
       if (hypre_GpuMatDataSpMVSpMatDescr(data))
@@ -2638,9 +2650,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixInvalidateSpMVCache(A);
-#endif
 
    new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
    new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
@@ -2895,9 +2905,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixInvalidateSpMVCache(A);
-#endif
 
    hypre_CSRMatrixNumNonzeros(A) = new_nnz;
    if (!A_ii)

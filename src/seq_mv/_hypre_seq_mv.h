@@ -659,6 +659,13 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
+#else
+#define hypre_CSRMatrixInvalidateSpMVCache(matrix) \
+   do \
+   { \
+      HYPRE_UNUSED_VAR(matrix); \
+   } \
+   while (0)
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
@@ -737,4 +744,3 @@ hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision );
 #endif
 
 #endif
-

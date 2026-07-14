@@ -51,15 +51,12 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 #endif
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWSPMM_VERSION
-#define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG3
 
 #elif CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-#define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_CSRMV_ALG2
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG1
 
 #else
-#define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_CSRMV_ALG2
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_CSRMM_ALG1
 #endif
 
@@ -253,11 +250,17 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    hypre_CSRMatrix  *B;
 
    /* SpMV data */
-   size_t                    bufferSize = 0;
-   char                     *dBuffer    = hypre_CSRMatrixGPUMatSpMVBuffer(A);
-   cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
-   const cudaDataType        data_type  = hypre_HYPREComplexToCudaDataType();
-   const cusparseIndexType_t index_type = hypre_HYPREIntToCusparseIndexType();
+   size_t                     bufferSize = 0;
+   hypre_GpuMatData          *gpu_mat = hypre_CSRMatrixGetGPUMatData(A);
+   char                      *dBuffer = hypre_GpuMatDataSpMVBuffer(gpu_mat);
+   cusparseHandle_t           handle = hypre_HandleCusparseHandle(hypre_handle());
+   const cudaDataType         data_type = hypre_HYPREComplexToCudaDataType();
+   const cusparseIndexType_t  index_type = hypre_HYPREIntToCusparseIndexType();
+   const cusparseSpMVAlg_t    spmv_alg =
+      (cusparseSpMVAlg_t) hypre_HandleSpMVAlgorithm(hypre_handle());
+   const HYPRE_Int            buffer_is_current =
+      dBuffer && hypre_GpuMatDataSpMVBufferNumVectors(gpu_mat) == num_vectors &&
+      (num_vectors > 1 || hypre_GpuMatDataSpMVBufferAlg(gpu_mat) == (HYPRE_Int) spmv_alg);
 
    /* Local cusparse descriptor variables */
    cusparseSpMatDescr_t      matA;
@@ -289,8 +292,14 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
       matY = hypre_VectorToCusparseDnMat(y);
    }
 
-   if (!dBuffer)
+   if (!buffer_is_current)
    {
+      hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
+      dBuffer = NULL;
+      hypre_GpuMatDataSpMVBuffer(gpu_mat) = NULL;
+      hypre_GpuMatDataSpMVBufferAlg(gpu_mat) = -1;
+      hypre_GpuMatDataSpMVBufferNumVectors(gpu_mat) = -1;
+
       if (num_vectors == 1)
       {
          HYPRE_CUSPARSE_CALL( cusparseSpMV_bufferSize(handle,
@@ -301,7 +310,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                                       &beta,
                                                       vecY,
                                                       data_type,
-                                                      HYPRE_CUSPARSE_SPMV_ALG,
+                                                      spmv_alg,
                                                       &bufferSize) );
       }
       else
@@ -320,7 +329,9 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
       }
 
       dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
-      hypre_CSRMatrixGPUMatSpMVBuffer(A) = dBuffer;
+      hypre_GpuMatDataSpMVBuffer(gpu_mat) = dBuffer;
+      hypre_GpuMatDataSpMVBufferAlg(gpu_mat) = (HYPRE_Int) spmv_alg;
+      hypre_GpuMatDataSpMVBufferNumVectors(gpu_mat) = num_vectors;
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWSPMM_VERSION
       if (num_vectors > 1)
@@ -350,7 +361,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                         &beta,
                                         vecY,
                                         data_type,
-                                        HYPRE_CUSPARSE_SPMV_ALG,
+                                        spmv_alg,
                                         dBuffer) );
    }
    else

@@ -305,9 +305,22 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#define CUSPARSE_NEWSPMVALG_VERSION 11401
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+#if CUSPARSE_VERSION >= CUSPARSE_NEWSPMVALG_VERSION
+#define HYPRE_CUSPARSE_SPMV_ALG_DEFAULT  CUSPARSE_SPMV_ALG_DEFAULT
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG1     CUSPARSE_SPMV_CSR_ALG1
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG2     CUSPARSE_SPMV_CSR_ALG2
+#else
+#define HYPRE_CUSPARSE_SPMV_ALG_DEFAULT  CUSPARSE_MV_ALG_DEFAULT
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG1     CUSPARSE_CSRMV_ALG1
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG2     CUSPARSE_CSRMV_ALG2
+#endif
+#endif
 
 #define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -1068,7 +1081,7 @@ struct hypre_DeviceData
    float                             spgemm_rownnz_estimate_mult_factor;
    /* cusparse */
    HYPRE_Int                         spmv_use_vendor;
-   HYPRE_Int                         spmv_algorithm; /* 0 = vendor default */
+   HYPRE_Int                         spmv_algorithm; /* raw vendor enum */
    HYPRE_Int                         sptrans_use_vendor;
    HYPRE_Int                         spgemm_use_vendor;
    /* PMIS RNG */
@@ -1248,6 +1261,8 @@ struct hypre_GpuMatData
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t                   mat_descr;
    char                                *spmv_buffer;
+   HYPRE_Int                            spmv_buffer_alg;
+   HYPRE_Int                            spmv_buffer_num_vectors;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr                  mat_descr;
@@ -1276,6 +1291,8 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatHandle(data)           ((data) -> mat_handle)
 #if defined(HYPRE_USING_CUSPARSE)
 #define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
+#define hypre_GpuMatDataSpMVBufferAlg(data)       ((data) -> spmv_buffer_alg)
+#define hypre_GpuMatDataSpMVBufferNumVectors(data) ((data) -> spmv_buffer_num_vectors)
 #elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
 #define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
 #define hypre_GpuMatDataSpMVBufferSize(data)      ((data) -> spmv_buffer_size)
@@ -3048,4 +3065,3 @@ struct ReduceSum
 #endif
 
 #endif
-

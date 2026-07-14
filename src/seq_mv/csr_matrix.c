@@ -241,9 +241,7 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix,
       }
    }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixInvalidateSpMVCache(matrix);
-#endif
 
    return 0;
 }
@@ -272,9 +270,7 @@ hypre_CSRMatrixBigJtoJ( hypre_CSRMatrix *matrix )
 
    if (num_nonzeros && matrix_big_j)
    {
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_CSRMatrixInvalidateSpMVCache(matrix);
-#endif
 #if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
       HYPRE_Int i;
       matrix_j = hypre_TAlloc(HYPRE_Int, num_nonzeros, hypre_CSRMatrixMemoryLocation(matrix));
@@ -308,9 +304,7 @@ hypre_CSRMatrixJtoBigJ( hypre_CSRMatrix *matrix )
 
    if (num_nonzeros && matrix_j)
    {
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_CSRMatrixInvalidateSpMVCache(matrix);
-#endif
 #if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
       HYPRE_Int i;
       matrix_big_j = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, hypre_CSRMatrixMemoryLocation(matrix));
@@ -996,9 +990,7 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(old_memory_location) )
    {
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_CSRMatrixInvalidateSpMVCache(A);
-#endif
 
       /* A takes ownership of `j`, `bigj`, and `data` since they will be allocated */
       hypre_CSRMatrixOwnsData(A) = 1;
@@ -1574,9 +1566,7 @@ hypre_CSRMatrixResetData(hypre_CSRMatrix  *matrix)
       return hypre_error_flag;
    }
    /* Free data array if already present */
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixInvalidateSpMVCache(matrix);
-#endif
 
    if (hypre_CSRMatrixData(matrix))
    {
