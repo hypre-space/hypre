@@ -554,7 +554,7 @@ hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
  * hypre_GpuVecDataCreate
  *--------------------------------------------------------------------------*/
 
-hypre_GpuVecData *
+static hypre_GpuVecData *
 hypre_GpuVecDataCreate()
 {
    hypre_GpuVecData *data = hypre_CTAlloc(hypre_GpuVecData, 1, HYPRE_MEMORY_HOST);
@@ -579,7 +579,7 @@ hypre_GpuVecDataCreate()
  * hypre_GpuVecDataInvalidate
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
+static HYPRE_Int
 hypre_GpuVecDataInvalidate(hypre_GpuVecData *data)
 {
    if (data)
@@ -629,7 +629,7 @@ hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
  * hypre_VectorGetGPUVecData
  *--------------------------------------------------------------------------*/
 
-hypre_GpuVecData *
+static hypre_GpuVecData *
 hypre_VectorGetGPUVecData(hypre_Vector *vector)
 {
    if (!hypre_VectorGPUVecData(vector))
@@ -656,10 +656,15 @@ hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
    cudaDataType      type = hypre_HYPREComplexToCudaDataType();
 
    if (hypre_GpuVecDataDnVecDescr(vec) &&
-       hypre_GpuVecDataCachedPtr(vec) == ptr &&
        hypre_GpuVecDataCachedSize(vec) == size &&
        hypre_GpuVecDataCachedType(vec) == type)
    {
+      if (hypre_GpuVecDataCachedPtr(vec) != ptr)
+      {
+         HYPRE_CUSPARSE_CALL( cusparseDnVecSetValues(hypre_GpuVecDataDnVecDescr(vec), ptr) );
+         hypre_GpuVecDataCachedPtr(vec) = ptr;
+      }
+
       return hypre_GpuVecDataDnVecDescr(vec);
    }
 

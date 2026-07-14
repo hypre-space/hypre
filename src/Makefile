@@ -248,30 +248,12 @@ distclean:
 	rm -rf ./config.status
 	rm -rf ./HYPRE_config.h
 
-.PHONY: gen_tags tags tagsnomup
-
-# gen_tags: internal implementation used by both `tags` and `tagsnomup`.
-# Set EXCLUDE_MUP=1 when calling to exclude mup_* and mup.h files.
-gen_tags:
-	@ \
-	if [ -n "$(EXCLUDE_MUP)" ]; then \
-	  EX_CTARGS="--exclude='*mup_*' --exclude='mup.h'"; ET_GREP="| grep -vE 'mup_|mup.h'"; \
-	else \
-	  EX_CTARGS=""; ET_GREP=""; \
-	fi; \
-	if command -v ctags >/dev/null 2>&1; then \
-	  echo "Generating TAGS with Universal Ctags (ctags -e)"; \
-	  eval "ctags -e -R --languages=C,C++ --langmap=C++:+.hip --c-kinds=+p --extras=+q --exclude=.git --exclude=build $${EX_CTARGS} -o TAGS ."; \
-	elif command -v etags >/dev/null 2>&1; then \
-	  echo "Generating TAGS with etags"; \
-	  eval "find . -name \"*.c\" -o -name \"*.C\" -o -name \"*.h\" -o -name \"*.c??\" -o -name \"*.h??\" -o -name \"*.f\" -type f $${ET_GREP} | etags -"; \
-	else \
-	  echo "No ctags or etags found in PATH. Please install universal-ctags (ctags) or etags." >&2; \
-	  exit 1; \
-	fi
-
 tags:
-	@$(MAKE) -s gen_tags
+	@find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+	-name "*.c??" -o -name "*.h??" -o -name "*.f" | etags -
 
 tagsnomup:
-	@$(MAKE) -s gen_tags EXCLUDE_MUP=1
+	@find . \( -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+		  -name "*.c??" -o -name "*.h??" -o -name "*.f" \) -type f \
+	| grep -vE 'mup_|mup.h' \
+	| etags -

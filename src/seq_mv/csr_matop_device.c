@@ -160,6 +160,7 @@ hypre_GpuMatDataCreate()
    hypre_GpuMatDataSpMVBuffer(data) = NULL;
    hypre_GpuMatDataSpMVBufferAlg(data) = -1;
    hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
+   hypre_GpuMatDataSpMVBufferTrans(data) = -1;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr mat_descr;
@@ -178,8 +179,6 @@ hypre_GpuMatDataCreate()
    hypre_GpuMatDataSpMVBuffer(data) = NULL;
    hypre_GpuMatDataSpMVBufferSize(data) = 0;
    hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
-   hypre_GpuMatDataSpMVPreprocessXPtr(data) = NULL;
-   hypre_GpuMatDataSpMVPreprocessYPtr(data) = NULL;
 #if (ROCSPARSE_VERSION >= 400002)
    hypre_GpuMatDataSpMVDescr(data) = NULL;
 #endif
@@ -250,6 +249,7 @@ hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data)
       hypre_GpuMatDataSpMVBuffer(data) = NULL;
       hypre_GpuMatDataSpMVBufferAlg(data) = -1;
       hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
+      hypre_GpuMatDataSpMVBufferTrans(data) = -1;
    }
 #elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
    if (data)
@@ -267,8 +267,6 @@ hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data)
          hypre_GpuMatDataSpMVDescr(data) = NULL;
       }
 #endif
-      hypre_GpuMatDataSpMVPreprocessXPtr(data) = NULL;
-      hypre_GpuMatDataSpMVPreprocessYPtr(data) = NULL;
       hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
    }
 #else
@@ -4423,40 +4421,5 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 }
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) */
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixSpMVAnalysisDevice
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
-{
-#if defined(HYPRE_USING_ROCSPARSE)
-#if (ROCSPARSE_VERSION >= 200000)
-   return hypre_CSRMatrixSpMVAnalysisRocsparseDevice(matrix, 0);
-#else
-   HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
-   rocsparse_handle       handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   if (exec == HYPRE_EXEC_DEVICE)
-   {
-      HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(handle,
-                                                           rocsparse_operation_none,
-                                                           hypre_CSRMatrixNumRows(matrix),
-                                                           hypre_CSRMatrixNumCols(matrix),
-                                                           hypre_CSRMatrixNumNonzeros(matrix),
-                                                           hypre_CSRMatrixGPUMatDescr(matrix),
-                                                           hypre_CSRMatrixData(matrix),
-                                                           hypre_CSRMatrixI(matrix),
-                                                           hypre_CSRMatrixJ(matrix),
-                                                           hypre_CSRMatrixGPUMatInfo(matrix)) );
-   }
-#endif
-#else
-   HYPRE_UNUSED_VAR(matrix);
-#endif /* #if defined(HYPRE_USING_ROCSPARSE) */
-
-   return hypre_error_flag;
-}
 
 #endif /* #if defined(HYPRE_USING_GPU) */

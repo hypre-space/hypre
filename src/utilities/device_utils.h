@@ -1030,6 +1030,7 @@ struct hypre_GpuMatData
    char                                *spmv_buffer;
    HYPRE_Int                            spmv_buffer_alg;
    HYPRE_Int                            spmv_buffer_num_vectors;
+   HYPRE_Int                            spmv_buffer_trans;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr                  mat_descr;
@@ -1039,10 +1040,8 @@ struct hypre_GpuMatData
    /* Cached SpMV resources for rocsparse multi-stage API */
    char                                *spmv_buffer;
    size_t                               spmv_buffer_size;
-   rocsparse_spmat_descr                spmv_spmat_descr;
+   rocsparse_const_spmat_descr          spmv_spmat_descr;
    HYPRE_Int                            spmv_preprocess_alg; /* -1 = not preprocessed */
-   const void                          *spmv_preprocess_x_ptr;
-   void                                *spmv_preprocess_y_ptr;
 #if (ROCSPARSE_VERSION >= 400002)
    rocsparse_spmv_descr                 spmv_descr;
 #endif
@@ -1060,13 +1059,12 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
 #define hypre_GpuMatDataSpMVBufferAlg(data)       ((data) -> spmv_buffer_alg)
 #define hypre_GpuMatDataSpMVBufferNumVectors(data) ((data) -> spmv_buffer_num_vectors)
+#define hypre_GpuMatDataSpMVBufferTrans(data)     ((data) -> spmv_buffer_trans)
 #elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
 #define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
 #define hypre_GpuMatDataSpMVBufferSize(data)      ((data) -> spmv_buffer_size)
 #define hypre_GpuMatDataSpMVSpMatDescr(data)      ((data) -> spmv_spmat_descr)
 #define hypre_GpuMatDataSpMVPreprocessAlg(data)   ((data) -> spmv_preprocess_alg)
-#define hypre_GpuMatDataSpMVPreprocessXPtr(data)  ((data) -> spmv_preprocess_x_ptr)
-#define hypre_GpuMatDataSpMVPreprocessYPtr(data)  ((data) -> spmv_preprocess_y_ptr)
 #if (ROCSPARSE_VERSION >= 400002)
 #define hypre_GpuMatDataSpMVDescr(data)           ((data) -> spmv_descr)
 #endif

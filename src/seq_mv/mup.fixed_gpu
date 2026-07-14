@@ -50,7 +50,6 @@ hypre_CSRMatrixSetRownnzDevice
 hypre_CSRMatrixSortDevice
 hypre_CSRMatrixSortRow
 hypre_CSRMatrixSortRowOutOfPlace
-hypre_CSRMatrixSpMVAnalysisRocsparseDevice
 hypre_CSRMatrixSpMVDevice
 hypre_CSRMatrixSplitDevice
 hypre_CSRMatrixSplitDevice_core
@@ -69,9 +68,7 @@ hypre_GPUMatDataSetCSRData
 hypre_GpuMatDataCreate
 hypre_GpuMatDataDestroy
 hypre_GpuMatDataInvalidateSpMVCache
-hypre_GpuVecDataCreate
 hypre_GpuVecDataDestroy
-hypre_GpuVecDataInvalidate
 hypre_SeqVectorAxpyDevice
 hypre_SeqVectorAxpyzDevice
 hypre_SeqVectorInnerProdDevice
@@ -89,7 +86,6 @@ hypre_SpGemmCreateBins
 hypre_SpGemmCreateGlobalHashTable
 hypre_SpGemmGhashSize
 hypre_VectorGetCusparseDnVecDescr
-hypre_VectorGetGPUVecData
 hypre_VectorGetRocsparseDnVecDescr
 hypre_create_ija
 hypre_expdistfromuniform
