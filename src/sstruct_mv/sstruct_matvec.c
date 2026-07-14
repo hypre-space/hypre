@@ -279,6 +279,8 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
    hypre_SStructGraph       *graph       = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
    hypre_SStructPGrid       *pgrid;
+   hypre_SStructPVector     *pvector;
+   hypre_StructVector       *svector;
 
    hypre_ParVector          *tmp;
    HYPRE_Complex            *tmp_data;
@@ -290,9 +292,6 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
    HYPRE_Int                 part, var, i, j, d;
    HYPRE_Complex             val;
    HYPRE_Int                 index[HYPRE_MAXDIM];
-
-   /* WM: todo - do I really need to call HYPRE_SStructVectorGather() here? */
-   HYPRE_SStructVectorGather(x);
 
    /* Get tmp vector and copy info in either the domain or range depending on transpose */
    if (transpose)
@@ -317,9 +316,11 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
       nvars = hypre_SStructPGridNVars(pgrid);
+      pvector = hypre_SStructVectorPVector(x, part);
       for (var = 0; var < nvars; var++)
       {
          /* WM: todo - GPU */
+         svector = hypre_SStructPVectorSVector(pvector, var);
          num_ranks = copy_ranks_part_var_starts[npartvars + 1] - copy_ranks_part_var_starts[npartvars];
          for (i = 0, j = copy_ranks_part_var_starts[npartvars]; i < num_ranks; i++, j++)
          {
@@ -327,7 +328,8 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
             {
                index[d] = copy_indexes[part][var][d][i];
             }
-            HYPRE_SStructVectorGetValues(x, part, index, var, &val);
+            hypre_StructVectorSetValues(svector, index, &val, -1, -1, 0);
+
             tmp_data[ copy_ranks[j] ] = val;
          }
          npartvars++;
