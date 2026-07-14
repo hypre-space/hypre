@@ -744,3 +744,4 @@ hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision );
 #endif
 
 #endif
+
