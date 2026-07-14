@@ -11,8 +11,10 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_sstruct_mv.h"
-#define TEST_INDEXESTOGLOBALRANKS
+#include "_hypre_utilities.hpp"
+/* #define TEST_INDEXESTOGLOBALRANKS */
 
 /*==========================================================================
  * PMatvec routines
@@ -516,6 +518,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       }
       hypre_SStructGridGetGlobalRanksPartVarStarts(dom_grid,
                                                    object_type,
+                                                   HYPRE_MEMORY_HOST,
                                                    dom_copy_ranks_size,
                                                    dom_copy_global_ranks,
                                                    &(dom_copy_ranks_part_var_starts));
@@ -531,13 +534,13 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
             num_ranks = dom_copy_ranks_part_var_starts[npartvars + 1] - dom_copy_ranks_part_var_starts[npartvars];
             if (num_ranks)
             {
-               hypre_SStructGridGlobalRanksToIndexes(dom_grid, object_type, part, var, num_ranks,
+               hypre_SStructGridGlobalRanksToIndexes(dom_grid, object_type, HYPRE_MEMORY_HOST, part, var, num_ranks,
                                                      &(dom_copy_global_ranks[dom_copy_ranks_part_var_starts[npartvars]]),
                                                      &(dom_copy_indexes[part][var]));
 #if defined(TEST_INDEXESTOGLOBALRANKS)
                /* WM: debug - check that mapping back to global ranks works */
                HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, HYPRE_MEMORY_HOST);
-               hypre_SStructGridIndexesToGlobalRanks(dom_grid, object_type, part, var,
+               hypre_SStructGridIndexesToGlobalRanks(dom_grid, object_type, HYPRE_MEMORY_HOST, part, var,
                                                  num_ranks, dom_copy_indexes[part][var],
                                                  &global_ranks_check);
                for (i = 0; i < num_ranks; i++)
@@ -578,6 +581,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       }
       hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
                                                    object_type,
+                                                   HYPRE_MEMORY_HOST,
                                                    ran_copy_ranks_size,
                                                    ran_copy_global_ranks,
                                                    &(ran_copy_ranks_part_var_starts));
@@ -593,13 +597,13 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
             num_ranks = ran_copy_ranks_part_var_starts[npartvars + 1] - ran_copy_ranks_part_var_starts[npartvars];
             if (num_ranks)
             {
-               hypre_SStructGridGlobalRanksToIndexes(grid, object_type, part, var, num_ranks,
+               hypre_SStructGridGlobalRanksToIndexes(grid, object_type, HYPRE_MEMORY_HOST, part, var, num_ranks,
                                                      &(ran_copy_global_ranks[ran_copy_ranks_part_var_starts[npartvars]]),
                                                      &(ran_copy_indexes[part][var]));
 #if defined(TEST_INDEXESTOGLOBALRANKS)
                /* WM: debug - check that mapping back to global ranks works */
                HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, HYPRE_MEMORY_HOST);
-               hypre_SStructGridIndexesToGlobalRanks(grid, object_type, part, var,
+               hypre_SStructGridIndexesToGlobalRanks(grid, object_type, HYPRE_MEMORY_HOST, part, var,
                                                  num_ranks, ran_copy_indexes[part][var],
                                                  &global_ranks_check);
                for (i = 0; i < num_ranks; i++)
