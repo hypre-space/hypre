@@ -14,7 +14,7 @@
 #include "_hypre_onedpl.hpp"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_utilities.hpp"
-/* #define TEST_INDEXESTOGLOBALRANKS */
+#define TEST_INDEXESTOGLOBALRANKS
 
 /*==========================================================================
  * PMatvec routines
@@ -292,8 +292,12 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
 
    HYPRE_Int                 nvars, npartvars, num_ranks;
    HYPRE_Int                 part, var, i, j, d;
-   HYPRE_Complex             val;
+   /* WM: todo - setting up val as a pointer is just a temporary solution until I
+    *            do a proper GPU port here */
+   HYPRE_Complex            *val;
    HYPRE_Int                 index[HYPRE_MAXDIM];
+
+   HYPRE_MemoryLocation      memory_location;
 
    /* Get tmp vector and copy info in either the domain or range depending on transpose */
    if (transpose)
@@ -311,6 +315,8 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
       copy_indexes = hypre_SStructMatrixDomCopyIndexes(A);
    }
    tmp_data = hypre_ParVectorLocalData(tmp);
+   memory_location = hypre_ParVectorMemoryLocation(tmp);
+   val = hypre_TAlloc(HYPRE_Complex, 1, memory_location);
 
    /* Loop over part/vars and copy from sstruct vector, x, into tmp par vector */
    npartvars = 0;
@@ -330,13 +336,15 @@ HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A,
             {
                index[d] = copy_indexes[part][var][d][i];
             }
-            hypre_StructVectorSetValues(svector, index, &val, -1, -1, 0);
+            hypre_StructVectorSetValues(svector, index, val, -1, -1, 0);
 
-            tmp_data[ copy_ranks[j] ] = val;
+            tmp_data[ copy_ranks[j] ] = *val;
          }
          npartvars++;
       }
    }
+
+   hypre_TFree(val, memory_location);
 
    return hypre_error_flag;
 }
@@ -364,8 +372,12 @@ hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A,
 
    HYPRE_Int                 nvars, npartvars, num_ranks;
    HYPRE_Int                 part, var, i, j, d;
-   HYPRE_Complex             val;
+   /* WM: todo - setting up val as a pointer is just a temporary solution until I
+    *            do a proper GPU port here */
+   HYPRE_Complex            *val;
    HYPRE_Int                 index[HYPRE_MAXDIM];
+
+   HYPRE_MemoryLocation      memory_location;
 
    /* Get tmp vector and copy info in either the domain or range depending on transpose */
    if (transpose)
@@ -383,6 +395,8 @@ hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A,
       copy_indexes = hypre_SStructMatrixRanCopyIndexes(A);
    }
    tmp_data = hypre_ParVectorLocalData(tmp);
+   memory_location = hypre_ParVectorMemoryLocation(tmp);
+   val = hypre_TAlloc(HYPRE_Complex, 1, memory_location);
 
    /* Loop over part/vars and add values from tmp par vector to sstruct vector, y */
    npartvars = 0;
@@ -400,12 +414,14 @@ hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A,
             {
                index[d] = copy_indexes[part][var][d][i];
             }
-            val = tmp_data[ copy_ranks[j] ];
-            HYPRE_SStructVectorAddToValues(y, part, index, var, &val);
+            *val = tmp_data[ copy_ranks[j] ];
+            HYPRE_SStructVectorAddToValues(y, part, index, var, val);
          }
          npartvars++;
       }
    }
+
+   hypre_TFree(val, memory_location);
 
    return hypre_error_flag;
 }
@@ -501,16 +517,50 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
       dom_copy_ranks_size = num_col_ind + num_send_map_elmts;
       dom_copy_ranks = hypre_TAlloc(HYPRE_Int, dom_copy_ranks_size, memory_location);
-      /* WM: todo - use device send map elmts when on GPU? */
       hypre_TMemcpy(dom_copy_ranks, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(parcsr_A)),
                     HYPRE_Int, num_col_ind, memory_location, memory_location);
-      hypre_TMemcpy(dom_copy_ranks + num_col_ind, hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
-                    HYPRE_Int, num_send_map_elmts, memory_location, HYPRE_MEMORY_HOST);
-      hypre_UniqueIntArrayND(1, &dom_copy_ranks_size, &dom_copy_ranks);
-      dom_copy_ranks = hypre_TReAlloc(dom_copy_ranks, HYPRE_Int, dom_copy_ranks_size, memory_location);
+      /* WM: todo - is this an appropriate check for whether to use the device send map elmts? */
+      if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) && memory_location != HYPRE_MEMORY_HOST)
+      {
+         hypre_TMemcpy(dom_copy_ranks + num_col_ind, hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                       HYPRE_Int, num_send_map_elmts, memory_location, HYPRE_MEMORY_DEVICE);
+      }
+      else
+      {
+         hypre_TMemcpy(dom_copy_ranks + num_col_ind, hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                       HYPRE_Int, num_send_map_elmts, memory_location, HYPRE_MEMORY_HOST);
+      }
+#if defined(HYPRE_USING_GPU)
+      if (memory_location != HYPRE_MEMORY_HOST)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::sort,
+                            dom_copy_ranks,
+                            dom_copy_ranks + dom_copy_ranks_size );
+         HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                                 dom_copy_ranks,
+                                                 dom_copy_ranks + dom_copy_ranks_size );
+         dom_copy_ranks_size = new_end - dom_copy_ranks;
+#else
+         HYPRE_THRUST_CALL( sort,
+                            dom_copy_ranks,
+                            dom_copy_ranks + dom_copy_ranks_size );
+         HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique,
+                                                 dom_copy_ranks,
+                                                 dom_copy_ranks + dom_copy_ranks_size );
+         dom_copy_ranks_size = new_end - dom_copy_ranks;
+#endif
+      }
+      else
+#endif
+      {
+         hypre_UniqueIntArrayND(1, &dom_copy_ranks_size, &dom_copy_ranks);
+      }
+      dom_copy_ranks = hypre_TReAlloc_v2(dom_copy_ranks, HYPRE_Int, num_col_ind + num_send_map_elmts, HYPRE_Int, dom_copy_ranks_size, memory_location);
 
       /* Convert local to global ranks, get the part/var starts,
        * then map to part/var/index to obtain dom_copy_indexes */
+      /* WM: todo - GPU */
       dom_copy_global_ranks = hypre_TAlloc(HYPRE_BigInt, dom_copy_ranks_size, memory_location);
       for (i = 0; i < dom_copy_ranks_size; i++)
       {
@@ -518,7 +568,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       }
       hypre_SStructGridGetGlobalRanksPartVarStarts(dom_grid,
                                                    object_type,
-                                                   HYPRE_MEMORY_HOST,
+                                                   memory_location,
                                                    dom_copy_ranks_size,
                                                    dom_copy_global_ranks,
                                                    &(dom_copy_ranks_part_var_starts));
@@ -534,13 +584,13 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
             num_ranks = dom_copy_ranks_part_var_starts[npartvars + 1] - dom_copy_ranks_part_var_starts[npartvars];
             if (num_ranks)
             {
-               hypre_SStructGridGlobalRanksToIndexes(dom_grid, object_type, HYPRE_MEMORY_HOST, part, var, num_ranks,
+               hypre_SStructGridGlobalRanksToIndexes(dom_grid, object_type, memory_location, part, var, num_ranks,
                                                      &(dom_copy_global_ranks[dom_copy_ranks_part_var_starts[npartvars]]),
                                                      &(dom_copy_indexes[part][var]));
 #if defined(TEST_INDEXESTOGLOBALRANKS)
                /* WM: debug - check that mapping back to global ranks works */
-               HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, HYPRE_MEMORY_HOST);
-               hypre_SStructGridIndexesToGlobalRanks(dom_grid, object_type, HYPRE_MEMORY_HOST, part, var,
+               HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, memory_location);
+               hypre_SStructGridIndexesToGlobalRanks(dom_grid, object_type, memory_location, part, var,
                                                  num_ranks, dom_copy_indexes[part][var],
                                                  &global_ranks_check);
                for (i = 0; i < num_ranks; i++)
@@ -548,7 +598,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                   /* hypre_printf("WM: debug - global_ranks_check = %b, dom_copy_global_ranks = %b\n", global_ranks_check[i], dom_copy_global_ranks[ dom_copy_ranks_part_var_starts[npartvars] + i ]); */
                   assert( global_ranks_check[i] == dom_copy_global_ranks[ dom_copy_ranks_part_var_starts[npartvars] + i ] );
                }
-               hypre_TFree(global_ranks_check, HYPRE_MEMORY_HOST);
+               hypre_TFree(global_ranks_check, memory_location);
 #endif
             }
             npartvars++;
@@ -569,11 +619,37 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                     HYPRE_Int, diag_num_rownnz, memory_location, memory_location);
       hypre_TMemcpy(ran_copy_ranks + diag_num_rownnz, hypre_CSRMatrixRownnz(hypre_ParCSRMatrixOffd(parcsr_A)),
                     HYPRE_Int, offd_num_rownnz, memory_location, memory_location);
-      hypre_UniqueIntArrayND(1, &ran_copy_ranks_size, &ran_copy_ranks);
-      ran_copy_ranks = hypre_TReAlloc(ran_copy_ranks, HYPRE_Int, ran_copy_ranks_size, memory_location);
+#if defined(HYPRE_USING_GPU)
+      if (memory_location != HYPRE_MEMORY_HOST)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::sort,
+                            ran_copy_ranks,
+                            ran_copy_ranks + ran_copy_ranks_size );
+         HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                                 ran_copy_ranks,
+                                                 ran_copy_ranks + ran_copy_ranks_size );
+         ran_copy_ranks_size = new_end - ran_copy_ranks;
+#else
+         HYPRE_THRUST_CALL( sort,
+                            ran_copy_ranks,
+                            ran_copy_ranks + ran_copy_ranks_size );
+         HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique,
+                                                 ran_copy_ranks,
+                                                 ran_copy_ranks + ran_copy_ranks_size );
+         ran_copy_ranks_size = new_end - ran_copy_ranks;
+#endif
+      }
+      else
+#endif
+      {
+         hypre_UniqueIntArrayND(1, &ran_copy_ranks_size, &ran_copy_ranks);
+      }
+      ran_copy_ranks = hypre_TReAlloc_v2(ran_copy_ranks, HYPRE_Int, diag_num_rownnz + offd_num_rownnz, HYPRE_Int, ran_copy_ranks_size, memory_location);
 
       /* Convert local to global ranks, get the part/var starts,
        * then map to part/var/index to obtain ran_copy_indexes */
+      /* WM: todo - GPU */
       ran_copy_global_ranks = hypre_TAlloc(HYPRE_BigInt, ran_copy_ranks_size, memory_location);
       for (i = 0; i < ran_copy_ranks_size; i++)
       {
@@ -581,7 +657,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
       }
       hypre_SStructGridGetGlobalRanksPartVarStarts(grid,
                                                    object_type,
-                                                   HYPRE_MEMORY_HOST,
+                                                   memory_location,
                                                    ran_copy_ranks_size,
                                                    ran_copy_global_ranks,
                                                    &(ran_copy_ranks_part_var_starts));
@@ -597,13 +673,13 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
             num_ranks = ran_copy_ranks_part_var_starts[npartvars + 1] - ran_copy_ranks_part_var_starts[npartvars];
             if (num_ranks)
             {
-               hypre_SStructGridGlobalRanksToIndexes(grid, object_type, HYPRE_MEMORY_HOST, part, var, num_ranks,
+               hypre_SStructGridGlobalRanksToIndexes(grid, object_type, memory_location, part, var, num_ranks,
                                                      &(ran_copy_global_ranks[ran_copy_ranks_part_var_starts[npartvars]]),
                                                      &(ran_copy_indexes[part][var]));
 #if defined(TEST_INDEXESTOGLOBALRANKS)
                /* WM: debug - check that mapping back to global ranks works */
-               HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, HYPRE_MEMORY_HOST);
-               hypre_SStructGridIndexesToGlobalRanks(grid, object_type, HYPRE_MEMORY_HOST, part, var,
+               HYPRE_BigInt *global_ranks_check = hypre_TAlloc(HYPRE_BigInt, num_ranks, memory_location);
+               hypre_SStructGridIndexesToGlobalRanks(grid, object_type, memory_location, part, var,
                                                  num_ranks, ran_copy_indexes[part][var],
                                                  &global_ranks_check);
                for (i = 0; i < num_ranks; i++)
@@ -611,7 +687,7 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
                   /* hypre_printf("WM: debug - global_ranks_check = %b, ran_copy_global_ranks = %b\n", global_ranks_check[i], ran_copy_global_ranks[ dom_copy_ranks_part_var_starts[npartvars] + i ]); */
                   assert( global_ranks_check[i] == ran_copy_global_ranks[ ran_copy_ranks_part_var_starts[npartvars] + i ] );
                }
-               hypre_TFree(global_ranks_check, HYPRE_MEMORY_HOST);
+               hypre_TFree(global_ranks_check, memory_location);
 #endif
             }
             npartvars++;
