@@ -2279,12 +2279,9 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    hypre_BoxDestroy(box);
 
    /* Loop over subsets of global_ranks for each box */
-   /* hypre_printf("WM: debug - nentries = %d, num_ranks = %d, global_ranks = %p\n", nentries, num_ranks, global_ranks); */
    for (i = 0; i < num_ranks; i++)
    {
       /* Find appropriate offsets and box */
-      /* hypre_printf("WM: debug - global_ranks[i] = %b\n", global_ranks[i]); */
-      /* hypre_printf("WM: debug - end_offsets[entry_num] = %b\n", end_offsets[entry_num]); */
       while (global_ranks[i] >= end_offsets[entry_num])
       {
          entry_num++;
@@ -2361,18 +2358,19 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
          npartvars++;
       }
    }
-   /* if (myid == 1) */
-   /* { */
-   /*    hypre_printf("WM: debug - global_ranks = "); */
-   /*    for (i = 0; i < num_ranks; i++) */
-   /*    { */
-   /*       hypre_printf("%b ", global_ranks[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
+   /* WM: debug */
+   if (myid == 0)
+   {
+      hypre_printf("WM: debug - global_ranks = ");
+      for (i = 0; i < num_ranks; i++)
+      {
+         hypre_printf("%b ", global_ranks[i]);
+      }
+      hypre_printf("\n");
+   }
 
    /* Get the array of global rank offsets for each part/var */
-   part_var_offsets_h = hypre_TAlloc(HYPRE_BigInt, npartvars, HYPRE_MEMORY_HOST);
+   part_var_offsets_h = hypre_TAlloc(HYPRE_BigInt, npartvars + 1, HYPRE_MEMORY_HOST);
    npartvars = 0;
    n_empty_partvars = 0;
    offset = 0;
@@ -2408,21 +2406,29 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
          }
       }
    }
-   for (j = 0; j < n_empty_partvars; j++)
+   if (type == HYPRE_PARCSR)
+   {
+      offset = hypre_SStructGridStartRank(grid) + (HYPRE_BigInt) hypre_SStructGridLocalSize(grid);
+   }
+   else if (type == HYPRE_SSTRUCT)
+   {
+      offset = hypre_SStructGridGhstartRank(grid) + (HYPRE_BigInt) hypre_SStructGridGhlocalSize(grid);
+   }
+   for (j = 0; j < n_empty_partvars + 1; j++)
    {
       part_var_offsets_h[npartvars] = offset;
       npartvars++;
    }
    /* WM: debug */
-   /* if (myid == 1) */
-   /* { */
-   /*    hypre_printf("WM: debug - part_var_offsets_h = "); */
-   /*    for (i = 0; i < npartvars; i++) */
-   /*    { */
-   /*       hypre_printf("%b ", part_var_offsets_h[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
+   if (myid == 0)
+   {
+      hypre_printf("WM: debug - part_var_offsets_h = ");
+      for (i = 0; i < npartvars; i++)
+      {
+         hypre_printf("%b ", part_var_offsets_h[i]);
+      }
+      hypre_printf("\n");
+   }
 
    /* Copy part_var_offsets to the device if needed */
    if (memory_location != HYPRE_MEMORY_HOST)
@@ -2437,9 +2443,9 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    }
 
    /* Get the starts for each part/var block in the global ranks */
-   global_ranks_part_var_starts = hypre_CTAlloc(HYPRE_Int, npartvars + 1, memory_location);
+   global_ranks_part_var_starts = hypre_CTAlloc(HYPRE_Int, npartvars, memory_location);
 #if defined(HYPRE_USING_GPU)
-   if (memory_location !== HYPRE_MEMORY_HOST)
+   if (memory_location != HYPRE_MEMORY_HOST)
    {
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( lower_bound,
@@ -2452,41 +2458,52 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
                          part_var_offsets, part_var_offsets + npartvars,
                          global_ranks_part_var_starts );
 #endif
-      hypre_TMemcpy(&(global_ranks_part_var_starts[npartvars]), num_ranks, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
+      /* WM: todo - don't think I need this memcpy if I put the final entry on part_var_offsets above */
+      /* hypre_TMemcpy(&(global_ranks_part_var_starts[npartvars]), num_ranks, HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST); */
    }
    else
 #endif
    {
-      npartvars = 0;
-      i = 0;
-      for (part = 0; part < nparts; part++)
+      /* npartvars = 0; */
+      /* i = 0; */
+      /* for (part = 0; part < nparts; part++) */
+      /* { */
+      /*    pgrid = hypre_SStructGridPGrid(grid, part); */
+      /*    nvars = hypre_SStructPGridNVars(pgrid); */
+      /*    for (var = 0; var < nvars; var++) */
+      /*    { */
+      /*       while (i < num_ranks && global_ranks[i] < part_var_offsets[npartvars]) */
+      /*       { */
+      /*          i++; */
+      /*       } */
+      /*       global_ranks_part_var_starts[npartvars] = i; */
+      /*       npartvars++; */
+      /*    } */
+      /* } */
+      /* global_ranks_part_var_starts[npartvars] = num_ranks; */
+
+      j = 0;
+      for (i = 0; i < npartvars; i++)
       {
-         pgrid = hypre_SStructGridPGrid(grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
-         for (var = 0; var < nvars; var++)
+         while (j < num_ranks && global_ranks[j] < part_var_offsets[i])
          {
-            while (i < num_ranks && global_ranks[i] < part_var_offsets[npartvars])
-            {
-               i++;
-            }
-            global_ranks_part_var_starts[npartvars] = i;
-            npartvars++;
+            j++;
          }
+         global_ranks_part_var_starts[i] = j;
       }
-      global_ranks_part_var_starts[npartvars] = num_ranks;
    }
 
    *global_ranks_part_var_starts_ptr = global_ranks_part_var_starts;
    /* WM: debug */
-   /* if (myid == 1) */
-   /* { */
-   /*    hypre_printf("WM: debug - global_ranks_part_var_starts = "); */
-   /*    for (i = 0; i < npartvars + 1; i++) */
-   /*    { */
-   /*       hypre_printf("%d ", global_ranks_part_var_starts[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
+   if (myid == 0)
+   {
+      hypre_printf("WM: debug - global_ranks_part_var_starts = ");
+      for (i = 0; i < npartvars + 1; i++)
+      {
+         hypre_printf("%d ", global_ranks_part_var_starts[i]);
+      }
+      hypre_printf("\n");
+   }
 
    hypre_TFree(part_var_offsets, memory_location);
 
