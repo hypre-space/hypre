@@ -136,7 +136,6 @@ main( hypre_int argc,
    HYPRE_Int           max_levels = 25;
    HYPRE_Int           num_iterations;
    HYPRE_Int           max_iter = 1000;
-   HYPRE_Int           mg_max_iter = 100;
    HYPRE_Int           nodal = 0;
    HYPRE_Int           nodal_diag = 0;
    HYPRE_Int           keep_same_sign = 0;
@@ -954,12 +953,6 @@ main( hypre_int argc,
          arg_index++;
          max_iter = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-mg_max_iter") == 0 )
-      {
-         arg_index++;
-         mg_max_iter = atoi(argv[arg_index++]);
-      }
-
       else if ( strcmp(argv[arg_index], "-dt") == 0 )
       {
          arg_index++;
@@ -1771,7 +1764,6 @@ main( hypre_int argc,
          hypre_printf("  -tol  <val>            : set solver convergence tolerance = val\n");
          hypre_printf("  -atol  <val>           : set solver absolute convergence tolerance = val\n");
          hypre_printf("  -max_iter  <val>       : set max iterations\n");
-         hypre_printf("  -mg_max_iter  <val>    : set max iterations for mg solvers\n");
          hypre_printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
          hypre_printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
          hypre_printf("\n");
