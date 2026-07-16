@@ -366,6 +366,8 @@
 #undef hypre_ParCSRMatrixMatvecTDevice
 #undef hypre_ParCSRMatrixMatvecT_unpack
 #undef hypre_ParCSRMatrixRAPKTDevice
+#undef hypre_ParCSRMatrixStatsComputePassOneLocalDevice
+#undef hypre_ParCSRMatrixStatsComputePassTwoLocalDevice
 #undef hypre_ParCSRMatrixTransposeDevice
 #undef hypre_ParCSRTMatMatKTDevice
 #undef hypre_ParCSRTMatMatPartialAddDevice

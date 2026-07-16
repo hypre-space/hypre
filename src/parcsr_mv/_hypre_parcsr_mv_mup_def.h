@@ -369,6 +369,8 @@
 #define hypre_ParCSRMatrixMatvecTDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixMatvecTDevice )
 #define hypre_ParCSRMatrixMatvecT_unpack HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixMatvecT_unpack )
 #define hypre_ParCSRMatrixRAPKTDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixRAPKTDevice )
+#define hypre_ParCSRMatrixStatsComputePassOneLocalDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixStatsComputePassOneLocalDevice )
+#define hypre_ParCSRMatrixStatsComputePassTwoLocalDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixStatsComputePassTwoLocalDevice )
 #define hypre_ParCSRMatrixTransposeDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRMatrixTransposeDevice )
 #define hypre_ParCSRTMatMatKTDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRTMatMatKTDevice )
 #define hypre_ParCSRTMatMatPartialAddDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_ParCSRTMatMatPartialAddDevice )

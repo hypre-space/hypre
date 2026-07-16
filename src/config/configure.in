@@ -63,6 +63,9 @@ AC_PREREQ([2.69])
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
+AH_TOP([#ifndef HYPRE_CONFIG_H
+#define HYPRE_CONFIG_H])
+AH_BOTTOM([#endif /* HYPRE_CONFIG_H */])
 AC_COPYRIGHT([Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 HYPRE Project Developers. See the top-level COPYRIGHT file for details.])
 
@@ -707,7 +710,7 @@ AS_HELP_STRING([--with-strict-checking],
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
+    CFLAGS="-g -Wall -Wshadow -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla"
  elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
@@ -2626,7 +2629,7 @@ then
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_CUDA_SM=90
    fi
 
    HYPRE_CUDA_GENCODE=""

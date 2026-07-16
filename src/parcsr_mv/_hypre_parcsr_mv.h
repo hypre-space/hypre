@@ -567,6 +567,7 @@ typedef struct hypre_OverlapData_struct
    HYPRE_Int            num_extended_rows;     /* Total rows in extended domain */
    HYPRE_Int            num_overlap_rows;      /* External rows (from overlap) */
    HYPRE_BigInt        *extended_row_indices;  /* Global indices of all extended rows */
+
    HYPRE_Int           *row_is_owned;          /* 1 if row is owned, 0 if external */
 
    /* Communication package for fetching overlap data */

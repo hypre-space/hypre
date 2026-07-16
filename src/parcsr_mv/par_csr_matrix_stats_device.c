@@ -13,16 +13,9 @@
 
 #include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_GPU)
-#include "_hypre_utilities.hpp"
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-#include <thrust/transform_reduce.h>
-#endif
-
-#if defined(HYPRE_USING_SYCL)
-namespace thrust = std;
-#endif
 
 typedef struct
 {

@@ -675,40 +675,44 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_assert((part >= 0) && (part < nparts));
       hypre_assert((to_part >= 0) && (to_part < nparts));
 
-      /* Ensure capacity before writing new indices */
-      if (idxcnt[part][var] >= idxcap[part][var])
+      /* Only count indices if part != to_part */
+      if (part != to_part)
       {
-         capacity = hypre_max(2 * idxcap[part][var], 1);
+         /* Ensure capacity before writing new indices */
+         if (idxcnt[part][var] >= idxcap[part][var])
+         {
+            capacity = hypre_max(2 * idxcap[part][var], 1);
+            for (d = 0; d < ndim; d++)
+            {
+               indices[part][var][d] = hypre_TReAlloc(indices[part][var][d], HYPRE_Int,
+                                                      capacity, HYPRE_MEMORY_HOST);
+            }
+            idxcap[part][var] = capacity;
+         }
+         if (idxcnt[to_part][to_var] >= idxcap[to_part][to_var])
+         {
+            capacity = hypre_max(2 * idxcap[to_part][to_var], 1);
+            for (d = 0; d < ndim; d++)
+            {
+               indices[to_part][to_var][d] = hypre_TReAlloc(indices[to_part][to_var][d], HYPRE_Int,
+                                                            capacity, HYPRE_MEMORY_HOST);
+            }
+            idxcap[to_part][to_var] = capacity;
+         }
+
+         /* Safety checks */
+         hypre_assert(idxcap[part][var] > idxcnt[part][var]);
+         hypre_assert(idxcap[to_part][to_var] > idxcnt[to_part][to_var]);
+
+         /* Build indices array */
          for (d = 0; d < ndim; d++)
          {
-            indices[part][var][d] = hypre_TReAlloc(indices[part][var][d], HYPRE_Int,
-                                                   capacity, HYPRE_MEMORY_HOST);
+            indices[part][var][d][idxcnt[part][var]] = hypre_IndexD(index, d);
+            indices[to_part][to_var][d][idxcnt[to_part][to_var]] = hypre_IndexD(to_index, d);
          }
-         idxcap[part][var] = capacity;
+         idxcnt[part][var]++;
+         idxcnt[to_part][to_var]++;
       }
-      if (idxcnt[to_part][to_var] >= idxcap[to_part][to_var])
-      {
-         capacity = hypre_max(2 * idxcap[to_part][to_var], 1);
-         for (d = 0; d < ndim; d++)
-         {
-            indices[to_part][to_var][d] = hypre_TReAlloc(indices[to_part][to_var][d], HYPRE_Int,
-                                                         capacity, HYPRE_MEMORY_HOST);
-         }
-         idxcap[to_part][to_var] = capacity;
-      }
-
-      /* Safety checks */
-      hypre_assert(idxcap[part][var] > idxcnt[part][var]);
-      hypre_assert(idxcap[to_part][to_var] > idxcnt[to_part][to_var]);
-
-      /* Build indices array */
-      for (d = 0; d < ndim; d++)
-      {
-         indices[part][var][d][idxcnt[part][var]] = hypre_IndexD(index, d);
-         indices[to_part][to_var][d][idxcnt[to_part][to_var]] = hypre_IndexD(to_index, d);
-      }
-      idxcnt[part][var]++;
-      idxcnt[to_part][to_var]++;
 
       /* compute location (rank) for Uventry */
       hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
@@ -856,13 +860,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          HYPRE_Int    *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
          hypre_Index  *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
          hypre_Index   offset;
-         HYPRE_Int     s, iv, jv, d, nvars, entry;
+         HYPRE_Int     s, iv, jv, d_local, nvars_local, entry_local;
          HYPRE_Int    *stencil_sizes;
          hypre_Index **stencil_offsets;
          HYPRE_Int   **stencil_vars;
 
          pgrid = hypre_SStructGridPGrid(grid, part);
-         nvars = hypre_SStructPGridNVars(pgrid);
+         nvars_local = hypre_SStructPGridNVars(pgrid);
 
          /* build default full sparsity pattern if nothing set by user */
          if (fem_nsparse < 0)
@@ -888,10 +892,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          fem_entries = hypre_CTAlloc(HYPRE_Int, fem_nsparse, HYPRE_MEMORY_HOST);
          hypre_SStructGraphFEMPEntries(graph, part) = fem_entries;
 
-         stencil_sizes   = hypre_CTAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
-         stencil_offsets = hypre_CTAlloc(hypre_Index *, nvars, HYPRE_MEMORY_HOST);
-         stencil_vars    = hypre_CTAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
-         for (iv = 0; iv < nvars; iv++)
+         stencil_sizes   = hypre_CTAlloc(HYPRE_Int, nvars_local, HYPRE_MEMORY_HOST);
+         stencil_offsets = hypre_CTAlloc(hypre_Index *, nvars_local, HYPRE_MEMORY_HOST);
+         stencil_vars    = hypre_CTAlloc(HYPRE_Int *, nvars_local, HYPRE_MEMORY_HOST);
+         for (iv = 0; iv < nvars_local; iv++)
          {
             stencil_offsets[iv] = hypre_CTAlloc(hypre_Index, fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
             stencil_vars[iv]    = hypre_CTAlloc(HYPRE_Int, fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
@@ -905,33 +909,33 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             jv = fem_vars[j];
 
             /* shift off-diagonal offset by diagonal */
-            for (d = 0; d < ndim; d++)
+            for (d_local = 0; d_local < ndim; d_local++)
             {
-               offset[d] = fem_offsets[j][d] - fem_offsets[i][d];
+               offset[d_local] = fem_offsets[j][d_local] - fem_offsets[i][d_local];
             }
 
             /* search stencil_offsets */
-            for (entry = 0; entry < stencil_sizes[iv]; entry++)
+            for (entry_local = 0; entry_local < stencil_sizes[iv]; entry_local++)
             {
                /* if offset is already in the stencil, break */
-               if ( hypre_IndexesEqual(offset, stencil_offsets[iv][entry], ndim)
-                    && (jv == stencil_vars[iv][entry]) )
+               if ( hypre_IndexesEqual(offset, stencil_offsets[iv][entry_local], ndim)
+                    && (jv == stencil_vars[iv][entry_local]) )
                {
                   break;
                }
             }
             /* if this is a new stencil offset, add it to the stencil */
-            if (entry == stencil_sizes[iv])
+            if (entry_local == stencil_sizes[iv])
             {
-               for (d = 0; d < ndim; d++)
+               for (d_local = 0; d_local < ndim; d_local++)
                {
-                  stencil_offsets[iv][entry][d] = offset[d];
+                  stencil_offsets[iv][entry_local][d_local] = offset[d_local];
                }
-               stencil_vars[iv][entry] = jv;
+               stencil_vars[iv][entry_local] = jv;
                stencil_sizes[iv]++;
             }
 
-            fem_entries[s] = entry;
+            fem_entries[s] = entry_local;
          }
 
          /* set up the stencils */
@@ -940,11 +944,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             HYPRE_SStructStencilDestroy(stencils[part][iv]);
             HYPRE_SStructStencilCreate(ndim, stencil_sizes[iv],
                                        &stencils[part][iv]);
-            for (entry = 0; entry < stencil_sizes[iv]; entry++)
+            for (entry_local = 0; entry_local < stencil_sizes[iv]; entry_local++)
             {
-               HYPRE_SStructStencilSetEntry(stencils[part][iv], entry,
-                                            stencil_offsets[iv][entry],
-                                            stencil_vars[iv][entry]);
+               HYPRE_SStructStencilSetEntry(stencils[part][iv], entry_local,
+                                            stencil_offsets[iv][entry_local],
+                                            stencil_vars[iv][entry_local]);
             }
          }
 

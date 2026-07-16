@@ -101,7 +101,7 @@ OBJS = ${COBJS} ${CUOBJS}
 
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

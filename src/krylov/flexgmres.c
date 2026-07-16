@@ -246,9 +246,10 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
       }
    }
 
-   /* fgmres mod */
-   (fgmres_data -> pre_vecs) = (void**)(*(fgmres_functions->CreateVectorArray))(k_dim + 1, x);
-   /*---*/
+   if ((fgmres_data -> pre_vecs) == NULL)
+   {
+      (fgmres_data -> pre_vecs) = (void**)(*(fgmres_functions->CreateVectorArray))(k_dim + 1, x);
+   }
 
    if ((fgmres_data -> matvec_data) == NULL)
    {

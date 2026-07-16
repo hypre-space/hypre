@@ -3201,6 +3201,8 @@ ac_config_headers="$ac_config_headers HYPRE_config.h:config/HYPRE_config.h.in"
 
 
 
+
+
 HYPRE_NAME="hypre"
 HYPRE_VERSION="3.1.0"
 HYPRE_NUMBER=30100
@@ -4013,7 +4015,7 @@ test -n "$CC" || CC=""""
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
+    CFLAGS="-g -Wall -Wshadow -std=gnu99 -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror=vla"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla"
  elif test "x$CC" = "xicc"; then
     FFLAGS="-g -Wall"
@@ -10845,7 +10847,7 @@ printf "%s\n" "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_CUDA_SM=90
    fi
 
    HYPRE_CUDA_GENCODE=""

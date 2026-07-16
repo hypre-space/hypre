@@ -441,6 +441,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/iterator/reverse_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
 #include <thrust/gather.h>
 #include <thrust/scan.h>

@@ -1191,6 +1191,16 @@ HYPRE_Int hypre_SchwarzSetDomainStructure ( void *data, hypre_CSRMatrix *domain_
 HYPRE_Int hypre_SchwarzSetScale ( void *data, HYPRE_Real *scale );
 HYPRE_Int hypre_SchwarzReScale ( void *data, HYPRE_Int size, HYPRE_Real value );
 HYPRE_Int hypre_SchwarzSetDofFunc ( void *data, HYPRE_Int *dof_func );
+HYPRE_Int hypre_SchwarzSetLocalSolverType ( void *data, HYPRE_Int local_solver_type );
+HYPRE_Int hypre_SchwarzSetILUKLevelOfFill ( void *data, HYPRE_Int level_of_fill );
+HYPRE_Int hypre_SchwarzSetILUTMaxNnzPerRow ( void *data, HYPRE_Int max_nnz_row );
+HYPRE_Int hypre_SchwarzSetILUTDroptol ( void *data, HYPRE_Real droptol );
+HYPRE_Int hypre_SchwarzSetMaxIter ( void *data, HYPRE_Int max_iter );
+HYPRE_Int hypre_SchwarzSetTol ( void *data, HYPRE_Real tol );
+HYPRE_Int hypre_SchwarzSetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_SchwarzSetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_SchwarzGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SchwarzGetFinalResidualNorm ( void *data, HYPRE_Real *norm );
 
 /* par_stats.c */
 HYPRE_Int hypre_BoomerAMGSetupStats ( void *amg_vdata, hypre_ParCSRMatrix *A );
@@ -1663,6 +1673,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_BlockDiagInvDevice( HYPRE_Complex *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
                                       hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
