@@ -516,7 +516,7 @@ int main (int argc, char *argv[])
                                                       to the offsets */
          double *values;
 
-         values = (double*) calloc(5 * (size_t) n * (size_t) n, sizeof(double));
+         values = (double*) calloc(5 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -547,7 +547,7 @@ int main (int argc, char *argv[])
          int stencil_indices[3] = {0, 1, 2};
          double *values;
 
-         values = (double*) calloc(3 * (size_t) n * (size_t) n, sizeof(double));
+         values = (double*) calloc(3 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -587,7 +587,7 @@ int main (int argc, char *argv[])
          nentries = 3;
       }
 
-      values  = (double*) calloc((size_t) nentries * (size_t) n, sizeof(double));
+      values  = (double*) calloc(nentries * n, sizeof(double));
       bvalues = (double*) calloc(n, sizeof(double));
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
