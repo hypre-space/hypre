@@ -280,7 +280,3 @@ HYPRE_Int HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver  solver,
                                                                      HYPRE_Real))modify_pc);
 
 }
-
-
-
-

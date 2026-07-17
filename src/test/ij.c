@@ -268,6 +268,13 @@ main( hypre_int argc,
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type;
+   /* flexible cycling params*/
+   HYPRE_Int      length_cycle_flexible = 0;
+   HYPRE_Int      *cycle_struct_flexible = NULL, *relax_types_flexible = NULL,
+                   *relax_orders_flexible = NULL;
+   HYPRE_Real     *relax_weights_flexible = NULL, *outer_weights_flexible = NULL,
+                   *cgc_scaling_factors_flexible = NULL;
+   /* end of flexible cycling params*/
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
    HYPRE_Int      measure_type = 0;
@@ -464,6 +471,11 @@ main( hypre_int argc,
    HYPRE_Int mgr_num_gsmooth_sweeps = 1;
    HYPRE_Int mgr_restrict_type = 0;
    HYPRE_Int mgr_num_restrict_sweeps = 0;
+   HYPRE_Int mgr_use_default_cgrid_solver = 0;
+   HYPRE_Int mgr_use_user_fsolver = 0;
+   HYPRE_Int mgr_use_user_gsmoother = 0;
+   HYPRE_Int second_time_mgr_relax_type = -999;
+   HYPRE_Int second_time_mgr_gsmooth_type = -999;
    /* end mgr options */
 
    /* hypre_ILU options */
@@ -740,6 +752,222 @@ main( hypre_int argc,
          arg_index++;
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_cycle_struct") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Int tmp1[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[cycle_arg] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         cycle_struct_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            cycle_struct_flexible[cycle_entry] = tmp1[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_types") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Int tmp1[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[cycle_arg] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         relax_types_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            relax_types_flexible[cycle_entry] = tmp1[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_orders") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Int tmp1[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp1[cycle_arg] = atoi(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         relax_orders_flexible = hypre_CTAlloc(HYPRE_Int, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            relax_orders_flexible[cycle_entry] = tmp1[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_outer_weights") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[cycle_arg] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         outer_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            outer_weights_flexible[cycle_entry] = tmp2[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_relax_weights") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[cycle_arg] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         relax_weights_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            relax_weights_flexible[cycle_entry] = tmp2[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-flexamg_cgc_scaling") == 0 )
+      {
+         arg_index++;
+         HYPRE_Int len_cycle = 0;
+         char *arg_ptr, *val_ptr;
+         HYPRE_Real tmp2[100];
+
+         // parse flexible amg cycle parameters
+         arg_ptr = argv[arg_index++];
+         val_ptr = strtok(arg_ptr, ",");
+         HYPRE_Int cycle_arg = 0;
+         while (val_ptr != NULL)
+         {
+            tmp2[cycle_arg] = atof(val_ptr);
+            val_ptr = strtok(NULL, ",");
+            cycle_arg++;
+         }
+
+         len_cycle = cycle_arg;
+         cgc_scaling_factors_flexible = hypre_CTAlloc(HYPRE_Real, len_cycle, HYPRE_MEMORY_HOST);
+
+         for (HYPRE_Int cycle_entry = 0; cycle_entry < len_cycle; cycle_entry++)
+         {
+            cgc_scaling_factors_flexible[cycle_entry] = tmp2[cycle_entry];
+         }
+
+         if (length_cycle_flexible == 0)
+         {
+            length_cycle_flexible = len_cycle;
+         }
+         else if (length_cycle_flexible != len_cycle)
+         {
+            hypre_printf("Error: Inconsistent flexible AMG cycle length parameters.\n");
+            exit(1);
+         }
       }
       else if ( strcmp(argv[arg_index], "-auxfromfile") == 0 )
       {
@@ -1442,6 +1670,31 @@ main( hypre_int argc,
          arg_index++;
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-mgr_use_default_cgrid_solver") == 0 )
+      {
+         arg_index++;
+         mgr_use_default_cgrid_solver = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_use_user_fsolver") == 0 )
+      {
+         arg_index++;
+         mgr_use_user_fsolver = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_use_user_gsmoother") == 0 )
+      {
+         arg_index++;
+         mgr_use_user_gsmoother = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-second_time_mgr_relax_type") == 0 )
+      {
+         arg_index++;
+         second_time_mgr_relax_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-second_time_mgr_gsmooth_type") == 0 )
+      {
+         arg_index++;
+         second_time_mgr_gsmooth_type = atoi(argv[arg_index++]);
+      }
       /* end mgr options */
       /* begin ilu options*/
       else if ( strcmp(argv[arg_index], "-ilu_type") == 0 )
@@ -1744,6 +1997,15 @@ main( hypre_int argc,
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
+
+
+      /* for flexible amg the array 'cycle_struct_flexible' should be user defined */
+      if (length_cycle_flexible > 0)
+         if (!cycle_struct_flexible)
+         {
+            hypre_printf("Error: cycle structure (-flexamg_cycle_struct) should be set to enable flexible amg cycles .. \n");
+            exit(1);
+         }
 
       /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
          implemented, i.e. Jacobi relaxation, and needs to be used without CF
@@ -2358,10 +2620,11 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("Usage: %s [<options>]\n", argv[0]);
          hypre_printf("\n");
-         hypre_printf("  -ll                        : hypre's log level. \n");
+         hypre_printf("  -ll <val>                  : hypre's log level. \n");
          hypre_printf("      0 = (default) No messaging.\n");
          hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
          hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
+         hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
@@ -2709,6 +2972,11 @@ main( hypre_int argc,
          hypre_printf("                                     for F-relaxation \n");
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");
          hypre_printf("                                     for F-relaxation \n");
+         hypre_printf("  -mgr_use_default_cgrid_solver <0/1> : use MGR's internal default coarse solver on repeated setup tests\n");
+         hypre_printf("  -mgr_use_user_fsolver <0/1>         : attach a user BoomerAMG F-solver at the first level\n");
+         hypre_printf("  -mgr_use_user_gsmoother <0/1>       : attach a user BoomerAMG global smoother at level 0\n");
+         hypre_printf("  -second_time_mgr_relax_type <val>   : override MGR relax type before the second setup\n");
+         hypre_printf("  -second_time_mgr_gsmooth_type <val> : override MGR global smooth type before the second setup\n");
          /* end MGR options */
          /* hypre ILU options */
          hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");
@@ -2767,14 +3035,37 @@ main( hypre_int argc,
          hypre_printf("       2=W-cycle  \n");
          hypre_printf("       3=F-cycle  \n");
          /* end AMG-DD options */
+#if defined(HYPRE_USING_GPU)
+         /* GPU options */
+         hypre_printf("GPU options:\n");
+         hypre_printf("  -lazy_device_init <0/1>    : delay device initialization until first use (default 0)\n");
+         hypre_printf("  -device_id <val>           : bind this MPI rank to a specific GPU device (default auto)\n");
+         hypre_printf("  -memory_host               : use host memory for IJ matrix/vector data\n");
+         hypre_printf("  -memory_device             : use device memory for IJ matrix/vector data\n");
+         hypre_printf("  -exec_host                 : use host execution policy\n");
+         hypre_printf("  -exec_device               : use device execution policy\n");
+         hypre_printf("  -exec2_host                : use host execution policy for the second setup/solve\n");
+         hypre_printf("  -exec2_device              : use device execution policy for the second setup/solve\n");
+         hypre_printf("  -gpu_mpi <0/1>             : use GPU-aware MPI with device buffers (default 0)\n");
+         hypre_printf("  -mv_vendor <0/1>           : use vendor SpMV implementation\n");
+         hypre_printf("  -mm_vendor <0/1>           : use vendor SpGEMM implementation\n");
+         hypre_printf("  -spgemm_alg <val>          : set SpGEMM algorithm (1-3)\n");
+         hypre_printf("  -spgemm_binned <0/1>       : use binned SpGEMM kernels\n");
+         hypre_printf("  -spgemm_rowest <val>       : set SpGEMM row-nnz estimate method (1-3)\n");
+         hypre_printf("  -spgemm_rowestmult <val>   : set SpGEMM row-nnz estimate multiplier\n");
+         hypre_printf("  -spgemm_rowestnsamples <val> : set SpGEMM row-nnz estimate sample count\n");
+         hypre_printf("  -use_curand <0/1>          : use GPU random number generation\n");
+         /* end GPU options */
+#endif
 #if defined (HYPRE_USING_UMPIRE)
-         /* hypre umpire options */
+         /* UMPIRE options */
          hypre_printf("  -umpire_dev_pool_size <val>      : device memory pool size (GiB)\n");
          hypre_printf("  -umpire_uvm_pool_size <val>      : device unified virtual memory pool size (GiB)\n");
          hypre_printf("  -umpire_pinned_pool_size <val>   : pinned memory pool size (GiB)\n");
          hypre_printf("  -umpire_host_pool_size <val>     : host memory pool size (GiB)\n");
-         /* end umpire options */
+         /* end UMPIRE options */
 #endif
+
       }
 
       goto final;
@@ -4510,6 +4801,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridCreate(&amg_solver);
       HYPRE_ParCSRHybridSetTol(amg_solver, tol);
       HYPRE_ParCSRHybridSetAbsoluteTol(amg_solver, atol);
+      HYPRE_ParCSRHybridSetTwoNorm(amg_solver, two_norm);
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
       HYPRE_ParCSRHybridSetSolverType(amg_solver, solver_type);
       HYPRE_ParCSRHybridSetRecomputeResidual(amg_solver, recompute_res);
@@ -4551,6 +4843,31 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetSeqThreshold(amg_solver, seq_threshold);
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
+      HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
+      if (cycle_struct_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+      }
+      if (relax_types_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+      }
+      if (relax_orders_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+      }
+      if (outer_weights_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+      }
+      if (relax_weights_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+      }
+      if (cgc_scaling_factors_flexible)
+      {
+         HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
+      }
       if (level_w > -1)
       {
          HYPRE_ParCSRHybridSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
@@ -4800,6 +5117,30 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetKeepSameSign(amg_solver, keep_same_sign);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
+      if (cycle_struct_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_solver, cycle_struct_flexible);
+      }
+      if (relax_types_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_solver, relax_types_flexible);
+      }
+      if (relax_orders_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_solver, relax_orders_flexible);
+      }
+      if (outer_weights_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_solver, outer_weights_flexible);
+      }
+      if (relax_weights_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_solver, relax_weights_flexible);
+      }
+      if (cgc_scaling_factors_flexible)
+      {
+         HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_solver, cgc_scaling_factors_flexible);
+      }
       if (ns_down > -1)
       {
          HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
@@ -5345,6 +5686,30 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFSAIThreshold(pcg_precond, fsai_threshold);
          HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
+         if (cycle_struct_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleCycleStruct(pcg_precond, cycle_struct_flexible);
+         }
+         if (relax_types_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxTypes(pcg_precond, relax_types_flexible);
+         }
+         if (relax_orders_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxOrders(pcg_precond, relax_orders_flexible);
+         }
+         if (outer_weights_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleOuterWeights(pcg_precond, outer_weights_flexible);
+         }
+         if (relax_weights_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxWeights(pcg_precond, relax_weights_flexible);
+         }
+         if (cgc_scaling_factors_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(pcg_precond, cgc_scaling_factors_flexible);
+         }
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -7123,6 +7488,30 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetDofFunc(amg_precond, dof_func);
             free_dof_func = 0;
+         }
+         if (cycle_struct_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleCycleStruct(amg_precond, cycle_struct_flexible);
+         }
+         if (relax_types_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxTypes(amg_precond, relax_types_flexible);
+         }
+         if (relax_orders_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxOrders(amg_precond, relax_orders_flexible);
+         }
+         if (outer_weights_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleOuterWeights(amg_precond, outer_weights_flexible);
+         }
+         if (relax_weights_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleRelaxWeights(amg_precond, relax_weights_flexible);
+         }
+         if (cgc_scaling_factors_flexible)
+         {
+            HYPRE_BoomerAMGSetFlexibleCGCScalingFactors(amg_precond, cgc_scaling_factors_flexible);
          }
          HYPRE_BoomerAMGSetAdditive(amg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(amg_precond, mult_add);
@@ -9293,7 +9682,15 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_Solver mgr_solver;
+      HYPRE_Solver mgr_fsolver = NULL;
+      HYPRE_Solver mgr_gsmoother = NULL;
+      HYPRE_Int    mgr_setup_relax_type = mgr_relax_type;
       HYPRE_MGRCreate(&mgr_solver);
+
+      if (mgr_use_user_fsolver && mgr_setup_relax_type == 0)
+      {
+         mgr_setup_relax_type = 2;
+      }
 
       mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int,  mgr_nlevels, HYPRE_MEMORY_HOST);
       for (i = 0; i < mgr_nlevels; i++)
@@ -9329,7 +9726,7 @@ main( hypre_int argc,
       /* set F relaxation strategy */
       HYPRE_MGRSetFRelaxMethod(mgr_solver, mgr_frelax_method);
       /* set relax type for single level F-relaxation and post-relaxation */
-      HYPRE_MGRSetRelaxType(mgr_solver, mgr_relax_type);
+      HYPRE_MGRSetRelaxType(mgr_solver, mgr_setup_relax_type);
       HYPRE_MGRSetNumRelaxSweeps(mgr_solver, mgr_num_relax_sweeps);
       /* set interpolation type */
       HYPRE_MGRSetRestrictType(mgr_solver, mgr_restrict_type);
@@ -9344,59 +9741,76 @@ main( hypre_int argc,
       /* set global smoother */
       HYPRE_MGRSetGlobalSmoothType(mgr_solver, mgr_gsmooth_type);
       HYPRE_MGRSetMaxGlobalSmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
+      if (mgr_use_user_gsmoother)
+      {
+         HYPRE_BoomerAMGCreate(&mgr_gsmoother);
+         HYPRE_BoomerAMGSetMaxIter(mgr_gsmoother, mgr_num_gsmooth_sweeps);
+         HYPRE_BoomerAMGSetTol(mgr_gsmoother, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(mgr_gsmoother, 0);
+         HYPRE_MGRSetGlobalSmootherAtLevel(mgr_solver, mgr_gsmoother, 0);
+      }
+      if (mgr_use_user_fsolver)
+      {
+         HYPRE_BoomerAMGCreate(&mgr_fsolver);
+         HYPRE_BoomerAMGSetMaxIter(mgr_fsolver, mgr_num_relax_sweeps);
+         HYPRE_BoomerAMGSetTol(mgr_fsolver, 0.0);
+         HYPRE_BoomerAMGSetPrintLevel(mgr_fsolver, 0);
+         HYPRE_MGRSetFSolver(mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, mgr_fsolver);
+      }
 
       /* create AMG coarse grid solver */
-
-      HYPRE_BoomerAMGCreate(&amg_solver);
-      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      if (!mgr_use_default_cgrid_solver)
       {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
-      }
-      else
-      {
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-         if (relax_down > -1)
+         HYPRE_BoomerAMGCreate(&amg_solver);
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 0);
          }
-         if (relax_up > -1)
+         else
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+            HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+            HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+            HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
-         if (relax_coarse > -1)
+         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+         HYPRE_BoomerAMGSetTol(amg_solver, tol);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         if (mgr_nlevels < 1 || mgr_bsize < 2)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
+            HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
+         else
+         {
+            HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
+            HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+            HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+         }
+         HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
       }
-      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
-      HYPRE_BoomerAMGSetTol(amg_solver, tol);
-      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-      HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
-      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-      if (mgr_nlevels < 1 || mgr_bsize < 2)
-      {
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
-      }
-      else
-      {
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
-         HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
-      }
-      /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
-      HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
       /* setup MGR solver */
       HYPRE_MGRSetup(mgr_solver, parcsr_M, b, x);
@@ -9425,6 +9839,15 @@ main( hypre_int argc,
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
+
+         if (second_time_mgr_relax_type != -999)
+         {
+            HYPRE_MGRSetRelaxType(mgr_solver, second_time_mgr_relax_type);
+         }
+         if (second_time_mgr_gsmooth_type != -999)
+         {
+            HYPRE_MGRSetGlobalSmoothType(mgr_solver, second_time_mgr_gsmooth_type);
+         }
 
          HYPRE_MGRSetup(mgr_solver, parcsr_M, b, x);
          HYPRE_MGRSolve(mgr_solver, parcsr_A, b, x);
@@ -9467,8 +9890,19 @@ main( hypre_int argc,
          mgr_cindexes = NULL;
       }
 
-      HYPRE_BoomerAMGDestroy(amg_solver);
       HYPRE_MGRDestroy(mgr_solver);
+      if (!mgr_use_default_cgrid_solver)
+      {
+         HYPRE_BoomerAMGDestroy(amg_solver);
+      }
+      if (mgr_fsolver)
+      {
+         HYPRE_BoomerAMGDestroy(mgr_fsolver);
+      }
+      if (mgr_gsmoother)
+      {
+         HYPRE_BoomerAMGDestroy(mgr_gsmoother);
+      }
    }
 
    /*-----------------------------------------------------------

@@ -315,5 +315,3 @@ HYPRE_Int HYPRE_COGMRESSetModifyPC(HYPRE_Solver   solver, HYPRE_PtrToModifyPCFcn
                                                                    HYPRE_Real))modify_pc);
 
 }
-
-

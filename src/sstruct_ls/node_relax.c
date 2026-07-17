@@ -194,7 +194,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_ComputePkg     **compute_pkgs;
    hypre_ComputePkg    ***svec_compute_pkgs;
    hypre_CommHandle     **comm_handle;
-   hypre_Index            ustride;
 
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
@@ -231,8 +230,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_BigInt           global_size;
 
    HYPRE_MemoryLocation   memory_location;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -370,7 +367,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                                                     sstencil_union_shape);
 
 
-         hypre_CreateComputeInfo(sgrid, ustride, sstencil_union, &compute_info);
+         hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
          orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
          orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
 
@@ -646,12 +643,9 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(
-                                              hypre_SStructPMatrixSMatrix(A, 0, 0)), i);
-            b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                              hypre_SStructPVectorSVector(b, 0)), i);
-            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                              hypre_SStructPVectorSVector(x, 0)), i);
+            A_data_box = hypre_StructMatrixBoxDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i);
+            b_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(b, 0), i);
+            x_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(x, 0), i);
 
             for (vi = 0; vi < nvars; vi++)
             {
@@ -695,7 +689,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
                {
-                  HYPRE_Int vi, vj;
+                  HYPRE_Int vi_local, vj_local;
                   HYPRE_Real A_loc[HYPRE_MAXVARS * HYPRE_MAXVARS] = {0};
                   HYPRE_Real x_loc[HYPRE_MAXVARS] = {0};
 
@@ -704,14 +698,14 @@ hypre_NodeRelax( void                 *relax_vdata,
                    * (intra-nodal) into local storage.
                    *----------------------------------------------*/
 
-                  for (vi = 0; vi < nvars; vi++)
+                  for (vi_local = 0; vi_local < nvars; vi_local++)
                   {
-                     HYPRE_Real *bpi = bp[vi];
-                     x_loc[vi] = bpi[bi];
-                     for (vj = 0; vj < nvars; vj++)
+                     HYPRE_Real *bpi = bp[vi_local];
+                     x_loc[vi_local] = bpi[bi];
+                     for (vj_local = 0; vj_local < nvars; vj_local++)
                      {
-                        HYPRE_Real *Apij = Ap[vi * nvars + vj];
-                        A_loc[vi * nvars + vj] = Apij ? Apij[Ai] : 0.0;
+                        HYPRE_Real *Apij = Ap[vi_local * nvars + vj_local];
+                        A_loc[vi_local * nvars + vj_local] = Apij ? Apij[Ai] : 0.0;
                      }
                   }
 
@@ -723,10 +717,10 @@ hypre_NodeRelax( void                 *relax_vdata,
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
-                  for (vi = 0; vi < nvars; vi++)
+                  for (vi_local = 0; vi_local < nvars; vi_local++)
                   {
-                     HYPRE_Real *xpi = xp[vi];
-                     xpi[xi] = x_loc[vi];
+                     HYPRE_Real *xpi = xp[vi_local];
+                     xpi[xi] = x_loc[vi_local];
                   }
                }
                hypre_BoxLoop3End(Ai, bi, xi);
@@ -789,14 +783,10 @@ hypre_NodeRelax( void                 *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box = hypre_BoxArrayBox( hypre_StructMatrixDataSpace(
-                                               hypre_SStructPMatrixSMatrix(A, 0, 0)), i );
-            b_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(b, 0)), i );
-            x_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(x, 0)), i );
-            t_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                               hypre_SStructPVectorSVector(t, 0)), i );
+            A_data_box = hypre_StructMatrixBoxDataBox(hypre_SStructPMatrixSMatrix(A, 0, 0), i );
+            b_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(b, 0), i );
+            x_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(x, 0), i );
+            t_data_box = hypre_StructVectorBoxDataBox(hypre_SStructPVectorSVector(t, 0), i );
 
             for (vi = 0; vi < nvars; vi++)
             {
@@ -822,12 +812,12 @@ hypre_NodeRelax( void                 *relax_vdata,
                                    b_data_box, start, stride, bi,
                                    t_data_box, start, stride, ti);
                {
-                  HYPRE_Int vi;
+                  HYPRE_Int vi_local;
                   /* Copy rhs into temp vector */
-                  for (vi = 0; vi < nvars; vi++)
+                  for (vi_local = 0; vi_local < nvars; vi_local++)
                   {
-                     HYPRE_Real *tpi = tp[vi];
-                     HYPRE_Real *bpi = bp[vi];
+                     HYPRE_Real *tpi = tp[vi_local];
+                     HYPRE_Real *bpi = bp[vi_local];
                      tpi[ti] = bpi[bi];
                   }
                }
@@ -901,7 +891,7 @@ hypre_NodeRelax( void                 *relax_vdata,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
                {
-                  HYPRE_Int vi, vj;
+                  HYPRE_Int vi_local, vj_local;
                   /*
                   HYPRE_Real *A_loc = tA_loc + hypre_BoxLoopBlock() * nvars * nvars;
                   HYPRE_Real *x_loc = tx_loc + hypre_BoxLoopBlock() * nvars;
@@ -913,14 +903,14 @@ hypre_NodeRelax( void                 *relax_vdata,
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
                    *----------------------------------------------*/
-                  for (vi = 0; vi < nvars; vi++)
+                  for (vi_local = 0; vi_local < nvars; vi_local++)
                   {
-                     HYPRE_Real *tpi = tp[vi];
-                     x_loc[vi] = tpi[ti];
-                     for (vj = 0; vj < nvars; vj++)
+                     HYPRE_Real *tpi = tp[vi_local];
+                     x_loc[vi_local] = tpi[ti];
+                     for (vj_local = 0; vj_local < nvars; vj_local++)
                      {
-                        HYPRE_Real *Apij = Ap[vi * nvars + vj];
-                        A_loc[vi * nvars + vj] = Apij ? Apij[Ai] : 0.0;
+                        HYPRE_Real *Apij = Ap[vi_local * nvars + vj_local];
+                        A_loc[vi_local * nvars + vj_local] = Apij ? Apij[Ai] : 0.0;
                      }
                   }
 
@@ -932,10 +922,10 @@ hypre_NodeRelax( void                 *relax_vdata,
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
-                  for (vi = 0; vi < nvars; vi++)
+                  for (vi_local = 0; vi_local < nvars; vi_local++)
                   {
-                     HYPRE_Real *tpi = tp[vi];
-                     tpi[ti] = x_loc[vi];
+                     HYPRE_Real *tpi = tp[vi_local];
+                     tpi[ti] = x_loc[vi_local];
                   }
 
                }

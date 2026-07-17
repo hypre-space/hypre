@@ -81,15 +81,12 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
 
    hypre_ComputePkg      *compute_pkg;
    hypre_ComputeInfo     *compute_info;
-   hypre_Index            ustride;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute packages
     *----------------------------------------------------------*/
 
-   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
    hypre_ComputePkgCreate(memory_location, compute_info,
                           hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
@@ -233,9 +230,9 @@ hypre_RedBlackGS( void               *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-            x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            A_dbox = hypre_StructMatrixBoxDataBox(A, i);
+            b_dbox = hypre_StructVectorBoxDataBox(b, i);
+            x_dbox = hypre_StructVectorBoxDataBox(x, i);
 
             Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
@@ -326,9 +323,9 @@ hypre_RedBlackGS( void               *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-            x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            A_dbox = hypre_StructMatrixBoxDataBox(A, i);
+            b_dbox = hypre_StructVectorBoxDataBox(b, i);
+            x_dbox = hypre_StructVectorBoxDataBox(x, i);
 
             Ap = hypre_StructMatrixBoxData(A, i, stencil_diag_entry);
             bp = hypre_StructVectorBoxData(b, i);

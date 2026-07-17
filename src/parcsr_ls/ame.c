@@ -418,10 +418,10 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                hypre_CSRMatrixComputeRowSumDevice(Ao, NULL, NULL, l1norm_arr, 1, 1.0, "add");
             }
 #if defined(HYPRE_USING_SYCL)
-            hypreSycl_transform_if( edge_bc,
-                                    edge_bc + ne,
-                                    l1norm_arr,
-                                    edge_bc,
+            hypre_TransformIfSycl( edge_bc,
+                                   edge_bc + ne,
+                                   l1norm_arr,
+                                   edge_bc,
             [] (const auto & x) {return 1;},
             less_than<HYPRE_Real>(eps) );
 #else
@@ -487,7 +487,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
 #if defined(HYPRE_USING_SYCL)
-            hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+            hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                                                 num_sends),
                               edge_bc,
@@ -688,10 +688,10 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             if (exec == HYPRE_EXEC_DEVICE)
             {
 #if defined(HYPRE_USING_SYCL)
-               hypreSycl_transform_if( data,
-                                       data + ne,
-                                       edge_bc,
-                                       data,
+               hypre_TransformIfSycl( data,
+                                      data + ne,
+                                      edge_bc,
+                                      data,
                [] (const auto & x) {return 0.0;},
                [] (const auto & x) {return x;} );
 #else

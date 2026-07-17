@@ -510,9 +510,7 @@ typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 #endif
 
 /**
- * Create a vector object.  Similarly to matrices, the grid is in general a
- * coarsening of \e grid as specified by \ref HYPRE_StructVectorSetStride.
- * By default, the two are the same (the stride is one).
+ * Create a vector object.
  **/
 HYPRE_Int
 HYPRE_StructVectorCreate(MPI_Comm            comm,
@@ -524,16 +522,6 @@ HYPRE_StructVectorCreate(MPI_Comm            comm,
  **/
 HYPRE_Int
 HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
-
-/* RDF: Need a good user interface for setting the grid. */
-
-/**
- * (Optional) Set the coarsening stride.  For more information, see
- * \ref HYPRE_StructVectorCreate.
- **/
-HYPRE_Int
-HYPRE_StructVectorSetStride(HYPRE_StructVector vector,
-                            HYPRE_Int         *stride);
 
 /**
  * Prepare a vector object for setting coefficient values.
@@ -796,6 +784,9 @@ HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                           HYPRE_StructGrid   *grid);
 HYPRE_Int
 HYPRE_StructMatrixClearBoundary(HYPRE_StructMatrix matrix);
+HYPRE_Int
+HYPRE_StructMatrixScale(HYPRE_StructMatrix  matrix,
+                        HYPRE_Complex       scalar);
 
 struct hypre_CommPkg_struct;
 typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;

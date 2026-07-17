@@ -40,8 +40,8 @@ hypre_SMGAxpy( HYPRE_Real          alpha,
       hypre_ProjectBox(box, base_index, base_stride);
       start = hypre_BoxIMin(box);
 
-      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      x_data_box = hypre_StructVectorBoxDataBox(x, i);
+      y_data_box = hypre_StructVectorBoxDataBox(y, i);
 
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);

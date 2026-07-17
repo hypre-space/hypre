@@ -44,6 +44,12 @@ hypre_MatrixStatsCreate(void)
    hypre_MatrixStatsRowsumStDev(stats)     = 0.0;
    hypre_MatrixStatsRowsumSqsum(stats)     = 0.0;
 
+   hypre_MatrixStatsAbsrowsumMin(stats)    = 0.0;
+   hypre_MatrixStatsAbsrowsumMax(stats)    = 0.0;
+   hypre_MatrixStatsAbsrowsumAvg(stats)    = 0.0;
+   hypre_MatrixStatsAbsrowsumStDev(stats)  = 0.0;
+   hypre_MatrixStatsAbsrowsumSqsum(stats)  = 0.0;
+
    return stats;
 }
 
@@ -118,6 +124,223 @@ hypre_MatrixStatsArrayDestroy(hypre_MatrixStatsArray *stats_array)
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_MatrixStatsReduce
+ *
+ * Reduce local matrix statistics across MPI processes.
+ *
+ * Expects local_stats populated by hypre_ParCSRMatrixStatsComputeLocal (or equivalent),
+ * with field semantics:
+ *   - {Nnzrow,Rowsum,Absrowsum}{Min,Max,Avg} are local per-row statistics
+ *   - {Nnzrow,Rowsum,Absrowsum}Sqsum is the local sum of squared deviations
+ *     from the local mean
+ *
+ * On output, global_stats holds the corresponding global statistics, with
+ * Sqsum re-centered on the global mean (Chan/Pebay parallel-variance combine):
+ *   global_sqsum = sum_p ( local_sqsum_p + n_p * (local_mean_p - global_mean)^2 )
+ *
+ * Uses 5 Allreduces:
+ *   1. MAX over packed [-min_nnz, max_nnz, -min_rowsum, max_rowsum,
+ *                       -min_absrowsum, max_absrowsum]
+ *   2. SUM over nonzero counts as HYPRE_Real to preflight BigInt range
+ *   3. SUM over [num_rows, num_nonzeros, actual_nonzeros] as HYPRE_BigInt
+ *   4. SUM over local row-sum totals to derive global means
+ *   5. SUM over each rank's mean-adjusted sqsums
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MatrixStatsReduce(hypre_MatrixStats *local_stats,
+                        hypre_MatrixStats *global_stats,
+                        MPI_Comm           comm)
+{
+   HYPRE_BigInt   local_num_rows;
+   HYPRE_BigInt   bigint_send[3], bigint_recv[3];
+   HYPRE_BigInt   global_num_rows;
+   hypre_ulonglongint global_num_nonzeros;
+   hypre_ulonglongint global_actual_nonzeros;
+   HYPRE_Real     global_size;
+   HYPRE_Real     real_send[6], real_recv[6];
+   HYPRE_Real     extrema_recv[6];
+   HYPRE_Real     local_avg_nnz, local_avg_rowsum, local_avg_absrowsum;
+   HYPRE_Real     global_avg_nnz, global_avg_rowsum, global_avg_absrowsum;
+   HYPRE_Real     global_sum_rows[2];
+   HYPRE_Real     global_dev_sqsum_nnz, global_dev_sqsum_rowsum, global_dev_sqsum_absrowsum;
+   HYPRE_Real     inv_global_num_rows;
+   HYPRE_Int      i;
+   HYPRE_Int      local_overflow;
+   HYPRE_Int      global_overflow;
+
+   if (!local_stats)
+   {
+      hypre_error_in_arg(1);
+   }
+   if (!global_stats)
+   {
+      hypre_error_in_arg(2);
+   }
+   if (!local_stats || !global_stats)
+   {
+      return hypre_error_flag;
+   }
+
+   local_num_rows   = hypre_MatrixStatsNumRows(local_stats);
+   local_avg_nnz    = hypre_MatrixStatsNnzrowAvg(local_stats);
+   local_avg_rowsum = hypre_MatrixStatsRowsumAvg(local_stats);
+   local_avg_absrowsum = hypre_MatrixStatsAbsrowsumAvg(local_stats);
+
+   /* (1) MAX-reduce packed mins (negated) and maxes. Empty ranks supply
+    * sentinel values that cannot win the max, so they don't pollute the
+    * global min/max. */
+   if (local_num_rows > 0)
+   {
+      real_send[0] = -(HYPRE_Real) hypre_MatrixStatsNnzrowMin(local_stats);
+      real_send[1] =  (HYPRE_Real) hypre_MatrixStatsNnzrowMax(local_stats);
+      real_send[2] = -hypre_MatrixStatsRowsumMin(local_stats);
+      real_send[3] =  hypre_MatrixStatsRowsumMax(local_stats);
+      real_send[4] = -hypre_MatrixStatsAbsrowsumMin(local_stats);
+      real_send[5] =  hypre_MatrixStatsAbsrowsumMax(local_stats);
+   }
+   else
+   {
+      real_send[0] = -HYPRE_REAL_MAX;
+      real_send[1] = -HYPRE_REAL_MAX;
+      real_send[2] = -HYPRE_REAL_MAX;
+      real_send[3] = -HYPRE_REAL_MAX;
+      real_send[4] = -HYPRE_REAL_MAX;
+      real_send[5] = -HYPRE_REAL_MAX;
+   }
+   hypre_MPI_Allreduce(real_send, real_recv, 6, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+   for (i = 0; i < 6; i++)
+   {
+      extrema_recv[i] = real_recv[i];
+   }
+
+   /* (2) Preflight unsigned count ranges before the signed BigInt reduction. */
+   local_overflow = (hypre_MatrixStatsNumNonzeros(local_stats) >
+                     (hypre_ulonglongint) HYPRE_BIG_INT_MAX) ||
+                    (hypre_MatrixStatsActualNonzeros(local_stats) >
+                     (hypre_ulonglongint) HYPRE_BIG_INT_MAX);
+   hypre_MPI_Allreduce(&local_overflow, &global_overflow, 1, HYPRE_MPI_INT,
+                       hypre_MPI_MAX, comm);
+   if (global_overflow)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Matrix statistics count exceeds HYPRE_BigInt range\n");
+      return hypre_error_flag;
+   }
+
+   real_send[0] = (HYPRE_Real) hypre_MatrixStatsNumNonzeros(local_stats);
+   real_send[1] = (HYPRE_Real) hypre_MatrixStatsActualNonzeros(local_stats);
+   hypre_MPI_Allreduce(real_send, real_recv, 2, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   if (real_recv[0] > (HYPRE_Real) HYPRE_BIG_INT_MAX ||
+       real_recv[1] > (HYPRE_Real) HYPRE_BIG_INT_MAX)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Global matrix statistics count exceeds HYPRE_BigInt range\n");
+      return hypre_error_flag;
+   }
+
+   /* (3) SUM-reduce row and nonzero counts as BigInt. */
+   bigint_send[0] = local_num_rows;
+   bigint_send[1] = (HYPRE_BigInt) hypre_MatrixStatsNumNonzeros(local_stats);
+   bigint_send[2] = (HYPRE_BigInt) hypre_MatrixStatsActualNonzeros(local_stats);
+   hypre_MPI_Allreduce(bigint_send, bigint_recv, 3, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   global_num_rows        = bigint_recv[0];
+   global_num_nonzeros    = (hypre_ulonglongint) bigint_recv[1];
+   global_actual_nonzeros = (hypre_ulonglongint) bigint_recv[2];
+
+   hypre_MatrixStatsNumRows(global_stats)         = global_num_rows;
+   hypre_MatrixStatsNumCols(global_stats)         = hypre_MatrixStatsNumCols(local_stats);
+   hypre_MatrixStatsNumNonzeros(global_stats)     = global_num_nonzeros;
+   hypre_MatrixStatsActualNonzeros(global_stats)  = global_actual_nonzeros;
+   hypre_MatrixStatsActualThreshold(global_stats) = hypre_MatrixStatsActualThreshold(local_stats);
+
+   if (global_num_rows == 0)
+   {
+      hypre_MatrixStatsSparsity(global_stats)    = 0.0;
+      hypre_MatrixStatsNnzrowMin(global_stats)   = 0;
+      hypre_MatrixStatsNnzrowMax(global_stats)   = 0;
+      hypre_MatrixStatsNnzrowAvg(global_stats)   = 0.0;
+      hypre_MatrixStatsNnzrowStDev(global_stats) = 0.0;
+      hypre_MatrixStatsNnzrowSqsum(global_stats) = 0.0;
+      hypre_MatrixStatsRowsumMin(global_stats)   = 0.0;
+      hypre_MatrixStatsRowsumMax(global_stats)   = 0.0;
+      hypre_MatrixStatsRowsumAvg(global_stats)   = 0.0;
+      hypre_MatrixStatsRowsumStDev(global_stats) = 0.0;
+      hypre_MatrixStatsRowsumSqsum(global_stats) = 0.0;
+      hypre_MatrixStatsAbsrowsumMin(global_stats)   = 0.0;
+      hypre_MatrixStatsAbsrowsumMax(global_stats)   = 0.0;
+      hypre_MatrixStatsAbsrowsumAvg(global_stats)   = 0.0;
+      hypre_MatrixStatsAbsrowsumStDev(global_stats) = 0.0;
+      hypre_MatrixStatsAbsrowsumSqsum(global_stats) = 0.0;
+      return hypre_error_flag;
+   }
+
+   global_size = (HYPRE_Real) global_num_rows *
+                 (HYPRE_Real) hypre_MatrixStatsNumCols(global_stats);
+   hypre_MatrixStatsSparsity(global_stats) = global_size > 0.0 ?
+                                             100.0 * (1.0 - (HYPRE_Real) global_num_nonzeros /
+                                                      global_size) :
+                                             0.0;
+
+   hypre_MatrixStatsNnzrowMin(global_stats) = (HYPRE_Int) - extrema_recv[0];
+   hypre_MatrixStatsNnzrowMax(global_stats) = (HYPRE_Int)   extrema_recv[1];
+   hypre_MatrixStatsRowsumMin(global_stats) =              -extrema_recv[2];
+   hypre_MatrixStatsRowsumMax(global_stats) =               extrema_recv[3];
+   hypre_MatrixStatsAbsrowsumMin(global_stats) =           -extrema_recv[4];
+   hypre_MatrixStatsAbsrowsumMax(global_stats) =            extrema_recv[5];
+
+   inv_global_num_rows = 1.0 / (HYPRE_Real) global_num_rows;
+
+   /* (4) Global mean for nnz comes for free from global_num_nonzeros.
+    * For row sums we need the global sums of local row sums. */
+   real_send[0] = local_avg_rowsum    * (HYPRE_Real) local_num_rows;
+   real_send[1] = local_avg_absrowsum * (HYPRE_Real) local_num_rows;
+   hypre_MPI_Allreduce(real_send, global_sum_rows, 2, HYPRE_MPI_REAL,
+                       hypre_MPI_SUM, comm);
+
+   global_avg_nnz       = (HYPRE_Real) global_num_nonzeros * inv_global_num_rows;
+   global_avg_rowsum    = global_sum_rows[0] * inv_global_num_rows;
+   global_avg_absrowsum = global_sum_rows[1] * inv_global_num_rows;
+
+   /* (5) Combine sqsums to a common (global) mean:
+    *   sqsum_global = sum_p ( sqsum_p + n_p * (mean_p - global_mean)^2 ) */
+   {
+      HYPRE_Real n_local = (HYPRE_Real) local_num_rows;
+      HYPRE_Real d_nnz       = local_avg_nnz       - global_avg_nnz;
+      HYPRE_Real d_rowsum    = local_avg_rowsum    - global_avg_rowsum;
+      HYPRE_Real d_absrowsum = local_avg_absrowsum - global_avg_absrowsum;
+
+      real_send[0] = hypre_MatrixStatsNnzrowSqsum(local_stats)     + n_local * d_nnz       * d_nnz;
+      real_send[1] = hypre_MatrixStatsRowsumSqsum(local_stats)     + n_local * d_rowsum    * d_rowsum;
+      real_send[2] = hypre_MatrixStatsAbsrowsumSqsum(local_stats)  + n_local * d_absrowsum * d_absrowsum;
+   }
+   hypre_MPI_Allreduce(real_send, real_recv, 3, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   global_dev_sqsum_nnz       = real_recv[0];
+   global_dev_sqsum_rowsum    = real_recv[1];
+   global_dev_sqsum_absrowsum = real_recv[2];
+   if (global_dev_sqsum_nnz       < 0.0) { global_dev_sqsum_nnz       = 0.0; }
+   if (global_dev_sqsum_rowsum    < 0.0) { global_dev_sqsum_rowsum    = 0.0; }
+   if (global_dev_sqsum_absrowsum < 0.0) { global_dev_sqsum_absrowsum = 0.0; }
+
+   hypre_MatrixStatsNnzrowAvg(global_stats)   = global_avg_nnz;
+   hypre_MatrixStatsNnzrowSqsum(global_stats) = global_dev_sqsum_nnz;
+   hypre_MatrixStatsNnzrowStDev(global_stats) = hypre_sqrt(global_dev_sqsum_nnz *
+                                                           inv_global_num_rows);
+
+   hypre_MatrixStatsRowsumAvg(global_stats)   = global_avg_rowsum;
+   hypre_MatrixStatsRowsumSqsum(global_stats) = global_dev_sqsum_rowsum;
+   hypre_MatrixStatsRowsumStDev(global_stats) = hypre_sqrt(global_dev_sqsum_rowsum *
+                                                           inv_global_num_rows);
+
+   hypre_MatrixStatsAbsrowsumAvg(global_stats)   = global_avg_absrowsum;
+   hypre_MatrixStatsAbsrowsumSqsum(global_stats) = global_dev_sqsum_absrowsum;
+   hypre_MatrixStatsAbsrowsumStDev(global_stats) = hypre_sqrt(global_dev_sqsum_absrowsum *
+                                                              inv_global_num_rows);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_MatrixStatsArrayPrint
  *--------------------------------------------------------------------------*/
 
@@ -136,8 +359,8 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    hypre_MatrixStats   *stats_next;
 
    HYPRE_Int            ndigits[HYPRE_NDIGITS_SIZE];
-   HYPRE_Int            offsets[6];
-   HYPRE_Int            divisors[3];
+   HYPRE_Int            offsets[8];
+   HYPRE_Int            divisors[4];
    HYPRE_Int            i, square;
    HYPRE_Int            square_count;
    HYPRE_Int            num_levels_total;
@@ -204,6 +427,10 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    ndigits[9]  = 8;
    ndigits[10] = 8;
    ndigits[11] = 8;
+   ndigits[12] = 8;
+   ndigits[13] = 8;
+   ndigits[14] = 8;
+   ndigits[15] = 8;
 
    for (i = 0; i < num_levels_total; i++)
    {
@@ -248,6 +475,8 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    offsets[3] = 7 + (ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) / 2;
    offsets[4] = (1 + ndigits[4] + ndigits[5] + ndigits[6] + ndigits[7]) / 2 - 3;
    offsets[5] = 4 + (ndigits[8] + ndigits[9] + ndigits[10] + ndigits[11]) / 2;
+   offsets[6] = (1 + ndigits[8] + ndigits[9] + ndigits[10] + ndigits[11]) / 2 - 3;
+   offsets[7] = 4 + (ndigits[12] + ndigits[13] + ndigits[14] + ndigits[15]) / 2;
    if (!square)
    {
       offsets[0] += 2;
@@ -259,6 +488,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
       divisors[0] = 9 + ndigits[0] + ndigits[1] +  ndigits[3] + 2 * ndigits[2];
       divisors[1] = 5 + ndigits[4] + ndigits[5] +  ndigits[6] +     ndigits[7];
       divisors[2] = 5 + ndigits[8] + ndigits[9] + ndigits[10] +    ndigits[11];
+      divisors[3] = 5 + ndigits[12] + ndigits[13] + ndigits[14] + ndigits[15];
       if (!square)
       {
          divisors[0] += 2;
@@ -296,6 +526,13 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    }
    {
       hypre_printf("%*s ", offsets[5], "rowsums");
+   }
+   if (use_divisors)
+   {
+      hypre_printf("%*s ", offsets[6], "|");
+   }
+   {
+      hypre_printf("%*s ", offsets[7], "absrowsums");
       hypre_printf("\n");
    }
 
@@ -325,7 +562,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
       hypre_printf("| ");
    }
    {
-      // entries per row
+      /* entries per row */
       hypre_printf("%*s ",  ndigits[4], "min");
       hypre_printf("%*s ",  ndigits[5], "max");
       hypre_printf("%*s ",  ndigits[6], "avg");
@@ -336,11 +573,22 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
       hypre_printf("| ");
    }
    {
-      // rowsums
+      /* rowsums */
       hypre_printf("%*s ",  ndigits[8], "min");
       hypre_printf("%*s ",  ndigits[9], "max");
       hypre_printf("%*s ", ndigits[10], "avg");
       hypre_printf("%*s ", ndigits[11], "stdev");
+   }
+   if (use_divisors)
+   {
+      hypre_printf("| ");
+   }
+   {
+      /* absrowsums */
+      hypre_printf("%*s ", ndigits[12], "min");
+      hypre_printf("%*s ", ndigits[13], "max");
+      hypre_printf("%*s ", ndigits[14], "avg");
+      hypre_printf("%*s ", ndigits[15], "stdev");
    }
    {
       hypre_printf("\n");
@@ -348,7 +596,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    HYPRE_PRINT_INDENT(shift);
    if (use_divisors)
    {
-      HYPRE_PRINT_TOP_DIVISOR(3, divisors);
+      HYPRE_PRINT_TOP_DIVISOR(4, divisors);
    }
    else
    {
@@ -423,6 +671,19 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
                    ndigits[9], hypre_MatrixStatsRowsumMax(stats),
                    ndigits[10], hypre_MatrixStatsRowsumAvg(stats),
                    ndigits[11], hypre_MatrixStatsRowsumStDev(stats));
+      if (use_divisors)
+      {
+         hypre_printf(" | ");
+      }
+      else
+      {
+         hypre_printf(" ");
+      }
+      hypre_printf("%*.1e %*.1e %*.1e %*.1e",
+                   ndigits[12], hypre_MatrixStatsAbsrowsumMin(stats),
+                   ndigits[13], hypre_MatrixStatsAbsrowsumMax(stats),
+                   ndigits[14], hypre_MatrixStatsAbsrowsumAvg(stats),
+                   ndigits[15], hypre_MatrixStatsAbsrowsumStDev(stats));
 
       if (use_divisors)
       {
@@ -449,14 +710,14 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
             {
                if (i == num_levels[0])
                {
-                  HYPRE_PRINT_MID_DIVISOR(3, divisors, messages[1]);
+                  HYPRE_PRINT_MID_DIVISOR(4, divisors, messages[1]);
                }
             }
             else
             {
                if (i == (num_levels[0] - 1))
                {
-                  HYPRE_PRINT_MID_DIVISOR(3, divisors, messages[1]);
+                  HYPRE_PRINT_MID_DIVISOR(4, divisors, messages[1]);
                }
             }
          }

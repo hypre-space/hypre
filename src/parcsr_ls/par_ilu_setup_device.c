@@ -250,7 +250,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_TFree(uend, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixDestroy(parS);
 
-         hypre_ILUSetupLDUtoCusparse(parL, parD, parU, &ALU);
+         hypre_ILUSetupLDUtoVendor(parL, parD, parU, &ALU);
          if ((ilu_type % 10) == 1)
          {
             hypre_TFree(parD, HYPRE_MEMORY_HOST);
@@ -502,9 +502,6 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    HYPRE_Int                 num_free_iter = 10;
 #endif
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("CSRMatrixITILU0");
-
    /* Set default output */
    *num_iter_ptr = 0;
 
@@ -532,6 +529,9 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
 #else
    data_type = rocsparse_datatype_f64_r;
 #endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CSRMatrixITILU0");
 
    /*-------------------------------------------------------------------------------------
     * 1. Sort columns belonging to each row, then copy result to new matrix

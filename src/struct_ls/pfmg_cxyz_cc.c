@@ -50,9 +50,6 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
       return hypre_error_flag;
    }
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("CC");
-
    hypre_SetIndex(ustride, 1);
    A_diag = (diag_is_constant) ?
             hypre_StructMatrixConstData(A, diag_entry) :
@@ -77,6 +74,9 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
          return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CC");
 
 #ifdef HYPRE_CORE_CASE
 #undef HYPRE_CORE_CASE

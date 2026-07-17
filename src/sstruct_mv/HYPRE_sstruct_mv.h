@@ -1539,6 +1539,13 @@ HYPRE_SStructMatrixMatmat(HYPRE_SStructMatrix  A,
                           HYPRE_SStructMatrix  B,
                           HYPRE_SStructMatrix *C);
 
+/**
+ * Scale a matrix by \e scalar (\f$A \leftarrow \text{scalar} \cdot A\f$).
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixScale(HYPRE_SStructMatrix  matrix,
+                         HYPRE_Complex        scalar);
+
 /**@}*/
 
 /*--------------------------------------------------------------------------

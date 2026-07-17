@@ -39,10 +39,13 @@ output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
 src_dir=`cd $1; pwd`
+root_dir=`cd $src_dir/..; pwd`
 shift
 
 # Basic build and run tests
+cco="-DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 mo="-j test"
+ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 eo=""
 
 rtol="0.0"
@@ -51,16 +54,36 @@ atol="3e-15"
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="aurora"
 
-##########
-## SYCL ##
-##########
+module load cmake
+
+#################
+## CMake tests ##
+#################
+
+# 1C) SYCL without UM [make check]
+co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-sycl-um
+
+# 2C) SYCL with mixed precision support [make check]
+co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_MIXED_PRECISION=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-sycl-mup
+
+#####################
+## Autotools tests ##
+#####################
 
 # SYCL with UM in debug mode [ij, struct, sstruct]
 # WM: I suppress all warnings for sycl files for now
 co="--enable-debug --disable-fpe-trap --with-sycl --enable-unified-memory --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\'"
-ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
+
+# 2A) SYCL with mixed precision support [make check]
+co="--with-sycl --enable-mixed-precision --with-extra-CUFLAGS=-w"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-sycl-mup
 
 ##########################################################
 # Echo to stderr all nonempty error files in $output_dir #
@@ -69,4 +92,3 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-

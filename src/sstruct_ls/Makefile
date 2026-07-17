@@ -134,4 +134,4 @@ libHYPRE_sstruct_ls.so libHYPRE_sstruct_ls.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h

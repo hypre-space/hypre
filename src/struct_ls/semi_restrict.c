@@ -61,11 +61,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
-   hypre_Index             ustride;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -74,7 +71,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, findex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
    hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
@@ -129,7 +126,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
 
-   HYPRE_Int               Ri;
+   HYPRE_Int               Ri_outer;
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Rp0, *Rp1;
@@ -229,9 +226,9 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-         R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
-         r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
-         rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
+         R_dbox  = hypre_StructMatrixBoxDataBox(R,  fi);
+         r_dbox  = hypre_StructVectorBoxDataBox(r,  fi);
+         rc_dbox = hypre_StructVectorBoxDataBox(rc, ci);
 
          // RL: PTROFFSET
          HYPRE_Int Rp0_offset = 0, rp0_offset, rp1_offset;
@@ -273,10 +270,10 @@ hypre_SemiRestrict( void               *restrict_vdata,
             if ( constant_coefficient )
             {
                HYPRE_Complex Rp0val, Rp1val;
-               Ri = hypre_CCBoxIndexRank( R_dbox, startc );
+               Ri_outer = hypre_CCBoxIndexRank( R_dbox, startc );
 
-               Rp0val = Rp0[Ri + Rp0_offset];
-               Rp1val = Rp1[Ri];
+               Rp0val = Rp0[Ri_outer + Rp0_offset];
+               Rp1val = Rp1[Ri_outer];
 #define DEVICE_VAR is_device_ptr(rcp,rp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,

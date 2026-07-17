@@ -82,7 +82,7 @@ rm -fr src/hypre
 # Configure
 cd $root_dir/build
 eval cmake $copts ../src
-eval cmake --build . $mopts
+eval cmake --build . -- $mopts
 eval cmake --install .
 
 cd $test_dir
