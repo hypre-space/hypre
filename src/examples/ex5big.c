@@ -338,7 +338,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", num_iterations);
+         printf("Iterations = %lld\n", (long long) num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", num_iterations);
+         printf("Iterations = %lld\n", (long long) num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -420,7 +420,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", num_iterations);
+         printf("Iterations = %lld\n", (long long) num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -474,7 +474,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", num_iterations);
+         printf("Iterations = %lld\n", (long long) num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -538,7 +538,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", num_iterations);
+         printf("Iterations = %lld\n", (long long) num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }

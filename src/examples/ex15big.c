@@ -892,7 +892,7 @@ int main (int argc, char *argv[])
       {
          HYPRE_Int numrows, numcols;
          HYPRE_ParCSRMatrixGetDims(par_A, &numrows, &numcols);
-         printf("Problem size: %lld\n\n", numrows);
+         printf("Problem size: %lld\n\n", (long long) numrows);
       }
 
       /* Start timing */
@@ -987,7 +987,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %lld\n", its);
+         printf("Iterations = %lld\n", (long long) its);
          printf("Final Relative Residual Norm = %g\n", final_res_norm);
          printf("\n");
       }
