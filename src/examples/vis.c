@@ -512,11 +512,13 @@ void GLVis_PrintSStructVector(HYPRE_SStructVector sol,
 
          if (dim == 2)
          {
-            values = (double*) malloc((ni + var_off) * (nj + var_off) * sizeof(double));
+            values = (double*) malloc((size_t) (ni + var_off) * (size_t) (nj + var_off) *
+                                      sizeof(double));
          }
          else
          {
-            values = (double*) malloc((ni + var_off) * (nj + var_off) * (nk + var_off) * sizeof(double));
+            values = (double*) malloc((size_t) (ni + var_off) * (size_t) (nj + var_off) *
+                                      (size_t) (nk + var_off) * sizeof(double));
             ilower[2] = hypre_BoxIMinD(box, 2) - var_off;
             iupper[2] = hypre_BoxIMaxD(box, 2);
          }
@@ -798,11 +800,11 @@ void GLVis_PrintStructVector(HYPRE_StructVector sol,
 
       if (dim == 2)
       {
-         values = (double*) malloc(ni * nj * sizeof(double));
+         values = (double*) malloc((size_t) ni * (size_t) nj * sizeof(double));
       }
       else
       {
-         values = (double*) malloc(ni * nj * nk * sizeof(double));
+         values = (double*) malloc((size_t) ni * (size_t) nj * (size_t) nk * sizeof(double));
          ilower[2] = hypre_BoxIMinD(box, 2);
          iupper[2] = hypre_BoxIMaxD(box, 2);
       }
