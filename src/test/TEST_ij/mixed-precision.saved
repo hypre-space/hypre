@@ -1,0 +1,48 @@
+# Output file: mixed-precision.out.600
+PCG Iterations = 7
+Final Relative Residual Norm = 7.796602e-09
+
+# Output file: mixed-precision.out.601
+GMRES Iterations = 9
+Final Relative Residual Norm = 4.039307e-09
+
+# Output file: mixed-precision.out.602
+BiCGSTAB Iterations = 4
+Final Relative Residual Norm = 7.169243e-09
+
+# Output file: mixed-precision.out.603
+PCG Iterations = 5
+Final Relative Residual Norm = 3.802873e-06
+
+# Output file: mixed-precision.out.604
+PCG Iterations = 8
+Final Relative Residual Norm = 6.513948e-10
+
+# Output file: mixed-precision.out.605
+PCG Iterations = 8
+Final Relative Residual Norm = 7.303790e-09
+
+# Output file: mixed-precision.out.606
+GMRES Iterations = 5
+Final Relative Residual Norm = 3.800347e-06
+
+# Output file: mixed-precision.out.607
+GMRES Iterations = 8
+Final Relative Residual Norm = 8.844861e-10
+
+# Output file: mixed-precision.out.608
+GMRES Iterations = 10
+Final Relative Residual Norm = 5.490371e-09
+
+# Output file: mixed-precision.out.609
+BiCGSTAB Iterations = 3
+Final Relative Residual Norm = 1.850791e-06
+
+# Output file: mixed-precision.out.610
+BiCGSTAB Iterations = 4
+Final Relative Residual Norm = 2.057948e-09
+
+# Output file: mixed-precision.out.611
+BiCGSTAB Iterations = 4
+Final Relative Residual Norm = 8.087356e-09
+
