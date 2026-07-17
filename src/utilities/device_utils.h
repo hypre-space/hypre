@@ -507,7 +507,7 @@ typedef sycl::queue* hypre_DeviceStream;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-struct hypre_GPUGraphHandler
+struct hypre_DeviceGraphData
 {
 #if defined(HYPRE_USING_CUDA)
    cudaGraph_t     graph;
@@ -520,30 +520,30 @@ struct hypre_GPUGraphHandler
 };
 
 #if defined(HYPRE_USING_CUDA)
-#define hypre_GraphStreamBeginCapture(stream) \
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
    HYPRE_CUDA_CALL( cudaStreamBeginCapture((stream), cudaStreamCaptureModeThreadLocal) )
-#define hypre_GraphStreamEndCapture(stream, graph) \
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
    HYPRE_CUDA_CALL( cudaStreamEndCapture((stream), (graph)) )
-#define hypre_GraphInstantiate(graph_exec, graph) \
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
    HYPRE_CUDA_CALL( cudaGraphInstantiate((graph_exec), (graph), 0) )
-#define hypre_GraphLaunch(graph_exec, stream) \
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
    HYPRE_CUDA_CALL( cudaGraphLaunch((graph_exec), (stream)) )
-#define hypre_GraphDestroy(graph) \
+#define hypre_DeviceGraphDestroy(graph) \
    HYPRE_CUDA_CALL( cudaGraphDestroy(graph) )
-#define hypre_GraphExecDestroy(graph_exec) \
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
    HYPRE_CUDA_CALL( cudaGraphExecDestroy(graph_exec) )
 #else  /* HIP */
-#define hypre_GraphStreamBeginCapture(stream) \
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
    HYPRE_HIP_CALL( hipStreamBeginCapture((stream), hipStreamCaptureModeThreadLocal) )
-#define hypre_GraphStreamEndCapture(stream, graph) \
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
    HYPRE_HIP_CALL( hipStreamEndCapture((stream), (graph)) )
-#define hypre_GraphInstantiate(graph_exec, graph) \
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
    HYPRE_HIP_CALL( hipGraphInstantiate((graph_exec), (graph), NULL, NULL, 0) )
-#define hypre_GraphLaunch(graph_exec, stream) \
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
    HYPRE_HIP_CALL( hipGraphLaunch((graph_exec), (stream)) )
-#define hypre_GraphDestroy(graph) \
+#define hypre_DeviceGraphDestroy(graph) \
    HYPRE_HIP_CALL( hipGraphDestroy(graph) )
-#define hypre_GraphExecDestroy(graph_exec) \
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
    HYPRE_HIP_CALL( hipGraphExecDestroy(graph_exec) )
 #endif  /* CUDA vs HIP */
 
