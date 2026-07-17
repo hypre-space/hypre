@@ -472,6 +472,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Level-set based ILU0 setup on host is not supported!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
          break;
