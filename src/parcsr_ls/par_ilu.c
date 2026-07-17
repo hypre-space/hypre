@@ -184,6 +184,11 @@ hypre_ILUDestroy( void *data )
       hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataADiagDiag(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataSDiagDiag(ilu_data) );
+
+      hypre_TFree( hypre_ParILUDataLowLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
+      hypre_TFree( hypre_ParILUDataDLowLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
+      hypre_TFree( hypre_ParILUDataUppLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
+      hypre_TFree( hypre_ParILUDataDUppLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
 #endif
 
       /* final residual vector */
@@ -1246,6 +1251,12 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
 
       case 50:
          hypre_printf("RAP-Modified-ILU with ILU(%d) \n", hypre_ParILUDataLfil(ilu_data));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+         break;
+
+      case 60:
+         hypre_printf("Level-set BJ with ILU0 \n");
          hypre_printf("Operator Complexity (Fill factor) = %f \n",
                       hypre_ParILUDataOperatorComplexity(ilu_data));
          break;

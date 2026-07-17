@@ -160,6 +160,11 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
    hypre_SeqVectorDestroy(hypre_ParILUDataSDiagDiag(ilu_data));
 
+   hypre_TFree(hypre_ParILUDataLowLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParILUDataDLowLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParILUDataUppLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParILUDataDUppLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE);
+
    hypre_ParILUDataFTempUpper(ilu_data) = NULL;
    hypre_ParILUDataUTempLower(ilu_data) = NULL;
    hypre_ParILUDataXTemp(ilu_data)      = NULL;
@@ -167,6 +172,10 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataZTemp(ilu_data)      = NULL;
    hypre_ParILUDataADiagDiag(ilu_data)  = NULL;
    hypre_ParILUDataSDiagDiag(ilu_data)  = NULL;
+   hypre_ParILUDataLowLevelSetOffsets(ilu_data) = NULL;
+   hypre_ParILUDataDLowLevelSetRows(ilu_data)   = NULL;
+   hypre_ParILUDataUppLevelSetOffsets(ilu_data) = NULL;
+   hypre_ParILUDataDUppLevelSetRows(ilu_data)   = NULL;
 #endif
 
    /* Free previously allocated data, if any not destroyed */
@@ -268,7 +277,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1: case 60:
+         case 0: case 1:
          default:
             /* RCM or none */
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
@@ -463,6 +472,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Level-set based ILU0 setup on host is not supported!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
          break;

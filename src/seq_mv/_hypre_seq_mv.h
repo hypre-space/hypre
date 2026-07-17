@@ -355,11 +355,13 @@ HYPRE_Int hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_
 HYPRE_Int hypre_CSRMatrixTaggedFnorm( hypre_CSRMatrix *A, HYPRE_Int num_tags, HYPRE_Int *tags,
                                       HYPRE_Real **tnorms_ptr );
 HYPRE_Int
-hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix *A,
-                                    HYPRE_Int       *low_set_offsets,
-                                    HYPRE_Int       *low_level_sets,
-                                    HYPRE_Int       *upp_set_offsets,
-                                    HYPRE_Int       *upp_level_sets);
+hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
+                                    HYPRE_Int       **low_set_offsets,
+                                    HYPRE_Int       **low_level_sets,
+                                    HYPRE_Int       **upp_set_offsets,
+                                    HYPRE_Int       **upp_level_sets,
+                                    HYPRE_Int        *num_low_levels,
+                                    HYPRE_Int        *num_upp_levels);
 
 /* csr_matop_device.c */
 hypre_CSRMatrix *hypre_CSRMatrixAddDevice ( HYPRE_Complex alpha, hypre_CSRMatrix *A,
@@ -427,6 +429,11 @@ HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, 
 HYPRE_Int hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix *A, HYPRE_BigInt *col_map,
                                                HYPRE_Int **col_idx_new_ptr, HYPRE_BigInt **col_map_new_ptr);
 HYPRE_Int hypre_CSRMatrixILU0(hypre_CSRMatrix *A);
+HYPRE_Int hypre_CSRMatrixILU0LevelSet(hypre_CSRMatrix *A,
+                                      HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets,
+                                      HYPRE_Int *d_low_level_set_rows,
+                                      HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets,
+                                      HYPRE_Int *d_upp_level_set_rows);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
@@ -641,6 +648,21 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+
+HYPRE_Int hypre_CSRMatrixILU0LevelSetFactorization(hypre_CSRMatrix *A,
+                                                   HYPRE_Int        num_low_levels,
+                                                   HYPRE_Int       *low_set_offsets,
+                                                   HYPRE_Int       *d_low_level_set_rows);
+HYPRE_Int hypre_CSRMatrixILU0LevelSetLSolve(hypre_CSRMatrix *A,
+                                            HYPRE_Int        num_low_levels,
+                                            HYPRE_Int       *low_set_offsets,
+                                            HYPRE_Int       *d_low_level_set_rows,
+                                            HYPRE_Complex   *f);
+HYPRE_Int hypre_CSRMatrixILU0LevelSetUSolve(hypre_CSRMatrix *A,
+                                            HYPRE_Int        num_upp_levels,
+                                            HYPRE_Int       *upp_set_offsets,
+                                            HYPRE_Int       *d_upp_level_set_rows,
+                                            HYPRE_Complex   *f);
 
 /* vector_device.c */
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
