@@ -242,7 +242,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                   for (j = 0; j < ndim; j++)
                   {
 #if defined(HYPRE_USING_SYCL)
-                     hypreSycl_gather(box_nnzrows,
+                     hypre_GatherSycl(box_nnzrows,
                                       box_nnzrows_end,
                                       all_indices[j],
                                       indices[j]);
@@ -426,7 +426,7 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                /* WM: how to set loop_size, box, start, stride?
                 *     I guess cdir will be used to set the stride? */
                /* WM: do I need to worry about ghost zones here or anything? */
-               /* compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i); */
+               /* compute_box = hypre_StructMatrixBoxDataBox(A_s, i); */
                hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
                hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), shrink_box);
 

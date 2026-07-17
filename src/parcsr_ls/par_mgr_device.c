@@ -70,7 +70,7 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
 
    /* Initialize interpolation matrix */
    hypre_ParCSRMatrixInitialize_v2(P, HYPRE_MEMORY_DEVICE);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
    P_diag = hypre_ParCSRMatrixDiag(P);
    P_offd = hypre_ParCSRMatrixOffd(P);
 
@@ -299,7 +299,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixNumNonzeros(P) = nC_global;
    }
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_MatvecCommPkgCreate(P);
 
@@ -571,33 +571,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    HYPRE_Complex        *A_diag_data  = hypre_CSRMatrixData(A_diag);
 
-   /* Local LS variables */
-#if defined(HYPRE_USING_ONEMKLBLAS)
-   std::int64_t         *pivots;
-   std::int64_t          work_sizes[2];
-   std::int64_t          work_size;
-   HYPRE_Complex        *scratchpad;
-#else
-   HYPRE_Int            *pivots;
-   HYPRE_Complex       **tmpdiag_aop;
-   HYPRE_Int            *info;
-#endif
-   HYPRE_Int            *blk_row_indices;
-   HYPRE_Complex        *tmpdiag;
-   HYPRE_Complex       **diag_aop;
-
    /* Local variables */
+   HYPRE_Int            *blk_row_indices;
    HYPRE_Int             bs2 = blk_size * blk_size;
    HYPRE_Int             num_blocks;
    HYPRE_Int             bdiag_size;
-
-   /* Additional variables for debugging */
-#if HYPRE_DEBUG
-   HYPRE_Int            *h_info;
-   HYPRE_Int             k, myid;
-
-   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
-#endif
 
    /*-----------------------------------------------------------------
     * Sanity checks
@@ -698,179 +676,23 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    {
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "InvertDiagSubBlocks");
 
-      /* Memory allocation */
-      tmpdiag     = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
-      diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_ONEMKLBLAS)
-      pivots      = hypre_CTAlloc(std::int64_t, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
-#else
-      pivots      = hypre_CTAlloc(HYPRE_Int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
-      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
-      info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
-#if defined (HYPRE_DEBUG)
-      h_info      = hypre_TAlloc(HYPRE_Int,  num_blocks, HYPRE_MEMORY_HOST);
-#endif
-
-      /* Memory copy */
-      hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-      /* Set work array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, tmpdiag, tmpdiag_aop);
-#endif
-
-      /* Set array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, B_diag_data, diag_aop);
-
-      /* Compute LU factorization */
-#if defined(HYPRE_USING_CUBLAS)
-      HYPRE_CUBLAS_CALL(hypre_cublas_getrfBatched(hypre_HandleCublasHandle(hypre_handle()),
-                                                  blk_size,
-                                                  tmpdiag_aop,
-                                                  blk_size,
-                                                  pivots,
-                                                  info,
-                                                  num_blocks));
-#elif defined(HYPRE_USING_ROCSOLVER)
-      /* Use diag_aop to store factors in B_diag_data. This is necessary for subsequent in-place call to getri. */
-      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                         blk_size,
-                                                         blk_size,
-                                                         diag_aop,
-                                                         blk_size,
-                                                         pivots,
-                                                         blk_size,
-                                                         info,
-                                                         num_blocks));
-
-#elif defined(HYPRE_USING_ONEMKLBLAS)
-      HYPRE_ONEMKL_CALL( work_sizes[0] =
-                            oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
-                                                                                                hypre_handle()),
-                                                                                             blk_size, // std::int64_t m,
-                                                                                             blk_size, // std::int64_t n,
-                                                                                             blk_size, // std::int64_t lda,
-                                                                                             bs2, // std::int64_t stride_a,
-                                                                                             blk_size, // std::int64_t stride_ipiv,
-                                                                                             num_blocks ) ); // std::int64_t batch_size
-
-      HYPRE_ONEMKL_CALL( work_sizes[1] =
-                            oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
-                                                                                                hypre_handle()),
-                                                                                             (std::int64_t) blk_size, // std::int64_t n,
-                                                                                             (std::int64_t) blk_size, // std::int64_t lda,
-                                                                                             (std::int64_t) bs2, // std::int64_t stride_a,
-                                                                                             (std::int64_t) blk_size, // std::int64_t stride_ipiv,
-                                                                                             (std::int64_t) num_blocks // std::int64_t batch_size
-                                                                                           ) );
-      work_size  = hypre_max(work_sizes[0], work_sizes[1]);
-      scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
-
-      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
-      HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
-                                                           (std::int64_t) blk_size, // std::int64_t m,
-                                                           (std::int64_t) blk_size, // std::int64_t n,
-                                                           B_diag_data, // T *a,
-                                                           (std::int64_t) blk_size, // std::int64_t lda,
-                                                           (std::int64_t) bs2, // std::int64_t stride_a,
-                                                           pivots, // std::int64_t *ipiv,
-                                                           (std::int64_t) blk_size, // std::int64_t stride_ipiv,
-                                                           (std::int64_t) num_blocks, // std::int64_t batch_size,
-                                                           scratchpad, // T *scratchpad,
-                                                           (std::int64_t) work_size // std::int64_t scratchpad_size,
-                                                         ).wait() ); // const std::vector<cl::sycl::event> &events = {} ) );
-#else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
-      return hypre_error_flag;
-#endif
-
-#if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
-      hypre_TMemcpy(h_info, info, HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      for (k = 0; k < num_blocks; k++)
-      {
-         if (h_info[k] != 0)
-         {
-            if (h_info[k] < 0)
-            {
-               hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
-                            myid, k, h_info[k]);
-            }
-            else
-            {
-               hypre_printf("[%d]: Singular U(%d, %d) at system %d",
-                            myid, h_info[k], h_info[k], k);
-            }
-         }
-      }
-#endif
-
-      /* Compute sub-blocks inverses */
-#if defined(HYPRE_USING_CUBLAS)
-      HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
-                                                  blk_size,
-                                                  (const HYPRE_Real **) tmpdiag_aop,
-                                                  blk_size,
-                                                  pivots,
-                                                  diag_aop,
-                                                  blk_size,
-                                                  info,
-                                                  num_blocks));
-#elif defined(HYPRE_USING_ROCSOLVER)
-      /* Note: This is an in-place operation and overwrites factorization with batched inverses. -DOK */
-      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                         blk_size,
-                                                         diag_aop,
-                                                         blk_size,
-                                                         pivots,
-                                                         blk_size,
-                                                         info,
-                                                         num_blocks));
-#elif defined(HYPRE_USING_ONEMKLBLAS)
-      /* NOTE: This call uses the strided version here so we use B_diag_data directly instead of *diag_aop. -DOK*/
-      HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
-                                                           (std::int64_t) blk_size, // std::int64_t n,
-                                                           B_diag_data, // T *a,
-                                                           (std::int64_t) blk_size, // std::int64_t lda,
-                                                           (std::int64_t) bs2, // std::int64_t stride_a,
-                                                           pivots, // std::int64_t *ipiv,
-                                                           (std::int64_t) blk_size, // std::int64_t stride_ipiv,
-                                                           (std::int64_t) num_blocks, // std::int64_t batch_size,
-                                                           scratchpad, // T *scratchpad,
-                                                           work_size // std::int64_t scratchpad_size
-                                                         ).wait() );
-#else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
-      return hypre_error_flag;
-#endif
-
-      /* Free memory */
-      hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_ONEMKLBLAS)
-      hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
-#else
-      hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(info, HYPRE_MEMORY_DEVICE);
-#if defined (HYPRE_DEBUG)
-      hypre_TFree(h_info, HYPRE_MEMORY_HOST);
-#endif
-#endif
+      /* Invert the extracted diagonal sub-blocks in place (batched getrf/getri) */
+      hypre_BlockDiagInvDevice(B_diag_data, num_blocks * blk_size, blk_size);
 
       /* Transpose data to row-major format */
       {
-         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_blocks, "warp", bDim);
+         dim3           bDim    = hypre_GetDefaultDeviceBlockDimension();
+         dim3           gDim    = hypre_GetDefaultDeviceGridDimension(num_blocks, "warp", bDim);
+         HYPRE_Complex *tmpdiag = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
 
-         /* Memory copy */
          hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
                        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
          HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
                            num_blocks, blk_size, tmpdiag, B_diag_data );
-      }
 
-      /* Free memory */
-      hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
+      }
 
       HYPRE_ANNOTATE_REGION_END("%s", "InvertDiagSubBlocks");
    }
@@ -878,6 +700,231 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    /* Free memory */
    hypre_TFree(blk_row_indices, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BlockDiagInvDevice
+ *
+ * Device counterpart of hypre_BlockDiagInvLapack. Inverts, in place, each of
+ * the (N / blk_size) diagonal blocks stored contiguously in the device array
+ * "diag" (each block is a blk_size-by-blk_size matrix of bs2 = blk_size *
+ * blk_size consecutive entries). Uses the vendor batched LU factorization and
+ * inversion (getrf/getri).
+ *
+ * Note: getrf/getri operate in column-major. The inverse of a matrix stored
+ * column-major, written back column-major, occupies the same flat array as
+ * the inverse of the (transposed) matrix stored row-major written back
+ * row-major. Hence this routine matches the host hypre_BlockDiagInvLapack
+ * result bitwise (up to floating-point rounding) regardless of the block
+ * storage convention, and no transpose is needed.
+ *
+ * Requires N to be a multiple of blk_size.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
+                          HYPRE_Int      N,
+                          HYPRE_Int      blk_size )
+{
+   HYPRE_Int             bs2        = blk_size * blk_size;
+   HYPRE_Int             num_blocks = (blk_size > 0) ? (N / blk_size) : 0;
+
+   /* Local LS variables */
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   std::int64_t         *pivots;
+   std::int64_t          work_sizes[2];
+   std::int64_t          work_size;
+   HYPRE_Complex        *scratchpad;
+#else
+   HYPRE_Int            *pivots;
+   HYPRE_Complex       **tmpdiag_aop;
+   HYPRE_Int            *info;
+#endif
+   HYPRE_Complex        *tmpdiag;
+   HYPRE_Complex       **diag_aop;
+
+#if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_Int            *h_info;
+   HYPRE_Int             k, myid;
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+#endif
+
+   /* Sanity checks */
+   if (blk_size < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid block size!");
+      return hypre_error_flag;
+   }
+   if (N % blk_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO! N % blk_size != 0");
+      return hypre_error_flag;
+   }
+   if (num_blocks < 1)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("BlockDiagInvDevice");
+
+   /* Memory allocation */
+   tmpdiag     = hypre_TAlloc(HYPRE_Complex, num_blocks * bs2, HYPRE_MEMORY_DEVICE);
+   diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   pivots      = hypre_CTAlloc(std::int64_t, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
+#else
+   pivots      = hypre_CTAlloc(HYPRE_Int, num_blocks * blk_size, HYPRE_MEMORY_DEVICE);
+   tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
+   info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
+#if defined (HYPRE_DEBUG)
+   h_info      = hypre_TAlloc(HYPRE_Int,  num_blocks, HYPRE_MEMORY_HOST);
+#endif
+
+   /* Use diag_aop to store factors; getri reads tmpdiag_aop and writes diag */
+   hypre_TMemcpy(tmpdiag, diag, HYPRE_Complex, num_blocks * bs2,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   /* Set work array of pointers */
+   hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, tmpdiag, tmpdiag_aop);
+#endif
+
+   /* Set array of pointers */
+   hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, diag, diag_aop);
+
+   /* Compute LU factorization */
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL(hypre_cublas_getrfBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                               blk_size,
+                                               tmpdiag_aop,
+                                               blk_size,
+                                               pivots,
+                                               info,
+                                               num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+   /* Use diag_aop to store factors in diag. This is necessary for subsequent in-place call to getri. */
+   HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                      blk_size,
+                                                      blk_size,
+                                                      diag_aop,
+                                                      blk_size,
+                                                      pivots,
+                                                      blk_size,
+                                                      info,
+                                                      num_blocks));
+#elif defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_ONEMKL_CALL( work_sizes[0] =
+                         oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
+                                                                                             hypre_handle()),
+                                                                                          blk_size,
+                                                                                          blk_size,
+                                                                                          blk_size,
+                                                                                          bs2,
+                                                                                          blk_size,
+                                                                                          num_blocks ) );
+
+   HYPRE_ONEMKL_CALL( work_sizes[1] =
+                         oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
+                                                                                             hypre_handle()),
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) bs2,
+                                                                                          (std::int64_t) blk_size,
+                                                                                          (std::int64_t) num_blocks ) );
+   work_size  = hypre_max(work_sizes[0], work_sizes[1]);
+   scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
+                                                        (std::int64_t) blk_size,
+                                                        (std::int64_t) blk_size,
+                                                        diag,
+                                                        (std::int64_t) blk_size,
+                                                        (std::int64_t) bs2,
+                                                        pivots,
+                                                        (std::int64_t) blk_size,
+                                                        (std::int64_t) num_blocks,
+                                                        scratchpad,
+                                                        (std::int64_t) work_size ).wait() );
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+   HYPRE_ANNOTATE_FUNC_END;
+   return hypre_error_flag;
+#endif
+
+#if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
+   hypre_TMemcpy(h_info, info, HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   for (k = 0; k < num_blocks; k++)
+   {
+      if (h_info[k] != 0)
+      {
+         if (h_info[k] < 0)
+         {
+            hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
+                         myid, k, h_info[k]);
+         }
+         else
+         {
+            hypre_printf("[%d]: Singular U(%d, %d) at system %d",
+                         myid, h_info[k], h_info[k], k);
+         }
+      }
+   }
+#endif
+
+   /* Compute sub-blocks inverses */
+#if defined(HYPRE_USING_CUBLAS)
+   HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                               blk_size,
+                                               (const HYPRE_Real **) tmpdiag_aop,
+                                               blk_size,
+                                               pivots,
+                                               diag_aop,
+                                               blk_size,
+                                               info,
+                                               num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+   /* Note: This is an in-place operation and overwrites factorization with batched inverses. */
+   HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                      blk_size,
+                                                      diag_aop,
+                                                      blk_size,
+                                                      pivots,
+                                                      blk_size,
+                                                      info,
+                                                      num_blocks));
+#elif defined(HYPRE_USING_ONEMKLBLAS)
+   /* NOTE: This call uses the strided version here so we use diag directly instead of *diag_aop. */
+   HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
+                                                        (std::int64_t) blk_size,
+                                                        diag,
+                                                        (std::int64_t) blk_size,
+                                                        (std::int64_t) bs2,
+                                                        pivots,
+                                                        (std::int64_t) blk_size,
+                                                        (std::int64_t) num_blocks,
+                                                        scratchpad,
+                                                        work_size ).wait() );
+#endif
+
+   /* Free memory */
+   hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
+#else
+   hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(info, HYPRE_MEMORY_DEVICE);
+#if defined (HYPRE_DEBUG)
+   hypre_TFree(h_info, HYPRE_MEMORY_HOST);
+#endif
+#endif
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

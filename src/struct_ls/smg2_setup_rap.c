@@ -215,10 +215,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
       cstart = hypre_BoxIMin(cgrid_box);
       hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-      PT_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), fi);
-      R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-      RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+      A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+      PT_dbox  = hypre_StructMatrixBoxDataBox(PT, fi);
+      R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+      RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
@@ -526,10 +526,10 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
       cstart = hypre_BoxIMin(cgrid_box);
       hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-      PT_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), fi);
-      R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-      RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+      A_dbox   = hypre_StructMatrixBoxDataBox(A, fi);
+      PT_dbox  = hypre_StructMatrixBoxDataBox(PT, fi);
+      R_dbox   = hypre_StructMatrixBoxDataBox(R, fi);
+      RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
       /*-----------------------------------------------------------------
        * Extract pointers for interpolation operator:
@@ -787,8 +787,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          cstart = hypre_BoxIMin(cgrid_box);
 
-         RAP_dbox =
-            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+         RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
          hypre_SetIndex3(index, 1, 0, 0);
          xOffset = hypre_BoxOffsetDistance(RAP_dbox, index);
@@ -889,7 +888,7 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
          cstart = hypre_BoxIMin(cgrid_box);
 
-         RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
+         RAP_dbox = hypre_StructMatrixBoxDataBox(RAP, ci);
 
          /*-----------------------------------------------------------------
           * Extract pointers for coarse grid operator - always 9-point:

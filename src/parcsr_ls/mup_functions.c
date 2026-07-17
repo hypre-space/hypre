@@ -1681,6 +1681,60 @@ HYPRE_BoomerAMGSetFilterThresholdR( HYPRE_Solver solver, hypre_long_double filte
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCGCScalingFactors( HYPRE_Solver solver, void *cgc_scaling_factors_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleCGCScalingFactors_pre( precision, solver, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleCycleStruct_pre( precision, solver, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleOuterWeights( HYPRE_Solver solver, void *outer_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleOuterWeights_pre( precision, solver, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxOrders( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxOrders_pre( precision, solver, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxTypes( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxTypes_pre( precision, solver, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFlexibleRelaxWeights( HYPRE_Solver solver, void *relax_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_BoomerAMGSetFlexibleRelaxWeights_pre( precision, solver, relax_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_BoomerAMGSetGMRESSwitchR( HYPRE_Solver solver, HYPRE_Int gmres_switch )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -3184,6 +3238,24 @@ HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver, HYPRE_Int block_size
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetCycleType( HYPRE_Solver solver, HYPRE_Int cycle_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetCycleType_pre( precision, solver, cycle_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFRelaxCycle( HYPRE_Solver solver, HYPRE_Int frelax_cycle )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetFRelaxCycle_pre( precision, solver, frelax_cycle );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver, HYPRE_Int relax_method )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -4453,6 +4525,60 @@ HYPRE_ParCSRHybridSetDofFunc( HYPRE_Solver solver, HYPRE_Int *dof_func )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors( HYPRE_Solver solver, void *cgc_scaling_factors_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleCGCScalingFactors_pre( precision, solver, cgc_scaling_factors_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleCycleStruct_pre( precision, solver, cycle_struct_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleOuterWeights( HYPRE_Solver solver, void *outer_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleOuterWeights_pre( precision, solver, outer_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxOrders( HYPRE_Solver solver, HYPRE_Int *relax_orders_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleRelaxOrders_pre( precision, solver, relax_orders_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxTypes( HYPRE_Solver solver, HYPRE_Int *relax_types_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleRelaxTypes_pre( precision, solver, relax_types_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetFlexibleRelaxWeights( HYPRE_Solver solver, void *relax_weights_flexible )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRHybridSetFlexibleRelaxWeights_pre( precision, solver, relax_weights_flexible );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver, HYPRE_Int **grid_relax_points )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -5704,6 +5830,24 @@ HYPRE_SchwarzDestroy( HYPRE_Solver solver )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SchwarzGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzGetFinalResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzGetNumIterations_pre( precision, solver, num_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SchwarzSetDofFunc( HYPRE_Solver solver, HYPRE_Int *dof_func )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -5726,6 +5870,60 @@ HYPRE_SchwarzSetDomainType( HYPRE_Solver solver, HYPRE_Int domain_type )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SchwarzSetDomainType_pre( precision, solver, domain_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetILUKLevelOfFill( HYPRE_Solver solver, HYPRE_Int level_of_fill )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetILUKLevelOfFill_pre( precision, solver, level_of_fill );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetILUTDroptol( HYPRE_Solver solver, hypre_long_double droptol )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetILUTDroptol_pre( precision, solver, droptol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetILUTMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int max_nnz_row )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetILUTMaxNnzPerRow_pre( precision, solver, max_nnz_row );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetLocalSolverType( HYPRE_Solver solver, HYPRE_Int local_solver_type )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetLocalSolverType_pre( precision, solver, local_solver_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetMaxIter_pre( precision, solver, max_iter );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -5758,10 +5956,28 @@ HYPRE_SchwarzSetOverlap( HYPRE_Solver solver, HYPRE_Int overlap )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SchwarzSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetPrintLevel_pre( precision, solver, print_level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver solver, hypre_long_double relax_weight )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SchwarzSetRelaxWeight_pre( precision, solver, relax_weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SchwarzSetTol( HYPRE_Solver solver, hypre_long_double tol )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SchwarzSetTol_pre( precision, solver, tol );
 }
 
 /*--------------------------------------------------------------------------*/

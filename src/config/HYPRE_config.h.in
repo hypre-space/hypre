@@ -1,5 +1,8 @@
 /* config/HYPRE_config.h.in.  Generated from configure.in by autoheader.  */
 
+#ifndef HYPRE_CONFIG_H
+#define HYPRE_CONFIG_H
+
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef FC_DUMMY_MAIN
@@ -320,3 +323,5 @@
    required in a freestanding environment). This macro is provided for
    backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
+
+#endif /* HYPRE_CONFIG_H */

@@ -69,9 +69,6 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
-   hypre_Index             ustride;
-
-   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up base points and the compute package
@@ -83,7 +80,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    base_points = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
-   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
    hypre_ComputeInfoProjectComp(compute_info, base_index, base_stride);
    hypre_ComputePkgCreate(memory_location, compute_info,
                           hypre_StructVectorDataSpace(x), 1,
@@ -184,10 +181,8 @@ hypre_SMGResidual( void               *residual_vdata,
                compute_box = hypre_BoxArrayBox(compute_box_a, i);
                start = hypre_BoxIMin(compute_box);
 
-               b_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-               r_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+               b_data_box = hypre_StructVectorBoxDataBox(b, i);
+               r_data_box = hypre_StructVectorBoxDataBox(r, i);
 
                bp = hypre_StructVectorBoxData(b, i);
                rp = hypre_StructVectorBoxData(r, i);
@@ -223,9 +218,9 @@ hypre_SMGResidual( void               *residual_vdata,
       {
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+         A_data_box = hypre_StructMatrixBoxDataBox(A, i);
+         x_data_box = hypre_StructVectorBoxDataBox(x, i);
+         r_data_box = hypre_StructVectorBoxDataBox(r, i);
 
          rp = hypre_StructVectorBoxData(r, i);
 

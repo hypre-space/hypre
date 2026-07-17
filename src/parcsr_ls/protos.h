@@ -132,6 +132,20 @@ HYPRE_Int hypre_AMGHybridSetLevelRelaxWt ( void *AMGhybrid_vdata, HYPRE_Real rel
 HYPRE_Int hypre_AMGHybridSetOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt );
 HYPRE_Int hypre_AMGHybridSetLevelOuterWt ( void *AMGhybrid_vdata, HYPRE_Real outer_wt,
                                            HYPRE_Int level );
+/* flexible AMG cycling parameter setters*/
+HYPRE_Int hypre_AMGHybridSetFlexibleCycleStruct ( void *AMGhybrid_vdata,
+                                                  HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_AMGHybridSetFlexibleRelaxTypes ( void *AMGhybrid_vdata,
+                                                 HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_AMGHybridSetFlexibleRelaxOrders ( void *AMGhybrid_vdata,
+                                                  HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_AMGHybridSetFlexibleRelaxWeights ( void *AMGhybrid_vdata,
+                                                   HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_AMGHybridSetFlexibleOuterWeights ( void *AMGhybrid_vdata,
+                                                   HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_AMGHybridSetFlexibleCGCScalingFactors ( void *AMGhybrid_vdata,
+                                                        HYPRE_Real *cgc_scaling_factors_flexible);
+/* end of flexible AMG cycling parameter setters*/
 HYPRE_Int hypre_AMGHybridSetNumPaths ( void *AMGhybrid_vdata, HYPRE_Int num_paths );
 HYPRE_Int hypre_AMGHybridSetDofFunc ( void *AMGhybrid_vdata, HYPRE_Int *dof_func );
 HYPRE_Int hypre_AMGHybridSetAggNumLevels ( void *AMGhybrid_vdata, HYPRE_Int agg_num_levels );
@@ -383,6 +397,15 @@ HYPRE_Int hypre_BoomerAMGSetSmoothNumLevels ( void *data, HYPRE_Int smooth_num_l
 HYPRE_Int hypre_BoomerAMGGetSmoothNumLevels ( void *data, HYPRE_Int *smooth_num_levels );
 HYPRE_Int hypre_BoomerAMGSetSmoothNumSweeps ( void *data, HYPRE_Int smooth_num_sweeps );
 HYPRE_Int hypre_BoomerAMGGetSmoothNumSweeps ( void *data, HYPRE_Int *smooth_num_sweeps );
+/* flexible AMG cycling parameters setters */
+HYPRE_Int hypre_BoomerAMGSetFlexibleCycleStruct ( void *data, HYPRE_Int *cycle_struct_flexible);
+HYPRE_Int hypre_BoomerAMGSetFlexibleRelaxTypes ( void *data, HYPRE_Int *relax_types_flexible);
+HYPRE_Int hypre_BoomerAMGSetFlexibleRelaxOrders ( void *data, HYPRE_Int *relax_orders_flexible);
+HYPRE_Int hypre_BoomerAMGSetFlexibleRelaxWeights ( void *data, HYPRE_Real *relax_weights_flexible);
+HYPRE_Int hypre_BoomerAMGSetFlexibleOuterWeights ( void *data, HYPRE_Real *outer_weights_flexible);
+HYPRE_Int hypre_BoomerAMGSetFlexibleCGCScalingFactors ( void *data,
+                                                        HYPRE_Real *cgc_scaling_factors_flexible);
+/* End of flexible AMG cycling parameters setters */
 HYPRE_Int hypre_BoomerAMGSetLogging ( void *data, HYPRE_Int logging );
 HYPRE_Int hypre_BoomerAMGGetLogging ( void *data, HYPRE_Int *logging );
 HYPRE_Int hypre_BoomerAMGSetPrintLevel ( void *data, HYPRE_Int print_level );
@@ -1168,6 +1191,16 @@ HYPRE_Int hypre_SchwarzSetDomainStructure ( void *data, hypre_CSRMatrix *domain_
 HYPRE_Int hypre_SchwarzSetScale ( void *data, HYPRE_Real *scale );
 HYPRE_Int hypre_SchwarzReScale ( void *data, HYPRE_Int size, HYPRE_Real value );
 HYPRE_Int hypre_SchwarzSetDofFunc ( void *data, HYPRE_Int *dof_func );
+HYPRE_Int hypre_SchwarzSetLocalSolverType ( void *data, HYPRE_Int local_solver_type );
+HYPRE_Int hypre_SchwarzSetILUKLevelOfFill ( void *data, HYPRE_Int level_of_fill );
+HYPRE_Int hypre_SchwarzSetILUTMaxNnzPerRow ( void *data, HYPRE_Int max_nnz_row );
+HYPRE_Int hypre_SchwarzSetILUTDroptol ( void *data, HYPRE_Real droptol );
+HYPRE_Int hypre_SchwarzSetMaxIter ( void *data, HYPRE_Int max_iter );
+HYPRE_Int hypre_SchwarzSetTol ( void *data, HYPRE_Real tol );
+HYPRE_Int hypre_SchwarzSetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_SchwarzSetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_SchwarzGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SchwarzGetFinalResidualNorm ( void *data, HYPRE_Real *norm );
 
 /* par_stats.c */
 HYPRE_Int hypre_BoomerAMGSetupStats ( void *amg_vdata, hypre_ParCSRMatrix *A );
@@ -1455,6 +1488,13 @@ HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
                                HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
                                void *fsolver );
 HYPRE_Int hypre_MGRSetFSolverAtLevel( void *mgr_vdata, void *fsolver, HYPRE_Int level );
+HYPRE_Int hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata );
+HYPRE_Int hypre_MGRReleaseFSolverAtLevel( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int hypre_MGRReleaseLevelSmootherAtLevel( void *mgr_vdata, HYPRE_Int level );
+HYPRE_Int hypre_MGRCleanupBuildData( void *mgr_vdata, HYPRE_Int num_coarse_levels );
+HYPRE_Int hypre_MGRCleanupSolvers( void *mgr_vdata );
+HYPRE_Int hypre_MGRCleanupConfig( void *mgr_vdata );
+HYPRE_Int hypre_MGRCleanup( void *mgr_vdata, HYPRE_Int num_coarse_levels, HYPRE_Int cleanup_mode );
 HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
                           hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,
@@ -1499,6 +1539,8 @@ HYPRE_Int hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method );
+HYPRE_Int hypre_MGRSetFRelaxCycle( void *mgr_vdata, HYPRE_Int frelax_cycle );
+HYPRE_Int hypre_MGRSetCycleType( void *mgr_vdata, HYPRE_Int cycle_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method );
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
@@ -1631,6 +1673,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_BlockDiagInvDevice( HYPRE_Complex *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
                                       hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
@@ -1802,8 +1845,8 @@ HYPRE_Int hypre_ParILUExtractEBFC( hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
                                    hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp );
 HYPRE_Int hypre_ParILURAPReorder( hypre_ParCSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_ParCSRMatrix **A_pq );
-HYPRE_Int hypre_ILUSetupLDUtoCusparse( hypre_ParCSRMatrix *L, HYPRE_Real *D,
-                                       hypre_ParCSRMatrix  *U, hypre_ParCSRMatrix **LDUp );
+HYPRE_Int hypre_ILUSetupLDUtoVendor( hypre_ParCSRMatrix *L, HYPRE_Real *D,
+                                     hypre_ParCSRMatrix  *U, hypre_ParCSRMatrix **LDUp );
 HYPRE_Int hypre_ILUSetupRAPMILU0( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **ALUp,
                                   HYPRE_Int modified );
 HYPRE_Int hypre_ILUSetupRAPILU0Device( hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,

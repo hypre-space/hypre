@@ -12,25 +12,28 @@
 #if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
-                                  HYPRE_Int                            k,
-                                  HYPRE_Int                            n,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_A,
-                                  HYPRE_Int                            nnzA,
-                                  HYPRE_Int                           *_d_ia,
-                                  HYPRE_Int                           *_d_ja,
-                                  HYPRE_Complex                       *d_a,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_B,
-                                  HYPRE_Int                            nnzB,
-                                  HYPRE_Int                           *_d_ib,
-                                  HYPRE_Int                           *_d_jb,
-                                  HYPRE_Complex                       *d_b,
-                                  oneapi::mkl::sparse::matrix_handle_t handle_C,
-                                  HYPRE_Int                           *nnzC_out,
-                                  HYPRE_Int                          **d_ic_out,
-                                  HYPRE_Int                          **d_jc_out,
-                                  HYPRE_Complex                      **d_c_out)
+hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix  *C,
+                      HYPRE_Int        *nnzC_out,
+                      HYPRE_Int       **d_ic_out,
+                      HYPRE_Int       **d_jc_out,
+                      HYPRE_Complex   **d_c_out)
 {
+   const HYPRE_Int                      m        = hypre_CSRMatrixNumRows(A);
+   const HYPRE_Int                      k        = hypre_CSRMatrixNumCols(A);
+   const HYPRE_Int                      n        = hypre_CSRMatrixNumCols(B);
+   oneapi::mkl::sparse::matrix_handle_t handle_A = hypre_CSRMatrixGPUMatHandle(A);
+   const HYPRE_Int                      nnzA     = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int                           *_d_ia    = hypre_CSRMatrixI(A);
+   HYPRE_Int                           *_d_ja    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex                       *d_a      = hypre_CSRMatrixData(A);
+   oneapi::mkl::sparse::matrix_handle_t handle_B = hypre_CSRMatrixGPUMatHandle(B);
+   const HYPRE_Int                      nnzB     = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Int                           *_d_ib    = hypre_CSRMatrixI(B);
+   HYPRE_Int                           *_d_jb    = hypre_CSRMatrixJ(B);
+   HYPRE_Complex                       *d_b      = hypre_CSRMatrixData(B);
+   oneapi::mkl::sparse::matrix_handle_t handle_C = hypre_CSRMatrixGPUMatHandle(C);
    /* Need these conversions in the case of the bigint build */
 #if defined(HYPRE_BIGINT)
    std::int64_t *d_ia      = reinterpret_cast<std::int64_t*>(_d_ia);
@@ -84,10 +87,12 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* sort copies of col indices and data for A and B */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                        handle_A, m, k, oneapi::mkl::index_base::zero,
+                                                        handle_A, m, k, (std::int64_t) nnzA,
+                                                        oneapi::mkl::index_base::zero,
                                                         d_ia, d_ja_sorted, d_a_sorted).wait() );
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                        handle_B, k, n, oneapi::mkl::index_base::zero,
+                                                        handle_B, k, n, (std::int64_t) nnzB,
+                                                        oneapi::mkl::index_base::zero,
                                                         d_ib, d_jb_sorted, d_b_sorted).wait() );
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()),
                                                        handle_A, {}).wait() );
@@ -103,7 +108,8 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 #endif
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                        handle_C, m, n, oneapi::mkl::index_base::zero,
+                                                        handle_C, m, n, 0,
+                                                        oneapi::mkl::index_base::zero,
                                                         d_ic, d_jc, d_c).wait() );
 
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::init_matmat_descr(&descr) );
@@ -200,7 +206,8 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 #endif
       d_c = hypre_TAlloc(HYPRE_Complex, *nnzC_h, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                           handle_C, m, n, oneapi::mkl::index_base::zero,
+                                                           handle_C, m, n, *nnzC_h,
+                                                           oneapi::mkl::index_base::zero,
                                                            d_ic, d_jc, d_c).wait() );
 
       /* finalize C */
@@ -232,10 +239,12 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* restore the original (unsorted) col indices and data to A and B and free sorted arrays */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                        handle_A, m, k, oneapi::mkl::index_base::zero,
+                                                        handle_A, m, k, (std::int64_t) nnzA,
+                                                        oneapi::mkl::index_base::zero,
                                                         d_ia, d_ja, d_a).wait() );
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
-                                                        handle_B, k, n, oneapi::mkl::index_base::zero,
+                                                        handle_B, k, n, (std::int64_t) nnzB,
+                                                        oneapi::mkl::index_base::zero,
                                                         d_ib, d_jb, d_b).wait() );
    hypre_TFree(d_a_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);

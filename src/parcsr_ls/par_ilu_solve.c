@@ -349,6 +349,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                  "NSH+ILU solve on device runs requires unified memory!");
+               HYPRE_ANNOTATE_FUNC_END;
                return hypre_error_flag;
             }
 #endif
@@ -363,6 +364,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                  "RAS+ILU solve on device runs requires unified memory!");
+               HYPRE_ANNOTATE_FUNC_END;
                return hypre_error_flag;
             }
 #endif
@@ -377,6 +379,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                  "ddPQ+GMRES+ILU solve on device runs requires unified memory!");
+               HYPRE_ANNOTATE_FUNC_END;
                return hypre_error_flag;
             }
 #endif

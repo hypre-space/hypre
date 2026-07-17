@@ -74,3 +74,13 @@ HYPRE_VectorCopy( HYPRE_Vector  xvec, HYPRE_Vector  yvec)
 {
    return ( hypre_SeqVectorCopy( (hypre_Vector *) xvec, (hypre_Vector *) yvec) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_VectorAxpy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_VectorAxpy( HYPRE_Complex alpha, HYPRE_Vector  xvec, HYPRE_Vector  yvec)
+{
+   return ( hypre_SeqVectorAxpy( alpha, (hypre_Vector *) xvec, (hypre_Vector *) yvec) );
+}

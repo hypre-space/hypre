@@ -35,9 +35,6 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    HYPRE_Real           *A_diag = NULL;
    HYPRE_AP_DECLARE_UP_TO_18;
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("VC");
-
    hypre_SetIndex(ustride, 1);
 
    /* Set A_diag pointer */
@@ -64,6 +61,9 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
          return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("VC");
 
 #ifdef HYPRE_CORE_CASE
 #undef HYPRE_CORE_CASE

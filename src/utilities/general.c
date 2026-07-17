@@ -15,6 +15,65 @@
 #include <fenv.h>
 #endif
 
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
+static __global__ void
+hypreGPUKernel_CompileFlagSafetyCheck(hypre_DeviceItem &item,
+                                      hypre_int        *cuda_arch_compile)
+{
+   HYPRE_UNUSED_VAR(item);
+
+#if defined(__CUDA_ARCH__)
+   cuda_arch_compile[0] = __CUDA_ARCH__;
+#else
+   HYPRE_UNUSED_VAR(cuda_arch_compile);
+#endif
+}
+
+static HYPRE_Int
+cuda_compile_flag_check_local(void)
+{
+   HYPRE_Int device;
+   hypre_GetDevice(&device);
+
+   struct cudaDeviceProp props;
+   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
+   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
+   hypre_int cuda_arch_compile = -1;
+   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
+
+   hypre_int *cuda_arch_compile_d = NULL;
+   HYPRE_CUDA_CALL(cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)));
+   HYPRE_CUDA_CALL(cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
+                              cudaMemcpyHostToDevice));
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d);
+   HYPRE_CUDA_CALL(cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
+                              cudaMemcpyDeviceToHost));
+   HYPRE_CUDA_CALL(cudaFree(cuda_arch_compile_d));
+
+   if (cuda_arch_actual < cuda_arch_compile)
+   {
+      char msg[256];
+
+      if (-1 == cuda_arch_compile)
+      {
+         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
+      }
+      else
+      {
+         hypre_sprintf(msg,
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') is greater than device arch %d",
+                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
+      }
+
+      hypre_error_w_msg(1, msg);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
+      hypre_assert(0);
+   }
+
+   return hypre_error_flag;
+}
+#endif
+
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
@@ -349,7 +408,7 @@ HYPRE_DeviceInitialize(void)
 
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
-   hypre_CudaCompileFlagCheck();
+   cuda_compile_flag_check_local();
 #endif
 
    /* Check if OS supports UVM */
@@ -511,6 +570,9 @@ HYPRE_PrintDeviceInfo(void)
    hypre_printf("Platform Version: %s\n", p_version.c_str());
    auto d_name = device.get_info<sycl::info::device::name>();
    hypre_printf("Device Name: %s\n", d_name.c_str());
+   auto total_vram = device.get_info<sycl::info::device::global_mem_size>();
+   hypre_printf("Total VRAM: %.2f GiB\n",
+                ((HYPRE_Real) total_vram) / (HYPRE_Real) (1 << 30));
    auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
    hypre_printf("Max Work Groups: %d\n", max_work_group);
    auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();

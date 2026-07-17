@@ -39,8 +39,8 @@ shift
 
 # Basic build and run tests
 aco="LIBS=-ldl"
-cco="-DMPIEXEC_EXECUTABLE=\"srun\" -DMPIEXEC_NUMPROC_FLAG=\"n\""
-cmo="--parallel"
+cco="-DMPIEXEC_EXECUTABLE=\"srun\" -DMPIEXEC_NUMPROC_FLAG=\"-n\""
+cmo="-j"
 mo="-j test"
 eo=""
 rtol="0.0"
@@ -84,12 +84,18 @@ co="${cco} -DHYPRE_ENABLE_MPI=OFF -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_UNIFI
 # 6C) GCC 13.3.1 + CUDA 12.9.1 with Umpire [benchmark]
 module reset && module -q load cmake/${cmake_version} cuda/12.9.1 gcc/13.3.1
 UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/install-umpire_2025.09.0-cuda_12.9_sm90-gcc_13.3
-co="${cco} -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_PRINT_ERRORS=ON -Dumpire_DIR=${UMPIRE_DIR}/lib/cmake"
+co="${cco} -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_PRINT_ERRORS=ON -Dumpire_DIR=${UMPIRE_DIR}/lib/cmake/umpire"
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $cmo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-cuda-bench
 
-# 7C) GCC 13.3.1 + CUDA 12.9.1 with host execution
+# 7C) GCC 13.3.1 + CUDA 12.9.1 + mixed precision [make check]
+module reset && module -q load cmake/${cmake_version} cuda/12.9.1 gcc/13.3.1
+co="${cco} -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_MIXED_PRECISION=ON -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_PRINT_ERRORS=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-cuda-mup
+
+# 8C) GCC 13.3.1 + CUDA 12.9.1 with host execution
 module reset && module -q load cmake/${cmake_version} cuda/12.9.1 gcc/13.3.1
 co="${cco} -DHYPRE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=90 -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_TEST_USING_HOST=ON -DHYPRE_ENABLE_MEMORY_TRACKER=OFF -DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=Debug"
 ro="-ij-noilu -ams -struct -sstruct"
@@ -137,7 +143,13 @@ co="${aco} --with-cuda --with-gpu-arch=90 --with-umpire --with-umpire-include=${
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-bench
 
-# 7A) GCC 13.3.1 + CUDA 12.9.1 with host execution
+# 7A) GCC 13.3.1 + CUDA 12.9.1 with mixed precision
+module reset && module -q load cuda/12.9.1 gcc/13.3.1
+co="${aco} --with-cuda --with-gpu-arch=90 --enable-mixed-precision --with-print-errors"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda-mup
+
+# 8A) GCC 13.3.1 + CUDA 12.9.1 with host execution
 module reset && module -q load cuda/12.9.1 gcc/13.3.1
 co="${aco} --with-cuda --with-gpu-arch=90 --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo

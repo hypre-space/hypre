@@ -307,14 +307,14 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -fsingle-precision-constant -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates
       -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -Wimplicit-float-conversion -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -Wimplicit-float-conversion
       -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
@@ -371,8 +371,19 @@ endif ()
 
 if (HYPRE_ENABLE_UMPIRE)
   set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+
+  # If no specific Umpire resource was requested, choose the default that matches
+  # hypre's memory model. Device-memory builds should not silently enable Umpire UM.
+  if (NOT HYPRE_ENABLE_UMPIRE_HOST AND
+      NOT HYPRE_ENABLE_UMPIRE_DEVICE AND
+      NOT HYPRE_ENABLE_UMPIRE_UM AND
+      NOT HYPRE_ENABLE_UMPIRE_PINNED)
+    if (HYPRE_ENABLE_UNIFIED_MEMORY)
+      set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+    else ()
+      set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+    endif ()
+  endif ()
 endif ()
 
 if (HYPRE_ENABLE_UMPIRE_HOST)
@@ -449,9 +460,9 @@ math(EXPR HYPRE_SOVERSION "${HYPRE_VERSION_MAJOR} * 100 + ${HYPRE_VERSION_MINOR}
 set_target_properties(${PROJECT_NAME} PROPERTIES
   VERSION "${HYPRE_VERSION}"
   SOVERSION "${HYPRE_SOVERSION}"
-  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+  ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib"
+  LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib"
+  RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin"
 )
 
 # Ensure installed shared library can locate dependency shared libs (e.g., umpire) at runtime

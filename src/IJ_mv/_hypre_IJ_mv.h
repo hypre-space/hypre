@@ -581,6 +581,7 @@ HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int nu
 #ifndef hypre_MP_BUILD
 #include "_hypre_IJ_mv_mup_undef.h"
 #include "_hypre_IJ_mv_mup.h"
+#include "_hypre_IJ_mv_mup.hpp"
 #endif
 #endif
 
