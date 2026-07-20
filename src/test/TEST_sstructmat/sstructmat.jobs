@@ -64,3 +64,33 @@ mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxy -m
 # interpolate in x direction (part 0) and z direction (part 1)
 mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPxz
 mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPxz.2procs
+
+#=============================================================================
+# 2D one proc A*A  - 5 to 9 points
+#=============================================================================
+
+mpirun -np 1 ./sstructmat -in 1 sstructmat.in.2quadsA -mat-mat 2 0 0 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsAA
+mpirun -np 1 ./sstructmat -in 1 sstructmat.in.2quadsA.FF -mat-mat 2 0 0 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsAA.FF
+mpirun -np 1 ./sstructmat -in 1 sstructmat.in.2quadsA.CC -mat-mat 2 0 0 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsAA.CC
+
+#=============================================================================
+# 2D two procs A*A  - 5 to 9 points
+#=============================================================================
+
+mpirun -np 2 ./sstructmat -in 1 sstructmat.in.2quadsA -mat-mat 2 0 0 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsAA.2procs
+mpirun -np 2 ./sstructmat -in 1 sstructmat.in.2quadsA.FF -mat-mat 2 0 0 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsAA.FF.2procs
+mpirun -np 2 ./sstructmat -in 1 sstructmat.in.2quadsA.CC -mat-mat 2 0 0 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsAA.CC.2procs
+
+#=============================================================================
+# 2D idle parts A*A - 5 to 9 points
+#=============================================================================
+
+mpirun -np 1 ./sstructmat -in 1 sstructmat.in.3quadsA.idle -mat-mat 2 0 0 -r 8 8 1 -pooldist 1 > sstructmat.out.3quadsAA.idle
+mpirun -np 3 ./sstructmat -in 1 sstructmat.in.3quadsA.idle -mat-mat 2 0 0 -r 8 8 1 -pooldist 0 > sstructmat.out.3quadsAA.idle.3procs
+
+#=============================================================================
+# 3D A*A - 7 to 15 points
+#=============================================================================
+
+mpirun -np 1 ./sstructmat -in 1 sstructmat.in.2cubesA -mat-mat 2 0 0 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesAA
+mpirun -np 2 ./sstructmat -in 1 sstructmat.in.2cubesA -mat-mat 2 0 0 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesAA.2procs

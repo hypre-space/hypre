@@ -55,6 +55,24 @@ mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.RA -mat-m
 mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.AP -mat-mat 2 0 1 -r 10 10 > structmat.out.2D3.x.AP
 
 #=============================================================================
+# 2D one proc A*A 
+#=============================================================================
+
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.AA -mat-mat 2 0 0 -r 10 10 > structmat.out.2D0.AA
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.AA -mat-mat 2 0 0 -r 10 10 > structmat.out.2D1.AA
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.AA -mat-mat 2 0 0 -r 10 10 > structmat.out.2D2.AA
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.AA -mat-mat 2 0 0 -r 10 10 > structmat.out.2D3.AA
+
+#=============================================================================
+# 2D four procs A*A 
+#=============================================================================
+
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.AA.4 -mat-mat 2 0 0 -r 5 5 -P 2 2 > structmat.out.2D0.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.AA.4 -mat-mat 2 0 0 -r 5 5 -P 2 2 > structmat.out.2D1.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.AA.4 -mat-mat 2 0 0 -r 5 5 -P 2 2 > structmat.out.2D2.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.AA.4 -mat-mat 2 0 0 -r 5 5 -P 2 2 > structmat.out.2D3.AA.4
+
+#=============================================================================
 # 2D one proc Matvec
 #=============================================================================
 
@@ -215,6 +233,24 @@ mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.x.4 -ma
 mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D1.sym.x.4
 mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D2.sym.x.4
 mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D3.sym.x.4
+
+#=============================================================================
+# Symmetric A - 2D one proc A*A
+#=============================================================================
+
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.AA -mat-mat 2 5 5 -r 10 10 > structmat.out.2D0.sym.AA
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.AA -mat-mat 2 5 5 -r 10 10 > structmat.out.2D1.sym.AA
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.AA -mat-mat 2 5 5 -r 10 10 > structmat.out.2D2.sym.AA
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.AA -mat-mat 2 5 5 -r 10 10 > structmat.out.2D3.sym.AA
+
+#=============================================================================
+# Symmetric A - 2D four procs A*A
+#=============================================================================
+
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.AA.4 -mat-mat 2 5 5 -r 5 5 -P 2 2 > structmat.out.2D0.sym.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.AA.4 -mat-mat 2 5 5 -r 5 5 -P 2 2 > structmat.out.2D1.sym.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.AA.4 -mat-mat 2 5 5 -r 5 5 -P 2 2 > structmat.out.2D2.sym.AA.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.AA.4 -mat-mat 2 5 5 -r 5 5 -P 2 2 > structmat.out.2D3.sym.AA.4
 
 #=============================================================================
 # Symmetric A - 2D four procs Matvec
