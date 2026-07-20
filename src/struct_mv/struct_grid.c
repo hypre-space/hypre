@@ -52,6 +52,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridGlobalSize(grid)  = 0;
    hypre_SetIndex(hypre_StructGridPeriodic(grid), 0);
    hypre_StructGridRefCount(grid)     = 1;
+   hypre_StructGridIsAssembled(grid)  = 0;
    hypre_StructGridBoxMan(grid)       = NULL;
 
    hypre_StructGridNumPeriods(grid)   = 1;
@@ -277,6 +278,14 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_IndexRef       pshift;
 
    void                *entry_info = NULL;
+
+   /* don't re-assemble */
+   if (hypre_StructGridIsAssembled(grid))
+   {
+      hypre_error_in_arg(1);
+      assert(0);
+      return hypre_error_flag;
+   }
 
    if (!time_index)
    {
@@ -532,6 +541,8 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_BoxDestroy(grow_box);
       hypre_BoxDestroy(result_box);
    }
+
+   hypre_StructGridIsAssembled(grid) = 1;
 
    /***************Assemble the box manager *****************/
 
