@@ -1,0 +1,48 @@
+# Output file: solvers_ij_mp.out.0
+PCG Iterations = 14
+Final Relative Residual Norm = 9.962349e-09
+
+# Output file: solvers_ij_mp.out.1
+GMRES Iterations = 15
+Final Relative Residual Norm = 5.561095e-09
+
+# Output file: solvers_ij_mp.out.2
+BiCGSTAB Iterations = 8
+Final Relative Residual Norm = 9.992322e-09
+
+# Output file: solvers_ij_mp.out.3
+PCG Iterations = 8
+Final Relative Residual Norm = 3.356878e-06
+
+# Output file: solvers_ij_mp.out.4
+PCG Iterations = 12
+Final Relative Residual Norm = 2.151884e-09
+
+# Output file: solvers_ij_mp.out.5
+PCG Iterations = 18
+Final Relative Residual Norm = 9.941508e-09
+
+# Output file: solvers_ij_mp.out.6
+GMRES Iterations = 8
+Final Relative Residual Norm = 4.113168e-06
+
+# Output file: solvers_ij_mp.out.7
+GMRES Iterations = 12
+Final Relative Residual Norm = 3.431310e-09
+
+# Output file: solvers_ij_mp.out.8
+GMRES Iterations = 15
+Final Relative Residual Norm = 4.296817e-09
+
+# Output file: solvers_ij_mp.out.9
+BiCGSTAB Iterations = 4
+Final Relative Residual Norm = 7.151844e-06
+
+# Output file: solvers_ij_mp.out.10
+BiCGSTAB Iterations = 6
+Final Relative Residual Norm = 6.804655e-09
+
+# Output file: solvers_ij_mp.out.11
+BiCGSTAB Iterations = 7
+Final Relative Residual Norm = 9.748538e-09
+

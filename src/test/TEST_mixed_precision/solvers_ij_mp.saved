@@ -1,48 +1,48 @@
-# Output file: mixed-precision.out.600
+# Output file: solvers_ij_mp.out.0
 PCG Iterations = 7
 Final Relative Residual Norm = 7.796602e-09
 
-# Output file: mixed-precision.out.601
+# Output file: solvers_ij_mp.out.1
 GMRES Iterations = 9
 Final Relative Residual Norm = 4.039307e-09
 
-# Output file: mixed-precision.out.602
+# Output file: solvers_ij_mp.out.2
 BiCGSTAB Iterations = 4
 Final Relative Residual Norm = 7.169243e-09
 
-# Output file: mixed-precision.out.603
+# Output file: solvers_ij_mp.out.3
 PCG Iterations = 5
 Final Relative Residual Norm = 3.802873e-06
 
-# Output file: mixed-precision.out.604
+# Output file: solvers_ij_mp.out.4
 PCG Iterations = 8
 Final Relative Residual Norm = 6.513948e-10
 
-# Output file: mixed-precision.out.605
+# Output file: solvers_ij_mp.out.5
 PCG Iterations = 8
 Final Relative Residual Norm = 7.303790e-09
 
-# Output file: mixed-precision.out.606
+# Output file: solvers_ij_mp.out.6
 GMRES Iterations = 5
 Final Relative Residual Norm = 3.800347e-06
 
-# Output file: mixed-precision.out.607
+# Output file: solvers_ij_mp.out.7
 GMRES Iterations = 8
 Final Relative Residual Norm = 8.844861e-10
 
-# Output file: mixed-precision.out.608
+# Output file: solvers_ij_mp.out.8
 GMRES Iterations = 10
 Final Relative Residual Norm = 5.490371e-09
 
-# Output file: mixed-precision.out.609
+# Output file: solvers_ij_mp.out.9
 BiCGSTAB Iterations = 3
 Final Relative Residual Norm = 1.850791e-06
 
-# Output file: mixed-precision.out.610
+# Output file: solvers_ij_mp.out.10
 BiCGSTAB Iterations = 4
 Final Relative Residual Norm = 2.057948e-09
 
-# Output file: mixed-precision.out.611
+# Output file: solvers_ij_mp.out.11
 BiCGSTAB Iterations = 4
 Final Relative Residual Norm = 8.087356e-09
 

@@ -9,18 +9,18 @@ RTOL=$1
 ATOL=$2
 
 FILES="\
- ${TNAME}.out.600\
- ${TNAME}.out.601\
- ${TNAME}.out.602\
- ${TNAME}.out.603\
- ${TNAME}.out.604\
- ${TNAME}.out.605\
- ${TNAME}.out.606\
- ${TNAME}.out.607\
- ${TNAME}.out.608\
- ${TNAME}.out.609\
- ${TNAME}.out.610\
- ${TNAME}.out.611\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
 "
 
 for i in $FILES
