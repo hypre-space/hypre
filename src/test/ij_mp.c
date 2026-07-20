@@ -103,12 +103,6 @@ main( hypre_int argc,
    HYPRE_Int           arg_index;
    HYPRE_Int           print_usage;
    HYPRE_Int           log_level = 0;
-   HYPRE_Int           sparsity_known = 0;
-   HYPRE_Int           add = 0;
-   HYPRE_Int           check_constant = 0;
-   HYPRE_Int           off_proc = 0;
-   HYPRE_Int           chunk = 0;
-   HYPRE_Int           omp_flag = 0;
    HYPRE_Int           build_matrix_type;
    HYPRE_Int           build_matrix_arg_index;
    HYPRE_Int           build_rhs_type;
@@ -119,16 +113,11 @@ main( hypre_int argc,
    HYPRE_Int           build_x0_arg_index;
    HYPRE_Int           build_funcs_type;
    HYPRE_Int           build_funcs_arg_index;
-   HYPRE_Int           build_fpt_arg_index;
-   HYPRE_Int           build_sfpt_arg_index;
-   HYPRE_Int           build_cpt_arg_index;
    HYPRE_Int           num_components = 1;
    HYPRE_Int           solver_id;
-   HYPRE_Int           solver_type = 1;
    HYPRE_Int           recompute_res = 1;   /* What should be the default here? */
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
-   HYPRE_Int           poutusr = 0; /* if user selects pout */
    HYPRE_Int           print_matrix_info = 0;
    HYPRE_Int           debug_flag;
    HYPRE_Int           ierr = 0;
@@ -139,7 +128,6 @@ main( hypre_int argc,
    HYPRE_Int           nodal = 0;
    HYPRE_Int           nodal_diag = 0;
    HYPRE_Int           keep_same_sign = 0;
-   HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          b_dot_b;
    void               *object;
@@ -159,7 +147,6 @@ main( hypre_int argc,
    HYPRE_Solver        pcg_precond = NULL;
    HYPRE_Solver        pcg_precond_gotten;
 
-   HYPRE_Int           check_residual = 0;
    HYPRE_Int           num_procs, myid;
    HYPRE_Int          *dof_func = NULL;
    HYPRE_Int           free_dof_func = 1;
@@ -167,7 +154,7 @@ main( hypre_int argc,
    HYPRE_Int           num_functions = 1;
    HYPRE_Int           num_paths = 1;
    HYPRE_Int           agg_num_levels = 0;
-   HYPRE_Int           ns_coarse = 1, ns_down = -1, ns_up = -1;
+   HYPRE_Int           ns_coarse = 1;
 
    HYPRE_Int           time_index;
    HYPRE_Int           local_num_rows, local_num_cols;
@@ -187,7 +174,6 @@ main( hypre_int argc,
    /* Specific tests */
    HYPRE_Int           lazy_device_init = 0;
    HYPRE_Int           device_id = -1;
-   HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_error = 0;
    
    /* max dt */
@@ -201,8 +187,6 @@ main( hypre_int argc,
    /* parameters for BoomerAMG */
    HYPRE_Int      coarsen_cut_factor = 0;
    HYPRE_Real     strong_threshold;
-   HYPRE_Real     strong_thresholdR;
-   HYPRE_Real     filter_thresholdR;
    HYPRE_Real     trunc_factor;
    HYPRE_Real     jacobi_trunc_threshold;
    HYPRE_Real     S_commpkg_switch = 1.0;
@@ -250,7 +234,6 @@ main( hypre_int argc,
    HYPRE_Real   tol = 1.e-8, pc_tol = 0.;
    HYPRE_Real   atol = 0.0;
    HYPRE_Real   max_row_sum = 1.;
-   HYPRE_Int    converge_type = 0;
    HYPRE_Int    precon_cycles = 1;
 
    HYPRE_Int  cheby_order = 2;
@@ -279,7 +262,6 @@ main( hypre_int argc,
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
    HYPRE_Int  gpu_aware_mpi = 0;
 #endif
-   HYPRE_Int      nmv = 100;
 
    /* for CGC BM Aug 25, 2006 */
    HYPRE_Int      cgcits = 1;
@@ -294,8 +276,6 @@ main( hypre_int argc,
    /* interpolation */
    HYPRE_Int    interp_type  = 6; /* default value */
    HYPRE_Int    post_interp_type  = 0; /* default value */
-   /* RL: restriction */
-   HYPRE_Int    restri_type = 0;
    /* aggressive coarsening */
    HYPRE_Int    agg_interp_type  = 4; /* default value */
    HYPRE_Int    agg_P_max_elmts  = 0; /* default value */
@@ -459,9 +439,6 @@ main( hypre_int argc,
    build_x0_arg_index = argc;
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
-   build_fpt_arg_index = 0;
-   build_sfpt_arg_index = 0;
-   build_cpt_arg_index = 0;
    IS_type = 1;
    debug_flag = 0;
    solver_id = 0;
@@ -544,11 +521,6 @@ main( hypre_int argc,
          build_matrix_type      = 8;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-test_multivec") == 0 )
-      {
-         arg_index++;
-         test_multivec = 1;
-      }
       else if ( strcmp(argv[arg_index], "-test_error") == 0 )
       {
          arg_index++;
@@ -580,46 +552,6 @@ main( hypre_int argc,
       {
          arg_index++;
          print_matrix_info = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-exact_size") == 0 )
-      {
-         arg_index++;
-         sparsity_known = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-storage_low") == 0 )
-      {
-         arg_index++;
-         sparsity_known = 2;
-      }
-      else if ( strcmp(argv[arg_index], "-add") == 0 )
-      {
-         arg_index++;
-         add = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-chunk") == 0 )
-      {
-         arg_index++;
-         chunk = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-off_proc") == 0 )
-      {
-         arg_index++;
-         off_proc = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-omp") == 0 )
-      {
-         arg_index++;
-         omp_flag = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-check_constant") == 0 )
-      {
-         arg_index++;
-         check_constant = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
-      {
-         arg_index++;
-         build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
@@ -755,21 +687,6 @@ main( hypre_int argc,
       {
          arg_index++;
          coarsen_type      = 999;
-      }
-      else if ( strcmp(argv[arg_index], "-Ffromonefile") == 0 )
-      {
-         arg_index++;
-         build_fpt_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-SFfromonefile") == 0 )
-      {
-         arg_index++;
-         build_sfpt_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-Cfromonefile") == 0 )
-      {
-         arg_index++;
-         build_cpt_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
@@ -933,16 +850,6 @@ main( hypre_int argc,
          arg_index++;
          ns_coarse = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-ns_down") == 0 )
-      {
-         arg_index++;
-         ns_down = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-ns_up") == 0 )
-      {
-         arg_index++;
-         ns_up = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-sns") == 0 )
       {
          arg_index++;
@@ -960,11 +867,6 @@ main( hypre_int argc,
          build_rhs_type = -1;
          if ( build_src_type == -1 ) { build_src_type = 2; }
       }
-      else if ( strcmp(argv[arg_index], "-restritype") == 0 )
-      {
-         arg_index++;
-         restri_type  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -979,11 +881,6 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_use_vendor = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-nmv") == 0 )
-      {
-         arg_index++;
-         nmv = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mv_vendor") == 0 )
       {
@@ -1125,6 +1022,10 @@ main( hypre_int argc,
       }
    }
 
+   /* Unused variables */
+   HYPRE_UNUSED_VAR(slvr_size_t);
+   HYPRE_UNUSED_VAR(pc_size_t);
+
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22)
    {
@@ -1147,8 +1048,6 @@ main( hypre_int argc,
    if (solver_id == 1 || solver_id == 11 || solver_id == 21 || solver_id == 31)
    {
       strong_threshold = 0.25;
-      strong_thresholdR = 0.25;
-      filter_thresholdR = 0.00;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
       cycle_type = 1;
@@ -1173,11 +1072,6 @@ main( hypre_int argc,
       {
          arg_index++;
          k_dim = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-check_residual") == 0 )
-      {
-         arg_index++;
-         check_residual = 1;
       }
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
@@ -1236,35 +1130,15 @@ main( hypre_int argc,
          arg_index++;
          strong_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-thR") == 0 )
-      {
-         arg_index++;
-         strong_thresholdR  = (HYPRE_Real)atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-fltr_thR") == 0 )
-      {
-         arg_index++;
-         filter_thresholdR  = (HYPRE_Real)atof(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-CF") == 0 )
       {
          arg_index++;
          relax_order = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-cf") == 0 )
-      {
-         arg_index++;
-         cf_tol  = (HYPRE_Real)atof(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
          tol  = (HYPRE_Real)atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-conv_type") == 0 )
-      {
-         arg_index++;
-         converge_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-atol") == 0 )
       {
@@ -1311,11 +1185,6 @@ main( hypre_int argc,
          arg_index++;
          S_commpkg_switch = (HYPRE_Real)atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
-      {
-         arg_index++;
-         solver_type  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-recompute") == 0 )
       {
          arg_index++;
@@ -1330,7 +1199,6 @@ main( hypre_int argc,
       {
          arg_index++;
          poutdat  = atoi(argv[arg_index++]);
-         poutusr = 1;
       }
       else if ( strcmp(argv[arg_index], "-var") == 0 )
       {
@@ -1599,10 +1467,6 @@ main( hypre_int argc,
          hypre_printf("           0=Forward (default)       1=Backward\n");
          hypre_printf("           2=Centered                3=Upwind\n");
          hypre_printf("\n");
-         hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
-         hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
-         hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
-         hypre_printf("\n");
          hypre_printf("  -rbm <val> <filename>  : rigid body mode vectors\n");
          hypre_printf("  -nc <val>              : number of components of a vector (multivector)\n");
          hypre_printf("  -rhsfromfile           : ");
@@ -1689,11 +1553,6 @@ main( hypre_int argc,
          hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
          hypre_printf("\n");
 
-         /* RL */
-         hypre_printf("  -restritype  <val>    : set restriction type\n");
-         hypre_printf("       0=transpose of the interpolation  \n");
-         hypre_printf("\n");
-
          hypre_printf("  -rlx  <val>            : relaxation type\n");
          hypre_printf("       0=Weighted Jacobi  \n");
          hypre_printf("       1=Gauss-Seidel (very slow!)  \n");
@@ -1733,9 +1592,6 @@ main( hypre_int argc,
          hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
          hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
          hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
-         /* RL restore these */
-         hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
-         hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
          hypre_printf("\n");
          hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n");
          hypre_printf("  -cutf <val>            : set coarsening cut factor for dense rows\n");
@@ -1751,7 +1607,6 @@ main( hypre_int argc,
          hypre_printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
          hypre_printf("\n");
          hypre_printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
-         hypre_printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
          hypre_printf("                         : 1  PCG  (default)\n");
          hypre_printf("                         : 2  GMRES\n");
          hypre_printf("                         : 3  BiCGSTAB\n");
@@ -2879,7 +2734,6 @@ main( hypre_int argc,
 
    if (benchmark)
    {
-      poutusr = 1;
       poutdat = 0;
       second_time = 1;
    }
