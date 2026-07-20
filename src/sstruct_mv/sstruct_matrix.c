@@ -1255,6 +1255,14 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
  *   cols        = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
  *   ijvalues    = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
  *   entry       = c e n     c w e n   c w n     c e s     c w e s   c w s
+ *
+ *   WM: todo - this function does not work for matrices with coarse range as
+ *              opposed to coarse domain. Probably want to store a RanGrid in
+ *              hypre_SStructGraph similar to what is done for DomGrid and use
+ *              that here just like we do for DomGrid. Likely should go through
+ *              the rest of the code to see where hypre_SStructGraphDomGrid(graph)
+ *              is used and make sure we aren't assuming coarse domain and
+ *              fine range defined by hypre_SStructGraphGrid(graph).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2719,6 +2727,145 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * Convert required rows of SStructMatrix B to parcsr in order to perform:
+ * uA * sB
+ *--------------------------------------------------------------------------*/
+
+hypre_IJMatrix*
+hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B )
+{
+   HYPRE_Int                ndim            = hypre_SStructMatrixNDim(B);
+   HYPRE_Int                nparts          = hypre_SStructMatrixNParts(B);
+   HYPRE_IJMatrix           ij_A            = hypre_SStructMatrixIJMatrix(A);
+   HYPRE_IJMatrix           ij_B            = hypre_SStructMatrixIJMatrix(B);
+   hypre_SStructGraph      *graph           = hypre_SStructMatrixGraph(B);
+   hypre_SStructGrid       *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                type            = hypre_SStructMatrixObjectType(B);
+   hypre_SStructPGrid      *pgrid;
+   HYPRE_Int                d, i, part, var, nvars, npartvars;
+   HYPRE_Int                num_col_ind, num_send_map_elmts, num_global_ranks;
+   HYPRE_Int               *col_ind;
+   HYPRE_Int               *send_map_elmts;
+   HYPRE_BigInt            *global_ranks;
+   HYPRE_Int               *global_ranks_part_var_ptr;
+   HYPRE_Real               threshold = 0.8;
+
+   HYPRE_Int              **convert_indexes;
+   HYPRE_Int                num_ranks;
+   hypre_BoxArray        ***convert_boxa;
+
+   hypre_ParCSRMatrix      *parcsr_uA;
+   hypre_ParCSRMatrix      *parcsr_uB;
+   hypre_ParCSRCommPkg     *comm_pkg;
+   hypre_IJMatrix          *ij_Bhat = NULL;
+#if defined(HYPRE_USING_GPU)
+   /* WM: todo - think about how to do all this on the GPU... */
+   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(ij_B);
+   HYPRE_ExecutionPolicy    exec  = hypre_GetExecPolicy1(memory_location);
+#endif
+
+   HYPRE_IJMatrixGetObject(ij_A, (void **) &parcsr_uA);
+   HYPRE_IJMatrixGetObject(ij_B, (void **) &parcsr_uB);
+   comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_uA);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("SStructMatmatRightMatrixToUMatrix");
+
+   /* Local rows that need to be converted: map column indexes of uA diag to grid dofs */
+   /* Rows needed by other processors: map send_map_elmts of uA to grid dofs */
+
+   /* Sort and unique the column indexes */
+   num_col_ind = hypre_ParCSRMatrixNumNonzeros(parcsr_uA);
+   col_ind = hypre_TAlloc(HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(col_ind, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(parcsr_uA)),
+                 HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // hypre_CSRMatrixJ is in device memory? Use memory location of parcsr_uA?
+   /* WM: todo - is this right? */
+   hypre_UniqueIntArrayND(1, &num_col_ind, &col_ind);
+
+   /* Sort and unique the send map elements */
+   if (!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(parcsr_uA);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_uA);
+   }
+   num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
+   send_map_elmts = hypre_TAlloc(HYPRE_Int, num_send_map_elmts, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(send_map_elmts, hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_Int,
+                 num_send_map_elmts, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_UniqueIntArrayND(1, &num_send_map_elmts, &send_map_elmts);
+
+   /* Combine col_ind and send_map_elmts to form full list of global_ranks to map to grid dofs */
+   num_global_ranks = num_col_ind + num_send_map_elmts;
+   global_ranks = hypre_TAlloc(HYPRE_BigInt, num_global_ranks, HYPRE_MEMORY_HOST);
+   for (i = 0; i < num_col_ind; i++)
+   {
+      global_ranks[i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) + (HYPRE_BigInt) col_ind[i];
+   }
+   for (i = 0; i < num_send_map_elmts; i++)
+   {
+      global_ranks[num_col_ind + i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) + (HYPRE_BigInt) send_map_elmts[i];
+   }
+
+   /* WM: todo - should I unique the global ranks also? Probably doesn't much matter? */
+
+   /* Get pointers to the start of each part/var block in the global ranks */
+   hypre_SStructGridGetGlobalRanksPartVarPtr(grid, global_ranks, &global_ranks_part_var_ptr,
+                                             type, hypre_ParCSRMatrixLastRowIndex(parcsr_uB));
+
+   /* Generate convert_boxa from global ranks */
+   convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
+   npartvars = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
+      for (var = 0; var < nvars; var++)
+      {
+         num_ranks = global_ranks_part_var_ptr[npartvars + 1] - global_ranks_part_var_ptr[npartvars];
+         if (num_ranks)
+         {
+            /* Map global_ranks to grid dofs to get convert_indexes */
+            hypre_SStructGridGlobalRanksToIndexes(grid, part, var, num_ranks,
+                                                  &(global_ranks[global_ranks_part_var_ptr[npartvars]]),
+                                                  &convert_indexes, type);
+            /* WM: note - inidces passed to hypre_BoxArrayCreateFromIndices() are indexes[dim][i] */
+            /* WM: todo - change hypre_BoxArrayCreateFromIndices() to hypre_BoxArrayCreateFromIndexes() */
+            hypre_BoxArrayCreateFromIndices(ndim, num_ranks, convert_indexes,
+                                            threshold, &(convert_boxa[part][var]));
+            for (d = 0; d < ndim; d++)
+            {
+               hypre_TFree(convert_indexes[d], HYPRE_MEMORY_HOST);
+            }
+         }
+         npartvars++;
+      }
+   }
+
+   /* Convert the rows of B using convert_boxa */
+   hypre_SStructMatrixBoxesToUMatrix(B, grid, &ij_Bhat, convert_boxa);
+
+   /* WM: todo - Free memory */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_BoxArrayDestroy(convert_boxa[part][var]);
+      }
+      hypre_TFree(convert_boxa[part], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(convert_boxa, HYPRE_MEMORY_HOST);
+   hypre_TFree(global_ranks_part_var_ptr, HYPRE_MEMORY_HOST);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return ij_Bhat;
+}
+
+/*--------------------------------------------------------------------------
  * Notes:
  *         *) Consider a single variable type for now.
  *         *) Input grid comes from the matrix we are multiplying to A
@@ -2828,8 +2975,6 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                {
                   if (!*ij_Ahat_ptr)
                   {
-                     /* WM: do I need to check whether there is a non-trivial
-                            intersection, or is that handled automatically? */
                      hypre_IntersectBoxes(grid_box, convert_box, box);
                      start = hypre_BoxIMin(box);
                      hypre_BoxGetSize(box, loop_size);

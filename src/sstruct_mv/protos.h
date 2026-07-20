@@ -182,6 +182,7 @@ HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStru
                                              hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa);
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
+hypre_IJMatrix* hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMatrix B );
 HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
                                              hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
@@ -279,6 +280,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 HYPRE_Int
 hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata,
                              hypre_SStructMatrix      *M );
+HYPRE_Int
+hypre_SStructMatmultComputePairwise( hypre_SStructMatmultData *mmdata,
+                                     hypre_SStructMatrix      *M );
 HYPRE_Int
 hypre_SStructMatmult(HYPRE_Int             nmatrices,
                      hypre_SStructMatrix **matrices,

@@ -249,7 +249,11 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
       hypre_TFree(mmdata -> matrices, HYPRE_MEMORY_HOST);
       hypre_TFree(mmdata -> mtypes, HYPRE_MEMORY_HOST);
 
-      hypre_BoxArrayDestroy(mmdata -> fdata_space);
+      /* fdata_space and cdata_space may point to the same box array */
+      if (mmdata -> fdata_space != mmdata -> cdata_space)
+      {
+         hypre_BoxArrayDestroy(mmdata -> fdata_space);
+      }
       hypre_BoxArrayDestroy(mmdata -> cdata_space);
       hypre_StructVectorDestroy(mmdata -> mask);
 
@@ -680,6 +684,9 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
+   /* WM: todo - assuming the finest data stride is the first matrix in the matrices array here? */
+   /*            In general, should we look at all the matrices and find the one with the finest */
+   /*            (smallest) data stride for fstride? */
    fstride = hypre_StructMatrixDataStride(matrices[0]);
    cstride = fstride;
    for (m = 1; m < nmatrices; m++)
@@ -1034,6 +1041,15 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
                break;
          }
       }
+   }
+   /* WM: todo - is this an appropriate fix? */
+   if (cdata_space == NULL)
+   {
+      cdata_space = fdata_space;
+   }
+   if (fdata_space == NULL)
+   {
+      fdata_space = cdata_space;
    }
    (mmdata -> cdata_space) = cdata_space;
    (mmdata -> fdata_space) = fdata_space;
