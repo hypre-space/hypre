@@ -1035,6 +1035,10 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          }
       }
    }
+   if (cdata_space == NULL)
+   {
+      cdata_space = hypre_BoxArrayClone(fdata_space);
+   }
    (mmdata -> cdata_space) = cdata_space;
    (mmdata -> fdata_space) = fdata_space;
 
