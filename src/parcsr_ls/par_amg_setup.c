@@ -2556,7 +2556,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        * Build prolongation matrix, P, and place in P_array[level]
        *--------------------------------------------------------------*/
 
-      if (interp_refine > 0)
+      if (interp_refine > 0 &&
+          !(interp_vec_variant > 1 && num_interp_vectors > 0 &&
+            level > interp_vec_first_level))
       {
          for (k = 0; k < interp_refine; k++)
             hypre_BoomerAMGRefineInterp(A_array[level],

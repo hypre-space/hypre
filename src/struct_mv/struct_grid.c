@@ -283,7 +283,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    if (hypre_StructGridIsAssembled(grid))
    {
       hypre_error_in_arg(1);
-      assert(0);
       return hypre_error_flag;
    }
 

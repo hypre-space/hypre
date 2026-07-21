@@ -22,6 +22,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     HYPRE_utilities_mup.h
     _hypre_mup_def.h
     _hypre_utilities_mup.h
+    _hypre_utilities_mup.hpp
     _hypre_utilities_mup_def.h
     _hypre_utilities_mup_undef.h
   )

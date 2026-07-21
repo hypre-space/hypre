@@ -2629,7 +2629,7 @@ then
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_CUDA_SM=90
    fi
 
    HYPRE_CUDA_GENCODE=""
