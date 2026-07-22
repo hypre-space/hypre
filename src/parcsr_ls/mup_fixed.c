@@ -5881,17 +5881,17 @@ hypre_ILUSetupILUKRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupILUKRASSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j )
+hypre_ILUSetupILUKRASSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_MemoryLocation memory_location )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupILUKRASSymbolic)( n, A_diag_i, A_diag_j, A_offd_i, A_offd_j, E_i, E_j, ext, lfil, perm, rperm, iw, nLU, L_diag_i, U_diag_i, L_diag_j, U_diag_j );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupILUKRASSymbolic)( n, A_diag_i, A_diag_j, A_offd_i, A_offd_j, E_i, E_j, ext, lfil, perm, rperm, iw, nLU, L_diag_i, U_diag_i, L_diag_j, U_diag_j, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end )
+hypre_ILUSetupILUKSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end, HYPRE_MemoryLocation memory_location )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupILUKSymbolic)( n, A_diag_i, A_diag_j, lfil, perm, rperm, iw, nLU, L_diag_i, U_diag_i, S_diag_i, L_diag_j, U_diag_j, S_diag_j, u_end );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupILUKSymbolic)( n, A_diag_i, A_diag_j, lfil, perm, rperm, iw, nLU, L_diag_i, U_diag_i, S_diag_i, L_diag_j, U_diag_j, S_diag_j, u_end, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/
