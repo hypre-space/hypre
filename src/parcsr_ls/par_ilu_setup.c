@@ -2794,6 +2794,8 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
                                     0,
                                     ctrL,
                                     0 );
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matL)) = memory_location;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matL)) = memory_location;
 
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
@@ -2821,6 +2823,8 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
                                     0,
                                     ctrU,
                                     0 );
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matU)) = memory_location;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matU)) = memory_location;
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
