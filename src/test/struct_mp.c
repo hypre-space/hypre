@@ -2011,9 +2011,9 @@ AddValuesVector_mp(hypre_StructGrid   *gridvector,
    }
 
    /* Allocate value arrays */
-   values_h = hypre_CAlloc((size_t)max_volume, (size_t)size, HYPRE_MEMORY_HOST);
+   values_h = (char *)hypre_CAlloc((size_t)max_volume, (size_t)size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-   values   = hypre_CAlloc((size_t)max_volume, (size_t)size, memory_location);
+   values   = (char *)hypre_CAlloc((size_t)max_volume, (size_t)size, memory_location);
 #else
    values   = values_h;
 #endif
@@ -2127,7 +2127,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    bi = 0;
 
    /* Alocate and set pointers to stencil coeffs */
-   stcoeffs = hypre_CAlloc((size_t) 7, size, HYPRE_MEMORY_HOST);
+   stcoeffs = (char *)hypre_CAlloc((size_t) 7, size, HYPRE_MEMORY_HOST);
    center = stcoeffs;
    east   = stcoeffs + size;
    west   = stcoeffs + 2 * size;
@@ -2173,7 +2173,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
          break;
    }
    stencil_size = 1 + (2 - sym) * dim;
-   stencil_indices = hypre_CAlloc((size_t) stencil_size, (size_t)sizeof(HYPRE_Int),
+   stencil_indices = (HYPRE_Int *)hypre_CAlloc((size_t) stencil_size, (size_t)sizeof(HYPRE_Int),
                                   HYPRE_MEMORY_HOST);
    for (s = 0; s < stencil_size; s++)
    {
@@ -2191,25 +2191,25 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    /* Allocate value arrays */
    if (constant_coefficient == 0)
    {
-      values_h = hypre_CAlloc((size_t)(stencil_size * max_volume), size,  HYPRE_MEMORY_HOST);
+      values_h = (char *)hypre_CAlloc((size_t)(stencil_size * max_volume), size,  HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = hypre_CAlloc((size_t)(stencil_size * max_volume), size,  memory_location);
+      values = (char *)hypre_CAlloc((size_t)(stencil_size * max_volume), size,  memory_location);
 #endif
    }
    else if (constant_coefficient == 1)
    {
-      values_h = hypre_CAlloc((size_t)stencil_size, size, HYPRE_MEMORY_HOST);
+      values_h = (char *)hypre_CAlloc((size_t)stencil_size, size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = hypre_CAlloc((size_t)stencil_size, size, memory_location);
+      values = (char *)hypre_CAlloc((size_t)stencil_size, size, memory_location);
 #endif
    }
    else if (constant_coefficient == 2)
    {
-      values_h = hypre_CAlloc((size_t)(stencil_size - 1), size, HYPRE_MEMORY_HOST);
-      centervalues_h = hypre_CAlloc((size_t)(max_volume), size, HYPRE_MEMORY_HOST);
+      values_h = (char *)hypre_CAlloc((size_t)(stencil_size - 1), size, HYPRE_MEMORY_HOST);
+      centervalues_h = (char *)hypre_CAlloc((size_t)(max_volume), size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = hypre_CAlloc((size_t)(stencil_size - 1), size, memory_location);
-      centervalues = hypre_CAlloc((size_t)(max_volume), size, memory_location);
+      values = (char *)hypre_CAlloc((size_t)(stencil_size - 1), size, memory_location);
+      centervalues = (char *)hypre_CAlloc((size_t)(max_volume), size, memory_location);
 #endif
    }
 
@@ -2667,13 +2667,13 @@ SetStencilBndry_mp(HYPRE_StructMatrix A,
      and space dependence only for diagonal if constant_coefficient==2 --
      and this function only touches off-diagonal entries */
 
-   vol    = hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-   ilower = hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
-   iupper = hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
+   vol    = (HYPRE_Int *)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   ilower = (HYPRE_Int **)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
+   iupper = (HYPRE_Int **)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
    for (i = 0; i < size; i++)
    {
-      ilower[i] = hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-      iupper[i] = hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      ilower[i] = (HYPRE_Int *)hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      iupper[i] = (HYPRE_Int *)hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
    }
 
    i = 0;

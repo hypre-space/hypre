@@ -93,6 +93,7 @@ set(MUP_SRCS
   mup_fixed.c
   mup_functions.c
   mup_pre.c
+  HYPRE_struct_ls_mp.c
 )
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
