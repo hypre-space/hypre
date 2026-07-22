@@ -5577,6 +5577,69 @@ hypre_MGRGetSubBlock_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE
 HYPRE_Int
 hypre_MGRGetSubBlock_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
 
+void *
+hypre_MGRPCDCreate_flt( void );
+void *
+hypre_MGRPCDCreate_dbl( void );
+void *
+hypre_MGRPCDCreate_long_dbl( void );
+
+HYPRE_Int
+hypre_MGRPCDDestroy_flt( void *pcd_vdata );
+HYPRE_Int
+hypre_MGRPCDDestroy_dbl( void *pcd_vdata );
+HYPRE_Int
+hypre_MGRPCDDestroy_long_dbl( void *pcd_vdata );
+
+HYPRE_Int
+hypre_MGRPCDSetApSolver_flt( void *mgr_vdata, HYPRE_Solver ap_solver );
+HYPRE_Int
+hypre_MGRPCDSetApSolver_dbl( void *mgr_vdata, HYPRE_Solver ap_solver );
+HYPRE_Int
+hypre_MGRPCDSetApSolver_long_dbl( void *mgr_vdata, HYPRE_Solver ap_solver );
+
+HYPRE_Int
+hypre_MGRPCDSetApplyOrder_flt( void *mgr_vdata, HYPRE_Int apply_order );
+HYPRE_Int
+hypre_MGRPCDSetApplyOrder_dbl( void *mgr_vdata, HYPRE_Int apply_order );
+HYPRE_Int
+hypre_MGRPCDSetApplyOrder_long_dbl( void *mgr_vdata, HYPRE_Int apply_order );
+
+HYPRE_Int
+hypre_MGRPCDSetMassInvType_flt( void *mgr_vdata, HYPRE_Int mass_inv_type );
+HYPRE_Int
+hypre_MGRPCDSetMassInvType_dbl( void *mgr_vdata, HYPRE_Int mass_inv_type );
+HYPRE_Int
+hypre_MGRPCDSetMassInvType_long_dbl( void *mgr_vdata, HYPRE_Int mass_inv_type );
+
+HYPRE_Int
+hypre_MGRPCDSetMpSolver_flt( void *mgr_vdata, HYPRE_Solver mp_solver );
+HYPRE_Int
+hypre_MGRPCDSetMpSolver_dbl( void *mgr_vdata, HYPRE_Solver mp_solver );
+HYPRE_Int
+hypre_MGRPCDSetMpSolver_long_dbl( void *mgr_vdata, HYPRE_Solver mp_solver );
+
+HYPRE_Int
+hypre_MGRPCDSetOperators_flt( void *mgr_vdata, hypre_ParCSRMatrix *Fp, hypre_ParCSRMatrix *Ap, hypre_ParCSRMatrix *Mp );
+HYPRE_Int
+hypre_MGRPCDSetOperators_dbl( void *mgr_vdata, hypre_ParCSRMatrix *Fp, hypre_ParCSRMatrix *Ap, hypre_ParCSRMatrix *Mp );
+HYPRE_Int
+hypre_MGRPCDSetOperators_long_dbl( void *mgr_vdata, hypre_ParCSRMatrix *Fp, hypre_ParCSRMatrix *Ap, hypre_ParCSRMatrix *Mp );
+
+HYPRE_Int
+hypre_MGRPCDSetup_flt( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRPCDSetup_dbl( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRPCDSetup_long_dbl( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+
+HYPRE_Int
+hypre_MGRPCDSolve_flt( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRPCDSolve_dbl( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int
+hypre_MGRPCDSolve_long_dbl( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
+
 HYPRE_Int
 hypre_MGRReleaseCoarseGridSolver_flt( void *mgr_vdata );
 HYPRE_Int
@@ -5611,6 +5674,13 @@ HYPRE_Int
 hypre_MGRSetBlockSize_dbl( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int
 hypre_MGRSetBlockSize_long_dbl( void *mgr_vdata, HYPRE_Int bsize );
+
+HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_flt( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
+HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_dbl( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
+HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel_long_dbl( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix );
 
 HYPRE_Int
 hypre_MGRSetCoarseGridMethod_flt( void *mgr_vdata, HYPRE_Int *cg_method );
