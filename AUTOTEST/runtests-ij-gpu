@@ -1,3 +1,2 @@
 TEST_ij/[^m]*.sh
 TEST_ij/matrix.sh
-TEST_ij/mixed-precision.sh
