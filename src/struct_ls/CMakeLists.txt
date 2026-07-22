@@ -90,6 +90,7 @@ set(REGULAR_SRCS
 
 # Mixed precision sources
 set(MUP_SRCS
+  HYPRE_struct_ls_mp.c
   mup_fixed.c
   mup_functions.c
   mup_pre.c
