@@ -1089,18 +1089,24 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
 
    HYPRE_Int    *send_map_elmts_new;
 
+   HYPRE_Int     num_send_elmts;
+
    HYPRE_Int     i, j;
 
    hypre_assert(num_components > 0);
 
    if (num_components_in != num_components)
    {
+      /* Number of scalar send elements. This is computed from the current
+         (not-yet-rescaled) extents, which hold num_send_elmts * num_components. */
+      num_send_elmts = send_map_starts[num_sends] / num_components;
+
       /* Update number of components in the communication package */
       hypre_ParCSRCommPkgNumComponents(comm_pkg) = num_components_in;
 
       /* Allocate send_maps_elmts */
       send_map_elmts_new = hypre_CTAlloc(HYPRE_Int,
-                                         send_map_starts[num_sends] * num_components_in,
+                                         num_send_elmts * num_components_in,
                                          HYPRE_MEMORY_HOST);
 
       /* Update send_maps_elmts */
@@ -1108,7 +1114,7 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       {
          if (num_components == 1)
          {
-            for (i = 0; i < send_map_starts[num_sends]; i++)
+            for (i = 0; i < num_send_elmts; i++)
             {
                for (j = 0; j < num_components_in; j++)
                {
@@ -1119,7 +1125,7 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
          }
          else
          {
-            for (i = 0; i < send_map_starts[num_sends]; i++)
+            for (i = 0; i < num_send_elmts; i++)
             {
                for (j = 0; j < num_components_in; j++)
                {
@@ -1134,14 +1140,14 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
          /* num_components_in < num_components */
          if (num_components_in == 1)
          {
-            for (i = 0; i < send_map_starts[num_sends]; i++)
+            for (i = 0; i < num_send_elmts; i++)
             {
                send_map_elmts_new[i] = send_map_elmts[i * num_components];
             }
          }
          else
          {
-            for (i = 0; i < send_map_starts[num_sends]; i++)
+            for (i = 0; i < num_send_elmts; i++)
             {
                for (j = 0; j < num_components_in; j++)
                {
@@ -1161,16 +1167,19 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       hypre_ParCSRCommPkgMatrixE(comm_pkg) = NULL;
 #endif
 
-      /* Update send_map_starts */
+      /* Update send_map_starts. Divide first to recover the scalar extent
+         (exact, since the extent is a multiple of num_components), then scale
+         by num_components_in. A direct multiply by the ratio num_components_in /
+         num_components would truncate to zero on a decreasing transition. */
       for (i = 0; i < num_sends + 1; i++)
       {
-         send_map_starts[i] *= num_components_in / num_components;
+         send_map_starts[i] = (send_map_starts[i] / num_components) * num_components_in;
       }
 
       /* Update recv_vec_starts */
       for (i = 0; i < num_recvs + 1; i++)
       {
-         recv_vec_starts[i] *= num_components_in / num_components;
+         recv_vec_starts[i] = (recv_vec_starts[i] / num_components) * num_components_in;
       }
    }
 
