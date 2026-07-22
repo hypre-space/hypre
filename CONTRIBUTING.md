@@ -9,7 +9,7 @@ SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 For any substantial contribution to the library, especially patches larger than 100 lines, please reach out to the hypre team for discussion before starting your own work. Early discussion helps us coordinate design choices, avoid duplicated effort, and point you to related ongoing work.
 
-hypre is an open source project distributed under the terms of both the MIT license and the Apache License (Version 2.0). All new contributions must be made under both licenses. We welcome contributions via pull requests as well as questions, feature requests, or bug reports via issues. See [SUPPORT.md](./SUPPORT.md) or contact the team on the [hypre issue tracker](https://github.com/hypre-space/hypre/issues).
+hypre is an open source project distributed under the terms of both the MIT license and the Apache License (Version 2.0). All new contributions must be made under both licenses. We welcome contributions via pull requests (PRs) as well as questions, feature requests, or bug reports via issues. See [SUPPORT.md](./SUPPORT.md) or contact the team on the [hypre issue tracker](https://github.com/hypre-space/hypre/issues).
 
 If you are not a member of the `hypre-space` organization, you will not have permission to push branches directly to the repository. In that case, start by creating a fork so you can publish your branch and open a pull request.
 
@@ -22,3 +22,9 @@ If you are not a member of the `hypre-space` organization, you will not have per
 7. When reporting bugs or requesting enhancements, be explicit about the expected behavior, the observed behavior, how to reproduce the problem, and any relevant environment or build configuration details.
 8. Add or update tests and documentation when they materially improve confidence in the change, especially for user-facing behavior, APIs, or build options.
 9. Small fixes such as typos, minor documentation updates, or narrowly scoped cleanups can usually be opened directly without prior discussion.
+
+# AI policy
+
+1. Use of AI code generation in hypre is allowed but must be disclosed, e.g. by selecting the AI-assisted label on the PR.
+2. By submitting a PR, the author acknowledges that they have reviewed and understand the changes they are proposing.
+3. PR authors are still responsible for correctness, licensing, and attribution of all changes.
