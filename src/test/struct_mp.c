@@ -1888,7 +1888,7 @@ main( hypre_int argc,
                hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm_ldbl);
                break;
          }
-         
+
          hypre_printf("\n");
       }
 
@@ -2092,16 +2092,16 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 #endif
 
-   HYPRE_Int            i,d, ierr = 0;
+   HYPRE_Int            i, d, ierr = 0;
    hypre_BoxArray      *gridboxes;
    HYPRE_Int            s, bi;
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
-   char                *values=NULL; /* use char to allow pointer arithmetic */
-   char                *values_h=NULL; /* use char to allow pointer arithmetic */
-   char                *centervalues_h=NULL; /* use char to allow pointer arithmetic */
-   char                *centervalues=NULL; /* use char to allow pointer arithmetic */
+   char                *values = NULL; /* use char to allow pointer arithmetic */
+   char                *values_h = NULL; /* use char to allow pointer arithmetic */
+   char                *centervalues_h = NULL; /* use char to allow pointer arithmetic */
+   char                *centervalues = NULL; /* use char to allow pointer arithmetic */
    void                *east, *west;
    void                *north, *south;
    void                *top, *bottom;
@@ -2255,7 +2255,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(values, values_h, (size_t)(stencil_size * volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
@@ -2287,7 +2287,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)(stencil_size * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(gridboxes) > 0)
@@ -2316,7 +2316,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
          }
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)((stencil_size - 1) * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
          if (hypre_BoxArraySize(gridboxes) > 0)
          {
@@ -2337,7 +2337,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(centervalues, centervalues_h, (size_t)(volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
@@ -2487,7 +2487,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(values, values_h, (size_t)(stencil_size * volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -2524,7 +2524,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)(stencil_size * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
          if (hypre_BoxArraySize(gridboxes) > 0)
          {
@@ -2571,7 +2571,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)((stencil_size - 1) * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(gridboxes) > 0)
@@ -2594,7 +2594,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(centervalues, centervalues_h, (size_t)(volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
