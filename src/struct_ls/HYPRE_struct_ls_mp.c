@@ -129,8 +129,8 @@ HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
    }
    /* create new vectors of matrix {A} precision type */
    HYPRE_StructVectorCreate_pre( precision, hypre_StructMatrixComm(A),
-                                hypre_StructMatrixGrid(A),
-                                &btemp);
+                                 hypre_StructMatrixGrid(A),
+                                 &btemp);
    HYPRE_StructVectorInitialize_pre( precision, btemp );
    HYPRE_StructVectorCreate_pre(precision, hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
@@ -174,16 +174,16 @@ HYPRE_StructPFMGSolve_mp( HYPRE_StructSolver solver,
    if (precision == hypre_StructVectorPrecision (x))
    {
       return    HYPRE_StructPFMGSolve_pre( precision, solver, A, b, x );
-   }   
+   }
 
-   HYPRE_StructVectorCreate_pre(precision,hypre_StructMatrixComm(A),
+   HYPRE_StructVectorCreate_pre(precision, hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &btemp);
-   HYPRE_StructVectorInitialize_pre( precision,btemp );
-   HYPRE_StructVectorCreate_pre(precision,hypre_StructMatrixComm(A),
+   HYPRE_StructVectorInitialize_pre( precision, btemp );
+   HYPRE_StructVectorCreate_pre(precision, hypre_StructMatrixComm(A),
                                 hypre_StructMatrixGrid(A),
                                 &xtemp);
-   HYPRE_StructVectorInitialize_pre( precision,xtemp );
+   HYPRE_StructVectorInitialize_pre( precision, xtemp );
 
    /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);

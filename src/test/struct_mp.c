@@ -835,20 +835,20 @@ main( hypre_int argc,
             nblocks = bx;
             if (sym)
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int ), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 2, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int ), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
             }
             else
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 3, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
-               offsets[2] = (HYPRE_Int *) hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[2] = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
                offsets[2][0] = 1;
             }
             /* compute p from P and myid */
@@ -859,33 +859,33 @@ main( hypre_int argc,
             nblocks = bx * by;
             if (sym)
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 3, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
                offsets[0][1] = 0;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
                offsets[1][1] = -1;
-               offsets[2] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[2] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[2][0] = 0;
                offsets[2][1] = 0;
             }
             else
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(5, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 5, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
                offsets[0][1] = 0;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
                offsets[1][1] = -1;
-               offsets[2] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[2] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[2][0] = 0;
                offsets[2][1] = 0;
-               offsets[3] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[3] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[3][0] = 1;
                offsets[3][1] = 0;
-               offsets[4] = (HYPRE_Int *) hypre_CAlloc(2, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[4] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
                offsets[4][0] = 0;
                offsets[4][1] = 1;
             }
@@ -898,52 +898,52 @@ main( hypre_int argc,
             nblocks = bx * by * bz;
             if (sym)
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(4, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 4, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
                offsets[0][1] = 0;
                offsets[0][2] = 0;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
                offsets[1][1] = -1;
                offsets[1][2] = 0;
-               offsets[2] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[2] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[2][0] = 0;
                offsets[2][1] = 0;
                offsets[2][2] = -1;
-               offsets[3] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[3] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[3][0] = 0;
                offsets[3][1] = 0;
                offsets[3][2] = 0;
             }
             else
             {
-               offsets = (HYPRE_Int **) hypre_CAlloc(7, (size_t)sizeof(HYPRE_Int *), HYPRE_MEMORY_HOST);
-               offsets[0] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets = hypre_CTAlloc(HYPRE_Int *, 7, HYPRE_MEMORY_HOST);
+               offsets[0] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[0][0] = -1;
                offsets[0][1] = 0;
                offsets[0][2] = 0;
-               offsets[1] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[1] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[1][0] = 0;
                offsets[1][1] = -1;
                offsets[1][2] = 0;
-               offsets[2] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[2] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[2][0] = 0;
                offsets[2][1] = 0;
                offsets[2][2] = -1;
-               offsets[3] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[3] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[3][0] = 0;
                offsets[3][1] = 0;
                offsets[3][2] = 0;
-               offsets[4] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[4] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[4][0] = 1;
                offsets[4][1] = 0;
                offsets[4][2] = 0;
-               offsets[5] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[5] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[5][0] = 0;
                offsets[5][1] = 1;
                offsets[5][2] = 0;
-               offsets[6] = (HYPRE_Int *) hypre_CAlloc(3, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+               offsets[6] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
                offsets[6][0] = 0;
                offsets[6][1] = 0;
                offsets[6][2] = 1;
@@ -1012,16 +1012,12 @@ main( hypre_int argc,
           * prepare space for the extents
           *-----------------------------------------------------------*/
 
-         ilower = (HYPRE_Int **) hypre_CAlloc((size_t)(nblocks), (size_t)sizeof(HYPRE_Int*),
-                                              HYPRE_MEMORY_HOST);
-         iupper = (HYPRE_Int **) hypre_CAlloc((size_t)(nblocks), (size_t)sizeof(HYPRE_Int*),
-                                              HYPRE_MEMORY_HOST);
+         ilower = hypre_CTAlloc(HYPRE_Int *, (size_t)(nblocks), HYPRE_MEMORY_HOST);
+         iupper = hypre_CTAlloc(HYPRE_Int *, (size_t)(nblocks), HYPRE_MEMORY_HOST);
          for (i = 0; i < nblocks; i++)
          {
-            ilower[i] = (HYPRE_Int *) hypre_CAlloc((size_t)(dim), (size_t)sizeof(HYPRE_Int),
-                                                   HYPRE_MEMORY_HOST);
-            iupper[i] = (HYPRE_Int *) hypre_CAlloc((size_t)(dim), (size_t)sizeof(HYPRE_Int),
-                                                   HYPRE_MEMORY_HOST);
+            ilower[i] = hypre_CTAlloc(HYPRE_Int, (size_t)(dim), HYPRE_MEMORY_HOST);
+            iupper[i] = hypre_CTAlloc(HYPRE_Int, (size_t)(dim), HYPRE_MEMORY_HOST);
          }
 
          /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
@@ -1892,7 +1888,7 @@ main( hypre_int argc,
                hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm_ldbl);
                break;
          }
-         
+
          hypre_printf("\n");
       }
 
@@ -2011,9 +2007,9 @@ AddValuesVector_mp(hypre_StructGrid   *gridvector,
    }
 
    /* Allocate value arrays */
-   values_h = (char *)hypre_CAlloc((size_t)max_volume, (size_t)size, HYPRE_MEMORY_HOST);
+   values_h = hypre_CTAlloc(char, (size_t)max_volume * size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-   values   = (char *)hypre_CAlloc((size_t)max_volume, (size_t)size, memory_location);
+   values   = hypre_CTAlloc(char, (size_t)max_volume * size, memory_location);
 #else
    values   = values_h;
 #endif
@@ -2096,16 +2092,16 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 #endif
 
-   HYPRE_Int            i,d, ierr = 0;
+   HYPRE_Int            i, d, ierr = 0;
    hypre_BoxArray      *gridboxes;
    HYPRE_Int            s, bi;
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
-   char                *values=NULL; /* use char to allow pointer arithmetic */
-   char                *values_h=NULL; /* use char to allow pointer arithmetic */
-   char                *centervalues_h=NULL; /* use char to allow pointer arithmetic */
-   char                *centervalues=NULL; /* use char to allow pointer arithmetic */
+   char                *values = NULL; /* use char to allow pointer arithmetic */
+   char                *values_h = NULL; /* use char to allow pointer arithmetic */
+   char                *centervalues_h = NULL; /* use char to allow pointer arithmetic */
+   char                *centervalues = NULL; /* use char to allow pointer arithmetic */
    void                *east, *west;
    void                *north, *south;
    void                *top, *bottom;
@@ -2127,7 +2123,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    bi = 0;
 
    /* Alocate and set pointers to stencil coeffs */
-   stcoeffs = (char *)hypre_CAlloc((size_t) 7, size, HYPRE_MEMORY_HOST);
+   stcoeffs = hypre_CTAlloc(char, (size_t) 7 * size, HYPRE_MEMORY_HOST);
    center = stcoeffs;
    east   = stcoeffs + size;
    west   = stcoeffs + 2 * size;
@@ -2173,8 +2169,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
          break;
    }
    stencil_size = 1 + (2 - sym) * dim;
-   stencil_indices = (HYPRE_Int *)hypre_CAlloc((size_t) stencil_size, (size_t)sizeof(HYPRE_Int),
-                                  HYPRE_MEMORY_HOST);
+   stencil_indices = hypre_CTAlloc(HYPRE_Int, (size_t) stencil_size, HYPRE_MEMORY_HOST);
    for (s = 0; s < stencil_size; s++)
    {
       stencil_indices[s] = s;
@@ -2191,25 +2186,25 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
    /* Allocate value arrays */
    if (constant_coefficient == 0)
    {
-      values_h = (char *)hypre_CAlloc((size_t)(stencil_size * max_volume), size,  HYPRE_MEMORY_HOST);
+      values_h = hypre_CTAlloc(char, (size_t)(stencil_size * max_volume) * size,  HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = (char *)hypre_CAlloc((size_t)(stencil_size * max_volume), size,  memory_location);
+      values = hypre_CTAlloc(char, (size_t)(stencil_size * max_volume) * size,  memory_location);
 #endif
    }
    else if (constant_coefficient == 1)
    {
-      values_h = (char *)hypre_CAlloc((size_t)stencil_size, size, HYPRE_MEMORY_HOST);
+      values_h = hypre_CTAlloc(char, (size_t)stencil_size * size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = (char *)hypre_CAlloc((size_t)stencil_size, size, memory_location);
+      values = hypre_CTAlloc(char, (size_t)stencil_size * size, memory_location);
 #endif
    }
    else if (constant_coefficient == 2)
    {
-      values_h = (char *)hypre_CAlloc((size_t)(stencil_size - 1), size, HYPRE_MEMORY_HOST);
-      centervalues_h = (char *)hypre_CAlloc((size_t)(max_volume), size, HYPRE_MEMORY_HOST);
+      values_h = hypre_CTAlloc(char, (size_t)(stencil_size - 1) * size, HYPRE_MEMORY_HOST);
+      centervalues_h = hypre_CTAlloc(char, (size_t)(max_volume) * size, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
-      values = (char *)hypre_CAlloc((size_t)(stencil_size - 1), size, memory_location);
-      centervalues = (char *)hypre_CAlloc((size_t)(max_volume), size, memory_location);
+      values = hypre_CTAlloc(char, (size_t)(stencil_size - 1) * size, memory_location);
+      centervalues = hypre_CTAlloc(char, (size_t)(max_volume) * size, memory_location);
 #endif
    }
 
@@ -2260,7 +2255,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(values, values_h, (size_t)(stencil_size * volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
@@ -2292,7 +2287,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)(stencil_size * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(gridboxes) > 0)
@@ -2321,7 +2316,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
          }
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)((stencil_size - 1) * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
          if (hypre_BoxArraySize(gridboxes) > 0)
          {
@@ -2342,7 +2337,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(centervalues, centervalues_h, (size_t)(volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
@@ -2492,7 +2487,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(values, values_h, (size_t)(stencil_size * volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -2529,7 +2524,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)(stencil_size * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
          if (hypre_BoxArraySize(gridboxes) > 0)
          {
@@ -2576,7 +2571,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
          hypre_Memcpy(values, values_h, (size_t)((stencil_size - 1) * size),
-                       memory_location, HYPRE_MEMORY_HOST);
+                      memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(gridboxes) > 0)
@@ -2599,7 +2594,7 @@ AddValuesMatrix_mp(HYPRE_StructMatrix A,
 
 #if defined(HYPRE_USING_GPU)
             hypre_Memcpy(centervalues, centervalues_h, (size_t)(volume * size),
-                          memory_location, HYPRE_MEMORY_HOST);
+                         memory_location, HYPRE_MEMORY_HOST);
 #endif
 
             ilower = hypre_BoxIMin(box);
@@ -2659,7 +2654,7 @@ SetStencilBndry_mp(HYPRE_StructMatrix A,
    /* Declare values as a (void *) to allow for generic data types */
    void              *values;
 
-   stencil_indices = (HYPRE_Int *)hypre_CAlloc(1, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   stencil_indices = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if ( constant_coefficient > 0 ) { return 1; }
@@ -2667,13 +2662,13 @@ SetStencilBndry_mp(HYPRE_StructMatrix A,
      and space dependence only for diagonal if constant_coefficient==2 --
      and this function only touches off-diagonal entries */
 
-   vol    = (HYPRE_Int *)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-   ilower = (HYPRE_Int **)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
-   iupper = (HYPRE_Int **)hypre_CAlloc((size_t) size, (size_t)sizeof(HYPRE_Int*), HYPRE_MEMORY_HOST);
+   vol    = hypre_CTAlloc(HYPRE_Int, (size_t) size, HYPRE_MEMORY_HOST);
+   ilower = hypre_CTAlloc(HYPRE_Int *, (size_t) size, HYPRE_MEMORY_HOST);
+   iupper = hypre_CTAlloc(HYPRE_Int *, (size_t) size, HYPRE_MEMORY_HOST);
    for (i = 0; i < size; i++)
    {
-      ilower[i] = (HYPRE_Int *)hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
-      iupper[i] = (HYPRE_Int *)hypre_CAlloc((size_t) dim, (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+      ilower[i] = hypre_CTAlloc(HYPRE_Int, (size_t) dim, HYPRE_MEMORY_HOST);
+      iupper[i] = hypre_CTAlloc(HYPRE_Int, (size_t) dim, HYPRE_MEMORY_HOST);
    }
 
    i = 0;
@@ -2698,7 +2693,7 @@ SetStencilBndry_mp(HYPRE_StructMatrix A,
             /* Allocate memory for values data.
              * Use long_double size to ensure enough memory is allocated for all supported types
              */
-            values = hypre_CAlloc((size_t)(vol[ib]), (size_t)sizeof(hypre_long_double), memory_location);
+            values = hypre_CTAlloc(hypre_long_double, (size_t)(vol[ib]), memory_location);
 
             if (ilower[ib][d] == istart[d] && period[d] == 0)
             {

@@ -15,28 +15,39 @@
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
-struct HYPRE_Real2
+/* Packed real types used by the reducers below.
+ *
+ * These are templated on the scalar type instead of referring to HYPRE_Real
+ * directly so that each precision yields a distinct C++ type.  Otherwise, in a
+ * mixed-precision build, the same source is compiled once per precision and the
+ * resulting structs (and every template/overload built on top of them) would
+ * carry identical mangled names while having different layouts. The linker would
+ * would then keep just one of them, so e.g. a double-precision reduction could end
+ * up running the single-precision kernel. */
+
+template <typename T>
+struct hypre_RealPack2
 {
-   HYPRE_Real x, y;
+   T x, y;
 
    __host__ __device__
-   HYPRE_Real2() {}
+   hypre_RealPack2() {}
 
    __host__ __device__
-   HYPRE_Real2(HYPRE_Real x1, HYPRE_Real x2)
+   hypre_RealPack2(T x1, T x2)
    {
       x = x1;
       y = x2;
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       x = y = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real2 rhs)
+   void operator+=(hypre_RealPack2<T> rhs)
    {
       x += rhs.x;
       y += rhs.y;
@@ -44,15 +55,16 @@ struct HYPRE_Real2
 
 };
 
-struct HYPRE_Real4
+template <typename T>
+struct hypre_RealPack4
 {
-   HYPRE_Real u, v, w, x;
+   T u, v, w, x;
 
    __host__ __device__
-   HYPRE_Real4() {}
+   hypre_RealPack4() {}
 
    __host__ __device__
-   HYPRE_Real4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   hypre_RealPack4(T x1, T x2, T x3, T x4)
    {
       u = x1;
       v = x2;
@@ -61,13 +73,13 @@ struct HYPRE_Real4
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       u = v = w = x = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real4 rhs)
+   void operator+=(hypre_RealPack4<T> rhs)
    {
       u += rhs.u;
       v += rhs.v;
@@ -77,16 +89,16 @@ struct HYPRE_Real4
 
 };
 
-struct HYPRE_Real6
+template <typename T>
+struct hypre_RealPack6
 {
-   HYPRE_Real u, v, w, x, y, z;
+   T u, v, w, x, y, z;
 
    __host__ __device__
-   HYPRE_Real6() {}
+   hypre_RealPack6() {}
 
    __host__ __device__
-   HYPRE_Real6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3,
-               HYPRE_Real x4, HYPRE_Real x5, HYPRE_Real x6)
+   hypre_RealPack6(T x1, T x2, T x3, T x4, T x5, T x6)
    {
       u = x1;
       v = x2;
@@ -97,13 +109,13 @@ struct HYPRE_Real6
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       u = v = w = x = y = z = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real6 rhs)
+   void operator+=(hypre_RealPack6<T> rhs)
    {
       u += rhs.u;
       v += rhs.v;
@@ -114,6 +126,10 @@ struct HYPRE_Real6
    }
 
 };
+
+typedef hypre_RealPack2<HYPRE_Real> HYPRE_Real2;
+typedef hypre_RealPack4<HYPRE_Real> HYPRE_Real4;
+typedef hypre_RealPack6<HYPRE_Real> HYPRE_Real6;
 
 /* reduction within a warp */
 __inline__ __host__ __device__
@@ -128,8 +144,9 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
+hypre_RealPack2<T> warpReduceSum(hypre_RealPack2<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -141,8 +158,9 @@ HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
+hypre_RealPack4<T> warpReduceSum(hypre_RealPack4<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -156,8 +174,9 @@ HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real6 warpReduceSum(HYPRE_Real6 val)
+hypre_RealPack6<T> warpReduceSum(hypre_RealPack6<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -293,9 +312,12 @@ struct ReduceSum
    {
       if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
-         /* allocate for the max size for reducing HYPRE_Real6 type */
+         /* Allocate for the max size for reducing HYPRE_Real6 type. This buffer is
+          * held by the (precision-agnostic) handle and shared by all precisions, so
+          * size it with the largest real type instead of the build's HYPRE_Real. */
          hypre_HandleReduceBuffer(hypre_handle()) =
-            hypre_TAlloc(HYPRE_Real6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
+            hypre_TAlloc(char, 6 * sizeof(hypre_long_double) * HYPRE_MAX_NTHREADS_BLOCK,
+                         HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());

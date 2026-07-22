@@ -97,8 +97,8 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
    HYPRE_ParVectorCopy_mp(xtemp, x);
 
    /* free data */
-   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(btemp),btemp);
-   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(xtemp),xtemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(btemp), btemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(xtemp), xtemp);
 
    return 0;
 }

@@ -39,7 +39,8 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
    /* Call standard vector copy if precisions match. */
    if (hypre_StructVectorPrecision (y) == hypre_StructVectorPrecision (x))
    {
-      return HYPRE_StructVectorCopy_pre(hypre_StructVectorPrecision (y), (HYPRE_StructVector)x, (HYPRE_StructVector)y);
+      return HYPRE_StructVectorCopy_pre(hypre_StructVectorPrecision (y), (HYPRE_StructVector)x,
+                                        (HYPRE_StructVector)y);
    }
 
    /*-----------------------------------------------------------------------
