@@ -55,3 +55,6 @@ PCG Iterations = 5
 Final Relative Residual Norm = 1.638724e-09
 
 # Output file: solvers_struct_mp.out.14
+PCG Iterations = 5
+Final Relative Residual Norm = 2.236021e-09
+
