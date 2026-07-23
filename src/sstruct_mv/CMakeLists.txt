@@ -60,7 +60,9 @@ endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    sstruct_grid.c
     sstruct_matrix.c
+    sstruct_matvec.c
     sstruct_vector.c
   )
   mark_hypre_gpu_sources(${GPU_SRCS})

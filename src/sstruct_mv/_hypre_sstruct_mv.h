@@ -571,6 +571,9 @@ typedef struct hypre_SStructGraph_struct
 #ifndef hypre_SSTRUCT_MATRIX_HEADER
 #define hypre_SSTRUCT_MATRIX_HEADER
 
+/* WM: macro for turning on new matvec strategy with copying to/from tmp par vectors */
+#define HYPRE_SSTRUCT_MATVEC_COPY
+
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrix:
  *--------------------------------------------------------------------------*/
@@ -629,6 +632,16 @@ typedef struct hypre_SStructMatrix_struct
    HYPRE_IJMatrix          ijmatrix;
    hypre_ParCSRMatrix     *parcsrmatrix;
 
+   /* Temporary par vectors and copy info for parcsr component of the matvec */
+   hypre_ParVector        *dom_tmp;
+   hypre_ParVector        *ran_tmp;
+   HYPRE_Int              *dom_copy_ranks;
+   HYPRE_Int              *ran_copy_ranks;
+   HYPRE_Int              *dom_copy_ranks_part_var_starts;
+   HYPRE_Int              *ran_copy_ranks_part_var_starts;
+   HYPRE_Int           ****dom_copy_indexes; /* (nparts x nvar x ndim x nindexes) array */
+   HYPRE_Int           ****ran_copy_indexes; /* (nparts x nvar x ndim x nindexes) array */
+
    /* temporary storage for SetValues routines */
    HYPRE_Int               entries_size;
    HYPRE_Int              *Sentries;
@@ -655,35 +668,43 @@ typedef struct hypre_SStructMatrix_struct
  * Accessor macros: hypre_SStructMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructMatrixComm(mat)                ((mat) -> comm)
-#define hypre_SStructMatrixNDim(mat)                ((mat) -> ndim)
-#define hypre_SStructMatrixGraph(mat)               ((mat) -> graph)
-#define hypre_SStructMatrixSplits(mat)              ((mat) -> splits)
-#define hypre_SStructMatrixSplit(mat, p, v)         ((mat) -> splits[p][v])
-#define hypre_SStructMatrixNParts(mat)              ((mat) -> nparts)
-#define hypre_SStructMatrixPMatrices(mat)           ((mat) -> pmatrices)
-#define hypre_SStructMatrixPMatrix(mat, part)       ((mat) -> pmatrices[part])
-#define hypre_SStructMatrixSymmetric(mat)           ((mat) -> symmetric)
-#define hypre_SStructMatrixNumCEntries(mat)         ((mat) -> num_centries)
-#define hypre_SStructMatrixCEntries(mat)            ((mat) -> centries)
-#define hypre_SStructMatrixDomainStride(mat)        ((mat) -> dom_stride)
-#define hypre_SStructMatrixRangeStride(mat)         ((mat) -> ran_stride)
-#define hypre_SStructMatrixIJMatrix(mat)            ((mat) -> ijmatrix)
-#define hypre_SStructMatrixParCSRMatrix(mat)        ((mat) -> parcsrmatrix)
-#define hypre_SStructMatrixEntriesSize(mat)         ((mat) -> entries_size)
-#define hypre_SStructMatrixSEntries(mat)            ((mat) -> Sentries)
-#define hypre_SStructMatrixUEntries(mat)            ((mat) -> Uentries)
-#define hypre_SStructMatrixTmpSize(mat)             ((mat) -> tmp_size)
-#define hypre_SStructMatrixTmpRowCoords(mat)        ((mat) -> tmp_row_coords)
-#define hypre_SStructMatrixTmpColCoords(mat)        ((mat) -> tmp_col_coords)
-#define hypre_SStructMatrixTmpCoeffs(mat)           ((mat) -> tmp_coeffs)
-#define hypre_SStructMatrixTmpRowCoordsDevice(mat)  ((mat) -> d_tmp_row_coords)
-#define hypre_SStructMatrixTmpColCoordsDevice(mat)  ((mat) -> d_tmp_col_coords)
-#define hypre_SStructMatrixTmpCoeffsDevice(mat)     ((mat) -> d_tmp_coeffs)
-#define hypre_SStructMatrixNSSymmetric(mat)         ((mat) -> ns_symmetric)
-#define hypre_SStructMatrixGlobalSize(mat)          ((mat) -> global_size)
-#define hypre_SStructMatrixRefCount(mat)            ((mat) -> ref_count)
-#define hypre_SStructMatrixObjectType(mat)          ((mat) -> object_type)
+#define hypre_SStructMatrixComm(mat)                      ((mat) -> comm)
+#define hypre_SStructMatrixNDim(mat)                      ((mat) -> ndim)
+#define hypre_SStructMatrixGraph(mat)                     ((mat) -> graph)
+#define hypre_SStructMatrixSplits(mat)                    ((mat) -> splits)
+#define hypre_SStructMatrixSplit(mat, p, v)               ((mat) -> splits[p][v])
+#define hypre_SStructMatrixNParts(mat)                    ((mat) -> nparts)
+#define hypre_SStructMatrixPMatrices(mat)                 ((mat) -> pmatrices)
+#define hypre_SStructMatrixPMatrix(mat, part)             ((mat) -> pmatrices[part])
+#define hypre_SStructMatrixSymmetric(mat)                 ((mat) -> symmetric)
+#define hypre_SStructMatrixNumCEntries(mat)               ((mat) -> num_centries)
+#define hypre_SStructMatrixCEntries(mat)                  ((mat) -> centries)
+#define hypre_SStructMatrixDomainStride(mat)              ((mat) -> dom_stride)
+#define hypre_SStructMatrixRangeStride(mat)               ((mat) -> ran_stride)
+#define hypre_SStructMatrixIJMatrix(mat)                  ((mat) -> ijmatrix)
+#define hypre_SStructMatrixParCSRMatrix(mat)              ((mat) -> parcsrmatrix)
+#define hypre_SStructMatrixEntriesSize(mat)               ((mat) -> entries_size)
+#define hypre_SStructMatrixSEntries(mat)                  ((mat) -> Sentries)
+#define hypre_SStructMatrixUEntries(mat)                  ((mat) -> Uentries)
+#define hypre_SStructMatrixTmpSize(mat)                   ((mat) -> tmp_size)
+#define hypre_SStructMatrixTmpRowCoords(mat)              ((mat) -> tmp_row_coords)
+#define hypre_SStructMatrixTmpColCoords(mat)              ((mat) -> tmp_col_coords)
+#define hypre_SStructMatrixTmpCoeffs(mat)                 ((mat) -> tmp_coeffs)
+#define hypre_SStructMatrixTmpRowCoordsDevice(mat)        ((mat) -> d_tmp_row_coords)
+#define hypre_SStructMatrixTmpColCoordsDevice(mat)        ((mat) -> d_tmp_col_coords)
+#define hypre_SStructMatrixTmpCoeffsDevice(mat)           ((mat) -> d_tmp_coeffs)
+#define hypre_SStructMatrixNSSymmetric(mat)               ((mat) -> ns_symmetric)
+#define hypre_SStructMatrixGlobalSize(mat)                ((mat) -> global_size)
+#define hypre_SStructMatrixRefCount(mat)                  ((mat) -> ref_count)
+#define hypre_SStructMatrixObjectType(mat)                ((mat) -> object_type)
+#define hypre_SStructMatrixDomTmp(mat)                    ((mat) -> dom_tmp)
+#define hypre_SStructMatrixRanTmp(mat)                    ((mat) -> ran_tmp)
+#define hypre_SStructMatrixDomCopyRanks(mat)              ((mat) -> dom_copy_ranks)
+#define hypre_SStructMatrixRanCopyRanks(mat)              ((mat) -> ran_copy_ranks)
+#define hypre_SStructMatrixDomCopyRanksPartVarStarts(mat) ((mat) -> dom_copy_ranks_part_var_starts)
+#define hypre_SStructMatrixRanCopyRanksPartVarStarts(mat) ((mat) -> ran_copy_ranks_part_var_starts)
+#define hypre_SStructMatrixDomCopyIndexes(mat)            ((mat) -> dom_copy_indexes)
+#define hypre_SStructMatrixRanCopyIndexes(mat)            ((mat) -> ran_copy_indexes)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPMatrix
@@ -964,6 +985,17 @@ HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid, HYPRE_Int part, H
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid, HYPRE_Int *num_ghost );
 HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry, hypre_Index index,
                                                   HYPRE_BigInt *rank_ptr, HYPRE_Int type );
+HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location,
+                                                 HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_indexes, HYPRE_Int **indexes,
+                                                 HYPRE_BigInt **global_ranks_ptr );
+HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location,
+                                                 HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
+                                                 HYPRE_Int ***indexes_ptr );
+HYPRE_Int hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location,
+                                                        HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
+                                                        HYPRE_Int **global_ranks_part_var_starts_ptr);
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry, hypre_Index strides,
                                                HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum,
@@ -1071,6 +1103,8 @@ HYPRE_Int hypre_SStructPMatvec ( HYPRE_Complex alpha, hypre_SStructPMatrix *pA,
                                  hypre_SStructPVector *px, HYPRE_Complex beta, hypre_SStructPVector *py );
 HYPRE_Int hypre_SStructMatvecCreate ( void **matvec_vdata_ptr );
 HYPRE_Int hypre_SStructMatvecSetTranspose ( void *matvec_vdata, HYPRE_Int  transpose );
+HYPRE_Int hypre_SStructMatvecCopyToParCSR( hypre_SStructMatrix *A, HYPRE_Int transpose, hypre_SStructVector *x );
+HYPRE_Int hypre_SStructMatvecAddToSStruct( hypre_SStructMatrix *A, HYPRE_Int transpose, hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata, hypre_SStructMatrix *A,
                                      hypre_SStructVector *x );
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata, HYPRE_Complex alpha,

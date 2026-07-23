@@ -42,16 +42,16 @@ FILES =\
  sstruct_axpy.c\
  sstruct_copy.c\
  sstruct_graph.c\
- sstruct_grid.c\
  sstruct_innerprod.c\
- sstruct_matvec.c\
  sstruct_matmult.c\
  sstruct_matop.c\
  sstruct_scale.c\
  sstruct_stencil.c
 
 CUFILES =\
+ sstruct_grid.c\
  sstruct_matrix.c\
+ sstruct_matvec.c\
  sstruct_vector.c
 
 # Mixed precision files
