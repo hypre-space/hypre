@@ -226,6 +226,7 @@ HYPRE_Int  hypre__sk##k[HYPRE_MAXDIM], hypre__ikinc##k[HYPRE_MAXDIM+1]
 hypre__ndim = ndim;\
 hypre__n[0] = loop_size[0];\
 hypre__tot = 1;\
+hypre__ik = 0;\
 HYPRE_UNUSED_VAR(hypre__ik);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
