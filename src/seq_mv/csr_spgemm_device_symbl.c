@@ -36,14 +36,10 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
                                             HYPRE_Int *d_rc,
                                             char      *d_rf )
 {
-   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   static constexpr HYPRE_Int BIN = 5;
-
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
-   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<5, SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5], false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    return hypre_error_flag;
@@ -181,16 +177,12 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   static constexpr HYPRE_Int BIN = 5;
-
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
-   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<5, SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5], false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
@@ -236,7 +228,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 
          hypre_assert(new_end - d_rind == num_failed_rows);
 
-         hypre_spgemm_symbolic_rownnz < BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true >
+         hypre_spgemm_symbolic_rownnz < 6, 2 * SYMBL_HASH_SIZE[5], 2 * T_GROUP_SIZE[5], true >
          (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
 
          hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
