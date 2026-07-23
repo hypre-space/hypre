@@ -2070,6 +2070,12 @@ HYPRE_Int hypre_BoxArrayArrayPrintToFile ( FILE *file, hypre_BoxArrayArray *box_
 HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm, const char *filename,
                                      hypre_BoxArrayArray *box_array_array );
 
+/* box_device.c */
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_BoxRanksToIndexesDevice( hypre_Box *box, HYPRE_Int num_ranks,
+                                         HYPRE_Int *ranks, HYPRE_Int ***indexes_ptr );
+#endif
+
 /* box_ds.c */
 HYPRE_Int hypre_BoxBTNodeCreate ( HYPRE_Int ndim, hypre_BoxBTNode **btnode_ptr );
 HYPRE_Int hypre_BoxBTNodeSetIndices ( hypre_BoxBTNode *btnode, HYPRE_Int num_indices,

@@ -992,6 +992,7 @@ hypre_BoxArrayCreate( HYPRE_Int size,
  *
  * Notes:
  *    1) indices_in is a (ndim x num_indices) two-dimensional array
+ * WM: todo - does it make sense to switch things around so that indices_in is (num_indices x ndim)?
  *
  * This is based on the Berger-Rigoutsos algorithm.
  *--------------------------------------------------------------------------*/

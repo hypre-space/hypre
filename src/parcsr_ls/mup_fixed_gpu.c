@@ -27,6 +27,14 @@ hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_In
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BlockDiagInvDevice( HYPRE_Complex *diag, HYPRE_Int N, HYPRE_Int blk_size )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BlockDiagInvDevice)( diag, N, blk_size );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int interp_type, hypre_ParCSRMatrix **P_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGBuildDirInterpDevice)( A, CF_marker, S, num_cpts_global, num_functions, dof_func, debug_flag, trunc_factor, max_elmts, interp_type, P_ptr );
