@@ -1061,6 +1061,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
+   HYPRE_Int special_case_PTAP = 0;
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation     memory_location;
    HYPRE_ExecutionPolicy    exec;
@@ -1068,25 +1070,33 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   m = terms[2];
-   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
-   num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+
+   if (nterms == 3)
+   {
+      m = terms[2];
+      ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
+      num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
 #if defined(HYPRE_USING_GPU)
-   memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
-   exec  = hypre_GetExecPolicy1(memory_location);
+      memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
+      exec  = hypre_GetExecPolicy1(memory_location);
 #endif
 
-   /* The following ensures that NumNonzeros is initialized (a negative value
-    * means uninitialized).  RDF: Not sure if this is needed for anything other
-    * than matching the subsequent if test for the special PtAP case. */
-   if (num_nonzeros_uP < 0)
-   {
-      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
-      num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+      /* The following ensures that NumNonzeros is initialized (a negative value
+       * means uninitialized).  RDF: Not sure if this is needed for anything other
+       * than matching the subsequent if test for the special PtAP case. */
+      if (num_nonzeros_uP < 0)
+      {
+         hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
+         num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+      }
+      if (num_nonzeros_uP == 0)
+      {
+         special_case_PTAP = 1;
+      }
    }
 
-   if (nterms == 3 && (num_nonzeros_uP == 0))
+   if (special_case_PTAP)
    {
       /* Specialization for RAP when P has only the structured component.
        *

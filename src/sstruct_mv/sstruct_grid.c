@@ -321,6 +321,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    cell_sgrid = hypre_SStructPGridCellSGrid(pgrid);
    HYPRE_StructGridSetPeriodic(cell_sgrid, periodic);
+   hypre_SStructPGridCellSGridDone(pgrid) = hypre_StructGridIsAssembled(cell_sgrid);
    if (!hypre_SStructPGridCellSGridDone(pgrid))
    {
       HYPRE_StructGridAssemble(cell_sgrid);
