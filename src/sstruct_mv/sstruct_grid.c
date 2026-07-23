@@ -2142,6 +2142,8 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
 
 /*--------------------------------------------------------------------------
  * Convert from sstruct grid indexes to global ranks for parcsr.
+ * Note that the indexes are assumed to belong to the real dofs in the
+ * given part/var (no ghost points) and should be owned by this processor.
  * Inputs:
  *    grid/part/var where the indexes live
  *    num_indexes = (number of indexes to be converted)
@@ -2167,37 +2169,55 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
    HYPRE_Int            i, d;
    hypre_Index          index;
    hypre_BoxManEntry   *boxman_entry;
+   HYPRE_BigInt        *global_ranks;
 
-   /* WM: todo - GPU port */
-   HYPRE_BigInt *global_ranks = hypre_TAlloc(HYPRE_BigInt, num_indexes, memory_location);
+   /* WM: todo - Do we need a proper GPU port?
+    *            For now, copying to host, and doing the work there. */
+   HYPRE_BigInt        *global_ranks_h;
+   HYPRE_Int          **indexes_h;
+
+   global_ranks = hypre_TAlloc(HYPRE_BigInt, num_indexes, memory_location);
+#if defined(HYPRE_USING_GPU)
+   if (memory_location != HYPRE_MEMORY_HOST)
+   {
+      global_ranks_h = hypre_TAlloc(HYPRE_BigInt, num_indexes, HYPRE_MEMORY_HOST);
+      indexes_h = hypre_TAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
+      for (d = 0; d < ndim; d++)
+      {
+         indexes_h[d] = hypre_TAlloc(HYPRE_Int, num_indexes, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(indexes_h[d], indexes[d], HYPRE_Int, num_indexes, HYPRE_MEMORY_HOST, memory_location);
+      }
+   }
+   else
+#endif
+   {
+      global_ranks_h = global_ranks;
+      indexes_h = indexes;
+   }
 
    /* Loop over indexes */
    for (i = 0; i < num_indexes; i++)
    {
       for (d = 0; d < ndim; d++)
       {
-         hypre_IndexD(index, d) = indexes[d][i];
+         hypre_IndexD(index, d) = indexes_h[d][i];
       }
       hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
-      /* WM: todo - I don't really understand hypre_SStructGridFindNborBoxManEntry()... is it necessary? */
-      /* if not local, check neighbors */
-      if (boxman_entry == NULL)
-      {
-         hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
-      }
-      /* WM: todo - do I want to throw an error here or just set to -1 or something like that? */
-      if (boxman_entry == NULL)
-      {
-         hypre_error_in_arg(1);
-         hypre_error_in_arg(2);
-         hypre_error_in_arg(4);
-
-         HYPRE_ANNOTATE_FUNC_END;
-
-         return hypre_error_flag;
-      }
-      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &(global_ranks[i]), type);
+      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &(global_ranks_h[i]), type);
    }
+
+#if defined(HYPRE_USING_GPU)
+   if (memory_location != HYPRE_MEMORY_HOST)
+   {
+      hypre_TMemcpy(global_ranks, global_ranks_h, HYPRE_BigInt, num_indexes, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TFree(global_ranks_h, HYPRE_MEMORY_HOST);
+      for (d = 0; d < ndim; d++)
+      {
+         hypre_TFree(indexes_h[d], HYPRE_MEMORY_HOST);
+      }
+      hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
+   }
+#endif
 
    *global_ranks_ptr = global_ranks;
 
@@ -2206,8 +2226,8 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
 
 /*--------------------------------------------------------------------------
  * Convert from sstruct grid indexes to global ranks for parcsr.
- * Note that global indexes are assumed to belong to the given par/var
- * and must be sorted when passed to this function.
+ * Note that global indexes are assumed to be on-processor, belong
+ * to the given par/var, and must be sorted when passed to this function.
  * Inputs:
  *    grid/part/var where the indexes live
  *    num_ranks = (number of global ranks to be converted)
@@ -2250,15 +2270,12 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    }
 #endif
 
-   /* WM: todo - do I need to consider the hypre_SStructGridNborBoxManagers?
-    *            do I need this function to work for global ranks not owned by this proc? */
    HYPRE_Int                  ndim      = hypre_SStructGridNDim(grid);
    hypre_BoxManager          *manager   = hypre_SStructGridBoxManager(grid, part, var);
    HYPRE_Int                  nentries  = hypre_BoxManNEntries(manager);
    hypre_Box                 *box       = hypre_BoxCreate(ndim);
    hypre_BoxArray            *box_a     = hypre_BoxArrayCreate(0, ndim);
 
-   /* WM: todo - GPU port */
    indexes = hypre_TAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
    for (d = 0; d < ndim; d++)
    {
@@ -2300,8 +2317,6 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    }
 
    /* Get box starts for the global ranks */
-   /* WM: todo - note that this kind of thing is repeated in hypre_SStructGridGetGlobalRanksPartVarStarts() */
-   /*            should I make a subroutine? */
    global_ranks_box_starts = hypre_CTAlloc(HYPRE_Int, nentries + 1, memory_location);
 #if defined(HYPRE_USING_GPU)
    if (memory_location != HYPRE_MEMORY_HOST)
@@ -2406,10 +2421,6 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
                                               HYPRE_BigInt           *global_ranks,
                                               HYPRE_Int             **global_ranks_part_var_starts_ptr )
 {
-   /* WM: debug */
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_SStructGridComm(grid), &myid);
-
    HYPRE_Int                  i, j, part, var, nvars, npartvars, partvar_cnt, n_empty_partvars;
    HYPRE_BigInt               offset;
    hypre_SStructPGrid        *pgrid;
@@ -2433,16 +2444,6 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
          npartvars++;
       }
    }
-   /* WM: debug */
-   /* if (myid == 0) */
-   /* { */
-   /*    hypre_printf("WM: debug - global_ranks = "); */
-   /*    for (i = 0; i < num_ranks; i++) */
-   /*    { */
-   /*       hypre_printf("%b ", global_ranks[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
 
    /* Get the array of global rank offsets for each part/var */
    part_var_offsets_h = hypre_TAlloc(HYPRE_BigInt, npartvars + 1, HYPRE_MEMORY_HOST);
@@ -2494,16 +2495,6 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
       part_var_offsets_h[partvar_cnt] = offset;
       partvar_cnt++;
    }
-   /* WM: debug */
-   /* if (myid == 0) */
-   /* { */
-   /*    hypre_printf("WM: debug - part_var_offsets_h = "); */
-   /*    for (i = 0; i < npartvars + 1; i++) */
-   /*    { */
-   /*       hypre_printf("%b ", part_var_offsets_h[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
 
    /* Copy part_var_offsets to the device if needed */
    if (memory_location != HYPRE_MEMORY_HOST)
@@ -2549,16 +2540,6 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    }
 
    *global_ranks_part_var_starts_ptr = global_ranks_part_var_starts;
-   /* WM: debug */
-   /* if (myid == 0) */
-   /* { */
-   /*    hypre_printf("WM: debug - global_ranks_part_var_starts = "); */
-   /*    for (i = 0; i < npartvars + 1; i++) */
-   /*    { */
-   /*       hypre_printf("%d ", global_ranks_part_var_starts[i]); */
-   /*    } */
-   /*    hypre_printf("\n"); */
-   /* } */
 
    hypre_TFree(part_var_offsets, memory_location);
 
