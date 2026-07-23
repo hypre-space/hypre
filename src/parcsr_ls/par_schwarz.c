@@ -585,6 +585,7 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
          hypre_SchwarzDataLocalSolverDestroy(schwarz_data) = (HYPRE_PtrToDestroyFcn)
                                                              hypre_SLUDistDestroy;
          hypre_SchwarzDataLocalSolverOwner(schwarz_data) = 1;
+         break;
 #else
          if (my_id == 0)
          {
@@ -595,7 +596,6 @@ hypre_SchwarzOverlapSetup(hypre_SchwarzData       *schwarz_data,
          hypre_SchwarzOverlapDataDestroy(schwarz_data);
          return hypre_error_flag;
 #endif
-         break;
       }
 
       default:
