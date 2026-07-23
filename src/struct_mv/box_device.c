@@ -1,3 +1,9 @@
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_utilities.hpp"
@@ -5,8 +11,9 @@
 #if defined(HYPRE_USING_GPU)
 
 /* Need struct wrapper to pass hypre_Index as argument to GPU kernel */
-typedef struct hypre_IndexDevice_struct {
-    hypre_Index idx;
+typedef struct hypre_IndexDevice_struct
+{
+   hypre_Index idx;
 } hypre_IndexDevice;
 
 __global__ void

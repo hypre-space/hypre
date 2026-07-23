@@ -2210,7 +2210,8 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
 #if defined(HYPRE_USING_GPU)
    if (memory_location != HYPRE_MEMORY_HOST)
    {
-      hypre_TMemcpy(global_ranks, global_ranks_h, HYPRE_BigInt, num_indexes, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(global_ranks, global_ranks_h, HYPRE_BigInt, num_indexes, memory_location,
+                    HYPRE_MEMORY_HOST);
       hypre_TFree(global_ranks_h, HYPRE_MEMORY_HOST);
       for (d = 0; d < ndim; d++)
       {
@@ -2309,7 +2310,8 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    if (memory_location != HYPRE_MEMORY_HOST)
    {
       box_offsets = hypre_TAlloc(HYPRE_BigInt, nentries + 1, memory_location);
-      hypre_TMemcpy(box_offsets, box_offsets_h, HYPRE_BigInt, nentries + 1, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(box_offsets, box_offsets_h, HYPRE_BigInt, nentries + 1, memory_location,
+                    HYPRE_MEMORY_HOST);
       hypre_TFree(box_offsets_h, HYPRE_MEMORY_HOST);
    }
    else
@@ -2357,14 +2359,23 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
       if (memory_location != HYPRE_MEMORY_HOST)
       {
 #if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform,
+                            global_ranks + global_ranks_box_starts[entry_num],
+                            global_ranks + global_ranks_box_starts[entry_num + 1],
+                            local_ranks,
+                            [offset] (const auto & val)
+         {
+            return static_cast<HYPRE_Int>(val - offset);
+         } );
 #else
          HYPRE_THRUST_CALL( transform,
                             global_ranks + global_ranks_box_starts[entry_num],
                             global_ranks + global_ranks_box_starts[entry_num + 1],
                             local_ranks,
-                            [offset] __host__ __device__ (int val) {
-                               return static_cast<HYPRE_Int>(val - offset);
-                            } );
+                            [offset] __device__ (const auto & val)
+         {
+            return static_cast<HYPRE_Int>(val - offset);
+         } );
 
          num_box_ranks = global_ranks_box_starts[entry_num + 1] - global_ranks_box_starts[entry_num];
          hypre_BoxRanksToIndexesDevice(box, num_box_ranks, local_ranks, &box_indexes);
@@ -2433,7 +2444,7 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    HYPRE_Int                 *global_ranks_part_var_starts;
 
    HYPRE_Int                  nparts = hypre_SStructGridNParts(grid);
-   
+
    /* Count the number of part/vars */
    npartvars = 0;
    for (part = 0; part < nparts; part++)
@@ -2501,7 +2512,8 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    if (memory_location != HYPRE_MEMORY_HOST)
    {
       part_var_offsets = hypre_TAlloc(HYPRE_BigInt, npartvars + 1, memory_location);
-      hypre_TMemcpy(part_var_offsets, part_var_offsets_h, HYPRE_BigInt, npartvars + 1, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(part_var_offsets, part_var_offsets_h, HYPRE_BigInt, npartvars + 1, memory_location,
+                    HYPRE_MEMORY_HOST);
       hypre_TFree(part_var_offsets_h, HYPRE_MEMORY_HOST);
    }
    else
