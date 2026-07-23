@@ -209,11 +209,32 @@ HYPRE_Int
 hypre_SStructGridFindNborBoxManEntry_long_dbl( hypre_SStructGrid *grid, HYPRE_Int part, hypre_Index index, HYPRE_Int var, hypre_BoxManEntry **entry_ptr );
 
 HYPRE_Int
+hypre_SStructGridGetGlobalRanksPartVarStarts_flt( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int **global_ranks_part_var_starts_ptr );
+HYPRE_Int
+hypre_SStructGridGetGlobalRanksPartVarStarts_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int **global_ranks_part_var_starts_ptr );
+HYPRE_Int
+hypre_SStructGridGetGlobalRanksPartVarStarts_long_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int **global_ranks_part_var_starts_ptr );
+
+HYPRE_Int
 hypre_SStructGridGetMaxBoxSize_flt( hypre_SStructGrid *grid );
 HYPRE_Int
 hypre_SStructGridGetMaxBoxSize_dbl( hypre_SStructGrid *grid );
 HYPRE_Int
 hypre_SStructGridGetMaxBoxSize_long_dbl( hypre_SStructGrid *grid );
+
+HYPRE_Int
+hypre_SStructGridGlobalRanksToIndexes_flt( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int ***indexes_ptr );
+HYPRE_Int
+hypre_SStructGridGlobalRanksToIndexes_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int ***indexes_ptr );
+HYPRE_Int
+hypre_SStructGridGlobalRanksToIndexes_long_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int ***indexes_ptr );
+
+HYPRE_Int
+hypre_SStructGridIndexesToGlobalRanks_flt( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_indexes, HYPRE_Int **indexes, HYPRE_BigInt **global_ranks_ptr );
+HYPRE_Int
+hypre_SStructGridIndexesToGlobalRanks_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_indexes, HYPRE_Int **indexes, HYPRE_BigInt **global_ranks_ptr );
+HYPRE_Int
+hypre_SStructGridIndexesToGlobalRanks_long_dbl( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_indexes, HYPRE_Int **indexes, HYPRE_BigInt **global_ranks_ptr );
 
 HYPRE_Int
 hypre_SStructGridIntersect_flt( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
