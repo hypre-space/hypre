@@ -2658,12 +2658,9 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 #if defined (HYPRE_USING_GPU)
    if (hypre_GetExecPolicy1(hypre_DenseBlockMatrixMemoryLocation(b_FF)) == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): GPU version */
-      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_HOST);
-      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+      hypre_BlockDiagInvDevice(hypre_DenseBlockMatrixData(b_FF),
                                hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
-      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_DEVICE);
    }
    else
 #endif
@@ -2832,9 +2829,20 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
 
    /* Invert block-diagonal approximation of A_FF (in place) */
-   hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                            hypre_DenseBlockMatrixNumRows(b_FF),
-                            hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+#if defined (HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_DenseBlockMatrixMemoryLocation(b_FF)) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BlockDiagInvDevice(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   }
+   else
+#endif
+   {
+      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   }
 
    /* Convert to ParCSR */
    A_FF_inv = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_FF),

@@ -14,6 +14,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     HYPRE_parcsr_mv_mp.h
     HYPRE_parcsr_mv_mup.h
     _hypre_parcsr_mv_mup.h
+    _hypre_parcsr_mv_mup.hpp
     _hypre_parcsr_mv_mup_def.h
     _hypre_parcsr_mv_mup_undef.h
   )

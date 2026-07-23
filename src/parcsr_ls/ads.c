@@ -592,18 +592,11 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
          HYPRE_BigInt global_num_cols = 3 * hypre_ParCSRMatrixGlobalNumCols(F2V);
          HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-         HYPRE_BigInt *col_starts;
-         HYPRE_Int col_starts_size;
          HYPRE_Int num_cols_offd = 3 * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_Int num_nonzeros_diag = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
          HYPRE_Int num_nonzeros_offd = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_BigInt *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
-         col_starts_size = 2;
-         col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
-         for (i = 0; i < col_starts_size; i++)
-         {
-            col_starts[i] = 3 * col_starts_F2V[i];
-         }
+         HYPRE_BigInt col_starts[2] = {3 * col_starts_F2V[0], 3 * col_starts_F2V[1]};
 
          Pi = hypre_ParCSRMatrixCreate(comm,
                                        global_num_rows,

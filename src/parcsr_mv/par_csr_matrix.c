@@ -577,6 +577,12 @@ hypre_ParCSRMatrixCreateFromDenseBlockMatrix(MPI_Comm                comm,
    hypre_CSRMatrixMemoryLocation(A_diag) = memory_location;
    hypre_CSRMatrixMemoryLocation(A_offd) = memory_location;
 
+   /* Initialize the (empty) off-diagonal block so it has a valid, zeroed row
+    * pointer of size (num_rows_diag + 1). Without this, the offd row pointer is
+    * NULL and device consumers such as hypre_ParCSRMatMat (which concatenates
+    * the diag and offd blocks) dereference it and fault under MPI. */
+   hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
+
    /* Set diag's data pointer */
    if (hypre_DenseBlockMatrixOwnsData(B))
    {
