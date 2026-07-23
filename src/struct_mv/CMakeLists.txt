@@ -44,6 +44,7 @@ set(REGULAR_SRCS
   box_algebra.c
   box_boundary.c
   box.c
+  box_device.c
   box_ds.c
   box_manager.c
   coarsen.c
@@ -91,6 +92,7 @@ endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    box_device.c
     struct_matvec.c
     struct_matvec_cc.c
     struct_matvec_icc.c
