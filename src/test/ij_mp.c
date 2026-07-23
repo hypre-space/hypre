@@ -3508,7 +3508,7 @@ main( hypre_int argc,
 
    /* update solution vector x */
    HYPRE_ParVectorCopy_mp( x_slvr, x);
-   /* cleanup data preconditioning */
+   /* cleanup preconditioning data*/
    if (solver_id == 1 || solver_id == 11 || solver_id == 21 || solver_id == 31)
    {
       HYPRE_BoomerAMGDestroy_pre(precond_precision, pcg_precond);

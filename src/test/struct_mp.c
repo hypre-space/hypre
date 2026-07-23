@@ -20,13 +20,6 @@
 #include "_hypre_struct_mv.h"
 #endif
 
-/* RDF: Why is this include here? */
-//#include "_hypre_struct_mv.h"
-
-#ifdef HYPRE_DEBUG
-/*#include <cegdb.h>*/
-#endif
-
 HYPRE_Int  SetStencilBndry_mp(HYPRE_StructMatrix A, HYPRE_StructGrid gridmatrix, HYPRE_Int* period);
 
 HYPRE_Int AddValuesVector_mp(hypre_StructGrid  *gridvector,
@@ -69,7 +62,6 @@ main( hypre_int argc,
    double              cx, cy, cz;
    double              conx, cony, conz;
    HYPRE_Int           solver_id;
-   HYPRE_Int           solver_type;
    HYPRE_Int           recompute_res;
    HYPRE_Int           flex = 0;
 
@@ -80,11 +72,11 @@ main( hypre_int argc,
    HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
 
    HYPRE_StructMatrix  A_slvr;
-   HYPRE_StructVector  b_dbl;
-   HYPRE_StructVector  x_dbl;
+   HYPRE_StructVector  b_slvr;
+   HYPRE_StructVector  x_slvr;
    HYPRE_StructMatrix  A_pc;
-   HYPRE_StructVector  b_flt;
-   HYPRE_StructVector  x_flt;
+   HYPRE_StructVector  b_pc;
+   HYPRE_StructVector  x_pc;
 
    HYPRE_StructSolver  solver;
    HYPRE_StructSolver  precond;
@@ -289,7 +281,6 @@ main( hypre_int argc,
    n_post = 1;
 
    solver_id = 0;
-   solver_type = 1;
    recompute_res = 1;   /* What should be the default here? */
 
    istart[0] = -3;
@@ -461,11 +452,6 @@ main( hypre_int argc,
       {
          arg_index++;
          skip = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
-      {
-         arg_index++;
-         solver_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-recompute") == 0 )
       {
@@ -640,6 +626,12 @@ main( hypre_int argc,
    HYPRE_SetUmpirePinnedPoolSize(umpire_pinned_pool_size);
 #endif
 
+   /* Unused variables */
+   HYPRE_UNUSED_VAR(read_fromfile_index);
+   HYPRE_UNUSED_VAR(read_x0fromfile_index);
+   HYPRE_UNUSED_VAR(read_rhsfromfile_index);
+   
+
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param;
 
    /*-----------------------------------------------------------
@@ -664,37 +656,21 @@ main( hypre_int argc,
       hypre_printf("  -x0fromfile <name>  : prefix name for firstguessfiles\n");
       hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1.  For solver 0,1,3\n");
       hypre_printf("  -solver <ID>        : solver ID\n");
-      hypre_printf("                        0  - SMG (default)\n");
-      hypre_printf("                        1  - PFMG\n");
-      hypre_printf("                        3  - PFMG constant coeffs\n");
-      hypre_printf("                        4  - PFMG constant coeffs var diag\n");
-      hypre_printf("                        10 -- 19 - CG\n");
-      hypre_printf("                        10 - CG with SMG precond\n");
-      hypre_printf("                        11 - CG with PFMG precond\n");
-      hypre_printf("                        13 - CG with PFMG-3 precond\n");
-      hypre_printf("                        14 - CG with PFMG-4 precond\n");
-      hypre_printf("                        15 - CG with single-prec SMG precond\n");
-      hypre_printf("                        16 - CG with single-prec PFMG precond\n");
-      hypre_printf("                        18 - CG with diagonal scaling\n");
-      hypre_printf("                        20 -- 29 - GMRES\n");
-      hypre_printf("                        20 - GMRES with SMG precond\n");
-      hypre_printf("                        21 - GMRES with PFMG precond\n");
-      hypre_printf("                        25 - GMRES with single-prec SMG precond\n");
-      hypre_printf("                        26 - GMRES with single-prec PFMG precond\n");
-      hypre_printf("                        28 - GMRES with diagonal scaling\n");
-      hypre_printf("                        30 -- 39 - FlexGMRES\n");
-      hypre_printf("                        30 - FlexGMRES with SMG precond\n");
-      hypre_printf("                        31 - FlexGMRES with PFMG precond\n");
-      hypre_printf("                        35 - FlexGMRES with single-prec SMG precond\n");
-      hypre_printf("                        36 - FlexGMRES with single-prec PFMG precond\n");
-      hypre_printf("                        38 - FlexGMRES with diagonal scaling\n");
-      hypre_printf("                        39 - FlexGMRES\n");
-      hypre_printf("                        40 -- 49 - BiCGSTAB\n");
-      hypre_printf("                        40 - BiCGSTAB with SMG precond\n");
-      hypre_printf("                        41 - BiCGSTAB with PFMG precond\n");
-      hypre_printf("                        45 - BiCGSTAB with single-prec SMG precond\n");
-      hypre_printf("                        46 - BiCGSTAB with single-prec PFMG precond\n");
-      hypre_printf("                        48 - BiCGSTAB with diagonal scaling\n");
+      hypre_printf("                        0 - CG with SMG precond\n");
+      hypre_printf("                        1 - CG with PFMG precond\n");
+      hypre_printf("                        2 - CG with PFMG constant coeffs precond\n");
+      hypre_printf("                        3 - CG with PFMG constant coeffs var diag precond\n");
+      hypre_printf("                        4 - CG with diagonal scaling\n");
+      hypre_printf("                        10 - GMRES with SMG precond\n");
+      hypre_printf("                        11 - GMRES with PFMG precond\n");
+      hypre_printf("                        12 - GMRES with PFMG constant coeffs precond\n");
+      hypre_printf("                        13 - GMRES with PFMG constant coeffs var diag precond\n");
+      hypre_printf("                        14 - GMRES with diagonal scaling\n");
+      hypre_printf("                        20 - BiCGSTAB with SMG precond\n");
+      hypre_printf("                        21 - BiCGSTAB with PFMG precond\n");
+      hypre_printf("                        22 - BiCGSTAB with PFMG constant coeffs precond\n");
+      hypre_printf("                        23 - BiCGSTAB with PFMG constant coeffs var diag precond\n");
+      hypre_printf("                        24 - BiCGSTAB with diagonal scaling\n");
       hypre_printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
       hypre_printf("  -rap <r>            : coarse grid operator type\n");
       hypre_printf("                        0 - Galerkin (default)\n");
@@ -708,9 +684,6 @@ main( hypre_int argc,
       hypre_printf("  -w <jacobi weight>  : jacobi weight\n");
       hypre_printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
       hypre_printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
-      hypre_printf("  -solver_type <ID>   : solver type for Hybrid\n");
-      hypre_printf("                        1 - PCG (default)\n");
-      hypre_printf("                        2 - GMRES\n");
       hypre_printf("  -recompute <bool>   : Recompute residual in PCG?\n");
       hypre_printf("  -cf <cf>            : convergence factor for Hybrid\n");
 
@@ -1079,14 +1052,15 @@ main( hypre_int argc,
          HYPRE_StructMatrixCreate_pre(solver_precision, hypre_MPI_COMM_WORLD, grid, stencil, &A_slvr);
          HYPRE_StructMatrixCreate_pre(precond_precision, hypre_MPI_COMM_WORLD, grid, stencil, &A_pc);
 
-         if ( solver_id == 3 || solver_id == 4 ||
-              solver_id == 13 || solver_id == 14 )
+         if ( solver_id == 2 || solver_id == 3 ||
+              solver_id == 12 || solver_id == 13 ||
+              solver_id == 22 || solver_id == 23 )
          {
             stencil_size  = hypre_StructStencilSize(stencil);
             /* integer array allocation */
             stencil_entries = (HYPRE_Int *) hypre_CAlloc ((size_t)(stencil_size), (size_t)sizeof(HYPRE_Int),
                                                           HYPRE_MEMORY_HOST);
-            if ( solver_id == 3 || solver_id == 13)
+            if ( solver_id == 2 || solver_id == 12 || solver_id == 22)
             {
                for ( i = 0; i < stencil_size; ++i )
                {
@@ -1101,7 +1075,7 @@ main( hypre_int argc,
                hypre_Free(stencil_entries, HYPRE_MEMORY_HOST);
                constant_coefficient = 1;
             }
-            if ( solver_id == 4 || solver_id == 14)
+            if ( solver_id == 3 || solver_id == 13 || solver_id == 23)
             {
                stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
                hypre_assert( stencil_size >= 1 );
@@ -1208,10 +1182,10 @@ main( hypre_int argc,
           * Set up the linear system
           *-----------------------------------------------------------*/
 
-         HYPRE_StructVectorCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, grid, &b_dbl);
-         HYPRE_StructVectorInitialize_pre( solver_precision, b_dbl);
-         HYPRE_StructVectorCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, grid, &b_flt);
-         HYPRE_StructVectorInitialize_pre( precond_precision, b_flt);
+         HYPRE_StructVectorCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, grid, &b_slvr);
+         HYPRE_StructVectorInitialize_pre( solver_precision, b_slvr);
+         HYPRE_StructVectorCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, grid, &b_pc);
+         HYPRE_StructVectorInitialize_pre( precond_precision, b_pc);
 
          /*-----------------------------------------------------------
           * For periodic b.c. in all directions, need rhs to satisfy
@@ -1219,20 +1193,20 @@ main( hypre_int argc,
           *  sink of equal strength.  All other problems have rhs = 1.
           *-----------------------------------------------------------*/
 
-         AddValuesVector_mp(grid, b_dbl, periodic, one_slvr, slvr_size_t);
-         AddValuesVector_mp(grid, b_flt, periodic, one_pc, pc_size_t);
-         HYPRE_StructVectorAssemble_pre( solver_precision, b_dbl);
-         HYPRE_StructVectorAssemble_pre( precond_precision, b_flt);
+         AddValuesVector_mp(grid, b_slvr, periodic, one_slvr, slvr_size_t);
+         AddValuesVector_mp(grid, b_pc, periodic, one_pc, pc_size_t);
+         HYPRE_StructVectorAssemble_pre( solver_precision, b_slvr);
+         HYPRE_StructVectorAssemble_pre( precond_precision, b_pc);
 
-         HYPRE_StructVectorCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, grid, &x_dbl);
-         HYPRE_StructVectorCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, grid, &x_flt);
-         HYPRE_StructVectorInitialize_pre( solver_precision, x_dbl);
-         HYPRE_StructVectorInitialize_pre( precond_precision, x_flt);
+         HYPRE_StructVectorCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, grid, &x_slvr);
+         HYPRE_StructVectorCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, grid, &x_pc);
+         HYPRE_StructVectorInitialize_pre( solver_precision, x_slvr);
+         HYPRE_StructVectorInitialize_pre( precond_precision, x_pc);
 
-         AddValuesVector_mp(grid, x_dbl, periodx0, zero_slvr, slvr_size_t);
-         AddValuesVector_mp(grid, x_flt, periodx0, zero_pc, pc_size_t);
-         HYPRE_StructVectorAssemble_pre(solver_precision, x_dbl);
-         HYPRE_StructVectorAssemble_pre(precond_precision, x_flt);
+         AddValuesVector_mp(grid, x_slvr, periodx0, zero_slvr, slvr_size_t);
+         AddValuesVector_mp(grid, x_pc, periodx0, zero_pc, pc_size_t);
+         HYPRE_StructVectorAssemble_pre(solver_precision, x_slvr);
+         HYPRE_StructVectorAssemble_pre(precond_precision, x_pc);
 
          HYPRE_StructGridDestroy_pre( solver_precision, grid);
 
@@ -1271,148 +1245,50 @@ main( hypre_int argc,
       }*/
 
       /*-----------------------------------------------------------
-       * Solve the system using SMG
+       * Create and set options for SMG Preconditioner
        *-----------------------------------------------------------*/
-
-#if !HYPRE_MFLOPS
-
-      if (solver_id == 0)
+      if(solver_id == 0 || solver_id == 10 || solver_id == 20 || solver_id == 30)
       {
-         time_index = hypre_InitializeTiming("SMG Setup");
-         hypre_BeginTiming(time_index);
-
-         HYPRE_StructSMGCreate_pre( solver_precision, MPI_COMM_WORLD, &solver);
-         HYPRE_StructSMGSetMaxIter_pre( solver_precision, solver, 50);
-         HYPRE_StructSMGSetTol_pre( solver_precision, solver, tol);
-         HYPRE_StructSMGSetRelChange_pre( solver_precision, solver, 0);
-         HYPRE_StructSMGSetNumPreRelax_pre( solver_precision, solver, n_pre);
-         HYPRE_StructSMGSetNumPostRelax_pre( solver_precision, solver, n_post);
-         HYPRE_StructSMGSetPrintLevel_pre( solver_precision, solver, 1);
-         HYPRE_StructSMGSetLogging_pre( solver_precision, solver, 1);
-#if 0//defined(HYPRE_USING_CUDA)
-         HYPRE_StructSMGSetDeviceLevel(solver, device_level);
-#endif
-
-#if 0//defined(HYPRE_USING_CUDA)
-         hypre_box_print = 0;
-#endif
-         HYPRE_StructSMGSetup_pre( solver_precision, solver, A_slvr, b_dbl, x_dbl);
-
-#if 0//defined(HYPRE_USING_CUDA)
-         hypre_box_print = 0;
-#endif
-
-         hypre_EndTiming(time_index);
-         if ( reps == 1 )
-         {
-            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-         else if ( rep == reps - 1 )
-         {
-            hypre_FinalizeTiming(time_index);
-         }
-
-         time_index = hypre_InitializeTiming("SMG Solve");
-         hypre_BeginTiming(time_index);
-
-         HYPRE_StructSMGSolve_pre( solver_precision, solver, A_slvr, b_dbl, x_dbl);
-
-         hypre_EndTiming(time_index);
-         if ( reps == 1 )
-         {
-            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-         else if ( rep == reps - 1 )
-         {
-            hypre_PrintTiming("Interface, Setup, and Solve times:",
-                              hypre_MPI_COMM_WORLD );
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-
-         HYPRE_StructSMGGetNumIterations_pre( solver_precision, solver, &num_iterations);
-         HYPRE_StructSMGGetFinalRelativeResidualNorm_pre( solver_precision, solver, final_res_norm);
-         HYPRE_StructSMGDestroy_pre( solver_precision, solver);
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
+         //HYPRE_StructSMGSetMemoryUse_pre( solver_precision,precond, 0);
+         HYPRE_StructSMGSetMaxIter_pre( precond_precision, precond, 1);
+         HYPRE_StructSMGSetTol_pre( precond_precision, precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess_pre( precond_precision, precond);
+         HYPRE_StructSMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax_pre( precond_precision, precond, n_post);
+         HYPRE_StructSMGSetPrintLevel_pre( precond_precision, precond, 0);
+         HYPRE_StructSMGSetLogging_pre( precond_precision, precond, 0);
       }
-
-      /*-----------------------------------------------------------
-       * Solve the system using PFMG
-       *-----------------------------------------------------------*/
-
-      else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
+      else if(solver_id == 1 || solver_id == 2 || solver_id == 3 || 
+               solver_id == 11 || solver_id == 12 || solver_id == 13 || 
+               solver_id == 21 || solver_id == 22 || solver_id == 23 )
       {
-         time_index = hypre_InitializeTiming("PFMG Setup");
-         hypre_BeginTiming(time_index);
-
-         HYPRE_StructPFMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &solver);
-         HYPRE_StructPFMGSetMaxIter_pre( solver_precision, solver, 200);
-         HYPRE_StructPFMGSetTol_pre( solver_precision, solver, tol);
-         HYPRE_StructPFMGSetRelChange_pre( solver_precision, solver, 0);
-         HYPRE_StructPFMGSetRAPType_pre( solver_precision, solver, rap);
-         HYPRE_StructPFMGSetRelaxType_pre( solver_precision, solver, relax);
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGSetMaxIter_pre( precond_precision, precond, 1);
+         HYPRE_StructPFMGSetTol_pre( precond_precision, precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess_pre( precond_precision, precond);
+         HYPRE_StructPFMGSetRAPType_pre( precond_precision, precond, rap);
+         HYPRE_StructPFMGSetRelaxType_pre( precond_precision, precond, relax);
          if (usr_jacobi_weight)
          {
-            HYPRE_StructPFMGSetJacobiWeight_pre( solver_precision, solver, jacobi_weight);
+            HYPRE_StructPFMGSetJacobiWeight_pre( precond_precision, precond, jacobi_weight);
          }
-         HYPRE_StructPFMGSetNumPreRelax_pre( solver_precision, solver, n_pre);
-         HYPRE_StructPFMGSetNumPostRelax_pre( solver_precision, solver, n_post);
-         HYPRE_StructPFMGSetSkipRelax_pre( solver_precision, solver, skip);
-         HYPRE_StructPFMGSetPrintLevel_pre( solver_precision, solver, 1);
-         HYPRE_StructPFMGSetLogging_pre( solver_precision, solver, 1);
-
-#if 0//defined(HYPRE_USING_CUDA)
-         HYPRE_StructPFMGSetDeviceLevel(solver, device_level);
-#endif
-
-         HYPRE_StructPFMGSetup_pre( solver_precision, solver, A_slvr, b_dbl, x_dbl);
-
-         hypre_EndTiming(time_index);
-         if ( reps == 1 )
-         {
-            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-         else if ( rep == reps - 1 )
-         {
-            hypre_FinalizeTiming(time_index);
-         }
-
-         time_index = hypre_InitializeTiming("PFMG Solve");
-         hypre_BeginTiming(time_index);
+         HYPRE_StructPFMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax_pre( precond_precision, precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax_pre( precond_precision, precond, skip);
+         HYPRE_StructPFMGSetPrintLevel_pre( precond_precision, precond, 0);
+         HYPRE_StructPFMGSetLogging_pre( precond_precision, precond, 0);       
+      } 
 
 
-         HYPRE_StructPFMGSolve_pre( solver_precision, solver, A_slvr, b_dbl, x_dbl);
-
-         hypre_EndTiming(time_index);
-         if ( reps == 1 )
-         {
-            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-         else if ( rep == reps - 1 )
-         {
-            hypre_PrintTiming("Interface, Setup, and Solve times",
-                              hypre_MPI_COMM_WORLD);
-            hypre_FinalizeTiming(time_index);
-            hypre_ClearTiming();
-         }
-
-         HYPRE_StructPFMGGetNumIterations_pre( solver_precision, solver, &num_iterations);
-         HYPRE_StructPFMGGetFinalRelativeResidualNorm_pre( solver_precision, solver, final_res_norm);
-         HYPRE_StructPFMGDestroy_pre( solver_precision, solver);
-      }
-
+#if !HYPRE_MFLOPS
       /*-----------------------------------------------------------
-       * Solve the system using CG
+       * Solve the system using PCG
        *-----------------------------------------------------------*/
 
-      if ((solver_id > 9) && (solver_id < 20))
+      if (solver_id == 0 || solver_id == 1 || solver_id == 2 || solver_id == 3 || solver_id == 4)
       {
          time_index = hypre_InitializeTiming("PCG Setup");
          hypre_BeginTiming(time_index);
@@ -1423,106 +1299,107 @@ main( hypre_int argc,
          HYPRE_PCGSetTwoNorm_pre( solver_precision, (HYPRE_Solver)solver, 1 );
          HYPRE_PCGSetRelChange_pre( solver_precision, (HYPRE_Solver)solver, 0 );
          HYPRE_PCGSetPrintLevel_pre( solver_precision, (HYPRE_Solver)solver, 3 );
-         HYPRE_PCGSetRecomputeResidual_pre( solver_precision, (HYPRE_Solver)solver, 1 );
+         HYPRE_PCGSetRecomputeResidual_pre( solver_precision, (HYPRE_Solver)solver, recompute_res );
          HYPRE_PCGSetFlex_pre( solver_precision, (HYPRE_Solver)solver, flex );
 
-         if (solver_id == 10)
+         if (solver_id == 0)
          {
             /* use symmetric SMG as preconditioner */
-            HYPRE_StructSMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            //HYPRE_StructSMGSetMemoryUse_pre( solver_precision,precond, 0);
-            HYPRE_StructSMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( solver_precision, precond, 0);
-
-            HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_dbl,
-                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_dbl,
-                                     (HYPRE_Solver) precond);
-         }
-         else if (solver_id == 15)
-         {
-            HYPRE_StructSMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructSMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( precond_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( precond_precision, precond, 0);
+            if (myid == 0)
+            {
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION SMG-PCG\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION SMG-PCG\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION SMG-PCG\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION SMG-PCG\n");
+               }
+            }
+            /* Set the preconditioning matrix */
             HYPRE_PCGSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
             HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_mp,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_mp,
                                      (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 11 || solver_id == 13 || solver_id == 14)
+         else if (solver_id == 1 || solver_id == 2 || solver_id == 3)
          {
             /* use symmetric PFMG as preconditioner */
-            HYPRE_StructPFMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( solver_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( solver_precision, precond, relax);
-            if (usr_jacobi_weight)
+            if (myid == 0)
             {
-               HYPRE_StructPFMGSetJacobiWeight_pre( solver_precision, precond, jacobi_weight);
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION PFMG-PCG\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION PFMG-PCG\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION PFMG-PCG\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION PFMG-PCG\n");
+               }
             }
-            HYPRE_StructPFMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( solver_precision, precond, skip);
-            /*HYPRE_StructPFMGSetDxyz_pre( solver_precision,precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( solver_precision, precond, 0);
-#if 0//defined(HYPRE_USING_CUDA)
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
-#endif
-            HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_dbl,
-                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_dbl,
-                                     (HYPRE_Solver) precond);
-         }
-         else if (solver_id == 16)
-         {
-            HYPRE_StructPFMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( precond_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( precond_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( precond_precision, precond, relax);
-            if (usr_jacobi_weight)
-            {
-               HYPRE_StructPFMGSetJacobiWeight_pre( precond_precision, precond, jacobi_weight);
-            }
-            HYPRE_StructPFMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( precond_precision, precond, skip);
-            HYPRE_StructPFMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( precond_precision, precond, 0);
+            /* Set the preconditioning matrix */
             HYPRE_PCGSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
             HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_mp,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_mp,
                                      (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 18)
+         else if(solver_id == 4)
          {
             /* use diagonal scaling as preconditioner */
             precond = NULL;
-            HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+            if (myid == 0)
+            {
+               if (solver_precision == HYPRE_REAL_SINGLE)
+               {
+                  hypre_printf("Solver: SINGLE PRECISION DS-PCG\n");
+                  HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                     (HYPRE_Solver) precond);
+               }
+               else if (solver_precision == HYPRE_REAL_DOUBLE)
+               {
+                  hypre_printf("Solver: DOUBLE PRECISION DS-PCG\n");
+                  HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
                                      (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
                                      (HYPRE_Solver) precond);
+               }
+               else
+               {
+                  hypre_printf("Solver: LONG DOUBLE PRECISION DS-PCG\n");
+                  HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                     (HYPRE_Solver) precond);
+               }
+            }            
          }
          HYPRE_PCGSetup_pre( solver_precision, (HYPRE_Solver)solver,
-                             (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl );
+                             (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr, (HYPRE_Vector)x_slvr );
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -1533,7 +1410,7 @@ main( hypre_int argc,
          hypre_BeginTiming(time_index);
 
          HYPRE_PCGSolve_pre( solver_precision, (HYPRE_Solver) solver,
-                             (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+                             (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr, (HYPRE_Vector)x_slvr);
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -1545,21 +1422,10 @@ main( hypre_int argc,
                                                     final_res_norm );
          HYPRE_StructPCGDestroy_pre( solver_precision, solver);
 
-         if (solver_id == 10)
+         if (myid == 0)
          {
-            HYPRE_StructSMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 15)
-         {
-            HYPRE_StructSMGDestroy_pre( precond_precision, precond);
-         }
-         else if (solver_id == 11 || solver_id == 13 || solver_id == 14)
-         {
-            HYPRE_StructPFMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 16)
-         {
-            HYPRE_StructPFMGDestroy_pre( precond_precision, precond);
+            hypre_printf("\n");
+            hypre_printf("PCG Iterations = %d\n", num_iterations);
          }
       }
 
@@ -1567,7 +1433,7 @@ main( hypre_int argc,
        * Solve the system using GMRES
        *-----------------------------------------------------------*/
 
-      if ((solver_id > 29) && (solver_id < 40))
+      if (solver_id == 10 || solver_id == 11 || solver_id == 12 || solver_id == 13 || solver_id == 14)
       {
          time_index = hypre_InitializeTiming("GMRES Setup");
          hypre_BeginTiming(time_index);
@@ -1580,100 +1446,104 @@ main( hypre_int argc,
          HYPRE_GMRESSetPrintLevel_pre( solver_precision, (HYPRE_Solver)solver, print_level );
          HYPRE_GMRESSetLogging_pre( solver_precision, (HYPRE_Solver)solver, 1 );
 
-         if (solver_id == 30)
+         if (solver_id == 10)
          {
             /* use symmetric SMG as preconditioner */
-            HYPRE_StructSMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            //HYPRE_StructSMGSetMemoryUse_pre( solver_precision,precond, 0);
-            HYPRE_StructSMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( solver_precision, precond, 0);
-            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_dbl,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_dbl,
-                                       (HYPRE_Solver)precond);
-         }
-         else if (solver_id == 35)
-         {
-            HYPRE_StructSMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructSMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( precond_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( precond_precision, precond, 0);
+            if (myid == 0)
+            {
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION SMG-GMRES\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION SMG-GMRES\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION SMG-GMRES\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION SMG-GMRES\n");
+               }
+            }
+            /* Set the preconditioning matrix */
             HYPRE_GMRESSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
-            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_mp,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_mp,
-                                       (HYPRE_Solver)precond);
+            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_mp,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_mp,
+                                     (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 31)
+         else if (solver_id == 11 || solver_id == 12 || solver_id == 13)
          {
             /* use symmetric PFMG as preconditioner */
-            HYPRE_StructPFMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( solver_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( solver_precision, precond, relax);
-            if (usr_jacobi_weight)
+            if (myid == 0)
             {
-               HYPRE_StructPFMGSetJacobiWeight_pre( solver_precision, precond, jacobi_weight);
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION PFMG-GMRES\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION PFMG-GMRES\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION PFMG-GMRES\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION PFMG-GMRES\n");
+               }
             }
-            HYPRE_StructPFMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( solver_precision, precond, skip);
-            /*HYPRE_StructPFMGSetDxyz_pre( solver_precision,precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( solver_precision, precond, 0);
-            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_dbl,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_dbl,
-                                       (HYPRE_Solver)precond);
-         }
-         else if (solver_id == 36)
-         {
-            HYPRE_StructPFMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( precond_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( precond_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( precond_precision, precond, relax);
-            if (usr_jacobi_weight)
-            {
-               HYPRE_StructPFMGSetJacobiWeight_pre( precond_precision, precond, jacobi_weight);
-            }
-            HYPRE_StructPFMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( precond_precision, precond, skip);
-            HYPRE_StructPFMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( precond_precision, precond, 0);
+            /* Set the preconditioning matrix */
             HYPRE_GMRESSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
-            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_mp,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_mp,
-                                       (HYPRE_Solver)precond);
+            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_mp,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_mp,
+                                     (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 38)
+         else if(solver_id == 14)
          {
             /* use diagonal scaling as preconditioner */
             precond = NULL;
-            HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
-                                       (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
-                                       (HYPRE_Solver)precond);
+            if (myid == 0)
+            {
+               if (solver_precision == HYPRE_REAL_SINGLE)
+               {
+                  hypre_printf("Solver: SINGLE PRECISION DS-GMRES\n");
+                  HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                     (HYPRE_Solver) precond);
+               }
+               else if (solver_precision == HYPRE_REAL_DOUBLE)
+               {
+                  hypre_printf("Solver: DOUBLE PRECISION DS-GMRES\n");
+                  HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
+                                     (HYPRE_Solver) precond);
+               }
+               else
+               {
+                  hypre_printf("Solver: LONG DOUBLE PRECISION DS-GMRES\n");
+                  HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                     (HYPRE_Solver) precond);
+               }
+            }
          }
-
-         HYPRE_GMRESSetup_dbl ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl,
-                                (HYPRE_Vector)x_dbl );
+         HYPRE_GMRESSetup_pre(solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr,
+                                (HYPRE_Vector)x_slvr );
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -1683,8 +1553,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("GMRES Solve");
          hypre_BeginTiming(time_index);
 
-         HYPRE_GMRESSolve_dbl
-         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         HYPRE_GMRESSolve_pre(solver_precision,  (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr, (HYPRE_Vector)x_slvr);
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -1696,21 +1565,10 @@ main( hypre_int argc,
                                                       final_res_norm);
          HYPRE_StructGMRESDestroy_pre( solver_precision, solver);
 
-         if (solver_id == 30)
+         if (myid == 0)
          {
-            HYPRE_StructSMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 35)
-         {
-            HYPRE_StructSMGDestroy_pre( precond_precision, precond);
-         }
-         else if (solver_id == 31)
-         {
-            HYPRE_StructPFMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 36)
-         {
-            HYPRE_StructPFMGDestroy_pre( precond_precision, precond);
+            hypre_printf("\n");
+            hypre_printf("GMRES Iterations = %d\n", num_iterations);
          }
       }
 
@@ -1718,7 +1576,7 @@ main( hypre_int argc,
        * Solve the system using BiCGTAB
        *-----------------------------------------------------------*/
 
-      if ((solver_id > 39) && (solver_id < 50))
+      if (solver_id == 20 || solver_id == 21 || solver_id == 22 || solver_id == 23 || solver_id == 24)
       {
          time_index = hypre_InitializeTiming("BiCGSTAB Setup");
          hypre_BeginTiming(time_index);
@@ -1729,100 +1587,104 @@ main( hypre_int argc,
          HYPRE_BiCGSTABSetPrintLevel_pre( solver_precision, (HYPRE_Solver)solver, print_level );
          HYPRE_BiCGSTABSetLogging_pre( solver_precision, (HYPRE_Solver)solver, 1 );
 
-         if (solver_id == 40)
+         if (solver_id == 20)
          {
             /* use symmetric SMG as preconditioner */
-            HYPRE_StructSMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            //HYPRE_StructSMGSetMemoryUse_pre( solver_precision,precond, 0);
-            HYPRE_StructSMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( solver_precision, precond, 0);
-            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_dbl,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_dbl,
-                                          (HYPRE_Solver)precond);
-         }
-         else if (solver_id == 45)
-         {
-            HYPRE_StructSMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructSMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructSMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess_pre( precond_precision, precond);
-            HYPRE_StructSMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructSMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructSMGSetLogging_pre( precond_precision, precond, 0);
+            if (myid == 0)
+            {
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION SMG-BiCGSTAB\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION SMG-BiCGSTAB\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION SMG-BiCGSTAB\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION SMG-BiCGSTAB\n");
+               }
+            }
+            /* Set the preconditioning matrix */
             HYPRE_BiCGSTABSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
-            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_mp,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_mp,
-                                          (HYPRE_Solver)precond);
+            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve_mp,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup_mp,
+                                     (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 41)
+         else if (solver_id == 21 || solver_id == 22 || solver_id == 23)
          {
             /* use symmetric PFMG as preconditioner */
-            HYPRE_StructPFMGCreate_pre( solver_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( solver_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( solver_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( solver_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( solver_precision, precond, relax);
-            if (usr_jacobi_weight)
+            if (myid == 0)
             {
-               HYPRE_StructPFMGSetJacobiWeight_pre( solver_precision, precond, jacobi_weight);
+               if (solver_precision == precond_precision)
+               {
+                  if (solver_precision == HYPRE_REAL_SINGLE)
+                  {
+                     hypre_printf("Solver: SINGLE PRECISION PFMG-BiCGSTAB\n");
+                  }
+                  else if (solver_precision == HYPRE_REAL_DOUBLE)
+                  {
+                     hypre_printf("Solver: DOUBLE PRECISION PFMG-BiCGSTAB\n");
+                  }
+                  else
+                  {
+                     hypre_printf("Solver: LONG DOUBLE PRECISION PFMG-BiCGSTAB\n");
+                  }
+               }
+               else
+               {
+                  hypre_printf("Solver: MIXED PRECISION PFMG-BiCGSTAB\n");
+               }
             }
-            HYPRE_StructPFMGSetNumPreRelax_pre( solver_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( solver_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( solver_precision, precond, skip);
-            /*HYPRE_StructPFMGSetDxyz_pre( solver_precision,precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel_pre( solver_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( solver_precision, precond, 0);
-            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_dbl,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_dbl,
-                                          (HYPRE_Solver)precond);
-         }
-         else if (solver_id == 46)
-         {
-            HYPRE_StructPFMGCreate_pre( precond_precision, hypre_MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter_pre( precond_precision, precond, 1);
-            HYPRE_StructPFMGSetTol_pre( precond_precision, precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess_pre( solver_precision, precond);
-            HYPRE_StructPFMGSetRAPType_pre( precond_precision, precond, rap);
-            HYPRE_StructPFMGSetRelaxType_pre( precond_precision, precond, relax);
-            if (usr_jacobi_weight)
-            {
-               HYPRE_StructPFMGSetJacobiWeight_pre( precond_precision, precond, jacobi_weight);
-            }
-            HYPRE_StructPFMGSetNumPreRelax_pre( precond_precision, precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax_pre( precond_precision, precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax_pre( precond_precision, precond, skip);
-            HYPRE_StructPFMGSetPrintLevel_pre( precond_precision, precond, 0);
-            HYPRE_StructPFMGSetLogging_pre( precond_precision, precond, 0);
+            /* Set the preconditioning matrix */
             HYPRE_BiCGSTABSetPrecondMatrix_pre( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_pc);
-            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_mp,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_mp,
-                                          (HYPRE_Solver)precond);
+            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve_mp,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup_mp,
+                                     (HYPRE_Solver) precond);
          }
-
-         else if (solver_id == 48)
+         else if(solver_id == 24)
          {
             /* use diagonal scaling as preconditioner */
             precond = NULL;
-            HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver)solver,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
-                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
-                                          (HYPRE_Solver)precond);
+            if (myid == 0)
+            {
+               if (solver_precision == HYPRE_REAL_SINGLE)
+               {
+                  hypre_printf("Solver: SINGLE PRECISION DS-BiCGSTAB\n");
+                  HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                     (HYPRE_Solver) precond);
+               }
+               else if (solver_precision == HYPRE_REAL_DOUBLE)
+               {
+                  hypre_printf("Solver: DOUBLE PRECISION DS-BiCGSTAB\n");
+                  HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
+                                     (HYPRE_Solver) precond);
+               }
+               else
+               {
+                  hypre_printf("Solver: LONG DOUBLE PRECISION DS-BiCGSTAB\n");
+                  HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                     (HYPRE_Solver) precond);
+               }
+            }
          }
-
-         HYPRE_BiCGSTABSetup_dbl
-         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl );
+         HYPRE_BiCGSTABSetup_pre
+         ( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr, (HYPRE_Vector)x_slvr );
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -1832,8 +1694,8 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("BiCGSTAB Solve");
          hypre_BeginTiming(time_index);
 
-         HYPRE_BiCGSTABSolve_dbl
-         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
+         HYPRE_BiCGSTABSolve_pre
+         ( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr, (HYPRE_Vector)x_slvr);
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -1845,21 +1707,10 @@ main( hypre_int argc,
                                                          final_res_norm);
          HYPRE_StructBiCGSTABDestroy_pre( solver_precision, solver);
 
-         if (solver_id == 40)
+         if (myid == 0)
          {
-            HYPRE_StructSMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 45)
-         {
-            HYPRE_StructSMGDestroy_pre( precond_precision, precond);
-         }
-         else if (solver_id == 41)
-         {
-            HYPRE_StructPFMGDestroy_pre( solver_precision, precond);
-         }
-         else if (solver_id == 46)
-         {
-            HYPRE_StructPFMGDestroy_pre( precond_precision, precond);
+            hypre_printf("\n");
+            hypre_printf("BiCGSTAB Iterations = %d\n", num_iterations);
          }
       }
 
@@ -1869,13 +1720,11 @@ main( hypre_int argc,
 
       if (print_system)
       {
-         HYPRE_StructVectorPrint_pre( solver_precision, "struct.out.x", x_dbl, 0);
+         HYPRE_StructVectorPrint_pre( solver_precision, "struct.out.x", x_slvr, 0);
       }
 
       if (myid == 0 && rep == reps - 1 )
       {
-         hypre_printf("\n");
-         hypre_printf("Iterations = %d\n", num_iterations);
          switch (solver_precision)
          {
             case HYPRE_REAL_SINGLE:
@@ -1892,6 +1741,21 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
 
+      /* cleanup preconditioning data*/
+      HYPRE_StructMatrixDestroy_pre(precond_precision, A_pc);
+      HYPRE_StructVectorDestroy_pre(precond_precision, x_pc);
+      HYPRE_StructVectorDestroy_pre(precond_precision, b_pc);
+      if(solver_id == 0 || solver_id == 10 || solver_id == 20 || solver_id == 30)
+      {
+         HYPRE_StructSMGDestroy_pre(precond_precision, precond);
+      }
+      else if(solver_id == 1 || solver_id == 2 || solver_id == 3 || 
+               solver_id == 11 || solver_id == 12 || solver_id == 13 || 
+               solver_id == 21 || solver_id == 22 || solver_id == 23 || 
+               solver_id == 31 || solver_id == 32 || solver_id == 33)
+      {
+         HYPRE_StructPFMGDestroy_pre(precond_precision, precond);
+      }
 #endif
 
       /*-----------------------------------------------------------
@@ -1935,8 +1799,8 @@ main( hypre_int argc,
 
       HYPRE_StructStencilDestroy_pre( solver_precision, stencil);
       HYPRE_StructMatrixDestroy_pre( solver_precision, A_slvr);
-      HYPRE_StructVectorDestroy_pre( solver_precision, b_dbl);
-      HYPRE_StructVectorDestroy_pre( solver_precision, x_dbl);
+      HYPRE_StructVectorDestroy_pre( solver_precision, b_slvr);
+      HYPRE_StructVectorDestroy_pre( solver_precision, x_slvr);
 
       for ( i = 0; i < (dim + 1); i++)
       {
