@@ -305,9 +305,22 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#define CUSPARSE_NEWSPMVALG_VERSION 11401
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+#if CUSPARSE_VERSION >= CUSPARSE_NEWSPMVALG_VERSION
+#define HYPRE_CUSPARSE_SPMV_ALG_DEFAULT  CUSPARSE_SPMV_ALG_DEFAULT
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG1     CUSPARSE_SPMV_CSR_ALG1
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG2     CUSPARSE_SPMV_CSR_ALG2
+#else
+#define HYPRE_CUSPARSE_SPMV_ALG_DEFAULT  CUSPARSE_MV_ALG_DEFAULT
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG1     CUSPARSE_CSRMV_ALG1
+#define HYPRE_CUSPARSE_SPMV_CSR_ALG2     CUSPARSE_CSRMV_ALG2
+#endif
+#endif
 
 #define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -406,6 +419,11 @@ using hypre_DeviceItem = void*;
 #include <rocsparse/rocsparse.h>
 #if !defined(ROCSPARSE_VERSION)
 #define ROCSPARSE_VERSION (ROCSPARSE_VERSION_MAJOR * 100000 + ROCSPARSE_VERSION_MINOR * 100 + ROCSPARSE_VERSION_PATCH)
+#endif
+/* rocSPARSE < 3.0.0 exposes only non-const descriptor typedefs */
+#if (ROCSPARSE_VERSION < 300000)
+typedef rocsparse_spmat_descr rocsparse_const_spmat_descr;
+typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #endif
 #endif
 
@@ -1063,6 +1081,7 @@ struct hypre_DeviceData
    float                             spgemm_rownnz_estimate_mult_factor;
    /* cusparse */
    HYPRE_Int                         spmv_use_vendor;
+   HYPRE_Int                         spmv_algorithm; /* raw vendor enum */
    HYPRE_Int                         sptrans_use_vendor;
    HYPRE_Int                         spgemm_use_vendor;
    /* PMIS RNG */
@@ -1080,6 +1099,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataReduceBuffer(data)                   ((data) -> reduce_buffer)
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
 #define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
+#define hypre_DeviceDataSpMVAlgorithm(data)                  ((data) -> spmv_algorithm)
 #define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmBinned(data)                   ((data) -> spgemm_binned)
@@ -1241,20 +1261,72 @@ struct hypre_GpuMatData
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t                   mat_descr;
    char                                *spmv_buffer;
+   HYPRE_Int                            spmv_buffer_alg;
+   HYPRE_Int                            spmv_buffer_num_vectors;
+   HYPRE_Int                            spmv_buffer_trans;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr                  mat_descr;
    rocsparse_mat_info                   mat_info;
+
+#if (ROCSPARSE_VERSION >= 200000)
+   /* Cached SpMV resources for rocsparse multi-stage API */
+   char                                *spmv_buffer;
+   size_t                               spmv_buffer_size;
+   rocsparse_const_spmat_descr          spmv_spmat_descr;
+   HYPRE_Int                            spmv_preprocess_alg; /* -1 = not preprocessed */
+#if (ROCSPARSE_VERSION >= 400002)
+   rocsparse_spmv_descr                 spmv_descr;
+#endif
+#endif
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle;
 #endif
 };
 
-#define hypre_GpuMatDataMatDescr(data)    ((data) -> mat_descr)
-#define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
-#define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
-#define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
+#define hypre_GpuMatDataMatDescr(data)            ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)             ((data) -> mat_info)
+#define hypre_GpuMatDataMatHandle(data)           ((data) -> mat_handle)
+#if defined(HYPRE_USING_CUSPARSE)
+#define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
+#define hypre_GpuMatDataSpMVBufferAlg(data)       ((data) -> spmv_buffer_alg)
+#define hypre_GpuMatDataSpMVBufferNumVectors(data) ((data) -> spmv_buffer_num_vectors)
+#define hypre_GpuMatDataSpMVBufferTrans(data)     ((data) -> spmv_buffer_trans)
+#elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+#define hypre_GpuMatDataSpMVBuffer(data)          ((data) -> spmv_buffer)
+#define hypre_GpuMatDataSpMVBufferSize(data)      ((data) -> spmv_buffer_size)
+#define hypre_GpuMatDataSpMVSpMatDescr(data)      ((data) -> spmv_spmat_descr)
+#define hypre_GpuMatDataSpMVPreprocessAlg(data)   ((data) -> spmv_preprocess_alg)
+#if (ROCSPARSE_VERSION >= 400002)
+#define hypre_GpuMatDataSpMVDescr(data)           ((data) -> spmv_descr)
+#endif
+#endif
+
+struct hypre_GpuVecData
+{
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   cusparseDnVecDescr_t   dnvec_descr;
+   void                  *cached_ptr;
+   HYPRE_Int              cached_size;
+   cudaDataType           cached_type;
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+   rocsparse_dnvec_descr  dnvec_descr;
+   void                  *cached_ptr;
+   int64_t                cached_size;
+   rocsparse_datatype     cached_type;
+#endif
+};
+
+#define hypre_GpuVecDataDnVecDescr(data)        ((data) -> dnvec_descr)
+#define hypre_GpuVecDataCachedPtr(data)         ((data) -> cached_ptr)
+#define hypre_GpuVecDataCachedSize(data)        ((data) -> cached_size)
+#if (defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION) ||\
+    (defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000))
+#define hypre_GpuVecDataCachedType(data)        ((data) -> cached_type)
+#endif
 
 #endif /* if defined(HYPRE_USING_GPU) */
 

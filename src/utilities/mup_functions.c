@@ -268,6 +268,15 @@ HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SetSpMVAlgorithm( HYPRE_Int algorithm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SetSpMVAlgorithm_pre( precision, algorithm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

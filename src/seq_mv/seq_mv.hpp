@@ -17,6 +17,23 @@
 extern "C" {
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+cusparseDnVecDescr_t hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
+                                                       HYPRE_Int offset,
+                                                       HYPRE_Int size);
+#endif
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+rocsparse_dnvec_descr hypre_VectorGetRocsparseDnVecDescr(hypre_Vector *vector,
+                                                         int64_t size,
+                                                         void *data,
+                                                         rocsparse_datatype type);
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 static inline cusparseSpMatDescr_t
 hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int      n,
@@ -75,12 +92,12 @@ hypre_VectorToCusparseDnVec_core(HYPRE_Complex *x_data,
 }
 
 static inline cusparseDnVecDescr_t
-hypre_VectorToCusparseDnVec(const hypre_Vector *x,
-                            HYPRE_Int           offset,
-                            HYPRE_Int           size_override)
+hypre_VectorToCusparseDnVec(hypre_Vector *x,
+                            HYPRE_Int     offset,
+                            HYPRE_Int     size_override)
 {
-   return hypre_VectorToCusparseDnVec_core(hypre_VectorData(x) + offset,
-                                           size_override >= 0 ? size_override : hypre_VectorSize(x) - offset);
+   HYPRE_Int n = size_override >= 0 ? size_override : hypre_VectorSize(x) - offset;
+   return hypre_VectorGetCusparseDnVecDescr(x, offset, n);
 }
 
 static inline cusparseDnMatDescr_t

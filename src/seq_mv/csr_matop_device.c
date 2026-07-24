@@ -157,6 +157,10 @@ hypre_GpuMatDataCreate()
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
    hypre_GpuMatDataMatDescr(data) = mat_descr;
+   hypre_GpuMatDataSpMVBuffer(data) = NULL;
+   hypre_GpuMatDataSpMVBufferAlg(data) = -1;
+   hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
+   hypre_GpuMatDataSpMVBufferTrans(data) = -1;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_descr mat_descr;
@@ -169,6 +173,16 @@ hypre_GpuMatDataCreate()
 
    hypre_GpuMatDataMatDescr(data) = mat_descr;
    hypre_GpuMatDataMatInfo(data) = info;
+#if (ROCSPARSE_VERSION >= 200000)
+   /* initialize cached SpMV resources */
+   hypre_GpuMatDataSpMVSpMatDescr(data) = NULL;
+   hypre_GpuMatDataSpMVBuffer(data) = NULL;
+   hypre_GpuMatDataSpMVBufferSize(data) = 0;
+   hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
+#if (ROCSPARSE_VERSION >= 400002)
+   hypre_GpuMatDataSpMVDescr(data) = NULL;
+#endif
+#endif
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle;
@@ -216,6 +230,53 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_GpuMatDataInvalidateSpMVCache
+ *
+ * Invalidate cached vendor SpMV state after a matrix's CSR storage changes.
+ * rocSPARSE descriptors and preprocessing state must be rebuilt before the next
+ * SpMV, but its pointer-independent workspace is retained for reuse. The
+ * cuSPARSE workspace is released because its required size can depend on the
+ * matrix structure and selected algorithm.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data)
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   if (data)
+   {
+      hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
+      hypre_GpuMatDataSpMVBuffer(data) = NULL;
+      hypre_GpuMatDataSpMVBufferAlg(data) = -1;
+      hypre_GpuMatDataSpMVBufferNumVectors(data) = -1;
+      hypre_GpuMatDataSpMVBufferTrans(data) = -1;
+   }
+#elif defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+   if (data)
+   {
+      if (hypre_GpuMatDataSpMVSpMatDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmat_descr(
+                                  hypre_GpuMatDataSpMVSpMatDescr(data)) );
+         hypre_GpuMatDataSpMVSpMatDescr(data) = NULL;
+      }
+#if (ROCSPARSE_VERSION >= 400002)
+      if (hypre_GpuMatDataSpMVDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmv_descr(hypre_GpuMatDataSpMVDescr(data)) );
+         hypre_GpuMatDataSpMVDescr(data) = NULL;
+      }
+#endif
+      hypre_GpuMatDataSpMVPreprocessAlg(data) = -1;
+   }
+#else
+   HYPRE_UNUSED_VAR(data);
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_GpuMatDataDestroy
  *--------------------------------------------------------------------------*/
 
@@ -231,6 +292,21 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 #elif defined(HYPRE_USING_ROCSPARSE)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDescr(data)) );
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
+#if (ROCSPARSE_VERSION >= 200000)
+      /* destroy cached spmv resources */
+      if (hypre_GpuMatDataSpMVSpMatDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmat_descr(
+                                  hypre_GpuMatDataSpMVSpMatDescr(data)) );
+      }
+#if (ROCSPARSE_VERSION >= 400002)
+      if (hypre_GpuMatDataSpMVDescr(data))
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_spmv_descr(hypre_GpuMatDataSpMVDescr(data)) );
+      }
+#endif
+      hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
+#endif
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
       HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::release_matrix_handle(*hypre_HandleComputeStream(
@@ -2572,6 +2648,8 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
       return hypre_error_flag;
    }
 
+   hypre_CSRMatrixInvalidateSpMVCache(A);
+
    new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
    new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
 
@@ -2824,6 +2902,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
       hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
+
+   hypre_CSRMatrixInvalidateSpMVCache(A);
 
    hypre_CSRMatrixNumNonzeros(A) = new_nnz;
    if (!A_ii)
@@ -4341,36 +4421,5 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 }
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) */
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixSpMVAnalysisDevice
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
-{
-#if defined(HYPRE_USING_ROCSPARSE)
-   HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
-   rocsparse_handle       handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   if (exec == HYPRE_EXEC_DEVICE)
-   {
-      HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(handle,
-                                                           rocsparse_operation_none,
-                                                           hypre_CSRMatrixNumRows(matrix),
-                                                           hypre_CSRMatrixNumCols(matrix),
-                                                           hypre_CSRMatrixNumNonzeros(matrix),
-                                                           hypre_CSRMatrixGPUMatDescr(matrix),
-                                                           hypre_CSRMatrixData(matrix),
-                                                           hypre_CSRMatrixI(matrix),
-                                                           hypre_CSRMatrixJ(matrix),
-                                                           hypre_CSRMatrixGPUMatInfo(matrix)) );
-   }
-#else
-   HYPRE_UNUSED_VAR(matrix);
-#endif /* #if defined(HYPRE_USING_ROCSPARSE) */
-
-   return hypre_error_flag;
-}
 
 #endif /* #if defined(HYPRE_USING_GPU) */

@@ -244,6 +244,12 @@ typedef struct
 #ifndef hypre_VECTOR_HEADER
 #define hypre_VECTOR_HEADER
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+struct hypre_GpuVecData;
+typedef struct hypre_GpuVecData hypre_GpuVecData;
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_Vector
  *--------------------------------------------------------------------------*/
@@ -273,6 +279,11 @@ typedef struct
    HYPRE_Precision vector_precision;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   hypre_GpuVecData     *vec_data;
+#endif
+
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -294,6 +305,11 @@ typedef struct
 #define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
 #define hypre_VectorEntryIJ(vector, i, j) \
    ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+#define hypre_VectorGPUVecData(vector)            ((vector) -> vec_data)
+#endif
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
@@ -626,12 +642,29 @@ HYPRE_Int hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
 HYPRE_Int hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 HYPRE_Int hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+HYPRE_Int hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
+
+#define hypre_CSRMatrixInvalidateSpMVCache(matrix) \
+   do \
+   { \
+      if (hypre_CSRMatrixGPUMatData(matrix)) \
+      { \
+         hypre_GpuMatDataInvalidateSpMVCache(hypre_CSRMatrixGPUMatData(matrix)); \
+      } \
+   } \
+   while (0)
 
 #define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDescr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
-#define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
+#else
+#define hypre_CSRMatrixInvalidateSpMVCache(matrix) \
+   do \
+   { \
+      HYPRE_UNUSED_VAR(matrix); \
+   } \
+   while (0)
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
