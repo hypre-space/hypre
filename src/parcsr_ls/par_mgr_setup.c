@@ -146,6 +146,22 @@ hypre_MGRSetup( void               *mgr_vdata,
    char        region_name[1024], level_name[1024];
    char        msg[2048];
 
+   /* Validate user-provided coarse operators before setup opens profiling
+      ranges or allocates hierarchy data. */
+   num_coarsening_levs = max_num_coarse_levels;
+   for (lev = 0; lev < num_coarsening_levs; lev++)
+   {
+      if (coarse_grid_method && coarse_grid_method[lev] == 6 &&
+          (!(mgr_data -> user_coarse_grid_matrix) ||
+           !((mgr_data -> user_coarse_grid_matrix)[lev])))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "MGR coarse_grid_method 6 requires a coarse matrix set via "
+                           "HYPRE_MGRSetCoarseGridMatrixAtLevel() for that level");
+         return hypre_error_flag;
+      }
+   }
+
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("MGRSetup");

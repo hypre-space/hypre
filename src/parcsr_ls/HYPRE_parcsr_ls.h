@@ -4746,6 +4746,21 @@ HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
                              HYPRE_Int *cg_method );
 
 /**
+ * (Optional) Provide an application-assembled coarse-grid (e.g. Schur-complement)
+ * operator for a given MGR reduction level, used in place of the Galerkin RAP
+ * product when that level's coarse_grid_method is 6. MGR uses the matrix in place:
+ * it never frees the matrix and never alters its entries. If the matrix has no
+ * communication package, MGR creates one during setup, which is reclaimed when the
+ * application destroys the matrix. The matrix's row/column partitioning must match
+ * the compressed coarse (C-point) space for that level. Call once per level as
+ * needed.
+ **/
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel(HYPRE_Solver solver,
+                                    HYPRE_Int level,
+                                    HYPRE_ParCSRMatrix coarse_matrix );
+
+/**
  * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
  * operator computed in the Non-Galerkin approach. Options for \e max_elmts are:
  *
