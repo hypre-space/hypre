@@ -1374,26 +1374,26 @@ main( hypre_int argc,
             {
                if (myid == 0) { hypre_printf("Solver: SINGLE PRECISION DS-PCG\n"); }
                HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
-                                  (HYPRE_Solver) precond);
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                        (HYPRE_Solver) precond);
             }
             else if (solver_precision == HYPRE_REAL_DOUBLE)
             {
                if (myid == 0) { hypre_printf("Solver: DOUBLE PRECISION DS-PCG\n"); }
                HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
-                                  (HYPRE_Solver) precond);
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
+                                        (HYPRE_Solver) precond);
             }
             else
             {
                if (myid == 0) { hypre_printf("Solver: LONG DOUBLE PRECISION DS-PCG\n"); }
                HYPRE_PCGSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
-                                  (HYPRE_Solver) precond);
-            }          
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                        (HYPRE_Solver) precond);
+            }
          }
 
          HYPRE_PCGSetup_pre( solver_precision, (HYPRE_Solver)solver,
@@ -1516,25 +1516,25 @@ main( hypre_int argc,
             {
                if (myid == 0) { hypre_printf("Solver: SINGLE PRECISION DS-GMRES\n"); }
                HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
-                                  (HYPRE_Solver) precond);
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                          (HYPRE_Solver) precond);
             }
             else if (solver_precision == HYPRE_REAL_DOUBLE)
             {
                if (myid == 0) { hypre_printf("Solver: DOUBLE PRECISION DS-GMRES\n"); }
                HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
-                                  (HYPRE_Solver) precond);
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
+                                          (HYPRE_Solver) precond);
             }
             else
             {
                if (myid == 0) { hypre_printf("Solver: LONG DOUBLE PRECISION DS-GMRES\n"); }
                HYPRE_GMRESSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
-                                  (HYPRE_Solver) precond);
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                          (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                          (HYPRE_Solver) precond);
             }
          }
          HYPRE_GMRESSetup_pre(solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr,
@@ -1656,28 +1656,28 @@ main( hypre_int argc,
             {
                if (myid == 0) { hypre_printf("Solver: SINGLE PRECISION DS-BiCGSTAB\n"); }
                HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
-                                  (HYPRE_Solver) precond);
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_flt,
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_flt,
+                                             (HYPRE_Solver) precond);
             }
             else if (solver_precision == HYPRE_REAL_DOUBLE)
             {
                if (myid == 0) { hypre_printf("Solver: DOUBLE PRECISION DS-BiCGSTAB\n"); }
                HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
-                                  (HYPRE_Solver) precond);
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_dbl,
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_dbl,
+                                             (HYPRE_Solver) precond);
             }
             else
             {
                if (myid == 0) { hypre_printf("Solver: LONG DOUBLE PRECISION DS-BiCGSTAB\n"); }
                HYPRE_BiCGSTABSetPrecond_pre( solver_precision, (HYPRE_Solver) solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
-                                  (HYPRE_Solver) precond);
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale_long_dbl,
+                                             (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup_long_dbl,
+                                             (HYPRE_Solver) precond);
             }
          }
-         
+
          HYPRE_BiCGSTABSetup_pre
          ( solver_precision, (HYPRE_Solver)solver, (HYPRE_Matrix)A_slvr, (HYPRE_Vector)b_slvr,
            (HYPRE_Vector)x_slvr );
