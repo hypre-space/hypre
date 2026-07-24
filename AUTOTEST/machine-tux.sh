@@ -139,8 +139,7 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-debug --enable-mixed-precision"
-RO="-mixed-precision -rt -save ${save}"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -mixed-precision
 ./renametest.sh basic $output_dir/basic--mixed-precision
 
 co="--enable-debug --enable-mixed-precision --enable-shared"

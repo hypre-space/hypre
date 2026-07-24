@@ -68,8 +68,6 @@ main( hypre_int argc,
    /*HYPRE_Real          dxyz[3];*/
 
    HYPRE_Int           num_ghost[6]   = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
 
    HYPRE_StructMatrix  A_slvr;
    HYPRE_StructVector  b_slvr;
@@ -306,8 +304,6 @@ main( hypre_int argc,
    for (i = 0; i < 2 * dim; i++)
    {
       num_ghost[i]   = 1;
-      A_num_ghost[i] = num_ghost[i];
-      v_num_ghost[i] = num_ghost[i];
    }
 
    //device_level = nx*ny*nz;
