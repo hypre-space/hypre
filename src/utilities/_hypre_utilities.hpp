@@ -2624,6 +2624,19 @@ hypre_HYPREIntToCusparseIndexType()
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
+/* These helpers depend on HYPRE_Real's size, so keep their C++/device symbols
+ * distinct across mixed-precision object builds. */
+#if defined(HYPRE_MIXED_PRECISION) && defined(hypre_MP_BUILD)
+#define HYPRE_Real2          HYPRE_FIXEDPRECISION_FUNC(HYPRE_Real2)
+#define HYPRE_Real4          HYPRE_FIXEDPRECISION_FUNC(HYPRE_Real4)
+#define HYPRE_Real6          HYPRE_FIXEDPRECISION_FUNC(HYPRE_Real6)
+#define ReduceSum            HYPRE_FIXEDPRECISION_FUNC(ReduceSum)
+#define OneBlockReduce       HYPRE_FIXEDPRECISION_FUNC(OneBlockReduce)
+#define OneBlockReduceKernel HYPRE_FIXEDPRECISION_FUNC(OneBlockReduceKernel)
+#define warpReduceSum        HYPRE_FIXEDPRECISION_FUNC(warpReduceSum)
+#define blockReduceSum       HYPRE_FIXEDPRECISION_FUNC(blockReduceSum)
+#endif
+
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
 struct HYPRE_Real2
