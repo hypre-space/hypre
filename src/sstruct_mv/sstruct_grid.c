@@ -2179,7 +2179,7 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
 
    global_ranks = hypre_TAlloc(HYPRE_BigInt, num_indexes, memory_location);
 #if defined(HYPRE_USING_GPU)
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       global_ranks_h = hypre_TAlloc(HYPRE_BigInt, num_indexes, HYPRE_MEMORY_HOST);
       indexes_h = hypre_TAlloc(HYPRE_Int*, ndim, HYPRE_MEMORY_HOST);
@@ -2208,7 +2208,7 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
    }
 
 #if defined(HYPRE_USING_GPU)
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       hypre_TMemcpy(global_ranks, global_ranks_h, HYPRE_BigInt, num_indexes, memory_location,
                     HYPRE_MEMORY_HOST);
@@ -2266,7 +2266,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    HYPRE_Int                  num_box_ranks;
    HYPRE_Int                **box_indexes = NULL;
    HYPRE_Int                 *local_ranks = NULL;
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       local_ranks = hypre_TAlloc(HYPRE_Int, num_ranks, memory_location);
    }
@@ -2307,7 +2307,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    hypre_BoxDestroy(box);
 
    /* Copy box_offsets to the device if needed */
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       box_offsets = hypre_TAlloc(HYPRE_BigInt, nentries + 1, memory_location);
       hypre_TMemcpy(box_offsets, box_offsets_h, HYPRE_BigInt, nentries + 1, memory_location,
@@ -2322,7 +2322,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
    /* Get box starts for the global ranks */
    global_ranks_box_starts = hypre_CTAlloc(HYPRE_Int, nentries + 1, memory_location);
 #if defined(HYPRE_USING_GPU)
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
@@ -2356,7 +2356,7 @@ HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
       box = hypre_BoxArrayBox(box_a, entry_num);
       offset = box_offsets[entry_num];
 #if defined(HYPRE_USING_GPU)
-      if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+      if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
       {
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL( std::transform,
@@ -2509,7 +2509,7 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    }
 
    /* Copy part_var_offsets to the device if needed */
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       part_var_offsets = hypre_TAlloc(HYPRE_BigInt, npartvars + 1, memory_location);
       hypre_TMemcpy(part_var_offsets, part_var_offsets_h, HYPRE_BigInt, npartvars + 1, memory_location,
@@ -2524,7 +2524,7 @@ hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid      *grid,
    /* Get the starts for each part/var block in the global ranks */
    global_ranks_part_var_starts = hypre_CTAlloc(HYPRE_Int, npartvars + 1, memory_location);
 #if defined(HYPRE_USING_GPU)
-   if (hypre_GetActualMemLocation(memory_location) != HYPRE_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
