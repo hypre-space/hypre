@@ -2294,6 +2294,7 @@
 #undef hypreGPUKernel_pass_order_count
 #undef hypreGPUKernel_populate_big_P_offd_j
 #undef hypre_BatchedGaussJordanSolveDevice
+#undef hypre_BlockDiagInvDevice
 #undef hypre_BoomerAMGBuildDirInterpDevice
 #undef hypre_BoomerAMGBuildDirInterp_getcoef
 #undef hypre_BoomerAMGBuildDirInterp_getcoef_v2

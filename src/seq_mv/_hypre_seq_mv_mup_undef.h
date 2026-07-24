@@ -48,6 +48,8 @@
 #undef hypre_CSRMatrixCreate
 #undef hypre_CSRMatrixInitialize_v2
 #undef hypre_CSRMatrixResetData
+#undef hypre_SeqMultiVectorCreate
+#undef hypre_SeqVectorInitialize_v2
 #undef hypre_SeqVectorSetData
 #undef hypre_CSRMatrixAdd
 #undef hypre_CSRMatrixAddFirstPass
@@ -131,7 +133,6 @@
 #undef hypre_MultiblockMatrixSetNumSubmatrices
 #undef hypre_MultiblockMatrixSetSubmatrix
 #undef hypre_MultiblockMatrixSetSubmatrixType
-#undef hypre_SeqMultiVectorCreate
 #undef hypre_SeqVectorAxpy
 #undef hypre_SeqVectorAxpyHost
 #undef hypre_SeqVectorAxpyz
@@ -145,7 +146,6 @@
 #undef hypre_SeqVectorDestroy
 #undef hypre_SeqVectorInitialize
 #undef hypre_SeqVectorInitializeShell
-#undef hypre_SeqVectorInitialize_v2
 #undef hypre_SeqVectorInnerProd
 #undef hypre_SeqVectorInnerProdHost
 #undef hypre_SeqVectorInnerProdTagged

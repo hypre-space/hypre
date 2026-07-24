@@ -67,6 +67,7 @@ src/test/sstructmat
 src/test/sstructmat.exe
 src/test/struct
 src/test/struct.exe
+src/test/struct_mp
 src/test/structmat
 src/test/structmat.exe
 src/test/struct_migrate

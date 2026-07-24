@@ -610,6 +610,10 @@ HYPRE_Int HYPRE_FlexGMRESSetPrecond(HYPRE_Solver         solver,
                                     HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_FlexGMRESSetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_FlexGMRESSetLogging(HYPRE_Solver solver,
@@ -676,6 +680,10 @@ HYPRE_Int HYPRE_FlexGMRESGetKDim(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_FlexGMRESGetPrecond(HYPRE_Solver  solver,
                                     HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_FlexGMRESGetPrecondMatrix ( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
 
 /**
  **/

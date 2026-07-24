@@ -1,0 +1,60 @@
+# Output file: solvers_struct_mp.out.0
+PCG Iterations = 10
+Final Relative Residual Norm = 9.129050e-09
+
+# Output file: solvers_struct_mp.out.1
+GMRES Iterations = 14
+Final Relative Residual Norm = 3.372513e-09
+
+# Output file: solvers_struct_mp.out.2
+BiCGSTAB Iterations = 6
+Final Relative Residual Norm = 8.071919e-09
+
+# Output file: solvers_struct_mp.out.3
+PCG Iterations = 7
+Final Relative Residual Norm = 4.327525e-06
+
+# Output file: solvers_struct_mp.out.4
+PCG Iterations = 11
+Final Relative Residual Norm = 2.035813e-09
+
+# Output file: solvers_struct_mp.out.5
+PCG Iterations = 11
+Final Relative Residual Norm = 8.958837e-09
+
+# Output file: solvers_struct_mp.out.6
+GMRES Iterations = 7
+Final Relative Residual Norm = 5.319382e-06
+
+# Output file: solvers_struct_mp.out.7
+GMRES Iterations = 11
+Final Relative Residual Norm = 3.247144e-09
+
+# Output file: solvers_struct_mp.out.8
+GMRES Iterations = 14
+Final Relative Residual Norm = 6.223950e-09
+
+# Output file: solvers_struct_mp.out.9
+BiCGSTAB Iterations = 4
+Final Relative Residual Norm = 3.278329e-06
+
+# Output file: solvers_struct_mp.out.10
+BiCGSTAB Iterations = 6
+Final Relative Residual Norm = 1.018262e-09
+
+# Output file: solvers_struct_mp.out.11
+BiCGSTAB Iterations = 6
+Final Relative Residual Norm = 9.301450e-09
+
+# Output file: solvers_struct_mp.out.12
+PCG Iterations = 3
+Final Relative Residual Norm = 5.831951e-06
+
+# Output file: solvers_struct_mp.out.13
+PCG Iterations = 5
+Final Relative Residual Norm = 1.638724e-09
+
+# Output file: solvers_struct_mp.out.14
+PCG Iterations = 5
+Final Relative Residual Norm = 2.164026e-09
+

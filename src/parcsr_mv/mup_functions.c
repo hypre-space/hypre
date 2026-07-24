@@ -392,6 +392,24 @@ hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocatio
    return hypre_ParCSRMatrixInitialize_v2_pre( precision, matrix, memory_location );
 }
 
+/*--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorCloneDeep_v2_pre( precision, x, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParVectorCreate_pre( precision, comm, global_size, partitioning_in );
+}
+
 
 #endif
 

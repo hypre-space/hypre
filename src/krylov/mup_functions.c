@@ -619,6 +619,15 @@ HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_FlexGMRESGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int *level )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -713,6 +722,15 @@ HYPRE_FlexGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HY
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_FlexGMRESSetPrecondMatrix_pre( precision, solver, precond_matrix );
 }
 
 /*--------------------------------------------------------------------------*/
