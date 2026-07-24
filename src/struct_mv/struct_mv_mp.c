@@ -53,27 +53,11 @@ hypre_StructVectorCopy_mp( hypre_StructVector *x,
    xp = hypre_StructVectorData(x);
    yp = hypre_StructVectorData(y);
    /* copy data */
-   hypre_RealArrayCopy_mp(hypre_StructVectorPrecision (x), xp, hypre_StructVectorMemoryLocation(y),
+   hypre_RealArrayCopy_mp(hypre_StructVectorPrecision (x), xp, hypre_StructVectorMemoryLocation(x),
                           hypre_StructVectorPrecision (y), yp, hypre_StructVectorMemoryLocation(y), size);
 
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- * Mixed-precision clone of struct vector.
- * New vector resides in the same memory location
- *--------------------------------------------------------------------------*/
-/*
-hypre_StructVector *
-hypre_StructVectorClone_mp( hypre_StructVector *x, HYPRE_Precision new_precision )
-{
-   hypre_StructVector   *y;
-
-   if (hypre_StructVectorPrecision(A) == new_precision)
-   {
-      return hypre_ParCSRMatrixClone_pre( hypre_ParCSRMatrixPrecision(A), A, 1 );
-   }
-}
-*/
 #endif
 
