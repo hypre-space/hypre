@@ -2778,7 +2778,8 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
    num_col_ind = hypre_ParCSRMatrixNumNonzeros(parcsr_uA);
    col_ind = hypre_TAlloc(HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(col_ind, hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(parcsr_uA)),
-                 HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE); // hypre_CSRMatrixJ is in device memory? Use memory location of parcsr_uA?
+                 HYPRE_Int, num_col_ind, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE); // hypre_CSRMatrixJ is in device memory? Use memory location of parcsr_uA?
    /* WM: todo - is this right? */
    hypre_UniqueIntArrayND(1, &num_col_ind, &col_ind);
 
@@ -2788,7 +2789,8 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
       hypre_MatvecCommPkgCreate(parcsr_uA);
       comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_uA);
    }
-   num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg));
+   num_send_map_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                        hypre_ParCSRCommPkgNumSends(comm_pkg));
    send_map_elmts = hypre_TAlloc(HYPRE_Int, num_send_map_elmts, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(send_map_elmts, hypre_ParCSRCommPkgSendMapElmts(comm_pkg), HYPRE_Int,
                  num_send_map_elmts, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
@@ -2803,14 +2805,15 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
    }
    for (i = 0; i < num_send_map_elmts; i++)
    {
-      global_ranks[num_col_ind + i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) + (HYPRE_BigInt) send_map_elmts[i];
+      global_ranks[num_col_ind + i] = hypre_ParCSRMatrixFirstRowIndex(parcsr_uA) +
+                                      (HYPRE_BigInt) send_map_elmts[i];
    }
 
    /* WM: todo - should I unique the global ranks also? Probably doesn't much matter? */
 
    /* Get pointers to the start of each part/var block in the global ranks */
-   hypre_SStructGridGetGlobalRanksPartVarPtr(grid, global_ranks, &global_ranks_part_var_ptr,
-                                             type, hypre_ParCSRMatrixLastRowIndex(parcsr_uB));
+   hypre_SStructGridGetGlobalRanksPartVarStarts(grid, type, memory_location, num_ranks, global_ranks,
+                                                &global_ranks_part_var_ptr);
 
    /* Generate convert_boxa from global ranks */
    convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
@@ -2826,9 +2829,9 @@ hypre_SStructMatmatRightMatrixToUMatrix( HYPRE_SStructMatrix A, HYPRE_SStructMat
          if (num_ranks)
          {
             /* Map global_ranks to grid dofs to get convert_indexes */
-            hypre_SStructGridGlobalRanksToIndexes(grid, part, var, num_ranks,
+            hypre_SStructGridGlobalRanksToIndexes(grid, type, memory_location, part, var, num_ranks,
                                                   &(global_ranks[global_ranks_part_var_ptr[npartvars]]),
-                                                  &convert_indexes, type);
+                                                  &convert_indexes);
             /* WM: note - inidces passed to hypre_BoxArrayCreateFromIndices() are indexes[dim][i] */
             /* WM: todo - change hypre_BoxArrayCreateFromIndices() to hypre_BoxArrayCreateFromIndexes() */
             hypre_BoxArrayCreateFromIndices(ndim, num_ranks, convert_indexes,

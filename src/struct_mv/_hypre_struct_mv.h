@@ -214,7 +214,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 #define zypre_BoxLoopDeclare() \
 HYPRE_Int  hypre__tot, hypre__div, hypre__mod;\
 HYPRE_Int  hypre__block, hypre__num_blocks;\
-HYPRE_Int  hypre__d, hypre__ndim, hypre__ik;\
+HYPRE_Int  hypre__d, hypre__ndim;\
 HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN;\
 HYPRE_Int  hypre__i[HYPRE_MAXDIM+1], hypre__n[HYPRE_MAXDIM+1]
 
@@ -226,7 +226,6 @@ HYPRE_Int  hypre__sk##k[HYPRE_MAXDIM], hypre__ikinc##k[HYPRE_MAXDIM+1]
 hypre__ndim = ndim;\
 hypre__n[0] = loop_size[0];\
 hypre__tot = 1;\
-HYPRE_UNUSED_VAR(hypre__ik);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
    hypre__n[hypre__d] = loop_size[hypre__d];\
@@ -250,6 +249,8 @@ else\
 }
 
 #define zypre_BoxLoopInitK(k, dboxk, startk, stridek) \
+{\
+HYPRE_Int  hypre__ik;\
 hypre__sk##k[0] = stridek[0];\
 hypre__ikinc##k[0] = 0;\
 hypre__ik = hypre_BoxSizeD(dboxk, 0);\
@@ -262,7 +263,8 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 }\
 hypre__i0inc##k = hypre__sk##k[0];\
 hypre__ikinc##k[hypre__ndim] = 0;\
-hypre__ikstart##k = hypre_BoxIndexRank(dboxk, startk)
+hypre__ikstart##k = hypre_BoxIndexRank(dboxk, startk);\
+}
 
 #define zypre_BoxLoopSet() \
 hypre__IN = hypre__n[0];\
@@ -2067,6 +2069,12 @@ hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_a
 HYPRE_Int hypre_BoxArrayArrayPrintToFile ( FILE *file, hypre_BoxArrayArray *box_array_array );
 HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm, const char *filename,
                                      hypre_BoxArrayArray *box_array_array );
+
+/* box_device.c */
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_BoxRanksToIndexesDevice( hypre_Box *box, HYPRE_Int num_ranks,
+                                         HYPRE_Int *ranks, HYPRE_Int ***indexes_ptr );
+#endif
 
 /* box_ds.c */
 HYPRE_Int hypre_BoxBTNodeCreate ( HYPRE_Int ndim, hypre_BoxBTNode **btnode_ptr );
