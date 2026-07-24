@@ -2297,6 +2297,7 @@
 #define hypreGPUKernel_pass_order_count HYPRE_FIXEDPRECISION_FUNC ( hypreGPUKernel_pass_order_count )
 #define hypreGPUKernel_populate_big_P_offd_j HYPRE_FIXEDPRECISION_FUNC ( hypreGPUKernel_populate_big_P_offd_j )
 #define hypre_BatchedGaussJordanSolveDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BatchedGaussJordanSolveDevice )
+#define hypre_BlockDiagInvDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BlockDiagInvDevice )
 #define hypre_BoomerAMGBuildDirInterpDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGBuildDirInterpDevice )
 #define hypre_BoomerAMGBuildDirInterp_getcoef HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGBuildDirInterp_getcoef )
 #define hypre_BoomerAMGBuildDirInterp_getcoef_v2 HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGBuildDirInterp_getcoef_v2 )
