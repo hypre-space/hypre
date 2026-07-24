@@ -164,7 +164,7 @@ set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
 set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
 
-# GPU options
+# GPU common options
 set_hypre_option(GPU  HYPRE_ENABLE_CUDA                 "Use CUDA. Require cuda-10.0 or higher" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_HIP                  "Use HIP" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_SYCL                 "Use SYCL" OFF)
@@ -173,12 +173,14 @@ set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for 
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_THRUST_NOSYNC        "Use Thrust par_nosync policy" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA or rocTX on HIP" OFF)
+
 # CUDA options
 set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
+
 # HIP options
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
@@ -186,6 +188,7 @@ set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCPRIM              "Use rocPRIM" ON)
+
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
