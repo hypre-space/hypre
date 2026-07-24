@@ -844,22 +844,6 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixSetRowValues(HYPRE_SStructMatrix  matrix,
-                                HYPRE_Int            part,
-                                HYPRE_Int            var,
-                                HYPRE_Int            nrows,
-                                HYPRE_Int          **indices,
-                                HYPRE_Int           *nentries,
-                                HYPRE_Int           *entries,
-                                HYPRE_Complex       *values)
-{
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
    HYPRE_Int               ndim            = hypre_SStructMatrixNDim(matrix);
