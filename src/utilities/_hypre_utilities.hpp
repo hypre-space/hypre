@@ -2624,8 +2624,6 @@ hypre_HYPREIntToCusparseIndexType()
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
-template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
-
 /* Packed real types used by the reducers below.
  *
  * These are templated on the scalar type instead of referring to HYPRE_Real
@@ -2927,7 +2925,7 @@ struct ReduceSum
           * held by the (precision-agnostic) handle and shared by all precisions, so
           * size it with the largest real type instead of the build's HYPRE_Real. */
          hypre_HandleReduceBuffer(hypre_handle()) =
-            hypre_TAlloc(char, 6 * sizeof(hypre_long_double) * HYPRE_MAX_NTHREADS_BLOCK,
+            hypre_TAlloc(hypre_RealPack6<hypre_long_double>, HYPRE_MAX_NTHREADS_BLOCK,
                          HYPRE_MEMORY_DEVICE);
       }
 
