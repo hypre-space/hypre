@@ -59,6 +59,7 @@ spackspec="hypre@develop~debug+superlu-dist ^$superludistspec"
 spack install --fresh $spackspec
 spack load    $spackspec
 spackdir=`spack location -i $spackspec`
+export LD_LIBRARY_PATH=$spackdir/lib64
 test.sh basic.sh ../src -co: -mo: -spack $spackdir -ro: -superlu
 ./renametest.sh basic $output_dir/basic-dsuperlu
 
