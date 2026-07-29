@@ -329,6 +329,20 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int hypre_SStructPVectorSetArrayValuesDevice( hypre_SStructPVector *pvector,
+                                                    HYPRE_Int var,
+                                                    HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes,
+                                                    HYPRE_Complex *values,
+                                                    HYPRE_Int action )
+{
+   /* WM: todo */
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
 {

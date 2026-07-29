@@ -631,13 +631,32 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorSetArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nvalues,
                                   HYPRE_Int           *indexes,
                                   HYPRE_Complex       *values)
 {
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructPVectorSetArrayValuesDevice(pvector, var, nvalues, indexes, values, 0);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorSetValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
+
    return hypre_error_flag;
 }
 
@@ -645,13 +664,32 @@ HYPRE_SStructVectorSetArrayValues(HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructVector  vector,
                                     HYPRE_Int            part,
                                     HYPRE_Int            var,
                                     HYPRE_Int            nvalues,
                                     HYPRE_Int           *indexes,
                                     HYPRE_Complex       *values)
 {
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructPVectorSetArrayValuesDevice(pvector, var, nvalues, indexes, values, 1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorAddToValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
+
    return hypre_error_flag;
 }
 
@@ -659,13 +697,32 @@ HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorGetArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorGetArrayValues(HYPRE_SStructVector  vector,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nvalues,
                                   HYPRE_Int           *indexes,
                                   HYPRE_Complex       *values)
 {
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructPVectorSetArrayValuesDevice(pvector, var, nvalues, indexes, values, -1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorGetValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
+
    return hypre_error_flag;
 }
 

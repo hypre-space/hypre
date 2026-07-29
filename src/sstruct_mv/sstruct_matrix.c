@@ -1942,6 +1942,27 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * (action > 0): add-to values
+ * (action = 0): set values
+ * (action < 0): get values
+ * (action =-2): get values and zero out
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
+                                         HYPRE_Int            part,
+                                         HYPRE_Int            var,
+                                         HYPRE_Int            nvalues,
+                                         HYPRE_Int           *indexes,
+                                         HYPRE_Int           *entries,
+                                         HYPRE_Complex       *values,
+                                         HYPRE_Int            action )
+{
+   /* WM: todo */
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Put inter-part couplings in UMatrix and zero them out in PMatrix (possibly in
  * ghost zones).  Assumes that all entries are stencil entries.
  *--------------------------------------------------------------------------*/

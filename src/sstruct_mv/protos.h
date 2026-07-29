@@ -179,6 +179,8 @@ HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix, HYPRE_Int p
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                            hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                            HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
+                                                   HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                                  hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                  HYPRE_Complex *values, HYPRE_Int action );
@@ -339,6 +341,8 @@ HYPRE_Int hypre_SStructPVectorSetValues ( hypre_SStructPVector *pvector, hypre_I
                                           HYPRE_Int var, HYPRE_Complex *value, HYPRE_Int action );
 HYPRE_Int hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector, hypre_Box *set_box,
                                             HYPRE_Int var, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_Int hypre_SStructPVectorSetArrayValuesDevice( hypre_SStructPVector *pvector, HYPRE_Int var, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructPVectorAccumulate ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorAssemble ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorGather ( hypre_SStructPVector *pvector );

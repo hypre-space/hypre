@@ -1406,7 +1406,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int
-HYPRE_SStructVectorSetArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nvalues,
@@ -1419,7 +1419,7 @@ HYPRE_SStructVectorSetArrayValues(HYPRE_SStructMatrix  matrix,
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int
-HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructVector  vector,
                                     HYPRE_Int            part,
                                     HYPRE_Int            var,
                                     HYPRE_Int            nvalues,
@@ -1479,7 +1479,7 @@ HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int
-HYPRE_SStructVectorGetArrayValues(HYPRE_SStructMatrix  matrix,
+HYPRE_SStructVectorGetArrayValues(HYPRE_SStructVector  vector,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nvalues,
