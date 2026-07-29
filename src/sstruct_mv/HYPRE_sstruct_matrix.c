@@ -847,9 +847,8 @@ HYPRE_Int
 HYPRE_SStructMatrixSetArrayValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
-                                  HYPRE_Int            nrows,
-                                  HYPRE_Int          **indexes,
-                                  HYPRE_Int           *nentries,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
                                   HYPRE_Int           *entries,
                                   HYPRE_Complex       *values)
 {
@@ -863,9 +862,8 @@ HYPRE_Int
 HYPRE_SStructMatrixAddToArrayValues(HYPRE_SStructMatrix  matrix,
                                     HYPRE_Int            part,
                                     HYPRE_Int            var,
-                                    HYPRE_Int            nrows,
-                                    HYPRE_Int          **indexes,
-                                    HYPRE_Int           *nentries,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
                                     HYPRE_Int           *entries,
                                     HYPRE_Complex       *values)
 {
@@ -879,9 +877,8 @@ HYPRE_Int
 HYPRE_SStructMatrixGetArrayValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
-                                  HYPRE_Int            nrows,
-                                  HYPRE_Int          **indexes,
-                                  HYPRE_Int           *nentries,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
                                   HYPRE_Int           *entries,
                                   HYPRE_Complex       *values)
 {

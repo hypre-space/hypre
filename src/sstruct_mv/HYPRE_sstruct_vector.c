@@ -634,8 +634,8 @@ HYPRE_Int
 HYPRE_SStructVectorSetArrayValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
-                                  HYPRE_Int            nindexes,
-                                  HYPRE_Int          **indexes,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
                                   HYPRE_Complex       *values)
 {
    return hypre_error_flag;
@@ -648,8 +648,8 @@ HYPRE_Int
 HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructMatrix  matrix,
                                     HYPRE_Int            part,
                                     HYPRE_Int            var,
-                                    HYPRE_Int            nindexes,
-                                    HYPRE_Int          **indexes,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
                                     HYPRE_Complex       *values)
 {
    return hypre_error_flag;
@@ -662,8 +662,8 @@ HYPRE_Int
 HYPRE_SStructVectorGetArrayValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Int            part,
                                   HYPRE_Int            var,
-                                  HYPRE_Int            nindexes,
-                                  HYPRE_Int          **indexes,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
                                   HYPRE_Complex       *values)
 {
    return hypre_error_flag;
