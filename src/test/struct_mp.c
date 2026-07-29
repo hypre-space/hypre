@@ -15,11 +15,6 @@
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
 
-#define HYPRE_MFLOPS 0
-#if HYPRE_MFLOPS
-#include "_hypre_struct_mv.h"
-#endif
-
 HYPRE_Int  SetStencilBndry_mp(HYPRE_StructMatrix A, HYPRE_StructGrid gridmatrix, HYPRE_Int* period);
 
 HYPRE_Int AddValuesVector_mp(hypre_StructGrid  *gridvector,
@@ -1278,8 +1273,6 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetLogging_pre( precond_precision, precond, 0);
       }
 
-
-#if !HYPRE_MFLOPS
       /*-----------------------------------------------------------
        * Solve the system using PCG
        *-----------------------------------------------------------*/
@@ -1748,42 +1741,6 @@ main( hypre_int argc,
       {
          HYPRE_StructPFMGDestroy_pre(precond_precision, precond);
       }
-#endif
-
-      /*-----------------------------------------------------------
-       * Compute MFLOPs for Matvec
-       *-----------------------------------------------------------*/
-
-#if HYPRE_MFLOPS
-      {
-         void *matvec_data;
-         HYPRE_Int   i, imax, N;
-
-         /* compute imax */
-         N = (P * nx) * (Q * ny) * (R * nz);
-         imax = (5 * 1000000) / N;
-
-         matvec_data = hypre_StructMatvecCreate_pre( solver_precision,);
-         hypre_StructMatvecSetup_pre( solver_precision, matvec_data, A, x);
-
-         time_index = hypre_InitializeTiming("Matvec");
-         hypre_BeginTiming(time_index);
-
-         for (i = 0; i < imax; i++)
-         {
-            hypre_StructMatvecCompute_pre( solver_precision, matvec_data, 1.0, A, x, 1.0, b);
-         }
-         /* this counts mult-adds */
-         hypre_IncFLOPCount_pre( solver_precision, 7 * N * imax);
-
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Matvec time", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-
-         hypre_StructMatvecDestroy_pre( solver_precision, matvec_data);
-      }
-#endif
 
       /*-----------------------------------------------------------
        * Finalize things
