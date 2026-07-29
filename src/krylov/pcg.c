@@ -654,7 +654,7 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (print_level > 1 && my_id == 0)
          {
-            hypre_printf("Recomputing the residual...\n");
+            hypre_printf("Periodic residual replacement at iteration %d ...\n", i);
          }
          (*(pcg_functions->CopyVector))(r, s); /*save old residual */
          if (flex)
@@ -831,7 +831,42 @@ hypre_PCGSolve( void *pcg_vdata,
             i_prod = (*(pcg_functions->InnerProd))(r, s);
             gamma = i_prod;
          }
-         if (i_prod / bi_prod >= eps) { tentatively_converged = 0; }
+         
+         if (i_prod / bi_prod >= eps) 
+         { 
+            tentatively_converged = 0; 
+
+            if (print_level > 1 && my_id == 0)
+            {
+               hypre_printf("\n");
+               hypre_printf(">>>> Recomputed residual convergence verification failed at iteration %d:\n", i);
+               if (two_norm)
+               {
+                  hypre_printf("    ||r||_2         = %e\n", hypre_sqrt(i_prod));
+                  hypre_printf("    ||r||_2/||b||_2 = %e\n",
+                      hypre_sqrt(i_prod / bi_prod));
+               }
+               else
+               {
+                  hypre_printf("    ||r||_C         = %e\n", hypre_sqrt(i_prod));
+                  hypre_printf("    ||r||_C/||b||_C = %e\n",
+                      hypre_sqrt(i_prod / bi_prod));
+               }
+               hypre_printf(">>>> Restarting PCG from the true residual.\n");
+               hypre_printf("\n");
+            }            
+
+            if (two_norm)
+            {
+               /* compute preconditioned resdidual - s = C*r */
+               (*(pcg_functions->ClearVector))(s);
+               precond(precond_data, precond_Mat, r, s);
+               /* iprod = gamma = <r,s> */
+               gamma = (*(pcg_functions->InnerProd))(r, s);
+            }
+            /* set flag to restart pcg from true residual */
+            recompute_true_residual = 1;
+         }
       }
       if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
          /* At user request, don't treat this as converged unless x didn't change
