@@ -666,6 +666,131 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* WM: todo - move these routines to box_device.c */
+/* WM: todo - Naming convention for device subroutines?
+ *            Is this something we do elsewhere in the code? */
+__device__ HYPRE_Int
+hypre_IndexInBoxDevice( HYPRE_Int    *index,
+                        hypre_Box     box )
+{
+   HYPRE_Int d, inbox, ndim = box.ndim;
+
+   inbox = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      if (!(index[d] >= box.imin[d] && index[d] <= box.imax[d]))
+      {
+         inbox = 0;
+         break;
+      }
+   }
+
+   return inbox;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+__device__ HYPRE_Int
+hypre_BoxIndexRankDevice( hypre_Box    box,
+                          HYPRE_Int   *index )
+{
+   HYPRE_Int  rank, size, d, ndim = box.ndim;
+
+   rank = 0;
+   size = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      rank += (index[d] - box.imin[d]) * size;
+      /* WM: todo - make hypre_BoxSizeDevice() subroutine? */
+      /* size *= hypre_BoxSizeD(box, d); */
+      size *= max(0, box.imax[d] - box.imin[d] + 1);
+   }
+
+   return rank;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+#if defined(HYPRE_USING_GPU)
+__global__ void
+hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
+                                           hypre_Box          grid_box,
+                                           hypre_Box          data_box,
+                                           HYPRE_Int          nvalues,
+                                           HYPRE_Int         *indexes,
+                                           HYPRE_Complex     *values,
+                                           HYPRE_Complex     *vec_box_data )
+{
+   /* WM: todo */
+   HYPRE_Int d;
+   HYPRE_Int ndim = grid_box.ndim;
+   HYPRE_Int my_index[3];
+
+   HYPRE_Int  i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < nvalues)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         my_index[d] = indexes[i * ndim + d];
+      }
+      /* Set value in the grid box */
+      if (hypre_IndexInBoxDevice(my_index, grid_box))
+      {
+         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = values[i];
+      }
+      /* Otherwise, clear the value in the ghost box */
+      /* WM: todo - do we always want to do this for set? What about pure struct case? */
+      else if (hypre_IndexInBoxDevice(my_index, data_box))
+      {
+         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = 0.0;
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
+                                        HYPRE_Int           nvalues,
+                                        HYPRE_Int          *indexes,
+                                        HYPRE_Complex      *values )
+{
+   HYPRE_Int i;
+   HYPRE_Complex *vec_box_data;
+   hypre_Box *grid_box;
+   hypre_Box *data_box;
+
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nvalues, "thread", bDim);
+
+   for (i = 0; i < hypre_StructVectorNBoxes(vector); i++)
+   {
+      grid_box = hypre_StructVectorBox(vector, i);
+      data_box = hypre_StructVectorBoxDataBox(vector, i);
+      vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
+
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorSetArrayValues,
+                        gDim,
+                        bDim,
+                        *grid_box,
+                        *data_box,
+                        nvalues,
+                        indexes,
+                        values,
+                        vec_box_data );
+   }
+
+   return hypre_error_flag;
+}
+#endif
+
+/*--------------------------------------------------------------------------
  * (outside > 0): clear values possibly outside of the grid extents
  * (outside = 0): clear values only inside the grid extents
  *--------------------------------------------------------------------------*/

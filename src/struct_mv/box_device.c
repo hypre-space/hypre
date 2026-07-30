@@ -11,10 +11,14 @@
 #if defined(HYPRE_USING_GPU)
 
 /* Need struct wrapper to pass hypre_Index as argument to GPU kernel */
+/* WM: todo - move this somewhere accessible by multiple files? */
 typedef struct hypre_IndexDevice_struct
 {
    hypre_Index idx;
 } hypre_IndexDevice;
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 __global__ void
 hypreGPUKernel_BoxRanksToIndexes( hypre_DeviceItem  &item,

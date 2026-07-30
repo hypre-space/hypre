@@ -642,11 +642,15 @@ HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
    HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
-   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
+   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
+   hypre_SStructPVector  *pvector         = hypre_SStructVectorPVector(vector, part);
+   hypre_StructVector    *svector         = hypre_SStructPVectorSVector(pvector, var);
+
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_SStructPVectorSetArrayValuesDevice(pvector, var, nvalues, indexes, values, 0);
+      /* WM: todo - do I need hypre_SStructPVectorSetArrayValuesDevice()? */
+      /* hypre_SStructPVectorSetArrayValuesDevice(pvector, var, nvalues, indexes, values, 0); */
+      hypre_StructVectorSetArrayValuesDevice(svector, nvalues, indexes, values);
    }
    else
 #endif

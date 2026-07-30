@@ -148,6 +148,8 @@ hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
  * (action > 0): add-to values
  * (action = 0): set values
  * (action < 0): get values
+ * WM: todo - note that we have a separate routine, hypre_SStructPVectorGetValues()
+ *            for get... do we actually ever use this routine with action < 0?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -336,7 +338,10 @@ HYPRE_Int hypre_SStructPVectorSetArrayValuesDevice( hypre_SStructPVector *pvecto
                                                     HYPRE_Complex *values,
                                                     HYPRE_Int action )
 {
-   /* WM: todo */
+   /* WM: todo - Do we need this routine?
+    *            Or just bypass and go directly to hypre_StructVectorSetArrayValuesDevice()? */
+   hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   hypre_StructVectorSetArrayValuesDevice(svector, nvalues, indexes, values);
    return hypre_error_flag;
 }
 
