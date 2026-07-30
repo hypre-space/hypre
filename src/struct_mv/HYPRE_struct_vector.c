@@ -211,7 +211,7 @@ HYPRE_StructVectorSetArrayValues(HYPRE_StructVector  vector,
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values);
+      hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values, 0);
    }
    else
 #endif
@@ -243,8 +243,7 @@ HYPRE_StructVectorAddToArrayValues(HYPRE_StructVector  vector,
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* WM: todo */
-      /* hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values); */
+      hypre_StructVectorAddToArrayValuesDevice(vector, nvalues, indexes, values, 0);
    }
    else
 #endif
@@ -384,8 +383,7 @@ HYPRE_StructVectorGetArrayValues(HYPRE_StructVector  vector,
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* WM: todo */
-      /* hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values); */
+      hypre_StructVectorGetArrayValuesDevice(vector, nvalues, indexes, values);
    }
    else
 #endif

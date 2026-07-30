@@ -668,6 +668,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_GPU)
 /* WM: todo - move these routines to box_device.c */
 /* WM: todo - Naming convention for device subroutines?
  *            Is this something we do elsewhere in the code? */
@@ -715,7 +716,7 @@ hypre_BoxIndexRankDevice( hypre_Box    box,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+template <bool clear_ghost>
 __global__ void
 hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
                                            hypre_Box          grid_box,
@@ -725,7 +726,214 @@ hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
                                            HYPRE_Complex     *values,
                                            HYPRE_Complex     *vec_box_data )
 {
-   /* WM: todo */
+   HYPRE_Int d;
+   HYPRE_Int done = 0;
+   HYPRE_Int ndim = grid_box.ndim;
+   HYPRE_Int my_index[3];
+
+   HYPRE_Int  i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < nvalues)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         my_index[d] = indexes[i * ndim + d];
+      }
+
+      /* Set value in the grid box */
+      if (hypre_IndexInBoxDevice(my_index, grid_box))
+      {
+         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = values[i];
+         done = 1;
+      }
+
+      /* Clear the value in the ghost box */
+      if (clear_ghost)
+      {
+         if (!done && hypre_IndexInBoxDevice(my_index, data_box))
+         {
+            vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = 0.0;
+         }
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
+                                        HYPRE_Int           nvalues,
+                                        HYPRE_Int          *indexes,
+                                        HYPRE_Complex      *values,
+                                        HYPRE_Int           clear_ghost )
+{
+   HYPRE_Int i;
+   HYPRE_Complex *vec_box_data;
+   hypre_Box *grid_box;
+   hypre_Box *data_box;
+
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nvalues, "thread", bDim);
+
+   for (i = 0; i < hypre_StructVectorNBoxes(vector); i++)
+   {
+      grid_box = hypre_StructVectorBox(vector, i);
+      data_box = hypre_StructVectorBoxDataBox(vector, i);
+      vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
+
+      if (clear_ghost)
+      {
+         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructVectorSetArrayValues<1>),
+                           gDim,
+                           bDim,
+                           *grid_box,
+                           *data_box,
+                           nvalues,
+                           indexes,
+                           values,
+                           vec_box_data );
+      }
+      else
+      {
+         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructVectorSetArrayValues<0>),
+                           gDim,
+                           bDim,
+                           *grid_box,
+                           *data_box,
+                           nvalues,
+                           indexes,
+                           values,
+                           vec_box_data );
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_StructVectorAddToArrayValues( hypre_DeviceItem  &item,
+                                             hypre_Box          grid_box,
+                                             hypre_Box          data_box,
+                                             HYPRE_Int          nvalues,
+                                             HYPRE_Int         *indexes,
+                                             HYPRE_Complex     *values,
+                                             HYPRE_Complex     *vec_box_data,
+                                             bool              *done_arr )
+{
+   HYPRE_Int d;
+   HYPRE_Int ndim = grid_box.ndim;
+   HYPRE_Int my_index[3];
+
+   HYPRE_Int  i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   /* Check whether value has already been added somewhere */
+   /* Note that done_arr may be NULL in the case where we don't consider adding to ghosts */
+   if (i < nvalues && (!done_arr || !done_arr[i]))
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         my_index[d] = indexes[i * ndim + d];
+      }
+
+      /* Add to value in the grid box */
+      if (hypre_IndexInBoxDevice(my_index, grid_box))
+      {
+         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] += values[i];
+         if (done_arr)
+         {
+            done_arr[i] = 1;
+         }
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector,
+                                        HYPRE_Int           nvalues,
+                                        HYPRE_Int          *indexes,
+                                        HYPRE_Complex      *values,
+                                        HYPRE_Int           add_to_ghost )
+{
+   HYPRE_Int i;
+   HYPRE_Complex *vec_box_data;
+   hypre_Box *grid_box;
+   hypre_Box *data_box;
+   bool *done_arr = NULL;
+
+   if (add_to_ghost)
+   {
+      done_arr = hypre_CTAlloc(bool, nvalues, HYPRE_MEMORY_DEVICE);
+   }
+
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nvalues, "thread", bDim);
+
+   /* Add to real dofs in the grid boxes */
+   for (i = 0; i < hypre_StructVectorNBoxes(vector); i++)
+   {
+      grid_box = hypre_StructVectorBox(vector, i);
+      data_box = hypre_StructVectorBoxDataBox(vector, i);
+      vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
+
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorAddToArrayValues,
+                        gDim,
+                        bDim,
+                        *grid_box,
+                        *data_box,
+                        nvalues,
+                        indexes,
+                        values,
+                        vec_box_data,
+                        done_arr );
+   }
+   /* Add to ghosts */
+   if (add_to_ghost)
+   {
+      for (i = 0; i < hypre_StructVectorNBoxes(vector); i++)
+      {
+         data_box = hypre_StructVectorBoxDataBox(vector, i);
+         vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
+
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorAddToArrayValues,
+                           gDim,
+                           bDim,
+                           *data_box,
+                           *data_box,
+                           nvalues,
+                           indexes,
+                           values,
+                           vec_box_data,
+                           done_arr );
+      }
+   }
+
+   if (add_to_ghost)
+   {
+      hypre_TFree(done_arr, HYPRE_MEMORY_DEVICE);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_StructVectorGetArrayValues( hypre_DeviceItem  &item,
+                                           hypre_Box          grid_box,
+                                           hypre_Box          data_box,
+                                           HYPRE_Int          nvalues,
+                                           HYPRE_Int         *indexes,
+                                           HYPRE_Complex     *vec_box_data,
+                                           HYPRE_Complex     *values )
+{
    HYPRE_Int d;
    HYPRE_Int ndim = grid_box.ndim;
    HYPRE_Int my_index[3];
@@ -738,16 +946,11 @@ hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
       {
          my_index[d] = indexes[i * ndim + d];
       }
-      /* Set value in the grid box */
+
+      /* Get value in the grid box */
       if (hypre_IndexInBoxDevice(my_index, grid_box))
       {
-         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = values[i];
-      }
-      /* Otherwise, clear the value in the ghost box */
-      /* WM: todo - do we always want to do this for set? What about pure struct case? */
-      else if (hypre_IndexInBoxDevice(my_index, data_box))
-      {
-         vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = 0.0;
+         values[i] = vec_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ];
       }
    }
 }
@@ -756,7 +959,7 @@ hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
+hypre_StructVectorGetArrayValuesDevice( hypre_StructVector *vector,
                                         HYPRE_Int           nvalues,
                                         HYPRE_Int          *indexes,
                                         HYPRE_Complex      *values )
@@ -775,15 +978,15 @@ hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
       data_box = hypre_StructVectorBoxDataBox(vector, i);
       vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorSetArrayValues,
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorGetArrayValues,
                         gDim,
                         bDim,
                         *grid_box,
                         *data_box,
                         nvalues,
                         indexes,
-                        values,
-                        vec_box_data );
+                        vec_box_data,
+                        values );
    }
 
    return hypre_error_flag;

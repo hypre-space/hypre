@@ -341,8 +341,6 @@ HYPRE_Int hypre_SStructPVectorSetValues ( hypre_SStructPVector *pvector, hypre_I
                                           HYPRE_Int var, HYPRE_Complex *value, HYPRE_Int action );
 HYPRE_Int hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector, hypre_Box *set_box,
                                             HYPRE_Int var, hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action );
-HYPRE_Int hypre_SStructPVectorSetArrayValuesDevice( hypre_SStructPVector *pvector, HYPRE_Int var, HYPRE_Int nvalues,
-                                                    HYPRE_Int *indexes, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructPVectorAccumulate ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorAssemble ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructPVectorGather ( hypre_SStructPVector *pvector );
