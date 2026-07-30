@@ -1011,7 +1011,7 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Complex       *values);
 
 /**
- * Set an arbitrary array of matrix values in a given part/var at once.
+ * Set an arbitrary array of matrix values in a given part/var.
  * The \e indexes array has length \e nvalues * \e ndim and lists the
  * indexes where values will be set, where entry (\e i * \e ndim + \e j)
  * in the passed \e indexes array describes the \e j'th component of the
@@ -1029,7 +1029,7 @@ HYPRE_SStructMatrixSetArrayValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Complex       *values);
 
 /**
- * Add to an arbitrary array of matrix values in a given part/var at once.
+ * Add to an arbitrary array of matrix values in a given part/var.
  * See HYPRE_SStructMatrixSetArrayValues() for details on argument array formats.
  **/
 HYPRE_Int
@@ -1093,7 +1093,7 @@ HYPRE_SStructMatrixGetFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Complex       *values);
 
 /**
- * Get an arbitrary array of matrix values in a given part/var at once.
+ * Get an arbitrary array of matrix values in a given part/var.
  * See HYPRE_SStructMatrixSetArrayValues() for details on argument array formats.
  **/
 HYPRE_Int
@@ -1401,8 +1401,8 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
                                    HYPRE_Complex       *values);
 
 /**
- * Set vector coefficients at an arbitrary array of indexes in a given part/var
- * at once, where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * Set vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int
@@ -1414,8 +1414,8 @@ HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
                                   HYPRE_Complex       *values);
 
 /**
- * Add to vector coefficients at an arbitrary array of indexes in a given part/var
- * at once, where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * Add to vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int
@@ -1474,8 +1474,8 @@ HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
                                    HYPRE_Complex       *values);
 
 /**
- * Get vector coefficients at an arbitrary array of indexes in a given part/var
- * at once, where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * Get vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
  * describes the \e j'th component of the \e i'th index.
  **/
 HYPRE_Int

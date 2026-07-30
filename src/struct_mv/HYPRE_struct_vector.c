@@ -194,6 +194,71 @@ HYPRE_StructVectorAddToBoxValues2( HYPRE_StructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetArrayValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetArrayValues(HYPRE_StructVector  vector,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Complex      *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_StructVectorMemoryLocation(vector);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructVectorSetValues(vector, &(indexes[i * ndim]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorAddToArrayValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorAddToArrayValues(HYPRE_StructVector  vector,
+                                   HYPRE_Int           nvalues,
+                                   HYPRE_Int          *indexes,
+                                   HYPRE_Complex      *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_StructVectorMemoryLocation(vector);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      /* WM: todo */
+      /* hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values); */
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructVectorAddToValues(vector, &(indexes[i * ndim]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorAxpy
  *--------------------------------------------------------------------------*/
 
@@ -297,6 +362,39 @@ HYPRE_StructVectorGetBoxValues2( HYPRE_StructVector  vector,
 
    hypre_BoxDestroy(set_box);
    hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorGetArrayValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorGetArrayValues(HYPRE_StructVector  vector,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Complex      *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_StructVectorMemoryLocation(vector);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      /* WM: todo */
+      /* hypre_StructVectorSetArrayValuesDevice(vector, nvalues, indexes, values); */
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructVectorGetValues(vector, &(indexes[i * ndim]), &(values[i]));
+      }
+   }
 
    return hypre_error_flag;
 }
