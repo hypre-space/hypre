@@ -667,6 +667,35 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
       iprod = *iprod_ptr;
    }
 
+   /* The tag count must agree across ranks: this routine performs collective
+    * reductions whose size depends on it, and a rank owning no rows carries no tags.
+    * Take the global maximum so every rank follows the same branch below. */
+   {
+      HYPRE_Int global_num_tags = num_tags;
+
+      hypre_MPI_Allreduce(&num_tags, &global_num_tags, 1, HYPRE_MPI_INT,
+                          hypre_MPI_MAX, comm);
+      if (global_num_tags > num_tags)
+      {
+         /* This rank owns no tagged entries; contribute zeros to the reduction. */
+         num_tags = global_num_tags;
+         if (*iprod_ptr == NULL)
+         {
+            hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+            iprod = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
+         }
+         iprod_local = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
+         hypre_MPI_Allreduce(iprod_local, iprod, num_tags + 1,
+                             HYPRE_MPI_COMPLEX, hypre_MPI_SUM, comm);
+         hypre_TFree(iprod_local, HYPRE_MEMORY_HOST);
+
+         *num_tags_ptr = num_tags;
+         *iprod_ptr    = iprod;
+
+         return hypre_error_flag;
+      }
+   }
+
    /* Fallback to full vector inner product if num_tags == 1 or tags is NULL */
    if (num_tags == 1 || !tags)
    {
