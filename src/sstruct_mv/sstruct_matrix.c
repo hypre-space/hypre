@@ -331,6 +331,7 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
    HYPRE_Int            *sentries;
    HYPRE_Int             i;
 
+   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var? */
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
    sentries = hypre_SStructPMatrixSEntries(pmatrix);
@@ -1941,6 +1942,173 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_GPU)
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* WM: todo - make this more generally available? Useful elsewhere? */
+__global__ void
+hypreGPUKernel_CopyIndexes(hypre_DeviceItem &item,
+                           HYPRE_Int  ndim,
+                           HYPRE_Int  n_copy_indexes,
+                           HYPRE_Int *indexes_in,
+                           HYPRE_Int *locations,
+                           HYPRE_Int *indexes_out)
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int j;
+
+   if (i < n_copy_indexes)
+   {
+      for (j = 0; j < ndim; j++)
+      {
+         indexes_out[i * ndim + j] = indexes_in[ locations[i] * ndim + j ];
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * Split indexes, entries, and values arrays into struct and unstruct
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
+                                            HYPRE_Int           part,
+                                            HYPRE_Int           var,
+                                            HYPRE_Int           nvalues,
+                                            HYPRE_Int          *indexes,
+                                            HYPRE_Int          *entries,
+                                            HYPRE_Complex      *values,
+                                            HYPRE_Int          *nSentries_out,
+                                            HYPRE_Int          *nUentries_out,
+                                            HYPRE_Int         **Sindexes_out,
+                                            HYPRE_Int         **Uindexes_out,
+                                            HYPRE_Int         **Sentries_out,
+                                            HYPRE_Int         **Uentries_out,
+                                            HYPRE_Complex     **Svalues_out,
+                                            HYPRE_Complex     **Uvalues_out )
+{
+   HYPRE_Int             entry;
+   HYPRE_Int             ndim      = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph   *graph     = hypre_SStructMatrixGraph(matrix);
+   HYPRE_Int            *split     = hypre_SStructMatrixSplit(matrix, part, var);
+   hypre_SStructStencil *stencil   = hypre_SStructGraphStencil(graph, part, var);
+   HYPRE_Int             nSentries;
+   HYPRE_Int             nUentries;
+   HYPRE_Int            *Sindexes;
+   HYPRE_Int            *Uindexes;
+   HYPRE_Int            *Sentries;
+   HYPRE_Int            *Uentries;
+   HYPRE_Complex        *Svalues;
+   HYPRE_Complex        *Uvalues;
+
+   HYPRE_Int *Sentry_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *Uentry_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim;
+
+   /* entries_split_arr[i] = 0 if entries[i] is Sentry, 1 if entries[i] is Uentry */
+   HYPRE_Int *entries_split_arr = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+   /* WM: todo */
+#else
+   /* If entries[i] >= hypre_SStructStencilSize(stencil), then it is a Uentry */
+   HYPRE_THRUST_CALL(replace_if, entries_split_arr, entries_split_arr + nvalues, entries,
+                     HYPRE_THRUST_NOT(less_than<HYPRE_Int>(hypre_SStructStencilSize(stencil))), 1);
+   /* If entries[i] == entry, where split[entry] < 0, then it is a Uentry */
+   for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+   {
+      if (split[entry] < 0)
+      {
+         HYPRE_THRUST_CALL( replace_if,
+                            entries_split_arr,
+                            entries_split_arr + nvalues, entries,
+                            equal<HYPRE_Int>(entry),
+                            1);
+      }
+   }
+   /* Get locations (indices) in the array where Sentries and Uentries live */
+   auto Sentries_locations_end = HYPRE_THRUST_CALL( copy_if,
+                                                    thrust::make_counting_iterator<HYPRE_Int>(0),
+                                                    thrust::make_counting_iterator<HYPRE_Int>(0) + nvalues,
+                                                    entries_split_arr,
+                                                    Sentry_locations,
+                                                    equal<HYPRE_Int>(0) );
+   auto Uentries_locations_end = HYPRE_THRUST_CALL( copy_if,
+                                                    thrust::make_counting_iterator<HYPRE_Int>(0),
+                                                    thrust::make_counting_iterator<HYPRE_Int>(0) + nvalues,
+                                                    entries_split_arr,
+                                                    Uentry_locations,
+                                                    equal<HYPRE_Int>(1) );
+#endif
+   /* Get number of Sentries and Uentries */
+   nSentries = Sentries_locations_end - Sentry_locations;
+   nUentries = Uentries_locations_end - Uentry_locations;
+
+   /* Allocate split arrays for entries, indexes, values */
+   Sentries = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_DEVICE);
+   Uentries = hypre_TAlloc(HYPRE_Int, nUentries, HYPRE_MEMORY_DEVICE);
+   Sindexes = hypre_TAlloc(HYPRE_Int, ndim * nSentries, HYPRE_MEMORY_DEVICE);
+   Uindexes = hypre_TAlloc(HYPRE_Int, ndim * nUentries, HYPRE_MEMORY_DEVICE);
+   Svalues = hypre_TAlloc(HYPRE_Complex, nSentries, HYPRE_MEMORY_DEVICE);
+   Uvalues = hypre_TAlloc(HYPRE_Complex, nUentries, HYPRE_MEMORY_DEVICE);
+
+   /* Copy from indexes into Sindexes and Uindexes */
+   gDim = hypre_GetDefaultDeviceGridDimension(nSentries, "thread", bDim);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nSentries, indexes, Sentry_locations, Sindexes );
+   gDim = hypre_GetDefaultDeviceGridDimension(nUentries, "thread", bDim);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nUentries, indexes, Uentry_locations, Uindexes );
+#if defined(HYPRE_USING_SYCL)
+   /* WM: todo */
+#else
+   /* Copy from entries into Sentries and Uentries */
+   HYPRE_THRUST_CALL( copy_if,
+                      entries,
+                      entries + nvalues,
+                      entries_split_arr,
+                      Sentries,
+                      equal<HYPRE_Int>(0) );
+   HYPRE_THRUST_CALL( copy_if,
+                      entries,
+                      entries + nvalues,
+                      entries_split_arr,
+                      Uentries,
+                      equal<HYPRE_Int>(1) );
+
+   /* Copy from values into Svalues and Uvalues */
+   HYPRE_THRUST_CALL( copy_if,
+                      values,
+                      values + nvalues,
+                      entries_split_arr,
+                      Svalues,
+                      equal<HYPRE_Int>(0) );
+   HYPRE_THRUST_CALL( copy_if,
+                      values,
+                      values + nvalues,
+                      entries_split_arr,
+                      Uvalues,
+                      equal<HYPRE_Int>(1) );
+#endif
+
+   /* Clean up memory */
+   hypre_TFree(entries_split_arr, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Sentry_locations, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Uentry_locations, HYPRE_MEMORY_DEVICE);
+
+   /* Assign outputs */
+   *nSentries_out = nSentries;
+   *nUentries_out = nUentries;
+   *Sindexes_out = Sindexes;
+   *Uindexes_out = Uindexes;
+   *Sentries_out = Sentries;
+   *Uentries_out = Uentries;
+   *Svalues_out = Svalues;
+   *Uvalues_out = Uvalues;
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
@@ -1958,9 +2126,120 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
                                          HYPRE_Complex       *values,
                                          HYPRE_Int            action )
 {
-   /* WM: todo */
+   HYPRE_Int             i;
+   HYPRE_Int             ndim  = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph   *graph = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid    *grid  = hypre_SStructGraphGrid(graph);
+   HYPRE_Int           **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+   HYPRE_Int            *smap;
+   HYPRE_Int             nSentries;
+   HYPRE_Int             nUentries;
+   HYPRE_Int            *Sindexes;
+   HYPRE_Int            *Uindexes;
+   HYPRE_Int            *Sentries;
+   HYPRE_Int            *Uentries;
+   HYPRE_Complex        *Svalues;
+   HYPRE_Complex        *Uvalues;
+   hypre_SStructPMatrix *pmatrix;
+   hypre_StructMatrix   *smatrix;
+
+   HYPRE_Int            *Sentries_h;
+   HYPRE_Int            *struct_stencil_indices;
+   HYPRE_Int            *struct_stencil_indices_h;
+
+   /* WM: todo - remove cindex */
+   hypre_Index           cindex;
+
+
+   hypre_SStructMatrixSplitArrayEntriesDevice( matrix,
+                                               part,
+                                               var,
+                                               nvalues,
+                                               indexes,
+                                               entries,
+                                               values,
+                                              &nSentries,
+                                              &nUentries,
+                                              &Sindexes,
+                                              &Uindexes,
+                                              &Sentries,
+                                              &Uentries,
+                                              &Svalues,
+                                              &Uvalues );
+
+   /* WM: todo - why is hypre_CopyToCleanIndex() used in the SetValues routine? */
+   /* hypre_CopyToCleanIndex(index, ndim, cindex); */
+
+   /* S-matrix */
+   if (nSentries > 0)
+   {
+      /* WM: todo */
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      smap    = hypre_SStructPMatrixSMap(pmatrix, var);
+      /* WM: todo - for now, assuming connections are only between same variable type */
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+
+      /* WM: todo - for now, doing the smap stuff on the host... */
+      Sentries_h = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_HOST);
+      struct_stencil_indices = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_DEVICE);
+      struct_stencil_indices_h = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(Sentries_h, Sentries, HYPRE_Int, nSentries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (i = 0; i < nSentries; i++)
+      {
+         struct_stencil_indices_h[i] = smap[Sentries_h[i]];
+      }
+      hypre_TMemcpy(struct_stencil_indices, struct_stencil_indices_h, HYPRE_Int, nSentries, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(Sentries_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(struct_stencil_indices_h, HYPRE_MEMORY_HOST);
+
+      /* Set values */
+      if (action == 0)
+      {
+         hypre_StructMatrixSetArrayValuesDevice(smatrix,
+                                                nSentries,
+                                                Sindexes,
+                                                struct_stencil_indices,
+                                                Svalues,
+                                                1);
+      }
+
+      hypre_TFree(struct_stencil_indices, HYPRE_MEMORY_DEVICE);
+
+
+
+
+
+      /* WM: todo - below is copy/paste from SetValues */
+
+      /* put inter-part couplings in UMatrix and zero them out in PMatrix
+       * (possibly in ghost zones) */
+      if (nvneighbors[part][var] > 0)
+      {
+         hypre_Box  *set_box;
+         HYPRE_Int   d;
+         /* This creates boxes with zeroed-out extents */
+         set_box = hypre_BoxCreate(ndim);
+         for (d = 0; d < ndim; d++)
+         {
+            hypre_BoxIMinD(set_box, d) = cindex[d];
+            hypre_BoxIMaxD(set_box, d) = cindex[d];
+         }
+         hypre_SStructMatrixSetInterPartValues(matrix, part, set_box, var, nSentries, entries,
+                                               set_box, values, action);
+         hypre_BoxDestroy(set_box);
+      }
+   }
+
+   /* U-matrix */
+   if (nUentries > 0)
+   {
+      hypre_SStructUMatrixSetValues(matrix, part, cindex, var,
+                                    nUentries, Uentries, values, action);
+   }
+
    return hypre_error_flag;
 }
+#endif // defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * Put inter-part couplings in UMatrix and zero them out in PMatrix (possibly in
