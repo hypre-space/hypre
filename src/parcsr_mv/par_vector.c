@@ -667,51 +667,51 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
       iprod = *iprod_ptr;
    }
 
-   /* The tag count must agree across ranks: this routine performs collective
-    * reductions whose size depends on it, and a rank owning no rows carries no tags.
-    * Take the global maximum so every rank follows the same branch below. */
+   /* This routine ends in a collective reduction whose length depends on the tag
+    * count, so every rank must take the same branch below. A rank that owns no rows
+    * carries no tags (tags == NULL), and would otherwise fall back to the untagged
+    * inner product - reducing a single value - while ranks holding tags reduce
+    * num_tags + 1 values. That mismatched collective deadlocks. Decide globally:
+    * if any rank holds a tagged vector, all ranks run the tagged path, and ranks
+    * without local tags simply contribute zeros. */
    {
-      HYPRE_Int global_num_tags = num_tags;
+      HYPRE_Int local_num_tags  = (tags && num_tags > 1) ? num_tags : 0;
+      HYPRE_Int global_num_tags = 0;
 
-      hypre_MPI_Allreduce(&num_tags, &global_num_tags, 1, HYPRE_MPI_INT,
+      hypre_MPI_Allreduce(&local_num_tags, &global_num_tags, 1, HYPRE_MPI_INT,
                           hypre_MPI_MAX, comm);
-      if (global_num_tags > num_tags)
-      {
-         /* This rank owns no tagged entries; contribute zeros to the reduction. */
-         num_tags = global_num_tags;
-         if (*iprod_ptr == NULL)
-         {
-            hypre_TFree(iprod, HYPRE_MEMORY_HOST);
-            iprod = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
-         }
-         iprod_local = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
-         hypre_MPI_Allreduce(iprod_local, iprod, num_tags + 1,
-                             HYPRE_MPI_COMPLEX, hypre_MPI_SUM, comm);
-         hypre_TFree(iprod_local, HYPRE_MEMORY_HOST);
 
-         *num_tags_ptr = num_tags;
-         *iprod_ptr    = iprod;
+      if (global_num_tags < 1)
+      {
+         /* No rank holds a tagged vector: everyone does the plain inner product. */
+         iprod[0] = hypre_ParVectorInnerProd(x, y);
+
+         *num_tags_ptr = 1;
+         *iprod_ptr = iprod;
 
          return hypre_error_flag;
       }
-   }
 
-   /* Fallback to full vector inner product if num_tags == 1 or tags is NULL */
-   if (num_tags == 1 || !tags)
-   {
-      iprod[0] = hypre_ParVectorInnerProd(x, y);
-
-      *num_tags_ptr = 1;
-      *iprod_ptr = iprod;
-
-      return hypre_error_flag;
+      if (global_num_tags != num_tags)
+      {
+         /* Size the output for the global tag count when we own the allocation. */
+         if (*iprod_ptr == NULL)
+         {
+            hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+            iprod = hypre_CTAlloc(HYPRE_Complex, global_num_tags + 1, HYPRE_MEMORY_HOST);
+         }
+         num_tags = global_num_tags;
+      }
    }
 
    /* Initialize work array */
    iprod_local = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
 
-   /* Compute local inner products */
-   hypre_SeqVectorInnerProdTagged(x_local, y_local, iprod_local);
+   /* Compute local inner products; a rank without local tags contributes zeros */
+   if (tags)
+   {
+      hypre_SeqVectorInnerProdTagged(x_local, y_local, iprod_local);
+   }
 
    /* Exit early in case of issues in the previous call */
    if (hypre_error_flag)
