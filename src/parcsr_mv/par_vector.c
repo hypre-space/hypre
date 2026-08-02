@@ -667,41 +667,19 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
       iprod = *iprod_ptr;
    }
 
-   /* This routine ends in a collective reduction whose length depends on the tag
-    * count, so every rank must take the same branch below. A rank that owns no rows
-    * carries no tags (tags == NULL), and would otherwise fall back to the untagged
-    * inner product - reducing a single value - while ranks holding tags reduce
-    * num_tags + 1 values. That mismatched collective deadlocks. Decide globally:
-    * if any rank holds a tagged vector, all ranks run the tagged path, and ranks
-    * without local tags simply contribute zeros. */
+   /* Fallback to the plain inner product when the vector is untagged.
+    * Branch only on num_tags (agreed across ranks in HYPRE_IJVectorAssemble),
+    * never on the local tags pointer: a rank that owns no rows may have tags == NULL
+    * while still participating in the tagged reduction, and must take the same
+    * collective path as its peers. */
+   if (num_tags <= 1)
    {
-      HYPRE_Int local_num_tags  = (tags && num_tags > 1) ? num_tags : 0;
-      HYPRE_Int global_num_tags = 0;
+      iprod[0] = hypre_ParVectorInnerProd(x, y);
 
-      hypre_MPI_Allreduce(&local_num_tags, &global_num_tags, 1, HYPRE_MPI_INT,
-                          hypre_MPI_MAX, comm);
+      *num_tags_ptr = 1;
+      *iprod_ptr = iprod;
 
-      if (global_num_tags < 1)
-      {
-         /* No rank holds a tagged vector: everyone does the plain inner product. */
-         iprod[0] = hypre_ParVectorInnerProd(x, y);
-
-         *num_tags_ptr = 1;
-         *iprod_ptr = iprod;
-
-         return hypre_error_flag;
-      }
-
-      if (global_num_tags != num_tags)
-      {
-         /* Size the output for the global tag count when we own the allocation. */
-         if (*iprod_ptr == NULL)
-         {
-            hypre_TFree(iprod, HYPRE_MEMORY_HOST);
-            iprod = hypre_CTAlloc(HYPRE_Complex, global_num_tags + 1, HYPRE_MEMORY_HOST);
-         }
-         num_tags = global_num_tags;
-      }
+      return hypre_error_flag;
    }
 
    /* Initialize work array */
@@ -716,6 +694,7 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
    /* Exit early in case of issues in the previous call */
    if (hypre_error_flag)
    {
+      hypre_TFree(iprod_local, HYPRE_MEMORY_HOST);
       return hypre_error_flag;
    }
 
