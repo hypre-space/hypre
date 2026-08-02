@@ -660,7 +660,6 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
 
    /* Auxiliary variables */
    HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
-   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
    HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
    HYPRE_Int             blk_dim         = (global_num_cols > 0) ?
                                            (HYPRE_Int) hypre_max(1, global_num_rows / global_num_cols) : 1;
