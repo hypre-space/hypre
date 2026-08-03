@@ -20,6 +20,8 @@ extern "C++" {
 #ifndef HYPRE_BOX_DEVICE_H
 #define HYPRE_BOX_DEVICE_H
 
+#if defined(HYPRE_USING_GPU)
+
 /* WM: todo - Naming convention for device subroutines?
  *            Is this something we do elsewhere in the code? */
 static __device__ __forceinline__
@@ -64,6 +66,8 @@ hypre_BoxIndexRankDevice( hypre_Box    box,
 
    return rank;
 }
+
+#endif
 
 #endif
 /******************************************************************************

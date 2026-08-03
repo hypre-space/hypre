@@ -16,6 +16,7 @@
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
+#include "_hypre_struct_mv.h"
 //#include "sstruct_helpers.h" /* TODO (VPM): remove duplicated code below provided here */
 
 /* begin lobpcg */
@@ -31,6 +32,7 @@
 
 #define DEBUG 0
 #define DEBUG_SSGRAPH 0
+#define TEST_SET_ARRAY_VALUES 1
 
 char infile_default[50] = "sstruct.in.default";
 
@@ -2714,6 +2716,13 @@ main( hypre_int argc,
    FILE                    *filePtr;
 
    /* end lobpcg */
+#if TEST_SET_ARRAY_VALUES
+   HYPRE_Int set_array_cnt;
+   HYPRE_Int set_array_box_volume;
+   HYPRE_Int *set_array_indexes;
+   HYPRE_Int *set_array_indexes_h;
+   hypre_Box *set_array_box;
+#endif
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    HYPRE_Int                print_mem_tracker = 0;
@@ -4197,7 +4206,35 @@ main( hypre_int argc,
                   {
                      GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                     pdata.vartypes[var], ilower, iupper);
+#if TEST_SET_ARRAY_VALUES
+                     set_array_box = hypre_BoxCreate(data.ndim);
+                     hypre_BoxSetExtents(set_array_box, ilower, iupper);
+                     set_array_box_volume = hypre_BoxVolume(set_array_box);
+                     set_array_indexes = hypre_TAlloc(HYPRE_Int, data.ndim * set_array_box_volume, memory_location);
+                     set_array_indexes_h = hypre_TAlloc(HYPRE_Int, data.ndim * set_array_box_volume, HYPRE_MEMORY_HOST);
+                     set_array_cnt = 0;
+                     for (index[2] = ilower[2]; index[2] <= iupper[2]; index[2] ++)
+                     {
+                        for (index[1] = ilower[1]; index[1] <= iupper[1]; index[1] ++)
+                        {
+                           for (index[0] = ilower[0]; index[0] <= iupper[0]; index[0] ++)
+                           {
+                              for (i = 0; i < data.ndim; i++)
+                              {
+                                 set_array_indexes_h[set_array_cnt++] = index[i];
+                              }
+                           }
+                        }
+                     }
+                     hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
+                                   set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
+                     hypre_BoxDestroy(set_array_box);
+                     HYPRE_SStructVectorSetArrayValues(b, part, var, set_array_box_volume, set_array_indexes, d_values);
+                     hypre_TFree(set_array_indexes, HYPRE_MEMORY_HOST);
+                     hypre_TFree(set_array_indexes, memory_location);
+#else
                      HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, d_values);
+#endif
                   }
                }
             }
