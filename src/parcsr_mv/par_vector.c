@@ -667,8 +667,12 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
       iprod = *iprod_ptr;
    }
 
-   /* Fallback to full vector inner product if num_tags == 1 or tags is NULL */
-   if (num_tags == 1 || !tags)
+   /* Fallback to the plain inner product when the vector is untagged.
+    * Branch only on num_tags (agreed across ranks in HYPRE_IJVectorAssemble),
+    * never on the local tags pointer: a rank that owns no rows may have tags == NULL
+    * while still participating in the tagged reduction, and must take the same
+    * collective path as its peers. */
+   if (num_tags <= 1)
    {
       iprod[0] = hypre_ParVectorInnerProd(x, y);
 
@@ -681,12 +685,16 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
    /* Initialize work array */
    iprod_local = hypre_CTAlloc(HYPRE_Complex, num_tags + 1, HYPRE_MEMORY_HOST);
 
-   /* Compute local inner products */
-   hypre_SeqVectorInnerProdTagged(x_local, y_local, iprod_local);
+   /* Compute local inner products; a rank without local tags contributes zeros */
+   if (tags)
+   {
+      hypre_SeqVectorInnerProdTagged(x_local, y_local, iprod_local);
+   }
 
    /* Exit early in case of issues in the previous call */
    if (hypre_error_flag)
    {
+      hypre_TFree(iprod_local, HYPRE_MEMORY_HOST);
       return hypre_error_flag;
    }
 

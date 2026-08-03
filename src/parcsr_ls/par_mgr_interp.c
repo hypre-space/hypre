@@ -2653,6 +2653,17 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixBlockColSum(A_CF, row_major, 1, block_dim, &b_CF);
 
+   if (!b_FF || !b_CF)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Block column-lumped restriction requires C and F spaces with "
+                        "matching block structure (one C point per F block)");
+      hypre_DenseBlockMatrixDestroy(b_FF);
+      hypre_DenseBlockMatrixDestroy(b_CF);
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+
    /*-------------------------------------------------------
     * 3) b_FF = inv(approx(A_FF))          (invert in-place)
     *-------------------------------------------------------*/
