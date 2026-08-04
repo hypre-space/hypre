@@ -545,8 +545,10 @@ HYPRE_Int HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
  * @param num_tags The number of tags.
  * @param tags The tags array. Must reside in the same memory location as the
  *         vector data (e.g., if vector is on GPU, tags must also be on GPU).
+ *         May be NULL on ranks that own no rows.
  *
- * Not collective.
+ * Not collective. Call \ref HYPRE_IJVectorAssemble after setting tags so that
+ * num_tags is agreed across the communicator before tagged collectives run.
  **/
 HYPRE_Int HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
                                 HYPRE_Int       owns_tags,
@@ -635,6 +637,10 @@ HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector       vector,
 
 /**
  * Finalize the construction of the vector before using.
+ *
+ * When vector tags are present (num_tags > 1 on any rank), also agrees on
+ * num_tags across the communicator so tagged collectives can trust the local
+ * count. If tags are set after a previous assemble, call Assemble again.
  **/
 HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 

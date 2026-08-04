@@ -513,17 +513,38 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
+      hypre_ParVector *par_vector;
+      HYPRE_Int        local_num_tags;
+      HYPRE_Int        global_num_tags;
+
 #if defined(HYPRE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         return ( hypre_IJVectorAssembleParDevice(vec) );
+         hypre_IJVectorAssembleParDevice(vec);
       }
       else
 #endif
       {
-         return ( hypre_IJVectorAssemblePar(vec) );
+         hypre_IJVectorAssemblePar(vec);
+      }
+
+      /* Agree on num_tags when tagging is in use so vector functions such as
+       * InnerProdTags can trust the local count without needing an Allreduce.
+       * Empty ranks may still have the default num_tags == 1 while others might
+       * have more tagged. Done here so both host and device paths are covered,
+       * including re-assemble after SetTags when the aux vector is already gone. */
+      par_vector = (hypre_ParVector*) hypre_IJVectorObject(vec);
+      if (par_vector)
+      {
+         local_num_tags = hypre_ParVectorNumTags(par_vector);
+         hypre_MPI_Allreduce(&local_num_tags, &global_num_tags, 1, HYPRE_MPI_INT,
+                             hypre_MPI_MAX, hypre_IJVectorComm(vec));
+         if (global_num_tags > 1 && global_num_tags != local_num_tags)
+         {
+            hypre_ParVectorSetNumTags(par_vector, global_num_tags);
+         }
       }
    }
    else

@@ -57,6 +57,7 @@ FILES =\
  struct_stmatrix.c
 
 CUFILES =\
+ box_device.c\
  struct_matvec.c\
  struct_matvec_cc.c\
  struct_matvec_icc.c\
