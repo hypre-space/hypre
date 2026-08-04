@@ -831,10 +831,10 @@ hypre_PCGSolve( void *pcg_vdata,
             i_prod = (*(pcg_functions->InnerProd))(r, s);
             gamma = i_prod;
          }
-         
-         if (i_prod / bi_prod >= eps) 
-         { 
-            tentatively_converged = 0; 
+
+         if (i_prod / bi_prod >= eps)
+         {
+            tentatively_converged = 0;
 
             if (print_level > 1 && my_id == 0)
             {
@@ -844,17 +844,17 @@ hypre_PCGSolve( void *pcg_vdata,
                {
                   hypre_printf("    ||r||_2         = %e\n", hypre_sqrt(i_prod));
                   hypre_printf("    ||r||_2/||b||_2 = %e\n",
-                      hypre_sqrt(i_prod / bi_prod));
+                               hypre_sqrt(i_prod / bi_prod));
                }
                else
                {
                   hypre_printf("    ||r||_C         = %e\n", hypre_sqrt(i_prod));
                   hypre_printf("    ||r||_C/||b||_C = %e\n",
-                      hypre_sqrt(i_prod / bi_prod));
+                               hypre_sqrt(i_prod / bi_prod));
                }
                hypre_printf(">>>> Restarting PCG from the true residual.\n");
                hypre_printf("\n");
-            }            
+            }
 
             if (two_norm)
             {
