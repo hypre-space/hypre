@@ -2014,7 +2014,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
       HYPRE_IJVectorGetObject(ij_x, &object);
       x = (HYPRE_ParVector) object;
    }
@@ -2036,7 +2035,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2071,7 +2069,6 @@ main( hypre_int argc,
          HYPRE_IJVectorSetComponent(ij_b, c);
          HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
       }
-      HYPRE_IJVectorAssemble(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
@@ -2086,7 +2083,6 @@ main( hypre_int argc,
          HYPRE_IJVectorSetComponent(ij_x, c);
          HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
       }
-      HYPRE_IJVectorAssemble(ij_x);
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
 
@@ -2127,7 +2123,6 @@ main( hypre_int argc,
       HYPRE_IJVectorSetNumComponents(ij_x, num_components);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2143,6 +2138,8 @@ main( hypre_int argc,
          }
       }
 
+      HYPRE_IJVector ij_unit = NULL;
+      HYPRE_ParVector unit;
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
       HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
       for (i = 0; i < local_num_cols; i++)
@@ -2152,19 +2149,19 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols,
                     memory_location, HYPRE_MEMORY_HOST);
 
-      /* Temporary use of solution vector */
-      HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-      HYPRE_IJVectorSetNumComponents(ij_x, num_components);
-      HYPRE_IJVectorInitialize(ij_x);
+      /* Temporary unit vector used only to form b = A*1 */
+      HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_unit);
+      HYPRE_IJVectorSetObjectType(ij_unit, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_unit, num_components);
+      HYPRE_IJVectorInitialize(ij_unit);
       for (c = 0; c < num_components; c++)
       {
-         HYPRE_IJVectorSetComponent(ij_x, c);
-         HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+         HYPRE_IJVectorSetComponent(ij_unit, c);
+         HYPRE_IJVectorSetValues(ij_unit, local_num_cols, NULL, values_d);
       }
-      HYPRE_IJVectorAssemble(ij_x);
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
+      HYPRE_IJVectorAssemble(ij_unit);
+      ierr = HYPRE_IJVectorGetObject(ij_unit, &object);
+      unit = (HYPRE_ParVector) object;
 
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
@@ -2174,12 +2171,19 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorSetNumComponents(ij_b, num_components);
       HYPRE_IJVectorInitialize(ij_b);
-      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+      ierr = HYPRE_IJVectorGetObject(ij_b, &object);
       b = (HYPRE_ParVector) object;
 
-      HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, 0.0, b);
+      HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, unit, 0.0, b);
+      HYPRE_IJVectorDestroy(ij_unit);
 
       /* Zero initial guess */
+      HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_x, num_components);
+      HYPRE_IJVectorInitialize(ij_x);
+      ierr = HYPRE_IJVectorGetObject(ij_x, &object);
+      x = (HYPRE_ParVector) object;
       hypre_IJVectorZeroValues(ij_x);
    }
    else if (build_rhs_type == 5)
@@ -2204,7 +2208,6 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorSetNumComponents(ij_b, num_components);
       HYPRE_IJVectorInitialize(ij_b);
-      HYPRE_IJVectorAssemble(ij_b);
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2219,7 +2222,6 @@ main( hypre_int argc,
          HYPRE_IJVectorSetComponent(ij_x, c);
          HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
       }
-      HYPRE_IJVectorAssemble(ij_x);
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
 
@@ -2248,7 +2250,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2287,7 +2288,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2301,7 +2301,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(comm, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2329,7 +2328,6 @@ main( hypre_int argc,
                     memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_b);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2343,7 +2341,6 @@ main( hypre_int argc,
 
       /* For backward Euler the previous backward Euler iterate (assumed
          0 here) is usually used as the initial guess */
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2371,7 +2368,6 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_b);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2385,7 +2381,6 @@ main( hypre_int argc,
 
       /* For backward Euler the previous backward Euler iterate (assumed
          0 here) is usually used as the initial guess */
-      HYPRE_IJVectorAssemble(ij_x);
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
@@ -2413,7 +2408,6 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_b);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2437,7 +2431,6 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols, memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_x);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2469,7 +2462,6 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols, memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_x);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2566,7 +2558,6 @@ main( hypre_int argc,
       hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols, memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
-      HYPRE_IJVectorAssemble(ij_x);
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
 
@@ -2613,12 +2604,26 @@ main( hypre_int argc,
       {
          hypre_printf ("  Number of functions = %d \n", num_functions);
       }
+   }
 
-      if (dof_func)
+   if (dof_func)
+   {
+      if (ij_x)
       {
          HYPRE_IJVectorSetTags(ij_x, 0, num_functions, dof_func);
+      }
+      if (ij_b)
+      {
          HYPRE_IJVectorSetTags(ij_b, 0, num_functions, dof_func);
       }
+   }
+   if (ij_x)
+   {
+      HYPRE_IJVectorAssemble(ij_x);
+   }
+   if (ij_b)
+   {
+      HYPRE_IJVectorAssemble(ij_b);
    }
 
    /*-----------------------------------------------------------
