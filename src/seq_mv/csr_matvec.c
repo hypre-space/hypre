@@ -1272,7 +1272,7 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
     *-----------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i,jj) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i,jj,temp) HYPRE_SMP_SCHEDULE
 #endif
 
    for (i = 0; i < num_rows; i++)
