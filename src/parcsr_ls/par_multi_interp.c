@@ -1188,7 +1188,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
           * up evenly amongst the threads. */
 
          alfa = beta = 1.0;
-         P_marker_offd = C_array_offd = NULL;
+         P_marker_offd = NULL;
          P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
          for (i = 0; i < n_fine; i++)
          {   P_marker[i] = -1; }
@@ -1787,7 +1787,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
          pass_length = pass_pointer[pass + 1] - pass_pointer[pass];
 #ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa,tmp_array,tmp_array_offd)
+         #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa,beta,tmp_array,tmp_array_offd)
 #endif
          {
             /* Sparsity structure is now finished.  Next, calculate interpolation
