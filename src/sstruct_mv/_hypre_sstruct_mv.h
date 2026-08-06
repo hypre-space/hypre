@@ -1039,6 +1039,8 @@ HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix,
 HYPRE_Int hypre_SStructUMatrixSetValues ( hypre_SStructMatrix *matrix, HYPRE_Int part,
                                           hypre_Index index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values,
                                           HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
+                                                   HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix, HYPRE_Int part,
                                                   hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                   HYPRE_Complex *values, HYPRE_Int action, HYPRE_IJMatrix ijmatrix );

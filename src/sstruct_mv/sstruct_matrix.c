@@ -1234,6 +1234,224 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_GPU)
+/*--------------------------------------------------------------------------
+ * (action > 0): add-to values
+ * (action = 0): set values
+ * (action < 0): get values
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
+                                          HYPRE_Int            part,
+                                          HYPRE_Int            var,
+                                          HYPRE_Int            nvalues,
+                                          HYPRE_Int           *indexes,
+                                          HYPRE_Int           *entries,
+                                          HYPRE_Complex       *values,
+                                          HYPRE_Int            action )
+{
+   HYPRE_Int                ndim        = hypre_SStructMatrixNDim(matrix);
+   HYPRE_IJMatrix           ijmatrix    = hypre_SStructMatrixIJMatrix(matrix);
+   hypre_SStructGraph      *graph       = hypre_SStructMatrixGraph(matrix);
+   HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
+   hypre_SStructGrid       *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructGrid       *dom_grid    = hypre_SStructGraphDomGrid(graph);
+   hypre_SStructStencil    *stencil     = hypre_SStructGraphStencil(graph, part, var);
+   HYPRE_Int               *vars        = hypre_SStructStencilVars(stencil);
+   hypre_Index             *shape       = hypre_SStructStencilShape(stencil);
+   HYPRE_Int                size        = hypre_SStructStencilSize(stencil);
+
+   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(ijmatrix);
+
+   hypre_IndexRef           offset;
+   hypre_Index              index;
+   hypre_Index              to_index;
+   hypre_SStructUVEntry    *Uventry;
+   hypre_BoxManEntry       *boxman_entry;
+   hypre_SStructBoxManInfo *entry_info;
+   HYPRE_Int                i, d, entry;
+   HYPRE_BigInt             Uverank;
+
+   HYPRE_Int               *indexes_h;
+   HYPRE_BigInt            *rows_h;
+   HYPRE_BigInt            *cols_h;
+
+   HYPRE_Int                nrows;
+   HYPRE_Int               *ncols;
+   HYPRE_BigInt            *rows = hypre_TAlloc(HYPRE_BigInt, nvalues, memory_location);
+   HYPRE_BigInt            *cols = hypre_TAlloc(HYPRE_BigInt, nvalues, memory_location);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* WM: todo - for now, I am copying the indexes to the host, then getting all
+    *            the row/col info on the host, then copying back to the device
+    *            a more complete GPU port may be needed if depending on performance
+    *            if there are many Uentries to set (though this should be small
+    *            compared to the struct component of the matrix) */
+
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
+      rows_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
+      cols_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, memory_location);
+   }
+   else
+   {
+      indexes_h = indexes;
+      rows_h = rows;
+      cols_h = cols;
+   }
+
+   /* Loop over indexes/entries and get row/col for IJ matrix */
+   for (i = 0; i < nvalues; i++)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         index[d] = indexes_h[i * ndim + d];
+      }
+
+      hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
+
+      /* if not local, check neighbors */
+      if (boxman_entry == NULL)
+      {
+         hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
+      }
+
+      /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad indexes? */
+      if (boxman_entry == NULL)
+      {
+         hypre_error_in_arg(1);
+         hypre_error_in_arg(2);
+         hypre_error_in_arg(4);
+
+         HYPRE_ANNOTATE_FUNC_END;
+
+         return hypre_error_flag;
+      }
+      else
+      {
+         hypre_BoxManEntryGetInfo(boxman_entry, (void **) &entry_info);
+      }
+
+      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index,
+                                            &(rows_h[i]), matrix_type);
+
+      entry = entries[i];
+      if (entry < size)
+      {
+         /* stencil entries */
+         offset = shape[entry];
+         hypre_AddIndexes(index, offset, ndim, to_index);
+
+         hypre_SStructGridFindBoxManEntry(dom_grid, part, to_index, vars[entry],
+                                          &boxman_entry);
+
+         /* if not local, check neighbors */
+         if (boxman_entry == NULL)
+         {
+            hypre_SStructGridFindNborBoxManEntry(dom_grid, part, to_index,
+                                                 vars[entry], &boxman_entry);
+         }
+
+         /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad entries? */
+         if (boxman_entry == NULL)
+         {
+            hypre_error_in_arg(1);
+            hypre_error_in_arg(2);
+            hypre_error_in_arg(5);
+
+            HYPRE_ANNOTATE_FUNC_END;
+
+            return hypre_error_flag;
+         }
+         else
+         {
+            hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
+                                                  &(cols_h[i]), matrix_type);
+         }
+      }
+      else
+      {
+         /* non-stencil entries */
+         entry -= size;
+         hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
+
+         /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad entries? */
+         if (Uverank < 0)
+         {
+            hypre_error_in_arg(1);
+            hypre_error_in_arg(2);
+            hypre_error_in_arg(5);
+
+            HYPRE_ANNOTATE_FUNC_END;
+
+            return hypre_error_flag;
+         }
+         else
+         {
+            Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
+            cols_h[i] = hypre_SStructUVEntryToRank(Uventry, entry);
+         }
+      }
+   }
+
+   /* Copy rows/cols to device */
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues, memory_location, HYPRE_MEMORY_HOST);
+   }
+
+   /* Sort and reduce_by_key to get rows/nrows/ncols to pass to IJMatrixSet/AddTo/GetValues */
+#if defined(HYPRE_USING_SYCL)
+   /* WM: todo */
+#else
+   ncols = hypre_TAlloc(HYPRE_Int, nvalues, memory_location);
+   HYPRE_THRUST_CALL( sort_by_key,
+                      rows,
+                      rows + nvalues,
+                      thrust::make_zip_iterator(thrust::make_tuple(cols, values)) );
+   auto new_end = HYPRE_THRUST_CALL( reduce_by_key,
+                                     rows,
+                                     rows + nvalues,
+                                     thrust::make_constant_iterator(1),
+                                     rows,
+                                     ncols );
+   nrows = new_end.first - rows;
+#endif
+
+   /* Call IJMatrixSet/AddTo/GetValues */
+   if (action > 0)
+   {
+      HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols, rows, cols, values);
+   }
+   else if (action > -1)
+   {
+      HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols, rows, cols, values);
+   }
+   else
+   {
+      HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values);
+   }
+
+   hypre_TFree(rows, memory_location);
+   hypre_TFree(cols, memory_location);
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(rows_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(cols_h, HYPRE_MEMORY_HOST);
+   }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+#endif // defined(HYPRE_USING_GPU)
+
 /*--------------------------------------------------------------------------
  * Note: Entries must all be of type stencil or non-stencil, but not both.
  *
