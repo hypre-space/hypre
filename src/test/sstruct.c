@@ -3889,6 +3889,7 @@ main( hypre_int argc,
                         GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                        pdata.vartypes[var], ilower, iupper);
 
+/* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                         set_array_box = hypre_BoxCreate(data.ndim);
                         hypre_CopyToCleanIndex(ilower, data.ndim, ilower);
@@ -3919,7 +3920,6 @@ main( hypre_int argc,
                         hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
                                       set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
                         hypre_BoxDestroy(set_array_box);
-                        hypre_printf("WM: debug - calling MatrixSetArrayValues with box_volume = %d, indexes = (%d %d) ..., entries = %d ..., values = %e ...\n", set_array_box_volume, set_array_indexes[0], set_array_indexes[1], set_array_entries[0], d_values[0]);
                         HYPRE_SStructMatrixSetArrayValues(A, part, var, set_array_box_volume, set_array_indexes, set_array_entries, d_values);
                         hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
                         hypre_TFree(set_array_indexes, memory_location);
@@ -4018,7 +4018,8 @@ main( hypre_int argc,
 #else
                hypre_MuPDataCopyToMP(h_values, &pdata.graph_values[box], 1);
                hypre_MuPDataMemcpy(d_values, h_values, 1, memory_location, HYPRE_MEMORY_HOST);
-#if TEST_SET_ARRAY_VALUES
+/* WM: debug */
+#if 0
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_BoxSetExtents(set_array_box, pdata.graph_ilowers[box], pdata.graph_iuppers[box]);
                set_array_box_volume = hypre_BoxVolume(set_array_box);
@@ -4040,7 +4041,8 @@ main( hypre_int argc,
                           index[0] <= pdata.graph_iuppers[box][0];
                           index[0] += pdata.graph_strides[box][0])
                      {
-#if TEST_SET_ARRAY_VALUES
+/* WM: debug */
+#if 0
                         for (k = 0; k < data.ndim; k++)
                         {
                            set_array_indexes_h[set_array_cnt * data.ndim + k] = index[k];
@@ -4055,7 +4057,8 @@ main( hypre_int argc,
                      }
                   }
                }
-#if TEST_SET_ARRAY_VALUES
+/* WM: debug */
+#if 0
                hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
                              data.ndim * set_array_cnt, memory_location, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
@@ -4063,7 +4066,6 @@ main( hypre_int argc,
                hypre_TMemcpy(d_values, h_values, HYPRE_Real,
                              set_array_cnt, memory_location, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(set_array_box);
-               hypre_printf("WM: debug - calling MatrixSetArrayValues with box_volume = %d, cnt = %d, indexes = (%d %d) ..., entries = %d ..., values = %e ...\n", set_array_box_volume, set_array_cnt, set_array_indexes[0], set_array_indexes[1], set_array_entries[0], d_values[0]);
                HYPRE_SStructMatrixSetArrayValues(A, part, pdata.graph_vars[box], set_array_cnt, set_array_indexes, set_array_entries, d_values);
                hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
                hypre_TFree(set_array_indexes, memory_location);
@@ -4090,7 +4092,8 @@ main( hypre_int argc,
                hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                    memory_location, HYPRE_MEMORY_HOST);
 
-#if TEST_SET_ARRAY_VALUES
+/* WM: debug */
+#if 0
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matset_ilowers[box], data.ndim, ilower);
                hypre_CopyToCleanIndex(pdata.matset_iuppers[box], data.ndim, iupper);
@@ -4142,7 +4145,8 @@ main( hypre_int argc,
             {
                size = BoxVolume(pdata.matadd_ilowers[box], pdata.matadd_iuppers[box]);
 
-#if TEST_SET_ARRAY_VALUES
+/* WM: debug */
+#if 0
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matadd_ilowers[box], data.ndim, ilower);
                hypre_CopyToCleanIndex(pdata.matadd_iuppers[box], data.ndim, iupper);
@@ -4176,8 +4180,6 @@ main( hypre_int argc,
                      }
                   }
                }
-               hypre_printf("WM: debug - set_array_cnt = %d\n", set_array_cnt);
-               hypre_printf("WM: debug - pdata.matadd_nentries[box] * set_array_box_volume = %d\n", pdata.matadd_nentries[box] * set_array_box_volume);
                hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
                              data.ndim * pdata.matadd_nentries[box] * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
@@ -4185,14 +4187,6 @@ main( hypre_int argc,
                hypre_TMemcpy(d_values, h_values, HYPRE_Real,
                              pdata.matadd_nentries[box] * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(set_array_box);
-               hypre_printf("WM; debug - calling MatrixAddToArrayValues, part = %d, var = %d, nvalues = %d, indexes = (%d %d) ..., entries = %d ..., values = %e ...\n",
-                     part,
-                     pdata.matadd_vars[box],
-                     pdata.matadd_nentries[box] * set_array_box_volume,
-                     set_array_indexes[0],
-                     set_array_indexes[1],
-                     set_array_entries[0],
-                     d_values[0]);
                HYPRE_SStructMatrixAddToArrayValues(A, part, pdata.matadd_vars[box], pdata.matadd_nentries[box] * set_array_box_volume, set_array_indexes, set_array_entries, d_values);
                hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
                hypre_TFree(set_array_indexes, memory_location);
@@ -4482,14 +4476,6 @@ main( hypre_int argc,
                   hypre_CopyToCleanIndex(pdata.rhsadd_ilowers[box], data.ndim, ilower);
                   hypre_CopyToCleanIndex(pdata.rhsadd_iuppers[box], data.ndim, iupper);
                   hypre_BoxSetExtents(set_array_box, ilower, iupper);
-                  hypre_printf("WM: debug - ndim = %d\n", data.ndim);
-                  hypre_printf("WM: debug - calling VectorAddToArrayValues with ilower = (%d %d %d), iupper = (%d %d %d)\n",
-                               ilower[0],
-                               ilower[1],
-                               ilower[2],
-                               iupper[0],
-                               iupper[1],
-                               iupper[2]);
                   set_array_box_volume = hypre_BoxVolume(set_array_box);
                   set_array_indexes = hypre_TAlloc(HYPRE_Int, data.ndim * set_array_box_volume, memory_location);
                   set_array_indexes_h = hypre_TAlloc(HYPRE_Int, data.ndim * set_array_box_volume, HYPRE_MEMORY_HOST);
@@ -4510,20 +4496,10 @@ main( hypre_int argc,
                   hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
                                 data.ndim * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
                   hypre_BoxDestroy(set_array_box);
-                  hypre_printf("WM: debug - calling VectorAddToArrayValues with box_volume = %d, indexes = (%d %d) ..., values = %e ...\n", set_array_box_volume, set_array_indexes[0], set_array_indexes[1], d_values[0]);
                   HYPRE_SStructVectorAddToArrayValues(b, part, pdata.rhsadd_vars[box], set_array_box_volume, set_array_indexes, d_values);
                   hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
                   hypre_TFree(set_array_indexes, memory_location);
 #else
-                  hypre_printf("WM: debug - calling VectorAddToBoxValues with ilower = (%d %d %d), iupper = (%d %d %d), var = %d, values = %e ...\n",
-                               pdata.rhsadd_ilowers[box][0],
-                               pdata.rhsadd_ilowers[box][1],
-                               pdata.rhsadd_ilowers[box][2],
-                               pdata.rhsadd_iuppers[box][0],
-                               pdata.rhsadd_iuppers[box][1],
-                               pdata.rhsadd_iuppers[box][2],
-                               pdata.rhsadd_vars[box],
-                               d_values[0]);
                   HYPRE_SStructVectorAddToBoxValues(b, part,
                                                     pdata.rhsadd_ilowers[box],
                                                     pdata.rhsadd_iuppers[box],

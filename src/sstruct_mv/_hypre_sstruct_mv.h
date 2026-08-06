@@ -1065,6 +1065,8 @@ HYPRE_Int hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, 
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                                  hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                  HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
+                                                            HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
                                              hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa);

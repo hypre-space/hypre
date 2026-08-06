@@ -725,6 +725,7 @@ hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
                                         HYPRE_Complex      *values,
                                         HYPRE_Int           clear_ghost )
 {
+   hypre_printf("WM: debug - using hypre_StructVectorSetArrayValuesDevice()\n");
    HYPRE_Int i;
    HYPRE_Complex *vec_box_data;
    hypre_Box *grid_box;
