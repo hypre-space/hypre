@@ -457,10 +457,13 @@ using hypre_DeviceItem = void*;
 #include <thrust/pair.h>
 #include <thrust/tuple.h>
 
-/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
+/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward.
+ *      CUDA 13 / CCCL 3 deprecates thrust::not_fn in favor of cuda::std::not_fn. */
 #define THRUST_VERSION_NOTFN 200600
 #if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
+#elif defined(HYPRE_USING_CUDA) && (defined(THRUST_VERSION) && THRUST_VERSION >= 300000)
+#define HYPRE_THRUST_NOT(pred) cuda::std::not_fn(pred)
 #else
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
 #endif
@@ -472,6 +475,19 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
+#endif
+
+/* Resolve deprecated warnings about thrust::plus / equal_to (CCCL 3.0 / CUDA 13).
+ * Variadic so types with commas (e.g. thrust::tuple<T1, T2>) work. */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300000)
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_PLUS(...)     cuda::std::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) cuda::std::equal_to<__VA_ARGS__>()
+#else
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
 #endif
 
 using namespace thrust::placeholders;
