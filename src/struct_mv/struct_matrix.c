@@ -1730,6 +1730,7 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+template <bool check_done>
 __global__ void
 hypreGPUKernel_StructMatrixAddToArrayValues( hypre_DeviceItem  &item,
                                              hypre_Box          grid_box,
@@ -1747,8 +1748,18 @@ hypreGPUKernel_StructMatrixAddToArrayValues( hypre_DeviceItem  &item,
    HYPRE_Int my_index[3];
    HYPRE_Int  i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
+   bool set_condition;
+   if (check_done)
+   {
+      set_condition = (i < nvalues && (!done_arr || !done_arr[i]) && stencil_indices[i] == set_stencil_index);
+   }
+   else
+   {
+      set_condition = (i < nvalues && stencil_indices[i] == set_stencil_index);
+   }
+
    /* Only operate on one stencil index at a time */
-   if (i < nvalues && (!done_arr || !done_arr[i]) && stencil_indices[i] == set_stencil_index)
+   if (set_condition)
    {
       for (d = 0; d < ndim; d++)
       {
@@ -1783,7 +1794,6 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
    hypre_Box *grid_box;
    hypre_Box *data_box;
    bool *done_arr = NULL;
-   bool *done_arr_save = NULL;
 
    hypre_StructStencil  *stencil          = hypre_StructMatrixStencil(matrix);
    HYPRE_Int             stencil_size     = hypre_StructStencilSize(stencil);
@@ -1798,14 +1808,13 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
 
    for (j = 0; j < stencil_size; j++)
    {
-      grid_box = hypre_StructMatrixBox(matrix, i);
-      data_box = hypre_StructMatrixBoxDataBox(matrix, i);
-
       for (i = 0; i < hypre_StructMatrixRanNBoxes(matrix); i++)
       {
+         grid_box = hypre_StructMatrixBox(matrix, i);
+         data_box = hypre_StructMatrixBoxDataBox(matrix, i);
          mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_StructMatrixAddToArrayValues,
+         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<0>),
                            gDim,
                            bDim,
                            *grid_box,
@@ -1818,14 +1827,9 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
                            mat_box_data,
                            done_arr );
       }
-
-      /* done_arr is set on the fisrt stencil entry, don't pass again here */
-      done_arr_save = done_arr;
-      done_arr = NULL;
    }
    if (add_to_ghost)
    {
-      done_arr = done_arr_save;
       for (i = 0; i < hypre_StructMatrixRanNBoxes(matrix); i++)
       {
          grid_box = hypre_StructMatrixBox(matrix, i);
@@ -1833,10 +1837,10 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
 
          for (j = 0; j < stencil_size; j++)
          {
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_StructMatrixAddToArrayValues,
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<1>),
                               gDim,
                               bDim,
-                              *grid_box,
+                              *data_box,
                               *data_box,
                               j,
                               nvalues,

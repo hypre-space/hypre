@@ -2706,6 +2706,7 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
    hypre_SStructPMatrix    *pmatrix    = hypre_SStructMatrixPMatrix(matrix, part);
    hypre_SStructPGrid      *pgrid      = hypre_SStructPMatrixPGrid(pmatrix);
+   hypre_BoxArrayArray     *pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, var);
    HYPRE_Int               *smap       = hypre_SStructPMatrixSMap(pmatrix, var);
    hypre_SStructVariable    frvartype  = hypre_SStructPGridVarType(pgrid, var);
    hypre_SStructStencil    *stencil    = hypre_SStructPMatrixStencil(pmatrix, var);
@@ -2715,12 +2716,16 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 
    hypre_SStructVariable    tovartype;
    hypre_StructMatrix      *smatrix;
-   hypre_Box               *set_box, *box, *ibox0, *ibox1, *ibox2, *tobox, *frbox;
+   hypre_StructGrid        *sgrid;
+   hypre_BoxArray          *pbnd_boxa;
+   hypre_BoxArray          *grid_boxes;
+   hypre_Box               *grid_box, *set_box, *box, *ibox0, *ibox1, *ibox2, *tobox, *frbox;
    hypre_IndexRef           offset;
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart, ntvalues = 0;
-   HYPRE_Int                entry, fri, toi, i, d;
+   HYPRE_Int                entry, fri, toi, i, j, d;
+   HYPRE_Int                box_id;
 
    HYPRE_Int               *tindexes;
    HYPRE_Int               *tentries;
@@ -2764,6 +2769,8 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
       offset = shape[entry];
       tovartype = hypre_SStructPGridVarType(pgrid, vars[entry]);
       smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
+      sgrid = hypre_StructMatrixGrid(smatrix);
+      grid_boxes = hypre_StructGridBoxes(sgrid);
 
       /* Copy index to a box to take advantage of existing box algebra fom SetInterPartValues */
       for (d = 0; d < ndim; d++)
@@ -2835,6 +2842,18 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
                      hypre_assert(hypre_BoxIMinD(ibox1, d) == hypre_BoxIMaxD(ibox1, d));
                   }
                   tlocations_h[ntvalues++] = i;
+
+                  /* Update list of part boundaries */
+                  /* WM: todo - I think we want to move away from using pbnd boxaa, but for now this is needed for ssamg */
+                  hypre_ForBoxI(j, grid_boxes)
+                  {
+                     box_id = hypre_StructGridID(sgrid, j);
+                     grid_box = hypre_BoxArrayBox(grid_boxes, j);
+                     hypre_IntersectBoxes(grid_box, ibox1, ibox2);
+
+                     pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, box_id);
+                     hypre_AppendBox(ibox2, pbnd_boxa);
+                  }
                } /* end if nonzero ibox1 */
             } /* end of "from" boxman entries loop */
 
@@ -2844,6 +2863,22 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 
       hypre_TFree(toentries, HYPRE_MEMORY_HOST);
    } /* end of entries loop */
+
+   /* WM: todo - Is this efficient? Better way to do this? */
+   /* Note that the pbnd_boxa's will have MANY boxes (one for each boundary index) if using this routine */
+   /* Union the boxes here */
+   for (i = 0; i < hypre_SStructStencilSize(stencil); i++)
+   {
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[i]);
+      sgrid = hypre_StructMatrixGrid(smatrix);
+      grid_boxes = hypre_StructGridBoxes(sgrid);
+      hypre_ForBoxI(j, grid_boxes)
+      {
+         box_id = hypre_StructGridID(sgrid, j);
+         pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, box_id);
+         hypre_UnionBoxes(pbnd_boxa);
+      }
+   }
 
    /* Copy tlocations to GPU */
    tlocations = hypre_TAlloc(HYPRE_Int, ntvalues, memloc);
