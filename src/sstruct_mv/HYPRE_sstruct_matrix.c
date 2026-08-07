@@ -1368,6 +1368,20 @@ HYPRE_SStructMatrixPrint( const char          *filename,
    /* Print grid info */
    hypre_fprintf(file, "SStructMatrix\n");
    hypre_SStructGridPrint(file, grid);
+   /* WM: debug - adding additional print info below... should we actually include this in general? */
+   /* hypre_fprintf(file, "\nDomainGrid\n"); */
+   /* hypre_SStructGridPrint(file, hypre_SStructGraphDomGrid(graph)); */
+   /* hypre_fprintf(file, "\nDomainStrides\n"); */
+   /* for (part = 0; part < nparts; part++) */
+   /* { */
+   /*    hypre_IndexPrint(file, hypre_SStructMatrixNDim(matrix), hypre_SStructMatrixDomainStride(matrix)[part]); */
+   /* } */
+   /* hypre_fprintf(file, "\n\nRangeStrides\n"); */
+   /* for (part = 0; part < nparts; part++) */
+   /* { */
+   /*    hypre_IndexPrint(file, hypre_SStructMatrixNDim(matrix), hypre_SStructMatrixRangeStride(matrix)[part]); */
+   /* } */
+   /* WM: end new print info */
 
    /* Print stencil info */
    for (part = 0; part < nparts; part++)
