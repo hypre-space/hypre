@@ -60,7 +60,12 @@ FILES =\
  mmio.c\
  prefix_sum.c\
  qsort.c\
+ general.c\
+ handle.c\
+ memory.c\
  unique.c\
+ device_markers.c\
+ device_utils.c\
  utilities.c\
  mpistubs.c\
  qsplit.c\
@@ -72,12 +77,7 @@ FILES =\
  caliper_instrumentation.c
 
 CUFILES=\
- device_markers.c\
- device_utils.c\
- general.c\
- handle.c\
  int_array_device.c\
- memory.c\
  omp_device.c\
  stl_ops.c
 
@@ -96,15 +96,29 @@ MP_CUFILES=\
 
 ifeq (${MP_BUILD}, 1)
 MP_FILES += printf.c multiprecision.c
-MP_CUFILES += umpire.c
+ifeq (${HYPRE_USING_UMPIRE}, 1)
+MP_FILES += umpire.c
+endif
 else
 FILES += printf.c multiprecision.c
-CUFILES += umpire.c
+ifeq (${HYPRE_USING_UMPIRE}, 1)
+FILES += umpire.c
+endif
+endif
+
+ifeq (${CUCC}, )
+FILES := ${FILES} $(filter-out %_device.c,$(CUFILES))
+CUFILES =
+MP_CUFILES =
 endif
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
+ifeq (${CUCC}, )
+OBJS = ${COBJS}
+else
 OBJS = ${COBJS} ${CUOBJS}
+endif
 
 ifeq (${MP_BUILD}, 1)
 
@@ -118,7 +132,9 @@ MP_COBJS          = ${MP_FILES:.c=.o}
 MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
+ifneq (${CUCC}, )
 OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
+endif
 
 endif
 

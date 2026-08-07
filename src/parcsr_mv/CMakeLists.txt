@@ -50,13 +50,6 @@ set(REGULAR_SRCS
   par_make_system.c
   par_vector.c
   par_vector_batched.c
-  par_csr_fffc_device.c
-  par_csr_filter_device.c
-  par_csr_matop_device.c
-  par_csr_matmat_device.c
-  par_csr_matvec_device.c
-  par_csr_triplemat_device.c
-  par_vector_device.c
 )
 
 # Mixed precision sources
@@ -76,13 +69,6 @@ if(HYPRE_USING_GPU)
   )
 endif()
 
-if(HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("parcsr_mv" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
-
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     par_csr_matrix_stats_device.c
@@ -92,15 +78,31 @@ if (HYPRE_USING_GPU)
     par_csr_filter_device.c
     par_csr_matop_device.c
     par_csr_triplemat_device.c
+    par_vector_device.c
+  )
+  set(GPU_MUP_SRCS
     mup_fixed_gpu.c
     mup_functions_gpu.c
     mup_pre_gpu.c
-    par_vector_device.c
   )
+  mark_hypre_gpu_sources(${GPU_MUP_SRCS})
   mark_hypre_gpu_sources(${GPU_SRCS})
+  convert_filenames_to_full_paths(GPU_MUP_SRCS)
   convert_filenames_to_full_paths(GPU_SRCS)
-  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} ${GPU_MUP_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+if(HYPRE_USING_GPU)
+  list(APPEND COMPILED_SRCS ${GPU_SRCS})
+endif()
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("parcsr_mv" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

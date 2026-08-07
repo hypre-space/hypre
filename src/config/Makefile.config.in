@@ -226,6 +226,7 @@ HYPRE_KOKKOS_LIB        = @HYPRE_KOKKOS_LIB@
 ##################################################################
 ##  UMPIRE options
 ##################################################################
+HYPRE_USING_UMPIRE      = @HYPRE_USING_UMPIRE@
 HYPRE_UMPIRE_LIB_DIR      = @HYPRE_UMPIRE_LIB_DIR@
 HYPRE_UMPIRE_INCLUDE      = @HYPRE_UMPIRE_INCLUDE@
 HYPRE_UMPIRE_LIB          = @HYPRE_UMPIRE_LIB@
