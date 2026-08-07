@@ -250,9 +250,7 @@ HYPRE_StructMatrixSetArrayValues(HYPRE_StructMatrix   matrix,
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* WM: todo */
-      /* hypre_StructMatrixSetArrayValuesDevice(matrix, nvalues, */
-      /*                                        indexes, entries, values, 0); */
+      hypre_StructMatrixSetArrayValuesDevice(matrix, nvalues, indexes, entries, values, 0);
    }
    else
 #endif
@@ -284,9 +282,7 @@ HYPRE_StructMatrixAddToArrayValues(HYPRE_StructMatrix   matrix,
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* WM: todo */
-      /* hypre_StructMatrixSetArrayValuesDevice(matrix, nvalues, */
-      /*                                         indexes, entries, values, 1); */
+      hypre_StructMatrixAddToArrayValuesDevice(matrix, nvalues, indexes, entries, values, 0);
    }
    else
 #endif
@@ -318,9 +314,7 @@ HYPRE_StructMatrixGetArrayValues(HYPRE_StructMatrix   matrix,
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* WM: todo */
-      /* hypre_StructMatrixSetArrayValuesDevice(matrix, nvalues, */
-      /*                                        indexes, entries, values, -1); */
+      hypre_StructMatrixGetArrayValuesDevice(matrix, nvalues, indexes, entries, values);
    }
    else
 #endif

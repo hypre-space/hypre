@@ -1271,6 +1271,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    hypre_BoxManEntry       *boxman_entry;
    hypre_SStructBoxManInfo *entry_info;
    HYPRE_Int                i, d, entry;
+   HYPRE_Int                nvalues_set = 0;
    HYPRE_BigInt             Uverank;
 
    HYPRE_Int               *indexes_h;
@@ -1320,7 +1321,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
          hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
       }
 
-      /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad indexes? */
+      /* WM: todo - note that I am not allowing the user to pass bad rows */
       if (boxman_entry == NULL)
       {
          hypre_error_in_arg(1);
@@ -1337,7 +1338,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
       }
 
       hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index,
-                                            &(rows_h[i]), matrix_type);
+                                            &(rows_h[nvalues_set]), matrix_type);
 
       entry = entries[i];
       if (entry < size)
@@ -1359,18 +1360,24 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
          /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad entries? */
          if (boxman_entry == NULL)
          {
-            hypre_error_in_arg(1);
-            hypre_error_in_arg(2);
-            hypre_error_in_arg(5);
+            /* WM: todo - I am allowing for col indices that reach outside the grid and just skip these...?
+             *            Do we want to do this? Makes it easier for the user at boundary conditions? That is,
+             *            when looping over the box, the stencils will look different at the boundary, but they
+             *            can just pass the same stencil as the interior, and we will skip the invalid entries here.
+             *            But also silently skips potentially "bad" arguments from the user... */
+            continue;
+            /* hypre_error_in_arg(1); */
+            /* hypre_error_in_arg(2); */
+            /* hypre_error_in_arg(5); */
 
-            HYPRE_ANNOTATE_FUNC_END;
+            /* HYPRE_ANNOTATE_FUNC_END; */
 
-            return hypre_error_flag;
+            /* return hypre_error_flag; */
          }
          else
          {
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
-                                                  &(cols_h[i]), matrix_type);
+                                                  &(cols_h[nvalues_set++]), matrix_type);
          }
       }
       else
@@ -1401,22 +1408,22 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    /* Copy rows/cols to device */
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-      hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
    }
 
    /* Sort and reduce_by_key to get rows/nrows/ncols to pass to IJMatrixSet/AddTo/GetValues */
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
-   ncols = hypre_TAlloc(HYPRE_Int, nvalues, memory_location);
+   ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, memory_location);
    HYPRE_THRUST_CALL( sort_by_key,
                       rows,
-                      rows + nvalues,
+                      rows + nvalues_set,
                       thrust::make_zip_iterator(thrust::make_tuple(cols, values)) );
    auto new_end = HYPRE_THRUST_CALL( reduce_by_key,
                                      rows,
-                                     rows + nvalues,
+                                     rows + nvalues_set,
                                      thrust::make_constant_iterator(1),
                                      rows,
                                      ncols );
@@ -2404,7 +2411,7 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
       hypre_TFree(Sentries_h, HYPRE_MEMORY_HOST);
       hypre_TFree(struct_stencil_indices_h, HYPRE_MEMORY_HOST);
 
-      /* Set values */
+      /* SetValues */
       if (action == 0)
       {
          hypre_StructMatrixSetArrayValuesDevice(smatrix,
@@ -2414,7 +2421,25 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
                                                 Svalues,
                                                 1);
       }
-      /* WM: todo - AddTo and Get */
+      /* AddToValues */
+      else if (action > 0)
+      {
+         hypre_StructMatrixAddToArrayValuesDevice(smatrix,
+                                                  nSentries,
+                                                  Sindexes,
+                                                  struct_stencil_indices,
+                                                  Svalues,
+                                                  1);
+      }
+      /* GetValues */
+      else
+      {
+         hypre_StructMatrixGetArrayValuesDevice(smatrix,
+                                                nSentries,
+                                                Sindexes,
+                                                struct_stencil_indices,
+                                                Svalues);
+      }
 
       hypre_TFree(struct_stencil_indices, HYPRE_MEMORY_DEVICE);
 
@@ -2429,7 +2454,7 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    /* U-matrix */
    if (nUentries > 0)
    {
-      hypre_SStructMatrixSetArrayValuesDevice(matrix, part, var, nUentries, Uindexes, Uentries, Uvalues, action);
+      hypre_SStructUMatrixSetArrayValuesDevice(matrix, part, var, nUentries, Uindexes, Uentries, Uvalues, action);
    }
 
    return hypre_error_flag;
@@ -2787,7 +2812,6 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
                                            hypre_BoxIMin(frbox),
                                            hypre_BoxIMax(frbox));
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
-               hypre_printf("WM: debug - hypre_BoxVolume(ibox1) = %d\n", hypre_BoxVolume(ibox1));
                if (hypre_BoxVolume(ibox1))
                {
                   /* ibox1 should be a single index */

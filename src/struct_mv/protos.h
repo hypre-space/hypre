@@ -675,6 +675,10 @@ HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix, hypre_Box
                                            HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes,
                                                   HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int clear_ghost );
+HYPRE_Int hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes,
+                                                    HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int add_to_ghost );
+HYPRE_Int hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes,
+                                                  HYPRE_Int *stencil_indices, HYPRE_Complex *values );
 HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix,
                                                 HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values,
                                                 HYPRE_Int action );
