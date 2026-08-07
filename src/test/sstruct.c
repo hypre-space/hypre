@@ -4088,7 +4088,7 @@ main( hypre_int argc,
                hypre_MuPDataCopyToMP(h_values, &pdata.graph_values[box], 1);
                hypre_MuPDataMemcpy(d_values, h_values, 1, memory_location, HYPRE_MEMORY_HOST);
 /* WM: debug */
-#if 0
+#if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_BoxSetExtents(set_array_box, pdata.graph_ilowers[box], pdata.graph_iuppers[box]);
                set_array_box_volume = hypre_BoxVolume(set_array_box);
@@ -4111,7 +4111,7 @@ main( hypre_int argc,
                           index[0] += pdata.graph_strides[box][0])
                      {
 /* WM: debug */
-#if 0
+#if TEST_SET_ARRAY_VALUES
                         for (k = 0; k < data.ndim; k++)
                         {
                            set_array_indexes_h[set_array_cnt * data.ndim + k] = index[k];
@@ -4127,7 +4127,7 @@ main( hypre_int argc,
                   }
                }
 /* WM: debug */
-#if 0
+#if TEST_SET_ARRAY_VALUES
                hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
                              data.ndim * set_array_cnt, memory_location, HYPRE_MEMORY_HOST);
                hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
@@ -4162,7 +4162,7 @@ main( hypre_int argc,
                                    memory_location, HYPRE_MEMORY_HOST);
 
 /* WM: debug */
-#if 0
+#if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matset_ilowers[box], data.ndim, ilower);
                hypre_CopyToCleanIndex(pdata.matset_iuppers[box], data.ndim, iupper);
@@ -4215,7 +4215,7 @@ main( hypre_int argc,
                size = BoxVolume(pdata.matadd_ilowers[box], pdata.matadd_iuppers[box]);
 
 /* WM: debug */
-#if 0
+#if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matadd_ilowers[box], data.ndim, ilower);
                hypre_CopyToCleanIndex(pdata.matadd_iuppers[box], data.ndim, iupper);

@@ -1274,6 +1274,8 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    HYPRE_Int                nvalues_set = 0;
    HYPRE_BigInt             Uverank;
 
+   HYPRE_Int               *skip_val;
+   HYPRE_Int               *skip_val_h;
    HYPRE_Int               *indexes_h;
    HYPRE_BigInt            *rows_h;
    HYPRE_BigInt            *cols_h;
@@ -1291,8 +1293,10 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
     *            if there are many Uentries to set (though this should be small
     *            compared to the struct component of the matrix) */
 
+   skip_val = hypre_CTAlloc(HYPRE_Int, nvalues, memory_location);
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
+      skip_val_h = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
       indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
       rows_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
       cols_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
@@ -1300,6 +1304,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    }
    else
    {
+      skip_val_h = skip_val;
       indexes_h = indexes;
       rows_h = rows;
       cols_h = cols;
@@ -1365,7 +1370,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
              *            when looping over the box, the stencils will look different at the boundary, but they
              *            can just pass the same stencil as the interior, and we will skip the invalid entries here.
              *            But also silently skips potentially "bad" arguments from the user... */
-            continue;
+            skip_val_h[i] = 1;
             /* hypre_error_in_arg(1); */
             /* hypre_error_in_arg(2); */
             /* hypre_error_in_arg(5); */
@@ -1410,12 +1415,20 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    {
       hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(skip_val, skip_val_h, HYPRE_Int, nvalues, memory_location, HYPRE_MEMORY_HOST);
    }
 
    /* Sort and reduce_by_key to get rows/nrows/ncols to pass to IJMatrixSet/AddTo/GetValues */
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
+
+   /* WM: note that the values array passed to this function is modified here... I think that's fine. */
+   HYPRE_THRUST_CALL( remove_if,
+                      values,
+                      values + nvalues,
+                      skip_val,
+                      thrust::identity<HYPRE_Int>() );
    ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, memory_location);
    HYPRE_THRUST_CALL( sort_by_key,
                       rows,
@@ -1446,8 +1459,10 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
 
    hypre_TFree(rows, memory_location);
    hypre_TFree(cols, memory_location);
+   hypre_TFree(skip_val, memory_location);
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
+      hypre_TFree(skip_val_h, HYPRE_MEMORY_HOST);
       hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
       hypre_TFree(rows_h, HYPRE_MEMORY_HOST);
       hypre_TFree(cols_h, HYPRE_MEMORY_HOST);
