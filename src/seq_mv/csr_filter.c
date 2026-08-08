@@ -31,6 +31,8 @@ hypre_CSRMatrixTruncateDiag(hypre_CSRMatrix *A)
    A_a = hypre_TAlloc(HYPRE_Complex, num_rows, memory_location);
    hypre_CSRMatrixExtractDiagonal(A, A_a, 0);
 
+   hypre_CSRMatrixInvalidateSpMVCache(A);
+
    /* Free old matrix data */
    hypre_TFree(hypre_CSRMatrixData(A), memory_location);
    hypre_TFree(hypre_CSRMatrixI(A), memory_location);

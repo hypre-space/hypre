@@ -1065,6 +1065,10 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(par_matrix));
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(par_matrix));
 
+   /* Run analysis phase for SpMV */
+   hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(par_matrix));
+   hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixOffd(par_matrix));
+
    /* Finalize */
    hypre_IJMatrixAssembleFlag(matrix) = 1;
    hypre_AuxParCSRMatrixDestroy(aux_matrix);

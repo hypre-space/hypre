@@ -172,6 +172,7 @@ hypre_SetSpGemmRownnzEstimateMethod
 hypre_SetSpGemmRownnzEstimateMultFactor
 hypre_SetSpGemmRownnzEstimateNSamples
 hypre_SetSpGemmUseVendor
+hypre_SetSpMVAlgorithm
 hypre_SetSpMVUseVendor
 hypre_SetSpTransUseVendor
 hypre_SetUseGpuRand

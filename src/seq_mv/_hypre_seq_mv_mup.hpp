@@ -378,6 +378,13 @@ HYPRE_Int
 hypre_GpuMatDataDestroy_long_dbl( hypre_GpuMatData *data );
 
 HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache_flt( hypre_GpuMatData *data );
+HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache_dbl( hypre_GpuMatData *data );
+HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache_long_dbl( hypre_GpuMatData *data );
+
+HYPRE_Int
 hypre_SeqVectorAxpyDevice_flt( hypre_float alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int
 hypre_SeqVectorAxpyDevice_dbl( hypre_double alpha, hypre_Vector *x, hypre_Vector *y );

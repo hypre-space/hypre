@@ -260,6 +260,8 @@
 #define hypre_GPUMatDataSetCSRData HYPRE_FIXEDPRECISION_FUNC ( hypre_GPUMatDataSetCSRData )
 #define hypre_GpuMatDataCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataCreate )
 #define hypre_GpuMatDataDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataDestroy )
+#define hypre_GpuMatDataInvalidateSpMVCache HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataInvalidateSpMVCache )
+#define hypre_GpuVecDataDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuVecDataDestroy )
 #define hypre_SeqVectorAxpyDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorAxpyDevice )
 #define hypre_SeqVectorAxpyzDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorAxpyzDevice )
 #define hypre_SeqVectorInnerProdDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorInnerProdDevice )
@@ -276,6 +278,8 @@
 #define hypre_SpGemmCreateBins HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmCreateBins )
 #define hypre_SpGemmCreateGlobalHashTable HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmCreateGlobalHashTable )
 #define hypre_SpGemmGhashSize HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmGhashSize )
+#define hypre_VectorGetCusparseDnVecDescr HYPRE_FIXEDPRECISION_FUNC ( hypre_VectorGetCusparseDnVecDescr )
+#define hypre_VectorGetRocsparseDnVecDescr HYPRE_FIXEDPRECISION_FUNC ( hypre_VectorGetRocsparseDnVecDescr )
 #define hypre_create_ija HYPRE_FIXEDPRECISION_FUNC ( hypre_create_ija )
 #define hypre_expdistfromuniform HYPRE_FIXEDPRECISION_FUNC ( hypre_expdistfromuniform )
 

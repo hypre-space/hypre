@@ -13,6 +13,11 @@
 
 #include "_hypre_seq_mv.h"
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
  *--------------------------------------------------------------------------*/
@@ -36,6 +41,11 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
 #if defined(HYPRE_MIXED_PRECISION)
    hypre_VectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   hypre_VectorGPUVecData(vector) = NULL;
 #endif
 
    return vector;
@@ -74,6 +84,11 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector), memory_location);
       }
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+      hypre_GpuVecDataDestroy(hypre_VectorGPUVecData(vector));
+#endif
 
       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
