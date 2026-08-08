@@ -651,9 +651,9 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
          for this level. The index is bounded by max_num_coarse_levels, so an unset or
          out-of-range level falls through to the error path rather than reading
          past the array. */
-      RAP = ((mgr_data -> user_coarse_grid_matrix) &&
+      RAP = ((mgr_data -> user_Ac_array) &&
              level < (mgr_data -> max_num_coarse_levels)) ?
-            (mgr_data -> user_coarse_grid_matrix)[level] : NULL;
+            (mgr_data -> user_Ac_array)[level] : NULL;
       if (!RAP)
       {
          hypre_GpuProfilingPopRange();

@@ -46,7 +46,7 @@ hypre_MGRCreate(void)
    (mgr_data -> R_array) = NULL;
    (mgr_data -> RT_array) = NULL;
    (mgr_data -> RAP) = NULL;
-   (mgr_data -> user_coarse_grid_matrix) = NULL;
+   (mgr_data -> user_Ac_array) = NULL;
    (mgr_data -> CF_marker_array) = NULL;
    (mgr_data -> coarse_indices_lvls) = NULL;
 
@@ -335,11 +335,11 @@ hypre_MGRCleanupBuildData( void      *mgr_vdata,
       but they are aliased into A_array / RAP. Clearing those slots lets the generic
       destroy loops below skip them through their existing NULL checks, so no
       per-matrix ownership test is needed. */
-   if ((mgr_data -> user_coarse_grid_matrix))
+   if ((mgr_data -> user_Ac_array))
    {
       for (lvl = 0; lvl < (mgr_data -> max_num_coarse_levels); lvl++)
       {
-         hypre_ParCSRMatrix *user_mat = (mgr_data -> user_coarse_grid_matrix)[lvl];
+         hypre_ParCSRMatrix *user_mat = (mgr_data -> user_Ac_array)[lvl];
 
          if (!user_mat)
          {
@@ -759,8 +759,8 @@ hypre_MGRCleanupConfig( void *mgr_vdata )
    hypre_TFree((mgr_data -> idx_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> coarse_grid_method), HYPRE_MEMORY_HOST);
    /* Free only the array of borrowed pointers, never the user matrices. */
-   hypre_TFree((mgr_data -> user_coarse_grid_matrix), HYPRE_MEMORY_HOST);
-   (mgr_data -> user_coarse_grid_matrix) = NULL;
+   hypre_TFree((mgr_data -> user_Ac_array), HYPRE_MEMORY_HOST);
+   (mgr_data -> user_Ac_array) = NULL;
    hypre_TFree((mgr_data -> nonglk_max_elmts), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> level_smooth_type), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> level_smooth_iters), HYPRE_MEMORY_HOST);
@@ -3122,12 +3122,12 @@ hypre_MGRSetCoarseGridMatrixAtLevel( void               *mgr_vdata,
    /* The borrowed-pointer array is sized to max_num_coarse_levels, exactly like
       MGR's other per-level arrays (e.g. coarse_grid_method); the bounds check
       above keeps every store in range. Allocate (zero-filled) on first use. */
-   if (!(mgr_data -> user_coarse_grid_matrix))
+   if (!(mgr_data -> user_Ac_array))
    {
-      (mgr_data -> user_coarse_grid_matrix) =
+      (mgr_data -> user_Ac_array) =
          hypre_CTAlloc(hypre_ParCSRMatrix *, max_lvls, HYPRE_MEMORY_HOST);
    }
-   (mgr_data -> user_coarse_grid_matrix)[level] = coarse_matrix;
+   (mgr_data -> user_Ac_array)[level] = coarse_matrix;
 
    return hypre_error_flag;
 }
