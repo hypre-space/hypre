@@ -6806,6 +6806,7 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Global number of rows is not divisable by the block dimension");
+      *B_ptr = NULL;
       return hypre_error_flag;
    }
 
@@ -6813,6 +6814,7 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Global number of columns is not divisable by the block dimension");
+      *B_ptr = NULL;
       return hypre_error_flag;
    }
 
@@ -6830,6 +6832,14 @@ hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix      *A,
    B = hypre_DenseBlockMatrixCreate(row_major,
                                     num_rows_diag_A, num_cols_diag_A,
                                     num_rows_block, num_cols_block);
+   if (!B)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Could not create block column sum matrix (incompatible block dimensions)");
+      *B_ptr = NULL;
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
    /* Initialize the output matrix */
    /* TODO: Change back to memory_location after implementing hypre_ParCSRMatrixBlockColSumDevice */

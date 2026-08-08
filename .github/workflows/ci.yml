@@ -8,10 +8,14 @@ on:
     types: [opened, reopened, synchronize, labeled, unlabeled]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   require-label:
     name: Require Run CI label
     runs-on: ubuntu-latest
+    permissions: {}
     if: github.event_name == 'pull_request'
     steps:
       - name: Ensure Run CI label is present

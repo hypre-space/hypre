@@ -118,3 +118,11 @@ Final Relative Residual Norm = 8.594333e-07
 Iterations = 48
 Final Relative Residual Norm = 8.594333e-07
 
+# Output file: periodic.out.100
+Iterations = 75
+Final Relative Residual Norm = 8.366889e-07
+
+# Output file: periodic.out.101
+Iterations = 75
+Final Relative Residual Norm = 8.366889e-07
+
