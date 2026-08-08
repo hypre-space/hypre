@@ -1751,7 +1751,8 @@ hypreGPUKernel_StructMatrixAddToArrayValues( hypre_DeviceItem  &item,
    bool set_condition;
    if (check_done)
    {
-      set_condition = (i < nvalues && (!done_arr || !done_arr[i]) && stencil_indices[i] == set_stencil_index);
+      set_condition = (i < nvalues && (!done_arr || !done_arr[i]) &&
+                       stencil_indices[i] == set_stencil_index);
    }
    else
    {

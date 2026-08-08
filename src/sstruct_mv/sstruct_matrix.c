@@ -2298,9 +2298,11 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
 
    /* Copy from indexes into Sindexes and Uindexes */
    gDim = hypre_GetDefaultDeviceGridDimension(nSentries, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nSentries, indexes, Sentry_locations, Sindexes );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nSentries, indexes,
+                     Sentry_locations, Sindexes );
    gDim = hypre_GetDefaultDeviceGridDimension(nUentries, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nUentries, indexes, Uentry_locations, Uindexes );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nUentries, indexes,
+                     Uentry_locations, Uindexes );
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
@@ -2395,14 +2397,14 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
                                                indexes,
                                                entries,
                                                values,
-                                              &nSentries,
-                                              &nUentries,
-                                              &Sindexes,
-                                              &Uindexes,
-                                              &Sentries,
-                                              &Uentries,
-                                              &Svalues,
-                                              &Uvalues );
+                                               &nSentries,
+                                               &nUentries,
+                                               &Sindexes,
+                                               &Uindexes,
+                                               &Sentries,
+                                               &Uentries,
+                                               &Svalues,
+                                               &Uvalues );
 
    /* S-matrix */
    if (nSentries > 0)
@@ -2422,7 +2424,8 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
       {
          struct_stencil_indices_h[i] = smap[Sentries_h[i]];
       }
-      hypre_TMemcpy(struct_stencil_indices, struct_stencil_indices_h, HYPRE_Int, nSentries, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(struct_stencil_indices, struct_stencil_indices_h, HYPRE_Int, nSentries,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(Sentries_h, HYPRE_MEMORY_HOST);
       hypre_TFree(struct_stencil_indices_h, HYPRE_MEMORY_HOST);
 
@@ -2462,14 +2465,16 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
        * (possibly in ghost zones) */
       if (nvneighbors[part][var] > 0)
       {
-         hypre_SStructMatrixSetArrayInterPartValuesDevice(matrix, part, var, nSentries, Sindexes, Sentries, Svalues, action);
+         hypre_SStructMatrixSetArrayInterPartValuesDevice(matrix, part, var, nSentries, Sindexes, Sentries,
+                                                          Svalues, action);
       }
    }
 
    /* U-matrix */
    if (nUentries > 0)
    {
-      hypre_SStructUMatrixSetArrayValuesDevice(matrix, part, var, nUentries, Uindexes, Uentries, Uvalues, action);
+      hypre_SStructUMatrixSetArrayValuesDevice(matrix, part, var, nUentries, Uindexes, Uentries, Uvalues,
+                                               action);
    }
 
    return hypre_error_flag;
@@ -2889,7 +2894,7 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    tentries = hypre_TAlloc(HYPRE_Int, ntvalues, memloc);
    tvalues = hypre_TAlloc(HYPRE_Complex, ntvalues, memloc);
 #if defined(HYPRE_USING_SYCL)
-/* WM: todo */
+   /* WM: todo */
 #else
    HYPRE_THRUST_CALL( gather,
                       tlocations,
@@ -2904,7 +2909,8 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 #endif
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(ntvalues, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, ntvalues, indexes, tlocations, tindexes );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, ntvalues, indexes, tlocations,
+                     tindexes );
 
    if (action >= 0)
    {
@@ -2933,12 +2939,14 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
       {
          struct_stencil_indices_h[i] = smap[tentries_h[i]];
       }
-      hypre_TMemcpy(struct_stencil_indices, struct_stencil_indices_h, HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(struct_stencil_indices, struct_stencil_indices_h, HYPRE_Int, ntvalues,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(tentries_h, HYPRE_MEMORY_HOST);
       hypre_TFree(struct_stencil_indices_h, HYPRE_MEMORY_HOST);
 
       /* zero out values in PMatrix (possibly in ghost) */
-      hypre_StructMatrixSetArrayValuesDevice(smatrix, ntvalues, tindexes, struct_stencil_indices, NULL, 1);
+      hypre_StructMatrixSetArrayValuesDevice(smatrix, ntvalues, tindexes, struct_stencil_indices, NULL,
+                                             1);
       hypre_TFree(struct_stencil_indices, HYPRE_MEMORY_DEVICE);
    }
    else

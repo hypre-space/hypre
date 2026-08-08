@@ -813,10 +813,10 @@ hypreGPUKernel_StructVectorAddToArrayValues( hypre_DeviceItem  &item,
 
 HYPRE_Int
 hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector,
-                                        HYPRE_Int           nvalues,
-                                        HYPRE_Int          *indexes,
-                                        HYPRE_Complex      *values,
-                                        HYPRE_Int           add_to_ghost )
+                                          HYPRE_Int           nvalues,
+                                          HYPRE_Int          *indexes,
+                                          HYPRE_Complex      *values,
+                                          HYPRE_Int           add_to_ghost )
 {
    HYPRE_Int i;
    HYPRE_Complex *vec_box_data;
