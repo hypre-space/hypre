@@ -134,6 +134,9 @@ HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm, const char *filename,
 
 /* box_device.c */
 #if defined(HYPRE_USING_GPU)
+/* WM: todo - figure out how to correctly make device subroutines available via header files */
+/* HYPRE_Int hypre_IndexInBoxDevice( HYPRE_Int *index, hypre_Box *box ); */
+/* HYPRE_Int hypre_BoxIndexRankDevice( hypre_Box *box, HYPRE_Int *index ); */
 HYPRE_Int hypre_BoxRanksToIndexesDevice( hypre_Box *box, HYPRE_Int num_ranks,
                                          HYPRE_Int *ranks, HYPRE_Int ***indexes_ptr );
 #endif
@@ -670,6 +673,15 @@ HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix, hypre_Index 
 HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix, hypre_Box *set_box,
                                            hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices,
                                            HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int clear_ghost );
+HYPRE_Int hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes,
+                                                    HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int add_to_ghost );
+HYPRE_Int hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Int *stencil_indices, HYPRE_Complex *values );
 HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix,
                                                 HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values,
                                                 HYPRE_Int action );
@@ -765,6 +777,15 @@ HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector, hypre_Index 
 HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector, hypre_Box *set_box,
                                            hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum,
                                            HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Complex *values, HYPRE_Int clear_ghost );
+HYPRE_Int hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes,
+                                                    HYPRE_Complex *values, HYPRE_Int add_to_ghost );
+HYPRE_Int hypre_StructVectorGetArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Complex *values );
 HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector, hypre_Index grid_index,
                                           HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector, hypre_Box *clear_box,
