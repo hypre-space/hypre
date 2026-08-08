@@ -83,6 +83,7 @@ hypre_FlexGMRESGetMaxIter
 hypre_FlexGMRESGetMinIter
 hypre_FlexGMRESGetNumIterations
 hypre_FlexGMRESGetPrecond
+hypre_FlexGMRESGetPrecondMatrix
 hypre_FlexGMRESGetPrintLevel
 hypre_FlexGMRESGetResidual
 hypre_FlexGMRESGetStopCrit
@@ -96,6 +97,7 @@ hypre_FlexGMRESSetMaxIter
 hypre_FlexGMRESSetMinIter
 hypre_FlexGMRESSetModifyPC
 hypre_FlexGMRESSetPrecond
+hypre_FlexGMRESSetPrecondMatrix
 hypre_FlexGMRESSetPrintLevel
 hypre_FlexGMRESSetStopCrit
 hypre_FlexGMRESSetTol

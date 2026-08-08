@@ -63,10 +63,11 @@ co="--with-hip --without-umpire --enable-unified-memory --enable-single --enable
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-hip-um-single
 
-# HIP with mixed precision [no run]
+# HIP with mixed precision
 co="--with-hip --without-umpire --enable-mixed-precision --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic-hip-mup
+ro="-mixed-precision -rt -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-hip-mp
 
 # run on CPU
 co="--with-hip --without-umpire --with-test-using-host --with-memory-tracker --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"

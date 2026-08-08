@@ -331,6 +331,24 @@ hypre_CSRMatrixResetData( hypre_CSRMatrix *matrix )
 
 /*--------------------------------------------------------------------------*/
 
+hypre_Vector *
+hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_SeqMultiVectorCreate_pre( precision, size, num_vectors );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_SeqVectorInitialize_v2_pre( precision, vector, memory_location );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SeqVectorSetData( hypre_Vector *vector, void *data )
 {

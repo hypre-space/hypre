@@ -49,6 +49,15 @@ HYPRE_ParVectorConvert_mp( HYPRE_ParVector v,
 }
 
 /*--------------------------------------------------------------------------
+ * Mixed-precision HYPRE_ParVectorClone
+ *--------------------------------------------------------------------------*/
+HYPRE_ParVector
+HYPRE_ParVectorClone_mp(HYPRE_ParVector   v, HYPRE_Precision new_precision)
+{
+   return ((HYPRE_ParVector)(hypre_ParVectorClone_mp((hypre_ParVector   *)v, new_precision)));
+}
+
+/*--------------------------------------------------------------------------
  * Mixed-precision HYPRE_ParCSRMatrixConvert
  *--------------------------------------------------------------------------*/
 HYPRE_Int

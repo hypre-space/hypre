@@ -43,3 +43,5 @@ hypre_ParCSRMatrixClone
 hypre_ParCSRMatrixCopy
 hypre_ParCSRMatrixCreate
 hypre_ParCSRMatrixInitialize_v2
+hypre_ParVectorCloneDeep_v2
+hypre_ParVectorCreate
