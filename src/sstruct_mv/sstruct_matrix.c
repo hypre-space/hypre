@@ -1405,7 +1405,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
          else
          {
             Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
-            cols_h[i] = hypre_SStructUVEntryToRank(Uventry, entry);
+            cols_h[nvalues_set++] = hypre_SStructUVEntryToRank(Uventry, entry);
          }
       }
    }
