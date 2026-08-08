@@ -146,6 +146,22 @@ hypre_MGRSetup( void               *mgr_vdata,
    char        region_name[1024], level_name[1024];
    char        msg[2048];
 
+   /* Validate user-provided coarse operators before setup opens profiling
+      ranges or allocates hierarchy data. */
+   num_coarsening_levs = max_num_coarse_levels;
+   for (lev = 0; lev < num_coarsening_levs; lev++)
+   {
+      if (coarse_grid_method && coarse_grid_method[lev] == 6 &&
+          (!(mgr_data -> user_coarse_grid_matrix) ||
+           !((mgr_data -> user_coarse_grid_matrix)[lev])))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "MGR coarse_grid_method 6 requires a coarse matrix set via "
+                           "HYPRE_MGRSetCoarseGridMatrixAtLevel() for that level");
+         return hypre_error_flag;
+      }
+   }
+
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("MGRSetup");
@@ -1380,6 +1396,33 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    /* set pointer to last level matrix */
    (mgr_data -> num_coarse_levels) = num_c_levels;
+
+   /* Wire the PCD coarse grid correction when pressure operators have been
+    * provided (HYPRE_MGRPCDSetOperators) and the user has not
+    * installed an explicit coarse solver via HYPRE_MGRSetCoarseSolver. */
+   {
+      hypre_MGRPCDData *pcd = (mgr_data -> pcd_data);
+
+      if (pcd && (pcd -> Fp) && (pcd -> Ap) && (pcd -> Mp) &&
+          (use_default_cgrid_solver ||
+           (mgr_data -> coarse_grid_solver_solve) ==
+           (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_MGRPCDSolve))
+      {
+         (pcd -> print_level) = (mgr_data -> cg_print_level);
+         (mgr_data -> coarse_grid_solver)       = (HYPRE_Solver) pcd;
+         (mgr_data -> coarse_grid_solver_owner) = HYPRE_MGR_SOLVER_OWNER_NONE;
+         (mgr_data -> coarse_grid_solver_setup) =
+            (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_MGRPCDSetup;
+         (mgr_data -> coarse_grid_solver_solve) =
+            (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_MGRPCDSolve;
+         (mgr_data -> use_default_cgrid_solver) = 0;
+
+         /* Refresh the local copies used for the setup call below */
+         use_default_cgrid_solver = 0;
+         cgrid_solver_setup       = (mgr_data -> coarse_grid_solver_setup);
+         cgrid_solver_solve       = (mgr_data -> coarse_grid_solver_solve);
+      }
+   }
 
    /* setup default coarsest grid solver (BoomerAMG) */
    if (use_default_cgrid_solver)

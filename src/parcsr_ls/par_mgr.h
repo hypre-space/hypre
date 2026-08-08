@@ -9,6 +9,76 @@
 #define hypre_ParMGR_DATA_HEADER
 
 /*--------------------------------------------------------------------------
+ * hypre_MGRPCDData
+ *
+ * Internal data for MGR's PCD (pressure convection-diffusion) coarse grid
+ * correction, created by hypre_MGRCreate and owned/destroyed by the parent
+ * MGR solver. It stays inert until the user supplies the pressure operators
+ * via HYPRE_MGRPCDSetOperators.
+ *
+ * Approximates the action of the inverse of MGR's coarse grid matrix
+ * (a Schur complement approximation for incompressible Navier-Stokes
+ * systems reduced onto the pressure unknowns) by
+ *
+ *    S^{-1} ~ Mp^{-1} Fp Ap^{-1}     (apply_order = 0, default)
+ *    S^{-1} ~ Ap^{-1} Fp Mp^{-1}     (apply_order = 1)
+ *
+ * where Ap, Fp, and Mp are the pressure Laplacian, convection-diffusion,
+ * and mass matrices supplied by the user on the same parallel partitioning
+ * as MGR's coarsest grid.
+ *
+ * The Ap^{-1} and Mp^{-1} actions are pluggable: users may inject arbitrary
+ * (caller-owned) solver objects via HYPRE_MGRPCDSetApSolver and
+ * HYPRE_MGRPCDSetMpSolver. Injected solvers are set up on the
+ * corresponding operator unless their base hypre_Solver setup-reuse flag is
+ * raised, which lets callers preserve, e.g., the Ap AMG hierarchy across
+ * MGR rebuilds. Defaults when not injected: BoomerAMG for Ap (owned) and a
+ * (lumped) mass diagonal scaling for Mp.
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   /* Base solver info (must be first member): MGR treats coarse grid solvers
+    * as hypre_Solver* to query/reset setup state. */
+   hypre_Solver         base;
+
+   /* User-provided operators (not owned) */
+   hypre_ParCSRMatrix  *Fp;              /* pressure convection-diffusion */
+   hypre_ParCSRMatrix  *Ap;              /* pressure Laplacian */
+   hypre_ParCSRMatrix  *Mp;              /* pressure mass matrix */
+
+   /* Options */
+   HYPRE_Int            apply_order;     /* see above */
+   HYPRE_Int            mass_inv_type;   /* internal Mp^{-1} when no solver is
+                                            injected. 0: lumped; 1: diag(Mp) */
+   HYPRE_Int            print_level;
+
+   /* Ap solver: injected (not owned) or internal default BoomerAMG (owned) */
+   HYPRE_Solver         ap_solver;
+   HYPRE_Int            ap_solver_owned;
+   HYPRE_Int          (*ap_solve)(void*, void*, void*, void*);
+   HYPRE_Int          (*ap_setup)(void*, void*, void*, void*);
+
+   /* Mp solver: injected (not owned); when absent, the (lumped) mass
+    * diagonal scaling below is used */
+   HYPRE_Solver         mp_solver;
+   HYPRE_Int          (*mp_solve)(void*, void*, void*, void*);
+   HYPRE_Int          (*mp_setup)(void*, void*, void*, void*);
+
+   /* Internal data (owned) */
+   hypre_ParVector     *mass_diag;       /* (lumped) mass diagonal */
+   hypre_ParVector     *r_work;
+   hypre_ParVector     *z_work;
+   hypre_ParVector     *w_work;
+
+   /* Operators the internal data was last set up with. Setup is skipped for
+    * internal components whose operator pointer is unchanged (Fp typically
+    * changes every nonlinear iteration while Ap and Mp are constant). */
+   hypre_ParCSRMatrix  *ap_setup_mat;
+   hypre_ParCSRMatrix  *mp_setup_mat;
+} hypre_MGRPCDData;
+
+/*--------------------------------------------------------------------------
  * hypre_ParMGRData
  *--------------------------------------------------------------------------*/
 
@@ -38,6 +108,7 @@ typedef struct
    hypre_ParCSRMatrix  **R_array;
    hypre_ParCSRMatrix  **RT_array;
    hypre_ParCSRMatrix   *RAP;
+   hypre_ParCSRMatrix  **user_coarse_grid_matrix; /* User-provided Schur complement */
    hypre_IntArray      **CF_marker_array;
    HYPRE_Int           **coarse_indices_lvls;
    hypre_ParVector     **F_array;
@@ -153,6 +224,10 @@ typedef struct
 
    /* Data for Gaussian elimination F-relaxation */
    hypre_ParAMGData    **GSElimData;
+
+   /* PCD (pressure convection-diffusion) coarse grid correction data;
+    * created by hypre_MGRCreate, configured via HYPRE_MGRPCDSet*, owned by MGR */
+   hypre_MGRPCDData     *pcd_data;
 } hypre_ParMGRData;
 
 /*--------------------------------------------------------------------------
