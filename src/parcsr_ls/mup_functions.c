@@ -3184,6 +3184,15 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_MGRSetCoarseGridMatrixAtLevel_pre( precision, solver, level, coarse_matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
