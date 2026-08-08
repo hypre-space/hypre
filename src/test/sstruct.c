@@ -3837,17 +3837,9 @@ main( hypre_int argc,
           * Set up the matrix
           *-----------------------------------------------------------*/
 
-
-
-
-
-
-
          HYPRE_SStructMatrixCreate(comm, graph, &A);
 
-         /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
-         /* NEW */
          /* Set and allocate values buffer */
          values_size = 1;
          values_size = hypre_max(values_size, data.fem_nvars * data.fem_nvars);
@@ -3944,8 +3936,6 @@ main( hypre_int argc,
             }
          }
 #else
-         /* OLD */
-
          /* Set and allocate values buffer */
          values_size = 1;
          values_size = hypre_max(values_size, data.fem_nvars * data.fem_nvars);
@@ -4006,7 +3996,6 @@ main( hypre_int argc,
                }
             }
          }
-
 #endif
          else if (data.fem_nvars > 0)
          {
@@ -4092,7 +4081,6 @@ main( hypre_int argc,
 #else
                hypre_MuPDataCopyToMP(h_values, &pdata.graph_values[box], 1);
                hypre_MuPDataMemcpy(d_values, h_values, 1, memory_location, HYPRE_MEMORY_HOST);
-               /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_BoxSetExtents(set_array_box, pdata.graph_ilowers[box], pdata.graph_iuppers[box]);
@@ -4115,7 +4103,6 @@ main( hypre_int argc,
                           index[0] <= pdata.graph_iuppers[box][0];
                           index[0] += pdata.graph_strides[box][0])
                      {
-                        /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                         for (k = 0; k < data.ndim; k++)
                         {
@@ -4132,7 +4119,6 @@ main( hypre_int argc,
                      }
                   }
                }
-               /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
                              data.ndim * set_array_cnt, memory_location, HYPRE_MEMORY_HOST);
@@ -4168,7 +4154,6 @@ main( hypre_int argc,
                hypre_MuPDataMemcpy(d_values, h_values, values_size,
                                    memory_location, HYPRE_MEMORY_HOST);
 
-               /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matset_ilowers[box], data.ndim, ilower);
@@ -4222,7 +4207,6 @@ main( hypre_int argc,
             {
                size = BoxVolume(pdata.matadd_ilowers[box], pdata.matadd_iuppers[box]);
 
-               /* WM: debug */
 #if TEST_SET_ARRAY_VALUES
                set_array_box = hypre_BoxCreate(data.ndim);
                hypre_CopyToCleanIndex(pdata.matadd_ilowers[box], data.ndim, ilower);
