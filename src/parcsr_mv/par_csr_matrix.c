@@ -660,9 +660,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
 
    /* Auxiliary variables */
    HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
-   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
    HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
-   HYPRE_Int             blk_dim         = hypre_max(1, num_rows / num_cols);
+   HYPRE_Int             blk_dim         = (global_num_cols > 0) ?
+                                           (HYPRE_Int) hypre_max(1, global_num_rows / global_num_cols) : 1;
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -681,7 +681,7 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
       return NULL;
    }
 
-   if (num_rows % num_cols)
+   if (global_num_cols > 0 && (global_num_rows % global_num_cols))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Number of rows is not evenly divisible by number of columns");

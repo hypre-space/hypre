@@ -5095,18 +5095,18 @@ HYPRE_Int
 hypre_ILUSetupILUKRAS_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr, hypre_long_double **Dptr, hypre_ParCSRMatrix **Uptr );
 
 HYPRE_Int
-hypre_ILUSetupILUKRASSymbolic_flt( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j );
+hypre_ILUSetupILUKRASSymbolic_flt( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_MemoryLocation memory_location);
 HYPRE_Int
-hypre_ILUSetupILUKRASSymbolic_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j );
+hypre_ILUSetupILUKRASSymbolic_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_MemoryLocation memory_location);
 HYPRE_Int
-hypre_ILUSetupILUKRASSymbolic_long_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j );
+hypre_ILUSetupILUKRASSymbolic_long_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_MemoryLocation memory_location);
 
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic_flt( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end );
+hypre_ILUSetupILUKSymbolic_flt( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end, HYPRE_MemoryLocation memory_location);
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end );
+hypre_ILUSetupILUKSymbolic_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end, HYPRE_MemoryLocation memory_location);
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic_long_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end );
+hypre_ILUSetupILUKSymbolic_long_dbl( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm, HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j, HYPRE_Int **u_end, HYPRE_MemoryLocation memory_location);
 
 HYPRE_Int
 hypre_ILUSetupILUT_flt( hypre_ParCSRMatrix *A, HYPRE_Int lfil, hypre_float *tol, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr, hypre_float **Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end );

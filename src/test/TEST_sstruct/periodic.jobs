@@ -70,3 +70,10 @@ mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver 218 > peri
 mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  18 > periodic.out.94
 mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  28 > periodic.out.95
 
+#=============================================================================
+# Check GraphAddEntries within the same part
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic -r 10 10 10 -solver 28          > periodic.out.100
+mpirun -np 1 ./sstruct -in sstruct.in.periodic.graphadd -r 10 10 10 -solver 28 > periodic.out.101
+
