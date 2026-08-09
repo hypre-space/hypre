@@ -2628,7 +2628,6 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       /* Sum G with G' if G is nonsymmetric */
       if (!sym)
       {
-         hypre_CSRMatrixData(G) = hypre_CTAlloc(HYPRE_Complex, G_nnz, HYPRE_MEMORY_HOST);
          hypre_CSRMatrixTranspose(G, &GT, 1);
          GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
          hypre_CSRMatrixDestroy(G);
