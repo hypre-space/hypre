@@ -551,65 +551,6 @@ hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
     defined(HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------------
- * hypre_GpuVecDataCreate
- *--------------------------------------------------------------------------*/
-
-static hypre_GpuVecData *
-hypre_GpuVecDataCreate()
-{
-   hypre_GpuVecData *data = hypre_CTAlloc(hypre_GpuVecData, 1, HYPRE_MEMORY_HOST);
-
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-   hypre_GpuVecDataDnVecDescr(data) = NULL;
-   hypre_GpuVecDataCachedPtr(data) = NULL;
-   hypre_GpuVecDataCachedSize(data) = 0;
-   hypre_GpuVecDataCachedType(data) = hypre_HYPREComplexToCudaDataType();
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
-   hypre_GpuVecDataDnVecDescr(data) = NULL;
-   hypre_GpuVecDataCachedPtr(data) = NULL;
-   hypre_GpuVecDataCachedSize(data) = 0;
-#endif
-
-   return data;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_GpuVecDataInvalidate
- *--------------------------------------------------------------------------*/
-
-static HYPRE_Int
-hypre_GpuVecDataInvalidate(hypre_GpuVecData *data)
-{
-   if (data)
-   {
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-      if (hypre_GpuVecDataDnVecDescr(data))
-      {
-         HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(hypre_GpuVecDataDnVecDescr(data)) );
-         hypre_GpuVecDataDnVecDescr(data) = NULL;
-      }
-      hypre_GpuVecDataCachedPtr(data) = NULL;
-      hypre_GpuVecDataCachedSize(data) = 0;
-      hypre_GpuVecDataCachedType(data) = hypre_HYPREComplexToCudaDataType();
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
-      if (hypre_GpuVecDataDnVecDescr(data))
-      {
-         HYPRE_ROCSPARSE_CALL( rocsparse_destroy_dnvec_descr(hypre_GpuVecDataDnVecDescr(data)) );
-         hypre_GpuVecDataDnVecDescr(data) = NULL;
-      }
-      hypre_GpuVecDataCachedPtr(data) = NULL;
-      hypre_GpuVecDataCachedSize(data) = 0;
-#endif
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_GpuVecDataDestroy
  *--------------------------------------------------------------------------*/
 
@@ -623,21 +564,6 @@ hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
    }
 
    return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_VectorGetGPUVecData
- *--------------------------------------------------------------------------*/
-
-static hypre_GpuVecData *
-hypre_VectorGetGPUVecData(hypre_Vector *vector)
-{
-   if (!hypre_VectorGPUVecData(vector))
-   {
-      hypre_VectorGPUVecData(vector) = hypre_GpuVecDataCreate();
-   }
-
-   return hypre_VectorGPUVecData(vector);
 }
 
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
