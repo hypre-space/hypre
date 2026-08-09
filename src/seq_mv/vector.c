@@ -13,11 +13,6 @@
 
 #include "_hypre_seq_mv.h"
 
-#if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
-#endif
-
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
  *--------------------------------------------------------------------------*/
