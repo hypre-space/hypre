@@ -332,33 +332,28 @@ hypre_MGRCleanupBuildData( void      *mgr_vdata,
 
    /* Detach application-provided coarse-grid (Schur) matrices from the hierarchy
       before cleaning it up. They are borrowed -- the application owns and frees them --
-      but they are aliased into A_array / RAP. Clearing those slots lets the generic
-      destroy loops below skip them through their existing NULL checks, so no
-      per-matrix ownership test is needed. */
+      but they are aliased into A_array[lvl + 1] (and RAP for the coarsest level).
+      Clearing those slots lets the generic destroy loops below skip them through
+      their existing NULL checks, so no per-matrix ownership test is needed. */
    if ((mgr_data -> user_Ac_array))
    {
-      for (lvl = 0; lvl < (mgr_data -> max_num_coarse_levels); lvl++)
+      for (lvl = 0; lvl < num_coarse_levels; lvl++)
       {
          hypre_ParCSRMatrix *user_mat = (mgr_data -> user_Ac_array)[lvl];
 
-         if (!user_mat)
+         if (user_mat &&
+             (mgr_data -> A_array) &&
+             (mgr_data -> A_array)[lvl + 1] == user_mat)
          {
-            continue;
+            (mgr_data -> A_array)[lvl + 1] = NULL;
          }
-         if ((mgr_data -> A_array))
-         {
-            for (i = 0; i < num_coarse_levels + 1; i++)
-            {
-               if ((mgr_data -> A_array)[i] == user_mat)
-               {
-                  (mgr_data -> A_array)[i] = NULL;
-               }
-            }
-         }
-         if ((mgr_data -> RAP) == user_mat)
-         {
-            (mgr_data -> RAP) = NULL;
-         }
+      }
+
+      /* RAP aliases only A_array[num_coarse_levels] */
+      if (num_coarse_levels > 0 &&
+          (mgr_data -> RAP) == (mgr_data -> user_Ac_array)[num_coarse_levels - 1])
+      {
+         (mgr_data -> RAP) = NULL;
       }
    }
 
