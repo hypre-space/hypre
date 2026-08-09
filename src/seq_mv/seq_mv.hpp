@@ -17,11 +17,6 @@
 extern "C" {
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
-#endif
-
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 cusparseDnVecDescr_t hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
                                                        HYPRE_Int offset,

@@ -352,6 +352,10 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
 
 /* vector_device.c */
+#if defined(HYPRE_USING_CUSPARSE) ||\
+    defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+#endif
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector *vector, HYPRE_Complex *values );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
