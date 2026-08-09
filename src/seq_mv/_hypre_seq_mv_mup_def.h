@@ -278,7 +278,6 @@
 #define hypre_SpGemmCreateBins HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmCreateBins )
 #define hypre_SpGemmCreateGlobalHashTable HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmCreateGlobalHashTable )
 #define hypre_SpGemmGhashSize HYPRE_FIXEDPRECISION_FUNC ( hypre_SpGemmGhashSize )
-#define hypre_VectorGetRocsparseDnVecDescr HYPRE_FIXEDPRECISION_FUNC ( hypre_VectorGetRocsparseDnVecDescr )
 #define hypre_create_ija HYPRE_FIXEDPRECISION_FUNC ( hypre_create_ija )
 #define hypre_expdistfromuniform HYPRE_FIXEDPRECISION_FUNC ( hypre_expdistfromuniform )
 

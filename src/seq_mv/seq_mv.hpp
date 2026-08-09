@@ -17,13 +17,6 @@
 extern "C" {
 #endif
 
-#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
-rocsparse_dnvec_descr hypre_VectorGetRocsparseDnVecDescr(hypre_Vector *vector,
-                                                         int64_t size,
-                                                         void *data,
-                                                         rocsparse_datatype type);
-#endif
-
 #if defined(HYPRE_USING_CUSPARSE) ||\
     defined(HYPRE_USING_ROCSPARSE)
 
@@ -102,6 +95,52 @@ hypre_VectorGetGPUVecData(hypre_Vector *vector)
 }
 
 #endif /* HYPRE_USING_CUSPARSE || HYPRE_USING_ROCSPARSE */
+
+#if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
+
+/*--------------------------------------------------------------------------
+ * hypre_VectorGetRocsparseDnVecDescr
+ *--------------------------------------------------------------------------*/
+
+static inline rocsparse_dnvec_descr
+hypre_VectorGetRocsparseDnVecDescr(hypre_Vector       *vector,
+                                   int64_t             size,
+                                   void               *data,
+                                   rocsparse_datatype  type)
+{
+   hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
+
+   if (hypre_GpuVecDataDnVecDescr(vec) &&
+       hypre_GpuVecDataCachedSize(vec) == size &&
+       hypre_GpuVecDataCachedType(vec) == type)
+   {
+      if (hypre_GpuVecDataCachedPtr(vec) != data)
+      {
+         HYPRE_ROCSPARSE_CALL( rocsparse_dnvec_set_values(hypre_GpuVecDataDnVecDescr(vec),
+                                                          data) );
+         hypre_GpuVecDataCachedPtr(vec) = data;
+      }
+
+      return hypre_GpuVecDataDnVecDescr(vec);
+   }
+
+   if (hypre_GpuVecDataDnVecDescr(vec))
+   {
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_dnvec_descr(hypre_GpuVecDataDnVecDescr(vec)) );
+   }
+
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_dnvec_descr(&hypre_GpuVecDataDnVecDescr(vec),
+                                                      size,
+                                                      data,
+                                                      type) );
+   hypre_GpuVecDataCachedPtr(vec) = data;
+   hypre_GpuVecDataCachedSize(vec) = size;
+   hypre_GpuVecDataCachedType(vec) = type;
+
+   return hypre_GpuVecDataDnVecDescr(vec);
+}
+
+#endif /* HYPRE_USING_ROCSPARSE && ROCSPARSE_VERSION >= 200000 */
 
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 static inline cusparseSpMatDescr_t
