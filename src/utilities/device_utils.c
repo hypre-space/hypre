@@ -1341,8 +1341,8 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
    auto begin_keys_in  = thrust::make_zip_iterator(thrust::make_tuple(keys1_in,     keys2_in    ));
    auto end_keys_in    = thrust::make_zip_iterator(thrust::make_tuple(keys1_in + N, keys2_in + N));
    auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
-   thrust::equal_to< thrust::tuple<T1, T2> > pred;
-   thrust::plus<T3> func;
+   auto pred = HYPRE_THRUST_EQUAL_TO(thrust::tuple<T1, T2>);
+   auto func = HYPRE_THRUST_PLUS(T3);
 
    auto new_end = HYPRE_THRUST_CALL(reduce_by_key,
                                     begin_keys_in,

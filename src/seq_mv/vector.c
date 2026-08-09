@@ -1146,7 +1146,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
          if (marker)
          {
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, val) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -1161,7 +1161,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, val) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -1177,7 +1177,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
          if (marker)
          {
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, j, val) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -1194,7 +1194,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-            #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, j, val) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {

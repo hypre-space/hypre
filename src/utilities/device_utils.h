@@ -242,10 +242,13 @@ typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #include <thrust/pair.h>
 #include <thrust/tuple.h>
 
-/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
+/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward.
+ *      CUDA 13 / CCCL 3 deprecates thrust::not_fn in favor of cuda::std::not_fn. */
 #define THRUST_VERSION_NOTFN 200600
 #if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
+#elif defined(HYPRE_USING_CUDA) && (defined(THRUST_VERSION) && THRUST_VERSION >= 300000)
+#define HYPRE_THRUST_NOT(pred) cuda::std::not_fn(pred)
 #else
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
 #endif
@@ -257,6 +260,19 @@ typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
+#endif
+
+/* Resolve deprecated warnings about thrust::plus / equal_to (CCCL 3.0 / CUDA 13).
+ * Variadic so types with commas (e.g. thrust::tuple<T1, T2>) work. */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300000)
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_PLUS(...)     cuda::std::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) cuda::std::equal_to<__VA_ARGS__>()
+#else
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
 #endif
 
 using namespace thrust::placeholders;
@@ -514,6 +530,58 @@ typedef sycl::queue* hypre_DeviceStream;
       assert(0);                                                                             \
    }
 #endif
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  GPU Graph capture type and macros (CUDA and HIP only)
+ *
+ *  Graph capture is a feature that can reduce overhead associated with
+ *  launching a known pattern of GPU kernels. If a sequence of kernels
+ *  is known to repeat, then capturing it the first time and subsequently
+ *  only launching the graph can improve performance.
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+struct hypre_DeviceGraphData
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaGraph_t     graph;
+   cudaGraphExec_t graph_exec;
+#else  /* HIP */
+   hipGraph_t      graph;
+   hipGraphExec_t  graph_exec;
+#endif
+   HYPRE_Int       is_ready; /* 0 = not yet captured, 1 = ready for graph launch */
+};
+
+#if defined(HYPRE_USING_CUDA)
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
+   HYPRE_CUDA_CALL( cudaStreamBeginCapture((stream), cudaStreamCaptureModeThreadLocal) )
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
+   HYPRE_CUDA_CALL( cudaStreamEndCapture((stream), (graph)) )
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
+   HYPRE_CUDA_CALL( cudaGraphInstantiate((graph_exec), (graph), 0) )
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
+   HYPRE_CUDA_CALL( cudaGraphLaunch((graph_exec), (stream)) )
+#define hypre_DeviceGraphDestroy(graph) \
+   HYPRE_CUDA_CALL( cudaGraphDestroy(graph) )
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
+   HYPRE_CUDA_CALL( cudaGraphExecDestroy(graph_exec) )
+#else  /* HIP */
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
+   HYPRE_HIP_CALL( hipStreamBeginCapture((stream), hipStreamCaptureModeThreadLocal) )
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
+   HYPRE_HIP_CALL( hipStreamEndCapture((stream), (graph)) )
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
+   HYPRE_HIP_CALL( hipGraphInstantiate((graph_exec), (graph), NULL, NULL, 0) )
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
+   HYPRE_HIP_CALL( hipGraphLaunch((graph_exec), (stream)) )
+#define hypre_DeviceGraphDestroy(graph) \
+   HYPRE_HIP_CALL( hipGraphDestroy(graph) )
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
+   HYPRE_HIP_CALL( hipGraphExecDestroy(graph_exec) )
+#endif  /* CUDA vs HIP */
+
+#endif  /* HYPRE_USING_CUDA || HYPRE_USING_HIP */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping vendor library calls for error reporting

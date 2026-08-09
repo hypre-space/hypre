@@ -3606,7 +3606,8 @@ HYPRE_Int hypre_ILUSetupILUKSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_In
                                       HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i,
                                       HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i,
                                       HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j,
-                                      HYPRE_Int **S_diag_j, HYPRE_Int **u_end );
+                                      HYPRE_Int **S_diag_j, HYPRE_Int **u_end,
+                                      HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ILUSetupILUK( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp,
                               HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI,
                               hypre_ParCSRMatrix **Lptr, HYPRE_Real **Dptr,
@@ -3628,7 +3629,8 @@ HYPRE_Int hypre_ILUSetupILUKRASSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE
                                          HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm,
                                          HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i,
                                          HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j,
-                                         HYPRE_Int **U_diag_j );
+                                         HYPRE_Int **U_diag_j,
+                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ILUSetupILUKRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
                                  HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr,
                                  HYPRE_Real **Dptr, hypre_ParCSRMatrix **Uptr );
