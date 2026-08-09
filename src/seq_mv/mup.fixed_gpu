@@ -85,7 +85,6 @@ hypre_SeqVectorSumEltsDevice
 hypre_SpGemmCreateBins
 hypre_SpGemmCreateGlobalHashTable
 hypre_SpGemmGhashSize
-hypre_VectorGetCusparseDnVecDescr
 hypre_VectorGetRocsparseDnVecDescr
 hypre_create_ija
 hypre_expdistfromuniform

@@ -566,52 +566,6 @@ hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-
-/*--------------------------------------------------------------------------
- * hypre_VectorGetCusparseDnVecDescr
- *--------------------------------------------------------------------------*/
-
-cusparseDnVecDescr_t
-hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
-                                  HYPRE_Int     offset,
-                                  HYPRE_Int     size)
-{
-   hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
-   void             *ptr = hypre_VectorData(vector) + offset;
-   cudaDataType      type = hypre_HYPREComplexToCudaDataType();
-
-   if (hypre_GpuVecDataDnVecDescr(vec) &&
-       hypre_GpuVecDataCachedSize(vec) == size &&
-       hypre_GpuVecDataCachedType(vec) == type)
-   {
-      if (hypre_GpuVecDataCachedPtr(vec) != ptr)
-      {
-         HYPRE_CUSPARSE_CALL( cusparseDnVecSetValues(hypre_GpuVecDataDnVecDescr(vec), ptr) );
-         hypre_GpuVecDataCachedPtr(vec) = ptr;
-      }
-
-      return hypre_GpuVecDataDnVecDescr(vec);
-   }
-
-   if (hypre_GpuVecDataDnVecDescr(vec))
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(hypre_GpuVecDataDnVecDescr(vec)) );
-   }
-
-   HYPRE_CUSPARSE_CALL( cusparseCreateDnVec(&hypre_GpuVecDataDnVecDescr(vec),
-                                            size,
-                                            ptr,
-                                            type) );
-   hypre_GpuVecDataCachedPtr(vec) = ptr;
-   hypre_GpuVecDataCachedSize(vec) = size;
-   hypre_GpuVecDataCachedType(vec) = type;
-
-   return hypre_GpuVecDataDnVecDescr(vec);
-}
-
-#endif /* HYPRE_USING_CUSPARSE && CUSPARSE_NEWAPI_VERSION */
-
 #if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
 
 /*--------------------------------------------------------------------------

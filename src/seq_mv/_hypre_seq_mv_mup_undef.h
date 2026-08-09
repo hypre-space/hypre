@@ -275,7 +275,6 @@
 #undef hypre_SpGemmCreateBins
 #undef hypre_SpGemmCreateGlobalHashTable
 #undef hypre_SpGemmGhashSize
-#undef hypre_VectorGetCusparseDnVecDescr
 #undef hypre_VectorGetRocsparseDnVecDescr
 #undef hypre_create_ija
 #undef hypre_expdistfromuniform

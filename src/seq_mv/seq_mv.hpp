@@ -17,11 +17,6 @@
 extern "C" {
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-cusparseDnVecDescr_t hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
-                                                       HYPRE_Int offset,
-                                                       HYPRE_Int size);
-#endif
 #if defined(HYPRE_USING_ROCSPARSE) && (ROCSPARSE_VERSION >= 200000)
 rocsparse_dnvec_descr hypre_VectorGetRocsparseDnVecDescr(hypre_Vector *vector,
                                                          int64_t size,
@@ -149,6 +144,48 @@ hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
                                               hypre_CSRMatrixI(A),
                                               hypre_CSRMatrixJ(A),
                                               hypre_CSRMatrixData(A));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_VectorGetCusparseDnVecDescr
+ *--------------------------------------------------------------------------*/
+
+static inline cusparseDnVecDescr_t
+hypre_VectorGetCusparseDnVecDescr(hypre_Vector *vector,
+                                  HYPRE_Int     offset,
+                                  HYPRE_Int     size)
+{
+   hypre_GpuVecData *vec = hypre_VectorGetGPUVecData(vector);
+   void             *ptr = hypre_VectorData(vector) + offset;
+   cudaDataType      type = hypre_HYPREComplexToCudaDataType();
+
+   if (hypre_GpuVecDataDnVecDescr(vec) &&
+       hypre_GpuVecDataCachedSize(vec) == size &&
+       hypre_GpuVecDataCachedType(vec) == type)
+   {
+      if (hypre_GpuVecDataCachedPtr(vec) != ptr)
+      {
+         HYPRE_CUSPARSE_CALL( cusparseDnVecSetValues(hypre_GpuVecDataDnVecDescr(vec), ptr) );
+         hypre_GpuVecDataCachedPtr(vec) = ptr;
+      }
+
+      return hypre_GpuVecDataDnVecDescr(vec);
+   }
+
+   if (hypre_GpuVecDataDnVecDescr(vec))
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(hypre_GpuVecDataDnVecDescr(vec)) );
+   }
+
+   HYPRE_CUSPARSE_CALL( cusparseCreateDnVec(&hypre_GpuVecDataDnVecDescr(vec),
+                                            size,
+                                            ptr,
+                                            type) );
+   hypre_GpuVecDataCachedPtr(vec) = ptr;
+   hypre_GpuVecDataCachedSize(vec) = size;
+   hypre_GpuVecDataCachedType(vec) = type;
+
+   return hypre_GpuVecDataDnVecDescr(vec);
 }
 
 static inline cusparseDnVecDescr_t
