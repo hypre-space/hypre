@@ -6473,6 +6473,14 @@ hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_MGRSetCoarseGridMatrixAtLevel( void *mgr_vdata, HYPRE_Int level, hypre_ParCSRMatrix *coarse_matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetCoarseGridMatrixAtLevel)( mgr_vdata, level, coarse_matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRSetCoarseGridMethod)( mgr_vdata, cg_method );
