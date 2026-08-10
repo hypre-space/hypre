@@ -475,6 +475,27 @@ HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetCoarseGridMatrixAtLevel
+ *
+ * Supply an application-assembled coarse-grid (e.g. Schur-complement) operator,
+ * used in place of the Galerkin RAP product where coarse_grid_method == 6.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel( HYPRE_Solver       solver,
+                                     HYPRE_Int          level,
+                                     HYPRE_ParCSRMatrix coarse_matrix )
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetCoarseGridMatrixAtLevel( solver, level, (hypre_ParCSRMatrix *) coarse_matrix );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetNonGalerkinMaxElmts
  *--------------------------------------------------------------------------*/
 
