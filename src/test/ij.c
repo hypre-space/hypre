@@ -1106,6 +1106,12 @@ main( hypre_int argc,
          arg_index++;
          omp_flag = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "--threads") == 0 )
+      {
+         arg_index++;
+         ierr = HYPRE_SetNumThreads(atoi(argv[arg_index++]));
+         hypre_assert(ierr == 0);
+      }
       else if ( strcmp(argv[arg_index], "-check_constant") == 0 )
       {
          arg_index++;
@@ -2624,6 +2630,7 @@ main( hypre_int argc,
          hypre_printf("      0 = (default) No messaging.\n");
          hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
          hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
+         hypre_printf("  --threads <N>             : use N OpenMP threads\n");
          hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");

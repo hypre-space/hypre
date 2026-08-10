@@ -37,6 +37,7 @@
 #undef HYPRE_SetGpuAwareMPI
 #undef HYPRE_SetLogLevel
 #undef HYPRE_SetMemoryLocation
+#undef HYPRE_SetNumThreads
 #undef HYPRE_SetPrintErrorMode
 #undef HYPRE_SetPrintErrorVerbosity
 #undef HYPRE_SetSpGemmUseVendor
