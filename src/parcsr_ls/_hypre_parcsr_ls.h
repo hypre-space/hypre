@@ -1316,6 +1316,14 @@ typedef struct hypre_ParILUData_struct
    hypre_Vector         *Utemp_lower;
    hypre_Vector         *Adiag_diag;
    hypre_Vector         *Sdiag_diag;
+
+   /* Level-set data for ilu_type 60 triangular solves */
+   HYPRE_Int             num_low_levels;           /* number of lower triangular level sets */
+   HYPRE_Int            *low_level_set_offsets;    /* host array, length num_low_levels+1 */
+   HYPRE_Int            *d_low_level_set_rows;     /* device array, length n */
+   HYPRE_Int             num_upp_levels;           /* number of upper triangular level sets */
+   HYPRE_Int            *upp_level_set_offsets;    /* host array, length num_upp_levels+1 */
+   HYPRE_Int            *d_upp_level_set_rows;     /* device array, length n */
 #endif
 
    /* data structure sor solving Schur System */
@@ -1383,6 +1391,12 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataUTempLower(ilu_data)                   ((ilu_data) -> Utemp_lower)
 #define hypre_ParILUDataADiagDiag(ilu_data)                    ((ilu_data) -> Adiag_diag)
 #define hypre_ParILUDataSDiagDiag(ilu_data)                    ((ilu_data) -> Sdiag_diag)
+#define hypre_ParILUDataNumLowLevels(ilu_data)                 ((ilu_data) -> num_low_levels)
+#define hypre_ParILUDataLowLevelSetOffsets(ilu_data)           ((ilu_data) -> low_level_set_offsets)
+#define hypre_ParILUDataDLowLevelSetRows(ilu_data)             ((ilu_data) -> d_low_level_set_rows)
+#define hypre_ParILUDataNumUppLevels(ilu_data)                 ((ilu_data) -> num_upp_levels)
+#define hypre_ParILUDataUppLevelSetOffsets(ilu_data)           ((ilu_data) -> upp_level_set_offsets)
+#define hypre_ParILUDataDUppLevelSetRows(ilu_data)             ((ilu_data) -> d_upp_level_set_rows)
 #endif
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
@@ -3702,6 +3716,14 @@ HYPRE_Int hypre_ILUSolveLUDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_
                                   hypre_ParVector *f, hypre_ParVector *u,
                                   HYPRE_Int *perm, hypre_ParVector *ftemp,
                                   hypre_ParVector *utemp );
+HYPRE_Int hypre_ILUSolveLULevelSetDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
+                                          hypre_ParVector *f, hypre_ParVector *u,
+                                          HYPRE_Int *perm,
+                                          HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets,
+                                          HYPRE_Int *d_low_set_rows,
+                                          HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets,
+                                          HYPRE_Int *d_upp_set_rows,
+                                          hypre_ParVector *ftemp, hypre_ParVector *utemp );
 HYPRE_Int hypre_ILUApplyLowerJacIterDevice( hypre_CSRMatrix *A, hypre_Vector *input,
                                             hypre_Vector *work, hypre_Vector *output,
                                             HYPRE_Int lower_jacobi_iters );
