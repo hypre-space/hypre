@@ -32,6 +32,17 @@ struct functor
    }
 };
 
+/* Safeguarded reciprocal: returns 1.0 for zero input (matches hypre_MGRBuildPHost) */
+template<typename T>
+struct safe_reciprocal
+{
+   __host__ __device__
+   T operator()(const T &x) const
+   {
+      return (x != T(0.0)) ? (T(1.0) / x) : T(1.0);
+   }
+};
+
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildPFromWpDevice
  *--------------------------------------------------------------------------*/
@@ -186,7 +197,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            diag,
                            diag + nfpoints,
                            diag,
-         [] (auto x) { return 1.0 / x; });
+                           safe_reciprocal<HYPRE_Complex>());
 #else
          HYPRE_THRUST_CALL(transform,
                            diag,
@@ -199,7 +210,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            diag,
                            diag + nfpoints,
                            diag,
-                           1.0 / _1);
+                           safe_reciprocal<HYPRE_Complex>());
 #endif
 
          hypre_TFree(diag1, HYPRE_MEMORY_DEVICE);

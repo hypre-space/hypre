@@ -32,6 +32,16 @@ FILESmatmat="\
  ${TNAME}.out.2cubesRAPxy.2procs\
  ${TNAME}.out.2cubesRAPxz\
  ${TNAME}.out.2cubesRAPxz.2procs\
+ ${TNAME}.out.2quadsAA\
+ ${TNAME}.out.2quadsAA.FF\
+ ${TNAME}.out.2quadsAA.CC\
+ ${TNAME}.out.2quadsAA.2procs\
+ ${TNAME}.out.2quadsAA.FF.2procs\
+ ${TNAME}.out.2quadsAA.CC.2procs\
+ ${TNAME}.out.3quadsAA.idle\
+ ${TNAME}.out.3quadsAA.idle.3procs\
+ ${TNAME}.out.2cubesAA\
+ ${TNAME}.out.2cubesAA.2procs\
 "
 #=============================================================================
 # Find failed tests

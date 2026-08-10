@@ -675,40 +675,44 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_assert((part >= 0) && (part < nparts));
       hypre_assert((to_part >= 0) && (to_part < nparts));
 
-      /* Ensure capacity before writing new indices */
-      if (idxcnt[part][var] >= idxcap[part][var])
+      /* Only count indices if part != to_part */
+      if (part != to_part)
       {
-         capacity = hypre_max(2 * idxcap[part][var], 1);
+         /* Ensure capacity before writing new indices */
+         if (idxcnt[part][var] >= idxcap[part][var])
+         {
+            capacity = hypre_max(2 * idxcap[part][var], 1);
+            for (d = 0; d < ndim; d++)
+            {
+               indices[part][var][d] = hypre_TReAlloc(indices[part][var][d], HYPRE_Int,
+                                                      capacity, HYPRE_MEMORY_HOST);
+            }
+            idxcap[part][var] = capacity;
+         }
+         if (idxcnt[to_part][to_var] >= idxcap[to_part][to_var])
+         {
+            capacity = hypre_max(2 * idxcap[to_part][to_var], 1);
+            for (d = 0; d < ndim; d++)
+            {
+               indices[to_part][to_var][d] = hypre_TReAlloc(indices[to_part][to_var][d], HYPRE_Int,
+                                                            capacity, HYPRE_MEMORY_HOST);
+            }
+            idxcap[to_part][to_var] = capacity;
+         }
+
+         /* Safety checks */
+         hypre_assert(idxcap[part][var] > idxcnt[part][var]);
+         hypre_assert(idxcap[to_part][to_var] > idxcnt[to_part][to_var]);
+
+         /* Build indices array */
          for (d = 0; d < ndim; d++)
          {
-            indices[part][var][d] = hypre_TReAlloc(indices[part][var][d], HYPRE_Int,
-                                                   capacity, HYPRE_MEMORY_HOST);
+            indices[part][var][d][idxcnt[part][var]] = hypre_IndexD(index, d);
+            indices[to_part][to_var][d][idxcnt[to_part][to_var]] = hypre_IndexD(to_index, d);
          }
-         idxcap[part][var] = capacity;
+         idxcnt[part][var]++;
+         idxcnt[to_part][to_var]++;
       }
-      if (idxcnt[to_part][to_var] >= idxcap[to_part][to_var])
-      {
-         capacity = hypre_max(2 * idxcap[to_part][to_var], 1);
-         for (d = 0; d < ndim; d++)
-         {
-            indices[to_part][to_var][d] = hypre_TReAlloc(indices[to_part][to_var][d], HYPRE_Int,
-                                                         capacity, HYPRE_MEMORY_HOST);
-         }
-         idxcap[to_part][to_var] = capacity;
-      }
-
-      /* Safety checks */
-      hypre_assert(idxcap[part][var] > idxcnt[part][var]);
-      hypre_assert(idxcap[to_part][to_var] > idxcnt[to_part][to_var]);
-
-      /* Build indices array */
-      for (d = 0; d < ndim; d++)
-      {
-         indices[part][var][d][idxcnt[part][var]] = hypre_IndexD(index, d);
-         indices[to_part][to_var][d][idxcnt[to_part][to_var]] = hypre_IndexD(to_index, d);
-      }
-      idxcnt[part][var]++;
-      idxcnt[to_part][to_var]++;
 
       /* compute location (rank) for Uventry */
       hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);

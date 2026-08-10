@@ -995,6 +995,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
    HYPRE_Int        start;
 
    HYPRE_Real       one  = 1.0;
+   HYPRE_Real       zero = 0.0;
 
    HYPRE_Int        my_id;
    HYPRE_Int        num_procs;
@@ -1272,7 +1273,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
          for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
             i1 = A_diag_j[jj];
-            if ( i == i1 ) /* diagonal of A only */
+            if (i == i1 && hypre_cabs(A_diag_data[jj]) > zero) /* diagonal of A only */
             {
                a_diag[i] = 1.0 / A_diag_data[jj];
             }
@@ -1562,6 +1563,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
    HYPRE_Int                j, jl, jj;
    HYPRE_Int                start;
    HYPRE_Real               one  = 1.0;
+   HYPRE_Real               zero = 0.0;
    HYPRE_Int                my_id, num_procs;
    HYPRE_Int                num_threads;
    HYPRE_Int                num_sends;
@@ -1839,7 +1841,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
       for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
       {
          i1 = A_diag_j[jj];
-         if ( i == i1 ) /* diagonal of A only */
+         if (i == i1 && hypre_cabs(A_diag_data[jj]) > zero) /* diagonal of A only */
          {
             a_diag[i] = 1.0 / A_diag_data[jj];
          }
@@ -2650,6 +2652,17 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
     *-------------------------------------------------------*/
 
    hypre_ParCSRMatrixBlockColSum(A_CF, row_major, 1, block_dim, &b_CF);
+
+   if (!b_FF || !b_CF)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Block column-lumped restriction requires C and F spaces with "
+                        "matching block structure (one C point per F block)");
+      hypre_DenseBlockMatrixDestroy(b_FF);
+      hypre_DenseBlockMatrixDestroy(b_CF);
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
    /*-------------------------------------------------------
     * 3) b_FF = inv(approx(A_FF))          (invert in-place)
