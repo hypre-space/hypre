@@ -3291,6 +3291,8 @@ HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_metho
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
 HYPRE_Int hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method );
+HYPRE_Int hypre_MGRSetCoarseGridMatrixAtLevel( void *mgr_vdata, HYPRE_Int level,
+                                               hypre_ParCSRMatrix *coarse_matrix );
 HYPRE_Int hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts );
 HYPRE_Int hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts );
 HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrictType );
@@ -3620,7 +3622,8 @@ HYPRE_Int hypre_ILUSetupILUKSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_In
                                       HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i,
                                       HYPRE_Int *U_diag_i, HYPRE_Int *S_diag_i,
                                       HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j,
-                                      HYPRE_Int **S_diag_j, HYPRE_Int **u_end );
+                                      HYPRE_Int **S_diag_j, HYPRE_Int **u_end,
+                                      HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ILUSetupILUK( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp,
                               HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI,
                               hypre_ParCSRMatrix **Lptr, HYPRE_Real **Dptr,
@@ -3642,7 +3645,8 @@ HYPRE_Int hypre_ILUSetupILUKRASSymbolic( HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE
                                          HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *rperm,
                                          HYPRE_Int *iw, HYPRE_Int nLU, HYPRE_Int *L_diag_i,
                                          HYPRE_Int *U_diag_i, HYPRE_Int **L_diag_j,
-                                         HYPRE_Int **U_diag_j );
+                                         HYPRE_Int **U_diag_j,
+                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ILUSetupILUKRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
                                  HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr,
                                  HYPRE_Real **Dptr, hypre_ParCSRMatrix **Uptr );

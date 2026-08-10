@@ -3246,6 +3246,15 @@ HYPRE_Int
 HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
 
 HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel_flt( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix );
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel_dbl( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix );
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix );
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel( HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix );
+
+HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod_flt( HYPRE_Solver solver, HYPRE_Int *cg_method );
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod_dbl( HYPRE_Solver solver, HYPRE_Int *cg_method );
@@ -7137,6 +7146,9 @@ HYPRE_MGRSetBlockJacobiBlockSize_pre( HYPRE_Precision precision, HYPRE_Solver so
 
 HYPRE_Int
 HYPRE_MGRSetBlockSize_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int bsize );
+
+HYPRE_Int
+HYPRE_MGRSetCoarseGridMatrixAtLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int level, HYPRE_ParCSRMatrix coarse_matrix );
 
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *cg_method );

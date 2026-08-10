@@ -391,6 +391,7 @@
 #undef HYPRE_MGRGetNumIterations
 #undef HYPRE_MGRSetBlockJacobiBlockSize
 #undef HYPRE_MGRSetBlockSize
+#undef HYPRE_MGRSetCoarseGridMatrixAtLevel
 #undef HYPRE_MGRSetCoarseGridMethod
 #undef HYPRE_MGRSetCoarseGridPrintLevel
 #undef HYPRE_MGRSetCoarseSolver
@@ -1562,6 +1563,7 @@
 #undef hypre_MGRReleaseLevelSmootherAtLevel
 #undef hypre_MGRSetBlockJacobiBlockSize
 #undef hypre_MGRSetBlockSize
+#undef hypre_MGRSetCoarseGridMatrixAtLevel
 #undef hypre_MGRSetCoarseGridMethod
 #undef hypre_MGRSetCoarseGridPrintLevel
 #undef hypre_MGRSetCoarseSolver
@@ -2294,6 +2296,7 @@
 #undef hypreGPUKernel_pass_order_count
 #undef hypreGPUKernel_populate_big_P_offd_j
 #undef hypre_BatchedGaussJordanSolveDevice
+#undef hypre_BlockDiagInvDevice
 #undef hypre_BoomerAMGBuildDirInterpDevice
 #undef hypre_BoomerAMGBuildDirInterp_getcoef
 #undef hypre_BoomerAMGBuildDirInterp_getcoef_v2

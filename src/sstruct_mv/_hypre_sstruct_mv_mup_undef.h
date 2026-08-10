@@ -131,7 +131,10 @@
 #undef hypre_SStructGridCreateCommInfo
 #undef hypre_SStructGridFindBoxManEntry
 #undef hypre_SStructGridFindNborBoxManEntry
+#undef hypre_SStructGridGetGlobalRanksPartVarStarts
 #undef hypre_SStructGridGetMaxBoxSize
+#undef hypre_SStructGridGlobalRanksToIndexes
+#undef hypre_SStructGridIndexesToGlobalRanks
 #undef hypre_SStructGridIntersect
 #undef hypre_SStructGridPrint
 #undef hypre_SStructGridPrintGLVis

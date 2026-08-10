@@ -13,6 +13,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
   list(APPEND HDRS
     HYPRE_seq_mv_mup.h
     _hypre_seq_mv_mup.h
+    _hypre_seq_mv_mup.hpp
     _hypre_seq_mv_mup_def.h
     _hypre_seq_mv_mup_undef.h
   )
