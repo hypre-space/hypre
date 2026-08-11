@@ -2620,8 +2620,7 @@ main( hypre_int argc,
    HYPRE_Real           *h_values_get = NULL;
    HYPRE_Real           *d_values     = NULL;
 
-   /* WM: todo - defaulting this to 1 for testing for now. */
-   HYPRE_Int             test_set_array_values = 1;
+   HYPRE_Int             test_set_array_values = 0;
    HYPRE_Int             set_array_cnt;
    HYPRE_Int             set_array_box_volume;
    HYPRE_Int            *set_array_indexes;
