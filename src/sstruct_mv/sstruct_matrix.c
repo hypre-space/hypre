@@ -1415,6 +1415,24 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
+   if (action < 0)
+   {
+      scatter_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+      HYPRE_THRUST_CALL( sequence,
+                         scatter_locations,
+                         scatter_locations + nvalues,
+                         0 );
+      HYPRE_THRUST_CALL( copy_if,
+                         thrust::make_zip_iterator(thrust::make_tuple(values, scatter_locations)),
+                         thrust::make_zip_iterator(thrust::make_tuple(values, scatter_locations)) + nvalues,
+                         skip_val,
+                         thrust::make_zip_iterator(thrust::make_tuple(values_set, scatter_locations)),
+                         equal<HYPRE_Int>(0) );
+      HYPRE_THRUST_CALL( sort_by_key,
+                         thrust::make_zip_iterator(thrust::make_tuple(rows, scatter_locations)),
+                         thrust::make_zip_iterator(thrust::make_tuple(rows, scatter_locations)) + nvalues_set,
+                         thrust::make_zip_iterator(thrust::make_tuple(cols, values_set)) );
+   }
    HYPRE_THRUST_CALL( copy_if,
                       values,
                       values + nvalues,
@@ -1424,7 +1442,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    HYPRE_THRUST_CALL( sort_by_key,
                       rows,
                       rows + nvalues_set,
-                      thrust::make_zip_iterator(thrust::make_tuple(cols, values)) );
+                      thrust::make_zip_iterator(thrust::make_tuple(cols, values_set)) );
    auto new_end = HYPRE_THRUST_CALL( reduce_by_key,
                                      rows,
                                      rows + nvalues_set,
@@ -1446,23 +1464,16 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    else
    {
       HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values_set);
-      scatter_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
       /* WM: todo */
 #else
-      HYPRE_THRUST_CALL( copy_if,
-                         thrust::make_counting_iterator<HYPRE_Int>(0),
-                         thrust::make_counting_iterator<HYPRE_Int>(0) + nvalues,
-                         skip_val,
-                         scatter_locations,
-                         equal<HYPRE_Int>(0) );
       HYPRE_THRUST_CALL( scatter,
                          values_set,
                          values_set + nvalues_set,
                          scatter_locations,
                          values );
-#endif
       hypre_TFree(scatter_locations, HYPRE_MEMORY_DEVICE);
+#endif
    }
 
    hypre_TFree(values_set, HYPRE_MEMORY_DEVICE);
