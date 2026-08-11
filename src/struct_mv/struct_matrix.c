@@ -1678,11 +1678,17 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
    hypre_Box *grid_box;
    hypre_Box *data_box;
 
+   HYPRE_Int            *constant         = hypre_StructMatrixConstant(matrix);
+   HYPRE_Int            *symm_entries     = hypre_StructMatrixSymmEntries(matrix);
    hypre_StructStencil  *stencil          = hypre_StructMatrixStencil(matrix);
    HYPRE_Int             stencil_size     = hypre_StructStencilSize(stencil);
 
    const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nvalues, "thread", bDim);
+
+   /* WM: todo - MatrixSetValues calls hypre_StructMatrixMapDataIndex()... when/why is this needed?
+    *            Need a device implementation? */
+   /* hypre_StructMatrixMapArrayDataIndexesDevice(indexes, map_indexes) */
 
    for (i = 0; i < hypre_StructMatrixRanNBoxes(matrix); i++)
    {
@@ -1691,35 +1697,40 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
 
       for (j = 0; j < stencil_size; j++)
       {
-         mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
+         /* only set stored, non-constant stencil values */
+         /* WM: note that this will be a silent no-op if the user tries to set constant values using this routine... */
+         if (symm_entries[j] < 0 && !constant[j])
+         {
+            mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-         if (clear_ghost)
-         {
-            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<1>),
-                              gDim,
-                              bDim,
-                              *grid_box,
-                              *data_box,
-                              j,
-                              nvalues,
-                              indexes,
-                              stencil_indices,
-                              values,
-                              mat_box_data );
-         }
-         else
-         {
-            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<0>),
-                              gDim,
-                              bDim,
-                              *grid_box,
-                              *data_box,
-                              j,
-                              nvalues,
-                              indexes,
-                              stencil_indices,
-                              values,
-                              mat_box_data );
+            if (clear_ghost)
+            {
+               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<1>),
+                                 gDim,
+                                 bDim,
+                                 *grid_box,
+                                 *data_box,
+                                 j,
+                                 nvalues,
+                                 indexes,
+                                 stencil_indices,
+                                 values,
+                                 mat_box_data );
+            }
+            else
+            {
+               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<0>),
+                                 gDim,
+                                 bDim,
+                                 *grid_box,
+                                 *data_box,
+                                 j,
+                                 nvalues,
+                                 indexes,
+                                 stencil_indices,
+                                 values,
+                                 mat_box_data );
+            }
          }
       }
    }
@@ -1796,6 +1807,8 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
    hypre_Box *data_box;
    bool *done_arr = NULL;
 
+   HYPRE_Int            *constant         = hypre_StructMatrixConstant(matrix);
+   HYPRE_Int            *symm_entries     = hypre_StructMatrixSymmEntries(matrix);
    hypre_StructStencil  *stencil          = hypre_StructMatrixStencil(matrix);
    HYPRE_Int             stencil_size     = hypre_StructStencilSize(stencil);
 
@@ -1809,24 +1822,29 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
 
    for (j = 0; j < stencil_size; j++)
    {
-      for (i = 0; i < hypre_StructMatrixRanNBoxes(matrix); i++)
+      /* only set stored, non-constant stencil values */
+      /* WM: note that this will be a silent no-op if the user tries to set constant values using this routine... */
+      if (symm_entries[j] < 0 && !constant[j])
       {
-         grid_box = hypre_StructMatrixBox(matrix, i);
-         data_box = hypre_StructMatrixBoxDataBox(matrix, i);
-         mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
+         for (i = 0; i < hypre_StructMatrixRanNBoxes(matrix); i++)
+         {
+            grid_box = hypre_StructMatrixBox(matrix, i);
+            data_box = hypre_StructMatrixBoxDataBox(matrix, i);
+            mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<0>),
-                           gDim,
-                           bDim,
-                           *grid_box,
-                           *data_box,
-                           j,
-                           nvalues,
-                           indexes,
-                           stencil_indices,
-                           values,
-                           mat_box_data,
-                           done_arr );
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<0>),
+                              gDim,
+                              bDim,
+                              *grid_box,
+                              *data_box,
+                              j,
+                              nvalues,
+                              indexes,
+                              stencil_indices,
+                              values,
+                              mat_box_data,
+                              done_arr );
+         }
       }
    }
    if (add_to_ghost)
@@ -1838,18 +1856,24 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
 
          for (j = 0; j < stencil_size; j++)
          {
-            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<1>),
-                              gDim,
-                              bDim,
-                              *data_box,
-                              *data_box,
-                              j,
-                              nvalues,
-                              indexes,
-                              stencil_indices,
-                              values,
-                              mat_box_data,
-                              done_arr );
+            /* only set stored, non-constant stencil values */
+            /* WM: note that this will be a silent no-op if the user tries to set constant values using this routine... */
+            if (symm_entries[j] < 0 && !constant[j])
+            {
+               mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
+               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<1>),
+                                 gDim,
+                                 bDim,
+                                 *data_box,
+                                 *data_box,
+                                 j,
+                                 nvalues,
+                                 indexes,
+                                 stencil_indices,
+                                 values,
+                                 mat_box_data,
+                                 done_arr );
+            }
          }
       }
 
@@ -1897,6 +1921,7 @@ hypreGPUKernel_StructMatrixGetArrayValues( hypre_DeviceItem  &item,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* WM: todo - add option to zero out after get */
 HYPRE_Int
 hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix,
                                         HYPRE_Int           nvalues,
@@ -1909,6 +1934,8 @@ hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix,
    hypre_Box *grid_box;
    hypre_Box *data_box;
 
+   HYPRE_Int            *constant         = hypre_StructMatrixConstant(matrix);
+   HYPRE_Int            *symm_entries     = hypre_StructMatrixSymmEntries(matrix);
    hypre_StructStencil  *stencil          = hypre_StructMatrixStencil(matrix);
    HYPRE_Int             stencil_size     = hypre_StructStencilSize(stencil);
 
@@ -1922,19 +1949,24 @@ hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix,
 
       for (j = 0; j < stencil_size; j++)
       {
-         mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
+         /* only set stored, non-constant stencil values */
+         /* WM: note that this will be a silent no-op if the user tries to set constant values using this routine... */
+         if (symm_entries[j] < 0 && !constant[j])
+         {
+            mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_StructMatrixGetArrayValues,
-                           gDim,
-                           bDim,
-                           *grid_box,
-                           *data_box,
-                           j,
-                           nvalues,
-                           indexes,
-                           stencil_indices,
-                           mat_box_data,
-                           values );
+            HYPRE_GPU_LAUNCH( hypreGPUKernel_StructMatrixGetArrayValues,
+                              gDim,
+                              bDim,
+                              *grid_box,
+                              *data_box,
+                              j,
+                              nvalues,
+                              indexes,
+                              stencil_indices,
+                              mat_box_data,
+                              values );
+         }
       }
    }
 
