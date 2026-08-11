@@ -699,7 +699,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
          hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
                        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelComplexMatrixBatchedTranspose, gDim, bDim,
                            num_blocks, blk_size, tmpdiag, B_diag_data );
 
          hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
@@ -804,7 +804,7 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
 #endif
 
    /* Set array of pointers */
-   hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, B_diag_data, diag_aop);
+   hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, diag, diag_aop);
 
    /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)
