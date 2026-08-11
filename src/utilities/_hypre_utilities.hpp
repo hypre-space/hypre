@@ -130,13 +130,13 @@ struct hypre_NonzeroAboveTolFunctor
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ElementCast
+ * hypre_ElementCastFunctor
  *
  * Functor for performing casting data between datatypes
  *--------------------------------------------------------------------------*/
 
 template <typename T, typename T2>
-struct hypreFunctor_ElementCast
+struct hypre_ElementCastFunctor
 {
    __host__ __device__ T2 operator()(T a)
    {
@@ -2637,7 +2637,7 @@ HYPRE_Int hypre_CsrRowPtrsToIndicesWithRowNumDevice(HYPRE_Int nrows, HYPRE_Int n
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 template<typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
+HYPRE_Int hypre_AxpyznDevice_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)

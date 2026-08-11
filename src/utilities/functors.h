@@ -114,13 +114,13 @@ struct hypre_NonzeroAboveTolFunctor
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ElementCast
+ * hypre_ElementCastFunctor
  *
  * Functor for performing casting data between datatypes
  *--------------------------------------------------------------------------*/
 
 template <typename T, typename T2>
-struct hypreFunctor_ElementCast
+struct hypre_ElementCastFunctor
 {
    __host__ __device__ T2 operator()(T a)
    {

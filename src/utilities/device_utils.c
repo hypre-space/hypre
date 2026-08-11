@@ -2128,11 +2128,11 @@ hypre_ComplexReduceSumDevice(HYPRE_Int n, HYPRE_Complex *d_x)
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_RealReduceMaxAbs
+ * hypre_RealReduceMaxAbsDevice
  *--------------------------------------------------------------------*/
 
 HYPRE_Real
-hypreDevice_RealReduceMaxAbs(HYPRE_Int n, HYPRE_Real *d_x)
+hypre_RealReduceMaxAbsDevice(HYPRE_Int n, HYPRE_Real *d_x)
 {
    if (n <= 0)
    {
@@ -2834,11 +2834,11 @@ hypre_bind_device( HYPRE_Int myid,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_ComplexDeviceArrayAxpyn
+ * hypre_ComplexDeviceArrayAxpynDevice
  *--------------------------------------------------------------------------*/
 /*
 HYPRE_Int
-hypreDevice_ComplexDeviceArrayAxpyn( HYPRE_Complex alpha,
+hypre_ComplexDeviceArrayAxpynDevice( HYPRE_Complex alpha,
                            HYPRE_Complex *x,
                            HYPRE_Complex *y,
                            HYPRE_Int n )
@@ -2853,7 +2853,7 @@ hypreDevice_ComplexDeviceArrayAxpyn( HYPRE_Complex alpha,
    HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
                                               n, alpha, x, 1, y, 1).wait() );
 #else
-   hypreDevice_ComplexAxpyn(x, n, y, y, alpha);
+   hypre_ComplexAxpynDevice(x, n, y, y, alpha);
 #endif
 
    hypre_SyncComputeStream();

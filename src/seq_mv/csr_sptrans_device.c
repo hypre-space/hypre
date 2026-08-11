@@ -162,13 +162,13 @@ hypre_CSRSpTransVendor(HYPRE_Int   m,
                        HYPRE_Int   want_data)
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   return hypreDevice_CSRSpTransCusparse(m, n, nnzA, d_ia, d_ja, d_aa,
+   return hypre_CSRSpTransCusparseDevice(m, n, nnzA, d_ia, d_ja, d_aa,
                                          d_ic_out, d_jc_out, d_ac_out, want_data);
 #elif defined(HYPRE_USING_ROCSPARSE)
-   return hypreDevice_CSRSpTransRocsparse(m, n, nnzA, d_ia, d_ja, d_aa,
+   return hypre_CSRSpTransRocsparseDevice(m, n, nnzA, d_ia, d_ja, d_aa,
                                           d_ic_out, d_jc_out, d_ac_out, want_data);
 #else
-   return hypreDevice_CSRSpTrans(m, n, nnzA, d_ia, d_ja, d_aa,
+   return hypre_CSRSpTransDevice(m, n, nnzA, d_ia, d_ja, d_aa,
                                  d_ic_out, d_jc_out, d_ac_out, want_data);
 #endif
 }

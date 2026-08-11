@@ -3079,22 +3079,22 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_SYCL)
                if (nnz_diag)
                {
-                  lfactor = hypreDevice_RealReduceMaxAbs(nnz_diag, B_diag_data);
+                  lfactor = hypre_RealReduceMaxAbsDevice(nnz_diag, B_diag_data);
                }
 
                if (nnz_offd)
                {
-                  lfactor = hypre_max(lfactor, hypreDevice_RealReduceMaxAbs(nnz_offd, B_offd_data));
+                  lfactor = hypre_max(lfactor, hypre_RealReduceMaxAbsDevice(nnz_offd, B_offd_data));
                }
 #else
                if (nnz_diag)
                {
-                  lfactor = hypreDevice_RealReduceMaxAbs(nnz_diag, B_diag_data);
+                  lfactor = hypre_RealReduceMaxAbsDevice(nnz_diag, B_diag_data);
                }
 
                if (nnz_offd)
                {
-                  lfactor = hypre_max(lfactor, hypreDevice_RealReduceMaxAbs(nnz_offd, B_offd_data));
+                  lfactor = hypre_max(lfactor, hypre_RealReduceMaxAbsDevice(nnz_offd, B_offd_data));
                }
 #endif
             }

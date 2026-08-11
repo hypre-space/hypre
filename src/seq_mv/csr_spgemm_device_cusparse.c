@@ -13,7 +13,7 @@
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
+hypre_CSRSpGemmCusparseGenericAPIDevice(HYPRE_Int       m,
                                         HYPRE_Int       k,
                                         HYPRE_Int       n,
                                         HYPRE_Int       nnzA,
@@ -31,7 +31,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 
 #if CUSPARSE_VERSION < CUSPARSE_NEWAPI_VERSION
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
+hypre_CSRSpGemmCusparseOldAPIDevice(HYPRE_Int          m,
                                     HYPRE_Int          k,
                                     HYPRE_Int          n,
                                     cusparseMatDescr_t descr_A,
