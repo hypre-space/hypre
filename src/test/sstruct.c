@@ -3889,30 +3889,29 @@ main( hypre_int argc,
                for (var = 0; var < pdata.nvars; var++)
                {
                   s = pdata.stencil_num[var];
-                  if (test_set_array_values)
+                  for (i = 0; i < data.stencil_sizes[s]; i++)
                   {
-                     for (box = 0; box < pdata.nboxes; box++)
+                     if (test_set_array_values)
                      {
-                        GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                       pdata.vartypes[var], ilower, iupper);
-
-                        set_array_box = hypre_BoxCreate(data.ndim);
-                        hypre_CopyToCleanIndex(ilower, data.ndim, ilower);
-                        hypre_CopyToCleanIndex(iupper, data.ndim, iupper);
-                        hypre_BoxSetExtents(set_array_box, ilower, iupper);
-                        set_array_box_volume = hypre_BoxVolume(set_array_box);
-                        set_array_indexes = hypre_TAlloc(HYPRE_Int,
-                                                         data.ndim * data.stencil_sizes[s] * set_array_box_volume, memory_location);
-                        set_array_indexes_h = hypre_TAlloc(HYPRE_Int,
-                                                           data.ndim * data.stencil_sizes[s] * set_array_box_volume, HYPRE_MEMORY_HOST);
-                        set_array_entries = hypre_TAlloc(HYPRE_Int,  data.stencil_sizes[s] * set_array_box_volume,
-                                                         memory_location);
-                        set_array_entries_h = hypre_TAlloc(HYPRE_Int, data.stencil_sizes[s] * set_array_box_volume,
-                                                           HYPRE_MEMORY_HOST);
-                        set_array_cnt = 0;
-
-                        for (i = 0; i < data.stencil_sizes[s]; i++)
+                        for (box = 0; box < pdata.nboxes; box++)
                         {
+                           GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                          pdata.vartypes[var], ilower, iupper);
+
+                           set_array_box = hypre_BoxCreate(data.ndim);
+                           hypre_CopyToCleanIndex(ilower, data.ndim, ilower);
+                           hypre_CopyToCleanIndex(iupper, data.ndim, iupper);
+                           hypre_BoxSetExtents(set_array_box, ilower, iupper);
+                           set_array_box_volume = hypre_BoxVolume(set_array_box);
+                           set_array_indexes = hypre_TAlloc(HYPRE_Int,
+                                                            data.ndim * set_array_box_volume, memory_location);
+                           set_array_indexes_h = hypre_TAlloc(HYPRE_Int,
+                                                              data.ndim * set_array_box_volume, HYPRE_MEMORY_HOST);
+                           set_array_entries = hypre_TAlloc(HYPRE_Int,  set_array_box_volume,
+                                                            memory_location);
+                           set_array_entries_h = hypre_TAlloc(HYPRE_Int, set_array_box_volume,
+                                                              HYPRE_MEMORY_HOST);
+                           set_array_cnt = 0;
                            for (index[2] = ilower[2]; index[2] <= iupper[2]; index[2] ++)
                            {
                               for (index[1] = ilower[1]; index[1] <= iupper[1]; index[1] ++)
@@ -3929,27 +3928,24 @@ main( hypre_int argc,
                                  }
                               }
                            }
-                        }
-                        hypre_MuPDataCopyToMP(h_values, values, data.stencil_sizes[s] * set_array_box_volume);
-                        hypre_MuPDataMemcpy(d_values, h_values, data.stencil_sizes[s] * set_array_box_volume,
-                                            memory_location, HYPRE_MEMORY_HOST);
+                           hypre_MuPDataCopyToMP(h_values, values, set_array_box_volume);
+                           hypre_MuPDataMemcpy(d_values, h_values, set_array_box_volume,
+                                               memory_location, HYPRE_MEMORY_HOST);
 
-                        hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
-                                      data.ndim * data.stencil_sizes[s] * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
-                        hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
-                                      data.stencil_sizes[s] * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
-                        hypre_BoxDestroy(set_array_box);
-                        HYPRE_SStructMatrixSetArrayValues(A, part, var, data.stencil_sizes[s] * set_array_box_volume,
-                                                          set_array_indexes, set_array_entries, d_values);
-                        hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
-                        hypre_TFree(set_array_indexes, memory_location);
-                        hypre_TFree(set_array_entries_h, HYPRE_MEMORY_HOST);
-                        hypre_TFree(set_array_entries, memory_location);
+                           hypre_TMemcpy(set_array_indexes, set_array_indexes_h, HYPRE_Int,
+                                         data.ndim * set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
+                           hypre_TMemcpy(set_array_entries, set_array_entries_h, HYPRE_Int,
+                                         set_array_box_volume, memory_location, HYPRE_MEMORY_HOST);
+                           hypre_BoxDestroy(set_array_box);
+                           HYPRE_SStructMatrixSetArrayValues(A, part, var, set_array_box_volume,
+                                                             set_array_indexes, set_array_entries, d_values);
+                           hypre_TFree(set_array_indexes_h, HYPRE_MEMORY_HOST);
+                           hypre_TFree(set_array_indexes, memory_location);
+                           hypre_TFree(set_array_entries_h, HYPRE_MEMORY_HOST);
+                           hypre_TFree(set_array_entries, memory_location);
+                        }
                      }
-                  }
-                  else
-                  {
-                     for (i = 0; i < data.stencil_sizes[s]; i++)
+                     else
                      {
                         for (j = 0; j < pdata.max_boxsize; j++)
                         {

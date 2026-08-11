@@ -331,7 +331,7 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
    HYPRE_Int            *sentries;
    HYPRE_Int             i;
 
-   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var? */
+   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var */
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
    sentries = hypre_SStructPMatrixSEntries(pmatrix);
@@ -428,6 +428,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    HYPRE_Int            *sentries;
    HYPRE_Int             i, j;
 
+   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var */
    smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entries[0]]);
 
    sentries = hypre_SStructPMatrixSEntries(pmatrix);
@@ -1262,8 +1263,6 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    hypre_Index             *shape       = hypre_SStructStencilShape(stencil);
    HYPRE_Int                size        = hypre_SStructStencilSize(stencil);
 
-   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(ijmatrix);
-
    hypre_IndexRef           offset;
    hypre_Index              index;
    hypre_Index              to_index;
@@ -1284,8 +1283,8 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
 
    HYPRE_Int                nrows;
    HYPRE_Int               *ncols;
-   HYPRE_BigInt            *rows = hypre_TAlloc(HYPRE_BigInt, nvalues, memory_location);
-   HYPRE_BigInt            *cols = hypre_TAlloc(HYPRE_BigInt, nvalues, memory_location);
+   HYPRE_BigInt            *rows = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_DEVICE);
+   HYPRE_BigInt            *cols = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_DEVICE);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1295,22 +1294,12 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
     *            if there are many Uentries to set (though this should be small
     *            compared to the struct component of the matrix) */
 
-   skip_val = hypre_CTAlloc(HYPRE_Int, nvalues, memory_location);
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
-   {
-      skip_val_h = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
-      indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
-      rows_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
-      cols_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, memory_location);
-   }
-   else
-   {
-      skip_val_h = skip_val;
-      indexes_h = indexes;
-      rows_h = rows;
-      cols_h = cols;
-   }
+   skip_val = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+   skip_val_h = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
+   indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
+   rows_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
+   cols_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    /* Loop over indexes/entries and get row/col for IJ matrix */
    for (i = 0; i < nvalues; i++)
@@ -1402,16 +1391,13 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    }
 
    /* Copy rows/cols to device */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
-   {
-      hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues_set, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(skip_val, skip_val_h, HYPRE_Int, nvalues, memory_location, HYPRE_MEMORY_HOST);
-   }
+   hypre_TMemcpy(rows, rows_h, HYPRE_BigInt, nvalues_set, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(cols, cols_h, HYPRE_BigInt, nvalues_set, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(skip_val, skip_val_h, HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* Sort and reduce_by_key to get rows/nrows/ncols to pass to IJMatrixSet/AddTo/GetValues */
    values_set = hypre_TAlloc(HYPRE_Complex, nvalues_set, HYPRE_MEMORY_DEVICE);
-   ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, memory_location);
+   ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
@@ -1477,17 +1463,14 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    }
 
    hypre_TFree(values_set, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(rows, memory_location);
-   hypre_TFree(cols, memory_location);
-   hypre_TFree(skip_val, memory_location);
-   hypre_TFree(ncols, memory_location);
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
-   {
-      hypre_TFree(skip_val_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(rows_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(cols_h, HYPRE_MEMORY_HOST);
-   }
+   hypre_TFree(rows, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(cols, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(skip_val, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(skip_val_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(rows_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(cols_h, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -2393,10 +2376,12 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
                                          HYPRE_Complex       *values,
                                          HYPRE_Int            action )
 {
-   HYPRE_Int             i;
-   hypre_SStructGraph   *graph = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructGrid    *grid  = hypre_SStructGraphGrid(graph);
+   HYPRE_Int             i, entry;
+   hypre_SStructGraph   *graph       = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid    *grid        = hypre_SStructGraphGrid(graph);
    HYPRE_Int           **nvneighbors = hypre_SStructGridNVNeighbors(grid);
+   hypre_SStructStencil *stencil     = hypre_SStructGraphStencil(graph, part, var);
+   HYPRE_Int            *vars        = hypre_SStructStencilVars(stencil);
    HYPRE_Int             nSentries;
    HYPRE_Int             nUentries;
    HYPRE_Int            *Sindexes;
@@ -2409,12 +2394,15 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    HYPRE_Int            *Uentry_locations;
    hypre_SStructPMatrix *pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
    HYPRE_Int            *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
-   /* WM: note that for now, assuming connections are only between same variable type */
-   hypre_StructMatrix   *smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+   hypre_StructMatrix   *smatrix;
 
    HYPRE_Int            *Sentries_h;
    HYPRE_Int            *struct_stencil_indices;
    HYPRE_Int            *struct_stencil_indices_h;
+
+   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var */
+   hypre_TMemcpy(&entry, entries, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
 
    hypre_SStructMatrixSplitArrayEntriesDevice( matrix,
                                                part,
@@ -2504,15 +2492,6 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    {
 #if defined(HYPRE_USING_SYCL)
 #else
-      /* WM: debug */
-      for (i = 0; i < nSentries; i++)
-      {
-         hypre_printf("WM: debug - i = %d, Svalues = %e, loc = %d\n", i, Svalues[i], Sentry_locations[i]);
-      }
-      for (i = 0; i < nUentries; i++)
-      {
-         hypre_printf("WM: debug - i = %d, Uvalues = %e, loc = %d\n", i, Uvalues[i], Uentry_locations[i]);
-      }
       HYPRE_THRUST_CALL( scatter,
                          Svalues,
                          Svalues + nSentries,
@@ -2765,7 +2744,6 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
                                                   HYPRE_Int            action )
 {
    HYPRE_Int                ndim       = hypre_SStructMatrixNDim(matrix);
-   hypre_IJMatrix          *ij_matrix  = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
    hypre_SStructPMatrix    *pmatrix    = hypre_SStructMatrixPMatrix(matrix, part);
@@ -2775,12 +2753,9 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    hypre_SStructStencil    *stencil    = hypre_SStructPMatrixStencil(pmatrix, var);
    hypre_Index             *shape      = hypre_SStructStencilShape(stencil);
    HYPRE_Int               *vars       = hypre_SStructStencilVars(stencil);
-   HYPRE_MemoryLocation     memloc     = hypre_IJMatrixMemoryLocation(ij_matrix);
 
    hypre_SStructVariable    tovartype;
-   /* WM: note that for now, we assume that all inter-variable connections in parcsr, so the */
-   /*     only smatrix we consider here is connections from var to var */
-   hypre_StructMatrix      *smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+   hypre_StructMatrix      *smatrix;
    hypre_Box               *set_box, *box, *ibox0, *ibox1, *tobox, *frbox;
    hypre_IndexRef           offset;
    hypre_BoxManEntry      **frentries, **toentries;
@@ -2806,22 +2781,16 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    tobox     = hypre_BoxCreate(ndim);
    frbox     = hypre_BoxCreate(ndim);
 
+   /* WM: todo - using vars[entries[0]] below assumes all the entries point to the same var */
+   hypre_TMemcpy(&entry, entries, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
+
    /* Copy indexes and entries to the host */
-   /* WM: todo - rethink these checks on memory location... I only expect this
-    * function to be called with inputs and the matrix in device memory? */
    tlocations_h = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
-   if (hypre_GetActualMemLocation(memloc) != hypre_MEMORY_HOST)
-   {
-      indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
-      entries_h = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, memloc);
-      hypre_TMemcpy(entries_h, entries, HYPRE_Int, nvalues, HYPRE_MEMORY_HOST, memloc);
-   }
-   else
-   {
-      indexes_h = indexes;
-      entries_h = entries;
-   }
+   indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
+   entries_h = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(entries_h, entries, HYPRE_Int, nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    for (i = 0; i < nvalues; i++)
    {
@@ -2910,13 +2879,13 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    } /* end of entries loop */
 
    /* Copy tlocations to GPU */
-   tlocations = hypre_TAlloc(HYPRE_Int, ntvalues, memloc);
-   hypre_TMemcpy(tlocations, tlocations_h, HYPRE_Int, ntvalues, memloc, HYPRE_MEMORY_HOST);
+   tlocations = hypre_TAlloc(HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(tlocations, tlocations_h, HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* Copy from indexes/entries/values into tindexes/tentries/tvalues */
-   tindexes = hypre_TAlloc(HYPRE_Int, ndim * ntvalues, memloc);
-   tentries = hypre_TAlloc(HYPRE_Int, ntvalues, memloc);
-   tvalues = hypre_TAlloc(HYPRE_Complex, ntvalues, memloc);
+   tindexes = hypre_TAlloc(HYPRE_Int, ndim * ntvalues, HYPRE_MEMORY_DEVICE);
+   tentries = hypre_TAlloc(HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE);
+   tvalues = hypre_TAlloc(HYPRE_Complex, ntvalues, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
@@ -2999,16 +2968,13 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    hypre_BoxDestroy(ibox1);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
-   if (hypre_GetActualMemLocation(memloc) != hypre_MEMORY_HOST)
-   {
-      hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(entries_h, HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(tlocations, memloc);
+   hypre_TFree(indexes_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(entries_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(tlocations, HYPRE_MEMORY_DEVICE);
    hypre_TFree(tlocations_h, HYPRE_MEMORY_HOST);
-   hypre_TFree(tindexes, memloc);
-   hypre_TFree(tentries, memloc);
-   hypre_TFree(tvalues, memloc);
+   hypre_TFree(tindexes, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tentries, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tvalues, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
