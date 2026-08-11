@@ -1272,6 +1272,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    hypre_SStructBoxManInfo *entry_info;
    HYPRE_Int                i, d, entry;
    HYPRE_Int                nvalues_set = 0;
+   HYPRE_Complex           *values_set;
    HYPRE_BigInt             Uverank;
 
    HYPRE_Int               *skip_val;
@@ -1279,6 +1280,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    HYPRE_Int               *indexes_h;
    HYPRE_BigInt            *rows_h;
    HYPRE_BigInt            *cols_h;
+   HYPRE_Int               *scatter_locations = NULL;
 
    HYPRE_Int                nrows;
    HYPRE_Int               *ncols;
@@ -1408,17 +1410,17 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    }
 
    /* Sort and reduce_by_key to get rows/nrows/ncols to pass to IJMatrixSet/AddTo/GetValues */
+   values_set = hypre_TAlloc(HYPRE_Complex, nvalues_set, HYPRE_MEMORY_DEVICE);
+   ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, memory_location);
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
 #else
-
-   /* WM: note that the values array passed to this function is modified here... I think that's fine. */
-   HYPRE_THRUST_CALL( remove_if,
+   HYPRE_THRUST_CALL( copy_if,
                       values,
                       values + nvalues,
                       skip_val,
-                      thrust::identity<HYPRE_Int>() );
-   ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, memory_location);
+                      values_set,
+                      equal<HYPRE_Int>(0) );
    HYPRE_THRUST_CALL( sort_by_key,
                       rows,
                       rows + nvalues_set,
@@ -1435,17 +1437,35 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    /* Call IJMatrixSet/AddTo/GetValues */
    if (action > 0)
    {
-      HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols, rows, cols, values);
+      HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols, rows, cols, values_set);
    }
    else if (action > -1)
    {
-      HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols, rows, cols, values);
+      HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols, rows, cols, values_set);
    }
    else
    {
-      HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values);
+      HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values_set);
+      scatter_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      /* WM: todo */
+#else
+      HYPRE_THRUST_CALL( copy_if,
+                         thrust::make_counting_iterator<HYPRE_Int>(0),
+                         thrust::make_counting_iterator<HYPRE_Int>(0) + nvalues,
+                         skip_val,
+                         scatter_locations,
+                         equal<HYPRE_Int>(0) );
+      HYPRE_THRUST_CALL( scatter,
+                         values_set,
+                         values_set + nvalues_set,
+                         scatter_locations,
+                         values );
+#endif
+      hypre_TFree(scatter_locations, HYPRE_MEMORY_DEVICE);
    }
 
+   hypre_TFree(values_set, HYPRE_MEMORY_DEVICE);
    hypre_TFree(rows, memory_location);
    hypre_TFree(cols, memory_location);
    hypre_TFree(skip_val, memory_location);
@@ -2217,7 +2237,9 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
                                             HYPRE_Int         **Sentries_out,
                                             HYPRE_Int         **Uentries_out,
                                             HYPRE_Complex     **Svalues_out,
-                                            HYPRE_Complex     **Uvalues_out )
+                                            HYPRE_Complex     **Uvalues_out,
+                                            HYPRE_Int         **Sentry_locations_out,
+                                            HYPRE_Int         **Uentry_locations_out )
 {
    HYPRE_Int             entry;
    HYPRE_Int             ndim      = hypre_SStructMatrixNDim(matrix);
@@ -2327,8 +2349,6 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
 
    /* Clean up memory */
    hypre_TFree(entries_split_arr, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(Sentry_locations, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(Uentry_locations, HYPRE_MEMORY_DEVICE);
 
    /* Assign outputs */
    *nSentries_out = nSentries;
@@ -2339,6 +2359,8 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
    *Uentries_out = Uentries;
    *Svalues_out = Svalues;
    *Uvalues_out = Uvalues;
+   *Sentry_locations_out = Sentry_locations;
+   *Uentry_locations_out = Uentry_locations;
 
    return hypre_error_flag;
 }
@@ -2372,6 +2394,8 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    HYPRE_Int            *Uentries;
    HYPRE_Complex        *Svalues;
    HYPRE_Complex        *Uvalues;
+   HYPRE_Int            *Sentry_locations;
+   HYPRE_Int            *Uentry_locations;
    hypre_SStructPMatrix *pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
    HYPRE_Int            *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    /* WM: note that for now, assuming connections are only between same variable type */
@@ -2395,7 +2419,9 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
                                                &Sentries,
                                                &Uentries,
                                                &Svalues,
-                                               &Uvalues );
+                                               &Uvalues,
+                                               &Sentry_locations,
+                                               &Uentry_locations );
 
    /* S-matrix */
    if (nSentries > 0)
@@ -2461,6 +2487,43 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
       hypre_SStructUMatrixSetArrayValuesDevice(matrix, part, var, nUentries, Uindexes, Uentries, Uvalues,
                                                action);
    }
+
+   /* Scatter struct and parcsr values back to input values array in the case of Get */
+   if (action < 0)
+   {
+#if defined(HYPRE_USING_SYCL)
+#else
+      /* WM: debug */
+      for (i = 0; i < nSentries; i++)
+      {
+         hypre_printf("WM: debug - i = %d, Svalues = %e, loc = %d\n", i, Svalues[i], Sentry_locations[i]);
+      }
+      for (i = 0; i < nUentries; i++)
+      {
+         hypre_printf("WM: debug - i = %d, Uvalues = %e, loc = %d\n", i, Uvalues[i], Uentry_locations[i]);
+      }
+      HYPRE_THRUST_CALL( scatter,
+                         Svalues,
+                         Svalues + nSentries,
+                         Sentry_locations,
+                         values );
+      HYPRE_THRUST_CALL( scatter,
+                         Uvalues,
+                         Uvalues + nUentries,
+                         Uentry_locations,
+                         values );
+#endif
+   }
+
+   /* Clean up memory */
+   hypre_TFree(Sindexes, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Uindexes, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Sentries, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Uentries, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Svalues, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Uvalues, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Sentry_locations, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Uentry_locations, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
