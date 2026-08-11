@@ -2456,19 +2456,11 @@ HYPRE_Int hypre_CopyParCSRRowsDevice(HYPRE_Int nrows, HYPRE_Int *d_row_indices, 
                                      HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
                                      HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib,
                                      HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-<<<<<<< HEAD
 HYPRE_Int hypre_IntegerReduceSumDevice(HYPRE_Int m, HYPRE_Int *d_i);
 HYPRE_Complex hypre_ComplexReduceSumDevice(HYPRE_Int m, HYPRE_Complex *d_x);
+HYPRE_Real hypre_RealReduceMaxAbsDevice(HYPRE_Int m, HYPRE_Real *d_x);
 HYPRE_Int hypre_IntegerInclusiveScanDevice(HYPRE_Int n, HYPRE_Int *d_i);
 HYPRE_Int hypre_IntegerExclusiveScanDevice(HYPRE_Int n, HYPRE_Int *d_i);
-HYPRE_Int hypre_CudaCompileFlagCheck(void);
-=======
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-HYPRE_Complex hypreDevice_ComplexReduceSum(HYPRE_Int m, HYPRE_Complex *d_x);
-HYPRE_Real hypreDevice_RealReduceMaxAbs(HYPRE_Int m, HYPRE_Real *d_x);
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
->>>>>>> 09ffbf40955dd523300dfa4a360a5ef79923bfc0
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed,

@@ -599,34 +599,15 @@ HYPRE_Int hypre_CSRSpAddDevice(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA,
 HYPRE_Int hypre_CSRSpTransDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                  HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                  HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-<<<<<<< HEAD
-HYPRE_Int hypre_CSRSpTransCusparseDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
-                                         HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                         HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-HYPRE_Int hypre_CSRSpTransRocsparseDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
-                                          HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                          HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-HYPRE_Int hypre_CSRSpTransOnemklsparseDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA,
-                                             HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                             HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
-
-/* csr_spgemm_device.c */
-HYPRE_Int hypre_CSRSpGemmDevice(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
-HYPRE_Int hypre_CSRSpGemmCusparseGenericAPIDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                                  HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int nnzB,
-                                                  HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
-                                                  HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
-=======
 HYPRE_Int hypre_CSRSpTransVendor(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                  HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                  HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
 /* csr_spgemm_device.c */
-HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
+HYPRE_Int hypre_CSRSpGemmDevice(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 HYPRE_Int hypre_CSRSpGemmVendor(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C,
                                 HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 HYPRE_Int hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A, HYPRE_Int use_sorted);
->>>>>>> 09ffbf40955dd523300dfa4a360a5ef79923bfc0
 
 /* csr_spmv_device.c */
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,
