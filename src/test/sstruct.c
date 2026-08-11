@@ -3124,7 +3124,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-test_set_array_values") == 0 )
       {
          arg_index++;
-         test_set_array_values = 1;
+         test_set_array_values = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-Aones") == 0 )
       {
