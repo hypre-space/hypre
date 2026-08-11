@@ -152,8 +152,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
       if (coarse_grid_method && coarse_grid_method[lev] == 6 &&
-          (!(mgr_data -> user_coarse_grid_matrix) ||
-           !((mgr_data -> user_coarse_grid_matrix)[lev])))
+          (!(mgr_data -> user_Ac_array) ||
+           !((mgr_data -> user_Ac_array)[lev])))
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "MGR coarse_grid_method 6 requires a coarse matrix set via "

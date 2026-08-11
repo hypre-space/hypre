@@ -1403,7 +1403,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    startf_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel private(i,j,start,stop,startf,stopf,row,theta,value)
+   #pragma omp parallel private(i,j,start,stop,startf,stopf,row,theta,value,index)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();

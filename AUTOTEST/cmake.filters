@@ -9,3 +9,10 @@ Enable it with -DHYPRE_ENABLE_UMPIRE=ON.
 Call Stack
 CMakeLists.txt:
 ^$
+In function .hypre_matinv.:
+warning: iteration .* invokes undefined behavior \[-Waggressive-loop-optimizations\]
+note: within this loop
+\|          x\[i \+ j \+ k \* i\] = 0;
+\|            ~~\^~~
+\|       for \(j = 1; j < k - i; j\+\+\)
+\|                   ~~\^~~~~~~
