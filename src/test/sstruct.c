@@ -2617,7 +2617,7 @@ main( hypre_int argc,
    HYPRE_Int             values_size  = 0;
    HYPRE_Real           *values       = NULL;
    HYPRE_Real           *h_values     = NULL;
-   HYPRE_Real           *h_values_get = NULL;
+   /* HYPRE_Real           *h_values_get = NULL; */
    HYPRE_Real           *d_values     = NULL;
 
    HYPRE_Int             test_set_array_values = 0;
