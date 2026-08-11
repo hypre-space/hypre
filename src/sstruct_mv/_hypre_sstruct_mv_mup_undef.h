@@ -131,7 +131,10 @@
 #undef hypre_SStructGridCreateCommInfo
 #undef hypre_SStructGridFindBoxManEntry
 #undef hypre_SStructGridFindNborBoxManEntry
+#undef hypre_SStructGridGetGlobalRanksPartVarStarts
 #undef hypre_SStructGridGetMaxBoxSize
+#undef hypre_SStructGridGlobalRanksToIndexes
+#undef hypre_SStructGridIndexesToGlobalRanks
 #undef hypre_SStructGridIntersect
 #undef hypre_SStructGridPrint
 #undef hypre_SStructGridPrintGLVis
@@ -242,7 +245,6 @@
 #undef hypre_SStructPVectorSetConstantValues
 #undef hypre_SStructPVectorSetRandomValues
 #undef hypre_SStructPVectorSetValues
-#undef hypre_SStructPartialPCopy
 #undef hypre_SStructScale
 #undef hypre_SStructStencilRef
 #undef hypre_SStructUMatrixAssemble

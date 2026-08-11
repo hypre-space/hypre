@@ -162,6 +162,8 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) bicgstab_vdata);
+
    (bicgstab_data -> A) = A;
 
    // if a preconditioning matrix has not been set, use A
@@ -228,6 +230,11 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) bicgstab_vdata);
+   }
 
    return hypre_error_flag;
 }

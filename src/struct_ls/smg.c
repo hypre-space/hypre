@@ -496,8 +496,7 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
       box   = hypre_BoxArrayBox(box_array, i);
       start = hypre_BoxIMin(box);
 
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      v_data_box = hypre_StructVectorBoxDataBox(vector, i);
       vp = hypre_StructVectorBoxData(vector, i);
 
       hypre_BoxGetStrideSize(box, stride, loop_size);

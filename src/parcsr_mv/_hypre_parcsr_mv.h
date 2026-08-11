@@ -333,7 +333,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
    HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
+   hypre_double          d_num_nonzeros;
 
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
@@ -567,6 +567,7 @@ typedef struct hypre_OverlapData_struct
    HYPRE_Int            num_extended_rows;     /* Total rows in extended domain */
    HYPRE_Int            num_overlap_rows;      /* External rows (from overlap) */
    HYPRE_BigInt        *extended_row_indices;  /* Global indices of all extended rows */
+
    HYPRE_Int           *row_is_owned;          /* 1 if row is owned, 0 if external */
 
    /* Communication package for fetching overlap data */
@@ -1231,6 +1232,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixSortColMapOffd(hypre_ParCSRMatrix *A);
 
 /* par_csr_matrix_stats.c */
+HYPRE_Int hypre_ParCSRMatrixStatsComputeLocal( hypre_ParCSRMatrix *A,
+                                               hypre_MatrixStats *stats );
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );
@@ -1412,7 +1415,7 @@ hypre_ParVectorCopy_mp( hypre_ParVector *x,
                         hypre_ParVector *y );
 
 HYPRE_Int
-hypre_ParVectorAxpy_mp( hypre_double    alpha,
+hypre_ParVectorAxpy_mp( hypre_long_double    alpha,
                         hypre_ParVector *x,
                         hypre_ParVector *y );
 
@@ -1423,6 +1426,13 @@ hypre_ParVectorConvert_mp ( hypre_ParVector *v,
 HYPRE_Int
 hypre_ParCSRMatrixConvert_mp ( hypre_ParCSRMatrix *A,
                                HYPRE_Precision new_precision );
+
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone_mp(hypre_ParCSRMatrix   *A, HYPRE_Precision new_precision);
+
+HYPRE_Int
+hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
+                           hypre_ParCSRMatrix *B );
 
 #endif
 
@@ -1438,6 +1448,7 @@ hypre_ParCSRMatrixConvert_mp ( hypre_ParCSRMatrix *A,
 #ifndef hypre_MP_BUILD
 #include "_hypre_parcsr_mv_mup_undef.h"
 #include "_hypre_parcsr_mv_mup.h"
+#include "_hypre_parcsr_mv_mup.hpp"
 #endif
 #endif
 

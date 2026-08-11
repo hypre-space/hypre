@@ -44,30 +44,30 @@ for OUTFILE in $OUTFILES; do
   if [ ! -f $OUTFILE ]; then
     continue
   fi
-  
+
   # Count PASSED and FAILED messages
   PASSED_COUNT=$(grep -c "PASSED" $OUTFILE 2>/dev/null || echo "0")
   FAILED_COUNT=$(grep -c "FAILED" $OUTFILE 2>/dev/null || echo "0")
-  
+
   # Strip whitespace
   PASSED_COUNT=$(echo "$PASSED_COUNT" | tr -d '[:space:]')
   FAILED_COUNT=$(echo "$FAILED_COUNT" | tr -d '[:space:]')
   PASSED_COUNT=${PASSED_COUNT:-0}
   FAILED_COUNT=${FAILED_COUNT:-0}
-  
+
   TOTAL_PASSED=$((TOTAL_PASSED + PASSED_COUNT))
   TOTAL_FAILED=$((TOTAL_FAILED + FAILED_COUNT))
-  
+
   if [ "$FAILED_COUNT" -gt 0 ]; then
     # Find which test(s) failed in this file
     FAILED_TESTS=$(grep "^Test[0-9]" $OUTFILE | grep -v "PASSED" | sed 's/ (.*procs).*//' | sed 's/:.*//')
-    
+
     # Get test driver for this output file
     TEST_DRIVER="${DRIVER_MAP[$OUTFILE]}"
     if [ -z "$TEST_DRIVER" ]; then
       TEST_DRIVER="Unknown"
     fi
-    
+
     # Add to failed details
     if [ -n "$FAILED_TESTS" ]; then
       while IFS= read -r test; do
@@ -106,5 +106,3 @@ OUTCOUNT=${OUTCOUNT:-0}
 if [ "$OUTCOUNT" -eq 0 ]; then
    echo "No test results found in output files" >&2
 fi
-
-

@@ -31,7 +31,7 @@ hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
                                     HYPRE_Int          *entries,
                                     hypre_Index        *stencil_shape,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      Adstart,
                                     hypre_IndexRef      xdstart,
@@ -50,6 +50,7 @@ hypre_StructMatvecCompute_core_IVC( hypre_StructMatrix *A,
    HYPRE_DECLARE_OFFSETS_UP_TO_26;
    HYPRE_DECLARE_OFFSETS(26);
    HYPRE_UNUSED_VAR(nentries);
+   HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y_data_box);
    HYPRE_UNUSED_VAR(ydstart);
    HYPRE_UNUSED_VAR(ydstride);

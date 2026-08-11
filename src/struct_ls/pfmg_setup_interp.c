@@ -302,8 +302,8 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
       hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
       hypre_StructMatrixMapDataIndex(P, Pstart);
 
-      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
+      A_dbox = hypre_StructMatrixBoxDataBox(A, i);
+      P_dbox = hypre_StructMatrixBoxDataBox(P, i);
 
       Pp1 = hypre_StructMatrixBoxData(P, i, 1);
       Pp2 = hypre_StructMatrixBoxData(P, i, 2);

@@ -138,32 +138,17 @@ hypre_FlexGMRESDestroy( void *fgmres_vdata )
          }
       }
 
-      if ( (fgmres_data -> matvec_data) != NULL )
-      {
-         (*(fgmres_functions->MatvecDestroy))(fgmres_data -> matvec_data);
-      }
+      (*(fgmres_functions->MatvecDestroy))(fgmres_data -> matvec_data);
 
-      if ( (fgmres_data -> r) != NULL )
-      {
-         (*(fgmres_functions->DestroyVector))(fgmres_data -> r);
-      }
-      if ( (fgmres_data -> w) != NULL )
-      {
-         (*(fgmres_functions->DestroyVector))(fgmres_data -> w);
-      }
-      if ( (fgmres_data -> w_2) != NULL )
-      {
-         (*(fgmres_functions->DestroyVector))(fgmres_data -> w_2);
-      }
+      (*(fgmres_functions->DestroyVector))(fgmres_data -> r);
+      (*(fgmres_functions->DestroyVector))(fgmres_data -> w);
+      (*(fgmres_functions->DestroyVector))(fgmres_data -> w_2);
 
       if ( (fgmres_data -> p) != NULL )
       {
          for (i = 0; i < (fgmres_data -> k_dim + 1); i++)
          {
-            if ( (fgmres_data -> p)[i] != NULL )
-            {
-               (*(fgmres_functions->DestroyVector))( (fgmres_data -> p) [i]);
-            }
+            (*(fgmres_functions->DestroyVector))( (fgmres_data -> p) [i]);
          }
          hypre_TFreeF( fgmres_data->p, fgmres_functions );
       }
@@ -173,10 +158,7 @@ hypre_FlexGMRESDestroy( void *fgmres_vdata )
       {
          for (i = 0; i < (fgmres_data -> k_dim + 1); i++)
          {
-            if ( (fgmres_data -> pre_vecs)[i] != NULL )
-            {
-               (*(fgmres_functions->DestroyVector))( (fgmres_data -> pre_vecs) [i]);
-            }
+            (*(fgmres_functions->DestroyVector))( (fgmres_data -> pre_vecs) [i]);
          }
          hypre_TFreeF( fgmres_data->pre_vecs, fgmres_functions );
       }
@@ -225,6 +207,8 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) fgmres_vdata);
+
    (fgmres_data -> A) = A;
 
    /*--------------------------------------------------
@@ -254,9 +238,10 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
       }
    }
 
-   /* fgmres mod */
-   (fgmres_data -> pre_vecs) = (void**)(*(fgmres_functions->CreateVectorArray))(k_dim + 1, x);
-   /*---*/
+   if ((fgmres_data -> pre_vecs) == NULL)
+   {
+      (fgmres_data -> pre_vecs) = (void**)(*(fgmres_functions->CreateVectorArray))(k_dim + 1, x);
+   }
 
    if ((fgmres_data -> matvec_data) == NULL)
    {
@@ -286,6 +271,11 @@ hypre_FlexGMRESSetup( void *fgmres_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) fgmres_vdata);
+   }
 
    return hypre_error_flag;
 }
@@ -369,19 +359,6 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       /* fp = fopen(log_file_name,"w"); */
    }
 
-   /* initialize work arrays  */
-   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-
-
-   /* fgmres mod. - need non-modified hessenberg ???? */
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + 1; i++)
-   {
-      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
-   }
-
    (*(fgmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
@@ -409,6 +386,8 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -437,9 +416,24 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          hypre_printf("ERROR detected by Hypre ... END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+      hypre_TFree(biprod, HYPRE_MEMORY_HOST);
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
+   }
+
+   /* initialize work arrays  */
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
+
+
+   /* fgmres mod. - need non-modified hessenberg ???? */
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, fgmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + 1; i++)
+   {
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, fgmres_functions, HYPRE_MEMORY_HOST);
    }
 
    if ( logging > 0 || print_level > 0)

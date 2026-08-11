@@ -39,6 +39,13 @@ typedef struct hypre_MatrixStats_struct
    HYPRE_Real          rowsum_avg;
    HYPRE_Real          rowsum_stdev;
    HYPRE_Real          rowsum_sqsum;
+
+   /* Absolute row sum statistics */
+   HYPRE_Real          absrowsum_min;
+   HYPRE_Real          absrowsum_max;
+   HYPRE_Real          absrowsum_avg;
+   HYPRE_Real          absrowsum_stdev;
+   HYPRE_Real          absrowsum_sqsum;
 } hypre_MatrixStats;
 
 /*--------------------------------------------------------------------------
@@ -64,6 +71,12 @@ typedef struct hypre_MatrixStats_struct
 #define hypre_MatrixStatsRowsumAvg(data)             ((data) -> rowsum_avg)
 #define hypre_MatrixStatsRowsumStDev(data)           ((data) -> rowsum_stdev)
 #define hypre_MatrixStatsRowsumSqsum(data)           ((data) -> rowsum_sqsum)
+
+#define hypre_MatrixStatsAbsrowsumMin(data)          ((data) -> absrowsum_min)
+#define hypre_MatrixStatsAbsrowsumMax(data)          ((data) -> absrowsum_max)
+#define hypre_MatrixStatsAbsrowsumAvg(data)          ((data) -> absrowsum_avg)
+#define hypre_MatrixStatsAbsrowsumStDev(data)        ((data) -> absrowsum_stdev)
+#define hypre_MatrixStatsAbsrowsumSqsum(data)        ((data) -> absrowsum_sqsum)
 
 /******************************************************************************
  *
@@ -125,6 +138,6 @@ typedef struct hypre_MatrixStatsArray_struct
    HYPRE_PRINT_INDENT(n)                            \
    hypre_printf(__VA_ARGS__)
 
-#define HYPRE_NDIGITS_SIZE 12
+#define HYPRE_NDIGITS_SIZE 16
 
 #endif /* hypre_MATRIX_STATS_HEADER */

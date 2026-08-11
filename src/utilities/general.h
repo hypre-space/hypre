@@ -57,6 +57,25 @@ typedef uint64_t               hypre_uint64;
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)
 
+/* Macro for emitting pragmas from macros */
+#define HYPRE_PRAGMA_STRINGIFY(...) #__VA_ARGS__
+#if defined(WIN32) && defined(_MSC_VER)
+#define HYPRE_PRAGMA(...) __pragma(__VA_ARGS__)
+#else
+#define HYPRE_PRAGMA(...) _Pragma(HYPRE_PRAGMA_STRINGIFY(__VA_ARGS__))
+#endif
+
+/* Macros for controlling compiler diagnostics */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_DIAGNOSTIC_PUSH           HYPRE_PRAGMA(GCC diagnostic push)
+#define HYPRE_DIAGNOSTIC_POP            HYPRE_PRAGMA(GCC diagnostic pop)
+#define HYPRE_DIAGNOSTIC_IGNORE_WSHADOW HYPRE_PRAGMA(GCC diagnostic ignored "-Wshadow")
+#else
+#define HYPRE_DIAGNOSTIC_PUSH
+#define HYPRE_DIAGNOSTIC_POP
+#define HYPRE_DIAGNOSTIC_IGNORE_WSHADOW
+#endif
+
 /* Macro for marking deprecated functions */
 #define HYPRE_DEPRECATED(reason) _Pragma(reason)
 

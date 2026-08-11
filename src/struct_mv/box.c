@@ -539,8 +539,13 @@ hypre_BoxInBox( hypre_Box  *box1,
 {
    HYPRE_Int inbox = 0;
 
-   if ( hypre_IndexInBox(hypre_BoxIMin(box1), box2) &&
-        hypre_IndexInBox(hypre_BoxIMax(box1), box2) )
+   if (hypre_BoxVolume(box1) == 0)
+   {
+      // when box1 is empty, define it to be in box2 (even if box2 is also empty)
+      inbox = 1;
+   }
+   else if ( hypre_IndexInBox(hypre_BoxIMin(box1), box2) &&
+             hypre_IndexInBox(hypre_BoxIMax(box1), box2) )
    {
       inbox = 1;
    }
@@ -987,6 +992,7 @@ hypre_BoxArrayCreate( HYPRE_Int size,
  *
  * Notes:
  *    1) indices_in is a (ndim x num_indices) two-dimensional array
+ * WM: todo - does it make sense to switch things around so that indices_in is (num_indices x ndim)?
  *
  * This is based on the Berger-Rigoutsos algorithm.
  *--------------------------------------------------------------------------*/
@@ -1521,6 +1527,7 @@ hypre_AppendBox( hypre_Box      *box,
    size = hypre_BoxArraySize(box_array);
    hypre_BoxArraySetSize(box_array, (size + 1));
    hypre_CopyBox(box, hypre_BoxArrayBox(box_array, size));
+   hypre_BoxArrayID(box_array, size) = size;  // use box rank-1 as the default ID
 
    return hypre_error_flag;
 }
@@ -1613,6 +1620,7 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array_0, i),
                     hypre_BoxArrayBox(box_array_1, size + i));
+      hypre_BoxArrayID(box_array_1, size + i) = size + i;  // use box rank-1 as the default ID
    }
 
    return hypre_error_flag;

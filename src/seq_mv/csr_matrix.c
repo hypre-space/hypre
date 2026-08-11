@@ -1544,27 +1544,30 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix      *A,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE) ||\
-    defined(HYPRE_USING_ONEMKLSPARSE)
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixGetGPUMatData
+ * hypre_CSRMatrixSetData
+ * Reinitialize matrix data array
  *--------------------------------------------------------------------------*/
-
-hypre_GpuMatData*
-hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
+HYPRE_Int
+hypre_CSRMatrixResetData(hypre_CSRMatrix  *matrix)
 {
-   if (!matrix)
+
+   /* Check that matrix owns its data */
+   if (!hypre_CSRMatrixOwnsData(matrix))
    {
-      return NULL;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Error: called hypre_CSRMatrixResetData on a matrix that doesn't own the data\n");
+      return hypre_error_flag;
+   }
+   /* Free data array if already present */
+   if (hypre_CSRMatrixData(matrix))
+   {
+      hypre_TFree(hypre_CSRMatrixData(matrix), hypre_CSRMatrixMemoryLocation(matrix));
    }
 
-   if (!hypre_CSRMatrixGPUMatData(matrix))
-   {
-      hypre_CSRMatrixGPUMatData(matrix) = hypre_GpuMatDataCreate();
-      hypre_GPUMatDataSetCSRData(matrix);
-   }
+   /* Reallocate memory */
+   hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(matrix),
+                                               hypre_CSRMatrixMemoryLocation(matrix));
 
-   return hypre_CSRMatrixGPUMatData(matrix);
+   return hypre_error_flag;
 }
-#endif

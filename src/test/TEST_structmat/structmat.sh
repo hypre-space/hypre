@@ -32,6 +32,14 @@ FILESmatmat="\
  ${TNAME}.out.2D1.yidle.5\
  ${TNAME}.out.2D3.x.RA\
  ${TNAME}.out.2D3.x.AP\
+ ${TNAME}.out.2D0.AA\
+ ${TNAME}.out.2D1.AA\
+ ${TNAME}.out.2D2.AA\
+ ${TNAME}.out.2D3.AA\
+ ${TNAME}.out.2D0.AA.4\
+ ${TNAME}.out.2D1.AA.4\
+ ${TNAME}.out.2D2.AA.4\
+ ${TNAME}.out.2D3.AA.4\
 "
 FILESmatmatsym="\
  ${TNAME}.out.2D0.sym.x\
@@ -42,6 +50,14 @@ FILESmatmatsym="\
  ${TNAME}.out.2D1.sym.x.4\
  ${TNAME}.out.2D2.sym.x.4\
  ${TNAME}.out.2D3.sym.x.4\
+ ${TNAME}.out.2D0.sym.AA\
+ ${TNAME}.out.2D1.sym.AA\
+ ${TNAME}.out.2D2.sym.AA\
+ ${TNAME}.out.2D3.sym.AA\
+ ${TNAME}.out.2D0.sym.AA.4\
+ ${TNAME}.out.2D1.sym.AA.4\
+ ${TNAME}.out.2D2.sym.AA.4\
+ ${TNAME}.out.2D3.sym.AA.4\
 "
 FILESmatvec="\
  ${TNAME}.out.2D0.mv0\

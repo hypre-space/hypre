@@ -12,8 +12,6 @@ hypre_CSRMatrixComputeColSum
 hypre_CSRMatrixComputeColSumHost
 hypre_CSRMatrixComputeRowSum
 hypre_CSRMatrixComputeRowSumHost
-hypre_CSRMatrixCopy
-hypre_CSRMatrixCreate
 hypre_CSRMatrixDeleteZeros
 hypre_CSRMatrixDestroy
 hypre_CSRMatrixDiagScale
@@ -25,7 +23,6 @@ hypre_CSRMatrixFnorm
 hypre_CSRMatrixGetLoadBalancedPartitionBegin
 hypre_CSRMatrixGetLoadBalancedPartitionEnd
 hypre_CSRMatrixInitialize
-hypre_CSRMatrixInitialize_v2
 hypre_CSRMatrixJtoBigJ
 hypre_CSRMatrixMatvec
 hypre_CSRMatrixMatvecOutOfPlace
@@ -128,7 +125,6 @@ hypre_SeqVectorScale
 hypre_SeqVectorScaleHost
 hypre_SeqVectorSetConstantValues
 hypre_SeqVectorSetConstantValuesHost
-hypre_SeqVectorSetData
 hypre_SeqVectorSetDataOwner
 hypre_SeqVectorSetNumTags
 hypre_SeqVectorSetOwnsTags

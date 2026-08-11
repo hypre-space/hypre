@@ -233,9 +233,33 @@ hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid *grid, HYPRE_Int part, h
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int **global_ranks_part_var_starts_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridGetGlobalRanksPartVarStarts)( grid, type, memory_location, num_ranks, global_ranks, global_ranks_part_var_starts_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructGridGetMaxBoxSize( hypre_SStructGrid *grid )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridGetMaxBoxSize)( grid );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks, HYPRE_Int ***indexes_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridGlobalRanksToIndexes)( grid, type, memory_location, part, var, num_ranks, global_ranks, indexes_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int type, HYPRE_MemoryLocation memory_location, HYPRE_Int part, HYPRE_Int var, HYPRE_Int num_indexes, HYPRE_Int **indexes, HYPRE_BigInt **global_ranks_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridIndexesToGlobalRanks)( grid, type, memory_location, part, var, num_indexes, indexes, global_ranks_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1116,14 +1140,6 @@ HYPRE_Int
 hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector, hypre_Index index, HYPRE_Int var, HYPRE_Complex *value, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPVectorSetValues)( pvector, index, var, value, action );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPartialPCopy( hypre_SStructPVector *px, hypre_SStructPVector *py, hypre_BoxArrayArray **array_boxes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructPartialPCopy)( px, py, array_boxes );
 }
 
 /*--------------------------------------------------------------------------*/

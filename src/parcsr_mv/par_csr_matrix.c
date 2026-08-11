@@ -296,7 +296,7 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
                                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(A)) );
 
    hypre_ParCSRMatrixNumNonzeros(S)  = hypre_ParCSRMatrixNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(S) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(S) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A);
 
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
@@ -394,7 +394,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix,
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                           HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-      hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+      hypre_ParCSRMatrixDNumNonzeros(matrix) = (hypre_double)total_num_nonzeros;
    }
    else
    {
@@ -577,6 +577,12 @@ hypre_ParCSRMatrixCreateFromDenseBlockMatrix(MPI_Comm                comm,
    hypre_CSRMatrixMemoryLocation(A_diag) = memory_location;
    hypre_CSRMatrixMemoryLocation(A_offd) = memory_location;
 
+   /* Initialize the (empty) off-diagonal block so it has a valid, zeroed row
+    * pointer of size (num_rows_diag + 1). Without this, the offd row pointer is
+    * NULL and device consumers such as hypre_ParCSRMatMat (which concatenates
+    * the diag and offd blocks) dereference it and fault under MPI. */
+   hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
+
    /* Set diag's data pointer */
    if (hypre_DenseBlockMatrixOwnsData(B))
    {
@@ -654,9 +660,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
 
    /* Auxiliary variables */
    HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
-   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
    HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
-   HYPRE_Int             blk_dim         = hypre_max(1, num_rows / num_cols);
+   HYPRE_Int             blk_dim         = (global_num_cols > 0) ?
+                                           (HYPRE_Int) hypre_max(1, global_num_rows / global_num_cols) : 1;
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -675,7 +681,7 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
       return NULL;
    }
 
-   if (num_rows % num_cols)
+   if (global_num_cols > 0 && (global_num_rows % global_num_cols))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Number of rows is not evenly divisible by number of columns");
@@ -2721,7 +2727,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
 }
 
 /*--------------------------------------------------------------------------
- * copies a ParCSR matrix B to A.
+ * copies a ParCSR matrix A to B.
  * If copy_data = 0, only the structure of A is copied to B
  * the routine does not check whether the dimensions of A and B are compatible
  *--------------------------------------------------------------------------*/

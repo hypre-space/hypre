@@ -13,6 +13,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
   list(APPEND HDRS
     HYPRE_IJ_mv_mup.h
     _hypre_IJ_mv_mup.h
+    _hypre_IJ_mv_mup.hpp
     _hypre_IJ_mv_mup_def.h
     _hypre_IJ_mv_mup_undef.h
   )
@@ -43,6 +44,14 @@ set(MUP_SRCS
   mup_pre.c
 )
 
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
+
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("IJ_mv" SRCS "${REGULAR_SRCS}")
   target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
@@ -54,7 +63,11 @@ if (HYPRE_USING_GPU)
   set(GPU_SRCS
     IJMatrix_parcsr_device.c
     IJVector_parcsr_device.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
   )
+  mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()

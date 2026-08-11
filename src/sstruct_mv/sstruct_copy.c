@@ -33,31 +33,6 @@ hypre_SStructPCopy( hypre_SStructPVector *px,
 }
 
 /*--------------------------------------------------------------------------
- * Copy the components on only a subset of the pgrid.
- * For each box of an sgrid, an array of subboxes are copied.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPartialPCopy( hypre_SStructPVector *px,
-                           hypre_SStructPVector *py,
-                           hypre_BoxArrayArray **array_boxes )
-{
-   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
-   hypre_BoxArrayArray  *boxes;
-   HYPRE_Int var;
-
-   for (var = 0; var < nvars; var++)
-   {
-      boxes = array_boxes[var];
-      hypre_StructPartialCopy(hypre_SStructPVectorSVector(px, var),
-                              hypre_SStructPVectorSVector(py, var),
-                              boxes);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

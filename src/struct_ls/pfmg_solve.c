@@ -16,6 +16,8 @@
  * are not guaranteed to stay clear as needed in the constant coefficient case.
  * So, below we clear the values of r_l and e_l before computing the residual
  * and calling interpolation.
+ *
+ * RDF BASE: e_l doesn't appear to be needed anymore - due to new z-form of matvec?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -145,7 +147,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #ifdef DEBUG_SOLVE
       hypre_sprintf(filename, "pfmg_xdown.i%02d.l%02d", g_iter + i, 0);
       hypre_StructVectorPrint(filename, x_l[0], 0);
-      hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", g_iter + i, 1);
+      hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", g_iter + i, 0);
       hypre_StructVectorPrint(filename, b_l[0], 0);
 #endif
 

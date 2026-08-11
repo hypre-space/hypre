@@ -62,16 +62,16 @@ hypre_StructVectorAxpy( HYPRE_Complex       alpha,
    hypre_SetIndex(ustride, 1);
    for (i = 0; i < nboxes; i++)
    {
-      hypre_StructVectorGridBoxCopy(x, i, loop_box);
+      hypre_StructVectorBoxCopy(x, i, loop_box);
       start = hypre_BoxIMin(loop_box);
 
-      x_data_box = hypre_StructVectorGridDataBox(x, i);
-      y_data_box = hypre_StructVectorGridDataBox(y, i);
-      z_data_box = hypre_StructVectorGridDataBox(z, i);
+      x_data_box = hypre_StructVectorBoxDataBox(x, i);
+      y_data_box = hypre_StructVectorBoxDataBox(y, i);
+      z_data_box = hypre_StructVectorBoxDataBox(z, i);
 
-      xp = hypre_StructVectorGridData(x, i);
-      yp = hypre_StructVectorGridData(y, i);
-      zp = hypre_StructVectorGridData(z, i);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
+      zp = hypre_StructVectorBoxData(z, i);
 
       hypre_BoxGetSize(loop_box, loop_size);
 
@@ -167,9 +167,9 @@ hypre_StructVectorPointwiseDivpy( HYPRE_Complex       alpha,
       box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      xdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      ydbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-      zdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(z), i);
+      xdbox = hypre_StructVectorBoxDataBox(x, i);
+      ydbox = hypre_StructVectorBoxDataBox(y, i);
+      zdbox = hypre_StructVectorBoxDataBox(z, i);
 
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);

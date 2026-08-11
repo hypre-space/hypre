@@ -31,7 +31,7 @@ hypre_StructMatvecCompute_core_ICC( hypre_StructMatrix *A,
                                     HYPRE_Int          *entries,
                                     hypre_Index        *stencil_shape,
                                     hypre_IndexRef      loop_size,
-                                    hypre_IndexRef      xfstride,
+                                    hypre_IndexRef      dom_stride,
                                     hypre_IndexRef      start,
                                     hypre_IndexRef      xdstart,
                                     hypre_IndexRef      ydstart,
@@ -45,6 +45,7 @@ hypre_StructMatvecCompute_core_ICC( hypre_StructMatrix *A,
 {
 #define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8,Ap9,Ap10,Ap11,Ap12,Ap13,Ap14,Ap15,Ap16,Ap17,Ap18,Ap19,Ap20,Ap21,Ap22,Ap23,Ap24,Ap25,Ap26)
    HYPRE_UNUSED_VAR(nentries);
+   HYPRE_UNUSED_VAR(x);
    HYPRE_DECLARE_OFFSETS_UP_TO_26;
    HYPRE_DECLARE_OFFSETS(26);
    hypre_Index    offset;

@@ -118,7 +118,10 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_IndexDInBox(index, d, box) \
 ( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
   hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
+
 #define hypre_BoxSpanIndex(box, index)\
+HYPRE_DIAGNOSTIC_PUSH \
+HYPRE_DIAGNOSTIC_IGNORE_WSHADOW \
 {\
    HYPRE_Int d;\
    for (d = 0; d < hypre_BoxNDim(box); d++)\
@@ -128,7 +131,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
       hypre_BoxIMaxD(box, d) =\
          hypre_max(hypre_BoxIMaxD(box, d), hypre_IndexD(index, d));\
    }\
-}
+} \
+HYPRE_DIAGNOSTIC_POP
 
 /* The first hypre_CCBoxIndexRank is better style because it is similar to
    hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
@@ -223,20 +227,23 @@ else\
    hypre__mod = 0;\
 }
 
-#define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
+#define zypre_BoxLoopInitK(k, dboxk, startk, stridek) \
+{\
+HYPRE_Int  hypre__ik;\
 hypre__sk##k[0] = stridek[0];\
 hypre__ikinc##k[0] = 0;\
-ik = hypre_BoxSizeD(dboxk, 0); /* temporarily use ik */\
+hypre__ik = hypre_BoxSizeD(dboxk, 0);\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__sk##k[hypre__d] = ik*stridek[hypre__d];\
+   hypre__sk##k[hypre__d] = hypre__ik*stridek[hypre__d];\
    hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
       hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
-   ik *= hypre_BoxSizeD(dboxk, hypre__d);\
+   hypre__ik *= hypre_BoxSizeD(dboxk, hypre__d);\
 }\
 hypre__i0inc##k = hypre__sk##k[0];\
 hypre__ikinc##k[hypre__ndim] = 0;\
-hypre__ikstart##k = hypre_BoxIndexRank(dboxk, startk)
+hypre__ikstart##k = hypre_BoxIndexRank(dboxk, startk);\
+}
 
 #define zypre_BoxLoopSet() \
 hypre__IN = hypre__n[0];\

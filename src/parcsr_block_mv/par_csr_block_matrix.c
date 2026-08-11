@@ -200,7 +200,7 @@ hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
    local_num_nonzeros = (HYPRE_Real) diag_i[local_num_rows] + (HYPRE_Real) offd_i[local_num_rows];
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
-   hypre_ParCSRBlockMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+   hypre_ParCSRBlockMatrixDNumNonzeros(matrix) = (hypre_double)total_num_nonzeros;
 
    return ierr;
 }

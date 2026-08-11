@@ -356,6 +356,42 @@ HYPRE_Generate2DSystem( HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2, HYPRE_
    return HYPRE_Generate2DSystem_pre( precision, H_L1, H_L2, H_b1, H_b2, H_x1, H_x2, M_vals );
 }
 
+/*--------------------------------------------------------------------------*/
+
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A, HYPRE_Int copy_data )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixClone_pre( precision, A, copy_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, HYPRE_Int copy_data )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixCopy_pre( precision, A, B, copy_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParCSRMatrix *
+hypre_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows, HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in, HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixCreate_pre( precision, comm, global_num_rows, global_num_cols, row_starts_in, col_starts_in, num_cols_offd, num_nonzeros_diag, num_nonzeros_offd );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return hypre_ParCSRMatrixInitialize_v2_pre( precision, matrix, memory_location );
+}
+
 
 #endif
 

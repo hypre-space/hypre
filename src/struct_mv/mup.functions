@@ -66,5 +66,4 @@ HYPRE_StructVectorSetBoxValues2
 HYPRE_StructVectorSetConstantValues
 HYPRE_StructVectorSetNumGhost
 HYPRE_StructVectorSetRandomValues
-HYPRE_StructVectorSetStride
 HYPRE_StructVectorSetValues

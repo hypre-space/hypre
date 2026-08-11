@@ -478,6 +478,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixSortColMapOffd(hypre_ParCSRMatrix *A);
 
 /* par_csr_matrix_stats.c */
+HYPRE_Int hypre_ParCSRMatrixStatsComputeLocal( hypre_ParCSRMatrix *A,
+                                               hypre_MatrixStats *stats );
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );

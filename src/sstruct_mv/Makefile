@@ -42,7 +42,6 @@ FILES =\
  sstruct_axpy.c\
  sstruct_copy.c\
  sstruct_graph.c\
- sstruct_grid.c\
  sstruct_innerprod.c\
  sstruct_matvec.c\
  sstruct_matmult.c\
@@ -51,6 +50,7 @@ FILES =\
  sstruct_stencil.c
 
 CUFILES =\
+ sstruct_grid.c\
  sstruct_matrix.c\
  sstruct_vector.c
 
@@ -117,4 +117,4 @@ libHYPRE_sstruct_mv.so libHYPRE_sstruct_mv.dylib: ${OBJS}
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s -f ${SONAME} $@
 
-${OBJS}: ${HEADERS}
+${OBJS}: ${HEADERS} ${HYPRE_SRC_TOP_DIR}/HYPRE_config.h
