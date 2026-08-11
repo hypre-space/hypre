@@ -1329,14 +1329,6 @@ hypre_ParVectorAxpyz( HYPRE_Complex alpha, hypre_ParVector *x, HYPRE_Complex bet
 /*--------------------------------------------------------------------------*/
 
 hypre_ParVector *
-hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCloneDeep_v2)( x, memory_location );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParVector *
 hypre_ParVectorCloneShallow( hypre_ParVector *x )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCloneShallow)( x );
@@ -1348,14 +1340,6 @@ HYPRE_Int
 hypre_ParVectorCopy( hypre_ParVector *x, hypre_ParVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCopy)( x, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParVector *
-hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCreate)( comm, global_size, partitioning_in );
 }
 
 /*--------------------------------------------------------------------------*/
