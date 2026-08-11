@@ -1633,8 +1633,6 @@ hypreGPUKernel_StructMatrixSetArrayValues( hypre_DeviceItem  &item,
    HYPRE_Int ndim = grid_box.ndim;
    HYPRE_Int my_index[3];
    HYPRE_Int  i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-   /* Note: can pass values = NULL to set to 0.0 */
-   HYPRE_Complex val = values ? values[i] : 0.0;
 
    /* Only operate on one stencil index at a time */
    if (i < nvalues && stencil_indices[i] == set_stencil_index)
@@ -1647,7 +1645,8 @@ hypreGPUKernel_StructMatrixSetArrayValues( hypre_DeviceItem  &item,
       /* Set value in the grid box */
       if (hypre_IndexInBoxDevice(my_index, grid_box))
       {
-         mat_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = val;
+         /* Note: can pass values = NULL to set to 0.0 */
+         mat_box_data[ hypre_BoxIndexRankDevice(data_box, my_index) ] = values ? values[i] : 0.0;
          done = 1;
       }
 

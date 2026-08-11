@@ -1362,22 +1362,14 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
                                                  vars[entry], &boxman_entry);
          }
 
-         /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad entries? */
          if (boxman_entry == NULL)
          {
-            /* WM: todo - I am allowing for col indices that reach outside the grid and just skip these...?
-             *            Do we want to do this? Makes it easier for the user at boundary conditions? That is,
+            /* WM: note - I am allowing for col indices that reach outside the grid. These will be skipped.
+             *            This can make it easier for the user at boundary conditions. That is,
              *            when looping over the box, the stencils will look different at the boundary, but they
              *            can just pass the same stencil as the interior, and we will skip the invalid entries here.
-             *            But also silently skips potentially "bad" arguments from the user... */
+             *            But this also silently skips potentially "bad" arguments from the user... maybe revisit. */
             skip_val_h[i] = 1;
-            /* hypre_error_in_arg(1); */
-            /* hypre_error_in_arg(2); */
-            /* hypre_error_in_arg(5); */
-
-            /* HYPRE_ANNOTATE_FUNC_END; */
-
-            /* return hypre_error_flag; */
          }
          else
          {
@@ -1391,12 +1383,9 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
          entry -= size;
          hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
 
-         /* WM: todo - is this good error handling? What do we want the code to do if we are getting bad entries? */
          if (Uverank < 0)
          {
-            hypre_error_in_arg(1);
-            hypre_error_in_arg(2);
-            hypre_error_in_arg(5);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-stencil entry not found in SStruct Graph.");
 
             HYPRE_ANNOTATE_FUNC_END;
 
@@ -1460,6 +1449,7 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    hypre_TFree(rows, memory_location);
    hypre_TFree(cols, memory_location);
    hypre_TFree(skip_val, memory_location);
+   hypre_TFree(ncols, memory_location);
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       hypre_TFree(skip_val_h, HYPRE_MEMORY_HOST);
@@ -2374,7 +2364,6 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    hypre_SStructGraph   *graph = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid    *grid  = hypre_SStructGraphGrid(graph);
    HYPRE_Int           **nvneighbors = hypre_SStructGridNVNeighbors(grid);
-   HYPRE_Int            *smap;
    HYPRE_Int             nSentries;
    HYPRE_Int             nUentries;
    HYPRE_Int            *Sindexes;
@@ -2383,8 +2372,10 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    HYPRE_Int            *Uentries;
    HYPRE_Complex        *Svalues;
    HYPRE_Complex        *Uvalues;
-   hypre_SStructPMatrix *pmatrix;
-   hypre_StructMatrix   *smatrix;
+   hypre_SStructPMatrix *pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+   HYPRE_Int            *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
+   /* WM: note that for now, assuming connections are only between same variable type */
+   hypre_StructMatrix   *smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
 
    HYPRE_Int            *Sentries_h;
    HYPRE_Int            *struct_stencil_indices;
@@ -2409,12 +2400,6 @@ hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix,
    /* S-matrix */
    if (nSentries > 0)
    {
-      /* WM: todo */
-      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
-      smap    = hypre_SStructPMatrixSMap(pmatrix, var);
-      /* WM: todo - for now, assuming connections are only between same variable type */
-      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-
       /* WM: todo - for now, doing the smap stuff on the host... */
       Sentries_h = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_HOST);
       struct_stencil_indices = hypre_TAlloc(HYPRE_Int, nSentries, HYPRE_MEMORY_DEVICE);
@@ -2719,8 +2704,10 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    HYPRE_MemoryLocation     memloc     = hypre_IJMatrixMemoryLocation(ij_matrix);
 
    hypre_SStructVariable    tovartype;
-   hypre_StructMatrix      *smatrix;
-   hypre_Box               *set_box, *box, *ibox0, *ibox1, *ibox2, *tobox, *frbox;
+   /* WM: note that for now, we assume that all inter-variable connections in parcsr, so the */
+   /*     only smatrix we consider here is connections from var to var */
+   hypre_StructMatrix      *smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+   hypre_Box               *set_box, *box, *ibox0, *ibox1, *tobox, *frbox;
    hypre_IndexRef           offset;
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
@@ -2742,7 +2729,6 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    box       = hypre_BoxCreate(ndim);
    ibox0     = hypre_BoxCreate(ndim);
    ibox1     = hypre_BoxCreate(ndim);
-   ibox2     = hypre_BoxCreate(ndim);
    tobox     = hypre_BoxCreate(ndim);
    frbox     = hypre_BoxCreate(ndim);
 
@@ -2768,7 +2754,6 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
       entry  = entries_h[i];
       offset = shape[entry];
       tovartype = hypre_SStructPGridVarType(pgrid, vars[entry]);
-      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, vars[entry]);
 
       /* Copy index to a box to take advantage of existing box algebra fom SetInterPartValues */
       for (d = 0; d < ndim; d++)
@@ -2934,10 +2919,10 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    } /* end if action */
 
    /* Free memory */
+   hypre_BoxDestroy(set_box);
    hypre_BoxDestroy(box);
    hypre_BoxDestroy(ibox0);
    hypre_BoxDestroy(ibox1);
-   hypre_BoxDestroy(ibox2);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
    if (hypre_GetActualMemLocation(memloc) != hypre_MEMORY_HOST)
