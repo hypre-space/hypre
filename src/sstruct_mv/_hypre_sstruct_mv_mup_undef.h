@@ -42,12 +42,14 @@
 #undef HYPRE_SStructInnerProd
 #undef HYPRE_SStructMatrixAddFEMBoxValues
 #undef HYPRE_SStructMatrixAddFEMValues
+#undef HYPRE_SStructMatrixAddToArrayValues
 #undef HYPRE_SStructMatrixAddToBoxValues
 #undef HYPRE_SStructMatrixAddToBoxValues2
 #undef HYPRE_SStructMatrixAddToValues
 #undef HYPRE_SStructMatrixAssemble
 #undef HYPRE_SStructMatrixCreate
 #undef HYPRE_SStructMatrixDestroy
+#undef HYPRE_SStructMatrixGetArrayValues
 #undef HYPRE_SStructMatrixGetBoxValues
 #undef HYPRE_SStructMatrixGetBoxValues2
 #undef HYPRE_SStructMatrixGetFEMValues
@@ -60,6 +62,7 @@
 #undef HYPRE_SStructMatrixPrint
 #undef HYPRE_SStructMatrixRead
 #undef HYPRE_SStructMatrixScale
+#undef HYPRE_SStructMatrixSetArrayValues
 #undef HYPRE_SStructMatrixSetBoxValues
 #undef HYPRE_SStructMatrixSetBoxValues2
 #undef HYPRE_SStructMatrixSetConstantEntries
@@ -78,6 +81,7 @@
 #undef HYPRE_SStructStencilSetEntry
 #undef HYPRE_SStructVectorAddFEMBoxValues
 #undef HYPRE_SStructVectorAddFEMValues
+#undef HYPRE_SStructVectorAddToArrayValues
 #undef HYPRE_SStructVectorAddToBoxValues
 #undef HYPRE_SStructVectorAddToBoxValues2
 #undef HYPRE_SStructVectorAddToValues
@@ -87,6 +91,7 @@
 #undef HYPRE_SStructVectorCreate
 #undef HYPRE_SStructVectorDestroy
 #undef HYPRE_SStructVectorGather
+#undef HYPRE_SStructVectorGetArrayValues
 #undef HYPRE_SStructVectorGetBoxValues
 #undef HYPRE_SStructVectorGetBoxValues2
 #undef HYPRE_SStructVectorGetFEMValues
@@ -98,6 +103,7 @@
 #undef HYPRE_SStructVectorPrintGLVis
 #undef HYPRE_SStructVectorRead
 #undef HYPRE_SStructVectorScale
+#undef HYPRE_SStructVectorSetArrayValues
 #undef HYPRE_SStructVectorSetBoxValues
 #undef HYPRE_SStructVectorSetBoxValues2
 #undef HYPRE_SStructVectorSetConstantValues
