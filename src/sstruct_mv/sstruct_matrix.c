@@ -1299,7 +1299,8 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
    rows_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
    cols_h = hypre_TAlloc(HYPRE_BigInt, nvalues, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
    /* Loop over indexes/entries and get row/col for IJ matrix */
    for (i = 0; i < nvalues; i++)
@@ -2876,7 +2877,8 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    tlocations_h = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
    indexes_h = hypre_TAlloc(HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST);
    entries_h = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(indexes_h, indexes, HYPRE_Int, ndim * nvalues, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(entries_h, entries, HYPRE_Int, nvalues, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    for (i = 0; i < nvalues; i++)
@@ -2967,7 +2969,8 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 
    /* Copy tlocations to GPU */
    tlocations = hypre_TAlloc(HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tlocations, tlocations_h, HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(tlocations, tlocations_h, HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_HOST);
 
    /* Copy from indexes/entries/values into tindexes/tentries/tvalues */
    tindexes = hypre_TAlloc(HYPRE_Int, ndim * ntvalues, HYPRE_MEMORY_DEVICE);

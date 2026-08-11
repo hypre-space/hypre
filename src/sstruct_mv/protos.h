@@ -182,10 +182,13 @@ HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix, HYPRE_Int p
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                            hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                            HYPRE_Complex *values, HYPRE_Int action );
-HYPRE_Int hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes,
+HYPRE_Int hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix, HYPRE_Int part,
+                                                      HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes,
                                                       HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int *nSentries_out, HYPRE_Int *nUentries_out,
-                                                      HYPRE_Int **Sindexes_out, HYPRE_Int **Uindexes_out, HYPRE_Int **Sentries_out, HYPRE_Int **Uentries_out,
-                                                      HYPRE_Complex **Svalues_out, HYPRE_Complex **Uvalues_out, HYPRE_Int **Sentry_locations, HYPRE_Int **Uentry_locations  );
+                                                      HYPRE_Int **Sindexes_out, HYPRE_Int **Uindexes_out, HYPRE_Int **Sentries_out,
+                                                      HYPRE_Int **Uentries_out,
+                                                      HYPRE_Complex **Svalues_out, HYPRE_Complex **Uvalues_out, HYPRE_Int **Sentry_locations,
+                                                      HYPRE_Int **Uentry_locations  );
 HYPRE_Int hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                                    HYPRE_Int var, HYPRE_Int nvalues,
                                                    HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );

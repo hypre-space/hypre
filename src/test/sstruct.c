@@ -4379,7 +4379,6 @@ main( hypre_int argc,
                                    HYPRE_MEMORY_HOST, memory_location);
                for (i = 0; i < data.stencil_sizes[s] * set_array_box_volume; i++)
                {
-                  hypre_printf("WM: debug - i = %d, h_values_get = %e, h_values = %e\n", i, h_values_get[i], h_values[i]);
                   hypre_assert(h_values_get[i] == h_values[i]);
                }
                hypre_TFree(h_values_get, HYPRE_MEMORY_HOST);
