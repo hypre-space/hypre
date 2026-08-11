@@ -49,7 +49,11 @@ hypre_BoxIndexRankDevice( hypre_Box    box,
       rank += (index[d] - box.imin[d]) * size;
       /* WM: todo - make hypre_BoxSizeDevice() subroutine? */
       /* size *= hypre_BoxSizeD(box, d); */
+#if defined(HYPRE_USING_SYCL)
+      size *= sycl::max(0, box.imax[d] - box.imin[d] + 1);
+#else
       size *= max(0, box.imax[d] - box.imin[d] + 1);
+#endif
    }
 
    return rank;

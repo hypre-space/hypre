@@ -1399,7 +1399,38 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    values_set = hypre_TAlloc(HYPRE_Complex, nvalues_set, HYPRE_MEMORY_DEVICE);
    ncols = hypre_TAlloc(HYPRE_Int, nvalues_set, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo */
+   if (action < 0)
+   {
+      scatter_locations = hypre_TAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
+      hypre_SequenceSycl( scatter_locations,
+                          scatter_locations + nvalues,
+                          0 );
+      hypre_CopyIfSycl( oneapi::dpl::make_zip_iterator(values, scatter_locations),
+                        oneapi::dpl::make_zip_iterator(values, scatter_locations) + nvalues,
+                        skip_val,
+                        oneapi::dpl::make_zip_iterator(values_set, scatter_locations),
+                        equal<HYPRE_Int>(0) );
+      HYPRE_ONEDPL_CALL( oneapi::dpl::sort_by_key,
+                         oneapi::dpl::make_zip_iterator(rows, scatter_locations),
+                         oneapi::dpl::make_zip_iterator(rows, scatter_locations) + nvalues_set,
+                         oneapi::dpl::make_zip_iterator(cols, values_set) );
+   }
+   hypre_CopyIfSycl( values,
+                     values + nvalues,
+                     skip_val,
+                     values_set,
+                     equal<HYPRE_Int>(0) );
+   HYPRE_ONEDPL_CALL( oneapi::dpl::sort_by_key,
+                      rows,
+                      rows + nvalues_set,
+                      oneapi::dpl::make_zip_iterator(cols, values_set) );
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     rows,
+                                     rows + nvalues_set,
+                                     dpct::make_constant_iterator(1),
+                                     rows,
+                                     ncols );
+   nrows = new_end.first - rows;
 #else
    if (action < 0)
    {
@@ -1451,15 +1482,18 @@ hypre_SStructUMatrixSetArrayValuesDevice( hypre_SStructMatrix *matrix,
    {
       HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values_set);
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo */
+      hypre_ScatterSycl( values_set,
+                         values_set + nvalues_set,
+                         scatter_locations,
+                         values );
 #else
       HYPRE_THRUST_CALL( scatter,
                          values_set,
                          values_set + nvalues_set,
                          scatter_locations,
                          values );
-      hypre_TFree(scatter_locations, HYPRE_MEMORY_DEVICE);
 #endif
+      hypre_TFree(scatter_locations, HYPRE_MEMORY_DEVICE);
    }
 
    hypre_TFree(values_set, HYPRE_MEMORY_DEVICE);
@@ -2259,7 +2293,38 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
    HYPRE_Int *entries_split_arr = hypre_CTAlloc(HYPRE_Int, nvalues, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo */
+   /* If entries[i] >= hypre_SStructStencilSize(stencil), then it is a Uentry */
+   HYPRE_Int stencil_size = hypre_SStructStencilSize(stencil);
+   hypre_TransformIfSycl(entries_split_arr,
+                         entries_split_arr + nvalues,
+                         entries,
+                         entries_split_arr,
+   [] (const auto & x) {return 1;},
+   [stencil_size] (const auto & x) {return x >= stencil_size;} );
+   /* If entries[i] == entry, where split[entry] < 0, then it is a Uentry */
+   for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+   {
+      if (split[entry] < 0)
+      {
+         hypre_TransformIfSycl(entries_split_arr,
+                               entries_split_arr + nvalues,
+                               entries,
+                               entries_split_arr,
+         [] (const auto & x) {return 1;},
+         [entry] (const auto & x) {return x == entry;} );
+      }
+   }
+   /* Get locations (indices) in the array where Sentries and Uentries live */
+   auto Sentries_locations_end = hypre_CopyIfSycl( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                                                   oneapi::dpl::counting_iterator<HYPRE_Int>(0) + nvalues,
+                                                   entries_split_arr,
+                                                   Sentry_locations,
+                                                   equal<HYPRE_Int>(0) );
+   auto Uentries_locations_end = hypre_CopyIfSycl( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                                                   oneapi::dpl::counting_iterator<HYPRE_Int>(0) + nvalues,
+                                                   entries_split_arr,
+                                                   Uentry_locations,
+                                                   equal<HYPRE_Int>(1) );
 #else
    /* If entries[i] >= hypre_SStructStencilSize(stencil), then it is a Uentry */
    HYPRE_THRUST_CALL(replace_if, entries_split_arr, entries_split_arr + nvalues, entries,
@@ -2310,7 +2375,29 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
    HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nUentries, indexes,
                      Uentry_locations, Uindexes );
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo */
+   /* Copy from entries into Sentries and Uentries */
+   hypre_CopyIfSycl( entries,
+                     entries + nvalues,
+                     entries_split_arr,
+                     Sentries,
+                     equal<HYPRE_Int>(0) );
+   hypre_CopyIfSycl( entries,
+                     entries + nvalues,
+                     entries_split_arr,
+                     Uentries,
+                     equal<HYPRE_Int>(1) );
+
+   /* Copy from values into Svalues and Uvalues */
+   hypre_CopyIfSycl( values,
+                     values + nvalues,
+                     entries_split_arr,
+                     Svalues,
+                     equal<HYPRE_Int>(0) );
+   hypre_CopyIfSycl( values,
+                     values + nvalues,
+                     entries_split_arr,
+                     Uvalues,
+                     equal<HYPRE_Int>(1) );
 #else
    /* Copy from entries into Sentries and Uentries */
    HYPRE_THRUST_CALL( copy_if,
@@ -2887,7 +2974,14 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
    tentries = hypre_TAlloc(HYPRE_Int, ntvalues, HYPRE_MEMORY_DEVICE);
    tvalues = hypre_TAlloc(HYPRE_Complex, ntvalues, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo */
+   hypre_GatherSycl( tlocations,
+                     tlocations + ntvalues,
+                     entries,
+                     tentries );
+   hypre_GatherSycl( tlocations,
+                     tlocations + ntvalues,
+                     values,
+                     tvalues );
 #else
    HYPRE_THRUST_CALL( gather,
                       tlocations,
@@ -2910,7 +3004,10 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
       /* set or add */
       /* copy values into tvalues */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo */
+      hypre_GatherSycl( tlocations,
+                        tlocations + ntvalues,
+                        values,
+                        tvalues );
 #else
       HYPRE_THRUST_CALL( gather,
                          tlocations,
@@ -2950,7 +3047,10 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 
       /* copy tvalues into values */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo */
+      hypre_ScatterSycl( tvalues,
+                         tvalues + ntvalues,
+                         tlocations,
+                         values );
 #else
       HYPRE_THRUST_CALL( scatter,
                          tvalues,
