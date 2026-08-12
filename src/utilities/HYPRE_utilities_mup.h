@@ -247,6 +247,15 @@ HYPRE_Int
 HYPRE_SetMemoryLocation( HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
+HYPRE_SetNumThreads_flt( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads_dbl( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads_long_dbl( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads( HYPRE_Int num_threads );
+
+HYPRE_Int
 HYPRE_SetPrintErrorMode_flt( HYPRE_Int mode );
 HYPRE_Int
 HYPRE_SetPrintErrorMode_dbl( HYPRE_Int mode );
@@ -421,6 +430,9 @@ HYPRE_SetLogLevel_pre( HYPRE_Precision precision, HYPRE_Int log_level );
 
 HYPRE_Int
 HYPRE_SetMemoryLocation_pre( HYPRE_Precision precision, HYPRE_MemoryLocation memory_location );
+
+HYPRE_Int
+HYPRE_SetNumThreads_pre( HYPRE_Precision precision, HYPRE_Int num_threads );
 
 HYPRE_Int
 HYPRE_SetPrintErrorMode_pre( HYPRE_Precision precision, HYPRE_Int mode );

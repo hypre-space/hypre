@@ -691,6 +691,9 @@ hypre_CSRMatrixCopy_mp( hypre_CSRMatrix *A, hypre_CSRMatrix *B);
 
 hypre_CSRMatrix*
 hypre_CSRMatrixClone_mp( hypre_CSRMatrix *A, HYPRE_Precision new_precision );
+
+hypre_Vector*
+hypre_SeqVectorClone_mp( hypre_Vector *x, HYPRE_Precision new_precision);
 #endif
 
 #ifdef __cplusplus

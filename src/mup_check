@@ -27,15 +27,34 @@ fi
 if [ $# -eq 1 ]; then
     case "$1" in
         --cuda)
-            opts="$opts --without-umpire --with-cuda"
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-cuda
+            )
             check_type="GPU"
             ;;
         --hip)
-            opts="$opts --without-umpire --with-hip"
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-hip 
+                --with-MPI-include=${MPICH_DIR}/include
+                --with-MPI-lib-dirs=${MPICH_DIR}/lib 
+                --with-MPI-libs=mpi 
+                --with-gpu-arch='gfx90a' 
+                CC=cc 
+                CXX=CC
+            )
             check_type="GPU"
             ;;
         --sycl)
-            opts="$opts --without-umpire --with-sycl --with-extra-CUFLAGS=-w"
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-sycl 
+                --with-extra-CUFLAGS=-w
+            )
             check_type="GPU"
             ;;
         -h|--help)
@@ -75,7 +94,7 @@ DIRS="\
 # RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
 # but this caused some problems for me when I tried it.  Sort out later.
 make distclean
-./configure $opts
+./configure "${opts[@]}"
 make -s -j
 
 echo -e "********************"

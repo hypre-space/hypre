@@ -40,6 +40,7 @@
 #define HYPRE_SetGpuAwareMPI HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetGpuAwareMPI )
 #define HYPRE_SetLogLevel HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetLogLevel )
 #define HYPRE_SetMemoryLocation HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetMemoryLocation )
+#define HYPRE_SetNumThreads HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetNumThreads )
 #define HYPRE_SetPrintErrorMode HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetPrintErrorMode )
 #define HYPRE_SetPrintErrorVerbosity HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetPrintErrorVerbosity )
 #define HYPRE_SetSpGemmUseVendor HYPRE_MULTIPRECISION_FUNC ( HYPRE_SetSpGemmUseVendor )
