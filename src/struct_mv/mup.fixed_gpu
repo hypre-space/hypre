@@ -1,0 +1,2 @@
+hypre_BoxRanksToIndexesDevice
+hypre_GPUKernelBoxRanksToIndexes
