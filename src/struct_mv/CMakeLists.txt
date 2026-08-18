@@ -44,7 +44,6 @@ set(REGULAR_SRCS
   box_algebra.c
   box_boundary.c
   box.c
-  box_device.c
   box_ds.c
   box_manager.c
   coarsen.c
@@ -85,11 +84,17 @@ set(MUP_SRCS
   struct_mv_mp.c
 )
 
+# Precision-independent GPU sources: not in the MUP rename lists, so they must
+# be compiled once or HIP shared builds emit duplicate kernel/host symbols.
+set(COMMON_SRCS
+  box_device.c
+)
+
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("struct_mv" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${COMMON_SRCS} ${HDRS})
 else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
+  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${COMMON_SRCS} ${HDRS})
 endif()
 
 if (HYPRE_USING_GPU)
