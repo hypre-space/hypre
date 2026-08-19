@@ -2587,6 +2587,7 @@ fi
 
 if test "x$hypre_using_umpire" = "xyes"
 then
+   HYPRE_USING_UMPIRE=1
    AC_DEFINE(HYPRE_USING_UMPIRE, 1, [Define to 1 if using UMPIRE])
    if test "x$HYPRE_UMPIRE_RPATH" != "x"
    then
@@ -2610,6 +2611,8 @@ Provide the following flags as appropriate:
 To opt out (not recommended), configure with --without-umpire.
 ===============================================================])
    fi
+else
+   HYPRE_USING_UMPIRE=0
 fi
 
 dnl *********************************************************************
@@ -3131,6 +3134,7 @@ AC_SUBST(HYPRE_KOKKOS_LIB)
 dnl *********************************************************************
 dnl * UMPIRE information
 dnl *********************************************************************
+AC_SUBST(HYPRE_USING_UMPIRE)
 AC_SUBST(HYPRE_UMPIRE_LIB_DIR)
 AC_SUBST(HYPRE_UMPIRE_INCLUDE)
 AC_SUBST(HYPRE_UMPIRE_LIB)

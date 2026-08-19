@@ -67,7 +67,6 @@ set(REGULAR_SRCS
   struct_communication.c
   struct_copy.c
   struct_data.c
-  struct_grid.c
   struct_innerprod.c
   struct_matrix.c
   struct_matop.c
@@ -84,13 +83,6 @@ set(MUP_SRCS
   mup_pre.c
   struct_mv_mp.c
 )
-
-if(HYPRE_ENABLE_MIXED_PRECISION)
-  setup_mixed_precision_compilation("struct_mv" SRCS "${REGULAR_SRCS}")
-  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
-else()
-  target_sources(${PROJECT_NAME} PRIVATE ${REGULAR_SRCS} ${HDRS})
-endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
@@ -127,6 +119,15 @@ if (HYPRE_USING_GPU)
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
+
+set(COMPILED_SRCS ${REGULAR_SRCS})
+
+if(HYPRE_ENABLE_MIXED_PRECISION)
+  setup_mixed_precision_compilation("struct_mv" SRCS "${COMPILED_SRCS}")
+  target_sources(${PROJECT_NAME} PRIVATE ${MUP_SRCS} ${HDRS})
+else()
+  target_sources(${PROJECT_NAME} PRIVATE ${COMPILED_SRCS} ${HDRS})
+endif()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)
