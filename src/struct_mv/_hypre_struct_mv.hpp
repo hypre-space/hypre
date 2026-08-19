@@ -8,7 +8,7 @@
 #include "_hypre_utilities.hpp"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "_hypre_IJ_mv_mup_def.h"
+#include "_hypre_struct_mv_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -1644,9 +1644,9 @@ else                                                            \
  * second header file.  The second header contains all the prototypes needed by
  * users for mixed precision. */
 #ifndef hypre_MP_BUILD
-#include "_hypre_IJ_mv_mup_undef.h"
-#include "_hypre_IJ_mv_mup.h"
-#include "_hypre_IJ_mv_mup.hpp"
+#include "_hypre_struct_mv_mup_undef.h"
+#include "_hypre_struct_mv_mup.h"
+#include "_hypre_struct_mv_mup.hpp"
 #endif
 #endif
 
