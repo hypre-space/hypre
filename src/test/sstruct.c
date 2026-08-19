@@ -35,7 +35,7 @@
 
 char infile_default[50] = "sstruct.in.default";
 
-typedef HYPRE_Int Index[3];
+typedef HYPRE_Int Index[HYPRE_MAXDIM];
 
 /*------------------------------------------------------------
  * ProblemIndex:
