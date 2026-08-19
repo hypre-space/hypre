@@ -24,6 +24,8 @@ extern "C++" {
 
 /* WM: todo - Naming convention for device subroutines?
  *            Is this something we do elsewhere in the code? */
+/* WM: todo - passing the Box struct by value does not seemt to */
+/*            work as expected with the sycl backend on Aurora */
 static __device__ __forceinline__
 HYPRE_Int
 hypre_IndexInBoxDevice( HYPRE_Int    *index,

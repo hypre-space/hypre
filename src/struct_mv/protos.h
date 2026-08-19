@@ -134,9 +134,6 @@ HYPRE_Int hypre_BoxArrayArrayPrint ( MPI_Comm comm, const char *filename,
 
 /* box_device.c */
 #if defined(HYPRE_USING_GPU)
-/* WM: todo - figure out how to correctly make device subroutines available via header files */
-/* HYPRE_Int hypre_IndexInBoxDevice( HYPRE_Int *index, hypre_Box *box ); */
-/* HYPRE_Int hypre_BoxIndexRankDevice( hypre_Box *box, HYPRE_Int *index ); */
 HYPRE_Int hypre_BoxRanksToIndexesDevice( hypre_Box *box, HYPRE_Int num_ranks,
                                          HYPRE_Int *ranks, HYPRE_Int ***indexes_ptr );
 #endif

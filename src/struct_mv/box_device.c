@@ -11,7 +11,7 @@
 #if defined(HYPRE_USING_GPU)
 
 /* Need struct wrapper to pass hypre_Index as argument to GPU kernel */
-/* WM: todo - move this somewhere accessible by multiple files? */
+/* WM: todo - remove hypre_IndexDevice_struct and just pass the Box instead */
 typedef struct hypre_IndexDevice_struct
 {
    hypre_Index idx;

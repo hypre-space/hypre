@@ -2689,8 +2689,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
          hypre_BoxManEntryGetExtents(toentries[toi],
                                      hypre_BoxIMin(tobox),
                                      hypre_BoxIMax(tobox));
-         /* Why does this intersection work? If the tobox lives in another part, why would their intersection be meaningful?
-          * I guess in the case where it is in another part, the indexing is still relative to this part? */
          hypre_IntersectBoxes(box, tobox, ibox0);
          if (hypre_BoxVolume(ibox0))
          {
