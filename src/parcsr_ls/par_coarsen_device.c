@@ -428,21 +428,47 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
-   /* graph_diag consists points with CF_marker_diag == 0 */
+   /* graph_diag consists of points with CF_marker_diag == 0.
+    * For CF_init == 1 (HMIS), C-points retained from the first coarsening pass
+    * are also kept in the initial graph, as in the host code, so that the first
+    * C/F update pass clears their measures */
 #if defined(HYPRE_USING_SYCL)
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   new_end = hypre_RemoveCopyIfSycl( count,
-                                     count + num_rows_diag,
-                                     CF_marker_diag,
-                                     graph_diag,
-   [] (const auto & x) {return x;} );
+   if (CF_init == 1)
+   {
+      new_end = hypre_RemoveCopyIfSycl( count,
+                                        count + num_rows_diag,
+                                        CF_marker_diag,
+                                        graph_diag,
+                                        is_negative<HYPRE_Int>() );
+   }
+   else
+   {
+      new_end = hypre_RemoveCopyIfSycl( count,
+                                        count + num_rows_diag,
+                                        CF_marker_diag,
+                                        graph_diag,
+      [] (const auto & x) {return x;} );
+   }
 #else
-   new_end = HYPRE_THRUST_CALL( remove_copy_if,
-                                thrust::make_counting_iterator(0),
-                                thrust::make_counting_iterator(num_rows_diag),
-                                CF_marker_diag,
-                                graph_diag,
-                                HYPRE_THRUST_IDENTITY(HYPRE_Int));
+   if (CF_init == 1)
+   {
+      new_end = HYPRE_THRUST_CALL( remove_copy_if,
+                                   thrust::make_counting_iterator(0),
+                                   thrust::make_counting_iterator(num_rows_diag),
+                                   CF_marker_diag,
+                                   graph_diag,
+                                   is_negative<HYPRE_Int>());
+   }
+   else
+   {
+      new_end = HYPRE_THRUST_CALL( remove_copy_if,
+                                   thrust::make_counting_iterator(0),
+                                   thrust::make_counting_iterator(num_rows_diag),
+                                   CF_marker_diag,
+                                   graph_diag,
+                                   HYPRE_THRUST_IDENTITY(HYPRE_Int));
+   }
 #endif
 
    *graph_diag_size = new_end - graph_diag;
