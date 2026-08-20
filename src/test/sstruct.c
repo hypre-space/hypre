@@ -477,6 +477,7 @@ ReadData( MPI_Comm      comm,
 
    data.memory_location = memory_location;
    data.max_boxsize = 0;
+   data.max_stencil_size = 1;
    data.numghost = NULL;
    data.nstencils = 0;
    data.rhs_true = 0;
@@ -675,7 +676,6 @@ ReadData( MPI_Comm      comm,
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
                hypre_MPI_Abort(comm, -1);
             }
-            data.max_stencil_size = 1;
             data.nstencils = (HYPRE_Int) strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int,  data.nstencils, HYPRE_MEMORY_HOST);
             data.stencil_offsets = hypre_CTAlloc(Index *,  data.nstencils, HYPRE_MEMORY_HOST);
