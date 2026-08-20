@@ -533,5 +533,7 @@
 #define hypre_structvectorsetnumghost HYPRE_FIXEDPRECISION_FUNC ( hypre_structvectorsetnumghost )
 #define hypre_structvectorsetrandomvalu HYPRE_FIXEDPRECISION_FUNC ( hypre_structvectorsetrandomvalu )
 #define hypre_structvectorsetvalues HYPRE_FIXEDPRECISION_FUNC ( hypre_structvectorsetvalues )
+#define hypre_BoxRanksToIndexesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoxRanksToIndexesDevice )
+#define hypre_GPUKernelBoxRanksToIndexes HYPRE_FIXEDPRECISION_FUNC ( hypre_GPUKernelBoxRanksToIndexes )
 
 #endif

@@ -817,7 +817,7 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
 #if defined(HYPRE_USING_GPU)
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_ComplexStridedCopy(nelts, fem_nsparse, values + s, tvalues);
+         hypre_ComplexStridedCopyDevice(nelts, fem_nsparse, values + s, tvalues);
       }
       else
 #endif
