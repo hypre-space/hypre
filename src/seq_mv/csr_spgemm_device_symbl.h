@@ -245,20 +245,20 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
 {
    /* number of groups in the grid */
 #if defined(HYPRE_USING_SYCL)
-   volatile const HYPRE_Int grid_num_groups = get_num_groups(item) * item.get_group_range(2);
+   const HYPRE_Int grid_num_groups = get_num_groups(item) * item.get_group_range(2);
 #else
-   volatile const HYPRE_Int grid_num_groups = get_num_groups(item) * gridDim.x;
+   const HYPRE_Int grid_num_groups = get_num_groups(item) * gridDim.x;
 #endif
    /* group id inside the block */
-   volatile const HYPRE_Int group_id = get_group_id(item);
+   const HYPRE_Int group_id = get_group_id(item);
    /* group id in the grid */
 #if defined(HYPRE_USING_SYCL)
-   volatile const HYPRE_Int grid_group_id = item.get_group(2) * get_num_groups(item) + group_id;
+   const HYPRE_Int grid_group_id = item.get_group(2) * get_num_groups(item) + group_id;
 #else
-   volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups(item) + group_id;
+   const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups(item) + group_id;
 #endif
    /* lane id inside the group */
-   volatile const HYPRE_Int lane_id = get_group_lane_id(item);
+   const HYPRE_Int lane_id = get_group_lane_id(item);
 #if defined(HYPRE_USING_SYCL)
    /* shared memory hash table */
    HYPRE_Int *s_HashKeys = (HYPRE_Int*) shmem_ptr;
