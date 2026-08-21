@@ -44,8 +44,8 @@ shift
 
 # Basic build and run tests
 cco="-DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+cmo="-j all test"
 mo="-j test"
-ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 eo=""
 
 rtol="0.0"
@@ -53,6 +53,7 @@ atol="3e-15"
 
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="aurora"
+ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 
 module load cmake
 
@@ -62,12 +63,12 @@ module load cmake
 
 # 1C) SYCL without UM [make check]
 co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF"
-./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $cmo
 ./renametest.sh cmake $output_dir/cmake-sycl-um
 
 # 2C) SYCL with mixed precision support [make check]
 co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_MIXED_PRECISION=ON"
-./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $cmo
 ./renametest.sh cmake $output_dir/cmake-sycl-mup
 
 #####################
