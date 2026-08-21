@@ -21,6 +21,7 @@ Version 3.2.0 released 2026/08/20
 - Fixed a memory leak when using umpire
 - Added an AI policy to CONTRIBUTING.md
 - Added GitHub CI
+- Added `clang` as a supported CUDA compiler
 - Various bug fixes
 
 #====================================
