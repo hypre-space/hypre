@@ -244,7 +244,7 @@ hypre_ParCSRMatrixStatsComputePassTwoLocalHost(hypre_ParCSRMatrix  *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel private(i, j)
+   #pragma omp parallel private(i, j, nnzrow)
 #endif
    {
       HYPRE_Int   ns, ne;

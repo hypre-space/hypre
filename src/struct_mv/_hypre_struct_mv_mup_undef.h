@@ -536,3 +536,5 @@
 #undef hypre_structvectorsetnumghost
 #undef hypre_structvectorsetrandomvalu
 #undef hypre_structvectorsetvalues
+#undef hypre_BoxRanksToIndexesDevice
+#undef hypre_GPUKernelBoxRanksToIndexes

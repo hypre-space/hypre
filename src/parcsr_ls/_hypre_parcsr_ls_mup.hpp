@@ -21,13 +21,6 @@ extern "C" {
 /* fixed_gpu */
 
 HYPRE_Int
-hypreDevice_extendWtoP_flt( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_float *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_float *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
-HYPRE_Int
-hypreDevice_extendWtoP_dbl( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_double *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_double *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
-HYPRE_Int
-hypreDevice_extendWtoP_long_dbl( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_long_double *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_long_double *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
-
-HYPRE_Int
 hypre_BlockDiagInvDevice_flt( hypre_float *diag, HYPRE_Int N, HYPRE_Int blk_size );
 HYPRE_Int
 hypre_BlockDiagInvDevice_dbl( hypre_double *diag, HYPRE_Int N, HYPRE_Int blk_size );
@@ -425,6 +418,13 @@ HYPRE_Int
 hypre_ParILUSchurGMRESMatvecJacIterDevice_dbl( void *matvec_data, hypre_double alpha, void *ilu_vdata, void *x, hypre_double beta, void *y );
 HYPRE_Int
 hypre_ParILUSchurGMRESMatvecJacIterDevice_long_dbl( void *matvec_data, hypre_long_double alpha, void *ilu_vdata, void *x, hypre_long_double beta, void *y );
+
+HYPRE_Int
+hypre_extendWtoPDevice_flt( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_float *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_float *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
+HYPRE_Int
+hypre_extendWtoPDevice_dbl( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_double *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_double *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
+HYPRE_Int
+hypre_extendWtoPDevice_long_dbl( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, hypre_long_double *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, hypre_long_double *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
 
 /* functions_gpu */
 

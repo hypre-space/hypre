@@ -39,7 +39,7 @@ MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
-LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
+LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -L${HYPRE_BUILD_DIR}/lib64 -lHYPRE
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
@@ -80,9 +80,7 @@ HYPRE_UNIT_TESTS =\
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
  test_mp.c\
- test_mp_pcg.c\
- test_mp_pcg_3d.c\
-# struct_mp.c\
+ struct_mp.c\
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\

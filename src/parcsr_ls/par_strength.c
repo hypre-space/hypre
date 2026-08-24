@@ -758,7 +758,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 
    /* give S same nonzero structure as A */
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel private(i,diag,row_scale,row_sum,jA,jS,start,stop)
+   #pragma omp parallel private(i,jj,diag,row_scale,row_sum,jA,jS,start,stop)
 #endif
    {
       hypre_GetSimpleThreadPartition(&start, &stop, num_variables);

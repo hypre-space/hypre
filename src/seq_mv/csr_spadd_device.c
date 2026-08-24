@@ -23,7 +23,7 @@
  * if d_ja_map/d_jb_map == NULL, it is [0:n)
  */
 HYPRE_Int
-hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
+hypre_CSRSpAddDevice( HYPRE_Int       ma, /* num of rows of A */
                       HYPRE_Int       mb, /* num of rows of B */
                       HYPRE_Int       nnzA,
                       HYPRE_Int       nnzB,
@@ -113,7 +113,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      hypreDevice_ComplexScalen( d_aa, nnzA, d_at, alpha );
+      hypre_ComplexScalenDevice( d_aa, nnzA, d_at, alpha );
    }
 
    if (beta == 1.0)
@@ -122,19 +122,19 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      hypreDevice_ComplexScalen( d_ab, nnzB, d_at + nnzA, beta );
+      hypre_ComplexScalenDevice( d_ab, nnzB, d_at + nnzA, beta );
    }
 
    /* expansion: i */
-   hypreDevice_CsrRowPtrsToIndices_v2(ma, nnzA, d_ia, d_it);
+   hypre_CsrRowPtrsToIndicesDevice_v2(ma, nnzA, d_ia, d_it);
    if (d_num_b || mb <= 0)
    {
-      hypreDevice_CsrRowPtrsToIndicesWithRowNum(mb, nnzB, d_ib, d_num_b, d_it + nnzA);
+      hypre_CsrRowPtrsToIndicesWithRowNumDevice(mb, nnzB, d_ib, d_num_b, d_it + nnzA);
    }
    else
    {
       hypre_assert(ma == mb);
-      hypreDevice_CsrRowPtrsToIndices_v2(mb, nnzB, d_ib, d_it + nnzA);
+      hypre_CsrRowPtrsToIndicesDevice_v2(mb, nnzB, d_ib, d_it + nnzA);
    }
 
    /* make copy of (it, jt, at), since reduce cannot be done in-place */
@@ -151,12 +151,12 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    hypre_assert( (size_t) (work_mem - work_mem_saved) == (4 * sizeof(HYPRE_Int) + 2 * sizeof(
                                                              HYPRE_Complex)) * ((size_t)nnzT2) );
 
-   /* sort: lexicographical order (row, col): hypreDevice_StableSortByTupleKey */
-   hypreDevice_StableSortByTupleKey(nnzT, d_it, d_jt, d_at, 0);
+   /* sort: lexicographical order (row, col): hypre_StableSortByTupleKeyDevice */
+   hypre_StableSortByTupleKeyDevice(nnzT, d_it, d_jt, d_at, 0);
 
    /* compress */
    /* returns end: so nnz = end - start */
-   nnzC = hypreDevice_ReduceByTupleKey(nnzT, d_it, d_jt, d_at, d_it_cp, d_jt_cp, d_at_cp);
+   nnzC = hypre_ReduceByTupleKeyDevice(nnzT, d_it, d_jt, d_at, d_it_cp, d_jt_cp, d_at_cp);
 
    /* allocate final C */
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
@@ -166,7 +166,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    hypre_TMemcpy(d_ac, d_at_cp, HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* convert into ic: row idx --> row ptrs */
-   d_ic = hypreDevice_CsrRowIndicesToPtrs(ma, nnzC, d_it_cp);
+   d_ic = hypre_CsrRowIndicesToPtrsDevice(ma, nnzC, d_it_cp);
 
 #ifdef HYPRE_DEBUG
    HYPRE_Int tmp_nnzC;

@@ -714,6 +714,19 @@ HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
  **/
 HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 
+/**
+ * Sets the number of threads to use in OpenMP parallel regions.
+ * Must be called from outside of a parallel region.
+ *
+ * @param num_threads The number of threads to use. This must be positive and
+ * no greater than the number of processors available to the OpenMP runtime or
+ * the OpenMP thread limit, whichever is smaller.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success and
+ * HYPRE_ERROR_ARG indicates that num_threads is outside the valid range.
+ **/
+HYPRE_Int HYPRE_SetNumThreads( HYPRE_Int num_threads );
+
 /**@}*/
 /**@}*/
 

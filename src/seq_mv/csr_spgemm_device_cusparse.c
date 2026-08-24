@@ -13,7 +13,7 @@
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
+hypre_CSRSpGemmCusparseGenericAPIDevice(HYPRE_Int       m,
                                         HYPRE_Int       k,
                                         HYPRE_Int       n,
                                         HYPRE_Int       nnzA,
@@ -31,7 +31,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 
 #if CUSPARSE_VERSION < CUSPARSE_NEWAPI_VERSION
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
+hypre_CSRSpGemmCusparseOldAPIDevice(HYPRE_Int          m,
                                     HYPRE_Int          k,
                                     HYPRE_Int          n,
                                     cusparseMatDescr_t descr_A,
@@ -65,7 +65,7 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
    const HYPRE_Int n = hypre_CSRMatrixNumCols(B);
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-   hypreDevice_CSRSpGemmCusparseGenericAPI(m, k, n,
+   hypre_CSRSpGemmCusparseGenericAPIDevice(m, k, n,
                                            hypre_CSRMatrixNumNonzeros(A),
                                            hypre_CSRMatrixI(A),
                                            hypre_CSRMatrixJ(A),
@@ -76,7 +76,7 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
                                            hypre_CSRMatrixData(B),
                                            nnzC_out, d_ic_out, d_jc_out, d_c_out);
 #else
-   hypreDevice_CSRSpGemmCusparseOldAPI(m, k, n,
+   hypre_CSRSpGemmCusparseOldAPIDevice(m, k, n,
                                        hypre_CSRMatrixGPUMatDescr(A), hypre_CSRMatrixNumNonzeros(A),
                                        hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
                                        hypre_CSRMatrixGPUMatDescr(B), hypre_CSRMatrixNumNonzeros(B),
@@ -109,7 +109,7 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
  */
 
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
+hypre_CSRSpGemmCusparseGenericAPIDevice(HYPRE_Int       m,
                                         HYPRE_Int       k,
                                         HYPRE_Int       n,
                                         HYPRE_Int       nnzA,
@@ -251,7 +251,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 #else
 
 static HYPRE_Int
-hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
+hypre_CSRSpGemmCusparseOldAPIDevice(HYPRE_Int          m,
                                     HYPRE_Int          k,
                                     HYPRE_Int          n,
                                     cusparseMatDescr_t descr_A,

@@ -32,6 +32,17 @@ struct functor
    }
 };
 
+/* Safeguarded reciprocal: returns 1.0 for zero input (matches hypre_MGRBuildPHost) */
+template<typename T>
+struct safe_reciprocal
+{
+   __host__ __device__
+   T operator()(const T &x) const
+   {
+      return (x != T(0.0)) ? (T(1.0) / x) : T(1.0);
+   }
+};
+
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildPFromWpDevice
  *--------------------------------------------------------------------------*/
@@ -75,7 +86,7 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
    P_offd = hypre_ParCSRMatrixOffd(P);
 
    /* Copy contents from W to P and set identity matrix for the mapping between coarse points */
-   hypreDevice_extendWtoP(hypre_ParCSRMatrixNumRows(A),
+   hypre_extendWtoPDevice(hypre_ParCSRMatrixNumRows(A),
                           hypre_ParCSRMatrixNumRows(Wp),
                           hypre_CSRMatrixNumCols(Wp_diag),
                           CF_marker,
@@ -186,7 +197,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            diag,
                            diag + nfpoints,
                            diag,
-         [] (auto x) { return 1.0 / x; });
+                           safe_reciprocal<HYPRE_Complex>());
 #else
          HYPRE_THRUST_CALL(transform,
                            diag,
@@ -199,7 +210,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            diag,
                            diag + nfpoints,
                            diag,
-                           1.0 / _1);
+                           safe_reciprocal<HYPRE_Complex>());
 #endif
 
          hypre_TFree(diag1, HYPRE_MEMORY_DEVICE);
@@ -249,7 +260,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_extendWtoP( A_nr_of_rows,
+   hypre_extendWtoPDevice( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_CSRMatrixNumCols(W_diag),
                            CF_marker,
@@ -347,7 +358,7 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixExtractBlockDiag
+ * hypre_GPUKernelCSRMatrixExtractBlockDiag
  *
  * Fills vector diag with the block diagonals from the input matrix.
  * This function uses column-major storage for diag.
@@ -361,7 +372,7 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
+hypre_GPUKernelCSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
                                           HYPRE_Int          blk_size,
                                           HYPRE_Int          num_rows,
                                           HYPRE_Int         *A_i,
@@ -427,7 +438,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixExtractBlockDiagMarked
+ * hypre_GPUKernelCSRMatrixExtractBlockDiagMarked
  *
  * Fills vector diag with the block diagonals from the input matrix.
  * This function uses column-major storage for diag.
@@ -441,7 +452,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
+hypre_GPUKernelCSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Int          blk_size,
                                                 HYPRE_Int          num_rows,
                                                 HYPRE_Int          marker_val,
@@ -505,7 +516,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ComplexMatrixBatchedTranspose
+ * hypre_GPUKernelComplexMatrixBatchedTranspose
  *
  * Transposes a group of dense matrices. Assigns one warp per block (batch).
  * Naive implementation.
@@ -517,7 +528,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
+hypre_GPUKernelComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
                                               HYPRE_Int          num_blocks,
                                               HYPRE_Int          block_size,
                                               HYPRE_Complex     *A_data,
@@ -612,7 +623,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    {
       /* Compute block row indices */
       blk_row_indices = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-      hypreDevice_IntFilln(blk_row_indices, (size_t) num_rows, 1);
+      hypre_IntFillnDevice(blk_row_indices, (size_t) num_rows, 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan_by_segment,
                         CF_marker,
@@ -654,14 +665,14 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
       if (CF_marker)
       {
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiagMarked, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelCSRMatrixExtractBlockDiagMarked, gDim, bDim,
                            blk_size, num_rows, point_type, CF_marker, blk_row_indices,
                            A_diag_i, A_diag_j, A_diag_data,
                            B_diag_i, B_diag_j, B_diag_data );
       }
       else
       {
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiag, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelCSRMatrixExtractBlockDiag, gDim, bDim,
                            blk_size, num_rows,
                            A_diag_i, A_diag_j, A_diag_data,
                            B_diag_i, B_diag_j, B_diag_data );
@@ -688,7 +699,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
          hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
                        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelComplexMatrixBatchedTranspose, gDim, bDim,
                            num_blocks, blk_size, tmpdiag, B_diag_data );
 
          hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
@@ -789,11 +800,11 @@ hypre_BlockDiagInvDevice( HYPRE_Complex *diag,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* Set work array of pointers */
-   hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, tmpdiag, tmpdiag_aop);
+   hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, tmpdiag, tmpdiag_aop);
 #endif
 
    /* Set array of pointers */
-   hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, diag, diag_aop);
+   hypre_ComplexArrayToArrayOfPtrsDevice(num_blocks, bs2, diag, diag_aop);
 
    /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)

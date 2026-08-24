@@ -435,8 +435,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
    offd_mark = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(n_local, A_diag_nnz, A_diag_i, A_diag_ii);
-   hypreDevice_CsrRowPtrsToIndices_v2(n_local, A_offd_nnz, A_offd_i, A_offd_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(n_local, A_diag_nnz, A_diag_i, A_diag_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(n_local, A_offd_nnz, A_offd_i, A_offd_ii);
 
    if (AFF_ptr)
    {
@@ -512,7 +512,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFF_diag_ii );
 #endif
 
-      AFF_diag_i = hypreDevice_CsrRowIndicesToPtrs(option == 1 ? nF_local : nF2_local, AFF_diag_nnz,
+      AFF_diag_i = hypre_CsrRowIndicesToPtrsDevice(option == 1 ? nF_local : nF2_local, AFF_diag_nnz,
                                                    AFF_diag_ii);
       hypre_TFree(AFF_diag_ii, HYPRE_MEMORY_DEVICE);
 
@@ -564,7 +564,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFF_offd_ii );
 #endif
 
-      AFF_offd_i = hypreDevice_CsrRowIndicesToPtrs(option == 1 ? nF_local : nF2_local, AFF_offd_nnz,
+      AFF_offd_i = hypre_CsrRowIndicesToPtrsDevice(option == 1 ? nF_local : nF2_local, AFF_offd_nnz,
                                                    AFF_offd_ii);
       hypre_TFree(AFF_offd_ii, HYPRE_MEMORY_DEVICE);
 
@@ -584,7 +584,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_ScatterConstantDevice(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -614,8 +614,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + AFF_offd_nnz );
       num_cols_AFF_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -742,7 +742,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFC_diag_ii );
 #endif
 
-      AFC_diag_i = hypreDevice_CsrRowIndicesToPtrs(nF_local, AFC_diag_nnz, AFC_diag_ii);
+      AFC_diag_i = hypre_CsrRowIndicesToPtrsDevice(nF_local, AFC_diag_nnz, AFC_diag_ii);
       hypre_TFree(AFC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* AFC Offd */
@@ -793,7 +793,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFC_offd_ii );
 #endif
 
-      AFC_offd_i = hypreDevice_CsrRowIndicesToPtrs(nF_local, AFC_offd_nnz, AFC_offd_ii);
+      AFC_offd_i = hypre_CsrRowIndicesToPtrsDevice(nF_local, AFC_offd_nnz, AFC_offd_ii);
       hypre_TFree(AFC_offd_ii, HYPRE_MEMORY_DEVICE);
 
       /* col_map_offd_AFC */
@@ -812,7 +812,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_ScatterConstantDevice(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -836,8 +836,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + AFC_offd_nnz );
       num_cols_AFC_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -965,7 +965,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACF_diag_ii );
 #endif
 
-      ACF_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACF_diag_nnz, ACF_diag_ii);
+      ACF_diag_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACF_diag_nnz, ACF_diag_ii);
       hypre_TFree(ACF_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACF Offd */
@@ -1016,7 +1016,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACF_offd_ii );
 #endif
 
-      ACF_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACF_offd_nnz, ACF_offd_ii);
+      ACF_offd_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACF_offd_nnz, ACF_offd_ii);
       hypre_TFree(ACF_offd_ii, HYPRE_MEMORY_DEVICE);
 
       /* col_map_offd_ACF */
@@ -1035,7 +1035,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_ScatterConstantDevice(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1064,8 +1064,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + ACF_offd_nnz );
       num_cols_ACF_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1194,7 +1194,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACC_diag_ii );
 #endif
 
-      ACC_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACC_diag_nnz, ACC_diag_ii);
+      ACC_diag_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACC_diag_nnz, ACC_diag_ii);
       hypre_TFree(ACC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACC Offd */
@@ -1245,7 +1245,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACC_offd_ii );
 #endif
 
-      ACC_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACC_offd_nnz, ACC_offd_ii);
+      ACC_offd_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACC_offd_nnz, ACC_offd_ii);
       hypre_TFree(ACC_offd_ii, HYPRE_MEMORY_DEVICE);
 
       /* col_map_offd_ACC */
@@ -1264,7 +1264,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_ScatterConstantDevice(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1288,8 +1288,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + ACC_offd_nnz );
       num_cols_ACC_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1624,8 +1624,8 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
    offd_mark = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(n_local, A_diag_nnz, A_diag_i, A_diag_ii);
-   hypreDevice_CsrRowPtrsToIndices_v2(n_local, A_offd_nnz, A_offd_i, A_offd_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(n_local, A_diag_nnz, A_diag_i, A_diag_ii);
+   hypre_CsrRowPtrsToIndicesDevice_v2(n_local, A_offd_nnz, A_offd_i, A_offd_ii);
 
    if (ACX_ptr)
    {
@@ -1688,7 +1688,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           ACX_diag_ii );
 #endif
 
-      ACX_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACX_diag_nnz, ACX_diag_ii);
+      ACX_diag_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACX_diag_nnz, ACX_diag_ii);
       hypre_TFree(ACX_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACX Offd */
@@ -1738,7 +1738,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           ACX_offd_ii );
 #endif
 
-      ACX_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACX_offd_nnz, ACX_offd_ii);
+      ACX_offd_i = hypre_CsrRowIndicesToPtrsDevice(nC_local, ACX_offd_nnz, ACX_offd_ii);
       hypre_TFree(ACX_offd_ii, HYPRE_MEMORY_DEVICE);
 
       /* col_map_offd_ACX */
@@ -1761,8 +1761,8 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                               tmp_j + ACX_offd_nnz );
 #endif
       num_cols_ACX_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACX_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_ACX_offd, tmp_j, (HYPRE_Int) 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
@@ -1897,7 +1897,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           AXC_diag_j );
 #endif
 
-      AXC_diag_i = hypreDevice_CsrRowIndicesToPtrs(n_local, AXC_diag_nnz, AXC_diag_ii);
+      AXC_diag_i = hypre_CsrRowIndicesToPtrsDevice(n_local, AXC_diag_nnz, AXC_diag_ii);
       hypre_TFree(AXC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* AXC Offd */
@@ -1937,7 +1937,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AXC_offd_ii + AXC_offd_nnz );
 #endif
 
-      AXC_offd_i = hypreDevice_CsrRowIndicesToPtrs(n_local, AXC_offd_nnz, AXC_offd_ii);
+      AXC_offd_i = hypre_CsrRowIndicesToPtrsDevice(n_local, AXC_offd_nnz, AXC_offd_ii);
       hypre_TFree(AXC_offd_ii, HYPRE_MEMORY_DEVICE);
 
       /* col_map_offd_AXC */
@@ -1960,8 +1960,8 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                               tmp_j + AXC_offd_nnz );
 #endif
       num_cols_AXC_offd = tmp_end - tmp_j;
-      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AXC_offd, tmp_j, (HYPRE_Int) 1);
+      hypre_IntFillnDevice( offd_mark, num_cols_A_offd, 0 );
+      hypre_ScatterConstantDevice(offd_mark, num_cols_AXC_offd, tmp_j, (HYPRE_Int) 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,

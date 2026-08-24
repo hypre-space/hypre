@@ -607,7 +607,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
          jj = twspace[0];
          for (ic = 1; ic < ii; ic++)
          {
-            jj += twspace[ia];
+            jj += twspace[ic];
          }
 
          for (ic = ns; ic < ne; ic++)
@@ -629,6 +629,10 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
          C_j = hypre_CSRMatrixBigJ(C);
          C_data = hypre_CSRMatrixData(C);
       }
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp barrier
+#endif
 
       /* Second pass */
       for (ia = 0; ia < ncols_A; ia++)
@@ -2202,7 +2206,7 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexScalen(data, k, data, scalar);
+      hypre_ComplexScalenDevice(data, k, data, scalar);
    }
    else
 #endif
@@ -2382,13 +2386,13 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexFilln(hypre_CSRMatrixData(A), nnz, value);
+      hypre_ComplexFillnDevice(hypre_CSRMatrixData(A), nnz, value);
    }
    else
 #endif
    {
 #ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < nnz; i++)
       {

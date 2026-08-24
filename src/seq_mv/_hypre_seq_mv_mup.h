@@ -523,13 +523,6 @@ hypre_MultiblockMatrixSetSubmatrixType_dbl( hypre_MultiblockMatrix *matrix, HYPR
 HYPRE_Int
 hypre_MultiblockMatrixSetSubmatrixType_long_dbl( hypre_MultiblockMatrix *matrix, HYPRE_Int j, HYPRE_Int type );
 
-hypre_Vector *
-hypre_SeqMultiVectorCreate_flt( HYPRE_Int size, HYPRE_Int num_vectors );
-hypre_Vector *
-hypre_SeqMultiVectorCreate_dbl( HYPRE_Int size, HYPRE_Int num_vectors );
-hypre_Vector *
-hypre_SeqMultiVectorCreate_long_dbl( HYPRE_Int size, HYPRE_Int num_vectors );
-
 HYPRE_Int
 hypre_SeqVectorAxpy_flt( hypre_float alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int
@@ -613,13 +606,6 @@ HYPRE_Int
 hypre_SeqVectorInitializeShell_dbl( hypre_Vector *vector );
 HYPRE_Int
 hypre_SeqVectorInitializeShell_long_dbl( hypre_Vector *vector );
-
-HYPRE_Int
-hypre_SeqVectorInitialize_v2_flt( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_SeqVectorInitialize_v2_dbl( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
-HYPRE_Int
-hypre_SeqVectorInitialize_v2_long_dbl( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Real
 hypre_SeqVectorInnerProd_flt( hypre_Vector *x, hypre_Vector *y );
@@ -904,6 +890,24 @@ hypre_CSRMatrixResetData_long_dbl( hypre_CSRMatrix *matrix );
 HYPRE_Int
 hypre_CSRMatrixResetData( hypre_CSRMatrix *matrix );
 
+hypre_Vector *
+hypre_SeqMultiVectorCreate_flt( HYPRE_Int size, HYPRE_Int num_vectors );
+hypre_Vector *
+hypre_SeqMultiVectorCreate_dbl( HYPRE_Int size, HYPRE_Int num_vectors );
+hypre_Vector *
+hypre_SeqMultiVectorCreate_long_dbl( HYPRE_Int size, HYPRE_Int num_vectors );
+hypre_Vector *
+hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors );
+
+HYPRE_Int
+hypre_SeqVectorInitialize_v2_flt( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_SeqVectorInitialize_v2_dbl( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_SeqVectorInitialize_v2_long_dbl( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int
+hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
+
 HYPRE_Int
 hypre_SeqVectorSetData_flt( hypre_Vector *vector, hypre_float *data );
 HYPRE_Int
@@ -926,6 +930,12 @@ hypre_CSRMatrixInitialize_v2_pre( HYPRE_Precision precision, hypre_CSRMatrix *ma
 
 HYPRE_Int
 hypre_CSRMatrixResetData_pre( HYPRE_Precision precision, hypre_CSRMatrix *matrix );
+
+hypre_Vector *
+hypre_SeqMultiVectorCreate_pre( HYPRE_Precision precision, HYPRE_Int size, HYPRE_Int num_vectors );
+
+HYPRE_Int
+hypre_SeqVectorInitialize_v2_pre( HYPRE_Precision precision, hypre_Vector *vector, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
 hypre_SeqVectorSetData_pre( HYPRE_Precision precision, hypre_Vector *vector, void *data );

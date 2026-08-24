@@ -241,6 +241,15 @@ HYPRE_SetMemoryLocation( HYPRE_MemoryLocation memory_location )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SetNumThreads( HYPRE_Int num_threads )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SetNumThreads_pre( precision, num_threads );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SetPrintErrorMode( HYPRE_Int mode )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

@@ -3762,6 +3762,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #ifndef hypre_MP_BUILD
 #include "_hypre_struct_mv_mup_undef.h"
 #include "_hypre_struct_mv_mup.h"
+#include "_hypre_struct_mv_mup.hpp"
 #endif
 #endif
 

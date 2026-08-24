@@ -27,18 +27,18 @@ extern "C++" {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_DenseMatrixIdentity
+ * hypre_DenseMatrixIdentityFunctor
  *
  * Functor for generating a dense identity matrix.
  * This assumes that the input array "a" is zeros everywhere
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_DenseMatrixIdentity
+struct hypre_DenseMatrixIdentityFunctor
 {
    HYPRE_Int   n_;
    HYPRE_Real *a_;
 
-   hypreFunctor_DenseMatrixIdentity(HYPRE_Int n, HYPRE_Real *a)
+   hypre_DenseMatrixIdentityFunctor(HYPRE_Int n, HYPRE_Real *a)
    {
       n_ = n;
       a_ = a;
@@ -51,7 +51,7 @@ struct hypreFunctor_DenseMatrixIdentity
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ArrayStridedAccess
+ * hypre_ArrayStridedAccessFunctor
  *
  * Functor for performing strided data access on a templated array.
  *
@@ -62,12 +62,12 @@ struct hypreFunctor_DenseMatrixIdentity
  *--------------------------------------------------------------------------*/
 
 template <typename T>
-struct hypreFunctor_ArrayStridedAccess
+struct hypre_ArrayStridedAccessFunctor
 {
    HYPRE_Int  s_;
    T         *a_;
 
-   hypreFunctor_ArrayStridedAccess(HYPRE_Int s, T *a) : s_(s), a_(a) {}
+   hypre_ArrayStridedAccessFunctor(HYPRE_Int s, T *a) : s_(s), a_(a) {}
 
    __host__ __device__ T operator()(HYPRE_Int i)
    {
@@ -76,7 +76,7 @@ struct hypreFunctor_ArrayStridedAccess
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_IndexStrided
+ * hypre_IndexStridedFunctor
  *
  * This functor multiplies a given index "i" by a specified stride "s_".
  *
@@ -84,11 +84,11 @@ struct hypreFunctor_ArrayStridedAccess
  *--------------------------------------------------------------------------*/
 
 template <typename T>
-struct hypreFunctor_IndexStrided
+struct hypre_IndexStridedFunctor
 {
    T s_;
 
-   hypreFunctor_IndexStrided(T s) : s_(s) {}
+   hypre_IndexStridedFunctor(T s) : s_(s) {}
 
    __host__ __device__ T operator()(const T i) const
    {
@@ -97,14 +97,14 @@ struct hypreFunctor_IndexStrided
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_IndexCycle
+ * hypre_IndexCycleFunctor
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_IndexCycle
+struct hypre_IndexCycleFunctor
 {
    HYPRE_Int cycle_length;
 
-   hypreFunctor_IndexCycle(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+   hypre_IndexCycleFunctor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
 
    __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
    {
@@ -116,11 +116,11 @@ struct hypreFunctor_IndexCycle
  * Functor to check: |x| > tol
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_NonzeroAboveTol
+struct hypre_NonzeroAboveTolFunctor
 {
    HYPRE_Real tol;
 
-   hypreFunctor_NonzeroAboveTol(HYPRE_Real tol_) : tol(tol_) {}
+   hypre_NonzeroAboveTolFunctor(HYPRE_Real tol_) : tol(tol_) {}
 
    __host__ __device__
    bool operator()(const HYPRE_Complex& x) const
@@ -130,13 +130,13 @@ struct hypreFunctor_NonzeroAboveTol
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ElementCast
+ * hypre_ElementCastFunctor
  *
  * Functor for performing casting data between datatypes
  *--------------------------------------------------------------------------*/
 
 template <typename T, typename T2>
-struct hypreFunctor_ElementCast
+struct hypre_ElementCastFunctor
 {
    __host__ __device__ T2 operator()(T a)
    {
@@ -165,7 +165,7 @@ struct hypreFunctor_ElementCast
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
- * hyprePred_StridedAccess
+ * hypre_PredStridedAccess
  *
  * This struct defines a predicate for strided access in array-like data.
  *
@@ -175,11 +175,11 @@ struct hypreFunctor_ElementCast
  * is part of the strided subset.
  *--------------------------------------------------------------------------*/
 
-struct hyprePred_StridedAccess
+struct hypre_PredStridedAccess
 {
    HYPRE_Int  s_;
 
-   hyprePred_StridedAccess(HYPRE_Int s) : s_(s) {}
+   hypre_PredStridedAccess(HYPRE_Int s) : s_(s) {}
 
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int i) const
    {
@@ -457,10 +457,13 @@ using hypre_DeviceItem = void*;
 #include <thrust/pair.h>
 #include <thrust/tuple.h>
 
-/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
+/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward.
+ *      CUDA 13 / CCCL 3 deprecates thrust::not_fn in favor of cuda::std::not_fn. */
 #define THRUST_VERSION_NOTFN 200600
 #if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
+#elif defined(HYPRE_USING_CUDA) && (defined(THRUST_VERSION) && THRUST_VERSION >= 300000)
+#define HYPRE_THRUST_NOT(pred) cuda::std::not_fn(pred)
 #else
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
 #endif
@@ -472,6 +475,19 @@ using hypre_DeviceItem = void*;
 #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
+#endif
+
+/* Resolve deprecated warnings about thrust::plus / equal_to (CCCL 3.0 / CUDA 13).
+ * Variadic so types with commas (e.g. thrust::tuple<T1, T2>) work. */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 300000)
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
+#elif defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_PLUS(...)     cuda::std::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) cuda::std::equal_to<__VA_ARGS__>()
+#else
+#define HYPRE_THRUST_PLUS(...)     thrust::plus<__VA_ARGS__>()
+#define HYPRE_THRUST_EQUAL_TO(...) thrust::equal_to<__VA_ARGS__>()
 #endif
 
 using namespace thrust::placeholders;
@@ -729,6 +745,58 @@ typedef sycl::queue* hypre_DeviceStream;
       assert(0);                                                                             \
    }
 #endif
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *  GPU Graph capture type and macros (CUDA and HIP only)
+ *
+ *  Graph capture is a feature that can reduce overhead associated with
+ *  launching a known pattern of GPU kernels. If a sequence of kernels
+ *  is known to repeat, then capturing it the first time and subsequently
+ *  only launching the graph can improve performance.
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+struct hypre_DeviceGraphData
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaGraph_t     graph;
+   cudaGraphExec_t graph_exec;
+#else  /* HIP */
+   hipGraph_t      graph;
+   hipGraphExec_t  graph_exec;
+#endif
+   HYPRE_Int       is_ready; /* 0 = not yet captured, 1 = ready for graph launch */
+};
+
+#if defined(HYPRE_USING_CUDA)
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
+   HYPRE_CUDA_CALL( cudaStreamBeginCapture((stream), cudaStreamCaptureModeThreadLocal) )
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
+   HYPRE_CUDA_CALL( cudaStreamEndCapture((stream), (graph)) )
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
+   HYPRE_CUDA_CALL( cudaGraphInstantiate((graph_exec), (graph), 0) )
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
+   HYPRE_CUDA_CALL( cudaGraphLaunch((graph_exec), (stream)) )
+#define hypre_DeviceGraphDestroy(graph) \
+   HYPRE_CUDA_CALL( cudaGraphDestroy(graph) )
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
+   HYPRE_CUDA_CALL( cudaGraphExecDestroy(graph_exec) )
+#else  /* HIP */
+#define hypre_DeviceGraphStreamBeginCapture(stream) \
+   HYPRE_HIP_CALL( hipStreamBeginCapture((stream), hipStreamCaptureModeThreadLocal) )
+#define hypre_DeviceGraphStreamEndCapture(stream, graph) \
+   HYPRE_HIP_CALL( hipStreamEndCapture((stream), (graph)) )
+#define hypre_DeviceGraphInstantiate(graph_exec, graph) \
+   HYPRE_HIP_CALL( hipGraphInstantiate((graph_exec), (graph), NULL, NULL, 0) )
+#define hypre_DeviceGraphLaunch(graph_exec, stream) \
+   HYPRE_HIP_CALL( hipGraphLaunch((graph_exec), (stream)) )
+#define hypre_DeviceGraphDestroy(graph) \
+   HYPRE_HIP_CALL( hipGraphDestroy(graph) )
+#define hypre_DeviceGraphExecDestroy(graph_exec) \
+   HYPRE_HIP_CALL( hipGraphExecDestroy(graph_exec) )
+#endif  /* CUDA vs HIP */
+
+#endif  /* HYPRE_USING_CUDA || HYPRE_USING_HIP */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping vendor library calls for error reporting
@@ -2546,30 +2614,30 @@ dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                            T3 *vals, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+HYPRE_Int hypre_StableSortTupleByTupleKeyDevice(HYPRE_Int N, T1 *keys1, T2 *keys2,
                                                 T3 *vals1, T4 *vals2, HYPRE_Int opt);
 
 template <typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
+HYPRE_Int hypre_ReduceByTupleKeyDevice(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
                                        T3 *vals_in, T1 *keys1_out, T2 *keys2_out,
                                        T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+HYPRE_Int hypre_ScatterConstantDevice(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
+HYPRE_Int hypre_GenScatterAddDevice(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
                                     HYPRE_Real *y, char *work);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+HYPRE_Int hypre_CsrRowPtrsToIndicesWithRowNumDevice(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 template<typename T1, typename T2, typename T3>
-HYPRE_Int hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
+HYPRE_Int hypre_AxpyznDevice_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
@@ -2624,30 +2692,39 @@ hypre_HYPREIntToCusparseIndexType()
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
-template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
+/* Packed real types used by the reducers below.
+ *
+ * These are templated on the scalar type instead of referring to HYPRE_Real
+ * directly so that each precision yields a distinct C++ type.  Otherwise, in a
+ * mixed-precision build, the same source is compiled once per precision and the
+ * resulting structs (and every template/overload built on top of them) would
+ * carry identical mangled names while having different layouts. The linker would
+ * would then keep just one of them, so e.g. a double-precision reduction could end
+ * up running the single-precision kernel. */
 
-struct HYPRE_Real2
+template <typename T>
+struct hypre_RealPack2
 {
-   HYPRE_Real x, y;
+   T x, y;
 
    __host__ __device__
-   HYPRE_Real2() {}
+   hypre_RealPack2() {}
 
    __host__ __device__
-   HYPRE_Real2(HYPRE_Real x1, HYPRE_Real x2)
+   hypre_RealPack2(T x1, T x2)
    {
       x = x1;
       y = x2;
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       x = y = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real2 rhs)
+   void operator+=(hypre_RealPack2<T> rhs)
    {
       x += rhs.x;
       y += rhs.y;
@@ -2655,15 +2732,16 @@ struct HYPRE_Real2
 
 };
 
-struct HYPRE_Real4
+template <typename T>
+struct hypre_RealPack4
 {
-   HYPRE_Real u, v, w, x;
+   T u, v, w, x;
 
    __host__ __device__
-   HYPRE_Real4() {}
+   hypre_RealPack4() {}
 
    __host__ __device__
-   HYPRE_Real4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   hypre_RealPack4(T x1, T x2, T x3, T x4)
    {
       u = x1;
       v = x2;
@@ -2672,13 +2750,13 @@ struct HYPRE_Real4
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       u = v = w = x = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real4 rhs)
+   void operator+=(hypre_RealPack4<T> rhs)
    {
       u += rhs.u;
       v += rhs.v;
@@ -2688,16 +2766,16 @@ struct HYPRE_Real4
 
 };
 
-struct HYPRE_Real6
+template <typename T>
+struct hypre_RealPack6
 {
-   HYPRE_Real u, v, w, x, y, z;
+   T u, v, w, x, y, z;
 
    __host__ __device__
-   HYPRE_Real6() {}
+   hypre_RealPack6() {}
 
    __host__ __device__
-   HYPRE_Real6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3,
-               HYPRE_Real x4, HYPRE_Real x5, HYPRE_Real x6)
+   hypre_RealPack6(T x1, T x2, T x3, T x4, T x5, T x6)
    {
       u = x1;
       v = x2;
@@ -2708,13 +2786,13 @@ struct HYPRE_Real6
    }
 
    __host__ __device__
-   void operator=(HYPRE_Real val)
+   void operator=(T val)
    {
       u = v = w = x = y = z = val;
    }
 
    __host__ __device__
-   void operator+=(HYPRE_Real6 rhs)
+   void operator+=(hypre_RealPack6<T> rhs)
    {
       u += rhs.u;
       v += rhs.v;
@@ -2725,6 +2803,10 @@ struct HYPRE_Real6
    }
 
 };
+
+typedef hypre_RealPack2<HYPRE_Real> HYPRE_Real2;
+typedef hypre_RealPack4<HYPRE_Real> HYPRE_Real4;
+typedef hypre_RealPack6<HYPRE_Real> HYPRE_Real6;
 
 /* reduction within a warp */
 __inline__ __host__ __device__
@@ -2739,8 +2821,9 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
+hypre_RealPack2<T> warpReduceSum(hypre_RealPack2<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -2752,8 +2835,9 @@ HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
+hypre_RealPack4<T> warpReduceSum(hypre_RealPack4<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -2767,8 +2851,9 @@ HYPRE_Real4 warpReduceSum(HYPRE_Real4 val)
    return val;
 }
 
+template <typename T>
 __inline__ __host__ __device__
-HYPRE_Real6 warpReduceSum(HYPRE_Real6 val)
+hypre_RealPack6<T> warpReduceSum(hypre_RealPack6<T> val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
@@ -2904,9 +2989,12 @@ struct ReduceSum
    {
       if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
-         /* allocate for the max size for reducing HYPRE_Real6 type */
+         /* Allocate for the max size for reducing HYPRE_Real6 type. This buffer is
+          * held by the (precision-agnostic) handle and shared by all precisions, so
+          * size it with the largest real type instead of the build's HYPRE_Real. */
          hypre_HandleReduceBuffer(hypre_handle()) =
-            hypre_TAlloc(HYPRE_Real6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
+            hypre_TAlloc(hypre_RealPack6<hypre_long_double>, HYPRE_MAX_NTHREADS_BLOCK,
+                         HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
