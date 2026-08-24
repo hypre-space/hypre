@@ -7,7 +7,26 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
-Version 3.1.0 released 2026/01/26
+Version 3.2.0 released 2026/08/20
+
+- Added overlapping Schwarz solver
+- Added GPU support for mixed precision
+- MGR updates
+  * Added rowsum prolongation option
+  * Support for component reuse
+  * Support for user provided Schur complement
+  * Support for various cycle types
+- Added flexible cycle feature in BoomerAMG
+- Added umpire + SYCL support
+- Fixed a memory leak when using umpire
+- Added an AI policy to CONTRIBUTING.md
+- Added GitHub CI
+- Added `clang` as a supported CUDA compiler
+- Various bug fixes
+
+#====================================
+
+Version 3.1.0 released 2026/01/23
 
 - Added a Chebyshev solver
 - Added rocm 7.0 support
