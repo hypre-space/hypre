@@ -63,12 +63,12 @@ module load cmake
 
 # 1C) SYCL without UM [make check]
 co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF"
-./test.sh cmake.sh $root_dir -co: $co -mo: $cmo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-sycl-um
 
 # 2C) SYCL with mixed precision support [make check]
 co="${cco} -DHYPRE_ENABLE_SYCL=ON -DHYPRE_ENABLE_UMPIRE=OFF -DHYPRE_ENABLE_MIXED_PRECISION=ON"
-./test.sh cmake.sh $root_dir -co: $co -mo: $cmo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-sycl-mup
 
 #####################
