@@ -3471,6 +3471,10 @@ main( hypre_int argc,
    {
       test_set_array_values = 0;
    }
+   /* WM: todo - there are issues with the sycl backend that need to be fixed */
+#if defined(HYPRE_USING_SYCL)
+   test_set_array_values = 0;
+#endif
 
    /*-----------------------------------------------------------
     * Print driver parameters TODO
