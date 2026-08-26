@@ -2229,7 +2229,7 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 
 /* WM: todo - make this more generally available? Useful elsewhere? */
 __global__ void
-hypreGPUKernel_CopyIndexes(hypre_DeviceItem &item,
+hypre_GPUKernelCopyIndexes(hypre_DeviceItem &item,
                            HYPRE_Int  ndim,
                            HYPRE_Int  n_copy_indexes,
                            HYPRE_Int *indexes_in,
@@ -2370,10 +2370,10 @@ hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix,
 
    /* Copy from indexes into Sindexes and Uindexes */
    gDim = hypre_GetDefaultDeviceGridDimension(nSentries, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nSentries, indexes,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelCopyIndexes, gDim, bDim, ndim, nSentries, indexes,
                      Sentry_locations, Sindexes );
    gDim = hypre_GetDefaultDeviceGridDimension(nUentries, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, nUentries, indexes,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelCopyIndexes, gDim, bDim, ndim, nUentries, indexes,
                      Uentry_locations, Uindexes );
 #if defined(HYPRE_USING_SYCL)
    /* Copy from entries into Sentries and Uentries */
@@ -2997,7 +2997,7 @@ hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix  matrix,
 #endif
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(ntvalues, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CopyIndexes, gDim, bDim, ndim, ntvalues, indexes, tlocations,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelCopyIndexes, gDim, bDim, ndim, ntvalues, indexes, tlocations,
                      tindexes );
 
    if (action >= 0)

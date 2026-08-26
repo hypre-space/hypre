@@ -339,5 +339,10 @@
 #define hypre_sstructvectorsetconstantv HYPRE_FIXEDPRECISION_FUNC ( hypre_sstructvectorsetconstantv )
 #define hypre_sstructvectorsetobjecttyp HYPRE_FIXEDPRECISION_FUNC ( hypre_sstructvectorsetobjecttyp )
 #define hypre_sstructvectorsetvalues HYPRE_FIXEDPRECISION_FUNC ( hypre_sstructvectorsetvalues )
+#define hypre_GPUKernelCopyIndexes HYPRE_FIXEDPRECISION_FUNC ( hypre_GPUKernelCopyIndexes )
+#define hypre_SStructMatrixSetArrayInterPartValuesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSetArrayInterPartValuesDevice )
+#define hypre_SStructMatrixSetArrayValuesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSetArrayValuesDevice )
+#define hypre_SStructMatrixSplitArrayEntriesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixSplitArrayEntriesDevice )
+#define hypre_SStructUMatrixSetArrayValuesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructUMatrixSetArrayValuesDevice )
 
 #endif

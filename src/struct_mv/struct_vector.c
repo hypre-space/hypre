@@ -675,7 +675,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 
 template <bool clear_ghost>
 __global__ void
-hypreGPUKernel_StructVectorSetArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructVectorSetArrayValues( hypre_DeviceItem  &item,
                                            hypre_Box          grid_box,
                                            hypre_Box          data_box,
                                            HYPRE_Int          nvalues,
@@ -741,7 +741,7 @@ hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
 
       if (clear_ghost)
       {
-         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructVectorSetArrayValues<1>),
+         HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructVectorSetArrayValues<1>),
                            gDim,
                            bDim,
                            *grid_box,
@@ -753,7 +753,7 @@ hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
       }
       else
       {
-         HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructVectorSetArrayValues<0>),
+         HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructVectorSetArrayValues<0>),
                            gDim,
                            bDim,
                            *grid_box,
@@ -772,7 +772,7 @@ hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_StructVectorAddToArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructVectorAddToArrayValues( hypre_DeviceItem  &item,
                                              hypre_Box          grid_box,
                                              hypre_Box          data_box,
                                              HYPRE_Int          nvalues,
@@ -839,7 +839,7 @@ hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector,
       data_box = hypre_StructVectorBoxDataBox(vector, i);
       vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorAddToArrayValues,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelStructVectorAddToArrayValues,
                         gDim,
                         bDim,
                         *grid_box,
@@ -858,7 +858,7 @@ hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector,
          data_box = hypre_StructVectorBoxDataBox(vector, i);
          vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
 
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorAddToArrayValues,
+         HYPRE_GPU_LAUNCH( hypre_GPUKernelStructVectorAddToArrayValues,
                            gDim,
                            bDim,
                            *data_box,
@@ -880,7 +880,7 @@ hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_StructVectorGetArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructVectorGetArrayValues( hypre_DeviceItem  &item,
                                            hypre_Box          grid_box,
                                            hypre_Box          data_box,
                                            HYPRE_Int          nvalues,
@@ -932,7 +932,7 @@ hypre_StructVectorGetArrayValuesDevice( hypre_StructVector *vector,
       data_box = hypre_StructVectorBoxDataBox(vector, i);
       vec_box_data = hypre_StructVectorBaseData(vector, hypre_StructVectorBaseBoxnum(vector, i));
 
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_StructVectorGetArrayValues,
+      HYPRE_GPU_LAUNCH( hypre_GPUKernelStructVectorGetArrayValues,
                         gDim,
                         bDim,
                         *grid_box,

@@ -1618,7 +1618,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
 template <bool clear_ghost>
 __global__ void
-hypreGPUKernel_StructMatrixSetArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructMatrixSetArrayValues( hypre_DeviceItem  &item,
                                            hypre_Box          grid_box,
                                            hypre_Box          data_box,
                                            HYPRE_Int          set_stencil_index,
@@ -1704,7 +1704,7 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
 
             if (clear_ghost)
             {
-               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<1>),
+               HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructMatrixSetArrayValues<1>),
                                  gDim,
                                  bDim,
                                  *grid_box,
@@ -1718,7 +1718,7 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
             }
             else
             {
-               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixSetArrayValues<0>),
+               HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructMatrixSetArrayValues<0>),
                                  gDim,
                                  bDim,
                                  *grid_box,
@@ -1742,7 +1742,7 @@ hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix,
 
 template <bool check_done>
 __global__ void
-hypreGPUKernel_StructMatrixAddToArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructMatrixAddToArrayValues( hypre_DeviceItem  &item,
                                              hypre_Box          grid_box,
                                              hypre_Box          data_box,
                                              HYPRE_Int          set_stencil_index,
@@ -1831,7 +1831,7 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
             data_box = hypre_StructMatrixBoxDataBox(matrix, i);
             mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-            HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<0>),
+            HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructMatrixAddToArrayValues<0>),
                               gDim,
                               bDim,
                               *grid_box,
@@ -1860,7 +1860,7 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
             if (symm_entries[j] < 0 && !constant[j])
             {
                mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
-               HYPRE_GPU_LAUNCH( (hypreGPUKernel_StructMatrixAddToArrayValues<1>),
+               HYPRE_GPU_LAUNCH( (hypre_GPUKernelStructMatrixAddToArrayValues<1>),
                                  gDim,
                                  bDim,
                                  *data_box,
@@ -1886,7 +1886,7 @@ hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_StructMatrixGetArrayValues( hypre_DeviceItem  &item,
+hypre_GPUKernelStructMatrixGetArrayValues( hypre_DeviceItem  &item,
                                            hypre_Box          grid_box,
                                            hypre_Box          data_box,
                                            HYPRE_Int          get_stencil_index,
@@ -1954,7 +1954,7 @@ hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix,
          {
             mat_box_data = hypre_StructMatrixBaseData(matrix, hypre_StructMatrixBaseBoxnum(matrix, i), j);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_StructMatrixGetArrayValues,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelStructMatrixGetArrayValues,
                               gDim,
                               bDim,
                               *grid_box,

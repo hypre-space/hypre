@@ -538,3 +538,12 @@
 #undef hypre_structvectorsetvalues
 #undef hypre_BoxRanksToIndexesDevice
 #undef hypre_GPUKernelBoxRanksToIndexes
+#undef hypre_GPUKernelStructMatrixGetArrayValues
+#undef hypre_GPUKernelStructVectorAddToArrayValues
+#undef hypre_GPUKernelStructVectorGetArrayValues
+#undef hypre_StructMatrixAddToArrayValuesDevice
+#undef hypre_StructMatrixGetArrayValuesDevice
+#undef hypre_StructMatrixSetArrayValuesDevice
+#undef hypre_StructVectorAddToArrayValuesDevice
+#undef hypre_StructVectorGetArrayValuesDevice
+#undef hypre_StructVectorSetArrayValuesDevice

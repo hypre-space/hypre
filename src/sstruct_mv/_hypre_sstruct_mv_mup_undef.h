@@ -336,3 +336,8 @@
 #undef hypre_sstructvectorsetconstantv
 #undef hypre_sstructvectorsetobjecttyp
 #undef hypre_sstructvectorsetvalues
+#undef hypre_GPUKernelCopyIndexes
+#undef hypre_SStructMatrixSetArrayInterPartValuesDevice
+#undef hypre_SStructMatrixSetArrayValuesDevice
+#undef hypre_SStructMatrixSplitArrayEntriesDevice
+#undef hypre_SStructUMatrixSetArrayValuesDevice
