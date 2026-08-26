@@ -2548,6 +2548,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
                                  block_dim, block_dim,
                                  hypre_DenseBlockMatrixNumNonzeros(B_CF),
                                  hypre_DenseBlockMatrixData(B_CF));
+      hypre_DenseBlockMatrixDestroy(B_CF);
    }
    else
    {
