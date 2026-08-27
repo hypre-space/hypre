@@ -51,7 +51,7 @@ typedef struct
                                                     parcsr structure (requires the knowledge of
                                                     offd_i and diag_i ) */
 
-   HYPRE_Int           *rownnz;                  /* row_nnz[i] contains the i-th nonzero row id */
+   HYPRE_Int           *rownnz;                  /* rownnz[i] contains the i-th nonzero row id */
    HYPRE_Int           *row_length;              /* row_length[i] contains number of stored
                                                     elements in i-th row */
    HYPRE_Int           *row_space;               /* row_space[i] contains space allocated to
@@ -69,7 +69,7 @@ typedef struct
                                                     in offd_j , offd_data assigned to row i */
 
    HYPRE_Int            max_off_proc_elmts;      /* length of off processor stash set for
-                                                    SetValues and AddTOValues */
+                                                    SetValues and AddToValues */
    HYPRE_Int            current_off_proc_elmts;  /* current no. of elements stored in stash */
    HYPRE_Int            off_proc_i_indx;         /* pointer to first empty space in
                                                     set_off_proc_i_set */
