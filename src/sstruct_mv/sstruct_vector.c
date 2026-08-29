@@ -147,7 +147,6 @@ hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action < 0): get values
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -387,6 +387,33 @@ HYPRE_StructMatrixAddToBoxValues2(HYPRE_StructMatrix  matrix,
                                   HYPRE_Complex      *values);
 
 /**
+ * Set an arbitrary array of matrix values.
+ * The \e indexes array has length \e nvalues * \e ndim and lists the
+ * indexes where values will be set, where entry (\e i * \e ndim + \e j)
+ * in the passed \e indexes array describes the \e j'th component of the
+ * \e i'th index. The \e entries array has lenght \e nvalues and lists
+ * the entry numbers for each value to be set, and finally, the \e values
+ * array also has length \e nvalues and holds values to be set.
+ **/
+HYPRE_Int
+HYPRE_StructMatrixSetArrayValues(HYPRE_StructMatrix  matrix,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Int          *entries,
+                                 HYPRE_Complex      *values);
+
+/**
+ * Add to an arbitrary array of matrix values.
+ * See HYPRE_StructMatrixSetArrayValues() for details on argument array formats.
+ **/
+HYPRE_Int
+HYPRE_StructMatrixAddToArrayValues(HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int           nvalues,
+                                   HYPRE_Int          *indexes,
+                                   HYPRE_Int          *entries,
+                                   HYPRE_Complex      *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 HYPRE_Int
@@ -431,6 +458,17 @@ HYPRE_StructMatrixGetBoxValues2(HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *vilower,
                                 HYPRE_Int          *viupper,
                                 HYPRE_Complex      *values);
+
+/**
+ * Get an arbitrary array of matrix values.
+ * See HYPRE_StructMatrixSetArrayValues() for details on argument array formats.
+ **/
+HYPRE_Int
+HYPRE_StructMatrixGetArrayValues(HYPRE_StructMatrix  matrix,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Int          *entries,
+                                 HYPRE_Complex      *values);
 
 /**
  * Define symmetry properties of the matrix.  By default, matrices are assumed
@@ -623,6 +661,28 @@ HYPRE_StructVectorAddToBoxValues2(HYPRE_StructVector  vector,
                                   HYPRE_Complex      *values);
 
 /**
+ * Set vector coefficients at an arbitrary array of indexes,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_StructVectorSetArrayValues(HYPRE_StructVector  vector,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Complex      *values);
+
+/**
+ * Add to vector coefficients at an arbitrary array of indexes,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_StructVectorAddToArrayValues(HYPRE_StructVector  vector,
+                                   HYPRE_Int           nvalues,
+                                   HYPRE_Int          *indexes,
+                                   HYPRE_Complex      *values);
+
+/**
  * Finalize the construction of the vector before using.
  **/
 HYPRE_Int
@@ -660,6 +720,17 @@ HYPRE_StructVectorGetBoxValues2(HYPRE_StructVector  vector,
                                 HYPRE_Int          *vilower,
                                 HYPRE_Int          *viupper,
                                 HYPRE_Complex      *values);
+
+/**
+ * Get vector coefficients at an arbitrary array of indexes,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_StructVectorGetArrayValues(HYPRE_StructVector  vector,
+                                 HYPRE_Int           nvalues,
+                                 HYPRE_Int          *indexes,
+                                 HYPRE_Complex      *values);
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.

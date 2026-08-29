@@ -27,6 +27,48 @@ hypre_BoxRanksToIndexesDevice_dbl( hypre_Box *box, HYPRE_Int num_ranks, HYPRE_In
 HYPRE_Int
 hypre_BoxRanksToIndexesDevice_long_dbl( hypre_Box *box, HYPRE_Int num_ranks, HYPRE_Int *ranks, HYPRE_Int ***indexes_ptr );
 
+HYPRE_Int
+hypre_StructMatrixAddToArrayValuesDevice_flt( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_float *values, HYPRE_Int add_to_ghost );
+HYPRE_Int
+hypre_StructMatrixAddToArrayValuesDevice_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_double *values, HYPRE_Int add_to_ghost );
+HYPRE_Int
+hypre_StructMatrixAddToArrayValuesDevice_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int add_to_ghost );
+
+HYPRE_Int
+hypre_StructMatrixGetArrayValuesDevice_flt( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_float *values );
+HYPRE_Int
+hypre_StructMatrixGetArrayValuesDevice_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_double *values );
+HYPRE_Int
+hypre_StructMatrixGetArrayValuesDevice_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_long_double *values );
+
+HYPRE_Int
+hypre_StructMatrixSetArrayValuesDevice_flt( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_float *values, HYPRE_Int clear_ghost );
+HYPRE_Int
+hypre_StructMatrixSetArrayValuesDevice_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_double *values, HYPRE_Int clear_ghost );
+HYPRE_Int
+hypre_StructMatrixSetArrayValuesDevice_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int clear_ghost );
+
+HYPRE_Int
+hypre_StructVectorAddToArrayValuesDevice_flt( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values, HYPRE_Int add_to_ghost );
+HYPRE_Int
+hypre_StructVectorAddToArrayValuesDevice_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values, HYPRE_Int add_to_ghost );
+HYPRE_Int
+hypre_StructVectorAddToArrayValuesDevice_long_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values, HYPRE_Int add_to_ghost );
+
+HYPRE_Int
+hypre_StructVectorGetArrayValuesDevice_flt( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values );
+HYPRE_Int
+hypre_StructVectorGetArrayValuesDevice_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values );
+HYPRE_Int
+hypre_StructVectorGetArrayValuesDevice_long_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values );
+
+HYPRE_Int
+hypre_StructVectorSetArrayValuesDevice_flt( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values, HYPRE_Int clear_ghost );
+HYPRE_Int
+hypre_StructVectorSetArrayValuesDevice_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values, HYPRE_Int clear_ghost );
+HYPRE_Int
+hypre_StructVectorSetArrayValuesDevice_long_dbl( hypre_StructVector *vector, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values, HYPRE_Int clear_ghost );
+
 /* functions_gpu */
 
 /* pre_gpu */
