@@ -130,6 +130,14 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPR
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Real
+hypre_CSRMatrixFnormDevice( hypre_CSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixFnormDevice)( A );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_GpuMatData*
 hypre_CSRMatrixGetGPUMatData( hypre_CSRMatrix *matrix )
 {

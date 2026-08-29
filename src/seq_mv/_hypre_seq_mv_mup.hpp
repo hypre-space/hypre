@@ -118,6 +118,13 @@ hypre_CSRMatrixExtractDiagonalDevice_dbl( hypre_CSRMatrix *A, hypre_double *d, H
 HYPRE_Int
 hypre_CSRMatrixExtractDiagonalDevice_long_dbl( hypre_CSRMatrix *A, hypre_long_double *d, HYPRE_Int type );
 
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_flt( hypre_CSRMatrix *A );
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_dbl( hypre_CSRMatrix *A );
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_long_dbl( hypre_CSRMatrix *A );
+
 hypre_GpuMatData*
 hypre_CSRMatrixGetGPUMatData_flt( hypre_CSRMatrix *matrix );
 hypre_GpuMatData*

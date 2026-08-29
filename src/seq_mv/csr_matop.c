@@ -1840,6 +1840,13 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    HYPRE_Int       i;
    HYPRE_Complex   sum = 0;
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_CSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_CSRMatrixFnormDevice(A);
+   }
+#endif
+
    hypre_assert(num_nonzeros == A_i[nrows]);
 
 #ifdef HYPRE_USING_OPENMP

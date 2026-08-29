@@ -205,6 +205,7 @@
 #define hypre_CSRMatrixDiagScaleDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixDiagScaleDevice )
 #define hypre_CSRMatrixDropSmallEntriesDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixDropSmallEntriesDevice )
 #define hypre_CSRMatrixExtractDiagonalDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixExtractDiagonalDevice )
+#define hypre_CSRMatrixFnormDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixFnormDevice )
 #define hypre_CSRMatrixGetGPUMatData HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixGetGPUMatData )
 #define hypre_CSRMatrixILU0 HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixILU0 )
 #define hypre_CSRMatrixIdentityDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixIdentityDevice )

@@ -393,6 +393,7 @@ HYPRE_Int hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_
                                               HYPRE_Complex scal, const char *set_or_add );
 HYPRE_Int hypre_CSRMatrixComputeColSumDevice( hypre_CSRMatrix *A,  HYPRE_Complex *col_sum,
                                               HYPRE_Int type, HYPRE_Complex scal );
+HYPRE_Real hypre_CSRMatrixFnormDevice( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixTaggedFnormDevice(hypre_CSRMatrix *A, HYPRE_Int num_tags,
                                            HYPRE_Int *tags, HYPRE_Real *tnorms);
 HYPRE_Int hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d,
