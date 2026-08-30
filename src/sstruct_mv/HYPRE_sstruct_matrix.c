@@ -844,6 +844,111 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructMatrixSetArrayValuesDevice(matrix, part, var, nvalues,
+                                              indexes, entries, values, 0);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructMatrixSetValues(matrix, part, &(indexes[i * ndim]),
+                                      var, 1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues(HYPRE_SStructMatrix  matrix,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
+                                    HYPRE_Int           *entries,
+                                    HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructMatrixSetArrayValuesDevice(matrix, part, var, nvalues,
+                                              indexes, entries, values, 1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructMatrixAddToValues(matrix, part, &(indexes[i * ndim]),
+                                        var, 1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SStructMatrixSetArrayValuesDevice(matrix, part, var, nvalues,
+                                              indexes, entries, values, -1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructMatrixGetValues(matrix, part, &(indexes[i * ndim]),
+                                      var, 1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
    HYPRE_Int               ndim            = hypre_SStructMatrixNDim(matrix);
