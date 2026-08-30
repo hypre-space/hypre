@@ -1678,7 +1678,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
  *--------------------------------------------------------------------*/
 
 template <typename T>
-HYPRE_Int
+static HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
                           T                 *urand,
                           HYPRE_Int          set_seed,
@@ -1745,7 +1745,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
  *--------------------------------------------------------------------*/
 
 template <typename T>
-HYPRE_Int
+static HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
                           T                 *urand,
                           HYPRE_Int          set_seed,
@@ -1802,7 +1802,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
  *--------------------------------------------------------------------*/
 
 template <typename T>
-HYPRE_Int
+static HYPRE_Int
 hypre_CurandUniform_core( HYPRE_Int          n,
                           T                 *urand,
                           HYPRE_Int          set_seed,
