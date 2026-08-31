@@ -1830,12 +1830,8 @@ hypre_GPUKernelCSRMatrixTaggedFnormAccum(hypre_DeviceItem    &item,
                                          HYPRE_Real          *tnorms)
 {
    /* Get warp and lane IDs */
-   const HYPRE_Int  num_warps     = hypre_gpu_get_blockDim<0>(item) / HYPRE_WARP_SIZE;
-   const HYPRE_Int  warp_id       = hypre_gpu_get_warp_id<1>(item);
-   const HYPRE_Int  lane_id       = hypre_gpu_get_lane_id<1>(item);
-   const HYPRE_Int  warp_in_block = warp_id % num_warps;
-   const HYPRE_Int  row           = hypre_gpu_get_blockDim<0>(item) * num_warps + warp_in_block;
-   const HYPRE_Int  itag          = tags[row];
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
+   const HYPRE_Int row     = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    /* Shared memory */
 #if defined (HYPRE_USING_SYCL)
@@ -1856,6 +1852,8 @@ hypre_GPUKernelCSRMatrixTaggedFnormAccum(hypre_DeviceItem    &item,
 
    if (row < nrows)
    {
+      const HYPRE_Int itag = tags[row];
+
       /* Load row bounds using warp shuffle */
       HYPRE_Int p = 0, q = 0;
       if (lane_id < 2)
@@ -1888,6 +1886,37 @@ hypre_GPUKernelCSRMatrixTaggedFnormAccum(hypre_DeviceItem    &item,
          hypre_gpu_atomicAdd(i, tnorms, sdata[i]);
       }
    }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixFnormDevice
+ *
+ * Frobenius norm of a device CSR matrix: sqrt(sum_k data[k]^2).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_CSRMatrixFnormDevice( hypre_CSRMatrix *A )
+{
+   HYPRE_Complex *A_data       = hypre_CSRMatrixData(A);
+   HYPRE_Int      num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Real     sum          = 0.0;
+
+   if (num_nonzeros <= 0 || !A_data)
+   {
+      return 0.0;
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   sum = HYPRE_THRUST_CALL( inner_product, A_data, A_data + num_nonzeros, A_data,
+                            (HYPRE_Real) 0.0 );
+#elif defined(HYPRE_USING_SYCL)
+   sum = HYPRE_ONEDPL_CALL( std::transform_reduce, A_data, A_data + num_nonzeros, A_data,
+                            (HYPRE_Real) 0.0 );
+#endif
+
+   hypre_SyncComputeStream();
+
+   return hypre_sqrt(sum);
 }
 
 /*--------------------------------------------------------------------------

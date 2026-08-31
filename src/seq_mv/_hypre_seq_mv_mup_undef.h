@@ -202,6 +202,7 @@
 #undef hypre_CSRMatrixDiagScaleDevice
 #undef hypre_CSRMatrixDropSmallEntriesDevice
 #undef hypre_CSRMatrixExtractDiagonalDevice
+#undef hypre_CSRMatrixFnormDevice
 #undef hypre_CSRMatrixGetGPUMatData
 #undef hypre_CSRMatrixILU0
 #undef hypre_CSRMatrixIdentityDevice
