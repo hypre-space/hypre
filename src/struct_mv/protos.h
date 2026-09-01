@@ -239,6 +239,9 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
                                    hypre_BoxArrayArray  **new_boxaa_ptr );
 HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride,
                                 HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+HYPRE_Int
+hypre_CoarsenStencil( hypre_StructStencil *stencil,
+                      hypre_Index          stride );
 
 /* communication_info.c */
 hypre_CommStencil *hypre_CommStencilCreate ( HYPRE_Int  ndim );
@@ -557,7 +560,7 @@ hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
                            hypre_StructMatrix       **A_ptr );
 HYPRE_Int
 hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
-                          HYPRE_Complex             alpha,
+                          HYPRE_Complex             beta,
                           hypre_StructMatrix       *B );
 
 /* struct_matmult_core.c */
@@ -602,13 +605,37 @@ HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A, HYPRE_Int type,
                                             hypre_StructVector *rowsum );
 HYPRE_Int hypre_StructMatrixScale( hypre_StructMatrix *A, HYPRE_Complex scalar );
+HYPRE_Int
+hypre_StructMatrixAddInit( HYPRE_Int            nmatrices,
+                           hypre_StructMatrix **matrices,
+                           hypre_StructMatrix **A_ptr );
+HYPRE_Int
+hypre_StructMatrixAddMat( hypre_StructMatrix *A,
+                          HYPRE_Complex       beta,
+                          hypre_StructMatrix *B );
+HYPRE_Int
+hypre_StructMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_StructMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_StructMatrix  *B,
+                       hypre_StructMatrix **C_ptr );
+HYPRE_Int
+hypre_StructMatrixPoly( hypre_StructMatrix       *A,
+                        HYPRE_Int                 order,
+                        HYPRE_Complex            *coeffs,
+                        hypre_StructMatrix      **polyA_ptr );
+HYPRE_Int
+hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
+                              HYPRE_Real           weight,
+                              HYPRE_Int            type,
+                              hypre_StructMatrix **D_ptr );
 
 /* struct_matrix.c */
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
-HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
-HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
 HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix, HYPRE_Int entry,
                                            hypre_Index dindex, hypre_Index index );
@@ -691,6 +718,9 @@ HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix,
                                       hypre_StructMatrix *to_matrix );
 HYPRE_Int hypre_StructMatrixClearBoundary ( hypre_StructMatrix *matrix);
 HYPRE_Int hypre_StructMatrixGetDiagonal ( hypre_StructMatrix *matrix, hypre_StructVector *diag );
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
+                            HYPRE_Complex      value );
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix,

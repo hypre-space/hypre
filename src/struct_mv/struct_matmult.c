@@ -340,20 +340,16 @@ hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
    hypre_Index                Mran_stride, Mdom_stride;
 
    MPI_Comm                   comm;
-   HYPRE_Int                  ndim, size;
+   HYPRE_Int                  ndim;
 
    hypre_StructMatrix        *matrix;
-   hypre_StructStencil       *stencil;
    hypre_StructGrid          *grid;
 
-   hypre_StMatrix           **st_matrices, *st_matrix;
-   hypre_StCoeff             *st_coeff;
-   hypre_StTerm              *st_term;
+   hypre_StMatrix           **st_matrices;
 
    hypre_IndexRef             ran_stride;
    hypre_IndexRef             dom_stride;
-   hypre_Index                offset;
-   HYPRE_Int                  d, i, e;
+   HYPRE_Int                  d, i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -443,23 +439,10 @@ hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
    for (t = 0; t < nterms; t++)
    {
       m = terms[t];
-      matrix = matrices[m];
-      stencil = hypre_StructMatrixStencil(matrix);
-      size = hypre_StructStencilSize(stencil);
-      hypre_StMatrixCreate(m, size, ndim, &st_matrix);
-      hypre_CopyToIndex(hypre_StructMatrixRanStride(matrix), ndim, hypre_StMatrixRMap(st_matrix));
-      hypre_CopyToIndex(hypre_StructMatrixDomStride(matrix), ndim, hypre_StMatrixDMap(st_matrix));
-      for (e = 0; e < size; e++)
-      {
-         hypre_CopyToIndex(hypre_StructStencilOffset(stencil, e), ndim,
-                           hypre_StMatrixOffset(st_matrix, e));
-         hypre_StCoeffCreate(1, &st_coeff);
-         st_term = hypre_StCoeffTerm(st_coeff, 0);
-         hypre_StTermID(st_term) = t;
-         hypre_StTermEntry(st_term) = e;
-         hypre_StMatrixCoeff(st_matrix, e) = st_coeff;
-      }
-      st_matrices[t] = st_matrix;
+      hypre_StMatrixCreateFromStencil(hypre_StructMatrixStencil(matrices[m]),
+                                      hypre_StructMatrixRanStride(matrices[m]),
+                                      hypre_StructMatrixDomStride(matrices[m]),
+                                      t, &st_matrices[t]);
    }
 
    /* Multiply st_matrices */
@@ -517,20 +500,13 @@ hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
       hypre_StructGridRef(grid, &Mgrid);
    }
 
-   /* Create Mstencil and compute an initial value for 'na' */
-   size = hypre_StMatrixSize(st_M);
-   HYPRE_StructStencilCreate(ndim, size, &Mstencil);
-   na = 0;
-   for (e = 0; e < size; e++)
+   /* Create Mstencil and set an initial value for 'na' */
+   hypre_StMatrixGetStencil(st_M, ndim, &Mstencil);
+   if (coarsen)
    {
-      hypre_CopyToIndex(hypre_StMatrixOffset(st_M, e), ndim, offset);
-      if (coarsen)
-      {
-         hypre_MapToCoarseIndex(offset, NULL, coarsen_stride, ndim);
-      }
-      HYPRE_StructStencilSetEntry(Mstencil, e, offset);
-      na += hypre_StMatrixNEntryCoeffs(st_M, e);
+      hypre_CoarsenStencil(Mstencil, coarsen_stride);
    }
+   na = hypre_StMatrixNCoeffs(st_M);
 
    /* Create the matrix */
    HYPRE_StructMatrixCreate(comm, Mgrid, Mstencil, &M);
@@ -573,6 +549,8 @@ hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
       }
    }
    HYPRE_StructMatrixSetSymmetric(M, symmetric);
+
+   /* RDF TODO: SetConstantEntries(M, nconst, const_entries) here */
 
    /* Destroy Mstencil and Mgrid (they will still exist in matrix M) */
    HYPRE_StructStencilDestroy(Mstencil);
@@ -1947,50 +1925,3 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- * StructMatrixAdd functions
- *
- * RDF: Implement this for more than just one matrix.
- * RDF: Move this to another place later.
- *--------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
-                           hypre_StructMatrix       **matrices,
-                           hypre_StructMatrix       **A_ptr )
-{
-   hypre_StructMatrix  *A = NULL;
-
-   /* RDF: Assume there is only one matrix (for now).  This would normally
-    * compute a valid stencil for A and initialize it to zero. */
-
-   if (nmatrices > 0)
-   {
-      A = hypre_StructMatrixRef(matrices[0]);
-   }
-
-   *A_ptr = A;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
-                          HYPRE_Complex             alpha,
-                          hypre_StructMatrix       *B )
-{
-   /* RDF: Assume there is only one matrix (for now) and alpha = 1 */
-
-   /* Compute A += alpha * B */
-   HYPRE_UNUSED_VAR(A);
-   HYPRE_UNUSED_VAR(alpha);
-   HYPRE_UNUSED_VAR(B);
-
-   return hypre_error_flag;
-}
