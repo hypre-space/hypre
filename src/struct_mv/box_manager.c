@@ -1258,7 +1258,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          HYPRE_Int statbuf[3];
          HYPRE_Int send_statbuf[3];
 
-         HYPRE_Int ndim = hypre_BoxManNDim(manager);
+         HYPRE_Int ndim_local = hypre_BoxManNDim(manager);
 
          void *entry_response_buf;
          void *index_ptr;
@@ -1267,7 +1267,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          HYPRE_Real local_volume, global_volume;
          HYPRE_Real sendbuf2[2], recvbuf2[2];
 
-         hypre_BoxArray *gather_regions;
+         hypre_BoxArray *gather_regions_local;
          hypre_BoxArray *local_boxes;
 
          hypre_Box *box;
@@ -1291,7 +1291,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             /* create an array of local boxes.  get the global box size/volume
                (as a HYPRE_Real). */
 
-            local_boxes = hypre_BoxArrayCreate(num_my_entries, ndim);
+            local_boxes = hypre_BoxArrayCreate(num_my_entries, ndim_local);
 
             local_volume = 0.0;
 
@@ -1335,7 +1335,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             gamma = .6; /* percentage a region must be full to avoid refinement */
 
             hypre_StructAssumedPartitionCreate(
-               ndim, hypre_BoxManBoundingBox(manager), global_volume, global_num_boxes,
+               ndim_local, hypre_BoxManBoundingBox(manager), global_volume, global_num_boxes,
                local_boxes, max_regions, max_refinements, gamma, comm, &ap);
 
             hypre_BoxManAssumedPartition(manager) = ap;
@@ -1357,28 +1357,28 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
           * until more extensive testing is done. (RDF) */
          /* if (global_num_boxes) */
          {
-            gather_regions = hypre_BoxManGatherRegions(manager);
+            gather_regions_local = hypre_BoxManGatherRegions(manager);
 
             /* allocate space to store info from one box */
             proc_count = 0;
-            proc_alloc = hypre_pow2(ndim); /* Just an initial estimate */
+            proc_alloc = hypre_pow2(ndim_local); /* Just an initial estimate */
             proc_array = hypre_CTAlloc(HYPRE_Int, proc_alloc, HYPRE_MEMORY_HOST);
 
             /* probably there will be one proc per box - allocate space for 2 */
-            size = 2 * hypre_BoxArraySize(gather_regions);
+            size = 2 * hypre_BoxArraySize(gather_regions_local);
             tmp_proc_ids =  hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
             count = 0;
 
             /* loop through all boxes */
-            hypre_ForBoxI(i, gather_regions)
+            hypre_ForBoxI(i, gather_regions_local)
             {
                hypre_StructAssumedPartitionGetProcsFromBox(
-                  ap, hypre_BoxArrayBox(gather_regions, i),
+                  ap, hypre_BoxArrayBox(gather_regions_local, i),
                   &proc_count, &proc_alloc, &proc_array);
 
                if ((count + proc_count) > size)
                {
-                  size = size + proc_count + 2 * (hypre_BoxArraySize(gather_regions) - i);
+                  size = size + proc_count + 2 * (hypre_BoxArraySize(gather_regions_local) - i);
                   tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids, HYPRE_Int, size, HYPRE_MEMORY_HOST);
                }
                for (j = 0; j < proc_count; j++)
@@ -1627,7 +1627,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   Note: For now, we do not need to send num_ghost, position, or
                   boxman, since this is just generated in addentry. */
 
-               non_info_size = 2 * ndim + 2;
+               non_info_size = 2 * ndim_local + 2;
                entry_size_bytes = ((size_t) non_info_size) * sizeof(HYPRE_Int) +
                                   (size_t) hypre_BoxManEntryInfoSize(manager);
 
@@ -1665,7 +1665,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                {
                   size = sizeof(HYPRE_Int);
                   /* imin */
-                  for (d = 0; d < ndim; d++)
+                  for (d = 0; d < ndim_local; d++)
                   {
                      hypre_TMemcpy( &tmp_int, index_ptr, HYPRE_Int, 1,
                                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
@@ -1674,7 +1674,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   }
 
                   /* imax */
-                  for (d = 0; d < ndim; d++)
+                  for (d = 0; d < ndim_local; d++)
                   {
                      hypre_TMemcpy( &tmp_int, index_ptr, HYPRE_Int, 1,
                                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);

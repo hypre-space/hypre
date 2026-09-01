@@ -69,34 +69,63 @@ hypre_OverlapDataDestroy(hypre_OverlapData *overlap_data)
    return hypre_error_flag;
 }
 
+static void
+hypre_OverlapPotentialMapRebuild(hypre_UnorderedBigIntMap *potential_map,
+                                 HYPRE_Int                *potential_map_created,
+                                 HYPRE_BigInt             *potential_external,
+                                 HYPRE_Int                 num_potential,
+                                 HYPRE_Int                 potential_alloc)
+{
+   HYPRE_Int j;
+
+   if (*potential_map_created)
+   {
+      hypre_UnorderedBigIntMapDestroy(potential_map);
+   }
+
+   hypre_UnorderedBigIntMapCreate(potential_map, hypre_max(2 * potential_alloc + 1, 100), 1);
+   *potential_map_created = 1;
+
+   for (j = 0; j < num_potential; j++)
+   {
+      hypre_UnorderedBigIntMapPutIfAbsent(potential_map, potential_external[j], j + 1);
+   }
+}
+
 /*--------------------------------------------------------------------------
- * Check if a sorted BigInt array contains a value using binary search.
+ * Sort integer column indices and apply the same permutation to complex data.
  *--------------------------------------------------------------------------*/
 
-static HYPRE_Int
-hypre_BigIntArrayContains(HYPRE_BigInt *array, HYPRE_Int size, HYPRE_BigInt value)
+static void
+hypre_IntQsort2Complex(HYPRE_Int     *v,
+                       HYPRE_Complex *w,
+                       HYPRE_Int      left,
+                       HYPRE_Int      right)
 {
-   HYPRE_Int left = 0;
-   HYPRE_Int right = size - 1;
+   HYPRE_Int i, last;
 
-   while (left <= right)
+   if (left >= right)
    {
-      HYPRE_Int mid = (left + right) / 2;
-      if (array[mid] == value)
+      return;
+   }
+
+   hypre_swap(v, left, (left + right) / 2);
+   hypre_swap_c(w, left, (left + right) / 2);
+
+   last = left;
+   for (i = left + 1; i <= right; i++)
+   {
+      if (v[i] < v[left])
       {
-         return 1;
-      }
-      else if (array[mid] < value)
-      {
-         left = mid + 1;
-      }
-      else
-      {
-         right = mid - 1;
+         hypre_swap(v, ++last, i);
+         hypre_swap_c(w, last, i);
       }
    }
 
-   return 0;
+   hypre_swap(v, left, last);
+   hypre_swap_c(w, left, last);
+   hypre_IntQsort2Complex(v, w, left, last - 1);
+   hypre_IntQsort2Complex(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -194,7 +223,23 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
    HYPRE_BigInt        *external_indices = NULL;
    HYPRE_Int            num_external = 0;
 
-   HYPRE_Int            level, i, j, jj;
+   HYPRE_Int            level, i, jj;
+
+   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == hypre_MEMORY_DEVICE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Overlapping Schwarz matrix overlap construction requires host memory");
+      return hypre_error_flag;
+   }
+
+   if (!hypre_ParCSRMatrixAssumedPartition(A))
+   {
+      hypre_ParCSRMatrixCreateAssumedPartition(A);
+      if (hypre_error_flag)
+      {
+         return hypre_error_flag;
+      }
+   }
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -246,12 +291,16 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
       HYPRE_BigInt *potential_external = NULL;
       HYPRE_Int     num_potential = 0;
       HYPRE_Int     potential_alloc = 0;
+      hypre_UnorderedBigIntMap potential_map;
+      HYPRE_Int     potential_map_created = 0;
 
       /* Estimate allocation */
       potential_alloc = num_cols_offd;
       if (potential_alloc > 0)
       {
          potential_external = hypre_TAlloc(HYPRE_BigInt, potential_alloc, HYPRE_MEMORY_HOST);
+         hypre_OverlapPotentialMapRebuild(&potential_map, &potential_map_created,
+                                          potential_external, num_potential, potential_alloc);
       }
 
       /* For each row in current set, find its off-processor neighbors */
@@ -271,20 +320,18 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
                HYPRE_BigInt global_col = col_map_offd[col];
 
                /* Check if already in current set */
-               if (!hypre_BigIntArrayContains(current_set, current_size, global_col))
+               if (hypre_BigBinarySearch(current_set, global_col, current_size) < 0)
                {
-                  /* Check if already in potential list */
-                  HYPRE_Int found = 0;
-                  for (j = 0; j < num_potential; j++)
+                  if (!potential_map_created)
                   {
-                     if (potential_external[j] == global_col)
-                     {
-                        found = 1;
-                        break;
-                     }
+                     potential_alloc = hypre_max(potential_alloc, 100);
+                     potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
+                                                         potential_alloc, HYPRE_MEMORY_HOST);
+                     hypre_OverlapPotentialMapRebuild(&potential_map, &potential_map_created,
+                                                      potential_external, num_potential, potential_alloc);
                   }
 
-                  if (!found)
+                  if (hypre_UnorderedBigIntMapGet(&potential_map, global_col) <= 0)
                   {
                      /* Add to potential list */
                      if (num_potential >= potential_alloc)
@@ -292,8 +339,11 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
                         potential_alloc = hypre_max(2 * potential_alloc, num_potential + 100);
                         potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
                                                             potential_alloc, HYPRE_MEMORY_HOST);
+                        hypre_OverlapPotentialMapRebuild(&potential_map, &potential_map_created,
+                                                         potential_external, num_potential, potential_alloc);
                      }
                      potential_external[num_potential++] = global_col;
+                     hypre_UnorderedBigIntMapPutIfAbsent(&potential_map, global_col, num_potential);
                   }
                }
             }
@@ -309,89 +359,118 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
       /* At this point, for multi-processor case with overlap > 1,
        * we need to communicate to find rows that are neighbors of external rows.
        * For level > 0, we need to get the sparsity pattern of external rows
-       * to find their neighbors. */
+       * to find their neighbors.
+       *
+       * IMPORTANT: The communication functions are collective - ALL processes
+       * must participate, even if they have no external rows to request. */
 
       if (level > 0)
       {
-         hypre_ParCSRCommPkg *ext_comm_pkg = NULL;
-         hypre_CSRMatrix     *A_ext = NULL;
-         void                *request = NULL;
+         HYPRE_Int global_has_external = 0;
+         hypre_MPI_Allreduce(&num_external, &global_has_external, 1, HYPRE_MPI_INT,
+                             hypre_MPI_MAX, comm);
 
-         /* Build comm pkg for external indices (works with num_external = 0) */
-         hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
-                                       hypre_ParCSRMatrixRowStarts(A),
-                                       hypre_ParCSRMatrixAssumedPartition(A),
-                                       num_external, external_indices, &ext_comm_pkg);
-
-         /* Fetch graph of external connections A_ext (pattern only, no data needed) */
-         /* All processes must call this, even with num_external = 0 */
-         hypre_ParcsrGetExternalRowsInit(A, num_external, external_indices,
-                                         ext_comm_pkg, 0, &request);
-         A_ext = hypre_ParcsrGetExternalRowsWait(request);
-
-         /* Find neighbors of external rows (only if this process received rows) */
-         if (A_ext)
+         if (global_has_external > 0)
          {
-            HYPRE_Int     *ext_i = hypre_CSRMatrixI(A_ext);
-            HYPRE_BigInt  *ext_j = hypre_CSRMatrixBigJ(A_ext);
-            HYPRE_Int      ext_num_rows = hypre_CSRMatrixNumRows(A_ext);
+            hypre_ParCSRCommPkg *ext_comm_pkg = NULL;
+            hypre_CSRMatrix     *A_ext = NULL;
+            void                *request = NULL;
 
-            for (i = 0; i < ext_num_rows; i++)
+            /* Build comm pkg for external indices (works with num_external = 0) */
+            hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
+                                          hypre_ParCSRMatrixRowStarts(A),
+                                          hypre_ParCSRMatrixAssumedPartition(A),
+                                          num_external, external_indices, &ext_comm_pkg);
+
+            /* Fetch graph of external connections A_ext (pattern only, no data needed) */
+            hypre_ParcsrGetExternalRowsInit(A, num_external, external_indices,
+                                            ext_comm_pkg, 0, &request);
+            A_ext = hypre_ParcsrGetExternalRowsWait(request);
+
+            /* Find neighbors of external rows (only if this process received rows) */
+            if (A_ext)
             {
-               for (jj = ext_i[i]; jj < ext_i[i + 1]; jj++)
+               HYPRE_Int     *ext_i = hypre_CSRMatrixI(A_ext);
+               HYPRE_BigInt  *ext_j = hypre_CSRMatrixBigJ(A_ext);
+               HYPRE_Int      ext_num_rows = hypre_CSRMatrixNumRows(A_ext);
+
+               for (i = 0; i < ext_num_rows; i++)
                {
-                  HYPRE_BigInt neighbor = ext_j[jj];
-
-                  /* Check if already in current set or potential */
-                  if (!hypre_BigIntArrayContains(current_set, current_size, neighbor))
+                  for (jj = ext_i[i]; jj < ext_i[i + 1]; jj++)
                   {
-                     HYPRE_Int found = 0;
-                     for (j = 0; j < num_potential; j++)
-                     {
-                        if (potential_external[j] == neighbor)
-                        {
-                           found = 1;
-                           break;
-                        }
-                     }
+                     HYPRE_BigInt neighbor = ext_j[jj];
 
-                     if (!found)
+                     /* Check if already in current set or potential */
+                     if (hypre_BigBinarySearch(current_set, neighbor, current_size) < 0)
                      {
-                        if (num_potential >= potential_alloc)
+                        if (!potential_map_created)
                         {
-                           potential_alloc = hypre_max(2 * potential_alloc, num_potential + 100);
+                           potential_alloc = hypre_max(potential_alloc, 100);
                            potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
                                                                potential_alloc, HYPRE_MEMORY_HOST);
+                           hypre_OverlapPotentialMapRebuild(&potential_map, &potential_map_created,
+                                                            potential_external, num_potential, potential_alloc);
                         }
-                        potential_external[num_potential++] = neighbor;
+
+                        if (hypre_UnorderedBigIntMapGet(&potential_map, neighbor) <= 0)
+                        {
+                           if (num_potential >= potential_alloc)
+                           {
+                              potential_alloc = hypre_max(2 * potential_alloc, num_potential + 100);
+                              potential_external = hypre_TReAlloc(potential_external, HYPRE_BigInt,
+                                                                  potential_alloc, HYPRE_MEMORY_HOST);
+                              hypre_OverlapPotentialMapRebuild(&potential_map, &potential_map_created,
+                                                               potential_external, num_potential, potential_alloc);
+                           }
+                           potential_external[num_potential++] = neighbor;
+                           hypre_UnorderedBigIntMapPutIfAbsent(&potential_map, neighbor, num_potential);
+                        }
                      }
                   }
                }
+
+               hypre_CSRMatrixDestroy(A_ext);
             }
 
-            hypre_CSRMatrixDestroy(A_ext);
-         }
-
-         if (ext_comm_pkg)
-         {
-            hypre_MatvecCommPkgDestroy(ext_comm_pkg);
-         }
-
-         /* Re-sort after adding more */
-         if (num_potential > 1)
-         {
-            hypre_BigQsort0(potential_external, 0, num_potential - 1);
-
-            /* Remove duplicates */
-            HYPRE_Int unique_count = 1;
-            for (i = 1; i < num_potential; i++)
+            if (ext_comm_pkg)
             {
-               if (potential_external[i] != potential_external[unique_count - 1])
-               {
-                  potential_external[unique_count++] = potential_external[i];
-               }
+               hypre_MatvecCommPkgDestroy(ext_comm_pkg);
             }
-            num_potential = unique_count;
+
+            /* Re-sort after adding more */
+            if (num_potential > 1)
+            {
+               hypre_BigQsort0(potential_external, 0, num_potential - 1);
+
+               /* Remove duplicates */
+               HYPRE_Int unique_count = 1;
+               for (i = 1; i < num_potential; i++)
+               {
+                  if (potential_external[i] != potential_external[unique_count - 1])
+                  {
+                     potential_external[unique_count++] = potential_external[i];
+                  }
+               }
+               num_potential = unique_count;
+            }
+         }
+      }
+
+      /* Check globally if any process found new external rows.
+       * ALL processes must agree to continue or stop to avoid deadlock. */
+      {
+         HYPRE_Int global_has_potential = 0;
+         hypre_MPI_Allreduce(&num_potential, &global_has_potential, 1, HYPRE_MPI_INT,
+                             hypre_MPI_MAX, comm);
+
+         if (global_has_potential == 0)
+         {
+            if (potential_map_created)
+            {
+               hypre_UnorderedBigIntMapDestroy(&potential_map);
+            }
+            hypre_TFree(potential_external, HYPRE_MEMORY_HOST);
+            break;
          }
       }
 
@@ -409,6 +488,11 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
       hypre_TFree(current_set, HYPRE_MEMORY_HOST);
       current_set = new_set;
       current_size = new_size;
+
+      if (potential_map_created)
+      {
+         hypre_UnorderedBigIntMapDestroy(&potential_map);
+      }
    }
 
    /* Store final extended set */
@@ -436,29 +520,45 @@ hypre_ParCSRMatrixComputeOverlap(hypre_ParCSRMatrix  *A,
    }
 
    /* Build communication package for overlap if needed */
-   if (current_size > num_rows && num_procs > 1)
+   if (num_procs > 1)
    {
-      /* Collect external row indices */
-      HYPRE_BigInt *ext_indices = hypre_TAlloc(HYPRE_BigInt, current_size - num_rows, HYPRE_MEMORY_HOST);
-      HYPRE_Int ext_count = 0;
+      HYPRE_BigInt *ext_indices = NULL;
+      HYPRE_Int      ext_count = current_size - num_rows;
+      HYPRE_Int      global_ext_count;
 
-      for (i = 0; i < current_size; i++)
+      if (ext_count > 0)
       {
-         if (!hypre_OverlapDataRowIsOwned(overlap_data)[i])
+         ext_indices = hypre_TAlloc(HYPRE_BigInt, ext_count, HYPRE_MEMORY_HOST);
+         ext_count = 0;
+
+         for (i = 0; i < current_size; i++)
          {
-            ext_indices[ext_count++] = current_set[i];
+            if (!hypre_OverlapDataRowIsOwned(overlap_data)[i])
+            {
+               ext_indices[ext_count++] = current_set[i];
+            }
          }
       }
 
-      /* Build comm pkg */
-      hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
-                                    hypre_ParCSRMatrixRowStarts(A),
-                                    hypre_ParCSRMatrixAssumedPartition(A),
-                                    ext_count, ext_indices,
-                                    &hypre_OverlapDataOverlapCommPkg(overlap_data));
+      hypre_MPI_Allreduce(&ext_count, &global_ext_count, 1, HYPRE_MPI_INT,
+                          hypre_MPI_SUM, comm);
 
-      /* Store external row map */
-      hypre_OverlapDataExternalRowMap(overlap_data) = ext_indices;
+      if (global_ext_count > 0)
+      {
+         /* Build comm pkg collectively, including ranks with no external rows. */
+         hypre_ParCSRFindExtendCommPkg(comm, global_num_rows, first_row, num_rows,
+                                       hypre_ParCSRMatrixRowStarts(A),
+                                       hypre_ParCSRMatrixAssumedPartition(A),
+                                       ext_count, ext_indices,
+                                       &hypre_OverlapDataOverlapCommPkg(overlap_data));
+
+         /* Store external row map */
+         hypre_OverlapDataExternalRowMap(overlap_data) = ext_indices;
+      }
+      else
+      {
+         hypre_TFree(ext_indices, HYPRE_MEMORY_HOST);
+      }
    }
 
    /* Clean up */
@@ -492,12 +592,21 @@ hypre_ParCSRMatrixGetExternalMatrix(hypre_ParCSRMatrix *A,
       return hypre_error_flag;
    }
 
+   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == hypre_MEMORY_DEVICE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Overlapping Schwarz external row fetch requires host memory");
+      return hypre_error_flag;
+   }
+
    num_external = hypre_OverlapDataNumOverlapRows(overlap_data);
    ext_indices = hypre_OverlapDataExternalRowMap(overlap_data);
    comm_pkg = hypre_OverlapDataOverlapCommPkg(overlap_data);
 
-   /* If no external rows, nothing to do */
-   if (num_external == 0 || !comm_pkg)
+   /* If there is no communication package, no rank has external rows.  Ranks
+    * with no local requests still need to participate when a package exists,
+    * because they may be sender-only ranks for other processes' requests. */
+   if (!comm_pkg)
    {
       return hypre_error_flag;
    }
@@ -558,6 +667,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
    HYPRE_BigInt        *extended_rows = hypre_OverlapDataExtendedRowIndices(overlap_data);
    HYPRE_Int            num_extended  = hypre_OverlapDataNumExtendedRows(overlap_data);
    HYPRE_Int           *row_is_owned  = hypre_OverlapDataRowIsOwned(overlap_data);
+   HYPRE_BigInt        *ext_indices   = hypre_OverlapDataExternalRowMap(overlap_data);
 
    hypre_CSRMatrix     *A_local;
    HYPRE_Int           *A_local_i;
@@ -567,9 +677,17 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
 
    HYPRE_BigInt        *col_map = NULL;
    HYPRE_Int            num_cols_local;
+   hypre_UnorderedBigIntMap col_to_local_map;
 
    HYPRE_Int            i, jj, k;
    HYPRE_Int            ext_row_counter = 0;
+
+   if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A)) == hypre_MEMORY_DEVICE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Overlapping Schwarz local matrix extraction requires host memory");
+      return hypre_error_flag;
+   }
 
    /* For a square matrix, the column map IS the extended rows (which is already sorted) */
    num_cols_local = num_extended;
@@ -577,6 +695,12 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
    for (i = 0; i < num_cols_local; i++)
    {
       col_map[i] = extended_rows[i];
+   }
+
+   hypre_UnorderedBigIntMapCreate(&col_to_local_map, num_cols_local, 1);
+   for (i = 0; i < num_cols_local; i++)
+   {
+      hypre_UnorderedBigIntMapPutIfAbsent(&col_to_local_map, col_map[i], i);
    }
 
    /* Get external rows data */
@@ -606,7 +730,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          {
             HYPRE_BigInt global_col = first_col + (HYPRE_BigInt) diag_j[jj];
             /* Check if column is in extended domain */
-            if (hypre_BigBinarySearch(col_map, global_col, num_cols_local) >= 0)
+            if (hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col) >= 0)
             {
                A_local_nnz++;
             }
@@ -616,7 +740,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          for (jj = offd_i[local_row]; jj < offd_i[local_row + 1]; jj++)
          {
             HYPRE_BigInt global_col = col_map_offd[offd_j[jj]];
-            if (hypre_BigBinarySearch(col_map, global_col, num_cols_local) >= 0)
+            if (hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col) >= 0)
             {
                A_local_nnz++;
             }
@@ -627,10 +751,13 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          /* External row */
          if (A_ext && ext_row_counter < num_ext_rows)
          {
+            hypre_assert(ext_indices);
+            hypre_assert(ext_indices[ext_row_counter] == global_row);
+
             for (jj = ext_i[ext_row_counter]; jj < ext_i[ext_row_counter + 1]; jj++)
             {
                HYPRE_BigInt global_col = ext_j[jj];
-               if (hypre_BigBinarySearch(col_map, global_col, num_cols_local) >= 0)
+               if (hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col) >= 0)
                {
                   A_local_nnz++;
                }
@@ -667,8 +794,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          {
             HYPRE_BigInt global_col = first_col + (HYPRE_BigInt) diag_j[jj];
 
-            /* Find local column index using binary search */
-            HYPRE_Int local_col = hypre_BigBinarySearch(col_map, global_col, num_cols_local);
+            HYPRE_Int local_col = hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col);
             if (local_col >= 0)
             {
                A_local_j[k] = local_col;
@@ -682,7 +808,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          {
             HYPRE_BigInt global_col = col_map_offd[offd_j[jj]];
 
-            HYPRE_Int local_col = hypre_BigBinarySearch(col_map, global_col, num_cols_local);
+            HYPRE_Int local_col = hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col);
             if (local_col >= 0)
             {
                A_local_j[k] = local_col;
@@ -696,11 +822,14 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
          /* External row */
          if (A_ext && ext_row_counter < num_ext_rows)
          {
+            hypre_assert(ext_indices);
+            hypre_assert(ext_indices[ext_row_counter] == global_row);
+
             for (jj = ext_i[ext_row_counter]; jj < ext_i[ext_row_counter + 1]; jj++)
             {
                HYPRE_BigInt global_col = ext_j[jj];
 
-               HYPRE_Int local_col = hypre_BigBinarySearch(col_map, global_col, num_cols_local);
+               HYPRE_Int local_col = hypre_UnorderedBigIntMapGet(&col_to_local_map, global_col);
                if (local_col >= 0)
                {
                   A_local_j[k] = local_col;
@@ -722,7 +851,7 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
       HYPRE_Int row_nnz = A_local_i[i + 1] - row_start;
       if (row_nnz > 1)
       {
-         hypre_qsort2(&A_local_j[row_start], &A_local_data[row_start], 0, row_nnz - 1);
+         hypre_IntQsort2Complex(&A_local_j[row_start], &A_local_data[row_start], 0, row_nnz - 1);
       }
    }
 
@@ -733,6 +862,8 @@ hypre_ParCSRMatrixCreateExtendedMatrix(hypre_ParCSRMatrix  *A,
    *A_local_ptr = A_local;
    *col_map_ptr = col_map;
    *num_cols_local_ptr = num_cols_local;
+
+   hypre_UnorderedBigIntMapDestroy(&col_to_local_map);
 
    return hypre_error_flag;
 }

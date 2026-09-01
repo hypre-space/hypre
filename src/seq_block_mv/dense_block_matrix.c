@@ -203,7 +203,7 @@ hypre_DenseBlockMatrixBuildAOP( hypre_DenseBlockMatrix *A )
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexArrayToArrayOfPtrs(hypre_DenseBlockMatrixNumBlocks(A),
+      hypre_ComplexArrayToArrayOfPtrsDevice(hypre_DenseBlockMatrixNumBlocks(A),
                                             hypre_DenseBlockMatrixNumNonzerosBlock(A),
                                             hypre_DenseBlockMatrixData(A),
                                             hypre_DenseBlockMatrixDataAOP(A));

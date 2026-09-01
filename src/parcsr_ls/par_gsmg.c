@@ -1625,7 +1625,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd,big_i2) HYPRE_SMP_SCHEDULE
 #endif
    for (jl = 0; jl < num_threads; jl++)
    {

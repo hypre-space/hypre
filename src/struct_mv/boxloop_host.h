@@ -21,16 +21,11 @@
 #if defined(HYPRE_USING_OPENMP)
 #define HYPRE_BOX_REDUCTION
 #define HYPRE_OMP_CLAUSE
-#if defined(WIN32) && defined(_MSC_VER)
-#define Pragma(x) __pragma(x)
-#else
-#define Pragma(x) _Pragma(HYPRE_XSTR(x))
-#endif
 #ifndef OMP0
-#define OMP0 Pragma(omp parallel for HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#define OMP0 HYPRE_PRAGMA(omp parallel for HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #endif
 #ifndef OMP1
-#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#define OMP1 HYPRE_PRAGMA(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_OMP_CLAUSE HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #endif
 #else /* #if defined(HYPRE_USING_OPENMP) */
 #define OMP0
@@ -61,15 +56,17 @@
 #define zypre_BoxLoop1Begin(ndim, loop_size,                                  \
                             dbox1, start1, stride1, i1)                       \
 {                                                                             \
-   HYPRE_Int i1;                                                              \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1;                                                           \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
@@ -92,17 +89,19 @@
                             dbox1, start1, stride1, i1,                       \
                             dbox2, start2, stride2, i2)                       \
 {                                                                             \
-   HYPRE_Int i1, i2;                                                          \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1, i2;                                                       \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       zypre_BoxLoopSetK(2, i2);                                               \
@@ -129,19 +128,21 @@
                             dbox2, start2, stride2, i2,                       \
                             dbox3, start3, stride3, i3)                       \
 {                                                                             \
-   HYPRE_Int i1, i2, i3;                                                      \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1, i2, i3;                                                   \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       zypre_BoxLoopSetK(2, i2);                                               \
@@ -171,21 +172,23 @@
                             dbox3, start3, stride3, i3,                       \
                             dbox4, start4, stride4, i4)                       \
 {                                                                             \
-   HYPRE_Int i1, i2, i3, i4;                                                  \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopDeclareK(3);                                                  \
    zypre_BoxLoopDeclareK(4);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
-   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);                         \
-   zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3);                             \
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4);                             \
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1, i2, i3, i4;                                               \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       zypre_BoxLoopSetK(2, i2);                                               \
@@ -222,7 +225,10 @@
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1;                                                           \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
@@ -243,7 +249,10 @@
    OMP1                                                                       \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
       HYPRE_Int i1, i2;                                                       \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       zypre_BoxLoopSetK(2, i2);                                               \
@@ -293,14 +302,17 @@
 #define hypre_SerialBoxLoop1Begin(ndim, loop_size,                            \
                                   dbox1, start1, stride1, i1)                 \
 {                                                                             \
-   HYPRE_Int i1;                                                              \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
+      HYPRE_Int i1;                                                           \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)                    \
@@ -314,16 +326,19 @@
                                   dbox1, start1, stride1, i1,                 \
                                   dbox2, start2, stride2, i2)                 \
 {                                                                             \
-   HYPRE_Int i1,i2;                                                           \
    zypre_BoxLoopDeclare();                                                    \
    zypre_BoxLoopDeclareK(1);                                                  \
    zypre_BoxLoopDeclareK(2);                                                  \
    zypre_BoxLoopInit(ndim, loop_size);                                        \
-   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);                         \
-   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);                         \
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1);                             \
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2);                             \
    zypre_BoxLoopSetOneBlock();                                                \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)   \
    {                                                                          \
+      HYPRE_DIAGNOSTIC_PUSH                                                   \
+      HYPRE_DIAGNOSTIC_IGNORE_WSHADOW                                         \
+      HYPRE_Int i1, i2;                                                       \
+      HYPRE_DIAGNOSTIC_POP                                                    \
       zypre_BoxLoopSet();                                                     \
       zypre_BoxLoopSetK(1, i1);                                               \
       zypre_BoxLoopSetK(2, i2);                                               \

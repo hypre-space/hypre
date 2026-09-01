@@ -995,6 +995,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
    HYPRE_Int        start;
 
    HYPRE_Real       one  = 1.0;
+   HYPRE_Real       zero = 0.0;
 
    HYPRE_Int        my_id;
    HYPRE_Int        num_procs;
@@ -1272,7 +1273,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
          for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
             i1 = A_diag_j[jj];
-            if ( i == i1 ) /* diagonal of A only */
+            if (i == i1 && hypre_cabs(A_diag_data[jj]) > zero) /* diagonal of A only */
             {
                a_diag[i] = 1.0 / A_diag_data[jj];
             }
@@ -1562,6 +1563,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
    HYPRE_Int                j, jl, jj;
    HYPRE_Int                start;
    HYPRE_Real               one  = 1.0;
+   HYPRE_Real               zero = 0.0;
    HYPRE_Int                my_id, num_procs;
    HYPRE_Int                num_threads;
    HYPRE_Int                num_sends;
@@ -1839,7 +1841,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
       for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
       {
          i1 = A_diag_j[jj];
-         if ( i == i1 ) /* diagonal of A only */
+         if (i == i1 && hypre_cabs(A_diag_data[jj]) > zero) /* diagonal of A only */
          {
             a_diag[i] = 1.0 / A_diag_data[jj];
          }
@@ -2546,6 +2548,7 @@ hypre_MGRColLumpedRestrict(HYPRE_Int            colsum_type,
                                  block_dim, block_dim,
                                  hypre_DenseBlockMatrixNumNonzeros(B_CF),
                                  hypre_DenseBlockMatrixData(B_CF));
+      hypre_DenseBlockMatrixDestroy(B_CF);
    }
    else
    {
@@ -2651,6 +2654,17 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixBlockColSum(A_CF, row_major, 1, block_dim, &b_CF);
 
+   if (!b_FF || !b_CF)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Block column-lumped restriction requires C and F spaces with "
+                        "matching block structure (one C point per F block)");
+      hypre_DenseBlockMatrixDestroy(b_FF);
+      hypre_DenseBlockMatrixDestroy(b_CF);
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+
    /*-------------------------------------------------------
     * 3) b_FF = inv(approx(A_FF))          (invert in-place)
     *-------------------------------------------------------*/
@@ -2658,12 +2672,9 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 #if defined (HYPRE_USING_GPU)
    if (hypre_GetExecPolicy1(hypre_DenseBlockMatrixMemoryLocation(b_FF)) == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): GPU version */
-      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_HOST);
-      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+      hypre_BlockDiagInvDevice(hypre_DenseBlockMatrixData(b_FF),
                                hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
-      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_DEVICE);
    }
    else
 #endif
@@ -2832,9 +2843,20 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixBlockRowSum(A_FF, row_major, block_dim, block_dim, use_abs, &b_FF);
 
    /* Invert block-diagonal approximation of A_FF (in place) */
-   hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                            hypre_DenseBlockMatrixNumRows(b_FF),
-                            hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+#if defined (HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_DenseBlockMatrixMemoryLocation(b_FF)) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_BlockDiagInvDevice(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   }
+   else
+#endif
+   {
+      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   }
 
    /* Convert to ParCSR */
    A_FF_inv = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_FF),

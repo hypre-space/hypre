@@ -147,7 +147,6 @@ hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector )
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
  * (action = 0): set values
- * (action < 0): get values
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -613,7 +612,7 @@ hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector,
    HYPRE_Int             pseed;
    HYPRE_Int             myid;
 
-   myid  = hypre_MPI_Comm_rank(hypre_SStructVectorComm(vector), &myid);
+   hypre_MPI_Comm_rank(hypre_SStructVectorComm(vector), &myid);
    pseed = seed * (myid + 1);
    for (part = 0; part < nparts; part++)
    {

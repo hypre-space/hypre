@@ -18,30 +18,6 @@
 
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int
-hypreDevice_CSRSpAdd( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpAdd)( ma, mb, nnzA, nnzB, d_ia, d_ja, alpha, d_aa, d_ja_map, d_ib, d_jb, beta, d_ab, d_jb_map, d_num_b, nnzC_out, d_ic_out, d_jc_out, d_ac_out );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_CSRSpGemm( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpGemm)( A, B, C_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_CSRSpTrans( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_CSRSpTrans)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
-}
-
-/*--------------------------------------------------------------------------*/
-
 hypre_CSRMatrix *
 hypre_CSRMatrixAddDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta, hypre_CSRMatrix *B )
 {
@@ -150,6 +126,14 @@ HYPRE_Int
 hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixExtractDiagonalDevice)( A, d, type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Real
+hypre_CSRMatrixFnormDevice( hypre_CSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixFnormDevice)( A );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -371,9 +355,33 @@ hypre_CSRMatrixTripleMultiplyDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hyp
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CSRSpAddDevice( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpAddDevice)( ma, mb, nnzA, nnzB, d_ia, d_ja, alpha, d_aa, d_ja_map, d_ib, d_jb, beta, d_ab, d_jb_map, d_num_b, nnzC_out, d_ic_out, d_jc_out, d_ac_out );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRSpGemmDevice( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpGemmDevice)( A, B, C_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CSRSpGemmVendor( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpGemmVendor)( A, B, C, nnzC_out, d_ic_out, d_jc_out, d_c_out );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRSpTransDevice( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, HYPRE_Int want_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRSpTransDevice)( m, n, nnzA, d_ia, d_ja, d_aa, d_ic_out, d_jc_out, d_ac_out, want_data );
 }
 
 /*--------------------------------------------------------------------------*/

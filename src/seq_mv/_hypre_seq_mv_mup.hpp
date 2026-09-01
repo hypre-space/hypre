@@ -20,27 +20,6 @@ extern "C" {
 
 /* fixed_gpu */
 
-HYPRE_Int
-hypreDevice_CSRSpAdd_flt( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float alpha, hypre_float *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_float beta, hypre_float *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out );
-HYPRE_Int
-hypreDevice_CSRSpAdd_dbl( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double alpha, hypre_double *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_double beta, hypre_double *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out );
-HYPRE_Int
-hypreDevice_CSRSpAdd_long_dbl( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double alpha, hypre_long_double *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_long_double beta, hypre_long_double *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out );
-
-HYPRE_Int
-hypreDevice_CSRSpGemm_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
-HYPRE_Int
-hypreDevice_CSRSpGemm_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
-HYPRE_Int
-hypreDevice_CSRSpGemm_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
-
-HYPRE_Int
-hypreDevice_CSRSpTrans_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTrans_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
-HYPRE_Int
-hypreDevice_CSRSpTrans_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
-
 hypre_CSRMatrix *
 hypre_CSRMatrixAddDevice_flt( hypre_float alpha, hypre_CSRMatrix *A, hypre_float beta, hypre_CSRMatrix *B );
 hypre_CSRMatrix *
@@ -138,6 +117,13 @@ HYPRE_Int
 hypre_CSRMatrixExtractDiagonalDevice_dbl( hypre_CSRMatrix *A, hypre_double *d, HYPRE_Int type );
 HYPRE_Int
 hypre_CSRMatrixExtractDiagonalDevice_long_dbl( hypre_CSRMatrix *A, hypre_long_double *d, HYPRE_Int type );
+
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_flt( hypre_CSRMatrix *A );
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_dbl( hypre_CSRMatrix *A );
+HYPRE_Real
+hypre_CSRMatrixFnormDevice_long_dbl( hypre_CSRMatrix *A );
 
 hypre_GpuMatData*
 hypre_CSRMatrixGetGPUMatData_flt( hypre_CSRMatrix *matrix );
@@ -329,11 +315,32 @@ hypre_CSRMatrix *
 hypre_CSRMatrixTripleMultiplyDevice_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C );
 
 HYPRE_Int
+hypre_CSRSpAddDevice_flt( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float alpha, hypre_float *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_float beta, hypre_float *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out );
+HYPRE_Int
+hypre_CSRSpAddDevice_dbl( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double alpha, hypre_double *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_double beta, hypre_double *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out );
+HYPRE_Int
+hypre_CSRSpAddDevice_long_dbl( HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA, HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double alpha, hypre_long_double *d_aa, HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, hypre_long_double beta, hypre_long_double *d_ab, HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out );
+
+HYPRE_Int
+hypre_CSRSpGemmDevice_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
+HYPRE_Int
+hypre_CSRSpGemmDevice_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
+HYPRE_Int
+hypre_CSRSpGemmDevice_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr );
+
+HYPRE_Int
 hypre_CSRSpGemmVendor_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_c_out );
 HYPRE_Int
 hypre_CSRSpGemmVendor_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_c_out );
 HYPRE_Int
 hypre_CSRSpGemmVendor_long_dbl( hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_c_out );
+
+HYPRE_Int
+hypre_CSRSpTransDevice_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );
+HYPRE_Int
+hypre_CSRSpTransDevice_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_double **d_ac_out, HYPRE_Int want_data );
+HYPRE_Int
+hypre_CSRSpTransDevice_long_dbl( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_long_double *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_long_double **d_ac_out, HYPRE_Int want_data );
 
 HYPRE_Int
 hypre_CSRSpTransVendor_flt( HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, hypre_float *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, hypre_float **d_ac_out, HYPRE_Int want_data );

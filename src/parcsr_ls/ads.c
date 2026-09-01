@@ -16,25 +16,25 @@
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreGPUKernel_AMSComputePi_copy1(hypre_DeviceItem &item, HYPRE_Int nnz,
-                                                  HYPRE_Int dim,
-                                                  HYPRE_Int *j_in,
-                                                  HYPRE_Int *j_out);
+__global__ void hypre_GPUKernelAMSComputePiCopy1(hypre_DeviceItem &item, HYPRE_Int nnz,
+                                                 HYPRE_Int dim,
+                                                 HYPRE_Int *j_in,
+                                                 HYPRE_Int *j_out);
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreGPUKernel_AMSComputePi_copy2(hypre_DeviceItem &item, HYPRE_Int nrows,
-                                                  HYPRE_Int dim,
-                                                  HYPRE_Int *i_in,
-                                                  HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
-                                                  HYPRE_Real *data_out);
+__global__ void hypre_GPUKernelAMSComputePiCopy2(hypre_DeviceItem &item, HYPRE_Int nrows,
+                                                 HYPRE_Int dim,
+                                                 HYPRE_Int *i_in,
+                                                 HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
+                                                 HYPRE_Real *data_out);
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item, HYPRE_Int nrows,
-                                                    HYPRE_Int dim,
-                                                    HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
-                                                    HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
+__global__ void hypre_GPUKernelAMSComputePixyzCopy(hypre_DeviceItem &item, HYPRE_Int nrows,
+                                                   HYPRE_Int dim,
+                                                   HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
+                                                   HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
 #endif
 
 /*--------------------------------------------------------------------------
@@ -592,18 +592,11 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
          HYPRE_BigInt global_num_cols = 3 * hypre_ParCSRMatrixGlobalNumCols(F2V);
          HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
-         HYPRE_BigInt *col_starts;
-         HYPRE_Int col_starts_size;
          HYPRE_Int num_cols_offd = 3 * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_Int num_nonzeros_diag = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
          HYPRE_Int num_nonzeros_offd = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_BigInt *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
-         col_starts_size = 2;
-         col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
-         for (i = 0; i < col_starts_size; i++)
-         {
-            col_starts[i] = 3 * col_starts_F2V[i];
-         }
+         HYPRE_BigInt col_starts[2] = {3 * col_starts_F2V[0], 3 * col_starts_F2V[1]};
 
          Pi = hypre_ParCSRMatrixCreate(comm,
                                        global_num_rows,
@@ -635,17 +628,17 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntScalen( F2V_diag_I, F2V_diag_nrows + 1, Pi_diag_I, 3);
+            hypre_IntScalenDevice( F2V_diag_I, F2V_diag_nrows + 1, Pi_diag_I, 3);
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nnz, "thread", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePi_copy1, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePiCopy1, gDim, bDim,
                               F2V_diag_nnz, 3, F2V_diag_J, Pi_diag_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePi_copy2, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePiCopy2, gDim, bDim,
                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
                               Pi_diag_data );
          }
@@ -696,18 +689,18 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          {
             if (F2V_offd_ncols)
             {
-               hypreDevice_IntScalen( F2V_offd_I, F2V_offd_nrows + 1, Pi_offd_I, 3 );
+               hypre_IntScalenDevice( F2V_offd_I, F2V_offd_nrows + 1, Pi_offd_I, 3 );
             }
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nnz, "thread", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePi_copy1, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePiCopy1, gDim, bDim,
                               F2V_offd_nnz, 3, F2V_offd_J, Pi_offd_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePi_copy2, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePiCopy2, gDim, bDim,
                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
                               Pi_offd_data );
          }
@@ -930,7 +923,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePixyz_copy, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePixyzCopy, gDim, bDim,
                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
                               Pix_diag_data, Piy_diag_data, Piz_diag_data );
          }
@@ -1025,7 +1018,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_AMSComputePixyz_copy, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelAMSComputePixyzCopy, gDim, bDim,
                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
          }

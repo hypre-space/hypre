@@ -14,6 +14,7 @@ if(HYPRE_ENABLE_MIXED_PRECISION)
     HYPRE_parcsr_mv_mp.h
     HYPRE_parcsr_mv_mup.h
     _hypre_parcsr_mv_mup.h
+    _hypre_parcsr_mv_mup.hpp
     _hypre_parcsr_mv_mup_def.h
     _hypre_parcsr_mv_mup_undef.h
   )
@@ -41,6 +42,7 @@ set(REGULAR_SRCS
   par_csr_overlap.c
   par_csr_matrix.c
   par_csr_matrix_stats.c
+  par_csr_matrix_stats_device.c
   par_csr_matmat.c
   par_csr_matvec.c
   par_csr_matop_marked.c
@@ -83,6 +85,7 @@ endif()
 
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
+    par_csr_matrix_stats_device.c
     par_csr_matmat_device.c
     par_csr_matvec_device.c
     par_csr_fffc_device.c

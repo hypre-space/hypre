@@ -360,4 +360,3 @@ hypre_RealArrayAxpyn_mp(HYPRE_Precision precision_x, void *x, HYPRE_Precision pr
 
 
 #endif
-

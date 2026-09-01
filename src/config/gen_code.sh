@@ -177,9 +177,9 @@ $(
 # Create temporary files and initial code
 ############################################################################
 
-# Create prototype information files. We treat C header files and C++ 
-# header files separately to correctly define C/ C++ linkage. C++ header 
-# file contains functions requiring C++ linkage. 
+# Create prototype information files. We treat C header files and C++
+# header files separately to correctly define C/ C++ linkage. C++ header
+# file contains functions requiring C++ linkage.
 
 for c in "" $gpu
 do
@@ -205,8 +205,8 @@ do
 done
 
 # Special case for .hpp functions:
-# These are only for GPU and are assumed to be strictly multiprecision 
-# functions. Hence only the fixed precision code and protos are generated. 
+# These are only for GPU and are assumed to be strictly multiprecision
+# functions. Hence only the fixed precision code and protos are generated.
 INTHPP=""
 if [ -f "${intp}.hpp" ]
 then
@@ -386,7 +386,7 @@ extern "C" {
 #if defined(HYPRE_USING_GPU)
 
 @
-#===== Declarations with C linkage 
+#===== Declarations with C linkage
    for i in fixed functions pre
    do
       tag=${i}${gpu}
@@ -419,7 +419,7 @@ extern "C++" {
          echo "/* ${tag} */"      >> $FOUT
          cat ${OUTP}_${tag}_intpp.h >> $FOUT
       done
-   fi   
+   fi
    cat >> $FOUT <<@
 
 #endif

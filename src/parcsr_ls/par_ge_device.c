@@ -165,7 +165,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_counting_iterator((HYPRE_BigInt) 0),
                         thrust::make_counting_iterator(global_num_rows),
-                        hypreFunctor_DenseMatrixIdentity(global_num_rows, A_work));
+                        hypre_DenseMatrixIdentityFunctor(global_num_rows, A_work));
 
       /* Compute inverse */
       HYPRE_CUSOLVER_CALL(hypre_cusolver_dngetrs(hypre_HandleVendorSolverHandle(hypre_handle()),

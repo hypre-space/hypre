@@ -156,31 +156,18 @@ hypre_PCGDestroy( void *pcg_vdata )
          (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
          pcg_data -> matvec_data = NULL;
       }
-      if ( pcg_data -> p != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> p);
-         pcg_data -> p = NULL;
-      }
-      if ( pcg_data -> s != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> s);
-         pcg_data -> s = NULL;
-      }
-      if ( pcg_data -> r != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r);
-         pcg_data -> r = NULL;
-      }
-      if ( pcg_data -> r_old != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
-         pcg_data -> r_old = NULL;
-      }
-      if ( pcg_data -> v != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> v);
-         pcg_data -> v = NULL;
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> p);
+      (*(pcg_functions->DestroyVector))(pcg_data -> s);
+      (*(pcg_functions->DestroyVector))(pcg_data -> r);
+      (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
+      (*(pcg_functions->DestroyVector))(pcg_data -> v);
+
+      pcg_data -> p = NULL;
+      pcg_data -> s = NULL;
+      pcg_data -> r = NULL;
+      pcg_data -> r_old = NULL;
+      pcg_data -> v = NULL;
+
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
@@ -227,6 +214,8 @@ hypre_PCGSetup( void *pcg_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("PCG-Setup");
 
+   hypre_SolverResetIsSetup((hypre_Solver *) pcg_vdata);
+
    (pcg_data -> A) = A;
 
    // if a preconditioning matrix has not been set, use A
@@ -241,22 +230,13 @@ hypre_PCGSetup( void *pcg_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   if ( pcg_data -> p != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> p);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> p);
    (pcg_data -> p) = (*(pcg_functions->CreateVector))(x);
 
-   if ( pcg_data -> s != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> s);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> s);
    (pcg_data -> s) = (*(pcg_functions->CreateVector))(x);
 
-   if ( pcg_data -> r != NULL )
-   {
-      (*(pcg_functions->DestroyVector))(pcg_data -> r);
-   }
+   (*(pcg_functions->DestroyVector))(pcg_data -> r);
    (pcg_data -> r) = (*(pcg_functions->CreateVector))(b);
 
    if ( pcg_data -> matvec_data != NULL && pcg_data->owns_matvec_data )
@@ -267,19 +247,13 @@ hypre_PCGSetup( void *pcg_vdata,
 
    if (flex)
    {
-      if ( pcg_data -> v != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> r_old);
       (pcg_data -> r_old) = (*(pcg_functions->CreateVector))(b);
    }
 
    if (rtol != 0.0 && recompute_residual_p && (!two_norm))
    {
-      if ( pcg_data -> v != NULL )
-      {
-         (*(pcg_functions->DestroyVector))(pcg_data -> v);
-      }
+      (*(pcg_functions->DestroyVector))(pcg_data -> v);
       (pcg_data -> v) = (*(pcg_functions->CreateVector))(b);
    }
 
@@ -308,6 +282,11 @@ hypre_PCGSetup( void *pcg_vdata,
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) pcg_vdata);
+   }
 
    return hypre_error_flag;
 }
@@ -675,7 +654,7 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (print_level > 1 && my_id == 0)
          {
-            hypre_printf("Recomputing the residual...\n");
+            hypre_printf("Periodic residual replacement at iteration %d ...\n", i);
          }
          (*(pcg_functions->CopyVector))(r, s); /*save old residual */
          if (flex)
@@ -852,7 +831,42 @@ hypre_PCGSolve( void *pcg_vdata,
             i_prod = (*(pcg_functions->InnerProd))(r, s);
             gamma = i_prod;
          }
-         if (i_prod / bi_prod >= eps) { tentatively_converged = 0; }
+
+         if (i_prod / bi_prod >= eps)
+         {
+            tentatively_converged = 0;
+
+            if (print_level > 1 && my_id == 0)
+            {
+               hypre_printf("\n");
+               hypre_printf(">>>> Recomputed residual convergence verification failed at iteration %d:\n", i);
+               if (two_norm)
+               {
+                  hypre_printf("    ||r||_2         = %e\n", hypre_sqrt(i_prod));
+                  hypre_printf("    ||r||_2/||b||_2 = %e\n",
+                               hypre_sqrt(i_prod / bi_prod));
+               }
+               else
+               {
+                  hypre_printf("    ||r||_C         = %e\n", hypre_sqrt(i_prod));
+                  hypre_printf("    ||r||_C/||b||_C = %e\n",
+                               hypre_sqrt(i_prod / bi_prod));
+               }
+               hypre_printf(">>>> Restarting PCG from the true residual.\n");
+               hypre_printf("\n");
+            }
+
+            if (two_norm)
+            {
+               /* compute preconditioned resdidual - s = C*r */
+               (*(pcg_functions->ClearVector))(s);
+               precond(precond_data, precond_Mat, r, s);
+               /* iprod = gamma = <r,s> */
+               gamma = (*(pcg_functions->InnerProd))(r, s);
+            }
+            /* set flag to restart pcg from true residual */
+            recompute_true_residual = 1;
+         }
       }
       if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
          /* At user request, don't treat this as converged unless x didn't change

@@ -643,7 +643,6 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
          }
 
          // Loop over the requested dofs for this destination proc
-         HYPRE_Int j;
          for (j = 0; j < num_requested_dofs; j++)
          {
             // Get the local index for this dof on this processor

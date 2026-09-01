@@ -27,10 +27,20 @@ mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 16 16 1 -P 1 1 1 -solver 
 mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r  8 16 1 -P 2 1 1 -solver 3 > periodic.out.41
 mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 16  8 1 -P 1 2 1 -solver 3 > periodic.out.42
 
+# test set array values
+mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 16 16 1 -P 1 1 1 -solver 3 -test_set_array_values 1 > periodic.out.43
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r  8 16 1 -P 2 1 1 -solver 3 -test_set_array_values 1 > periodic.out.44
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 16  8 1 -P 1 2 1 -solver 3 -test_set_array_values 1 > periodic.out.45
+
 # non-power-of-two
 mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 22 22 1 -P 1 1 1 -solver 3 > periodic.out.50
 mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 11 22 1 -P 2 1 1 -solver 3 > periodic.out.51
 mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 22 11 1 -P 1 2 1 -solver 3 > periodic.out.52
+
+# test set array values
+mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 22 22 1 -P 1 1 1 -solver 3 -test_set_array_values 1 > periodic.out.53
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 11 22 1 -P 2 1 1 -solver 3 -test_set_array_values 1 > periodic.out.54
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 22 11 1 -P 1 2 1 -solver 3 -test_set_array_values 1 > periodic.out.55
 
 #=============================================================================
 # Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
@@ -69,4 +79,11 @@ mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeA -P 1 6 1 -solver  28 > peri
 mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver 218 > periodic.out.93
 mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  18 > periodic.out.94
 mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  28 > periodic.out.95
+
+#=============================================================================
+# Check GraphAddEntries within the same part
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic -r 10 10 10 -solver 28          > periodic.out.100
+mpirun -np 1 ./sstruct -in sstruct.in.periodic.graphadd -r 10 10 10 -solver 28 > periodic.out.101
 

@@ -57,13 +57,13 @@ MP_FILES = \
 MP_CUFILES=\
  mup_fixed_gpu.c\
  mup_functions_gpu.c\
- mup_pre_gpu.c 
+ mup_pre_gpu.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
 
-ifeq (${MP_BUILD}, 1) 
+ifeq (${MP_BUILD}, 1)
 
 COBJS_single      = ${FILES:.c=.o_flt}
 COBJS_double      = ${FILES:.c=.o_dbl}

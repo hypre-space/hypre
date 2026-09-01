@@ -1041,6 +1041,13 @@ hypre_MatrixStatsDestroy_dbl( hypre_MatrixStats *stats );
 HYPRE_Int
 hypre_MatrixStatsDestroy_long_dbl( hypre_MatrixStats *stats );
 
+HYPRE_Int
+hypre_MatrixStatsReduce_flt( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm );
+HYPRE_Int
+hypre_MatrixStatsReduce_dbl( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm );
+HYPRE_Int
+hypre_MatrixStatsReduce_long_dbl( hypre_MatrixStats *local_stats, hypre_MatrixStats *global_stats, MPI_Comm comm );
+
 void
 hypre_MemPrefetch_flt( void *ptr, size_t size, HYPRE_MemoryLocation location );
 void

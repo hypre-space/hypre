@@ -22,9 +22,9 @@ if(POLICY CMP0090)
 endif()
 
 # The version number.
-set(HYPRE_VERSION 3.1.0)
-set(HYPRE_NUMBER  30100)
-set(HYPRE_DATE    2026/01/23)
+set(HYPRE_VERSION 3.2.0)
+set(HYPRE_NUMBER  30200)
+set(HYPRE_DATE    2026/08/20)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -164,7 +164,7 @@ set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
 set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
 
-# GPU options
+# GPU common options
 set_hypre_option(GPU  HYPRE_ENABLE_CUDA                 "Use CUDA. Require cuda-10.0 or higher" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_HIP                  "Use HIP" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_SYCL                 "Use SYCL" OFF)
@@ -173,12 +173,14 @@ set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for 
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_THRUST_NOSYNC        "Use Thrust par_nosync policy" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA or rocTX on HIP" OFF)
+
 # CUDA options
 set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
+
 # HIP options
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
@@ -186,6 +188,7 @@ set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCTHRUST            "Use rocThrust" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCPRIM              "Use rocPRIM" ON)
+
 # oneAPI options
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
 set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
@@ -307,14 +310,14 @@ if (HYPRE_ENABLE_STRICT_CHECKING)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
   if(CMAKE_C_COMPILER_ID MATCHES "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -fsingle-precision-constant -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -fno-implicit-templates
       -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
 
   elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE
-      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -Wshadow -pedantic -Wfloat-conversion
       -Wimplicit-float-conversion -Werror -Werror=vla -Wconversion>
       $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wshadow -Wimplicit-float-conversion
       -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic -Werror=vla -Wconversion>)
@@ -371,8 +374,19 @@ endif ()
 
 if (HYPRE_ENABLE_UMPIRE)
   set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
-  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+
+  # If no specific Umpire resource was requested, choose the default that matches
+  # hypre's memory model. Device-memory builds should not silently enable Umpire UM.
+  if (NOT HYPRE_ENABLE_UMPIRE_HOST AND
+      NOT HYPRE_ENABLE_UMPIRE_DEVICE AND
+      NOT HYPRE_ENABLE_UMPIRE_UM AND
+      NOT HYPRE_ENABLE_UMPIRE_PINNED)
+    if (HYPRE_ENABLE_UNIFIED_MEMORY)
+      set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
+    else ()
+      set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+    endif ()
+  endif ()
 endif ()
 
 if (HYPRE_ENABLE_UMPIRE_HOST)

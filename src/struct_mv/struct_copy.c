@@ -96,4 +96,3 @@ hypre_StructCopy( hypre_StructVector *x,
 
    return hypre_error_flag;
 }
-

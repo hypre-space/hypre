@@ -11,6 +11,62 @@
 # NOTE: Must be run on non-multiprecision build of hypre.
 
 scriptpath=$PWD
+opts="--enable-debug"
+check_type=""
+
+usage()
+{
+    echo "Usage: $0 [--cuda|--hip|--sycl]"
+}
+
+if [ $# -gt 1 ]; then
+    usage
+    exit 1
+fi
+
+if [ $# -eq 1 ]; then
+    case "$1" in
+        --cuda)
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-cuda
+            )
+            check_type="GPU"
+            ;;
+        --hip)
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-hip 
+                --with-MPI-include=${MPICH_DIR}/include
+                --with-MPI-lib-dirs=${MPICH_DIR}/lib 
+                --with-MPI-libs=mpi 
+                --with-gpu-arch='gfx90a' 
+                CC=cc 
+                CXX=CC
+            )
+            check_type="GPU"
+            ;;
+        --sycl)
+            opts=(
+                $opts 
+                --without-umpire 
+                --with-sycl 
+                --with-extra-CUFLAGS=-w
+            )
+            check_type="GPU"
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+fi
 
 DIRS="\
  IJ_mv\
@@ -37,9 +93,8 @@ DIRS="\
 
 # RDF: Need to add '--enable-hopscotch --enable-complex --with-timing' options,
 # but this caused some problems for me when I tried it.  Sort out later.
-# DOK: We need a similar build below for GPU-build checks 
 make distclean
-./configure --enable-debug
+./configure "${opts[@]}"
 make -s -j
 
 echo -e "********************"
@@ -49,7 +104,7 @@ exit_code=0
 for i in $DIRS
 do
     echo -ne "Checking $i ... "
-    (cd $i; $scriptpath/config/mup_check_dir.sh)
+    (cd $i; $scriptpath/config/mup_check_dir.sh $check_type)
     if [ $? -ne 0 ]; then
         exit_code=1
     fi

@@ -25,7 +25,7 @@
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundNoBinDevice( HYPRE_Int  m,
                                             HYPRE_Int  k,
                                             HYPRE_Int  n,
                                             HYPRE_Int *d_ia,
@@ -36,21 +36,17 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
                                             HYPRE_Int *d_rc,
                                             char      *d_rf )
 {
-   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   static constexpr HYPRE_Int BIN = 5;
-
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
-   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<5, SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5], false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundBinnedDevice( HYPRE_Int  m,
                                              HYPRE_Int  k,
                                              HYPRE_Int  n,
                                              HYPRE_Int *d_ia,
@@ -94,7 +90,7 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
  *        1: input row count est (CURRENTLY ONLY 1)
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundDevice( HYPRE_Int  m,
                                        HYPRE_Int  k,
                                        HYPRE_Int  n,
                                        HYPRE_Int *d_ia,
@@ -125,12 +121,12 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 
    if (binned)
    {
-      hypreDevice_CSRSpGemmRownnzUpperboundBinned
+      hypre_CSRSpGemmRownnzUpperboundBinnedDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rf);
    }
    else
    {
-      hypreDevice_CSRSpGemmRownnzUpperboundNoBin
+      hypre_CSRSpGemmRownnzUpperboundNoBinDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rf);
    }
 
@@ -171,7 +167,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
  *        2: input row bound
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzNoBinDevice( HYPRE_Int  m,
                                   HYPRE_Int  k,
                                   HYPRE_Int  n,
                                   HYPRE_Int *d_ia,
@@ -181,16 +177,12 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   static constexpr HYPRE_Int BIN = 5;
-
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
-   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<5, SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5], false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
@@ -236,7 +228,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 
          hypre_assert(new_end - d_rind == num_failed_rows);
 
-         hypre_spgemm_symbolic_rownnz < BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true >
+         hypre_spgemm_symbolic_rownnz < 6, 2 * SYMBL_HASH_SIZE[5], 2 * T_GROUP_SIZE[5], true >
          (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
 
          hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
@@ -253,7 +245,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
  *        2: input row bound
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzBinnedDevice( HYPRE_Int  m,
                                    HYPRE_Int  k,
                                    HYPRE_Int  n,
                                    HYPRE_Int  nnzA,
@@ -271,7 +263,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 #if 0
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
+   hypre_CSRSpGemmRownnzEstimateDevice(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
 #else
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, hypre_max(m, k + 1), HYPRE_MEMORY_DEVICE);
 
@@ -368,7 +360,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzDevice( HYPRE_Int  m,
                              HYPRE_Int  k,
                              HYPRE_Int  n,
                              HYPRE_Int  nnzA,
@@ -397,12 +389,12 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
    if (binned)
    {
-      hypreDevice_CSRSpGemmRownnzBinned
+      hypre_CSRSpGemmRownnzBinnedDevice
       (m, k, n, nnzA, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
    }
    else
    {
-      hypreDevice_CSRSpGemmRownnzNoBin
+      hypre_CSRSpGemmRownnzNoBinDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
    }
 

@@ -181,8 +181,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_Memset(S_diag_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
    hypre_Memset(S_offd_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_IntegerExclusiveScan(num_variables + 1, S_diag_i);
-   hypreDevice_IntegerExclusiveScan(num_variables + 1, S_offd_i);
+   hypre_IntegerExclusiveScanDevice(num_variables + 1, S_diag_i);
+   hypre_IntegerExclusiveScanDevice(num_variables + 1, S_offd_i);
 
    HYPRE_Int *tmp, S_num_nonzeros_diag, S_num_nonzeros_offd;
 

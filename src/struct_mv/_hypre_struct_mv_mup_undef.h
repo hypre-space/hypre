@@ -22,6 +22,7 @@
 #undef HYPRE_StructGridSetExtents
 #undef HYPRE_StructGridSetNumGhost
 #undef HYPRE_StructGridSetPeriodic
+#undef HYPRE_StructMatrixAddToArrayValues
 #undef HYPRE_StructMatrixAddToBoxValues
 #undef HYPRE_StructMatrixAddToBoxValues2
 #undef HYPRE_StructMatrixAddToConstantValues
@@ -30,6 +31,7 @@
 #undef HYPRE_StructMatrixClearBoundary
 #undef HYPRE_StructMatrixCreate
 #undef HYPRE_StructMatrixDestroy
+#undef HYPRE_StructMatrixGetArrayValues
 #undef HYPRE_StructMatrixGetBoxValues
 #undef HYPRE_StructMatrixGetBoxValues2
 #undef HYPRE_StructMatrixGetGrid
@@ -41,6 +43,7 @@
 #undef HYPRE_StructMatrixPrint
 #undef HYPRE_StructMatrixRead
 #undef HYPRE_StructMatrixScale
+#undef HYPRE_StructMatrixSetArrayValues
 #undef HYPRE_StructMatrixSetBoxValues
 #undef HYPRE_StructMatrixSetBoxValues2
 #undef HYPRE_StructMatrixSetConstantEntries
@@ -55,6 +58,7 @@
 #undef HYPRE_StructStencilDestroy
 #undef HYPRE_StructStencilSetElement
 #undef HYPRE_StructStencilSetEntry
+#undef HYPRE_StructVectorAddToArrayValues
 #undef HYPRE_StructVectorAddToBoxValues
 #undef HYPRE_StructVectorAddToBoxValues2
 #undef HYPRE_StructVectorAddToValues
@@ -64,6 +68,7 @@
 #undef HYPRE_StructVectorCopy
 #undef HYPRE_StructVectorCreate
 #undef HYPRE_StructVectorDestroy
+#undef HYPRE_StructVectorGetArrayValues
 #undef HYPRE_StructVectorGetBoxValues
 #undef HYPRE_StructVectorGetBoxValues2
 #undef HYPRE_StructVectorGetMigrateCommPkg
@@ -75,6 +80,7 @@
 #undef HYPRE_StructVectorRead
 #undef HYPRE_StructVectorScale
 #undef HYPRE_StructVectorScaleValues
+#undef HYPRE_StructVectorSetArrayValues
 #undef HYPRE_StructVectorSetBoxValues
 #undef HYPRE_StructVectorSetBoxValues2
 #undef HYPRE_StructVectorSetConstantValues
@@ -530,3 +536,14 @@
 #undef hypre_structvectorsetnumghost
 #undef hypre_structvectorsetrandomvalu
 #undef hypre_structvectorsetvalues
+#undef hypre_BoxRanksToIndexesDevice
+#undef hypre_GPUKernelBoxRanksToIndexes
+#undef hypre_GPUKernelStructMatrixGetArrayValues
+#undef hypre_GPUKernelStructVectorAddToArrayValues
+#undef hypre_GPUKernelStructVectorGetArrayValues
+#undef hypre_StructMatrixAddToArrayValuesDevice
+#undef hypre_StructMatrixGetArrayValuesDevice
+#undef hypre_StructMatrixSetArrayValuesDevice
+#undef hypre_StructVectorAddToArrayValuesDevice
+#undef hypre_StructVectorGetArrayValuesDevice
+#undef hypre_StructVectorSetArrayValuesDevice

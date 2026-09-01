@@ -44,6 +44,7 @@ shift
 
 # Basic build and run tests
 cco="-DHYPRE_ENABLE_PRINT_ERRORS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+cmo="-j all test"
 mo="-j test"
 ro="-ij-gpu -struct -sstruct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 eo=""

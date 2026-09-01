@@ -48,3 +48,9 @@ mpirun -np 1  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -po
  > amr2d.out.18
 mpirun -np 2  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -pooldist 1 \
  > amr2d.out.19
+
+# test set array values
+mpirun -np 1  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -pooldist 0 \
+ -test_set_array_values 1 > amr2d.out.20
+mpirun -np 2  ./sstruct -in sstruct.in.amr2D_center_lev2 -solver 20 -r 4 4 1 -pooldist 1 \
+ -test_set_array_values 1 > amr2d.out.21

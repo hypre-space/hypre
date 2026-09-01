@@ -85,6 +85,20 @@ HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid, HYPRE_Int part, H
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid, HYPRE_Int *num_ghost );
 HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry, hypre_Index index,
                                                   HYPRE_BigInt *rank_ptr, HYPRE_Int type );
+HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid *grid, HYPRE_Int type,
+                                                 HYPRE_MemoryLocation memory_location,
+                                                 HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_indexes, HYPRE_Int **indexes,
+                                                 HYPRE_BigInt **global_ranks_ptr );
+HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid *grid, HYPRE_Int type,
+                                                 HYPRE_MemoryLocation memory_location,
+                                                 HYPRE_Int part, HYPRE_Int var,
+                                                 HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
+                                                 HYPRE_Int ***indexes_ptr );
+HYPRE_Int hypre_SStructGridGetGlobalRanksPartVarStarts( hypre_SStructGrid *grid, HYPRE_Int type,
+                                                        HYPRE_MemoryLocation memory_location,
+                                                        HYPRE_Int num_ranks, HYPRE_BigInt *global_ranks,
+                                                        HYPRE_Int **global_ranks_part_var_starts_ptr);
 HYPRE_Int hypre_SStructBoxManEntryGetStrides ( hypre_BoxManEntry *entry, hypre_Index strides,
                                                HYPRE_Int type );
 HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int boxnum,
@@ -146,6 +160,9 @@ HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix,
 HYPRE_Int hypre_SStructUMatrixSetValues ( hypre_SStructMatrix *matrix, HYPRE_Int part,
                                           hypre_Index index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values,
                                           HYPRE_Int action );
+HYPRE_Int hypre_SStructUMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
+                                                    HYPRE_Int var, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix, HYPRE_Int part,
                                                   hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                   HYPRE_Complex *values, HYPRE_Int action, HYPRE_IJMatrix ijmatrix );
@@ -165,9 +182,22 @@ HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix, HYPRE_Int p
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                            hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                            HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSplitArrayEntriesDevice( HYPRE_SStructMatrix matrix, HYPRE_Int part,
+                                                      HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes,
+                                                      HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int *nSentries_out, HYPRE_Int *nUentries_out,
+                                                      HYPRE_Int **Sindexes_out, HYPRE_Int **Uindexes_out, HYPRE_Int **Sentries_out,
+                                                      HYPRE_Int **Uentries_out,
+                                                      HYPRE_Complex **Svalues_out, HYPRE_Complex **Uvalues_out, HYPRE_Int **Sentry_locations,
+                                                      HYPRE_Int **Uentry_locations  );
+HYPRE_Int hypre_SStructMatrixSetArrayValuesDevice( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
+                                                   HYPRE_Int var, HYPRE_Int nvalues,
+                                                   HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix, HYPRE_Int part,
                                                  hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                  HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_Int hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix matrix,
+                                                            HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
+                                                            HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
                                              hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa);

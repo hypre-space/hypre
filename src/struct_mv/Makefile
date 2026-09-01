@@ -57,6 +57,7 @@ FILES =\
  struct_stmatrix.c
 
 CUFILES =\
+ box_device.c\
  struct_matvec.c\
  struct_matvec_cc.c\
  struct_matvec_icc.c\
@@ -93,6 +94,11 @@ MP_FILES = \
  HYPRE_struct_mv_mp.c\
  struct_mv_mp.c
 
+MP_CUFILES=\
+ mup_fixed_gpu.c\
+ mup_functions_gpu.c\
+ mup_pre_gpu.c
+
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
 OBJS = ${COBJS} ${CUOBJS}
@@ -106,9 +112,10 @@ CUOBJS_single     = ${CUFILES:.c=.obj_flt}
 CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
 CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
 MP_COBJS          = ${MP_FILES:.c=.o}
+MP_CUOBJS         = ${MP_CUFILES:.c=.obj}
 
 OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${MP_COBJS}
-OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${MP_CUOBJS}
 
 endif
 

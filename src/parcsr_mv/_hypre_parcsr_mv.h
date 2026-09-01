@@ -567,6 +567,7 @@ typedef struct hypre_OverlapData_struct
    HYPRE_Int            num_extended_rows;     /* Total rows in extended domain */
    HYPRE_Int            num_overlap_rows;      /* External rows (from overlap) */
    HYPRE_BigInt        *extended_row_indices;  /* Global indices of all extended rows */
+
    HYPRE_Int           *row_is_owned;          /* 1 if row is owned, 0 if external */
 
    /* Communication package for fetching overlap data */
@@ -1231,6 +1232,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols(hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixSortColMapOffd(hypre_ParCSRMatrix *A);
 
 /* par_csr_matrix_stats.c */
+HYPRE_Int hypre_ParCSRMatrixStatsComputeLocal( hypre_ParCSRMatrix *A,
+                                               hypre_MatrixStats *stats );
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );
@@ -1431,6 +1434,8 @@ HYPRE_Int
 hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
                            hypre_ParCSRMatrix *B );
 
+hypre_ParVector *
+hypre_ParVectorClone_mp(hypre_ParVector *v, HYPRE_Precision new_precision);
 #endif
 
 #ifdef __cplusplus

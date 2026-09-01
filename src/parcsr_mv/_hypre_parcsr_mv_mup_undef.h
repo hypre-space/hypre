@@ -57,6 +57,8 @@
 #undef hypre_ParCSRMatrixCopy
 #undef hypre_ParCSRMatrixCreate
 #undef hypre_ParCSRMatrixInitialize_v2
+#undef hypre_ParVectorCloneDeep_v2
+#undef hypre_ParVectorCreate
 #undef hypre_AssumedPartitionCreate
 #undef hypre_AssumedPartitionDestroy
 #undef hypre_BooleanGenerateDiagAndOffd
@@ -212,6 +214,7 @@
 #undef hypre_ParCSRMatrixSortColMapOffd
 #undef hypre_ParCSRMatrixSortColMapOffdHost
 #undef hypre_ParCSRMatrixStatsArrayCompute
+#undef hypre_ParCSRMatrixStatsComputeLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocal
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalHost
 #undef hypre_ParCSRMatrixStatsComputePassTwoLocal
@@ -236,10 +239,8 @@
 #undef hypre_ParTMatmul
 #undef hypre_ParVectorAxpy
 #undef hypre_ParVectorAxpyz
-#undef hypre_ParVectorCloneDeep_v2
 #undef hypre_ParVectorCloneShallow
 #undef hypre_ParVectorCopy
-#undef hypre_ParVectorCreate
 #undef hypre_ParVectorCreateAssumedPartition
 #undef hypre_ParVectorDestroy
 #undef hypre_ParVectorGetValues
@@ -330,14 +331,14 @@
 #undef hypre_setparvectordataowner
 #undef hypre_setparvectorrandomvalues
 #undef hypre_vectortoparvector
-#undef hypreGPUKernel_ConcatDiagAndOffd
-#undef hypreGPUKernel_ParCSRMatMatDiag
-#undef hypreGPUKernel_ParCSRMatrixBlkFilterCount
-#undef hypreGPUKernel_ParCSRMatrixBlkFilterFill
 #undef hypre_ConcatDiagAndOffdDevice
 #undef hypre_ConcatDiagOffdAndExtDevice
 #undef hypre_ExchangeExternalRowsDeviceInit
 #undef hypre_ExchangeExternalRowsDeviceWait
+#undef hypre_GPUKernelConcatDiagAndOffd
+#undef hypre_GPUKernelParCSRMatMatDiag
+#undef hypre_GPUKernelParCSRMatrixBlkFilterCount
+#undef hypre_GPUKernelParCSRMatrixBlkFilterFill
 #undef hypre_MergeDiagAndOffdDevice
 #undef hypre_ParCSRCommPkgCreateMatrixE
 #undef hypre_ParCSRDiagScaleVectorDevice
@@ -365,6 +366,8 @@
 #undef hypre_ParCSRMatrixMatvecTDevice
 #undef hypre_ParCSRMatrixMatvecT_unpack
 #undef hypre_ParCSRMatrixRAPKTDevice
+#undef hypre_ParCSRMatrixStatsComputePassOneLocalDevice
+#undef hypre_ParCSRMatrixStatsComputePassTwoLocalDevice
 #undef hypre_ParCSRMatrixTransposeDevice
 #undef hypre_ParCSRTMatMatKTDevice
 #undef hypre_ParCSRTMatMatPartialAddDevice
