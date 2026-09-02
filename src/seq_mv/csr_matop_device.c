@@ -4018,6 +4018,24 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
    void             *pBuffer = NULL;
    HYPRE_Int        *P = NULL;
    HYPRE_Complex    *d_a_tmp;
+#if defined(HYPRE_USING_HIP)
+   /*
+    * ROCm 7.2's legacy rocSPARSE csrsort path is not reliable on gfx1100.
+    * Use HYPRE's device-side stable tuple sort instead.  Sorting by row
+    * first preserves the CSR row boundaries while sorting columns within
+    * each row.
+    */
+   if (num_nonzeros > 0)
+   {
+      HYPRE_Int *d_row_ind = hypre_CsrRowPtrsToIndicesDevice(n, num_nonzeros,
+                                                             (HYPRE_Int *) d_ia);
+      hypre_StableSortByTupleKeyDevice(num_nonzeros, d_row_ind, d_ja_sorted,
+                                       d_a_sorted, 0);
+      hypre_ForceSyncComputeStream();
+      hypre_TFree(d_row_ind, HYPRE_MEMORY_DEVICE);
+   }
+   return hypre_error_flag;
+#endif
 
    // FIXME: There is not in-place version of csr sort in rocSPARSE currently, so we make
    //        a temporary copy of the data for gthr, sort that, and then copy the sorted values
