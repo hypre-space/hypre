@@ -261,6 +261,8 @@
 #define hypre_GPUMatDataSetCSRData HYPRE_FIXEDPRECISION_FUNC ( hypre_GPUMatDataSetCSRData )
 #define hypre_GpuMatDataCreate HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataCreate )
 #define hypre_GpuMatDataDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataDestroy )
+#define hypre_GpuMatDataInvalidateSpMVCache HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuMatDataInvalidateSpMVCache )
+#define hypre_GpuVecDataDestroy HYPRE_FIXEDPRECISION_FUNC ( hypre_GpuVecDataDestroy )
 #define hypre_SeqVectorAxpyDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorAxpyDevice )
 #define hypre_SeqVectorAxpyzDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorAxpyzDevice )
 #define hypre_SeqVectorInnerProdDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_SeqVectorInnerProdDevice )

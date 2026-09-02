@@ -435,6 +435,22 @@ hypre_GpuMatDataDestroy( hypre_GpuMatData *data )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_GpuMatDataInvalidateSpMVCache( hypre_GpuMatData *data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GpuMatDataInvalidateSpMVCache)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuVecDataDestroy( hypre_GpuVecData *data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GpuVecDataDestroy)( data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorAxpyDevice)( alpha, x, y );

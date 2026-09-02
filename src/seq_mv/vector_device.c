@@ -547,4 +547,25 @@ hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+
+/*--------------------------------------------------------------------------
+ * hypre_GpuVecDataDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
+{
+   if (data)
+   {
+      hypre_GpuVecDataInvalidate(data);
+      hypre_TFree(data, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+#endif /* vendor sparse */
+
 #endif

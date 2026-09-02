@@ -258,6 +258,8 @@
 #undef hypre_GPUMatDataSetCSRData
 #undef hypre_GpuMatDataCreate
 #undef hypre_GpuMatDataDestroy
+#undef hypre_GpuMatDataInvalidateSpMVCache
+#undef hypre_GpuVecDataDestroy
 #undef hypre_SeqVectorAxpyDevice
 #undef hypre_SeqVectorAxpyzDevice
 #undef hypre_SeqVectorInnerProdDevice
