@@ -367,7 +367,6 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
 
    /* Get S = w diag(A)^{-1} */
    hypre_StructMatrixGetDiagMat(A, weight, 1, &S);
-   HYPRE_StructMatrixPrint("zS1", S, 0);
 
    if (m == 0)
    {
@@ -389,10 +388,8 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
 
    /* Compute B */
    hypre_StructMatrixPoly(T, m, coeffs, &P);
-   HYPRE_StructMatrixPrint("zP", P, 0);
    hypre_StructMatrixDestroy(T);
    hypre_StructMatmat(P, S, &B);
-   HYPRE_StructMatrixPrint("zB", B, 0);
    hypre_StructMatrixDestroy(P);
    hypre_StructMatrixDestroy(S);
 

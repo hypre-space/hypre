@@ -2362,7 +2362,8 @@ PrintUsage( char *progname,
       hypre_printf("  -crtdim <tdim>     : Struct- cyclic reduction tdim\n");
       hypre_printf("  -cri <ix> <iy> <iz>: Struct- cyclic reduction base_index\n");
       hypre_printf("  -crs <sx> <sy> <sz>: Struct- cyclic reduction base_stride\n");
-      hypre_printf("  -mpsteps <steps>   : Struct- MatPrec number of steps\n");
+      hypre_printf("  -mpsteps <nsteps>  : Struct- MatPrec num steps\n");
+      hypre_printf("  -jpsteps <nsteps>  : Struct- Jacobi preconditioning num steps\n");
       hypre_printf("  -old_default       : sets old BoomerAMG defaults, possibly better for 2D problems\n");
       hypre_printf("  -vis               : save the solution for GLVis visualization");
       hypre_printf("  -seed <val>        : use <val> as the seed for the pseudo-random number generator\n");
@@ -2693,6 +2694,7 @@ main( hypre_int argc,
    Index                 cycred_index, cycred_stride;
 
    HYPRE_Int             matprec_steps;
+   HYPRE_Int             jacprec_steps;
 
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
    HYPRE_Int             row, col;
@@ -2841,6 +2843,7 @@ main( hypre_int argc,
       cycred_stride[i] = 1;
    }
    matprec_steps = 2;
+   jacprec_steps = 2;
 
    solver_id = 39;
    reps = 1;
@@ -3392,6 +3395,11 @@ main( hypre_int argc,
       {
          arg_index++;
          matprec_steps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-jpsteps") == 0 )
+      {
+         arg_index++;
+         jacprec_steps = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-old_default") == 0 )
       {
@@ -7261,7 +7269,7 @@ main( hypre_int argc,
          {
             /* use two-step Jacobi as preconditioner */
             HYPRE_StructJacobiCreate(comm, &struct_precond);
-            HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
+            HYPRE_StructJacobiSetMaxIter(struct_precond, jacprec_steps);
             HYPRE_StructJacobiSetTol(struct_precond, 0.0);
             HYPRE_StructJacobiSetZeroGuess(struct_precond);
             HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
