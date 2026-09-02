@@ -27,6 +27,14 @@ extern "C" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/* HYPRE_struct_matprec.c */
+HYPRE_Int
+hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecSetupChebyshev( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecPrintLogging( HYPRE_StructSolver  solver );
+
 /* cyclic_reduction.c */
 void *hypre_CyclicReductionCreate ( MPI_Comm comm );
 hypre_StructMatrix *hypre_CycRedCreateCoarseOp ( hypre_StructMatrix *A,

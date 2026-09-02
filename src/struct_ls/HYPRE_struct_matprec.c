@@ -140,9 +140,10 @@ HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
                           HYPRE_StructVector b,
                           HYPRE_StructVector x )
 {
-   HYPRE_Int             type = (solver -> max_iter);
-   hypre_StructMatrix   *B    = (solver -> max_iter);
-   hypre_StructVector   *r    = (solver -> max_iter);
+   HYPRE_Int             type     = (solver -> type);
+   HYPRE_Int             max_iter = (solver -> max_iter);
+   hypre_StructMatrix   *B        = (solver -> B);
+   hypre_StructVector   *r        = (solver -> r);
 
    /* Set A, b, x references */
    (solver -> A) = hypre_StructMatrixRef(A);
@@ -150,9 +151,7 @@ HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
    (solver -> x) = hypre_StructVectorRef(x);
 
    /* Create residual vector r */
-   comm = hypre_StructVectorComm(b);
-   grid = hypre_StructVectorGrid(b);
-   HYPRE_StructVectorCreate(comm, grid, &r);
+   HYPRE_StructVectorCreate(hypre_StructVectorComm(b), hypre_StructVectorGrid(b), &r);
    HYPRE_StructVectorInitialize(r);
    HYPRE_StructVectorAssemble(r);
    (solver -> r) = r;
@@ -208,10 +207,10 @@ HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
 
    if ((solver -> tol) > 0.0)
    {
-      hypre_SStructMatvecCreate(&(solver -> Ax_matvec_data));
-      hypre_SStructMatvecSetup((solver -> Ax_matvec_data), A, x);
-      hypre_SStructMatvecCreate(&(solver -> Br_matvec_data));
-      hypre_SStructMatvecSetup((solver -> Br_matvec_data), B, r);
+      (solver -> Ax_matvec_data) = hypre_StructMatvecCreate();
+      hypre_StructMatvecSetup((solver -> Ax_matvec_data), A, x);
+      (solver -> Br_matvec_data) = hypre_StructMatvecCreate();
+      hypre_StructMatvecSetup((solver -> Br_matvec_data), B, r);
    }
 
    return hypre_error_flag;
@@ -226,7 +225,6 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
                           HYPRE_StructVector b,
                           HYPRE_StructVector x )
 {
-   HYPRE_Real            weight         = (solver -> weight);
    HYPRE_Real            tol            = (solver -> tol);
    HYPRE_Int             max_iter       = (solver -> max_iter);
    HYPRE_Int             zero_guess     = (solver -> zero_guess);
@@ -234,10 +232,10 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
    hypre_StructVector   *r              = (solver -> r);
    void                 *Ax_matvec_data = (solver -> Ax_matvec_data);
    void                 *Br_matvec_data = (solver -> Br_matvec_data);
-   HYPRE_Int             print_level    = (solver -> print_level);
    HYPRE_Int             logging        = (solver -> logging);
    HYPRE_Real           *norms          = (solver -> norms);
    HYPRE_Real           *rel_norms      = (solver -> rel_norms);
+   HYPRE_Real            b_dot_b = 0.0, r_dot_r = 0.0, eps = 0.0;
 
    HYPRE_Int             iter;
 
@@ -355,12 +353,13 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
 HYPRE_Int
 hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
 {
-   HYPRE_Int   steps  = (solver -> jacobi_steps);
-   HYPRE_Real  weight = (solver -> jacobi_weight);
+   hypre_StructMatrix  *A      = (solver -> A);
+   HYPRE_Int            steps  = (solver -> jacobi_steps);
+   HYPRE_Real           weight = (solver -> jacobi_weight);
 
-   HYPRE_int            m, coeff;
+   HYPRE_Int            m, k, coeff;
    HYPRE_Complex       *coeffs;
-   hypre_StructMatrix  *S, *T, *P;
+   hypre_StructMatrix  *B, *S, *T, *P;
 
    if (steps < 1)
    {
@@ -383,7 +382,7 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
    hypre_StructMatmat(S, A, &T);
 
    /* Compute polynomial coefficients from binomial coefficients */
-   coeffs = hypre_TAlloc(HYPRE_Complex, m + 1);
+   coeffs = hypre_TAlloc(HYPRE_Complex, m + 1, HYPRE_MEMORY_HOST);
    coeff = 1;
    for (k = 1; k < (m + 2); k++)
    {
@@ -394,7 +393,7 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
    /* Compute B */
    hypre_StructMatrixPoly(T, m, coeffs, &P);
    hypre_StructMatrixDestroy(T);
-   hypre_StructMatMat(P, S, &B);
+   hypre_StructMatmat(P, S, &B);
    hypre_StructMatrixDestroy(P);
    hypre_StructMatrixDestroy(S);
 
@@ -557,7 +556,7 @@ HYPRE_StructMatPrecGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatPrecPrintLogging( HYPRE_StructSolver  solver )
+hypre_StructMatPrecPrintLogging( HYPRE_StructSolver  solver )
 {
    return hypre_error_flag;
 }
