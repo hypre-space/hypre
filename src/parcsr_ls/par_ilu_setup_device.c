@@ -158,7 +158,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
        * in a way different than HYPRE. Diagonal is not listed in the front
        */
 
-#if !defined(HYPRE_USING_SYCL)
+#if !defined(HYPRE_USING_SYCL) && !defined(HYPRE_USING_HIP)
       if ((fill_level == 0) && !(ilu_type % 10))
       {
          /* Copy diagonal matrix into a new place with permutation
@@ -185,6 +185,23 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
 #endif
       {
          hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
+#if defined(HYPRE_USING_HIP)
+         /*
+          * rocSPARSE's ILU(0) paths are not reliable on gfx1100 with ROCm
+          * 7.2.  Use the host implementation for both standard and
+          * iterative ILU(0) setup; the generated factors are migrated to
+          * the device below.
+          */
+         if (fill_level == 0 && !(ilu_type % 10))
+         {
+            hypre_ParCSRMatrixMigrate(Apq, HYPRE_MEMORY_HOST);
+            hypre_ILUSetupILU0(Apq, NULL, NULL, n, n,
+                               &parL, &parD, &parU, &parS, &uend);
+
+            /* The host fallback does not produce iterative setup data. */
+            hypre_ParILUDataIterativeSetupType(ilu_data) = 0;
+         }
+#endif
 #if defined(HYPRE_USING_SYCL)
          /* WM: note - ILU0 is not yet available in oneMKL sparse */
          if (fill_level == 0 && !(ilu_type % 10))
@@ -212,6 +229,12 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          {
             hypre_TFree(parD, HYPRE_MEMORY_HOST);
          }
+#if defined(HYPRE_USING_HIP)
+         else if (fill_level == 0 && !(ilu_type % 10))
+         {
+            hypre_TFree(parD, HYPRE_MEMORY_HOST);
+         }
+#endif
          else
          {
             hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
