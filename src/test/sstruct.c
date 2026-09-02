@@ -2253,10 +2253,11 @@ PrintUsage( char *progname,
       hypre_printf("                        203- Struct PFMG constant coefficients\n");
       hypre_printf("                        204- Struct PFMG constant coefficients variable diagonal\n");
       hypre_printf("                        205- Struct Cyclic Reduction\n");
+      hypre_printf("                        206- Struct MatPrec\n");
       hypre_printf("                        208- Struct Jacobi\n");
-      hypre_printf("                        209- Struct MatPrec\n");
       hypre_printf("                        210- Struct CG with SMG precond\n");
       hypre_printf("                        211- Struct CG with PFMG precond\n");
+      hypre_printf("                        216- Struct CG with MatPrec\n");
       hypre_printf("                        217- Struct CG with 2-step Jacobi\n");
       hypre_printf("                        218- Struct CG with diagonal scaling\n");
       hypre_printf("                        219- Struct CG\n");
@@ -7113,6 +7114,41 @@ main( hypre_int argc,
       }
 
       /*-----------------------------------------------------------
+       * Solve the system using MatPrec
+       *-----------------------------------------------------------*/
+
+      else if ( solver_id == 206 )
+      {
+         time_index = hypre_InitializeTiming("MatPrec Setup");
+         hypre_BeginTiming(time_index);
+
+         HYPRE_StructMatPrecCreate(comm, &struct_solver);
+         HYPRE_StructMatPrecSetMaxIter(struct_solver, max_iterations);
+         HYPRE_StructMatPrecSetTol(struct_solver, tol);
+         HYPRE_StructMatPrecSetJacobi(struct_solver, matprec_steps, jacobi_weight);
+         HYPRE_StructMatPrecSetup(struct_solver, sA, sb, sx);
+
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Setup phase times", comm);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         time_index = hypre_InitializeTiming("MatPrec Solve");
+         hypre_BeginTiming(time_index);
+
+         HYPRE_StructMatPrecSolve(struct_solver, sA, sb, sx);
+
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Solve phase times", comm);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+
+         HYPRE_StructMatPrecGetNumIterations(struct_solver, &num_iterations);
+         HYPRE_StructMatPrecGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
+         HYPRE_StructMatPrecDestroy(struct_solver);
+      }
+
+      /*-----------------------------------------------------------
        * Solve the system using Jacobi
        *-----------------------------------------------------------*/
 
@@ -7144,41 +7180,6 @@ main( hypre_int argc,
          HYPRE_StructJacobiGetNumIterations(struct_solver, &num_iterations);
          HYPRE_StructJacobiGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
          HYPRE_StructJacobiDestroy(struct_solver);
-      }
-
-      /*-----------------------------------------------------------
-       * Solve the system using MatPrec
-       *-----------------------------------------------------------*/
-
-      else if ( solver_id == 209 )
-      {
-         time_index = hypre_InitializeTiming("MatPrec Setup");
-         hypre_BeginTiming(time_index);
-
-         HYPRE_StructMatPrecCreate(comm, &struct_solver);
-         HYPRE_StructMatPrecSetMaxIter(struct_solver, max_iterations);
-         HYPRE_StructMatPrecSetTol(struct_solver, tol);
-         HYPRE_StructMatPrecSetJacobi(struct_solver, matprec_steps, jacobi_weight);
-         HYPRE_StructMatPrecSetup(struct_solver, sA, sb, sx);
-
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", comm);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-
-         time_index = hypre_InitializeTiming("MatPrec Solve");
-         hypre_BeginTiming(time_index);
-
-         HYPRE_StructMatPrecSolve(struct_solver, sA, sb, sx);
-
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", comm);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-
-         HYPRE_StructMatPrecGetNumIterations(struct_solver, &num_iterations);
-         HYPRE_StructMatPrecGetFinalRelativeResidualNorm(struct_solver, final_res_norm_ptr);
-         HYPRE_StructMatPrecDestroy(struct_solver);
       }
 
       /*-----------------------------------------------------------
@@ -7239,6 +7240,20 @@ main( hypre_int argc,
             HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                 (HYPRE_Solver) struct_precond);
+         }
+
+         else if (solver_id == 216)
+         {
+            /* use two-step MatPrec as preconditioner */
+            HYPRE_StructMatPrecCreate(comm, &struct_precond);
+            HYPRE_StructMatPrecSetMaxIter(struct_precond, 1);
+            HYPRE_StructMatPrecSetTol(struct_precond, 0.0);
+            HYPRE_StructMatPrecSetZeroGuess(struct_precond);
+            HYPRE_StructMatPrecSetJacobi(struct_precond, matprec_steps, jacobi_weight);
+            HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructMatPrecSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructMatPrecSetup,
                                  (HYPRE_Solver) struct_precond);
          }
 

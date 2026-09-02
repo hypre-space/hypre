@@ -142,8 +142,7 @@ HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
 {
    HYPRE_Int             type     = (solver -> type);
    HYPRE_Int             max_iter = (solver -> max_iter);
-   hypre_StructMatrix   *B        = (solver -> B);
-   hypre_StructVector   *r        = (solver -> r);
+   hypre_StructVector   *r;
 
    /* Set A, b, x references */
    (solver -> A) = hypre_StructMatrixRef(A);
@@ -205,13 +204,10 @@ HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
     * Setup matvec for A*x and A*r
     *-----------------------------------------------------*/
 
-   if ((solver -> tol) > 0.0)
-   {
-      (solver -> Ax_matvec_data) = hypre_StructMatvecCreate();
-      hypre_StructMatvecSetup((solver -> Ax_matvec_data), A, x);
-      (solver -> Br_matvec_data) = hypre_StructMatvecCreate();
-      hypre_StructMatvecSetup((solver -> Br_matvec_data), B, r);
-   }
+   (solver -> Ax_matvec_data) = hypre_StructMatvecCreate();
+   hypre_StructMatvecSetup((solver -> Ax_matvec_data), A, x);
+   (solver -> Br_matvec_data) = hypre_StructMatvecCreate();
+   hypre_StructMatvecSetup((solver -> Br_matvec_data), (solver -> B), r);
 
    return hypre_error_flag;
 }
@@ -371,6 +367,7 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
 
    /* Get S = w diag(A)^{-1} */
    hypre_StructMatrixGetDiagMat(A, weight, 1, &S);
+   HYPRE_StructMatrixPrint("zS1", S, 0);
 
    if (m == 0)
    {
@@ -392,8 +389,10 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
 
    /* Compute B */
    hypre_StructMatrixPoly(T, m, coeffs, &P);
+   HYPRE_StructMatrixPrint("zP", P, 0);
    hypre_StructMatrixDestroy(T);
    hypre_StructMatmat(P, S, &B);
+   HYPRE_StructMatrixPrint("zB", B, 0);
    hypre_StructMatrixDestroy(P);
    hypre_StructMatrixDestroy(S);
 
