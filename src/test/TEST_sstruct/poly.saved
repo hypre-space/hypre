@@ -1,0 +1,32 @@
+# Output file: poly.out.1m
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
+# Output file: poly.out.1j
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
+# Output file: poly.out.2m
+Iterations = 14
+Final Relative Residual Norm = 3.329463e-07
+
+# Output file: poly.out.2j
+Iterations = 14
+Final Relative Residual Norm = 3.329463e-07
+
+# Output file: poly.out.3m
+Iterations = 15
+Final Relative Residual Norm = 3.977295e-07
+
+# Output file: poly.out.3j
+Iterations = 15
+Final Relative Residual Norm = 3.977295e-07
+
+# Output file: poly.out.4m
+Iterations = 10
+Final Relative Residual Norm = 2.434559e-07
+
+# Output file: poly.out.4j
+Iterations = 10
+Final Relative Residual Norm = 2.434559e-07
+

@@ -2038,6 +2038,30 @@ hypre_StructKrylovSetRandomValues( void *x, HYPRE_Int seed )
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructKrylovSetRandomValues)( x, seed );
 }
 
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatPrecPrintLogging( HYPRE_StructSolver solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatPrecPrintLogging)( solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatPrecSetupChebyshev( HYPRE_StructSolver solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatPrecSetupChebyshev)( solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatPrecSetupJacobi)( solver );
+}
+
 
 #endif
 

@@ -849,6 +849,14 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray *boxaa, hypre_BoxArray *r
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CoarsenStencil( hypre_StructStencil *stencil, hypre_Index stride )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CoarsenStencil)( stencil, stride );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CommBlockSetEntries( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_BoxArrayArray *comm_boxes, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CommBlockSetEntries)( comm_block, boxnums, boxes, orders, comm_boxes, stride, data_space, data_offsets );
@@ -1585,9 +1593,25 @@ hypre_StMatrixCreate( HYPRE_Int id, HYPRE_Int size, HYPRE_Int ndim, hypre_StMatr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StMatrixCreateFromStencil( hypre_StructStencil *stencil, hypre_Index ran_stride, hypre_Index dom_stride, HYPRE_Int id, hypre_StMatrix **matrix_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StMatrixCreateFromStencil)( stencil, ran_stride, dom_stride, id, matrix_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StMatrixDestroy( hypre_StMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StMatrixDestroy)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixGetStencil( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StMatrixGetStencil)( matrix, ndim, stencil_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1604,6 +1628,14 @@ HYPRE_Int
 hypre_StMatrixMatmult( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StMatrixMatmult)( nmatrices, matrices, transposes, Cid, ndim, C_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixNCoeffs( hypre_StMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StMatrixNCoeffs)( matrix );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2049,6 +2081,14 @@ hypre_StructMatmultSetup( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatri
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructMatrixAdd( HYPRE_Complex alpha, hypre_StructMatrix *A, HYPRE_Complex beta, hypre_StructMatrix *B, hypre_StructMatrix **C_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAdd)( alpha, A, beta, B, C_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructMatrixAddInit( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddInit)( nmatrices, matrices, A_ptr );
@@ -2057,9 +2097,9 @@ hypre_StructMatrixAddInit( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, h
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixAddMat( hypre_StructMatrix *A, HYPRE_Complex alpha, hypre_StructMatrix *B )
+hypre_StructMatrixAddMat( hypre_StructMatrix *A, HYPRE_Complex beta, hypre_StructMatrix *B )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddMat)( A, alpha, B );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddMat)( A, beta, B );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2152,6 +2192,14 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
 
 /*--------------------------------------------------------------------------*/
 
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal( hypre_StructGrid *grid, HYPRE_Complex value )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixDiagonal)( grid, value );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Complex *
 hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix, HYPRE_Int b, hypre_Index index )
 {
@@ -2164,6 +2212,14 @@ HYPRE_Int
 hypre_StructMatrixForget( hypre_StructMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixForget)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetDiagMat( hypre_StructMatrix *A, HYPRE_Real weight, HYPRE_Int type, hypre_StructMatrix **D_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixGetDiagMat)( A, weight, type, D_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2284,6 +2340,14 @@ HYPRE_Int
 hypre_StructMatrixPlaceStencil( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixPlaceStencil)( matrix, entry, dindex, index );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixPoly( hypre_StructMatrix *A, HYPRE_Int order, HYPRE_Complex *coeffs, hypre_StructMatrix **polyA_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixPoly)( A, order, coeffs, polyA_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
