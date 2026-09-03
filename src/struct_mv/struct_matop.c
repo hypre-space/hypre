@@ -997,6 +997,7 @@ hypre_StructMatrixScale( hypre_StructMatrix *A,
  * Assumptions:
  * - The number of matrices to add is greater than zero, i.e. nmatrices > 0
  * - The matrices have the same stencil grid, range grid, and domain grid
+ * - The matrices are either all symmetric or all non-symmetric
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1080,6 +1081,7 @@ hypre_StructMatrixAddInit( HYPRE_Int            nmatrices,
    HYPRE_StructMatrixSetConstantEntries(A, nconst, isvar);
    HYPRE_StructMatrixInitialize(A);
 
+   HYPRE_StructStencilDestroy(stencil);
    hypre_TFree(offsets, HYPRE_MEMORY_HOST);
    hypre_TFree(isvar, HYPRE_MEMORY_HOST);
 
@@ -1103,9 +1105,11 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
                           HYPRE_Complex       beta,
                           hypre_StructMatrix *B )
 {
-   HYPRE_Int             ndim     = hypre_StructMatrixNDim(A);
-   hypre_StructStencil  *Astencil = hypre_StructMatrixStencil(A);
-   hypre_StructStencil  *Bstencil = hypre_StructMatrixStencil(B);
+   HYPRE_Int             ndim          = hypre_StructMatrixNDim(A);
+   hypre_StructStencil  *Astencil      = hypre_StructMatrixStencil(A);
+   hypre_StructStencil  *Bstencil      = hypre_StructMatrixStencil(B);
+   HYPRE_Int            *Bsymm_entries = hypre_StructMatrixSymmEntries(B);
+   hypre_IndexRef        Boffset;
    hypre_Box            *Adbox, *Bdbox;
    HYPRE_Complex        *Adata, *Bdata;
    HYPRE_Int             Aentry, Bentry;
@@ -1124,9 +1128,14 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
 
    for (Bentry = 0; Bentry < hypre_StructStencilSize(Bstencil); Bentry++)
    {
-      hypre_IndexRef  Boffset = hypre_StructStencilOffset(Bstencil, Bentry);
+      /* Only want to add symmetric entries once (add the stored entries in B) */
+      if (hypre_StructMatrixSymmetric(A) && !(Bsymm_entries[Bentry] < 0))
+      {
+         continue;
+      }
 
       /* Find the entry in A that correspond to Bentry */
+      Boffset = hypre_StructStencilOffset(Bstencil, Bentry);
       Aentry = hypre_StructStencilOffsetEntry(Astencil, Boffset);
       if (Aentry < 0)
       {
