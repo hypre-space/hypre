@@ -392,6 +392,7 @@ hypre_StructMatPrecSetupJacobi( HYPRE_StructSolver solver )
    hypre_StructMatmat(P, S, &B);
    hypre_StructMatrixDestroy(P);
    hypre_StructMatrixDestroy(S);
+   hypre_TFree(coeffs, HYPRE_MEMORY_HOST);
 
    (solver -> B) = B;
 
@@ -502,6 +503,28 @@ HYPRE_Int
 HYPRE_StructMatPrecSetNonZeroGuess( HYPRE_StructSolver solver )
 {
    (solver -> zero_guess) = 0;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int          logging )
+{
+   (solver -> logging) = logging;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int         *logging )
+{
+   *logging = (solver -> logging);
    return hypre_error_flag;
 }
 

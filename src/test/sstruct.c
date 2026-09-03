@@ -2258,7 +2258,7 @@ PrintUsage( char *progname,
       hypre_printf("                        210- Struct CG with SMG precond\n");
       hypre_printf("                        211- Struct CG with PFMG precond\n");
       hypre_printf("                        216- Struct CG with MatPrec\n");
-      hypre_printf("                        217- Struct CG with 2-step Jacobi\n");
+      hypre_printf("                        217- Struct CG with m-step Jacobi\n");
       hypre_printf("                        218- Struct CG with diagonal scaling\n");
       hypre_printf("                        219- Struct CG\n");
       hypre_printf("                        220- Struct Hybrid with SMG precond\n");
@@ -7134,6 +7134,7 @@ main( hypre_int argc,
          HYPRE_StructMatPrecSetMaxIter(struct_solver, max_iterations);
          HYPRE_StructMatPrecSetTol(struct_solver, tol);
          HYPRE_StructMatPrecSetJacobi(struct_solver, matprec_steps, jacobi_weight);
+         HYPRE_StructMatPrecSetLogging(struct_solver, 1);
          HYPRE_StructMatPrecSetup(struct_solver, sA, sb, sx);
 
          hypre_EndTiming(time_index);
@@ -7320,6 +7321,10 @@ main( hypre_int argc,
          else if (solver_id == 211)
          {
             HYPRE_StructPFMGDestroy(struct_precond);
+         }
+         else if (solver_id == 216)
+         {
+            HYPRE_StructMatPrecDestroy(struct_precond);
          }
          else if (solver_id == 217)
          {

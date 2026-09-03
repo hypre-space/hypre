@@ -683,6 +683,17 @@ HYPRE_Int HYPRE_StructMatPrecGetZeroGuess( HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructMatPrecSetNonZeroGuess( HYPRE_StructSolver solver );
 
 /**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_StructMatPrecSetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int          logging );
+
+HYPRE_Int
+HYPRE_StructMatPrecGetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int         *logging );
+
+/**
  * Return the number of iterations taken.
  **/
 HYPRE_Int HYPRE_StructMatPrecGetNumIterations( HYPRE_StructSolver  solver,

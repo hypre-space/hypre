@@ -1269,6 +1269,7 @@ hypre_StructMatrixPoly( hypre_StructMatrix       *A,
          hypre_StMatrixMatmult(order, st_matrices, transposes, order, ndim, &st_Aorder);
          hypre_StMatrixDestroy(st_matrices[0]);
          hypre_TFree(st_matrices, HYPRE_MEMORY_HOST);
+         hypre_TFree(transposes, HYPRE_MEMORY_HOST);
          hypre_StMatrixGetStencil(st_Aorder, ndim, &stencil);
          hypre_StMatrixDestroy(st_Aorder);
       }
@@ -1342,6 +1343,7 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
    HYPRE_StructStencilSetEntry(stencil, 0, offset);
    HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
    HYPRE_StructMatrixInitialize(D);
+   HYPRE_StructStencilDestroy(stencil);
 
    if (hypre_StructMatrixConstEntry(A, Adiag))
    {

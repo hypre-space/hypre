@@ -3166,5 +3166,7 @@ hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
    HYPRE_StructMatrixSetConstantValues(D, 1, &stencil_index, &value);
    HYPRE_StructMatrixAssemble(D);
 
+   HYPRE_StructStencilDestroy(stencil);
+
    return D;
 }
