@@ -1840,20 +1840,6 @@ HYPRE_Int
 hypre_StructMatrixAddInit_long_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
 
 HYPRE_Int
-hypre_StructMatrixAddInit_flt( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
-HYPRE_Int
-hypre_StructMatrixAddInit_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
-HYPRE_Int
-hypre_StructMatrixAddInit_long_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
-
-HYPRE_Int
-hypre_StructMatrixAddMat_flt( hypre_StructMatrix *A, hypre_float beta, hypre_StructMatrix *B );
-HYPRE_Int
-hypre_StructMatrixAddMat_dbl( hypre_StructMatrix *A, hypre_double beta, hypre_StructMatrix *B );
-HYPRE_Int
-hypre_StructMatrixAddMat_long_dbl( hypre_StructMatrix *A, hypre_long_double beta, hypre_StructMatrix *B );
-
-HYPRE_Int
 hypre_StructMatrixAddMat_flt( hypre_StructMatrix *A, hypre_float beta, hypre_StructMatrix *B );
 HYPRE_Int
 hypre_StructMatrixAddMat_dbl( hypre_StructMatrix *A, hypre_double beta, hypre_StructMatrix *B );

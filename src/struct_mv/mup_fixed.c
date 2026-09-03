@@ -2097,22 +2097,6 @@ hypre_StructMatrixAddInit( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, h
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixAddInit( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddInit)( nmatrices, matrices, A_ptr );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixAddMat( hypre_StructMatrix *A, HYPRE_Complex beta, hypre_StructMatrix *B )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddMat)( A, beta, B );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_StructMatrixAddMat( hypre_StructMatrix *A, HYPRE_Complex beta, hypre_StructMatrix *B )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixAddMat)( A, beta, B );

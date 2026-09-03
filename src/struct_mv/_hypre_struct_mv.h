@@ -2512,14 +2512,6 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix  *A,
                          hypre_StructMatrix  *P,
                          hypre_StructMatrix **M_ptr);
-HYPRE_Int
-hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
-                           hypre_StructMatrix       **matrices,
-                           hypre_StructMatrix       **A_ptr );
-HYPRE_Int
-hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
-                          HYPRE_Complex             beta,
-                          hypre_StructMatrix       *B );
 
 /* struct_matmult_core.c */
 HYPRE_Int
