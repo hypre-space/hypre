@@ -1362,7 +1362,6 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
    else
    {
       hypre_Box            *Adbox, *Ddbox;
-      HYPRE_Complex        *Adata, *Ddata;
       hypre_Box            *loop_box;
       hypre_Index           loop_size;
       hypre_IndexRef        start;
