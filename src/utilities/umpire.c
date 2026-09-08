@@ -42,6 +42,7 @@ hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpireHostPoolSize(handle),
                                                        hypre_HandleUmpireBlockSize(handle), pooled_allocator);
+      umpire_allocator_delete(&allocator);
       hypre_HandleUmpireOwnHostPool(handle) = 1;
    }
 
@@ -136,6 +137,7 @@ hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpireDevicePoolSize(handle),
                                                        hypre_HandleUmpireBlockSize(handle), pooled_allocator);
+      umpire_allocator_delete(&allocator);
 
       hypre_HandleUmpireOwnDevicePool(handle) = 1;
    }
@@ -198,6 +200,7 @@ hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpireUMPoolSize(handle),
                                                        hypre_HandleUmpireBlockSize(handle), pooled_allocator);
+      umpire_allocator_delete(&allocator);
 
       hypre_HandleUmpireOwnUMPool(handle) = 1;
    }
@@ -260,6 +263,7 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
       hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
                                                        hypre_HandleUmpirePinnedPoolSize(handle),
                                                        hypre_HandleUmpireBlockSize(handle), pooled_allocator);
+      umpire_allocator_delete(&allocator);
 
       hypre_HandleUmpireOwnPinnedPool(handle) = 1;
    }
@@ -354,43 +358,63 @@ hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
    umpire_allocator allocator;
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
-   if (hypre_HandleUmpireOwnHostPool(hypre_handle_))
+   if (hypre_HandleUmpireHostAllocatorAddress(hypre_handle_))
    {
-      allocator = hypre_HandleUmpireHostPool(hypre_handle_);
-      umpire_allocator_release(&allocator);
+      if (hypre_HandleUmpireOwnHostPool(hypre_handle_))
+      {
+         allocator = hypre_HandleUmpireHostPool(hypre_handle_);
+         umpire_allocator_release(&allocator);
+      }
+      umpire_allocator_delete(&hypre_HandleUmpireHostPool(hypre_handle_));
    }
    hypre_HandleUmpireHostAllocatorAddress(hypre_handle_) = NULL;
    hypre_HandleUmpireHostAllocatorId(hypre_handle_)      = 0;
+   hypre_HandleUmpireOwnHostPool(hypre_handle_)          = 0;
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-   if (hypre_HandleUmpireOwnDevicePool(hypre_handle_))
+   if (hypre_HandleUmpireDeviceAllocatorAddress(hypre_handle_))
    {
-      allocator = hypre_HandleUmpireDevicePool(hypre_handle_);
-      umpire_allocator_release(&allocator);
+      if (hypre_HandleUmpireOwnDevicePool(hypre_handle_))
+      {
+         allocator = hypre_HandleUmpireDevicePool(hypre_handle_);
+         umpire_allocator_release(&allocator);
+      }
+      umpire_allocator_delete(&hypre_HandleUmpireDevicePool(hypre_handle_));
    }
    hypre_HandleUmpireDeviceAllocatorAddress(hypre_handle_) = NULL;
    hypre_HandleUmpireDeviceAllocatorId(hypre_handle_)      = 0;
+   hypre_HandleUmpireOwnDevicePool(hypre_handle_)          = 0;
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_UM)
-   if (hypre_HandleUmpireOwnUMPool(hypre_handle_))
+   if (hypre_HandleUmpireUMAllocatorAddress(hypre_handle_))
    {
-      allocator = hypre_HandleUmpireUMPool(hypre_handle_);
-      umpire_allocator_release(&allocator);
+      if (hypre_HandleUmpireOwnUMPool(hypre_handle_))
+      {
+         allocator = hypre_HandleUmpireUMPool(hypre_handle_);
+         umpire_allocator_release(&allocator);
+      }
+      umpire_allocator_delete(&hypre_HandleUmpireUMPool(hypre_handle_));
    }
    hypre_HandleUmpireUMAllocatorAddress(hypre_handle_) = NULL;
    hypre_HandleUmpireUMAllocatorId(hypre_handle_)      = 0;
+   hypre_HandleUmpireOwnUMPool(hypre_handle_)          = 0;
 #endif
 
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-   if (hypre_HandleUmpireOwnPinnedPool(hypre_handle_))
+   if (hypre_HandleUmpirePinnedAllocatorAddress(hypre_handle_))
    {
-      allocator = hypre_HandleUmpirePinnedPool(hypre_handle_);
-      umpire_allocator_release(&allocator);
+      if (hypre_HandleUmpireOwnPinnedPool(hypre_handle_))
+      {
+         allocator = hypre_HandleUmpirePinnedPool(hypre_handle_);
+         umpire_allocator_release(&allocator);
+      }
+      umpire_allocator_delete(&hypre_HandleUmpirePinnedPool(hypre_handle_));
    }
    hypre_HandleUmpirePinnedAllocatorAddress(hypre_handle_) = NULL;
    hypre_HandleUmpirePinnedAllocatorId(hypre_handle_)      = 0;
+   hypre_HandleUmpireOwnPinnedPool(hypre_handle_)          = 0;
 #endif
 
    return hypre_error_flag;
