@@ -14,6 +14,12 @@
 #ifndef hypre_VECTOR_HEADER
 #define hypre_VECTOR_HEADER
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+struct hypre_GpuVecData;
+typedef struct hypre_GpuVecData hypre_GpuVecData;
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_Vector
  *--------------------------------------------------------------------------*/
@@ -43,6 +49,11 @@ typedef struct
    HYPRE_Precision vector_precision;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   hypre_GpuVecData     *vec_data;
+#endif
+
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -64,6 +75,11 @@ typedef struct
 #define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
 #define hypre_VectorEntryIJ(vector, i, j) \
    ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+#define hypre_VectorGPUVecData(vector)            ((vector) -> vec_data)
+#endif
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)

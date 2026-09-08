@@ -283,6 +283,15 @@ HYPRE_Int
 HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 
 HYPRE_Int
+HYPRE_SetSpMVAlgorithm_flt( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_dbl( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_long_dbl( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm( HYPRE_Int algorithm );
+
+HYPRE_Int
 HYPRE_SetSpMVUseVendor_flt( HYPRE_Int use_vendor );
 HYPRE_Int
 HYPRE_SetSpMVUseVendor_dbl( HYPRE_Int use_vendor );
@@ -442,6 +451,9 @@ HYPRE_SetPrintErrorVerbosity_pre( HYPRE_Precision precision, HYPRE_Int code, HYP
 
 HYPRE_Int
 HYPRE_SetSpGemmUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor );
+
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_pre( HYPRE_Precision precision, HYPRE_Int algorithm );
 
 HYPRE_Int
 HYPRE_SetSpMVUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor );

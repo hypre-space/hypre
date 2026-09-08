@@ -38,6 +38,11 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    hypre_VectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+   hypre_VectorGPUVecData(vector) = NULL;
+#endif
+
    return vector;
 }
 
@@ -74,6 +79,11 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector), memory_location);
       }
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE)
+      hypre_GpuVecDataDestroy(hypre_VectorGPUVecData(vector));
+#endif
 
       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
