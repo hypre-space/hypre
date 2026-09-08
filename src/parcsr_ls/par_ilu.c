@@ -2580,7 +2580,7 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
    HYPRE_Real G_capacity_estimate = (HYPRE_Real) A_nnz * n * n /
                                     num_nodes / num_nodes - num_nodes;
    G_capacity = hypre_max((HYPRE_Int) hypre_min(G_capacity_estimate,
-                                                 (HYPRE_Real) A_nnz), 1);
+                                                (HYPRE_Real) A_nnz), 1);
    G_i = hypre_TAlloc(HYPRE_Int, num_nodes + 1, HYPRE_MEMORY_HOST);
    G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_HOST);
 
