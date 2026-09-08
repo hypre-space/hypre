@@ -748,6 +748,13 @@ HYPRE_Int
 hypre_CoarsenBoxArrayArrayOutward_long_dbl( hypre_BoxArrayArray *boxaa, hypre_BoxArray *refboxa, hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
 
 HYPRE_Int
+hypre_CoarsenStencil_flt( hypre_StructStencil *stencil, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenStencil_dbl( hypre_StructStencil *stencil, hypre_Index stride );
+HYPRE_Int
+hypre_CoarsenStencil_long_dbl( hypre_StructStencil *stencil, hypre_Index stride );
+
+HYPRE_Int
 hypre_CommBlockSetEntries_flt( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_BoxArrayArray *comm_boxes, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
 HYPRE_Int
 hypre_CommBlockSetEntries_dbl( hypre_CommBlock *comm_block, HYPRE_Int *boxnums, hypre_Box *boxes, HYPRE_Int *orders, hypre_BoxArrayArray *comm_boxes, hypre_Index stride, hypre_BoxArray *data_space, HYPRE_Int *data_offsets );
@@ -1392,11 +1399,25 @@ HYPRE_Int
 hypre_StMatrixCreate_long_dbl( HYPRE_Int id, HYPRE_Int size, HYPRE_Int ndim, hypre_StMatrix **matrix_ptr );
 
 HYPRE_Int
+hypre_StMatrixCreateFromStencil_flt( hypre_StructStencil *stencil, hypre_Index ran_stride, hypre_Index dom_stride, HYPRE_Int id, hypre_StMatrix **matrix_ptr );
+HYPRE_Int
+hypre_StMatrixCreateFromStencil_dbl( hypre_StructStencil *stencil, hypre_Index ran_stride, hypre_Index dom_stride, HYPRE_Int id, hypre_StMatrix **matrix_ptr );
+HYPRE_Int
+hypre_StMatrixCreateFromStencil_long_dbl( hypre_StructStencil *stencil, hypre_Index ran_stride, hypre_Index dom_stride, HYPRE_Int id, hypre_StMatrix **matrix_ptr );
+
+HYPRE_Int
 hypre_StMatrixDestroy_flt( hypre_StMatrix *matrix );
 HYPRE_Int
 hypre_StMatrixDestroy_dbl( hypre_StMatrix *matrix );
 HYPRE_Int
 hypre_StMatrixDestroy_long_dbl( hypre_StMatrix *matrix );
+
+HYPRE_Int
+hypre_StMatrixGetStencil_flt( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
+HYPRE_Int
+hypre_StMatrixGetStencil_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
+HYPRE_Int
+hypre_StMatrixGetStencil_long_dbl( hypre_StMatrix *matrix, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
 
 HYPRE_Int
 hypre_StMatrixMatmat_flt( hypre_StMatrix *A, hypre_StMatrix *B, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
@@ -1411,6 +1432,13 @@ HYPRE_Int
 hypre_StMatrixMatmult_dbl( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
 HYPRE_Int
 hypre_StMatrixMatmult_long_dbl( HYPRE_Int nmatrices, hypre_StMatrix **matrices, HYPRE_Int *transposes, HYPRE_Int Cid, HYPRE_Int ndim, hypre_StMatrix **C_ptr );
+
+HYPRE_Int
+hypre_StMatrixNCoeffs_flt( hypre_StMatrix *matrix );
+HYPRE_Int
+hypre_StMatrixNCoeffs_dbl( hypre_StMatrix *matrix );
+HYPRE_Int
+hypre_StMatrixNCoeffs_long_dbl( hypre_StMatrix *matrix );
 
 HYPRE_Int
 hypre_StMatrixNEntryCoeffs_flt( hypre_StMatrix *matrix, HYPRE_Int entry );
@@ -1798,6 +1826,13 @@ HYPRE_Int
 hypre_StructMatmultSetup_long_dbl( HYPRE_Int type, HYPRE_Int nmatrices, hypre_StructMatrix **matrices, HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatmultData **mmdata_ptr, hypre_StructMatrix **M_ptr );
 
 HYPRE_Int
+hypre_StructMatrixAdd_flt( hypre_float alpha, hypre_StructMatrix *A, hypre_float beta, hypre_StructMatrix *B, hypre_StructMatrix **C_ptr );
+HYPRE_Int
+hypre_StructMatrixAdd_dbl( hypre_double alpha, hypre_StructMatrix *A, hypre_double beta, hypre_StructMatrix *B, hypre_StructMatrix **C_ptr );
+HYPRE_Int
+hypre_StructMatrixAdd_long_dbl( hypre_long_double alpha, hypre_StructMatrix *A, hypre_long_double beta, hypre_StructMatrix *B, hypre_StructMatrix **C_ptr );
+
+HYPRE_Int
 hypre_StructMatrixAddInit_flt( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
 HYPRE_Int
 hypre_StructMatrixAddInit_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
@@ -1805,11 +1840,11 @@ HYPRE_Int
 hypre_StructMatrixAddInit_long_dbl( HYPRE_Int nmatrices, hypre_StructMatrix **matrices, hypre_StructMatrix **A_ptr );
 
 HYPRE_Int
-hypre_StructMatrixAddMat_flt( hypre_StructMatrix *A, hypre_float alpha, hypre_StructMatrix *B );
+hypre_StructMatrixAddMat_flt( hypre_StructMatrix *A, hypre_float beta, hypre_StructMatrix *B );
 HYPRE_Int
-hypre_StructMatrixAddMat_dbl( hypre_StructMatrix *A, hypre_double alpha, hypre_StructMatrix *B );
+hypre_StructMatrixAddMat_dbl( hypre_StructMatrix *A, hypre_double beta, hypre_StructMatrix *B );
 HYPRE_Int
-hypre_StructMatrixAddMat_long_dbl( hypre_StructMatrix *A, hypre_long_double alpha, hypre_StructMatrix *B );
+hypre_StructMatrixAddMat_long_dbl( hypre_StructMatrix *A, hypre_long_double beta, hypre_StructMatrix *B );
 
 HYPRE_Int
 hypre_StructMatrixAssemble_flt( hypre_StructMatrix *matrix );
@@ -1888,6 +1923,13 @@ hypre_StructMatrixDestroy_dbl( hypre_StructMatrix *matrix );
 HYPRE_Int
 hypre_StructMatrixDestroy_long_dbl( hypre_StructMatrix *matrix );
 
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal_flt( hypre_StructGrid *grid, hypre_float value );
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal_dbl( hypre_StructGrid *grid, hypre_double value );
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal_long_dbl( hypre_StructGrid *grid, hypre_long_double value );
+
 HYPRE_Complex *
 hypre_StructMatrixExtractPointerByIndex_flt( hypre_StructMatrix *matrix, HYPRE_Int b, hypre_Index index );
 HYPRE_Complex *
@@ -1901,6 +1943,13 @@ HYPRE_Int
 hypre_StructMatrixForget_dbl( hypre_StructMatrix *matrix );
 HYPRE_Int
 hypre_StructMatrixForget_long_dbl( hypre_StructMatrix *matrix );
+
+HYPRE_Int
+hypre_StructMatrixGetDiagMat_flt( hypre_StructMatrix *A, hypre_float weight, HYPRE_Int type, hypre_StructMatrix **D_ptr );
+HYPRE_Int
+hypre_StructMatrixGetDiagMat_dbl( hypre_StructMatrix *A, hypre_double weight, HYPRE_Int type, hypre_StructMatrix **D_ptr );
+HYPRE_Int
+hypre_StructMatrixGetDiagMat_long_dbl( hypre_StructMatrix *A, hypre_long_double weight, HYPRE_Int type, hypre_StructMatrix **D_ptr );
 
 HYPRE_Int
 hypre_StructMatrixGetDiagonal_flt( hypre_StructMatrix *matrix, hypre_StructVector *diag );
@@ -2006,6 +2055,13 @@ HYPRE_Int
 hypre_StructMatrixPlaceStencil_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index );
 HYPRE_Int
 hypre_StructMatrixPlaceStencil_long_dbl( hypre_StructMatrix *matrix, HYPRE_Int entry, hypre_Index dindex, hypre_Index index );
+
+HYPRE_Int
+hypre_StructMatrixPoly_flt( hypre_StructMatrix *A, HYPRE_Int order, hypre_float *coeffs, hypre_StructMatrix **polyA_ptr );
+HYPRE_Int
+hypre_StructMatrixPoly_dbl( hypre_StructMatrix *A, HYPRE_Int order, hypre_double *coeffs, hypre_StructMatrix **polyA_ptr );
+HYPRE_Int
+hypre_StructMatrixPoly_long_dbl( hypre_StructMatrix *A, HYPRE_Int order, hypre_long_double *coeffs, hypre_StructMatrix **polyA_ptr );
 
 HYPRE_Int
 hypre_StructMatrixPrint_flt( const char *filename, hypre_StructMatrix *matrix, HYPRE_Int all );

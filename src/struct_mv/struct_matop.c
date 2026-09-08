@@ -992,3 +992,433 @@ hypre_StructMatrixScale( hypre_StructMatrix *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * Assumptions:
+ * - The number of matrices to add is greater than zero, i.e. nmatrices > 0
+ * - The matrices have the same stencil grid, range grid, and domain grid
+ * - The matrices are either all symmetric or all non-symmetric
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixAddInit( HYPRE_Int            nmatrices,
+                           hypre_StructMatrix **matrices,
+                           hypre_StructMatrix **A_ptr )
+{
+   hypre_StructMatrix  *A, *mat0;
+   hypre_StructStencil *stencil;
+   hypre_Index         *offsets;
+   hypre_IndexRef       offset;
+   HYPRE_Int           *isvar;
+   HYPRE_Int            ndim, nconst, size, entry, m, i;
+
+   if ( !(nmatrices > 0) )
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Require at least one matrix to add!");
+      return hypre_error_flag;
+   }
+
+   mat0 = matrices[0];
+   ndim = hypre_StructMatrixNDim(mat0);
+
+   /* Compute an upper bound for the stencil size */
+   size = 0;
+   for (m = 0; m < nmatrices; m++)
+   {
+      stencil = hypre_StructMatrixStencil(matrices[m]);
+      size += hypre_StructStencilSize(stencil);
+   }
+   offsets = hypre_CTAlloc(hypre_Index,  size, HYPRE_MEMORY_HOST);
+   isvar   = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+
+   /* Find the set of unique offsets in matrices - use them to define the stencil for A */
+   size = 0;
+   for (m = 0; m < nmatrices; m++)
+   {
+      stencil = hypre_StructMatrixStencil(matrices[m]);
+      for (entry = 0; entry < hypre_StructStencilSize(stencil); entry++)
+      {
+         offset = hypre_StructStencilOffset(stencil, entry);
+         for (i = 0; i < size; i++)
+         {
+            if (hypre_IndexesEqual(offset, offsets[i], ndim))
+            {
+               break;
+            }
+         }
+         if ( !hypre_StructMatrixConstEntry(matrices[m], entry) )
+         {
+            /* This stencil entry of A must be variable (not constant) */
+            isvar[i] = 1;
+         }
+         if (i == size)
+         {
+            /* This is a new offset */
+            hypre_CopyIndex(offset, offsets[i]);
+            size ++;
+         }
+      }
+   }
+
+   /* Create the stencil for A */
+   HYPRE_StructStencilCreate(ndim, size, &stencil);
+   nconst = 0;
+   for (i = 0; i < size; i++)
+   {
+      HYPRE_StructStencilSetEntry(stencil, i, offsets[i]);
+      if ( !isvar[i] )
+      {
+         isvar[nconst] = i;  /* Now use isvar to hold the constant entries */
+         nconst++;
+      }
+   }
+
+   /* Create A */
+   HYPRE_StructMatrixCreate(hypre_StructMatrixComm(mat0), hypre_StructMatrixGrid(mat0), stencil, &A);
+   HYPRE_StructMatrixSetRangeStride(A, hypre_StructMatrixRanStride(mat0));
+   HYPRE_StructMatrixSetDomainStride(A, hypre_StructMatrixDomStride(mat0));
+   HYPRE_StructMatrixSetSymmetric(A, hypre_StructMatrixSymmetric(mat0));
+   HYPRE_StructMatrixSetConstantEntries(A, nconst, isvar);
+   HYPRE_StructMatrixInitialize(A);
+
+   HYPRE_StructStencilDestroy(stencil);
+   hypre_TFree(offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(isvar, HYPRE_MEMORY_HOST);
+
+   *A_ptr = A;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute A += beta * B
+ *
+ * Assumptions:
+ * - A and B have the same stencil grid, range grid, and domain grid
+ * - Every stencil entry of B is also present in A
+ * - Constant entries in A map to constant entries in B (variable entries in A
+ *   can map to either constant or variable entries in B)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixAddMat( hypre_StructMatrix *A,
+                          HYPRE_Complex       beta,
+                          hypre_StructMatrix *B )
+{
+   HYPRE_Int             ndim          = hypre_StructMatrixNDim(A);
+   hypre_StructStencil  *Astencil      = hypre_StructMatrixStencil(A);
+   hypre_StructStencil  *Bstencil      = hypre_StructMatrixStencil(B);
+   HYPRE_Int            *Bsymm_entries = hypre_StructMatrixSymmEntries(B);
+   hypre_IndexRef        Boffset;
+   hypre_Box            *Adbox, *Bdbox;
+   HYPRE_Complex        *Adata, *Bdata;
+   HYPRE_Int             Aentry, Bentry;
+
+   hypre_Box            *loop_box;
+   hypre_Index           loop_size;
+   hypre_IndexRef        start;
+   hypre_Index           ustride;
+   HYPRE_Int             i;
+
+   loop_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(ustride, 1);
+
+   // RDF TODO: Optimize by fusing loops and separating the adds into groups:
+   // type CC (constant A - constant B), VC, and VV
+
+   for (Bentry = 0; Bentry < hypre_StructStencilSize(Bstencil); Bentry++)
+   {
+      /* Only want to add symmetric entries once (add the stored entries in B) */
+      if (hypre_StructMatrixSymmetric(A) && !(Bsymm_entries[Bentry] < 0))
+      {
+         continue;
+      }
+
+      /* Find the entry in A that correspond to Bentry */
+      Boffset = hypre_StructStencilOffset(Bstencil, Bentry);
+      Aentry = hypre_StructStencilOffsetEntry(Astencil, Boffset);
+      if (Aentry < 0)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Stencil offset for B not present in A!");
+         return hypre_error_flag;
+      }
+
+      if (hypre_StructMatrixConstEntry(A, Aentry))
+      {
+         Adata = hypre_StructMatrixConstData(A, Aentry);
+         Bdata = hypre_StructMatrixConstData(B, Bentry);
+
+         Adata[0] += beta * Bdata[0];
+      }
+      else
+      {
+         for (i = 0; i < hypre_StructMatrixRanNBoxes(A); i++)
+         {
+            Adbox = hypre_StructMatrixRanDataBox(A, i);
+            Adata = hypre_StructMatrixRanData(A, i, Aentry);
+
+            hypre_CopyBox(hypre_StructMatrixRanBox(A, i), loop_box);
+            hypre_StructMatrixMapDataBox(A, loop_box);
+            start = hypre_BoxIMin(loop_box);
+            hypre_BoxGetSize(loop_box, loop_size);
+
+            if (hypre_StructMatrixConstEntry(B, Bentry))
+            {
+               Bdata = hypre_StructMatrixConstData(B, Bentry);
+               hypre_BoxLoop1Begin(ndim, loop_size,
+                                   Adbox, start, ustride, Ai)
+               {
+                  Adata[Ai] += beta * Bdata[0];
+               }
+               hypre_BoxLoop1End(Ai);
+            }
+            else
+            {
+               Bdbox = hypre_StructMatrixRanDataBox(B, i);
+               Bdata = hypre_StructMatrixRanData(B, i, Bentry);
+               hypre_BoxLoop2Begin(ndim, loop_size,
+                                   Adbox, start, ustride, Ai,
+                                   Bdbox, start, ustride, Bi)
+               {
+                  Adata[Ai] += beta * Bdata[Bi];
+               }
+               hypre_BoxLoop2End(Ai, Bi);
+            }
+         }
+      }
+   }
+
+   hypre_BoxDestroy(loop_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute C = alpha * A + beta * B
+ * TODO
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_StructMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_StructMatrix  *B,
+                       hypre_StructMatrix **C_ptr )
+{
+   HYPRE_UNUSED_VAR(alpha);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(beta);
+   HYPRE_UNUSED_VAR(B);
+   HYPRE_UNUSED_VAR(C_ptr);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute the matrix polynomial: polyA = c0 I + c1 A + ... + cm A^m
+ * Here, 'coeffs[i]' = ci and 'order' = m.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixPoly( hypre_StructMatrix       *A,
+                        HYPRE_Int                 order,
+                        HYPRE_Complex            *coeffs,
+                        hypre_StructMatrix      **polyA_ptr )
+{
+   HYPRE_Int            ndim    = hypre_StructMatrixNDim(A);
+   hypre_StructGrid    *grid    = hypre_StructMatrixGrid(A);
+   hypre_StructMatrix  *polyA   = NULL;
+   hypre_StructMatrix  *T, *TA;
+   hypre_StructStencil *stencil;
+   HYPRE_Int            i;
+
+   if (order == 0)
+   {
+      /* Treat (order = 0) as a special case: polyA = c0 I */
+      polyA = hypre_StructMatrixDiagonal(grid, coeffs[0]);
+   }
+   else if (order > 0)
+   {
+      HYPRE_Int  nconst = 0, *const_entries = NULL;
+
+      /* Compute the stencil for A^order */
+      if (order == 1)
+      {
+         /* For (order = 1): use stencil for A, match the constant entry structure */
+         HYPRE_Int  e, size;
+
+         stencil = hypre_StructStencilRef( hypre_StructMatrixStencil(A) );
+         size    = hypre_StructStencilSize(stencil);
+         const_entries = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+         for (e = 0; e < size; e++)
+         {
+            if (hypre_StructMatrixConstEntry(A, e))
+            {
+               const_entries[nconst] = e;
+               nconst++;
+            }
+         }
+      }
+      else
+      {
+         /* For (order > 1): compute stencil with StMatrixMatmult, use fully variable entries */
+         hypre_StMatrix **st_matrices, *st_Aorder;
+         HYPRE_Int       *transposes;
+
+         st_matrices = hypre_CTAlloc(hypre_StMatrix *, order, HYPRE_MEMORY_HOST);
+         transposes  = hypre_CTAlloc(HYPRE_Int,        order, HYPRE_MEMORY_HOST);
+         hypre_StMatrixCreateFromStencil(hypre_StructMatrixStencil(A),
+                                         hypre_StructMatrixRanStride(A),
+                                         hypre_StructMatrixDomStride(A),
+                                         0, &st_matrices[0]);
+         for (i = 1; i < order; i++)
+         {
+            st_matrices[i] = st_matrices[0];
+         }
+         hypre_StMatrixMatmult(order, st_matrices, transposes, order, ndim, &st_Aorder);
+         hypre_StMatrixDestroy(st_matrices[0]);
+         hypre_TFree(st_matrices, HYPRE_MEMORY_HOST);
+         hypre_TFree(transposes, HYPRE_MEMORY_HOST);
+         hypre_StMatrixGetStencil(st_Aorder, ndim, &stencil);
+         hypre_StMatrixDestroy(st_Aorder);
+      }
+
+      /* Initialize polyA = 0 */
+      HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &polyA);
+      HYPRE_StructMatrixSetRangeStride(polyA, hypre_StructMatrixRanStride(A));
+      HYPRE_StructMatrixSetDomainStride(polyA, hypre_StructMatrixDomStride(A));
+      HYPRE_StructMatrixSetSymmetric(polyA, hypre_StructMatrixSymmetric(A));
+      HYPRE_StructMatrixSetConstantEntries(polyA, nconst, const_entries);
+      HYPRE_StructMatrixInitialize(polyA);
+
+      /* Compute (order = 0) and (order = 1) components: polyA = c0 I + c1 A */
+      T = hypre_StructMatrixDiagonal(grid, 1.0);
+      hypre_StructMatrixAddMat(polyA, coeffs[0], T);
+      hypre_StructMatrixAddMat(polyA, coeffs[1], A);
+      hypre_StructMatrixDestroy(T);
+      T = hypre_StructMatrixRef(A);
+
+      /* Compute (order > 1) components: polyA += ci A^i */
+      for (i = 2; i <= order; i++)
+      {
+         hypre_StructMatmat(T, A, &TA);
+         hypre_StructMatrixAddMat(polyA, coeffs[i], TA);  // RDF write this
+         hypre_StructMatrixDestroy(T);
+         T = TA;
+      }
+
+      HYPRE_StructMatrixAssemble(polyA);
+
+      /* Clean up */
+      hypre_StructMatrixDestroy(T);
+      hypre_StructStencilDestroy(stencil);
+      hypre_TFree(const_entries, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_ARG, "Polynomial order is negative");
+   }
+
+   *polyA_ptr = polyA;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return the diagonal matrix D defined as follows.
+ *
+ *   type == 0:  D = weight*diag(A)
+ *   type == 1:  D = weight*diag(A)^-1
+ *
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
+                              HYPRE_Real           weight,
+                              HYPRE_Int            type,
+                              hypre_StructMatrix **D_ptr )
+{
+   HYPRE_Int             ndim   = hypre_StructMatrixNDim(A);
+   hypre_StructGrid     *grid   = hypre_StructMatrixGrid(A);
+   HYPRE_Int             Adiag  = hypre_StructStencilDiagEntry(hypre_StructMatrixStencil(A));
+   HYPRE_Complex        *Adata;
+   hypre_StructMatrix   *D;
+   HYPRE_Complex        *Ddata;
+   hypre_StructStencil  *stencil;
+   hypre_Index           offset;
+
+   hypre_SetIndex(offset, 0);
+   HYPRE_StructStencilCreate(hypre_StructGridNDim(grid), 1, &stencil);
+   HYPRE_StructStencilSetEntry(stencil, 0, offset);
+   HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
+   HYPRE_StructMatrixInitialize(D);
+   HYPRE_StructStencilDestroy(stencil);
+
+   if (hypre_StructMatrixConstEntry(A, Adiag))
+   {
+      Adata = hypre_StructMatrixConstData(A, Adiag);
+      Ddata = hypre_StructMatrixConstData(D, 0);
+
+      if (type == 0)
+      {
+         Ddata[0] = weight * Adata[0];
+      }
+      else if (type == 1)
+      {
+         Ddata[0] = weight / Adata[0];
+      }
+   }
+   else
+   {
+      hypre_Box            *Adbox, *Ddbox;
+      hypre_Box            *loop_box;
+      hypre_Index           loop_size;
+      hypre_IndexRef        start;
+      hypre_Index           ustride;
+      HYPRE_Int             i;
+
+      loop_box = hypre_BoxCreate(ndim);
+      hypre_SetIndex(ustride, 1);
+
+      for (i = 0; i < hypre_StructMatrixRanNBoxes(A); i++)
+      {
+         Adbox = hypre_StructMatrixRanDataBox(A, i);
+         Ddbox = hypre_StructMatrixRanDataBox(D, i);
+         Adata = hypre_StructMatrixRanData(A, i, Adiag);
+         Ddata = hypre_StructMatrixRanData(D, i, 0);
+
+         hypre_CopyBox(hypre_StructMatrixRanBox(A, i), loop_box);
+         hypre_StructMatrixMapDataBox(A, loop_box);
+         start = hypre_BoxIMin(loop_box);
+         hypre_BoxGetSize(loop_box, loop_size);
+
+         if (type == 0)
+         {
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Adbox, start, ustride, Ai,
+                                Ddbox, start, ustride, Di);
+            {
+               Ddata[Di] = weight * Adata[Ai];
+            }
+            hypre_BoxLoop2End(Ai, Di);
+         }
+         else if (type == 1)
+         {
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Adbox, start, ustride, Ai,
+                                Ddbox, start, ustride, Di);
+            {
+               Ddata[Di] = weight / Adata[Ai];
+            }
+            hypre_BoxLoop2End(Ai, Di);
+         }
+      }
+
+      hypre_BoxDestroy(loop_box);
+   }
+
+   HYPRE_StructMatrixAssemble(D);
+   *D_ptr = D;
+
+   return hypre_error_flag;
+}

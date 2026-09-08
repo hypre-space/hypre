@@ -716,3 +716,23 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CoarsenStencil( hypre_StructStencil *stencil,
+                      hypre_Index          stride )
+{
+   HYPRE_Int  size = hypre_StructStencilSize(stencil);
+   HYPRE_Int  ndim = hypre_StructStencilNDim(stencil);
+   HYPRE_Int  e;
+
+   for (e = 0; e < size; e++)
+   {
+      hypre_MapToCoarseIndex(hypre_StructStencilOffset(stencil, e), NULL, stride, ndim);
+   }
+
+   return hypre_error_flag;
+}
+

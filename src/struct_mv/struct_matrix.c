@@ -2888,6 +2888,51 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 }
 
 /*--------------------------------------------------------------------------
+ * Return a copy of A.  Everything is copied except for comm_pkg.
+ *--------------------------------------------------------------------------*/
+
+#if 0  // RDF write this
+hypre_StructMatrix *
+hypre_StructMatrixClone( hypre_StructMatrix *A )
+{
+   MPI_Comm              comm            = hypre_StructMatrixComm(x);
+   hypre_StructGrid     *grid            = hypre_StructMatrixGrid(x);
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(x);
+   hypre_BoxArray       *data_space      = hypre_StructMatrixDataSpace(x);
+   HYPRE_Int            *data_indices    = hypre_StructMatrixDataIndices(x);
+   HYPRE_Int             data_size       = hypre_StructMatrixDataSize(x);
+   HYPRE_Int             ndim            = hypre_StructGridNDim(grid);
+   HYPRE_Int             data_space_size = hypre_BoxArraySize(data_space);
+
+   hypre_StructMatrix   *Acopy;
+   HYPRE_Int             i;
+
+   A = hypre_StructMatrixCreate(comm, grid, stencil);
+
+   hypre_StructMatrixDataSize(y)    = data_size;
+   hypre_StructMatrixDataSpace(y)   = hypre_BoxArrayClone(data_space);
+   hypre_StructMatrixDataAlloced(y) = 1;
+   hypre_StructMatrixData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
+   hypre_StructMatrixDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size,
+                                                    HYPRE_MEMORY_HOST);
+   for (i = 0; i < data_space_size; i++)
+   {
+      hypre_StructMatrixDataIndices(y)[i] = data_indices[i];
+   }
+   hypre_StructCopy(x, y);
+
+   for (i = 0; i < 2 * ndim; i++)
+   {
+      hypre_StructMatrixNumGhost(y)[i] = hypre_StructMatrixNumGhost(x)[i];
+   }
+   hypre_StructMatrixBGhostNotClear(y) = hypre_StructMatrixBGhostNotClear(x);
+   hypre_StructMatrixGlobalSize(y)     = hypre_StructMatrixGlobalSize(x);
+
+   return y;
+}
+#endif
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3096,4 +3141,32 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return a constant-coefficient diagonal matrix D = value I
+ *--------------------------------------------------------------------------*/
+
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
+                            HYPRE_Complex      value )
+{
+   hypre_StructMatrix   *D;
+   hypre_StructStencil  *stencil;
+   hypre_Index           offset;
+   HYPRE_Int             stencil_index = 0;
+
+   hypre_SetIndex(offset, 0);
+   HYPRE_StructStencilCreate(hypre_StructGridNDim(grid), 1, &stencil);
+   HYPRE_StructStencilSetEntry(stencil, 0, offset);
+
+   HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
+   HYPRE_StructMatrixSetConstantEntries(D, 1, &stencil_index);
+   HYPRE_StructMatrixInitialize(D);
+   HYPRE_StructMatrixSetConstantValues(D, 1, &stencil_index, &value);
+   HYPRE_StructMatrixAssemble(D);
+
+   HYPRE_StructStencilDestroy(stencil);
+
+   return D;
 }

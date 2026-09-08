@@ -103,7 +103,6 @@ HYPRE_Int HYPRE_StructJacobiSolve(HYPRE_StructSolver solver,
 HYPRE_Int HYPRE_StructJacobiSetTol(HYPRE_StructSolver solver,
                                    HYPRE_Real         tol);
 
-
 HYPRE_Int HYPRE_StructJacobiGetTol(HYPRE_StructSolver solver,
                                    HYPRE_Real *tol );
 
@@ -587,6 +586,124 @@ HYPRE_Int HYPRE_StructCycRedSetBase(HYPRE_StructSolver solver,
                                     HYPRE_Int          ndim,
                                     HYPRE_Int         *base_index,
                                     HYPRE_Int         *base_stride);
+
+/**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Struct MatPrec Solver
+ *
+ * MatPrec is a defect-correction solver based on a matrix preconditioner B.
+ * The iteration has the form u_{k+1} = u_{k} + wB r_{k} where w is a weight and
+ * r_{k} = f_{k} - Au_{k} is the residual.  The following routines determine B:
+ *
+ *   HYPRE_StructMatPrecSetPrec()
+ *   HYPRE_StructMatPrecSetJacobi()
+ *   HYPRE_StructMatPrecSetChebyshev()
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_StructMatPrecCreate( MPI_Comm            comm,
+                                     HYPRE_StructSolver *solver_ptr );
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_StructMatPrecDestroy( HYPRE_StructSolver solver );
+
+/**
+ * Prepare to solve the system.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver,
+                                    HYPRE_StructMatrix A,
+                                    HYPRE_StructVector b,
+                                    HYPRE_StructVector x );
+
+/**
+ * Solve the system.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
+                                    HYPRE_StructMatrix A,
+                                    HYPRE_StructVector b,
+                                    HYPRE_StructVector x );
+
+/**
+ * (Optional) Set the solver matrix B to be weighted Jacobi with \e steps steps
+ * and weight \e weight.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetJacobi( HYPRE_StructSolver solver,
+                                        HYPRE_Int          steps,
+                                        HYPRE_Real         weight );
+
+/**
+ * (Optional) Set the solver matrix B to be Chebyshev with \e steps steps.
+ * NOT YET IMPLEMENTED.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetChebyshev( HYPRE_StructSolver solver,
+                                           HYPRE_Int          steps );
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetTol( HYPRE_StructSolver solver,
+                                     HYPRE_Real         tol );
+
+HYPRE_Int HYPRE_StructMatPrecGetTol( HYPRE_StructSolver solver,
+                                     HYPRE_Real        *tol );
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetMaxIter( HYPRE_StructSolver solver,
+                                         HYPRE_Int          max_iter );
+
+HYPRE_Int HYPRE_StructMatPrecGetMaxIter( HYPRE_StructSolver solver,
+                                         HYPRE_Int         *max_iter );
+
+/**
+ * (Optional) Use a zero initial guess.  This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce compuational cost.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetZeroGuess( HYPRE_StructSolver solver );
+
+HYPRE_Int HYPRE_StructMatPrecGetZeroGuess( HYPRE_StructSolver solver,
+                                           HYPRE_Int         *zero_guess );
+
+/**
+ * (Optional) Use a nonzero initial guess.  This is the default behavior, but
+ * this routine allows the user to switch back after using \e SetZeroGuess.
+ **/
+HYPRE_Int HYPRE_StructMatPrecSetNonZeroGuess( HYPRE_StructSolver solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_StructMatPrecSetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int          logging );
+
+HYPRE_Int
+HYPRE_StructMatPrecGetLogging( HYPRE_StructSolver solver,
+                               HYPRE_Int         *logging );
+
+/**
+ * Return the number of iterations taken.
+ **/
+HYPRE_Int HYPRE_StructMatPrecGetNumIterations( HYPRE_StructSolver  solver,
+                                               HYPRE_Int          *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+HYPRE_Int HYPRE_StructMatPrecGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                                           HYPRE_Real         *norm );
 
 /**@}*/
 

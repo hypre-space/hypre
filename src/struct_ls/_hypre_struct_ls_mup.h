@@ -1790,6 +1790,27 @@ hypre_StructKrylovSetRandomValues_dbl( void *x, HYPRE_Int seed );
 HYPRE_Int
 hypre_StructKrylovSetRandomValues_long_dbl( void *x, HYPRE_Int seed );
 
+HYPRE_Int
+hypre_StructMatPrecPrintLogging_flt( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecPrintLogging_dbl( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecPrintLogging_long_dbl( HYPRE_StructSolver solver );
+
+HYPRE_Int
+hypre_StructMatPrecSetupChebyshev_flt( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecSetupChebyshev_dbl( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecSetupChebyshev_long_dbl( HYPRE_StructSolver solver );
+
+HYPRE_Int
+hypre_StructMatPrecSetupJacobi_flt( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecSetupJacobi_dbl( HYPRE_StructSolver solver );
+HYPRE_Int
+hypre_StructMatPrecSetupJacobi_long_dbl( HYPRE_StructSolver solver );
+
 /* functions */
 
 /* pre */

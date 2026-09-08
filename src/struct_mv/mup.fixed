@@ -102,6 +102,7 @@ hypre_CoarsenBox
 hypre_CoarsenBoxArray
 hypre_CoarsenBoxArrayArray
 hypre_CoarsenBoxArrayArrayOutward
+hypre_CoarsenStencil
 hypre_CommBlockSetEntries
 hypre_CommBlockSetEntry
 hypre_CommInfoClone
@@ -197,9 +198,12 @@ hypre_StIndexPrint
 hypre_StIndexShift
 hypre_StMatrixClone
 hypre_StMatrixCreate
+hypre_StMatrixCreateFromStencil
 hypre_StMatrixDestroy
+hypre_StMatrixGetStencil
 hypre_StMatrixMatmat
 hypre_StMatrixMatmult
+hypre_StMatrixNCoeffs
 hypre_StMatrixNEntryCoeffs
 hypre_StMatrixPrint
 hypre_StMatrixTranspose
@@ -273,6 +277,7 @@ hypre_StructMatmultMultiply
 hypre_StructMatmultSetKernelType
 hypre_StructMatmultSetProduct
 hypre_StructMatmultSetup
+hypre_StructMatrixAdd
 hypre_StructMatrixAddInit
 hypre_StructMatrixAddMat
 hypre_StructMatrixAssemble
@@ -288,8 +293,10 @@ hypre_StructMatrixCreate
 hypre_StructMatrixCreateCommPkg
 hypre_StructMatrixCreateMask
 hypre_StructMatrixDestroy
+hypre_StructMatrixDiagonal
 hypre_StructMatrixExtractPointerByIndex
 hypre_StructMatrixForget
+hypre_StructMatrixGetDiagMat
 hypre_StructMatrixGetDiagonal
 hypre_StructMatrixGetStSpaces
 hypre_StructMatrixGetStencilSpace
@@ -305,6 +312,7 @@ hypre_StructMatrixMapDataStride
 hypre_StructMatrixMigrate
 hypre_StructMatrixNeedResize
 hypre_StructMatrixPlaceStencil
+hypre_StructMatrixPoly
 hypre_StructMatrixPrint
 hypre_StructMatrixPrintData
 hypre_StructMatrixPtAP
