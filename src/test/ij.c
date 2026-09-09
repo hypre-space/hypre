@@ -3177,7 +3177,7 @@ main( hypre_int argc,
    if ( build_matrix_type == -3 )
    {
       ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
-                                   HYPRE_PARCSR, &ij_A);
+                                   HYPRE_PARCSR, &ij_A );
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the MM matrix!\n");
