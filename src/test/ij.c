@@ -741,7 +741,13 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      if ( strcmp(argv[arg_index], "-fromMMfile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = -3;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -2;
@@ -2640,6 +2646,8 @@ main( hypre_int argc,
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
          hypre_printf("  -fromonecsrfile <filename> : ");
          hypre_printf("matrix read from a single file (CSR format)\n");
+         hypre_printf("  -fromMMfile <filename> : ");
+         hypre_printf("matrix read from a single file (MatrixMarket format)\n");
          hypre_printf("\n");
          hypre_printf("  -laplacian             : build 5pt 2D laplacian problem (default) \n");
          hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
@@ -3166,7 +3174,17 @@ main( hypre_int argc,
 
    time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
-   if ( build_matrix_type == -2 )
+   if ( build_matrix_type == -3 )
+   {
+      ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
+                                   HYPRE_PARCSR, &ij_A);
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the MM matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+   }
+   else if ( build_matrix_type == -2 )
    {
       ierr = HYPRE_IJMatrixReadBinary( argv[build_matrix_arg_index], comm,
                                        HYPRE_PARCSR, &ij_A );
@@ -10032,7 +10050,7 @@ final:
 
    HYPRE_ParVectorDestroy(x0_save);
 
-   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2)
+   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2 || build_matrix_type == -3)
    {
       if (ij_A)
       {
