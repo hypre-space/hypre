@@ -16,6 +16,36 @@
 
 #include <HYPRE_config.h>
 
+/*--------------------------------------------------------------------------
+ * Thread-local storage, used below for hypre's process-wide state so that two
+ * threads can drive hypre independently.
+ *
+ * Deliberately EMPTY in an OpenMP build. There, the threads inside a rank are
+ * hypre's own workers and must share that state: a handful of sites raise an
+ * error from inside a parallel region (par_fsai_setup.c, IJMatrix_parcsr.c),
+ * and per-thread error records would leave HYPRE_GetError() on the master
+ * thread unable to see them. So an OpenMP build gets exactly the storage it
+ * has always had, and this whole change is a no-op for it.
+ *
+ * The spelling differs between C11 and C++, and hypre's headers are included
+ * from both -- the GPU sources are compiled as C++ by nvcc.
+ *--------------------------------------------------------------------------*/
+#if !defined(HYPRE_THREAD_LOCAL)
+#if defined(HYPRE_USING_OPENMP)
+#define HYPRE_THREAD_LOCAL
+#elif defined(__cplusplus)
+#define HYPRE_THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#define HYPRE_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__) || defined(__clang__)
+#define HYPRE_THREAD_LOCAL __thread
+#elif defined(_MSC_VER)
+#define HYPRE_THREAD_LOCAL __declspec(thread)
+#else
+#define HYPRE_THREAD_LOCAL
+#endif
+#endif
+
 #ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
 #endif
