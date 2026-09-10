@@ -19,6 +19,6 @@ typedef enum hypre_State_enum
    HYPRE_STATE_FINALIZED   = 2
 } hypre_State;
 
-extern hypre_State hypre__global_state;
+extern HYPRE_THREAD_LOCAL hypre_State hypre__global_state;
 
 #endif /* hypre_STATE_HEADER */

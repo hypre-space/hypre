@@ -22,15 +22,15 @@ extern void sigRegister_dh(void); /* use sig_dh.h if not for euclid_signals_len 
 /*-------------------------------------------------------------------------
  * Globally scoped variables, flags, and objects
  *-------------------------------------------------------------------------*/
-bool        errFlag_dh = false; /* set to "true" by functions encountering errors */
-Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
-TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
-Mem_dh      mem_dh = NULL;      /* memory management */
-FILE        *logFile = NULL;
-char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
-HYPRE_Int         np_dh = 1;     /* number of processors and subdomains */
-HYPRE_Int         myid_dh = 0;   /* rank of this processor (and subdomain) */
-MPI_Comm    comm_dh = 0;
+HYPRE_THREAD_LOCAL bool        errFlag_dh = false; /* set to "true" by functions encountering errors */
+HYPRE_THREAD_LOCAL Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
+HYPRE_THREAD_LOCAL TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
+HYPRE_THREAD_LOCAL Mem_dh      mem_dh = NULL;      /* memory management */
+HYPRE_THREAD_LOCAL FILE        *logFile = NULL;
+HYPRE_THREAD_LOCAL char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
+HYPRE_THREAD_LOCAL HYPRE_Int         np_dh = 1;     /* number of processors and subdomains */
+HYPRE_THREAD_LOCAL HYPRE_Int         myid_dh = 0;   /* rank of this processor (and subdomain) */
+HYPRE_THREAD_LOCAL MPI_Comm    comm_dh = 0;
 
 
   /* Each processor (may) open a logfile.
@@ -41,13 +41,13 @@ MPI_Comm    comm_dh = 0;
 
 void openLogfile_dh(HYPRE_Int argc, char *argv[]);
 void closeLogfile_dh(void);
-bool logInfoToStderr  = false;
-bool logInfoToFile    = true;
-bool logFuncsToStderr = false;
-bool logFuncsToFile   = false;
+HYPRE_THREAD_LOCAL bool logInfoToStderr  = false;
+HYPRE_THREAD_LOCAL bool logInfoToFile    = true;
+HYPRE_THREAD_LOCAL bool logFuncsToStderr = false;
+HYPRE_THREAD_LOCAL bool logFuncsToFile   = false;
 
 bool ignoreMe = true;
-HYPRE_Int  ref_counter = 0;
+HYPRE_THREAD_LOCAL HYPRE_Int  ref_counter = 0;
 
 #endif
 
@@ -59,12 +59,12 @@ HYPRE_Int  ref_counter = 0;
 #define MAX_MSG_SIZE 1024
 #define MAX_STACK_SIZE 20
 
-static  char errMsg_private[MAX_STACK_SIZE][MAX_MSG_SIZE];
-static  HYPRE_Int errCount_private = 0;
+static HYPRE_THREAD_LOCAL char errMsg_private[MAX_STACK_SIZE][MAX_MSG_SIZE];
+static HYPRE_THREAD_LOCAL HYPRE_Int errCount_private = 0;
 
-static  char calling_stack[MAX_STACK_SIZE][MAX_MSG_SIZE];
+static HYPRE_THREAD_LOCAL char calling_stack[MAX_STACK_SIZE][MAX_MSG_SIZE];
 /* static  HYPRE_Int  priority_private[MAX_STACK_SIZE]; */
-static  HYPRE_Int calling_stack_count = 0;
+static HYPRE_THREAD_LOCAL HYPRE_Int calling_stack_count = 0;
 
 /* static  char errMsg[MAX_MSG_SIZE];    */
 

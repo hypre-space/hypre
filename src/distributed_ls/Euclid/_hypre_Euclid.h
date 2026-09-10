@@ -355,6 +355,22 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+
+/* thread-local storage: see HYPRE_utilities.h */
+#if !defined(HYPRE_THREAD_LOCAL)
+#if defined(__cplusplus)
+#define HYPRE_THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#define HYPRE_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__) || defined(__clang__)
+#define HYPRE_THREAD_LOCAL __thread
+#elif defined(_MSC_VER)
+#define HYPRE_THREAD_LOCAL __declspec(thread)
+#else
+#define HYPRE_THREAD_LOCAL
+#endif
+#endif
+
 #include <stdarg.h>
 
 #define REAL_DH HYPRE_Real
@@ -420,17 +436,17 @@ typedef struct _externalRows_dh*    ExternalRows_dh;
  * Globally scoped variables, error handling functions, etc.
  * These are all defined in /src/globalObjects.c
  * ------------------------------------------------------------------*/
-extern Parser_dh   parser_dh;  /* for setting/getting runtime options */
-extern TimeLog_dh  tlog_dh;    /* internal timing  functionality */
-extern Mem_dh      mem_dh;     /* memory management */
-extern FILE        *logFile;
-extern HYPRE_Int         np_dh;     /* number of processors and subdomains */
-extern HYPRE_Int         myid_dh;   /* rank of this processor (and subdomain) */
-extern MPI_Comm    comm_dh;
+extern HYPRE_THREAD_LOCAL Parser_dh   parser_dh;  /* for setting/getting runtime options */
+extern HYPRE_THREAD_LOCAL TimeLog_dh  tlog_dh;    /* internal timing  functionality */
+extern HYPRE_THREAD_LOCAL Mem_dh      mem_dh;     /* memory management */
+extern HYPRE_THREAD_LOCAL FILE        *logFile;
+extern HYPRE_THREAD_LOCAL HYPRE_Int         np_dh;     /* number of processors and subdomains */
+extern HYPRE_THREAD_LOCAL HYPRE_Int         myid_dh;   /* rank of this processor (and subdomain) */
+extern HYPRE_THREAD_LOCAL MPI_Comm    comm_dh;
 
 
 extern bool ignoreMe;    /* used to stop compiler complaints */
-extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
+extern HYPRE_THREAD_LOCAL HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
                             to ensure that global objects are not
                             destroyed when Euclid's destructor is called,
                             and more than one instance of Euclid has been
@@ -441,7 +457,7 @@ extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
 /* Error and message handling.  These are accessed through
  * macros defined in "macros_dh.h"
  */
-extern bool  errFlag_dh;
+extern HYPRE_THREAD_LOCAL bool  errFlag_dh;
 extern void  setInfo_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
 extern void  setError_dh(const char *msg, const char *function, const char *file, HYPRE_Int line);
 extern void  printErrorMsg(FILE *fp);
@@ -451,7 +467,7 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
-extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
+extern HYPRE_THREAD_LOCAL char  msgBuf_dh[MSG_BUF_SIZE_DH];
 
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational
@@ -460,10 +476,10 @@ extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
  */
 extern void openLogfile_dh(HYPRE_Int argc, char *argv[]);
 extern void closeLogfile_dh(void);
-extern bool logInfoToStderr;
-extern bool logInfoToFile;
-extern bool logFuncsToStderr;
-extern bool logFuncsToFile;
+extern HYPRE_THREAD_LOCAL bool logInfoToStderr;
+extern HYPRE_THREAD_LOCAL bool logInfoToFile;
+extern HYPRE_THREAD_LOCAL bool logFuncsToStderr;
+extern HYPRE_THREAD_LOCAL bool logFuncsToFile;
 extern void Error_dhStartFunc(char *function, char *file, HYPRE_Int line);
 extern void Error_dhEndFunc(char *function);
 extern void dh_StartFunc(const char *function, const char *file, HYPRE_Int line, HYPRE_Int priority);
