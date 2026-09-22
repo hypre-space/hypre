@@ -680,6 +680,9 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    grid = hypre_StructMatrixGrid(matrices[0]); /* Same grid for all matrices */
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
+   /* WM: todo - assuming the finest data stride is the first matrix in the matrices array here? */
+   /*            In general, should we look at all the matrices and find the one with the finest */
+   /*            (smallest) data stride for fstride? */
    fstride = hypre_StructMatrixDataStride(matrices[0]);
    cstride = fstride;
    for (m = 1; m < nmatrices; m++)
