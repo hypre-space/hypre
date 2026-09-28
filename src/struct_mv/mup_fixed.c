@@ -2553,6 +2553,22 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix, hypre_Index grid_index,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructMatrixSyncConstToDevice( hypre_StructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixSyncConstToDevice)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost( hypre_StructMatrix *matrix )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixSyncConstToHost)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructMatrixUnMapDataBox( hypre_StructMatrix *matrix, hypre_Box *dbox )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_StructMatrixUnMapDataBox)( matrix, dbox );

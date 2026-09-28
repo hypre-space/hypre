@@ -2239,6 +2239,20 @@ HYPRE_Int
 hypre_StructMatrixSetValues_long_dbl( hypre_StructMatrix *matrix, hypre_Index grid_index, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 
 HYPRE_Int
+hypre_StructMatrixSyncConstToDevice_flt( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixSyncConstToDevice_dbl( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixSyncConstToDevice_long_dbl( hypre_StructMatrix *matrix );
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost_flt( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost_dbl( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost_long_dbl( hypre_StructMatrix *matrix );
+
+HYPRE_Int
 hypre_StructMatrixUnMapDataBox_flt( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int
 hypre_StructMatrixUnMapDataBox_dbl( hypre_StructMatrix *matrix, hypre_Box *dbox );

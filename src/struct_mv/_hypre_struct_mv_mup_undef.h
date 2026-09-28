@@ -427,6 +427,8 @@
 #undef hypre_StructMatrixSetRangeStride
 #undef hypre_StructMatrixSetTranspose
 #undef hypre_StructMatrixSetValues
+#undef hypre_StructMatrixSyncConstToDevice
+#undef hypre_StructMatrixSyncConstToHost
 #undef hypre_StructMatrixUnMapDataBox
 #undef hypre_StructMatrixUnMapDataIndex
 #undef hypre_StructMatrixUnMapDataStride

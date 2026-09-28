@@ -430,6 +430,8 @@
 #define hypre_StructMatrixSetRangeStride HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetRangeStride )
 #define hypre_StructMatrixSetTranspose HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetTranspose )
 #define hypre_StructMatrixSetValues HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSetValues )
+#define hypre_StructMatrixSyncConstToDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSyncConstToDevice )
+#define hypre_StructMatrixSyncConstToHost HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixSyncConstToHost )
 #define hypre_StructMatrixUnMapDataBox HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixUnMapDataBox )
 #define hypre_StructMatrixUnMapDataIndex HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixUnMapDataIndex )
 #define hypre_StructMatrixUnMapDataStride HYPRE_FIXEDPRECISION_FUNC ( hypre_StructMatrixUnMapDataStride )
