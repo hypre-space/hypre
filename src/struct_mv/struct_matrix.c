@@ -119,6 +119,44 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * Routines for syncing constant data between host and device
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToDevice( hypre_StructMatrix *matrix )
+{
+   /* This does nothing when the exec policy is host */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TMemcpy(hypre_StructMatrixData(matrix), hypre_StructMatrixConstHData(matrix),
+                    HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix),
+                    hypre_StructMatrixMemoryLocation(matrix), HYPRE_MEMORY_HOST);
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+/*----------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost( hypre_StructMatrix *matrix )
+{
+   /* This does nothing when the exec policy is host */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TMemcpy(hypre_StructMatrixConstHData(matrix), hypre_StructMatrixData(matrix),
+                    HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix),
+                    HYPRE_MEMORY_HOST, hypre_StructMatrixMemoryLocation(matrix));
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Determine where the stencil center is located (on the stencil index space),
  * given a stencil entry and a data index.
  *--------------------------------------------------------------------------*/
@@ -589,6 +627,13 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          hypre_TFree(hypre_StructMatrixRanBoxnums(matrix), HYPRE_MEMORY_HOST);
          hypre_StructGridDestroy(hypre_StructMatrixGrid(matrix));
          hypre_StructMatrixForget(matrix);
+
+#if defined(HYPRE_USING_GPU)
+         if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+         {
+            hypre_TFree(hypre_StructMatrixConstHData(matrix), HYPRE_MEMORY_HOST);
+         }
+#endif
 
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
@@ -1287,6 +1332,15 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
       hypre_StructMatrixDataAlloced(matrix) = 0;
    }
    hypre_StructMatrixData(matrix) = data;
+   hypre_StructMatrixConstHData(matrix) = data;
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructMatrixConstHData(matrix) =
+         hypre_TAlloc(HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix), HYPRE_MEMORY_HOST);
+   }
+#endif
 
    return hypre_error_flag;
 }

@@ -85,6 +85,7 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_MemoryLocation  memory_location;  /* Memory location of the data array */
    HYPRE_Complex        *data;             /* Pointer to matrix data */
+   HYPRE_Complex        *const_hdata;      /* Pointer to matrix constant data (always on host) */
    hypre_BoxArray       *data_space;       /* Boxes describing the data layout */
    hypre_Index           data_stride;      /* Data layout stride on grid */
    HYPRE_Int           **data_indices;     /* Array of indices into the data array -
@@ -129,7 +130,6 @@ typedef struct hypre_StructMatrix_struct
  * Accessor macros: hypre_StructMatrix
  *--------------------------------------------------------------------------*/
 
-
 #define hypre_StructMatrixComm(matrix)                ((matrix) -> comm)
 #define hypre_StructMatrixGrid(matrix)                ((matrix) -> grid)
 #define hypre_StructMatrixRanNBoxes(matrix)           ((matrix) -> ran_nboxes)
@@ -146,6 +146,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixConstEntry(matrix, s)       ((matrix) -> constant[s])
 #define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
 #define hypre_StructMatrixData(matrix)                ((matrix) -> data)
+#define hypre_StructMatrixConstHData(matrix)          ((matrix) -> const_hdata)
 #define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
 #define hypre_StructMatrixDataStride(matrix)          ((matrix) -> data_stride)
 #define hypre_StructMatrixDataIndices(matrix)         ((matrix) -> data_indices)
@@ -181,6 +182,8 @@ hypre_StructGridStride(hypre_StructMatrixGrid(matrix))
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
+#define hypre_StructMatrixConstDataHost(matrix, s) \
+(hypre_StructMatrixConstHData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
 /* The following use a base-grid box index */
 #define hypre_StructMatrixBaseDataBox(matrix, b) \
@@ -224,6 +227,11 @@ hypre_StructMatrixBoxDataBox(matrix, hypre_StructMatrixDomBoxnum(matrix, i))
 hypre_StructMatrixBoxData(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s)
 #define hypre_StructMatrixDomDataValue(matrix, i, s, index) \
 hypre_StructMatrixBoxDataValue(matrix, hypre_StructMatrixDomBoxnum(matrix, i), s, index)
+
+#if defined(HYPRE_USING_GPU)
+#define hypre_StructMatrixGetExecPolicy1(matrix) \
+hypre_GetExecPolicy1(hypre_StructMatrixMemoryLocation(matrix))
+#endif
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)

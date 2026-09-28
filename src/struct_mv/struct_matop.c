@@ -1126,6 +1126,10 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
    // RDF TODO: Optimize by fusing loops and separating the adds into groups:
    // type CC (constant A - constant B), VC, and VV
 
+   /* Ensure constant host data for A/B matches device */
+   hypre_StructMatrixSyncConstToHost(A);
+   hypre_StructMatrixSyncConstToHost(B);
+
    for (Bentry = 0; Bentry < hypre_StructStencilSize(Bstencil); Bentry++)
    {
       /* Only want to add symmetric entries once (add the stored entries in B) */
@@ -1145,8 +1149,8 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
 
       if (hypre_StructMatrixConstEntry(A, Aentry))
       {
-         Adata = hypre_StructMatrixConstData(A, Aentry);
-         Bdata = hypre_StructMatrixConstData(B, Bentry);
+         Adata = hypre_StructMatrixConstDataHost(A, Aentry);
+         Bdata = hypre_StructMatrixConstDataHost(B, Bentry);
 
          Adata[0] += beta * Bdata[0];
       }
@@ -1187,6 +1191,9 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
          }
       }
    }
+
+   /* Ensure constant device data for A matches updates on host */
+   hypre_StructMatrixSyncConstToHost(A);
 
    hypre_BoxDestroy(loop_box);
 
@@ -1356,8 +1363,11 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
 
    if (hypre_StructMatrixConstEntry(A, Adiag))
    {
-      Adata = hypre_StructMatrixConstData(A, Adiag);
-      Ddata = hypre_StructMatrixConstData(D, 0);
+      /* Ensure constant host data for A matches device */
+      hypre_StructMatrixSyncConstToHost(A);
+
+      Adata = hypre_StructMatrixConstDataHost(A, Adiag);
+      Ddata = hypre_StructMatrixConstDataHost(D, 0);
 
       if (type == 0)
       {
@@ -1367,6 +1377,9 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
       {
          Ddata[0] = weight / Adata[0];
       }
+
+      /* Ensure constant device data for D matches updates on host */
+      hypre_StructMatrixSyncConstToHost(D);
    }
    else
    {
