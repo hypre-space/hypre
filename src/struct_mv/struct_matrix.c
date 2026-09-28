@@ -972,6 +972,12 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    }
 
    hypre_StructMatrixData(matrix)         = data;
+#if defined(HYPRE_USING_GPU)
+   if ( !(hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE) )
+   {
+      hypre_StructMatrixConstHData(matrix) = data;
+   }
+#endif
    hypre_StructMatrixDataSpace(matrix)    = data_space;
    hypre_StructMatrixDataSize(matrix)     = data_size;
    hypre_StructMatrixDataIndices(matrix)  = data_indices;
@@ -3199,6 +3205,8 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
 
 /*--------------------------------------------------------------------------
  * Return a constant-coefficient diagonal matrix D = value I
+ *
+ * NOTE: The 'value' argument is assumed to live on the host
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
@@ -3217,7 +3225,9 @@ hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
    HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
    HYPRE_StructMatrixSetConstantEntries(D, 1, &stencil_index);
    HYPRE_StructMatrixInitialize(D);
-   HYPRE_StructMatrixSetConstantValues(D, 1, &stencil_index, &value);
+   /* 'value' is on the host */
+   *hypre_StructMatrixConstDataHost(D, stencil_index) = value;
+   hypre_StructMatrixSyncConstToDevice(D);
    HYPRE_StructMatrixAssemble(D);
 
    HYPRE_StructStencilDestroy(stencil);
