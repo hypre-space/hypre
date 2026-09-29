@@ -2455,7 +2455,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
    hypre_MPI_Status          *status;
    HYPRE_Int                  num_contacts;
    HYPRE_Int                  contact_proc_list[1];
-   HYPRE_Int                  contact_send_buf[1];
+   HYPRE_BigInt               contact_send_buf[1];
    HYPRE_Int                  contact_send_buf_starts[2];
    HYPRE_Int                  max_response_size;
    HYPRE_Int                 *response_recv_buf = NULL;
@@ -2501,7 +2501,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
    {
       num_contacts = 1;
       contact_proc_list[0] = 0;
-      contact_send_buf[0]  = (HYPRE_Int) hypre_ParCSRMatrixLastRowIndex(par_matrix);
+      contact_send_buf[0]  = hypre_ParCSRMatrixLastRowIndex(par_matrix);
       contact_send_buf_starts[0] = 0;
       contact_send_buf_starts[1] = 1;
    }
@@ -2530,7 +2530,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
 
    hypre_DataExchangeList(num_contacts,
                           contact_proc_list, contact_send_buf,
-                          contact_send_buf_starts, sizeof(HYPRE_Int),
+                          contact_send_buf_starts, sizeof(HYPRE_BigInt),
                           sizeof(HYPRE_Int), &response_obj,
                           max_response_size, 1,
                           comm, (void**) &response_recv_buf,

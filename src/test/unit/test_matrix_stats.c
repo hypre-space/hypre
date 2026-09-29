@@ -157,6 +157,9 @@ Test1_ParCSRMatrixStatsComputeLocal(MPI_Comm comm)
 #if defined(HYPRE_USING_GPU)
    /* Re-run on device data to cover the native device reduction path. */
    hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+   HYPRE_UNIT_CHECK_REAL(error, "CSRMatrixFnorm(device)",
+                         hypre_CSRMatrixFnorm(hypre_ParCSRMatrixDiag(A)),
+                         hypre_sqrt(65.0), MATRIX_STATS_TOL);
    hypre_ParCSRMatrixStatsComputeLocal(A, stats);
    error += CheckStats("Test1_ParCSRMatrixStatsComputeLocal", stats,
                        4, 5, 7, 7, 65.0, 0, 4, 1.75, 8.75,

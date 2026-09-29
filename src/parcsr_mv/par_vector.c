@@ -1091,7 +1091,7 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
 
    hypre_DataExchangeList(num_contacts,
                           contact_proc_list, contact_send_buf,
-                          contact_send_buf_starts, sizeof(HYPRE_Int),
+                          contact_send_buf_starts, sizeof(HYPRE_BigInt),
                           //0, &response_obj,
                           sizeof(HYPRE_Int), &response_obj,
                           max_response_size, 1,
