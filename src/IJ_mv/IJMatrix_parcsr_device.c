@@ -1137,18 +1137,25 @@ struct hypre_IJMatrixGetValuesFunctor
             const HYPRE_Int *p_found = p_end;
             if (p_begin != p_end)
             {
-               /* Device assembly puts diag first and sorts remaining columns in increasing order */
+               /* The diagonal is first in a diag block row, so check it before searching. The
+                  columns after it are in increasing order when the device assembly built the row,
+                  but hypre_IJMatrixAssembleParCSR moves the diagonal to the front by swapping,
+                  which leaves the row's smallest column at the diagonal's former position. Scan
+                  rather than binary search so that both orderings are read correctly. */
                if (*p_begin == l_col)
                {
                   p_found = p_begin;
                }
                else
                {
-#if defined(HYPRE_USING_SYCL)
-                  p_found = std::lower_bound(p_begin + 1, p_end, l_col);
-#else
-                  p_found = thrust::lower_bound(thrust::seq, p_begin + 1, p_end, l_col);
-#endif
+                  for (const HYPRE_Int *p = p_begin + 1; p < p_end; p++)
+                  {
+                     if (*p == l_col)
+                     {
+                        p_found = p;
+                        break;
+                     }
+                  }
                }
             }
             if (p_found < p_end && *p_found == l_col)
