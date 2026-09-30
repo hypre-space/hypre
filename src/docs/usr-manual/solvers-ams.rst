@@ -232,7 +232,7 @@ the function
 A node is interior, if its entry in the ``interior_nodes`` array is :math:`1.0`.
 Based on this array, a restricted discrete gradient operator :math:`G_0` is
 constructed, and AMS is then defined based on the matrix :math:`{\mathbf
-A}+\delta G_0^TG_0` which is non-singular, and a small :math:`\delta>0`
+A}+\delta G_0G_0^T` which is non-singular, and a small :math:`\delta>0`
 perturbation of :math:`{\mathbf A}`. When iterating with this preconditioner, it
 is advantageous to project on the compatible subspace :math:`Ker(G_0^T)`. This
 can be done periodically, or manually through the functions
