@@ -48,6 +48,9 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) HYPRE_CUSPARSE_SPMV_CSR_ALG2;
 #elif defined(HYPRE_USING_ROCSPARSE) && ROCSPARSE_VERSION >= 400100
    hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_rowsplit;
+#elif defined(HYPRE_USING_ROCSPARSE) && ROCSPARSE_VERSION >= 200000
+   /* rocSPARSE < 4.1 calls rowsplit "stream"; the enum value is the same. */
+   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_stream;
 #else
    hypre_DeviceDataSpMVAlgorithm(data)    = 0; /* vendor default */
 #endif
