@@ -450,16 +450,20 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /*-----------------------------------------------------------------------
     * Print log
     *-----------------------------------------------------------------------*/
-
-   bi_prod = hypre_sqrt(bi_prod);
-
    if (logging > 1 && my_id == 0)
    {
       hypre_printf("\n\n");
    }
 
    (cgnr_data -> num_iterations) = i;
-   (cgnr_data -> rel_residual_norm) = norms[i] / bi_prod;
+   if (bi_prod > 0.0)
+   {
+      (cgnr_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
+   }
+   else /* actually, we'll never get here... */
+   {
+      (cgnr_data -> rel_residual_norm) = 0.0;
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 
