@@ -1193,7 +1193,7 @@ hypre_StructMatrixAddMat( hypre_StructMatrix *A,
    }
 
    /* Ensure constant device data for A matches updates on host */
-   hypre_StructMatrixSyncConstToHost(A);
+   hypre_StructMatrixSyncConstToDevice(A);
 
    hypre_BoxDestroy(loop_box);
 
@@ -1353,16 +1353,19 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
    HYPRE_Complex        *Ddata;
    hypre_StructStencil  *stencil;
    hypre_Index           offset;
+   HYPRE_Int             stencil_index = 0;
 
    hypre_SetIndex(offset, 0);
    HYPRE_StructStencilCreate(hypre_StructGridNDim(grid), 1, &stencil);
    HYPRE_StructStencilSetEntry(stencil, 0, offset);
    HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
-   HYPRE_StructMatrixInitialize(D);
    HYPRE_StructStencilDestroy(stencil);
 
    if (hypre_StructMatrixConstEntry(A, Adiag))
    {
+      HYPRE_StructMatrixSetConstantEntries(D, 1, &stencil_index);
+      HYPRE_StructMatrixInitialize(D);
+
       /* Ensure constant host data for A matches device */
       hypre_StructMatrixSyncConstToHost(A);
 
@@ -1379,7 +1382,7 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
       }
 
       /* Ensure constant device data for D matches updates on host */
-      hypre_StructMatrixSyncConstToHost(D);
+      hypre_StructMatrixSyncConstToDevice(D);
    }
    else
    {
@@ -1389,6 +1392,8 @@ hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
       hypre_IndexRef        start;
       hypre_Index           ustride;
       HYPRE_Int             i;
+
+      HYPRE_StructMatrixInitialize(D);
 
       loop_box = hypre_BoxCreate(ndim);
       hypre_SetIndex(ustride, 1);
