@@ -221,6 +221,7 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
                           HYPRE_StructVector b,
                           HYPRE_StructVector x )
 {
+   HYPRE_Real            weight         = (solver -> weight);
    HYPRE_Real            tol            = (solver -> tol);
    HYPRE_Int             max_iter       = (solver -> max_iter);
    HYPRE_Int             zero_guess     = (solver -> zero_guess);
@@ -297,7 +298,15 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
    for (iter = 0; iter < max_iter; iter++)
    {
       /* compute residual (r = b - Ax) */
-      hypre_StructMatvecCompute(Ax_matvec_data, -1.0, A, x, 1.0, b, r);
+      if (zero_guess && (iter == 0))
+      {
+         r = b;
+      }
+      else
+      {
+         r = (solver -> r);
+         hypre_StructMatvecCompute(Ax_matvec_data, -1.0, A, x, 1.0, b, r);
+      }
 
       /* convergence check */
       if (tol > 0.0)
@@ -317,7 +326,7 @@ HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver,
       }
 
       /* compute next iterate */
-      hypre_StructMatvecCompute(Br_matvec_data, 1.0, B, r, 1.0, x, x);
+      hypre_StructMatvecCompute(Br_matvec_data, weight, B, r, 1.0, x, x);
    }
 
    (solver -> num_iterations) = iter;
