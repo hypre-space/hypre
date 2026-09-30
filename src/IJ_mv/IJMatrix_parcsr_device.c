@@ -932,6 +932,10 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          }
       }
 
+      /* The device col_map_offd is read below. A ParCSR built on the host has only the host copy,
+         so make sure the device one exists before the merge copies from it. */
+      hypre_ParCSRMatrixCopyColMapOffdToDevice(par_matrix);
+
       /* split IJ into diag and offd */
       hypre_CSRMatrixSplitDevice_core( 1,
                                        nrows,
