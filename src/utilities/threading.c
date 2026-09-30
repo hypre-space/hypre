@@ -66,3 +66,31 @@ hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n )
    *begin = hypre_min(n_per_thread * my_thread_num, n);
    *end = hypre_min(*begin + n_per_thread, n);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetNumThreads
+ *
+ * Sets the number of threads to use. Must be called from outside of a
+ * parallel region.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetNumThreads( HYPRE_Int num_threads )
+{
+#ifdef HYPRE_USING_OPENMP
+   HYPRE_Int num_available_threads = hypre_min(omp_get_num_procs(), omp_get_thread_limit());
+
+   if (num_threads < 1 || num_threads > num_available_threads)
+   {
+      hypre_error_in_arg(1);
+   }
+   else
+   {
+      hypre_SetNumThreads(num_threads);
+   }
+#else
+   HYPRE_UNUSED_VAR(num_threads);
+#endif
+
+   return hypre_error_flag;
+}

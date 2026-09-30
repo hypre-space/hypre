@@ -286,6 +286,15 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructMatrixAddToArrayValues_pre( precision, matrix, part, var, nvalues, indexes, entries, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -335,6 +344,15 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixDestroy_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructMatrixGetArrayValues_pre( precision, matrix, part, var, nvalues, indexes, entries, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -443,6 +461,15 @@ HYPRE_SStructMatrixScale( HYPRE_SStructMatrix matrix, hypre_long_double scalar )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructMatrixScale_pre( precision, matrix, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructMatrixSetArrayValues_pre( precision, matrix, part, var, nvalues, indexes, entries, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -610,6 +637,15 @@ HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYP
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructVectorAddToArrayValues_pre( precision, vector, part, var, nvalues, indexes, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -686,6 +722,15 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorGather_pre( precision, vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructVectorGetArrayValues_pre( precision, vector, part, var, nvalues, indexes, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -785,6 +830,15 @@ HYPRE_SStructVectorScale( hypre_long_double alpha, HYPRE_SStructVector y )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_SStructVectorScale_pre( precision, alpha, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_SStructVectorSetArrayValues_pre( precision, vector, part, var, nvalues, indexes, values );
 }
 
 /*--------------------------------------------------------------------------*/

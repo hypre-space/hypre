@@ -1434,6 +1434,8 @@ HYPRE_Int
 hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
                            hypre_ParCSRMatrix *B );
 
+hypre_ParVector *
+hypre_ParVectorClone_mp(hypre_ParVector *v, HYPRE_Precision new_precision);
 #endif
 
 #ifdef __cplusplus

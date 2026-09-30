@@ -292,6 +292,15 @@ HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
+
+HYPRE_Int
 HYPRE_SStructMatrixAddToBoxValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
 HYPRE_Int
 HYPRE_SStructMatrixAddToBoxValues_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_double *values );
@@ -344,6 +353,15 @@ HYPRE_Int
 HYPRE_SStructMatrixDestroy_long_dbl( HYPRE_SStructMatrix matrix );
 HYPRE_Int
 HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix );
+
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
 HYPRE_SStructMatrixGetBoxValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
@@ -452,6 +470,15 @@ HYPRE_Int
 HYPRE_SStructMatrixScale_long_dbl( HYPRE_SStructMatrix matrix, hypre_long_double scalar );
 HYPRE_Int
 HYPRE_SStructMatrixScale( HYPRE_SStructMatrix matrix, hypre_long_double scalar );
+
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues_flt( HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_float *values );
@@ -616,6 +643,15 @@ HYPRE_Int
 HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues_long_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
+
+HYPRE_Int
 HYPRE_SStructVectorAddToBoxValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, hypre_float *values );
 HYPRE_Int
 HYPRE_SStructVectorAddToBoxValues_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, hypre_double *values );
@@ -695,6 +731,15 @@ HYPRE_Int
 HYPRE_SStructVectorGather_long_dbl( HYPRE_SStructVector vector );
 HYPRE_Int
 HYPRE_SStructVectorGather( HYPRE_SStructVector vector );
+
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues_long_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
 
 HYPRE_Int
 HYPRE_SStructVectorGetBoxValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, hypre_float *values );
@@ -794,6 +839,15 @@ HYPRE_Int
 HYPRE_SStructVectorScale_long_dbl( hypre_long_double alpha, HYPRE_SStructVector y );
 HYPRE_Int
 HYPRE_SStructVectorScale( hypre_long_double alpha, HYPRE_SStructVector y );
+
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_float *values );
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_double *values );
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues_long_dbl( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, hypre_long_double *values );
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
 
 HYPRE_Int
 HYPRE_SStructVectorSetBoxValues_flt( HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, hypre_float *values );
@@ -942,6 +996,9 @@ HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
+
+HYPRE_Int
 HYPRE_SStructMatrixAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
@@ -958,6 +1015,9 @@ HYPRE_SStructMatrixCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_S
 
 HYPRE_Int
 HYPRE_SStructMatrixDestroy_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix );
+
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
 HYPRE_SStructMatrixGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
@@ -994,6 +1054,9 @@ HYPRE_SStructMatrixRead_pre( HYPRE_Precision precision, MPI_Comm comm, const cha
 
 HYPRE_Int
 HYPRE_SStructMatrixScale_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, hypre_long_double scalar );
+
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values );
 
 HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructMatrix matrix, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, void *values );
@@ -1050,6 +1113,9 @@ HYPRE_Int
 HYPRE_SStructVectorAddFEMValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *index, void *values );
 
 HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
+
+HYPRE_Int
 HYPRE_SStructVectorAddToBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values );
 
 HYPRE_Int
@@ -1075,6 +1141,9 @@ HYPRE_SStructVectorDestroy_pre( HYPRE_Precision precision, HYPRE_SStructVector v
 
 HYPRE_Int
 HYPRE_SStructVectorGather_pre( HYPRE_Precision precision, HYPRE_SStructVector vector );
+
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
 
 HYPRE_Int
 HYPRE_SStructVectorGetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values );
@@ -1108,6 +1177,9 @@ HYPRE_SStructVectorRead_pre( HYPRE_Precision precision, MPI_Comm comm, const cha
 
 HYPRE_Int
 HYPRE_SStructVectorScale_pre( HYPRE_Precision precision, hypre_long_double alpha, HYPRE_SStructVector y );
+
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values );
 
 HYPRE_Int
 HYPRE_SStructVectorSetBoxValues_pre( HYPRE_Precision precision, HYPRE_SStructVector vector, HYPRE_Int part, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int var, void *values );

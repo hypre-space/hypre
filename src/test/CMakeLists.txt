@@ -38,8 +38,8 @@ list(APPEND HYPRE_TEST_DRIVER_TARGETS sstructmat)
 # Mixed precision test executables (only built when mixed precision is enabled)
 if(HYPRE_ENABLE_MIXED_PRECISION)
   set(MP_TEST_SRCS
-    test_mp_pcg.c
-    test_mp_pcg_3d.c
+    ij_mp.c
+    struct_mp.c
   )
   add_hypre_executables("${MP_TEST_SRCS}")
 

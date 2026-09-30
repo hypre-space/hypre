@@ -8,6 +8,7 @@ HYPRE_StructGridProjectBox
 HYPRE_StructGridSetExtents
 HYPRE_StructGridSetNumGhost
 HYPRE_StructGridSetPeriodic
+HYPRE_StructMatrixAddToArrayValues
 HYPRE_StructMatrixAddToBoxValues
 HYPRE_StructMatrixAddToBoxValues2
 HYPRE_StructMatrixAddToConstantValues
@@ -16,6 +17,7 @@ HYPRE_StructMatrixAssemble
 HYPRE_StructMatrixClearBoundary
 HYPRE_StructMatrixCreate
 HYPRE_StructMatrixDestroy
+HYPRE_StructMatrixGetArrayValues
 HYPRE_StructMatrixGetBoxValues
 HYPRE_StructMatrixGetBoxValues2
 HYPRE_StructMatrixGetGrid
@@ -27,6 +29,7 @@ HYPRE_StructMatrixMatvecT
 HYPRE_StructMatrixPrint
 HYPRE_StructMatrixRead
 HYPRE_StructMatrixScale
+HYPRE_StructMatrixSetArrayValues
 HYPRE_StructMatrixSetBoxValues
 HYPRE_StructMatrixSetBoxValues2
 HYPRE_StructMatrixSetConstantEntries
@@ -41,6 +44,7 @@ HYPRE_StructStencilCreate
 HYPRE_StructStencilDestroy
 HYPRE_StructStencilSetElement
 HYPRE_StructStencilSetEntry
+HYPRE_StructVectorAddToArrayValues
 HYPRE_StructVectorAddToBoxValues
 HYPRE_StructVectorAddToBoxValues2
 HYPRE_StructVectorAddToValues
@@ -50,6 +54,7 @@ HYPRE_StructVectorClone
 HYPRE_StructVectorCopy
 HYPRE_StructVectorCreate
 HYPRE_StructVectorDestroy
+HYPRE_StructVectorGetArrayValues
 HYPRE_StructVectorGetBoxValues
 HYPRE_StructVectorGetBoxValues2
 HYPRE_StructVectorGetMigrateCommPkg
@@ -61,6 +66,7 @@ HYPRE_StructVectorPrint
 HYPRE_StructVectorRead
 HYPRE_StructVectorScale
 HYPRE_StructVectorScaleValues
+HYPRE_StructVectorSetArrayValues
 HYPRE_StructVectorSetBoxValues
 HYPRE_StructVectorSetBoxValues2
 HYPRE_StructVectorSetConstantValues

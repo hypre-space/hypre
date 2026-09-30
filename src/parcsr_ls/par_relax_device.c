@@ -133,7 +133,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, r);
 
    // 1) z = r/D, u = u + z
-   hypreDevice_DiagScaleVector2(num_vectors, num_rows, A_diag_diag,
+   hypre_DiagScaleVector2Device(num_vectors, num_rows, A_diag_diag,
                                 r_data, 1.0, z_data, u_data, 1);
    multiplier *= -1.0;
 
@@ -143,7 +143,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice( hypre_ParCSRMatrix *A,
       hypre_CSRMatrixSpMVDevice(0, 1.0, A_diag, z_local, 0.0, r_local, -2);
 
       // 3) z = r/D, u = u + m * z
-      hypreDevice_DiagScaleVector2(num_vectors, num_rows, A_diag_diag,
+      hypre_DiagScaleVector2Device(num_vectors, num_rows, A_diag_diag,
                                    r_data, multiplier, z_data, u_data,
                                    (num_inner_iters > i + 1));
       multiplier *= -1.0;

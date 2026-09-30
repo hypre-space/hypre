@@ -80,7 +80,6 @@ hypre_MultiblockMatrixPrint
 hypre_MultiblockMatrixSetNumSubmatrices
 hypre_MultiblockMatrixSetSubmatrix
 hypre_MultiblockMatrixSetSubmatrixType
-hypre_SeqMultiVectorCreate
 hypre_SeqVectorAxpy
 hypre_SeqVectorAxpyHost
 hypre_SeqVectorAxpyz
@@ -94,7 +93,6 @@ hypre_SeqVectorCreate
 hypre_SeqVectorDestroy
 hypre_SeqVectorInitialize
 hypre_SeqVectorInitializeShell
-hypre_SeqVectorInitialize_v2
 hypre_SeqVectorInnerProd
 hypre_SeqVectorInnerProdHost
 hypre_SeqVectorInnerProdTagged

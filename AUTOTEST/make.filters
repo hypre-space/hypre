@@ -1,4 +1,5 @@
 slu_util.c:
+^ar: `u' modifier ignored since `D' is the default \(see `U'\)$
 autoconf has been disabled
 automake has been disabled
 autoheader has been disabled

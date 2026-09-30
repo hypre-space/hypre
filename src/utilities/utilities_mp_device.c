@@ -25,7 +25,7 @@
 
 template<typename T1, typename T2, typename T3>
 __global__ void
-hypreGPUKernel_Axpyzn_mp( hypre_DeviceItem &item,
+hypre_GPUKernelAxpyzn_mp( hypre_DeviceItem &item,
                           HYPRE_Int         n,
                           T1                *x,
                           T2                *y,
@@ -42,12 +42,12 @@ hypreGPUKernel_Axpyzn_mp( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_Axpyzn_mp
+ * hypre_AxpyznDevice_mp
  *--------------------------------------------------------------------*/
 
 template<typename T1, typename T2, typename T3>
 HYPRE_Int
-hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
+hypre_AxpyznDevice_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
 {
    if (n <= 0)
    {
@@ -57,7 +57,7 @@ hypreDevice_Axpyzn_mp(HYPRE_Int n, T1 *d_x, T2 *d_y, T3 *d_z, T1 a, T2 b)
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_Axpyzn_mp, gDim, bDim, n, d_x, d_y, d_z, a, b );
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelAxpyzn_mp, gDim, bDim, n, d_x, d_y, d_z, a, b );
 
    return hypre_error_flag;
 }
@@ -92,7 +92,7 @@ hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
                HYPRE_THRUST_CALL( transform, xp, xp + n, yp,
-                                  hypreFunctor_ElementCast<hypre_float, hypre_double>() );
+                                  hypre_ElementCastFunctor<hypre_float, hypre_double>() );
 #elif defined(HYPRE_USING_SYCL)
                HYPRE_ONEDPL_CALL( std::transform, xp, xp + n, yp, [](const auto & x) {return static_cast<hypre_double>(x);} );
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -121,7 +121,7 @@ hypre_RealArrayCopyDevice_mp(HYPRE_Precision precision_x, void *x,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
                HYPRE_THRUST_CALL( transform, xp, xp + n, yp,
-                                  hypreFunctor_ElementCast<hypre_double, hypre_float>() );
+                                  hypre_ElementCastFunctor<hypre_double, hypre_float>() );
 #elif defined(HYPRE_USING_SYCL)
                HYPRE_ONEDPL_CALL( std::transform, xp, xp + n, yp, [](const auto & x) {return static_cast<hypre_float>(x);});
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -174,7 +174,7 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
                hypre_double *yp = (hypre_double *)y;
 
 #if defined(HYPRE_USING_GPU)
-               hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_float)alpha, 1.0);
+               hypre_AxpyznDevice_mp(n, xp, yp, yp, (hypre_float)alpha, 1.0);
                hypre_SyncComputeStream();
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
                HYPRE_Int i;
@@ -202,7 +202,7 @@ hypre_RealArrayAxpynDevice_mp(HYPRE_Precision precision_x, hypre_long_double alp
 
 #if defined(HYPRE_USING_GPU)
 
-               hypreDevice_Axpyzn_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
+               hypre_AxpyznDevice_mp(n, xp, yp, yp, (hypre_double)alpha, 1.0f);
                hypre_SyncComputeStream();
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
                HYPRE_Int i;

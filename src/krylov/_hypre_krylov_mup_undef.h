@@ -81,6 +81,7 @@
 #undef HYPRE_FlexGMRESGetMinIter
 #undef HYPRE_FlexGMRESGetNumIterations
 #undef HYPRE_FlexGMRESGetPrecond
+#undef HYPRE_FlexGMRESGetPrecondMatrix
 #undef HYPRE_FlexGMRESGetPrintLevel
 #undef HYPRE_FlexGMRESGetResidual
 #undef HYPRE_FlexGMRESGetTol
@@ -92,6 +93,7 @@
 #undef HYPRE_FlexGMRESSetMinIter
 #undef HYPRE_FlexGMRESSetModifyPC
 #undef HYPRE_FlexGMRESSetPrecond
+#undef HYPRE_FlexGMRESSetPrecondMatrix
 #undef HYPRE_FlexGMRESSetPrintLevel
 #undef HYPRE_FlexGMRESSetTol
 #undef HYPRE_FlexGMRESSetup
@@ -299,6 +301,7 @@
 #undef hypre_FlexGMRESGetMinIter
 #undef hypre_FlexGMRESGetNumIterations
 #undef hypre_FlexGMRESGetPrecond
+#undef hypre_FlexGMRESGetPrecondMatrix
 #undef hypre_FlexGMRESGetPrintLevel
 #undef hypre_FlexGMRESGetResidual
 #undef hypre_FlexGMRESGetStopCrit
@@ -312,6 +315,7 @@
 #undef hypre_FlexGMRESSetMinIter
 #undef hypre_FlexGMRESSetModifyPC
 #undef hypre_FlexGMRESSetPrecond
+#undef hypre_FlexGMRESSetPrecondMatrix
 #undef hypre_FlexGMRESSetPrintLevel
 #undef hypre_FlexGMRESSetStopCrit
 #undef hypre_FlexGMRESSetTol

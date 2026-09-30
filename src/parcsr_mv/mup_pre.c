@@ -770,6 +770,42 @@ hypre_ParCSRMatrixInitialize_v2_pre( HYPRE_Precision precision, hypre_ParCSRMatr
    }
 }
 
+/*--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCloneDeep_v2_pre( HYPRE_Precision precision, hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_ParVectorCloneDeep_v2_flt( x, memory_location );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_ParVectorCloneDeep_v2_dbl( x, memory_location );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_ParVectorCloneDeep_v2_long_dbl( x, memory_location );
+      default:
+         { hypre_ParVector * value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_ParVectorCreate_flt( comm, global_size, partitioning_in );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_ParVectorCreate_dbl( comm, global_size, partitioning_in );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_ParVectorCreate_long_dbl( comm, global_size, partitioning_in );
+      default:
+         { hypre_ParVector * value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
 
 #endif
 

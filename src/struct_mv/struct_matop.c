@@ -976,7 +976,7 @@ hypre_StructMatrixScale( hypre_StructMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexScalen(data, k, data, scalar);
+      hypre_ComplexScalenDevice(data, k, data, scalar);
    }
    else
 #endif

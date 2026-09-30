@@ -11,7 +11,7 @@
 
 #include "csr_spgemm_device.h"
 
-HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
+HYPRE_Int hypre_CSRSpGemmBinnedGetBlockNumDimDevice()
 {
    hypre_int multiProcessorCount = 0;
    /* bins 1, 2, ..., num_bins, are effective; 0 is reserved for empty rows */

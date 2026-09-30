@@ -25,7 +25,7 @@
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundNoBinDevice( HYPRE_Int  m,
                                             HYPRE_Int  k,
                                             HYPRE_Int  n,
                                             HYPRE_Int *d_ia,
@@ -46,7 +46,7 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundBinnedDevice( HYPRE_Int  m,
                                              HYPRE_Int  k,
                                              HYPRE_Int  n,
                                              HYPRE_Int *d_ia,
@@ -90,7 +90,7 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
  *        1: input row count est (CURRENTLY ONLY 1)
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzUpperboundDevice( HYPRE_Int  m,
                                        HYPRE_Int  k,
                                        HYPRE_Int  n,
                                        HYPRE_Int *d_ia,
@@ -121,12 +121,12 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 
    if (binned)
    {
-      hypreDevice_CSRSpGemmRownnzUpperboundBinned
+      hypre_CSRSpGemmRownnzUpperboundBinnedDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rf);
    }
    else
    {
-      hypreDevice_CSRSpGemmRownnzUpperboundNoBin
+      hypre_CSRSpGemmRownnzUpperboundNoBinDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rf);
    }
 
@@ -167,7 +167,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
  *        2: input row bound
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzNoBinDevice( HYPRE_Int  m,
                                   HYPRE_Int  k,
                                   HYPRE_Int  n,
                                   HYPRE_Int *d_ia,
@@ -245,7 +245,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
  *        2: input row bound
 */
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzBinnedDevice( HYPRE_Int  m,
                                    HYPRE_Int  k,
                                    HYPRE_Int  n,
                                    HYPRE_Int  nnzA,
@@ -263,7 +263,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 #if 0
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
+   hypre_CSRSpGemmRownnzEstimateDevice(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
 #else
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, hypre_max(m, k + 1), HYPRE_MEMORY_DEVICE);
 
@@ -360,7 +360,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzDevice( HYPRE_Int  m,
                              HYPRE_Int  k,
                              HYPRE_Int  n,
                              HYPRE_Int  nnzA,
@@ -389,12 +389,12 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
    if (binned)
    {
-      hypreDevice_CSRSpGemmRownnzBinned
+      hypre_CSRSpGemmRownnzBinnedDevice
       (m, k, n, nnzA, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
    }
    else
    {
-      hypreDevice_CSRSpGemmRownnzNoBin
+      hypre_CSRSpGemmRownnzNoBinDevice
       (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
    }
 

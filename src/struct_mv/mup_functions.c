@@ -106,6 +106,15 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid grid, HYPRE_Int *periodic )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixAddToArrayValues( HYPRE_StructMatrix matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatrixAddToArrayValues_pre( precision, matrix, nvalues, indexes, entries, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix matrix, HYPRE_Int *ilower, HYPRE_Int *iupper, HYPRE_Int nentries, HYPRE_Int *entries, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -173,6 +182,15 @@ HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructMatrixDestroy_pre( precision, matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixGetArrayValues( HYPRE_StructMatrix matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatrixGetArrayValues_pre( precision, matrix, nvalues, indexes, entries, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -272,6 +290,15 @@ HYPRE_StructMatrixScale( HYPRE_StructMatrix matrix, hypre_long_double scalar )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructMatrixScale_pre( precision, matrix, scalar );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetArrayValues( HYPRE_StructMatrix matrix, HYPRE_Int nvalues, HYPRE_Int *indexes, HYPRE_Int *entries, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatrixSetArrayValues_pre( precision, matrix, nvalues, indexes, entries, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -403,6 +430,15 @@ HYPRE_StructStencilSetEntry( HYPRE_StructStencil stencil, HYPRE_Int entry, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructVectorAddToArrayValues( HYPRE_StructVector vector, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructVectorAddToArrayValues_pre( precision, vector, nvalues, indexes, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector vector, HYPRE_Int *ilower, HYPRE_Int *iupper, void *values )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -479,6 +515,15 @@ HYPRE_StructVectorDestroy( HYPRE_StructVector vector )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructVectorDestroy_pre( precision, vector );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorGetArrayValues( HYPRE_StructVector vector, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructVectorGetArrayValues_pre( precision, vector, nvalues, indexes, values );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -578,6 +623,15 @@ HYPRE_StructVectorScaleValues( HYPRE_StructVector vector, hypre_long_double fact
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_StructVectorScaleValues_pre( precision, vector, factor );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetArrayValues( HYPRE_StructVector vector, HYPRE_Int nvalues, HYPRE_Int *indexes, void *values )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructVectorSetArrayValues_pre( precision, vector, nvalues, indexes, values );
 }
 
 /*--------------------------------------------------------------------------*/

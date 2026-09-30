@@ -12,11 +12,11 @@
 #if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ParCSRMatMatDiag
+ * hypre_GPUKernelParCSRMatMatDiag
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_ParCSRMatMatDiag(hypre_DeviceItem &item,
+hypre_GPUKernelParCSRMatMatDiag(hypre_DeviceItem &item,
                                 HYPRE_Int         num_rows,
                                 HYPRE_Int        *A_diag_i,
                                 HYPRE_Int        *A_diag_j,
@@ -126,7 +126,7 @@ hypre_ParCSRMatMatDiagDevice(hypre_ParCSRMatrix  *A,
    const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    const dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "threads", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ParCSRMatMatDiag, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelParCSRMatMatDiag, gDim, bDim,
                      num_rows,
                      hypre_CSRMatrixI(A_diag),
                      hypre_CSRMatrixJ(A_diag),

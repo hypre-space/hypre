@@ -34,4 +34,6 @@ hypre_CSRMatrixCopy
 hypre_CSRMatrixCreate
 hypre_CSRMatrixInitialize_v2
 hypre_CSRMatrixResetData
+hypre_SeqMultiVectorCreate
+hypre_SeqVectorInitialize_v2
 hypre_SeqVectorSetData

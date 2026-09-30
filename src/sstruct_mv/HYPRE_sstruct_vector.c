@@ -605,7 +605,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
 #if defined(HYPRE_USING_GPU)
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         hypreDevice_ComplexStridedCopy(nelts, fem_nvars, values + i, tvalues);
+         hypre_ComplexStridedCopyDevice(nelts, fem_nvars, values + i, tvalues);
       }
       else
 #endif
@@ -623,6 +623,122 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
    /* Free memory */
    hypre_TFree(tvalues, memory_location);
    hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
+   hypre_SStructPVector  *pvector         = hypre_SStructVectorPVector(vector, part);
+   hypre_StructVector    *svector         = hypre_SStructPVectorSVector(pvector, var);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructVectorSetArrayValuesDevice(svector, nvalues, indexes, values, 1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorSetValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructVector  vector,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
+                                    HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
+   hypre_SStructPVector  *pvector         = hypre_SStructVectorPVector(vector, part);
+   hypre_StructVector    *svector         = hypre_SStructPVectorSVector(pvector, var);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructVectorAddToArrayValuesDevice(svector, nvalues, indexes, values, 1);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorAddToValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues(HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_SStructVectorNDim(vector);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
+   hypre_SStructPVector  *pvector         = hypre_SStructVectorPVector(vector, part);
+   hypre_StructVector    *svector         = hypre_SStructPVectorSVector(pvector, var);
+   hypre_SStructPGrid    *pgrid           = hypre_SStructPVectorPGrid(pvector);
+   hypre_StructGrid      *sgrid           = hypre_StructVectorGrid(svector);
+   hypre_BoxArray        *iboxarray       = hypre_SStructPGridIBoxArray(pgrid, var);
+   hypre_BoxArray        *tboxarray;
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      /* temporarily swap out sgrid boxes in order to get boundary data */
+      /* WM: todo - unsure whether the data boxes for the underlying struct vectors are
+       * guaranteed to have sufficient ghosts to cover IBoxArray...? May be getting away
+       * with this by setting num ghosts to 1 by default. Should check on this. */
+      tboxarray = hypre_StructGridBoxes(sgrid);
+      hypre_StructGridBoxes(sgrid) = iboxarray;
+      hypre_StructVectorGetArrayValuesDevice(svector, nvalues, indexes, values);
+      hypre_StructGridBoxes(sgrid) = tboxarray;
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_SStructVectorGetValues(vector, part, &(indexes[i * ndim]), var, &(values[i]));
+      }
+   }
 
    return hypre_error_flag;
 }

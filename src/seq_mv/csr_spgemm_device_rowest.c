@@ -417,7 +417,7 @@ void hypre_spgemm_rownnz_cohen( HYPRE_Int  M,
 
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
+hypre_CSRSpGemmRownnzEstimateDevice( HYPRE_Int  m,
                                      HYPRE_Int  k,
                                      HYPRE_Int  n,
                                      HYPRE_Int *d_ia,

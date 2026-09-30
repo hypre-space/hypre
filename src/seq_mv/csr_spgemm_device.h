@@ -405,19 +405,19 @@ HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_
                                              HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr,
                                              HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr);
 
-HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmRownnzEstimateDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                               HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc,
                                               HYPRE_Int row_est_mtd);
 
-HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmRownnzUpperboundDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                                 HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc,
                                                 HYPRE_Int *d_rc, HYPRE_Int *rownnz_exact_ptr);
 
-HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA,
+HYPRE_Int hypre_CSRSpGemmRownnzDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA,
                                       HYPRE_Int *d_ia,
                                       HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
-HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+HYPRE_Int hypre_CSRSpGemmNumerWithRownnzUpperboundDevice(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                                          HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
                                                          HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out,
                                                          HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
@@ -445,10 +445,10 @@ template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount,
                                                  HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
-HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim();
+HYPRE_Int hypre_CSRSpGemmBinnedGetBlockNumDimDevice();
 
 template <HYPRE_Int GROUP_SIZE>
-HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *nnzC,
+HYPRE_Int hypre_CSRSpGemmNumerPostCopyDevice( HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *nnzC,
                                               HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
 
 template <HYPRE_Int GROUP_SIZE>

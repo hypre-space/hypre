@@ -237,6 +237,102 @@ HYPRE_StructMatrixGetBoxValues2( HYPRE_StructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixSetArrayValues(HYPRE_StructMatrix   matrix,
+                                 HYPRE_Int            nvalues,
+                                 HYPRE_Int           *indexes,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructMatrixSetArrayValuesDevice(matrix, nvalues, indexes, entries, values, 0);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructMatrixSetValues(matrix, &(indexes[i * ndim]),
+                                     1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixAddToArrayValues(HYPRE_StructMatrix   matrix,
+                                   HYPRE_Int            nvalues,
+                                   HYPRE_Int           *indexes,
+                                   HYPRE_Int           *entries,
+                                   HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructMatrixAddToArrayValuesDevice(matrix, nvalues, indexes, entries, values, 0);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructMatrixAddToValues(matrix, &(indexes[i * ndim]),
+                                       1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixGetArrayValues(HYPRE_StructMatrix   matrix,
+                                 HYPRE_Int            nvalues,
+                                 HYPRE_Int           *indexes,
+                                 HYPRE_Int           *entries,
+                                 HYPRE_Complex       *values)
+{
+   HYPRE_Int i;
+   HYPRE_Int ndim = hypre_StructMatrixNDim(matrix);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(matrix);
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructMatrixGetArrayValuesDevice(matrix, nvalues, indexes, entries, values);
+   }
+   else
+#endif
+   {
+      for (i = 0; i < nvalues; i++)
+      {
+         HYPRE_StructMatrixGetValues(matrix, &(indexes[i * ndim]),
+                                     1, &(entries[i]), &(values[i]));
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int          num_stencil_indices,
                                      HYPRE_Int         *stencil_indices,

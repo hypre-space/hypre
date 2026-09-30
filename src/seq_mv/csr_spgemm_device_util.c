@@ -225,7 +225,7 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize, gDim, bDim,
                      num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
 
-   hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
+   hypre_IntegerExclusiveScanDevice(num_ghash + 1, ghash_i);
 
    hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);

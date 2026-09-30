@@ -14,7 +14,7 @@
 
 #if defined(HYPRE_USING_GPU)
 __global__ void
-hypreGPUKernel_IndepSetMain(hypre_DeviceItem &item,
+hypre_GPUKernelIndepSetMain(hypre_DeviceItem &item,
                             HYPRE_Int   graph_diag_size,
                             HYPRE_Int  *graph_diag,
                             HYPRE_Real *measure_diag,
@@ -107,7 +107,7 @@ hypreGPUKernel_IndepSetMain(hypre_DeviceItem &item,
 }
 
 __global__ void
-hypreGPUKernel_IndepSetFixMarker(hypre_DeviceItem &item,
+hypre_GPUKernelIndepSetFixMarker(hypre_DeviceItem &item,
                                  HYPRE_Int  *IS_marker_diag,
                                  HYPRE_Int   num_elmts_send,
                                  HYPRE_Int  *send_map_elmts,
@@ -163,7 +163,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*------------------------------------------------------------------
     * Initialize IS_marker by putting all nodes in the IS (marked by 1)
     *------------------------------------------------------------------*/
-   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, (HYPRE_Int) 1);
+   hypre_ScatterConstantDevice(IS_marker_diag, graph_diag_size, graph_diag, (HYPRE_Int) 1);
 
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
@@ -171,7 +171,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetMain, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIndepSetMain, gDim, bDim,
                      graph_diag_size, graph_diag, measure_diag, measure_offd,
                      S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                      IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
@@ -193,7 +193,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /* adjust IS_marker_diag from the received */
    gDim = hypre_GetDefaultDeviceGridDimension(num_elmts_send, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetFixMarker, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIndepSetFixMarker, gDim, bDim,
                      IS_marker_diag, num_elmts_send, send_map_elmts,
                      int_send_buf, IS_offd_temp_mark );
 
@@ -246,7 +246,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
-   hypreDevice_ComplexAxpyn(measure_array, num_rows_diag, urand, measure_array, 1.0);
+   hypre_ComplexAxpynDevice(measure_array, num_rows_diag, urand, measure_array, 1.0);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 

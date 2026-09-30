@@ -178,10 +178,8 @@ hypre_ParMultiVectorCreate
 hypre_ParTMatmul
 hypre_ParVectorAxpy
 hypre_ParVectorAxpyz
-hypre_ParVectorCloneDeep_v2
 hypre_ParVectorCloneShallow
 hypre_ParVectorCopy
-hypre_ParVectorCreate
 hypre_ParVectorCreateAssumedPartition
 hypre_ParVectorDestroy
 hypre_ParVectorGetValues

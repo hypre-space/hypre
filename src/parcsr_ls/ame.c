@@ -265,7 +265,7 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_GPU)
 __global__ void
-hypreGPUKernel_GtEliminateBoundary( hypre_DeviceItem    &item,
+hypre_GPUKernelGtEliminateBoundary( hypre_DeviceItem    &item,
                                     HYPRE_Int      nrows,
                                     HYPRE_Int     *Gt_diag_i,
                                     HYPRE_Int     *Gt_diag_j,
@@ -549,7 +549,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(nv, "warp", bDim);
-            HYPRE_GPU_LAUNCH( hypreGPUKernel_GtEliminateBoundary, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypre_GPUKernelGtEliminateBoundary, gDim, bDim,
                               nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
          }
          else

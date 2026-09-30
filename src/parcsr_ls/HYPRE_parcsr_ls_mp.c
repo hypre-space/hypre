@@ -28,31 +28,33 @@ HYPRE_BoomerAMGSetup_mp( HYPRE_Solver solver,
    hypre_ParVector *btemp = NULL;
    hypre_ParVector *xtemp = NULL;
 
-   HYPRE_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A),
+   HYPRE_ParVectorCreate_pre(hypre_ParCSRMatrixPrecision(A),
+                             hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A),
                              &btemp);
-   HYPRE_ParVectorInitialize_flt( btemp );
-   HYPRE_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A),
+   HYPRE_ParVectorInitialize_pre( hypre_ParCSRMatrixPrecision(A), btemp );
+   HYPRE_ParVectorCreate_pre(hypre_ParCSRMatrixPrecision(A),
+                             hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A),
                              &xtemp);
-   HYPRE_ParVectorInitialize_flt( xtemp );
+   HYPRE_ParVectorInitialize_pre( hypre_ParCSRMatrixPrecision(A), xtemp );
 
-   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from precision {b,x} to precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);
    HYPRE_ParVectorCopy_mp(x, xtemp);
 
    /* call setup */
-   HYPRE_BoomerAMGSetup_flt( solver, A, btemp, xtemp );
+   HYPRE_BoomerAMGSetup_pre( hypre_ParCSRMatrixPrecision(A), solver, A, btemp, xtemp );
 
-   /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
+   /* copy from precision {btemp,xtemp} to precision {b,x} */
    HYPRE_ParVectorCopy_mp(btemp, b);
    HYPRE_ParVectorCopy_mp(xtemp, x);
 
    /* free data */
-   HYPRE_ParVectorDestroy_flt(btemp);
-   HYPRE_ParVectorDestroy_flt(xtemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(btemp), btemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(xtemp), xtemp);
 
    return 0;
 
@@ -70,31 +72,33 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
    hypre_ParVector *btemp = NULL;
    hypre_ParVector *xtemp = NULL;
 
-   HYPRE_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A),
+   HYPRE_ParVectorCreate_pre(hypre_ParCSRMatrixPrecision(A),
+                             hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A),
                              &btemp);
-   HYPRE_ParVectorInitialize_flt( btemp );
-   HYPRE_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A),
+   HYPRE_ParVectorInitialize_pre( hypre_ParCSRMatrixPrecision(A), btemp );
+   HYPRE_ParVectorCreate_pre(hypre_ParCSRMatrixPrecision(A),
+                             hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
                              hypre_ParCSRMatrixRowStarts(A),
                              &xtemp);
-   HYPRE_ParVectorInitialize_flt( xtemp );
+   HYPRE_ParVectorInitialize_pre( hypre_ParCSRMatrixPrecision(A), xtemp );
 
-   /* copy from double-precision {b,x} to single precision {btemp,xtemp} */
+   /* copy from precision {b,x} to precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);
    HYPRE_ParVectorCopy_mp(x, xtemp);
 
    /* call setup */
-   HYPRE_BoomerAMGSolve_flt( solver, A, btemp, xtemp );
+   HYPRE_BoomerAMGSolve_pre( hypre_ParCSRMatrixPrecision(A), solver, A, btemp, xtemp );
 
    /* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_ParVectorCopy_mp(btemp, b);
    HYPRE_ParVectorCopy_mp(xtemp, x);
 
    /* free data */
-   HYPRE_ParVectorDestroy_flt(btemp);
-   HYPRE_ParVectorDestroy_flt(xtemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(btemp), btemp);
+   HYPRE_ParVectorDestroy_pre(hypre_ParVectorPrecision(xtemp), xtemp);
 
    return 0;
 }

@@ -78,10 +78,20 @@ set(REGULAR_SRCS
 
 # Mixed precision sources
 set(MUP_SRCS
+  HYPRE_struct_mv_mp.c
   mup_fixed.c
   mup_functions.c
   mup_pre.c
+  struct_mv_mp.c
 )
+
+if(HYPRE_USING_GPU)
+  list(APPEND MUP_SRCS
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
+  )
+endif()
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("struct_mv" SRCS "${REGULAR_SRCS}")
@@ -120,6 +130,9 @@ if (HYPRE_USING_GPU)
     struct_matrix.c
     struct_scale.c
     struct_vector.c
+    mup_fixed_gpu.c
+    mup_functions_gpu.c
+    mup_pre_gpu.c
   )
   mark_hypre_gpu_sources(${GPU_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)

@@ -177,10 +177,10 @@
 #undef hypre_ijvectorsetmaxoffprocelmt
 #undef hypre_ijvectorsetobjecttype
 #undef hypre_ijvectorsetvalues
-#undef hypreCUDAKernel_IJVectorUpdateValues
-#undef hypreGPUKernel_IJMatrixValues_dev1
-#undef hypreGPUKernel_IJVectorAssemblePar
 #undef hypre_AuxParCSRMatrixStackReallocate
+#undef hypre_GPUKernelIJMatrixValuesDev1
+#undef hypre_GPUKernelIJVectorAssemblePar
+#undef hypre_GPUKernelIJVectorUpdateValues
 #undef hypre_IJMatrixAssembleCommunicate
 #undef hypre_IJMatrixAssembleCompressDevice
 #undef hypre_IJMatrixAssembleParCSRDevice

@@ -80,9 +80,7 @@ HYPRE_UNIT_TESTS =\
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
  test_mp.c\
- test_mp_pcg.c\
- test_mp_pcg_3d.c\
-# struct_mp.c\
+ struct_mp.c\
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\

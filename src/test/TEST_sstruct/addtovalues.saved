@@ -30,3 +30,35 @@ Final Relative Residual Norm = 8.778287e-07
 Iterations = 44
 Final Relative Residual Norm = 8.778287e-07
 
+# Output file: addtovalues.out.8
+Iterations = 8
+Final Relative Residual Norm = 9.531730e-07
+
+# Output file: addtovalues.out.9
+Iterations = 8
+Final Relative Residual Norm = 9.531730e-07
+
+# Output file: addtovalues.out.10
+Iterations = 34
+Final Relative Residual Norm = 5.437407e-07
+
+# Output file: addtovalues.out.11
+Iterations = 34
+Final Relative Residual Norm = 5.437407e-07
+
+# Output file: addtovalues.out.12
+Iterations = 9
+Final Relative Residual Norm = 4.767660e-07
+
+# Output file: addtovalues.out.13
+Iterations = 9
+Final Relative Residual Norm = 4.767660e-07
+
+# Output file: addtovalues.out.14
+Iterations = 44
+Final Relative Residual Norm = 8.778287e-07
+
+# Output file: addtovalues.out.15
+Iterations = 44
+Final Relative Residual Norm = 8.778287e-07
+
