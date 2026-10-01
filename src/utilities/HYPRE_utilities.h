@@ -660,6 +660,52 @@ HYPRE_Int HYPRE_SetSpTransUseVendor(HYPRE_Int use_vendor);
 HYPRE_Int HYPRE_SetSpMVUseVendor(HYPRE_Int use_vendor);
 
 /**
+ * Selects the vendor algorithm used for device sparse matrix/vector
+ * multiplication.
+ *
+ * @warning The value of @p algorithm is a raw, backend-specific vendor enum
+ * value, not a portable hypre algorithm identifier. Its interpretation depends
+ * on the vendor sparse library selected when hypre was compiled. In particular,
+ * the same integer can select different algorithms in cuSPARSE and rocSPARSE.
+ * Applications that must run with multiple GPU backends should select the value
+ * conditionally for each backend.
+ *
+ * For CUDA Toolkit 11.0 and newer builds, @p algorithm is interpreted as a raw
+ * @c cusparseSpMVAlg_t value from the cuSPARSE generic API. Since hypre matrices
+ * use CSR storage, the accepted values are:
+ *
+ *    - 0: @c CUSPARSE_SPMV_ALG_DEFAULT
+ *    - 2: @c CUSPARSE_SPMV_CSR_ALG1
+ *    - 3: @c CUSPARSE_SPMV_CSR_ALG2
+ *
+ * cuSPARSE 11.0 through 11.4.0 headers use the older names
+ * @c CUSPARSE_MV_ALG_DEFAULT, @c CUSPARSE_CSRMV_ALG1, and
+ * @c CUSPARSE_CSRMV_ALG2 for the same raw values.
+ *
+ * If this routine is not called, hypre uses
+ * @c CUSPARSE_SPMV_CSR_ALG2 to preserve deterministic CUDA SpMV results.
+ * CUDA builds using the legacy cuSPARSE SpMV API accept only 0.
+ *
+ * For HIP builds, @p algorithm is interpreted as a
+ * @c rocsparse_spmv_alg value. The CSR algorithms accepted when provided by the
+ * compiled rocSPARSE version are:
+ *
+ *    - 0: @c rocsparse_spmv_alg_default
+ *    - 2: @c rocsparse_spmv_alg_csr_adaptive
+ *    - 3: @c rocsparse_spmv_alg_csr_rowsplit, or its former name
+ *         @c rocsparse_spmv_alg_csr_stream
+ *    - 7: @c rocsparse_spmv_alg_csr_lrb
+ *    - 8: @c rocsparse_spmv_alg_csr_nnzsplit
+ *
+ * oneMKL builds accept only 0. This setting applies to SpMV with a single
+ * vector; vendor SpMM algorithm selection for multivectors is separate.
+ *
+ * @param algorithm Raw algorithm enum value for the configured vendor backend.
+ * @return hypre global error code (0 = success)
+ */
+HYPRE_Int HYPRE_SetSpMVAlgorithm(HYPRE_Int algorithm);
+
+/**
  * Specifies the algorithm used for sparse matrix/matrix multiplication in device builds.
  *
  * The following options are available for \e use_vendor:

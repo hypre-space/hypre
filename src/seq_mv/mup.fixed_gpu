@@ -68,6 +68,8 @@ hypre_GPUKernelCSRMoveDiagFirst
 hypre_GPUMatDataSetCSRData
 hypre_GpuMatDataCreate
 hypre_GpuMatDataDestroy
+hypre_GpuMatDataInvalidateSpMVCache
+hypre_GpuVecDataDestroy
 hypre_SeqVectorAxpyDevice
 hypre_SeqVectorAxpyzDevice
 hypre_SeqVectorInnerProdDevice
