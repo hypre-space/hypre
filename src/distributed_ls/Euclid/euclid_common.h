@@ -14,22 +14,6 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-
-/* thread-local storage: see HYPRE_utilities.h */
-#if !defined(HYPRE_THREAD_LOCAL)
-#if defined(__cplusplus)
-#define HYPRE_THREAD_LOCAL thread_local
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-#define HYPRE_THREAD_LOCAL _Thread_local
-#elif defined(__GNUC__) || defined(__clang__)
-#define HYPRE_THREAD_LOCAL __thread
-#elif defined(_MSC_VER)
-#define HYPRE_THREAD_LOCAL __declspec(thread)
-#else
-#define HYPRE_THREAD_LOCAL
-#endif
-#endif
-
 #include <stdarg.h>
 
 #define REAL_DH HYPRE_Real
