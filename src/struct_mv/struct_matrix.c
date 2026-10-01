@@ -119,6 +119,44 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * Routines for syncing constant data between host and device
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToDevice( hypre_StructMatrix *matrix )
+{
+   /* This does nothing when the exec policy is host */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TMemcpy(hypre_StructMatrixData(matrix), hypre_StructMatrixConstHData(matrix),
+                    HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix),
+                    hypre_StructMatrixMemoryLocation(matrix), HYPRE_MEMORY_HOST);
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+/*----------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost( hypre_StructMatrix *matrix )
+{
+   /* This does nothing when the exec policy is host */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TMemcpy(hypre_StructMatrixConstHData(matrix), hypre_StructMatrixData(matrix),
+                    HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix),
+                    HYPRE_MEMORY_HOST, hypre_StructMatrixMemoryLocation(matrix));
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Determine where the stencil center is located (on the stencil index space),
  * given a stencil entry and a data index.
  *--------------------------------------------------------------------------*/
@@ -590,6 +628,13 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          hypre_StructGridDestroy(hypre_StructMatrixGrid(matrix));
          hypre_StructMatrixForget(matrix);
 
+#if defined(HYPRE_USING_GPU)
+         if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+         {
+            hypre_TFree(hypre_StructMatrixConstHData(matrix), HYPRE_MEMORY_HOST);
+         }
+#endif
+
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
@@ -927,6 +972,12 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    }
 
    hypre_StructMatrixData(matrix)         = data;
+#if defined(HYPRE_USING_GPU)
+   if ( !(hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE) )
+   {
+      hypre_StructMatrixConstHData(matrix) = data;
+   }
+#endif
    hypre_StructMatrixDataSpace(matrix)    = data_space;
    hypre_StructMatrixDataSize(matrix)     = data_size;
    hypre_StructMatrixDataIndices(matrix)  = data_indices;
@@ -1287,6 +1338,15 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
       hypre_StructMatrixDataAlloced(matrix) = 0;
    }
    hypre_StructMatrixData(matrix) = data;
+   hypre_StructMatrixConstHData(matrix) = data;
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_StructMatrixGetExecPolicy1(matrix) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_StructMatrixConstHData(matrix) =
+         hypre_TAlloc(HYPRE_Complex, hypre_StructMatrixVDataOffset(matrix), HYPRE_MEMORY_HOST);
+   }
+#endif
 
    return hypre_error_flag;
 }
@@ -2888,6 +2948,51 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 }
 
 /*--------------------------------------------------------------------------
+ * Return a copy of A.  Everything is copied except for comm_pkg.
+ *--------------------------------------------------------------------------*/
+
+#if 0  // RDF write this
+hypre_StructMatrix *
+hypre_StructMatrixClone( hypre_StructMatrix *A )
+{
+   MPI_Comm              comm            = hypre_StructMatrixComm(x);
+   hypre_StructGrid     *grid            = hypre_StructMatrixGrid(x);
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(x);
+   hypre_BoxArray       *data_space      = hypre_StructMatrixDataSpace(x);
+   HYPRE_Int            *data_indices    = hypre_StructMatrixDataIndices(x);
+   HYPRE_Int             data_size       = hypre_StructMatrixDataSize(x);
+   HYPRE_Int             ndim            = hypre_StructGridNDim(grid);
+   HYPRE_Int             data_space_size = hypre_BoxArraySize(data_space);
+
+   hypre_StructMatrix   *Acopy;
+   HYPRE_Int             i;
+
+   A = hypre_StructMatrixCreate(comm, grid, stencil);
+
+   hypre_StructMatrixDataSize(y)    = data_size;
+   hypre_StructMatrixDataSpace(y)   = hypre_BoxArrayClone(data_space);
+   hypre_StructMatrixDataAlloced(y) = 1;
+   hypre_StructMatrixData(y)        = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
+   hypre_StructMatrixDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size,
+                                                    HYPRE_MEMORY_HOST);
+   for (i = 0; i < data_space_size; i++)
+   {
+      hypre_StructMatrixDataIndices(y)[i] = data_indices[i];
+   }
+   hypre_StructCopy(x, y);
+
+   for (i = 0; i < 2 * ndim; i++)
+   {
+      hypre_StructMatrixNumGhost(y)[i] = hypre_StructMatrixNumGhost(x)[i];
+   }
+   hypre_StructMatrixBGhostNotClear(y) = hypre_StructMatrixBGhostNotClear(x);
+   hypre_StructMatrixGlobalSize(y)     = hypre_StructMatrixGlobalSize(x);
+
+   return y;
+}
+#endif
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3096,4 +3201,36 @@ hypre_StructMatrixGetDiagonal( hypre_StructMatrix  *matrix,
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return a constant-coefficient diagonal matrix D = value I
+ *
+ * NOTE: The 'value' argument is assumed to live on the host
+ *--------------------------------------------------------------------------*/
+
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
+                            HYPRE_Complex      value )
+{
+   hypre_StructMatrix   *D;
+   hypre_StructStencil  *stencil;
+   hypre_Index           offset;
+   HYPRE_Int             stencil_index = 0;
+
+   hypre_SetIndex(offset, 0);
+   HYPRE_StructStencilCreate(hypre_StructGridNDim(grid), 1, &stencil);
+   HYPRE_StructStencilSetEntry(stencil, 0, offset);
+
+   HYPRE_StructMatrixCreate(hypre_StructGridComm(grid), grid, stencil, &D);
+   HYPRE_StructMatrixSetConstantEntries(D, 1, &stencil_index);
+   HYPRE_StructMatrixInitialize(D);
+   /* 'value' is on the host */
+   *hypre_StructMatrixConstDataHost(D, stencil_index) = value;
+   hypre_StructMatrixSyncConstToDevice(D);
+   HYPRE_StructMatrixAssemble(D);
+
+   HYPRE_StructStencilDestroy(stencil);
+
+   return D;
 }

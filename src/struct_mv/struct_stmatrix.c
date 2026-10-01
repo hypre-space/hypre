@@ -804,3 +804,87 @@ hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
 
    return ncoeffs;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixNCoeffs( hypre_StMatrix *matrix )
+{
+   HYPRE_Int ncoeffs = 0;
+   HYPRE_Int entry;
+
+   for (entry = 0; entry < hypre_StMatrixSize(matrix); entry++)
+   {
+      ncoeffs += hypre_StMatrixNEntryCoeffs(matrix, entry);
+   }
+
+   return ncoeffs;
+}
+
+/*--------------------------------------------------------------------------
+ * Routines based on hypre stencils
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ * Create an StMatrix from a Stencil
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixCreateFromStencil( hypre_StructStencil  *stencil,
+                                 hypre_Index           ran_stride,
+                                 hypre_Index           dom_stride,
+                                 HYPRE_Int             id,
+                                 hypre_StMatrix      **matrix_ptr )
+{
+   HYPRE_Int        size = hypre_StructStencilSize(stencil);
+   HYPRE_Int        ndim = hypre_StructStencilNDim(stencil);
+   hypre_StMatrix  *matrix;
+   hypre_StCoeff   *coeff;
+   hypre_StTerm    *term;
+   HYPRE_Int        e;
+
+   hypre_StMatrixCreate(id, size, ndim, &matrix);
+   hypre_StIndexCopy(ran_stride, hypre_StMatrixRMap(matrix), ndim);
+   hypre_StIndexCopy(dom_stride, hypre_StMatrixDMap(matrix), ndim);
+   for (e = 0; e < size; e++)
+   {
+      hypre_StIndexCopy(hypre_StructStencilOffset(stencil, e),
+                        hypre_StMatrixOffset(matrix, e), ndim);
+      hypre_StCoeffCreate(1, &coeff);
+      term = hypre_StCoeffTerm(coeff, 0);
+      hypre_StTermID(term) = id;
+      hypre_StTermEntry(term) = e;
+      hypre_StMatrixCoeff(matrix, e) = coeff;
+   }
+
+   *matrix_ptr = matrix;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return the stencil for an StMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixGetStencil( hypre_StMatrix       *matrix,
+                          HYPRE_Int             ndim,
+                          hypre_StructStencil **stencil_ptr )
+{
+   HYPRE_Int             size = hypre_StMatrixSize(matrix);
+   hypre_StructStencil  *stencil;
+   hypre_Index           offset;
+   HYPRE_Int             entry;
+
+   HYPRE_StructStencilCreate(ndim, size, &stencil);
+   for (entry = 0; entry < size; entry++)
+   {
+      hypre_StIndexCopy(hypre_StMatrixOffset(matrix, entry), offset, ndim);
+      HYPRE_StructStencilSetEntry(stencil, entry, offset);
+   }
+
+   *stencil_ptr = stencil;
+
+   return hypre_error_flag;
+}
