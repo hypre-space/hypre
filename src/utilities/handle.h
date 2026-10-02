@@ -159,5 +159,5 @@ typedef struct
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
-extern hypre_Handle *_hypre_handle;
+extern HYPRE_THREAD_LOCAL hypre_Handle *_hypre_handle;
 #endif
