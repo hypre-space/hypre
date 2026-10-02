@@ -6432,6 +6432,78 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker, HYPRE_Int
 
 /*--------------------------------------------------------------------------*/
 
+void *
+hypre_MGRPCDCreate( void )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDCreate)( );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDDestroy( void *pcd_vdata )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDDestroy)( pcd_vdata );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetApSolver( void *mgr_vdata, HYPRE_Solver ap_solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetApSolver)( mgr_vdata, ap_solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetApplyOrder( void *mgr_vdata, HYPRE_Int apply_order )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetApplyOrder)( mgr_vdata, apply_order );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetMassInvType( void *mgr_vdata, HYPRE_Int mass_inv_type )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetMassInvType)( mgr_vdata, mass_inv_type );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetMpSolver( void *mgr_vdata, HYPRE_Solver mp_solver )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetMpSolver)( mgr_vdata, mp_solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetOperators( void *mgr_vdata, hypre_ParCSRMatrix *Fp, hypre_ParCSRMatrix *Ap, hypre_ParCSRMatrix *Mp )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetOperators)( mgr_vdata, Fp, Ap, Mp );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSetup( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSetup)( pcd_vdata, A, f, u );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRPCDSolve( void *pcd_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_MGRPCDSolve)( pcd_vdata, A, f, u );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata )
 {
