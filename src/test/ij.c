@@ -64,7 +64,7 @@ HYPRE_Int BuildParDifConv (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_I
                            HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParFromOneMMFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], 
+HYPRE_Int BuildParFromOneMMFile (MPI_Comm comm, HYPRE_Int argc, char *argv [],
                                  HYPRE_Int arg_index, HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
@@ -11190,15 +11190,15 @@ BuildParFromOneFile( MPI_Comm             comm,
 }
 
 /*----------------------------------------------------------------------
- * Build matrix from one Matrix Market file on Proc. 0. Distributes 
+ * Build matrix from one Matrix Market file on Proc. 0. Distributes
  * matrix across processors giving each about the same number of rows.
  * Parameters given in command line.
  *----------------------------------------------------------------------*/
 
-HYPRE_Int BuildParFromOneMMFile( MPI_Comm comm, 
-                                 HYPRE_Int argc, 
-                                 char *argv [], 
-                                 HYPRE_Int arg_index, 
+HYPRE_Int BuildParFromOneMMFile( MPI_Comm comm,
+                                 HYPRE_Int argc,
+                                 char *argv [],
+                                 HYPRE_Int arg_index,
                                  HYPRE_ParCSRMatrix *A_ptr )
 {
    char               *filename;
@@ -11241,12 +11241,16 @@ HYPRE_Int BuildParFromOneMMFile( MPI_Comm comm,
        *-----------------------------------------------------------*/
 
       void *par_A_self;
-      
-      HYPRE_IJMatrixReadMM(filename, hypre_MPI_COMM_SELF, HYPRE_PARCSR, &ij_A_self);
+
+      if (HYPRE_IJMatrixReadMM(filename, hypre_MPI_COMM_SELF, HYPRE_PARCSR, &ij_A_self))
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
       HYPRE_IJMatrixGetObject(ij_A_self, &par_A_self);
       A_CSR = hypre_ParCSRMatrixDiag((hypre_ParCSRMatrix *)par_A_self);
    }
-   
+
    /*-----------------------------------------------------------
     * Partition the matrix
     *-----------------------------------------------------------*/
@@ -11258,7 +11262,7 @@ HYPRE_Int BuildParFromOneMMFile( MPI_Comm comm,
       HYPRE_IJMatrixDestroy(ij_A_self);
    }
 
-   return (0);   
+   return (0);
 }
 
 /*----------------------------------------------------------------------

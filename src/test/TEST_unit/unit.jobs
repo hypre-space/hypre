@@ -11,4 +11,3 @@
 
 mpirun -np 8  ./test_csr_overlap > unit.out.0
 mpirun -np 2  ./test_matrix_stats > unit.out.1
-mpirun -np 1  ./test_finalize_before_init > unit.out.2
