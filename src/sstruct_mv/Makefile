@@ -43,7 +43,6 @@ FILES =\
  sstruct_copy.c\
  sstruct_graph.c\
  sstruct_innerprod.c\
- sstruct_matvec.c\
  sstruct_matmult.c\
  sstruct_matop.c\
  sstruct_scale.c\
@@ -52,6 +51,7 @@ FILES =\
 CUFILES =\
  sstruct_grid.c\
  sstruct_matrix.c\
+ sstruct_matvec.c\
  sstruct_vector.c
 
 # Mixed precision files
