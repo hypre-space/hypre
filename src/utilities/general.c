@@ -484,8 +484,8 @@ HYPRE_Initialize(void)
 HYPRE_Int
 HYPRE_Finalize(void)
 {
-   /* Return if the hypre library has already been finalized */
-   if (hypre_Finalized())
+   /* Return if the hypre library has already been finalized or was never initialized */
+   if (hypre_Finalized() || !_hypre_handle)
    {
       return hypre_error_flag;
    }

@@ -301,11 +301,12 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* r = b - Ax */
    (*(cgnr_functions->CopyVector))(b, r);
    (*(cgnr_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+   i_prod = (*(cgnr_functions->InnerProd))(r, r);
 
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = hypre_sqrt((*(cgnr_functions->InnerProd))(r, r));
+      norms[0] = hypre_sqrt(i_prod);
 
       /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
@@ -405,7 +406,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
          if (logging > 1 && my_id == 0)
          {
             hypre_printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i] /
-                         norms[i - 1], norms[i] / bi_prod);
+                         norms[i - 1], norms[i] / hypre_sqrt(bi_prod));
          }
       }
 
@@ -450,16 +451,20 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /*-----------------------------------------------------------------------
     * Print log
     *-----------------------------------------------------------------------*/
-
-   bi_prod = hypre_sqrt(bi_prod);
-
    if (logging > 1 && my_id == 0)
    {
       hypre_printf("\n\n");
    }
 
    (cgnr_data -> num_iterations) = i;
-   (cgnr_data -> rel_residual_norm) = norms[i] / bi_prod;
+   if (bi_prod > 0.0)
+   {
+      (cgnr_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
+   }
+   else /* actually, we'll never get here... */
+   {
+      (cgnr_data -> rel_residual_norm) = 0.0;
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 

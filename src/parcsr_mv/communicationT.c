@@ -152,6 +152,8 @@ hypre_MatTCommPkgCreate_core (
 )
 {
    HYPRE_UNUSED_VAR(data);
+   HYPRE_UNUSED_VAR(col_starts);
+   HYPRE_UNUSED_VAR(row_starts);
 
    HYPRE_Int         num_sends;
    HYPRE_Int         *send_procs;
@@ -234,7 +236,7 @@ hypre_MatTCommPkgCreate_core (
    */
 
    num_recvs = num_procs - 1;
-   local_info = num_procs + num_cols_offd + num_cols_diag;
+   local_info = 1 + num_cols_offd + num_cols_diag;
 
    hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
 
@@ -253,25 +255,16 @@ hypre_MatTCommPkgCreate_core (
    recv_buf = hypre_CTAlloc(HYPRE_BigInt,  displs[num_procs], HYPRE_MEMORY_HOST);
    tmp = hypre_CTAlloc(HYPRE_BigInt,  local_info, HYPRE_MEMORY_HOST);
 
+   /* The global partition is not available, so send all my columns as one group */
    j = 0;
-   for (i = 0; i < num_procs; i++)
+   tmp[j++] = (HYPRE_BigInt) (num_cols_offd + num_cols_diag);
+   for (k = 0; k < num_cols_offd; k++)
    {
-      j2 = j++;
-      tmp[j2] = 0;
-      for (k = 0; k < num_cols_offd; k++)
-         if (col_map_offd[k] >= col_starts[i] &&
-             col_map_offd[k] < col_starts[i + 1])
-         {
-            tmp[j++] = col_map_offd[k];
-            ++(tmp[j2]);
-         };
-      for (k = 0; k < num_cols_diag; k++)
-         if ( (HYPRE_BigInt)k + first_col_diag >= col_starts[i] &&
-              (HYPRE_BigInt)k + first_col_diag < col_starts[i + 1] )
-         {
-            tmp[j++] = (HYPRE_BigInt)k + first_col_diag;
-            ++(tmp[j2]);
-         }
+      tmp[j++] = col_map_offd[k];
+   }
+   for (k = 0; k < num_cols_diag; k++)
+   {
+      tmp[j++] = (HYPRE_BigInt)k + first_col_diag;
    }
 
    hypre_MPI_Allgatherv(tmp, local_info, HYPRE_MPI_BIG_INT,
@@ -360,9 +353,9 @@ hypre_MatTCommPkgCreate_core (
                            }
                         }
             */
-            for ( kc = row_starts[my_id]; kc < row_starts[my_id + 1]; kc++ )
+            if ( col >= first_col_diag && col < first_col_diag + num_cols_diag )
             {
-               if ( kc == col && i != my_id )
+               if ( i != my_id )
                {
                   /* this processor has the same column as proc. i (but is different) */
                   pmatch = 1;
