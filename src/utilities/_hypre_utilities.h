@@ -252,7 +252,7 @@ typedef struct
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
-extern hypre_Handle *_hypre_handle;
+extern HYPRE_THREAD_LOCAL hypre_Handle *_hypre_handle;
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
@@ -275,7 +275,7 @@ typedef enum hypre_State_enum
    HYPRE_STATE_FINALIZED   = 2
 } hypre_State;
 
-extern hypre_State hypre__global_state;
+extern HYPRE_THREAD_LOCAL hypre_State hypre__global_state;
 
 #endif /* hypre_STATE_HEADER */
 /******************************************************************************
@@ -738,7 +738,7 @@ typedef struct
 
 } hypre_Error;
 
-extern hypre_Error hypre__global_error;
+extern HYPRE_THREAD_LOCAL hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
 #define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
@@ -932,10 +932,11 @@ typedef struct
 {
    HYPRE_Int hypre_MPI_SOURCE;
    HYPRE_Int hypre_MPI_TAG;
+   HYPRE_Int hypre_MPI_COUNT;
 } hypre_MPI_Status;
 
 typedef HYPRE_Int  hypre_MPI_Op;
-typedef HYPRE_Int  hypre_MPI_Aint;
+typedef intptr_t   hypre_MPI_Aint;
 typedef HYPRE_Int  hypre_MPI_Info;
 
 #define  hypre_MPI_COMM_SELF   1
@@ -969,8 +970,8 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
 #define  hypre_MPI_INFO_NULL     0
-#define  hypre_MPI_ANY_SOURCE    1
-#define  hypre_MPI_ANY_TAG       1
+#define  hypre_MPI_ANY_SOURCE    (-1)
+#define  hypre_MPI_ANY_TAG       (-2)
 
 #else
 
@@ -1778,7 +1779,7 @@ typedef struct
 
 } hypre_TimingType;
 
-extern hypre_TimingType *hypre_global_timing;
+extern HYPRE_THREAD_LOCAL hypre_TimingType *hypre_global_timing;
 
 /*-------------------------------------------------------
  * Accessor functions

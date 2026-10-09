@@ -35,7 +35,7 @@ typedef struct
 
 } hypre_Error;
 
-extern hypre_Error hypre__global_error;
+extern HYPRE_THREAD_LOCAL hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
 #define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
