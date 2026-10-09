@@ -210,13 +210,14 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
-   /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
+   /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI.
+      This is also needed without THRUST_NOSYNC: with nothing to send, the gather above
+      returns without synchronizing the stream, and the receive into x_tmp_data could then
+      overwrite it while the previous call's offd matvec is still reading it. */
    if (hypre_GetGpuAwareMPI())
    {
       hypre_ForceSyncComputeStream();
    }
-#endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
    hypre_CSRMatrixMatvecOutOfPlace(alpha, diag, x_local, beta, b_local, y_local, 0);
