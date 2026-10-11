@@ -1231,6 +1231,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
  * JSP: to allow communication overlapping, it returns comm_handle_idx and
  * comm_handle_data. Before accessing B, they should be destroyed (including
  * send_data contained in the comm_handle).
+ *
+ * TODO (VPM): revisit HYPRE_Complex implementation (diag_data and offd_data)
  *--------------------------------------------------------------------------*/
 
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
@@ -1679,8 +1681,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int * offd_i,
    HYPRE_Int * offd_j,
    HYPRE_BigInt * col_map_offd,
-   HYPRE_Real * diag_data,
-   HYPRE_Real * offd_data
+   HYPRE_Complex * diag_data,
+   HYPRE_Complex * offd_data
 )
 {
    hypre_ParCSRCommHandle *comm_handle_idx, *comm_handle_data;
@@ -1700,7 +1702,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
 
    if (data)
    {
-      HYPRE_Real *send_data = (HYPRE_Real *)comm_handle_data->send_data;
+      HYPRE_Complex *send_data = (HYPRE_Complex *)comm_handle_data->send_data;
       hypre_ParCSRCommHandleDestroy(comm_handle_data);
       hypre_TFree(send_data, HYPRE_MEMORY_HOST);
    }
@@ -1737,13 +1739,13 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
 
    HYPRE_Int *diag_i = hypre_CSRMatrixI(diag);
    HYPRE_Int *diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Real *diag_data = hypre_CSRMatrixData(diag);
+   HYPRE_Complex *diag_data = hypre_CSRMatrixData(diag);
 
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(B);
 
    HYPRE_Int *offd_i = hypre_CSRMatrixI(offd);
    HYPRE_Int *offd_j = hypre_CSRMatrixJ(offd);
-   HYPRE_Real *offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Complex *offd_data = hypre_CSRMatrixData(offd);
 
    HYPRE_BigInt num_cols_B;
    HYPRE_Int num_rows_B_ext, num_nonzeros;
@@ -1815,7 +1817,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
 
    if (want_data)
    {
-      HYPRE_Real *send_data = (HYPRE_Real *)comm_handle_data->send_data;
+      HYPRE_Complex *send_data = (HYPRE_Complex *)comm_handle_data->send_data;
       hypre_ParCSRCommHandleDestroy(comm_handle_data);
       hypre_TFree(send_data, HYPRE_MEMORY_HOST);
    }
@@ -4926,13 +4928,13 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
 
    /* diag part of A */
    hypre_CSRMatrix         *A_diag    = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real              *A_diag_a  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Complex              *A_diag_a  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               *A_diag_i  = hypre_CSRMatrixI(A_diag);
    HYPRE_Int               *A_diag_j  = hypre_CSRMatrixJ(A_diag);
 
    /* off-diag part of A */
    hypre_CSRMatrix         *A_offd    = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Real              *A_offd_a  = hypre_CSRMatrixData(A_offd);
+   HYPRE_Complex              *A_offd_a  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int               *A_offd_i  = hypre_CSRMatrixI(A_offd);
    HYPRE_Int               *A_offd_j  = hypre_CSRMatrixJ(A_offd);
 
@@ -6041,12 +6043,12 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
    /* off-diag part of A */
    hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Real      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
@@ -6078,7 +6080,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
          }
          else if (type == 2)
          {
-            row_nrm += v * v;
+            row_nrm += hypre_cabs(v) * hypre_cabs(v);
          }
          else
          {
@@ -6096,7 +6098,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
             }
             else if (type == 2)
             {
-               row_nrm += v * v;
+               row_nrm += hypre_cabs(v) * hypre_cabs(v);
             }
             else
             {

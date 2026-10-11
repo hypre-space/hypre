@@ -65,6 +65,8 @@ additional user input:
 #. Vectors :math:`x`, :math:`y`, and :math:`z` representing the coordinates of
    the vertices of the mesh.
 
+When debugging an implementation, it might be useful to note that by construction,
+:math:`CG`, the product of the discrete curl and gradient matrices is the zero matrix.
 Internally, ADS proceeds with the construction of the following additional objects:
 
 * :math:`A_C` -- the curl-curl matrix :math:`C^{\,T} {\mathbf A} C`.

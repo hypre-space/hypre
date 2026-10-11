@@ -210,13 +210,18 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
-   /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
+   /* Finish packing x_buf_data and reading the reused x_tmp_data before GPU-aware MPI.
+      A nonempty synchronous CUDA/HIP Thrust gather already synchronizes the stream;
+      an empty gather needs an explicit sync only when receiving into x_tmp_data. */
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)) && \
+    !defined(HYPRE_USING_THRUST_NOSYNC)
+   if (hypre_GetGpuAwareMPI() && send_map_num_elmts == 0 && num_recvs > 0)
+#else
    if (hypre_GetGpuAwareMPI())
+#endif
    {
       hypre_ForceSyncComputeStream();
    }
-#endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
    hypre_CSRMatrixMatvecOutOfPlace(alpha, diag, x_local, beta, b_local, y_local, 0);

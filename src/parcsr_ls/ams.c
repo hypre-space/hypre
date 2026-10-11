@@ -2957,7 +2957,7 @@ hypre_AMSSetup(void *solver,
       ams_data -> solve_counter = 0;
 
       /* Construct the discrete gradient matrix for the zero-conductivity region
-         by eliminating the zero-conductivity nodes from G^t. The range of G0
+         by eliminating the non-zero-conductivity nodes from G^t. The range of G0
          represents the kernel of A, i.e. the gradients of nodal basis functions
          supported in zero-conductivity regions. */
       hypre_ParCSRMatrixTranspose(ams_data -> G, &G0t, 1);

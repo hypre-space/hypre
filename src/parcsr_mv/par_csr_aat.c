@@ -379,33 +379,29 @@ hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
    HYPRE_Int        jj_row_begin_diag, jj_row_begin_offd;
    HYPRE_Int        start_indexing = 0; /* start indexing for C_data at 0 */
    HYPRE_Int        count;
-   HYPRE_BigInt     n_rows_A, n_cols_A;
+   HYPRE_BigInt     n_rows_A;
+   HYPRE_Int        num_procs;
 
    HYPRE_Complex    a_entry;
    HYPRE_Complex    a_b_product;
 
    HYPRE_Complex    zero = 0.0;
 
+   hypre_MPI_Comm_size(comm, &num_procs);
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
-   n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
 
-   if (n_cols_A != n_rows_A)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Error! Incompatible matrix dimensions!\n");
-      return NULL;
-   }
    /*-----------------------------------------------------------------------
     *  Extract A_ext, i.e. portion of A that is stored on neighbor procs
     *  and needed locally for A^T in the matrix matrix product A*A^T
     *-----------------------------------------------------------------------*/
 
-   if ((HYPRE_BigInt)num_rows_diag_A != n_rows_A)
+   if (num_procs > 1)
    {
       /*---------------------------------------------------------------------
        * If there exists no CommPkg for A, a CommPkg is generated using
        * equally load balanced partitionings
        *--------------------------------------------------------------------*/
-      if (!hypre_ParCSRMatrixCommPkg(A))
+      if (!hypre_ParCSRMatrixCommPkgT(A))
       {
          hypre_MatTCommPkgCreate(A);
       }
@@ -852,13 +848,10 @@ hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
     *  Free B_ext and marker array.
     *-----------------------------------------------------------------------*/
 
-   if (num_cols_offd_A)
-   {
-      hypre_CSRMatrixDestroy(A_ext);
-      A_ext = NULL;
-   }
+   hypre_CSRMatrixDestroy(A_ext);
+   A_ext = NULL;
    hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
-   if ( num_rows_diag_A != n_rows_A )
+   if (num_procs > 1)
    {
       hypre_TFree(A_ext_row_map, HYPRE_MEMORY_HOST);
    }
