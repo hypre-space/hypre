@@ -997,7 +997,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap ( HYPRE_Int **pB_ext_i, HYPRE_
                                                     HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts,
                                                     HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                                     HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j,
-                                                    HYPRE_BigInt *col_map_offd, HYPRE_Complex *diag_data, HYPRE_Complex *offd_data,
+                                                    HYPRE_BigInt *col_map_offd, HYPRE_Real *diag_data, HYPRE_Real *offd_data,
                                                     hypre_ParCSRCommHandle **comm_handle_idx, hypre_ParCSRCommHandle **comm_handle_data,
                                                     HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int skip_fine, HYPRE_Int skip_same_sign );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt ( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A,
