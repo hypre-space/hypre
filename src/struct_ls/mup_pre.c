@@ -1816,6 +1816,312 @@ HYPRE_StructLGMRESSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solve
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatPrecCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver_ptr )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecCreate_flt( comm, solver_ptr );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecCreate_dbl( comm, solver_ptr );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecCreate_long_dbl( comm, solver_ptr );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solver )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecDestroy_flt( solver );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecDestroy_dbl( solver );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecDestroy_long_dbl( solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetFinalRelativeResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *logging )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetLogging_flt( solver, logging );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetLogging_dbl( solver, logging );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetLogging_long_dbl( solver, logging );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *max_iter )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetMaxIter_flt( solver, max_iter );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetMaxIter_dbl( solver, max_iter );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetMaxIter_long_dbl( solver, max_iter );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetNumIterations_flt( solver, num_iterations );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetNumIterations_dbl( solver, num_iterations );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetNumIterations_long_dbl( solver, num_iterations );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *tol )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetTol_flt( solver, (hypre_float *)tol );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetTol_dbl( solver, (hypre_double *)tol );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetTol_long_dbl( solver, (hypre_long_double *)tol );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *zero_guess )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecGetZeroGuess_flt( solver, zero_guess );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecGetZeroGuess_dbl( solver, zero_guess );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecGetZeroGuess_long_dbl( solver, zero_guess );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetChebyshev_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int steps )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetChebyshev_flt( solver, steps );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetChebyshev_dbl( solver, steps );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetChebyshev_long_dbl( solver, steps );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetJacobi_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int steps, hypre_long_double weight )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetJacobi_flt( solver, steps, (hypre_float)weight );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetJacobi_dbl( solver, steps, (hypre_double)weight );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetJacobi_long_dbl( solver, steps, (hypre_long_double)weight );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetLogging_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int logging )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetLogging_flt( solver, logging );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetLogging_dbl( solver, logging );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetLogging_long_dbl( solver, logging );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetMaxIter_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int max_iter )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetMaxIter_flt( solver, max_iter );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetMaxIter_dbl( solver, max_iter );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetMaxIter_long_dbl( solver, max_iter );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetNonZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetNonZeroGuess_flt( solver );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetNonZeroGuess_dbl( solver );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetNonZeroGuess_long_dbl( solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetTol_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, hypre_long_double tol )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetTol_flt( solver, (hypre_float)tol );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetTol_dbl( solver, (hypre_double)tol );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetTol_long_dbl( solver, (hypre_long_double)tol );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetZeroGuess_pre( HYPRE_Precision precision, HYPRE_StructSolver solver )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetZeroGuess_flt( solver );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetZeroGuess_dbl( solver );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetZeroGuess_long_dbl( solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetup_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_StructMatrix A, HYPRE_StructVector b, HYPRE_StructVector x )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSetup_flt( solver, A, b, x );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSetup_dbl( solver, A, b, x );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSetup_long_dbl( solver, A, b, x );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSolve_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_StructMatrix A, HYPRE_StructVector b, HYPRE_StructVector x )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_StructMatPrecSolve_flt( solver, A, b, x );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_StructMatPrecSolve_dbl( solver, A, b, x );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_StructMatPrecSolve_long_dbl( solver, A, b, x );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructPCGCreate_pre( HYPRE_Precision precision, MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    switch (precision)

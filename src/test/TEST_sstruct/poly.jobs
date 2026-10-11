@@ -1,0 +1,16 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+# Compare MatPrec-Jacobi PCG to Jacobi PCG
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 216 -mpsteps 1 > poly.out.1m
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 217 -jpsteps 1 > poly.out.1j
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 216 -mpsteps 2 > poly.out.2m
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 217 -jpsteps 2 > poly.out.2j
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 216 -mpsteps 3 > poly.out.3m
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 217 -jpsteps 3 > poly.out.3j
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 216 -mpsteps 4 > poly.out.4m
+mpirun -np 2 ./sstruct -in sstruct.in.cube -r 2 4 4 -P 2 1 1 -solver 217 -jpsteps 4 > poly.out.4j
+

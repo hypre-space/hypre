@@ -916,6 +916,159 @@ HYPRE_StructLGMRESSolve( HYPRE_StructSolver solver, HYPRE_StructMatrix A, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatPrecCreate( MPI_Comm comm, HYPRE_StructSolver *solver_ptr )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecCreate_pre( precision, comm, solver_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecDestroy( HYPRE_StructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecDestroy_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetFinalRelativeResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetLogging( HYPRE_StructSolver solver, HYPRE_Int *logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetMaxIter( HYPRE_StructSolver solver, HYPRE_Int *max_iter )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetMaxIter_pre( precision, solver, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetNumIterations( HYPRE_StructSolver solver, HYPRE_Int *num_iterations )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetNumIterations_pre( precision, solver, num_iterations );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetTol( HYPRE_StructSolver solver, void *tol )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetTol_pre( precision, solver, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecGetZeroGuess( HYPRE_StructSolver solver, HYPRE_Int *zero_guess )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecGetZeroGuess_pre( precision, solver, zero_guess );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetChebyshev( HYPRE_StructSolver solver, HYPRE_Int steps )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetChebyshev_pre( precision, solver, steps );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetJacobi( HYPRE_StructSolver solver, HYPRE_Int steps, hypre_long_double weight )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetJacobi_pre( precision, solver, steps, weight );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetLogging( HYPRE_StructSolver solver, HYPRE_Int logging )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetLogging_pre( precision, solver, logging );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetMaxIter( HYPRE_StructSolver solver, HYPRE_Int max_iter )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetMaxIter_pre( precision, solver, max_iter );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetNonZeroGuess( HYPRE_StructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetNonZeroGuess_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetTol( HYPRE_StructSolver solver, hypre_long_double tol )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetTol_pre( precision, solver, tol );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetZeroGuess( HYPRE_StructSolver solver )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetZeroGuess_pre( precision, solver );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSetup( HYPRE_StructSolver solver, HYPRE_StructMatrix A, HYPRE_StructVector b, HYPRE_StructVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSetup_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatPrecSolve( HYPRE_StructSolver solver, HYPRE_StructMatrix A, HYPRE_StructVector b, HYPRE_StructVector x )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_StructMatPrecSolve_pre( precision, solver, A, b, x );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();

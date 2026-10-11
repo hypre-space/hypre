@@ -43,6 +43,7 @@ FILES =\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_jacobi.c\
  HYPRE_struct_lgmres.c\
+ HYPRE_struct_matprec.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  hybrid.c\
