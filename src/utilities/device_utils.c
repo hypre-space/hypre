@@ -44,10 +44,21 @@ hypre_DeviceDataCreate()
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_DeviceDataSpgemmUseVendor(data)  = 1;
    hypre_DeviceDataSpMVUseVendor(data)    = 1;
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) HYPRE_CUSPARSE_SPMV_CSR_ALG2;
+#elif defined(HYPRE_USING_ROCSPARSE) && ROCSPARSE_VERSION >= 400100
+   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_rowsplit;
+#elif defined(HYPRE_USING_ROCSPARSE) && ROCSPARSE_VERSION >= 200000
+   /* rocSPARSE < 4.1 calls rowsplit "stream"; the enum value is the same. */
+   hypre_DeviceDataSpMVAlgorithm(data)    = (HYPRE_Int) rocsparse_spmv_alg_csr_stream;
+#else
+   hypre_DeviceDataSpMVAlgorithm(data)    = 0; /* vendor default */
+#endif
    hypre_DeviceDataSpTransUseVendor(data) = 1;
 #else
    hypre_DeviceDataSpgemmUseVendor(data)  = 0;
    hypre_DeviceDataSpMVUseVendor(data)    = 0;
+   hypre_DeviceDataSpMVAlgorithm(data)    = 0;
    hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
    /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */

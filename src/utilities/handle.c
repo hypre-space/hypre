@@ -84,6 +84,53 @@ hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SetSpMVAlgorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetSpMVAlgorithm( HYPRE_Int algorithm )
+{
+#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_Int valid = algorithm == (HYPRE_Int) rocsparse_spmv_alg_default ||
+                     algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_adaptive;
+
+#if (ROCSPARSE_VERSION >= 400100)
+   valid |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_rowsplit;
+#else
+   valid |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_stream;
+#endif
+#if (ROCSPARSE_VERSION >= 300100)
+   valid |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_lrb;
+#endif
+#if (ROCSPARSE_VERSION >= 400100)
+   valid |= algorithm == (HYPRE_Int) rocsparse_spmv_alg_csr_nnzsplit;
+#endif
+
+#elif defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   HYPRE_Int valid = algorithm == (HYPRE_Int) HYPRE_CUSPARSE_SPMV_ALG_DEFAULT ||
+                     algorithm == (HYPRE_Int) HYPRE_CUSPARSE_SPMV_CSR_ALG1 ||
+                     algorithm == (HYPRE_Int) HYPRE_CUSPARSE_SPMV_CSR_ALG2;
+#else
+   HYPRE_Int valid = algorithm == 0;
+#endif
+
+   if (valid)
+   {
+      hypre_HandleSpMVAlgorithm(hypre_handle()) = algorithm;
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+#else
+   HYPRE_UNUSED_VAR(algorithm);
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SetSpGemmUseVendor
  *--------------------------------------------------------------------------*/
 

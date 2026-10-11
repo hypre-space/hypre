@@ -44,6 +44,16 @@ HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetSpMVAlgorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm( HYPRE_Int algorithm )
+{
+   return hypre_SetSpMVAlgorithm(algorithm);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SetSpGemmUseVendor
  *--------------------------------------------------------------------------*/
 

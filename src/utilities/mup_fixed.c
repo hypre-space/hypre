@@ -1393,6 +1393,14 @@ hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SetSpMVAlgorithm( HYPRE_Int algorithm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SetSpMVAlgorithm)( algorithm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SetSpMVUseVendor)( use_vendor );

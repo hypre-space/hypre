@@ -41,6 +41,7 @@
 #undef HYPRE_SetPrintErrorMode
 #undef HYPRE_SetPrintErrorVerbosity
 #undef HYPRE_SetSpGemmUseVendor
+#undef HYPRE_SetSpMVAlgorithm
 #undef HYPRE_SetSpMVUseVendor
 #undef HYPRE_SetSpTransUseVendor
 #undef HYPRE_SetUseGpuRand
@@ -224,6 +225,7 @@
 #undef hypre_SetSpGemmRownnzEstimateMultFactor
 #undef hypre_SetSpGemmRownnzEstimateNSamples
 #undef hypre_SetSpGemmUseVendor
+#undef hypre_SetSpMVAlgorithm
 #undef hypre_SetSpMVUseVendor
 #undef hypre_SetSpTransUseVendor
 #undef hypre_SetUseGpuRand
