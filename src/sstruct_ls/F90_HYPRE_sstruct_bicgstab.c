@@ -292,6 +292,22 @@ hypre_F90_IFACE(hypre_sstructbicgstabgetfinalre, HYPRE_SSTRUCTBICGSTABGETFINALRE
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructBiCGSTABGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructbicgstabgetfinalres, HYPRE_SSTRUCTBICGSTABGETFINALRES)
+(hypre_F90_Obj *solver,
+ hypre_F90_Real *norm,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           (HYPRE_SStructBiCGSTABGetFinalResidualNorm(
+               hypre_F90_PassObj (HYPRE_SStructSolver, solver),
+               hypre_F90_PassRealRef (norm) ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 

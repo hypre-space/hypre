@@ -233,6 +233,14 @@ hypre_CGNRGetFinalRelativeResidualNorm( void *cgnr_vdata, HYPRE_Real *relative_r
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CGNRGetFinalResidualNorm( void *cgnr_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CGNRGetFinalResidualNorm)( cgnr_vdata, residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CGNRGetNumIterations( void *cgnr_vdata, HYPRE_Int *num_iterations )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CGNRGetNumIterations)( cgnr_vdata, num_iterations );
@@ -372,6 +380,14 @@ HYPRE_Int
 hypre_COGMRESGetFinalRelativeResidualNorm( void *gmres_vdata, HYPRE_Real *relative_residual_norm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_COGMRESGetFinalRelativeResidualNorm)( gmres_vdata, relative_residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_COGMRESGetFinalResidualNorm( void *gmres_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_COGMRESGetFinalResidualNorm)( gmres_vdata, residual_norm );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -652,6 +668,14 @@ HYPRE_Int
 hypre_FlexGMRESGetFinalRelativeResidualNorm( void *fgmres_vdata, HYPRE_Real *relative_residual_norm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_FlexGMRESGetFinalRelativeResidualNorm)( fgmres_vdata, relative_residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_FlexGMRESGetFinalResidualNorm( void *fgmres_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_FlexGMRESGetFinalResidualNorm)( fgmres_vdata, residual_norm );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1236,6 +1260,14 @@ HYPRE_Int
 hypre_LGMRESGetFinalRelativeResidualNorm( void *lgmres_vdata, HYPRE_Real *relative_residual_norm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_LGMRESGetFinalRelativeResidualNorm)( lgmres_vdata, relative_residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_LGMRESGetFinalResidualNorm( void *lgmres_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_LGMRESGetFinalResidualNorm)( lgmres_vdata, residual_norm );
 }
 
 /*--------------------------------------------------------------------------*/

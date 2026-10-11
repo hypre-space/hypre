@@ -82,6 +82,7 @@ typedef struct
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
 
    /*lgmres specific stuff */

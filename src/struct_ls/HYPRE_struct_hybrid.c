@@ -266,3 +266,13 @@ HYPRE_StructHybridGetFinalRelativeResidualNorm( HYPRE_StructSolver solver,
    return ( hypre_HybridGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm( HYPRE_StructSolver solver,
+                                        HYPRE_Real        *norm    )
+{
+   return ( hypre_HybridGetFinalResidualNorm( (void *) solver, norm ) );
+}
+

@@ -180,6 +180,16 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructPCGGetFinalResidualNorm( HYPRE_SStructSolver  solver,
+                                      HYPRE_Real          *norm )
+{
+   return ( HYPRE_PCGGetFinalResidualNorm( (HYPRE_Solver) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver  solver,
                              void              **residual )
 {

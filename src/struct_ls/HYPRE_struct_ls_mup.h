@@ -49,6 +49,15 @@ HYPRE_Int
 HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructBiCGSTABGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructBiCGSTABGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructBiCGSTABGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructBiCGSTABGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructBiCGSTABGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
 HYPRE_StructBiCGSTABGetNumIterations_dbl( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
@@ -238,6 +247,15 @@ HYPRE_Int
 HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructFlexGMRESGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
 HYPRE_StructFlexGMRESGetNumIterations_dbl( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
@@ -364,6 +382,15 @@ HYPRE_Int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructGMRESGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
 HYPRE_StructGMRESGetNumIterations_dbl( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
@@ -488,6 +515,15 @@ HYPRE_Int
 HYPRE_StructHybridGetFinalRelativeResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
 HYPRE_Int
 HYPRE_StructHybridGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
 HYPRE_StructHybridGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_its );
@@ -823,6 +859,15 @@ HYPRE_Int
 HYPRE_StructLGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructLGMRESGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructLGMRESGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructLGMRESGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructLGMRESGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructLGMRESGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
 HYPRE_StructLGMRESGetNumIterations_dbl( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
@@ -1100,6 +1145,15 @@ HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
 HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm_flt( HYPRE_StructSolver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm_dbl( HYPRE_StructSolver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm_long_dbl( HYPRE_StructSolver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm( HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
 HYPRE_StructPCGGetNumIterations_flt( HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
@@ -1779,6 +1833,9 @@ HYPRE_Int
 HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructBiCGSTABGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
@@ -1842,6 +1899,9 @@ HYPRE_Int
 HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
@@ -1884,6 +1944,9 @@ HYPRE_Int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
@@ -1924,6 +1987,9 @@ HYPRE_StructHybridGetDSCGNumIterations_pre( HYPRE_Precision precision, HYPRE_Str
 
 HYPRE_Int
 HYPRE_StructHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
+HYPRE_StructHybridGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
 HYPRE_StructHybridGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_its );
@@ -2037,6 +2103,9 @@ HYPRE_Int
 HYPRE_StructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
+HYPRE_StructLGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
 HYPRE_StructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
@@ -2128,6 +2197,9 @@ HYPRE_StructPCGDestroy_pre( HYPRE_Precision precision, HYPRE_StructSolver solver
 
 HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
+
+HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, void *norm );
 
 HYPRE_Int
 HYPRE_StructPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_StructSolver solver, HYPRE_Int *num_iterations );

@@ -3221,8 +3221,12 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *norm);
 
+/**
+ * Returns the norm of the final residual.
+ * The norm is preconditioned unless the two-norm is selected.
+ **/
 HYPRE_Int HYPRE_ParCSRPCGGetFinalResidualNorm(HYPRE_Solver  solver,
-                                                 HYPRE_Real   *norm);
+                                              HYPRE_Real   *norm);
 /**
  * Returns the residual.
  **/
@@ -3345,6 +3349,12 @@ HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                         HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRGMRESGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                HYPRE_Real   *norm);
 /**
  * Returns the residual.
  **/
@@ -3418,6 +3428,12 @@ HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                           HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                  HYPRE_Real   *norm);
 
 /**
  * Returns the residual.
@@ -3500,6 +3516,12 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                             HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                    HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual(HYPRE_Solver     solver,
                                            HYPRE_ParVector *residual);
@@ -3584,6 +3606,12 @@ HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
 
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRLGMRESGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                 HYPRE_Real   *norm);
+
 HYPRE_Int HYPRE_ParCSRLGMRESGetResidual(HYPRE_Solver     solver,
                                         HYPRE_ParVector *residual);
 
@@ -3656,6 +3684,12 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                            HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                   HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual(HYPRE_Solver     solver,
                                           HYPRE_ParVector *residual);
@@ -4287,10 +4321,10 @@ HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
 
 /**
- * Returns the norm of the final residual. Requires logging to be enabled.
+ * Returns the norm of the final residual.
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetFinalResidualNorm(HYPRE_Solver solver,
-                                                    HYPRE_Real *norm);
+                                                 HYPRE_Real *norm);
 
 /* Is this a retired function? (RDF) */
 HYPRE_Int
@@ -4482,6 +4516,12 @@ HYPRE_Int HYPRE_ParCSRCGNRGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                        HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_ParCSRCGNRGetFinalResidualNorm(HYPRE_Solver  solver,
+                                               HYPRE_Real   *norm);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

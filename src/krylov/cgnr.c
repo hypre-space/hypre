@@ -286,6 +286,9 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
    {
+      (cgnr_data -> residual_norm) = 0.0;
+      (cgnr_data -> rel_residual_norm) = 0.0;
+      (cgnr_data -> num_iterations) = 0;
       /* Set x equal to zero and return */
       (*(cgnr_functions->CopyVector))(b, x);
       if (logging > 0)
@@ -459,10 +462,12 @@ hypre_CGNRSolve(void *cgnr_vdata,
    (cgnr_data -> num_iterations) = i;
    if (bi_prod > 0.0)
    {
+      (cgnr_data -> residual_norm) = hypre_sqrt(i_prod);
       (cgnr_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
    }
    else /* actually, we'll never get here... */
    {
+      (cgnr_data -> residual_norm) = 0.0;
       (cgnr_data -> rel_residual_norm) = 0.0;
    }
 
@@ -619,6 +624,22 @@ hypre_CGNRGetFinalRelativeResidualNorm( void   *cgnr_vdata,
    HYPRE_Int ierr = 0;
 
    *relative_residual_norm = (cgnr_data -> rel_residual_norm);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CGNRGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CGNRGetFinalResidualNorm( void   *cgnr_vdata,
+                                HYPRE_Real *residual_norm )
+{
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
+   HYPRE_Int ierr = 0;
+
+   *residual_norm = (cgnr_data -> residual_norm);
 
    return ierr;
 }

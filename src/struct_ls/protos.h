@@ -54,6 +54,9 @@ HYPRE_Int hypre_HybridGetDSCGNumIterations ( void *hybrid_vdata, HYPRE_Int *dscg
 HYPRE_Int hypre_HybridGetPCGNumIterations ( void *hybrid_vdata, HYPRE_Int *pcg_num_its );
 HYPRE_Int hypre_HybridGetFinalRelativeResidualNorm ( void *hybrid_vdata,
                                                      HYPRE_Real *final_rel_res_norm );
+
+HYPRE_Int hypre_HybridGetFinalResidualNorm ( void *hybrid_vdata,
+                                             HYPRE_Real *final_res_norm );
 HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,

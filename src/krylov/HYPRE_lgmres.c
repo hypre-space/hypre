@@ -275,6 +275,17 @@ HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_LGMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_LGMRESGetFinalResidualNorm( HYPRE_Solver  solver,
+                                  HYPRE_Real         *norm   )
+{
+   return ( hypre_LGMRESGetFinalResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_LGMRESGetResidual
  *--------------------------------------------------------------------------*/
 

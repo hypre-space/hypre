@@ -15,6 +15,7 @@
 #undef HYPRE_SStructBiCGSTABCreate
 #undef HYPRE_SStructBiCGSTABDestroy
 #undef HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm
+#undef HYPRE_SStructBiCGSTABGetFinalResidualNorm
 #undef HYPRE_SStructBiCGSTABGetNumIterations
 #undef HYPRE_SStructBiCGSTABGetResidual
 #undef HYPRE_SStructBiCGSTABSetAbsoluteTol
@@ -32,6 +33,7 @@
 #undef HYPRE_SStructFlexGMRESCreate
 #undef HYPRE_SStructFlexGMRESDestroy
 #undef HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_SStructFlexGMRESGetFinalResidualNorm
 #undef HYPRE_SStructFlexGMRESGetNumIterations
 #undef HYPRE_SStructFlexGMRESGetResidual
 #undef HYPRE_SStructFlexGMRESSetAbsoluteTol
@@ -48,6 +50,7 @@
 #undef HYPRE_SStructGMRESCreate
 #undef HYPRE_SStructGMRESDestroy
 #undef HYPRE_SStructGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_SStructGMRESGetFinalResidualNorm
 #undef HYPRE_SStructGMRESGetNumIterations
 #undef HYPRE_SStructGMRESGetResidual
 #undef HYPRE_SStructGMRESSetAbsoluteTol
@@ -64,6 +67,7 @@
 #undef HYPRE_SStructLGMRESCreate
 #undef HYPRE_SStructLGMRESDestroy
 #undef HYPRE_SStructLGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_SStructLGMRESGetFinalResidualNorm
 #undef HYPRE_SStructLGMRESGetNumIterations
 #undef HYPRE_SStructLGMRESGetResidual
 #undef HYPRE_SStructLGMRESSetAbsoluteTol
@@ -80,6 +84,7 @@
 #undef HYPRE_SStructPCGCreate
 #undef HYPRE_SStructPCGDestroy
 #undef HYPRE_SStructPCGGetFinalRelativeResidualNorm
+#undef HYPRE_SStructPCGGetFinalResidualNorm
 #undef HYPRE_SStructPCGGetNumIterations
 #undef HYPRE_SStructPCGGetResidual
 #undef HYPRE_SStructPCGSetAbsoluteTol
@@ -280,6 +285,7 @@
 #undef hypre_sstructbicgstabcreate
 #undef hypre_sstructbicgstabdestroy
 #undef hypre_sstructbicgstabgetfinalre
+#undef hypre_sstructbicgstabgetfinalres
 #undef hypre_sstructbicgstabgetnumiter
 #undef hypre_sstructbicgstabgetresidua
 #undef hypre_sstructbicgstabsetabsolutetol
@@ -297,6 +303,7 @@
 #undef hypre_sstructflexgmrescreate
 #undef hypre_sstructflexgmresdestroy
 #undef hypre_sstructflexgmresgetfinalrelat
+#undef hypre_sstructflexgmresgetfinalres
 #undef hypre_sstructflexgmresgetnumiterati
 #undef hypre_sstructflexgmresgetresidual
 #undef hypre_sstructflexgmressetabsolutetol
@@ -312,6 +319,7 @@
 #undef hypre_sstructgmrescreate
 #undef hypre_sstructgmresdestroy
 #undef hypre_sstructgmresgetfinalrelat
+#undef hypre_sstructgmresgetfinalres
 #undef hypre_sstructgmresgetnumiterati
 #undef hypre_sstructgmresgetresidual
 #undef hypre_sstructgmressetabsolutetol
@@ -328,6 +336,7 @@
 #undef hypre_sstructlgmrescreate
 #undef hypre_sstructlgmresdestroy
 #undef hypre_sstructlgmresgetfinalrelat
+#undef hypre_sstructlgmresgetfinalres
 #undef hypre_sstructlgmresgetnumiterati
 #undef hypre_sstructlgmresgetresidual
 #undef hypre_sstructlgmressetabsolutetol
@@ -344,6 +353,7 @@
 #undef hypre_sstructpcgcreate
 #undef hypre_sstructpcgdestroy
 #undef hypre_sstructpcggetfinalrelativ
+#undef hypre_sstructpcggetfinalres
 #undef hypre_sstructpcggetnumiteration
 #undef hypre_sstructpcggetresidual
 #undef hypre_sstructpcgsetabsolutetol

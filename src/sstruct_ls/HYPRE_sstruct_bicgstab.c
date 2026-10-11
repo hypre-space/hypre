@@ -179,6 +179,17 @@ HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructBiCGSTABGetFinalResidualNorm( HYPRE_SStructSolver  solver,
+                                           HYPRE_Real          *norm )
+{
+   return ( HYPRE_BiCGSTABGetFinalResidualNorm( (HYPRE_Solver) solver,
+                                                norm ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 

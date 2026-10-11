@@ -160,3 +160,14 @@ HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return ( hypre_CGNRGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_CGNRGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_CGNRGetFinalResidualNorm( HYPRE_Solver  solver,
+                                HYPRE_Real         *norm   )
+{
+   return ( hypre_CGNRGetFinalResidualNorm( (void *) solver, norm ) );
+}

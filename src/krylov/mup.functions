@@ -19,6 +19,7 @@ HYPRE_BiCGSTABSetup
 HYPRE_BiCGSTABSolve
 HYPRE_CGNRDestroy
 HYPRE_CGNRGetFinalRelativeResidualNorm
+HYPRE_CGNRGetFinalResidualNorm
 HYPRE_CGNRGetNumIterations
 HYPRE_CGNRGetPrecond
 HYPRE_CGNRSetLogging
@@ -34,6 +35,7 @@ HYPRE_COGMRESGetCGS
 HYPRE_COGMRESGetConverged
 HYPRE_COGMRESGetConvergenceFactorTol
 HYPRE_COGMRESGetFinalRelativeResidualNorm
+HYPRE_COGMRESGetFinalResidualNorm
 HYPRE_COGMRESGetKDim
 HYPRE_COGMRESGetLogging
 HYPRE_COGMRESGetMaxIter
@@ -62,6 +64,7 @@ HYPRE_FlexGMRESGetAbsoluteTol
 HYPRE_FlexGMRESGetConverged
 HYPRE_FlexGMRESGetConvergenceFactorTol
 HYPRE_FlexGMRESGetFinalRelativeResidualNorm
+HYPRE_FlexGMRESGetFinalResidualNorm
 HYPRE_FlexGMRESGetKDim
 HYPRE_FlexGMRESGetLogging
 HYPRE_FlexGMRESGetMaxIter
@@ -125,6 +128,7 @@ HYPRE_LGMRESGetAugDim
 HYPRE_LGMRESGetConverged
 HYPRE_LGMRESGetConvergenceFactorTol
 HYPRE_LGMRESGetFinalRelativeResidualNorm
+HYPRE_LGMRESGetFinalResidualNorm
 HYPRE_LGMRESGetKDim
 HYPRE_LGMRESGetLogging
 HYPRE_LGMRESGetMaxIter

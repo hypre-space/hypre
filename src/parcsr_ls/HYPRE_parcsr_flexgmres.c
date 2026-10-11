@@ -213,6 +213,17 @@ HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRFlexGMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRFlexGMRESGetFinalResidualNorm( HYPRE_Solver  solver,
+                                           HYPRE_Real         *norm   )
+{
+   return ( HYPRE_FlexGMRESGetFinalResidualNorm( solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRFlexGMRESGetResidual
  *--------------------------------------------------------------------------*/
 

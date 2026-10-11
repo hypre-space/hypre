@@ -484,6 +484,10 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
       rs[0] = r_norm;
       if (r_norm == 0.0)
       {
+         (cogmres_data -> residual_norm) = 0.0;
+         (cogmres_data -> rel_residual_norm) = 0.0;
+         (cogmres_data -> num_iterations) = iter;
+         (cogmres_data -> converged) = 1;
          hypre_TFreeF(c, cogmres_functions);
          hypre_TFreeF(s, cogmres_functions);
          hypre_TFreeF(rs, cogmres_functions);
@@ -880,6 +884,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    } /* END of iteration while loop */
 
 
+   (cogmres_data -> residual_norm) = r_norm;
    (cogmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)
    {
@@ -1240,6 +1245,19 @@ hypre_COGMRESGetFinalRelativeResidualNorm( void   *cogmres_vdata,
 {
    hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
    *relative_residual_norm = (cogmres_data -> rel_residual_norm);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_COGMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_COGMRESGetFinalResidualNorm( void   *cogmres_vdata,
+                                   HYPRE_Real *residual_norm )
+{
+   hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
+   *residual_norm = (cogmres_data -> residual_norm);
    return hypre_error_flag;
 }
 

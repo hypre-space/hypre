@@ -171,6 +171,15 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 /*==========================================================================*/
 
 HYPRE_Int
+HYPRE_StructPCGGetFinalResidualNorm( HYPRE_StructSolver  solver,
+                                     HYPRE_Real         *norm   )
+{
+   return ( HYPRE_PCGGetFinalResidualNorm( (HYPRE_Solver) solver, norm ) );
+}
+
+/*==========================================================================*/
+
+HYPRE_Int
 HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
                             HYPRE_StructMatrix A,
                             HYPRE_StructVector y,

@@ -477,6 +477,9 @@ hypre_PCGSolve( void *pcg_vdata,
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
       (pcg_data -> residual_norm) = 0.0;
+      (pcg_data -> rel_residual_norm) = 0.0;
+      (pcg_data -> num_iterations) = 0;
+      (pcg_data -> converged) = 1;
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
       if (logging > 0 || print_level > 0)
@@ -531,7 +534,7 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* Set initial residual norm */
-   if ( logging > 0 || print_level > 0 || cf_tol > 0.0 )
+   if ( logging > 0 || print_level > 0 || cf_tol > 0.0 || max_iter == 0 )
    {
       if (two_norm)
       {
@@ -544,6 +547,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       if ( logging > 0 || print_level > 0 ) { norms[0] = hypre_sqrt(i_prod_0); }
    }
+   i_prod = i_prod_0;
    if ( print_level > 1 && my_id == 0 )
    {
       hypre_printf("\n\n");

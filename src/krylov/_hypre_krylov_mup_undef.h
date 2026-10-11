@@ -33,6 +33,7 @@
 #undef HYPRE_BiCGSTABSolve
 #undef HYPRE_CGNRDestroy
 #undef HYPRE_CGNRGetFinalRelativeResidualNorm
+#undef HYPRE_CGNRGetFinalResidualNorm
 #undef HYPRE_CGNRGetNumIterations
 #undef HYPRE_CGNRGetPrecond
 #undef HYPRE_CGNRSetLogging
@@ -48,6 +49,7 @@
 #undef HYPRE_COGMRESGetConverged
 #undef HYPRE_COGMRESGetConvergenceFactorTol
 #undef HYPRE_COGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_COGMRESGetFinalResidualNorm
 #undef HYPRE_COGMRESGetKDim
 #undef HYPRE_COGMRESGetLogging
 #undef HYPRE_COGMRESGetMaxIter
@@ -76,6 +78,7 @@
 #undef HYPRE_FlexGMRESGetConverged
 #undef HYPRE_FlexGMRESGetConvergenceFactorTol
 #undef HYPRE_FlexGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_FlexGMRESGetFinalResidualNorm
 #undef HYPRE_FlexGMRESGetKDim
 #undef HYPRE_FlexGMRESGetLogging
 #undef HYPRE_FlexGMRESGetMaxIter
@@ -139,6 +142,7 @@
 #undef HYPRE_LGMRESGetConverged
 #undef HYPRE_LGMRESGetConvergenceFactorTol
 #undef HYPRE_LGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_LGMRESGetFinalResidualNorm
 #undef HYPRE_LGMRESGetKDim
 #undef HYPRE_LGMRESGetLogging
 #undef HYPRE_LGMRESGetMaxIter
@@ -246,6 +250,7 @@
 #undef hypre_CGNRDestroy
 #undef hypre_CGNRFunctionsCreate
 #undef hypre_CGNRGetFinalRelativeResidualNorm
+#undef hypre_CGNRGetFinalResidualNorm
 #undef hypre_CGNRGetNumIterations
 #undef hypre_CGNRGetPrecond
 #undef hypre_CGNRSetLogging
@@ -264,6 +269,7 @@
 #undef hypre_COGMRESGetConverged
 #undef hypre_COGMRESGetConvergenceFactorTol
 #undef hypre_COGMRESGetFinalRelativeResidualNorm
+#undef hypre_COGMRESGetFinalResidualNorm
 #undef hypre_COGMRESGetKDim
 #undef hypre_COGMRESGetLogging
 #undef hypre_COGMRESGetMaxIter
@@ -299,6 +305,7 @@
 #undef hypre_FlexGMRESGetConverged
 #undef hypre_FlexGMRESGetConvergenceFactorTol
 #undef hypre_FlexGMRESGetFinalRelativeResidualNorm
+#undef hypre_FlexGMRESGetFinalResidualNorm
 #undef hypre_FlexGMRESGetKDim
 #undef hypre_FlexGMRESGetLogging
 #undef hypre_FlexGMRESGetMaxIter
@@ -372,6 +379,7 @@
 #undef hypre_LGMRESGetConverged
 #undef hypre_LGMRESGetConvergenceFactorTol
 #undef hypre_LGMRESGetFinalRelativeResidualNorm
+#undef hypre_LGMRESGetFinalResidualNorm
 #undef hypre_LGMRESGetKDim
 #undef hypre_LGMRESGetLogging
 #undef hypre_LGMRESGetMaxIter

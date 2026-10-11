@@ -159,6 +159,16 @@ HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 
 /*==========================================================================*/
 
+HYPRE_Int
+HYPRE_StructFlexGMRESGetFinalResidualNorm( HYPRE_StructSolver  solver,
+                                           HYPRE_Real         *norm   )
+{
+   return ( HYPRE_FlexGMRESGetFinalResidualNorm( (HYPRE_Solver) solver,
+                                                 norm ) );
+}
+
+/*==========================================================================*/
+
 HYPRE_Int HYPRE_StructFlexGMRESSetModifyPC( HYPRE_StructSolver  solver,
                                             HYPRE_PtrToModifyPCFcn modify_pc)
 {

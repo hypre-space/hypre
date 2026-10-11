@@ -346,6 +346,22 @@ hypre_F90_IFACE(hypre_parcsrlgmresgetfinalrelati, HYPRE_PARCSRLGMRESGETFINALRELA
                 hypre_F90_PassRealRef (norm)    ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRLGMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrlgmresgetfinalres, HYPRE_PARCSRLGMRESGETFINALRES)
+( hypre_F90_Obj *solver,
+  hypre_F90_Real *norm,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_ParCSRLGMRESGetFinalResidualNorm(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassRealRef (norm)    ) );
+}
+
 #ifdef __cplusplus
 }
 #endif

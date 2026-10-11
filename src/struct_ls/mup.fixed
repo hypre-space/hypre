@@ -10,6 +10,7 @@ hypre_HybridCreate
 hypre_HybridDestroy
 hypre_HybridGetDSCGNumIterations
 hypre_HybridGetFinalRelativeResidualNorm
+hypre_HybridGetFinalResidualNorm
 hypre_HybridGetNumIterations
 hypre_HybridGetPCGNumIterations
 hypre_HybridGetRecomputeResidual
@@ -263,6 +264,7 @@ hypre_StructMatPrecSetupJacobi
 hypre_structbicgstabcreate
 hypre_structbicgstabdestroy
 hypre_structbicgstabgetfinalrel
+hypre_structbicgstabgetfinalres
 hypre_structbicgstabgetnumitera
 hypre_structbicgstabgetresidual
 hypre_structbicgstabsetabstol
@@ -284,6 +286,7 @@ hypre_structdiagscalesetup
 hypre_structfgmrescreate
 hypre_structfgmresdestroy
 hypre_structfgmresgetfinalrel
+hypre_structfgmresgetfinalres
 hypre_structfgmresgetnumiter
 hypre_structfgmressetabstol
 hypre_structfgmressetkdim
@@ -297,6 +300,7 @@ hypre_structfgmressolve
 hypre_structgmrescreate
 hypre_structgmresdestroy
 hypre_structgmresgetfinalrelati
+hypre_structgmresgetfinalres
 hypre_structgmresgetnumiteratio
 hypre_structgmressetabstol
 hypre_structgmressetkdim
@@ -311,6 +315,7 @@ hypre_structhybridcreate
 hypre_structhybriddestroy
 hypre_structhybridgetdscgnumite
 hypre_structhybridgetfinalrelat
+hypre_structhybridgetfinalres
 hypre_structhybridgetnumiterati
 hypre_structhybridgetpcgnumiter
 hypre_structhybridsetconvergenc
@@ -344,6 +349,7 @@ hypre_structjacobisolve
 hypre_structlgmrescreate
 hypre_structlgmresdestroy
 hypre_structlgmresgetfinalrel
+hypre_structlgmresgetfinalres
 hypre_structlgmresgetnumiter
 hypre_structlgmressetabstol
 hypre_structlgmressetaugdim
@@ -358,6 +364,7 @@ hypre_structlgmressolve
 hypre_structpcgcreate
 hypre_structpcgdestroy
 hypre_structpcggetfinalrelative
+hypre_structpcggetfinalres
 hypre_structpcggetnumiterations
 hypre_structpcgsetabstol
 hypre_structpcgsetlogging

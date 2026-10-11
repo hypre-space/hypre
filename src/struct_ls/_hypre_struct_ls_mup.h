@@ -104,6 +104,13 @@ HYPRE_Int
 hypre_HybridGetFinalRelativeResidualNorm_long_dbl( void *hybrid_vdata, hypre_long_double *final_rel_res_norm );
 
 HYPRE_Int
+hypre_HybridGetFinalResidualNorm_flt( void *hybrid_vdata, hypre_float *final_res_norm );
+HYPRE_Int
+hypre_HybridGetFinalResidualNorm_dbl( void *hybrid_vdata, hypre_double *final_res_norm );
+HYPRE_Int
+hypre_HybridGetFinalResidualNorm_long_dbl( void *hybrid_vdata, hypre_long_double *final_res_norm );
+
+HYPRE_Int
 hypre_HybridGetNumIterations_flt( void *hybrid_vdata, HYPRE_Int *num_its );
 HYPRE_Int
 hypre_HybridGetNumIterations_dbl( void *hybrid_vdata, HYPRE_Int *num_its );

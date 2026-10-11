@@ -210,6 +210,17 @@ HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRBiCGSTABGetFinalResidualNorm( HYPRE_Solver  solver,
+                                          HYPRE_Real         *norm   )
+{
+   return ( HYPRE_BiCGSTABGetFinalResidualNorm( solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 

@@ -15,6 +15,7 @@
 #undef HYPRE_StructBiCGSTABCreate
 #undef HYPRE_StructBiCGSTABDestroy
 #undef HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm
+#undef HYPRE_StructBiCGSTABGetFinalResidualNorm
 #undef HYPRE_StructBiCGSTABGetNumIterations
 #undef HYPRE_StructBiCGSTABGetResidual
 #undef HYPRE_StructBiCGSTABSetAbsoluteTol
@@ -36,6 +37,7 @@
 #undef HYPRE_StructFlexGMRESCreate
 #undef HYPRE_StructFlexGMRESDestroy
 #undef HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_StructFlexGMRESGetFinalResidualNorm
 #undef HYPRE_StructFlexGMRESGetNumIterations
 #undef HYPRE_StructFlexGMRESSetAbsoluteTol
 #undef HYPRE_StructFlexGMRESSetKDim
@@ -50,6 +52,7 @@
 #undef HYPRE_StructGMRESCreate
 #undef HYPRE_StructGMRESDestroy
 #undef HYPRE_StructGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_StructGMRESGetFinalResidualNorm
 #undef HYPRE_StructGMRESGetNumIterations
 #undef HYPRE_StructGMRESSetAbsoluteTol
 #undef HYPRE_StructGMRESSetKDim
@@ -64,6 +67,7 @@
 #undef HYPRE_StructHybridDestroy
 #undef HYPRE_StructHybridGetDSCGNumIterations
 #undef HYPRE_StructHybridGetFinalRelativeResidualNorm
+#undef HYPRE_StructHybridGetFinalResidualNorm
 #undef HYPRE_StructHybridGetNumIterations
 #undef HYPRE_StructHybridGetPCGNumIterations
 #undef HYPRE_StructHybridGetRecomputeResidual
@@ -101,6 +105,7 @@
 #undef HYPRE_StructLGMRESCreate
 #undef HYPRE_StructLGMRESDestroy
 #undef HYPRE_StructLGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_StructLGMRESGetFinalResidualNorm
 #undef HYPRE_StructLGMRESGetNumIterations
 #undef HYPRE_StructLGMRESSetAbsoluteTol
 #undef HYPRE_StructLGMRESSetAugDim
@@ -132,6 +137,7 @@
 #undef HYPRE_StructPCGCreate
 #undef HYPRE_StructPCGDestroy
 #undef HYPRE_StructPCGGetFinalRelativeResidualNorm
+#undef HYPRE_StructPCGGetFinalResidualNorm
 #undef HYPRE_StructPCGGetNumIterations
 #undef HYPRE_StructPCGSetAbsoluteTol
 #undef HYPRE_StructPCGSetLogging
@@ -218,6 +224,7 @@
 #undef hypre_HybridDestroy
 #undef hypre_HybridGetDSCGNumIterations
 #undef hypre_HybridGetFinalRelativeResidualNorm
+#undef hypre_HybridGetFinalResidualNorm
 #undef hypre_HybridGetNumIterations
 #undef hypre_HybridGetPCGNumIterations
 #undef hypre_HybridGetRecomputeResidual
@@ -471,6 +478,7 @@
 #undef hypre_structbicgstabcreate
 #undef hypre_structbicgstabdestroy
 #undef hypre_structbicgstabgetfinalrel
+#undef hypre_structbicgstabgetfinalres
 #undef hypre_structbicgstabgetnumitera
 #undef hypre_structbicgstabgetresidual
 #undef hypre_structbicgstabsetabstol
@@ -492,6 +500,7 @@
 #undef hypre_structfgmrescreate
 #undef hypre_structfgmresdestroy
 #undef hypre_structfgmresgetfinalrel
+#undef hypre_structfgmresgetfinalres
 #undef hypre_structfgmresgetnumiter
 #undef hypre_structfgmressetabstol
 #undef hypre_structfgmressetkdim
@@ -505,6 +514,7 @@
 #undef hypre_structgmrescreate
 #undef hypre_structgmresdestroy
 #undef hypre_structgmresgetfinalrelati
+#undef hypre_structgmresgetfinalres
 #undef hypre_structgmresgetnumiteratio
 #undef hypre_structgmressetabstol
 #undef hypre_structgmressetkdim
@@ -519,6 +529,7 @@
 #undef hypre_structhybriddestroy
 #undef hypre_structhybridgetdscgnumite
 #undef hypre_structhybridgetfinalrelat
+#undef hypre_structhybridgetfinalres
 #undef hypre_structhybridgetnumiterati
 #undef hypre_structhybridgetpcgnumiter
 #undef hypre_structhybridsetconvergenc
@@ -552,6 +563,7 @@
 #undef hypre_structlgmrescreate
 #undef hypre_structlgmresdestroy
 #undef hypre_structlgmresgetfinalrel
+#undef hypre_structlgmresgetfinalres
 #undef hypre_structlgmresgetnumiter
 #undef hypre_structlgmressetabstol
 #undef hypre_structlgmressetaugdim
@@ -566,6 +578,7 @@
 #undef hypre_structpcgcreate
 #undef hypre_structpcgdestroy
 #undef hypre_structpcggetfinalrelative
+#undef hypre_structpcggetfinalres
 #undef hypre_structpcggetnumiterations
 #undef hypre_structpcgsetabstol
 #undef hypre_structpcgsetlogging

@@ -70,6 +70,24 @@ HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructBiCGSTABGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructBiCGSTABGetFinalResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructBiCGSTABGetFinalResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructBiCGSTABGetFinalResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructBiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
@@ -376,6 +394,24 @@ HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precisio
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructFlexGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructFlexGMRESGetFinalResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructFlexGMRESGetFinalResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructFlexGMRESGetFinalResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructFlexGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
@@ -656,6 +692,24 @@ HYPRE_SStructGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, H
          return HYPRE_SStructGMRESGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SStructGMRESGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructGMRESGetFinalResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructGMRESGetFinalResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructGMRESGetFinalResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }
@@ -952,6 +1006,24 @@ HYPRE_SStructLGMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructLGMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructLGMRESGetFinalResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructLGMRESGetFinalResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructLGMRESGetFinalResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructLGMRESGetNumIterations_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, HYPRE_Int *num_iterations )
 {
    switch (precision)
@@ -1232,6 +1304,24 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYP
          return HYPRE_SStructPCGGetFinalRelativeResidualNorm_dbl( solver, (hypre_double *)norm );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SStructPCGGetFinalRelativeResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructPCGGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_SStructSolver solver, void *norm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SStructPCGGetFinalResidualNorm_flt( solver, (hypre_float *)norm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SStructPCGGetFinalResidualNorm_dbl( solver, (hypre_double *)norm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SStructPCGGetFinalResidualNorm_long_dbl( solver, (hypre_long_double *)norm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

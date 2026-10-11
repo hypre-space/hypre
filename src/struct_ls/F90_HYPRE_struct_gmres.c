@@ -264,6 +264,21 @@ hypre_F90_IFACE(hypre_structgmresgetfinalrelati, HYPRE_STRUCTGMRESGETFINALRELATI
                 hypre_F90_PassRealRef (norm) ) );
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structgmresgetfinalres, HYPRE_STRUCTGMRESGETFINALRES)
+( hypre_F90_Obj *solver,
+  hypre_F90_Real *norm,
+  hypre_F90_Int *ierr   )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_StructGMRESGetFinalResidualNorm(
+                hypre_F90_PassObj (HYPRE_StructSolver, solver),
+                hypre_F90_PassRealRef (norm) ) );
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -3625,6 +3625,15 @@ HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *nor
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRBiCGSTABGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRBiCGSTABGetFinalResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -3769,6 +3778,15 @@ HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRCGNRGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRCGNRGetFinalResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -3881,6 +3899,15 @@ HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRCOGMRESGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRCOGMRESGetFinalResidualNorm_pre( precision, solver, norm );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -4066,6 +4093,15 @@ HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *no
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_ParCSRFlexGMRESGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRFlexGMRESGetFinalResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
@@ -4214,6 +4250,15 @@ HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm )
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRGMRESGetFinalResidualNorm_pre( precision, solver, norm );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -4997,6 +5042,15 @@ HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm 
 {
    HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRLGMRESGetFinalResidualNorm( HYPRE_Solver solver, void *norm )
+{
+   HYPRE_Precision precision = hypre_GlobalPrecision();
+   return HYPRE_ParCSRLGMRESGetFinalResidualNorm_pre( precision, solver, norm );
 }
 
 /*--------------------------------------------------------------------------*/

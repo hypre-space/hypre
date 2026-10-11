@@ -76,6 +76,7 @@ typedef struct
    hypre_Solver   base;
 
    HYPRE_Real   tol;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;

@@ -153,3 +153,12 @@ HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 {
    return ( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
+
+/*==========================================================================*/
+
+HYPRE_Int
+HYPRE_StructGMRESGetFinalResidualNorm( HYPRE_StructSolver  solver,
+                                       HYPRE_Real         *norm   )
+{
+   return ( HYPRE_GMRESGetFinalResidualNorm( (HYPRE_Solver) solver, norm ) );
+}

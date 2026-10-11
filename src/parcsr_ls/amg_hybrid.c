@@ -2336,11 +2336,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
     *---------------------------------------------------------------------*/
    if (converged)
    {
-      if (logging)
-      {
-         (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
-         (AMGhybrid_data -> final_res_norm) = res_norm;
-      }
+      (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+      (AMGhybrid_data -> final_res_norm) = res_norm;
    }
    /*-----------------------------------------------------------------------
     * ... otherwise, use AMG+solver
@@ -2555,13 +2552,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from PCG that is always logged in AMGhybrid solver*/
          hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         if (logging)
-         {
-            hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
-            hypre_PCGGetFinalResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
-            (AMGhybrid_data -> final_res_norm) = res_norm;
-         }
+         hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_PCGGetFinalResidualNorm(pcg_solver, &res_norm);
+         (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (AMGhybrid_data -> final_res_norm) = res_norm;
 
          tt2 = hypre_MPI_Wtime();
          AMGhybrid_data->solve_time2 = tt2 - tt1;
@@ -2586,13 +2580,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from GMRES that is always logged in AMGhybrid solver*/
          hypre_GMRESGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         if (logging)
-         {
-            hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
-            hypre_GMRESGetFinalResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
-            (AMGhybrid_data -> final_res_norm) = res_norm;
-         }
+         hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_GMRESGetFinalResidualNorm(pcg_solver, &res_norm);
+         (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (AMGhybrid_data -> final_res_norm) = res_norm;
 
          tt2 = hypre_MPI_Wtime();
          AMGhybrid_data->solve_time2 = tt2 - tt1;
@@ -2617,13 +2608,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from BiCGSTAB that is always logged in AMGhybrid solver*/
          hypre_BiCGSTABGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         if (logging)
-         {
-            hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
-            hypre_BiCGSTABGetFinalResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
-            (AMGhybrid_data -> final_res_norm) = res_norm;
-         }
+         hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_BiCGSTABGetFinalResidualNorm(pcg_solver, &res_norm);
+         (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (AMGhybrid_data -> final_res_norm) = res_norm;
 
          tt2 = hypre_MPI_Wtime();
          AMGhybrid_data->solve_time2 = tt2 - tt1;

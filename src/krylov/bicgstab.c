@@ -455,9 +455,14 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    {
       (bicgstab_data -> rel_residual_norm) = r_norm / b_norm;
    }
+   else
+   {
+      (bicgstab_data -> rel_residual_norm) = r_norm;
+   }
    /* check for convergence before starting */
    if (r_norm == 0.0)
    {
+      (bicgstab_data -> converged) = 1;
       HYPRE_ANNOTATE_FUNC_END;
       return hypre_error_flag;
    }

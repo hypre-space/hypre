@@ -192,3 +192,14 @@ HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return ( HYPRE_CGNRGetFinalRelativeResidualNorm( solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRCGNRGetFinalResidualNorm( HYPRE_Solver  solver,
+                                      HYPRE_Real   *norm   )
+{
+   return ( HYPRE_CGNRGetFinalResidualNorm( solver, norm ) );
+}

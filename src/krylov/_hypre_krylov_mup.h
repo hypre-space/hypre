@@ -209,6 +209,13 @@ HYPRE_Int
 hypre_CGNRGetFinalRelativeResidualNorm_long_dbl( void *cgnr_vdata, hypre_long_double *relative_residual_norm );
 
 HYPRE_Int
+hypre_CGNRGetFinalResidualNorm_flt( void *cgnr_vdata, hypre_float *residual_norm );
+HYPRE_Int
+hypre_CGNRGetFinalResidualNorm_dbl( void *cgnr_vdata, hypre_double *residual_norm );
+HYPRE_Int
+hypre_CGNRGetFinalResidualNorm_long_dbl( void *cgnr_vdata, hypre_long_double *residual_norm );
+
+HYPRE_Int
 hypre_CGNRGetNumIterations_flt( void *cgnr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int
 hypre_CGNRGetNumIterations_dbl( void *cgnr_vdata, HYPRE_Int *num_iterations );
@@ -333,6 +340,13 @@ HYPRE_Int
 hypre_COGMRESGetFinalRelativeResidualNorm_dbl( void *gmres_vdata, hypre_double *relative_residual_norm );
 HYPRE_Int
 hypre_COGMRESGetFinalRelativeResidualNorm_long_dbl( void *gmres_vdata, hypre_long_double *relative_residual_norm );
+
+HYPRE_Int
+hypre_COGMRESGetFinalResidualNorm_flt( void *gmres_vdata, hypre_float *residual_norm );
+HYPRE_Int
+hypre_COGMRESGetFinalResidualNorm_dbl( void *gmres_vdata, hypre_double *residual_norm );
+HYPRE_Int
+hypre_COGMRESGetFinalResidualNorm_long_dbl( void *gmres_vdata, hypre_long_double *residual_norm );
 
 HYPRE_Int
 hypre_COGMRESGetKDim_flt( void *gmres_vdata, HYPRE_Int *k_dim );
@@ -578,6 +592,13 @@ HYPRE_Int
 hypre_FlexGMRESGetFinalRelativeResidualNorm_dbl( void *fgmres_vdata, hypre_double *relative_residual_norm );
 HYPRE_Int
 hypre_FlexGMRESGetFinalRelativeResidualNorm_long_dbl( void *fgmres_vdata, hypre_long_double *relative_residual_norm );
+
+HYPRE_Int
+hypre_FlexGMRESGetFinalResidualNorm_flt( void *fgmres_vdata, hypre_float *residual_norm );
+HYPRE_Int
+hypre_FlexGMRESGetFinalResidualNorm_dbl( void *fgmres_vdata, hypre_double *residual_norm );
+HYPRE_Int
+hypre_FlexGMRESGetFinalResidualNorm_long_dbl( void *fgmres_vdata, hypre_long_double *residual_norm );
 
 HYPRE_Int
 hypre_FlexGMRESGetKDim_flt( void *fgmres_vdata, HYPRE_Int *k_dim );
@@ -1089,6 +1110,13 @@ HYPRE_Int
 hypre_LGMRESGetFinalRelativeResidualNorm_dbl( void *lgmres_vdata, hypre_double *relative_residual_norm );
 HYPRE_Int
 hypre_LGMRESGetFinalRelativeResidualNorm_long_dbl( void *lgmres_vdata, hypre_long_double *relative_residual_norm );
+
+HYPRE_Int
+hypre_LGMRESGetFinalResidualNorm_flt( void *lgmres_vdata, hypre_float *residual_norm );
+HYPRE_Int
+hypre_LGMRESGetFinalResidualNorm_dbl( void *lgmres_vdata, hypre_double *residual_norm );
+HYPRE_Int
+hypre_LGMRESGetFinalResidualNorm_long_dbl( void *lgmres_vdata, hypre_long_double *residual_norm );
 
 HYPRE_Int
 hypre_LGMRESGetKDim_flt( void *lgmres_vdata, HYPRE_Int *k_dim );

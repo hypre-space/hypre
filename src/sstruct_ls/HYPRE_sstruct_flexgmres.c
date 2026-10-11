@@ -184,6 +184,17 @@ HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructFlexGMRESGetFinalResidualNorm( HYPRE_SStructSolver  solver,
+                                            HYPRE_Real          *norm )
+{
+   return ( HYPRE_FlexGMRESGetFinalResidualNorm( (HYPRE_Solver) solver,
+                                                 norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructFlexGMRESGetResidual( HYPRE_SStructSolver  solver,
                                    void              **residual )
 {

@@ -440,6 +440,7 @@
 #undef HYPRE_ParCSRBiCGSTABCreate
 #undef HYPRE_ParCSRBiCGSTABDestroy
 #undef HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRBiCGSTABGetFinalResidualNorm
 #undef HYPRE_ParCSRBiCGSTABGetNumIterations
 #undef HYPRE_ParCSRBiCGSTABGetPrecond
 #undef HYPRE_ParCSRBiCGSTABGetResidual
@@ -456,6 +457,7 @@
 #undef HYPRE_ParCSRCGNRCreate
 #undef HYPRE_ParCSRCGNRDestroy
 #undef HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRCGNRGetFinalResidualNorm
 #undef HYPRE_ParCSRCGNRGetNumIterations
 #undef HYPRE_ParCSRCGNRGetPrecond
 #undef HYPRE_ParCSRCGNRSetLogging
@@ -469,6 +471,7 @@
 #undef HYPRE_ParCSRCOGMRESCreate
 #undef HYPRE_ParCSRCOGMRESDestroy
 #undef HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRCOGMRESGetFinalResidualNorm
 #undef HYPRE_ParCSRCOGMRESGetNumIterations
 #undef HYPRE_ParCSRCOGMRESGetPrecond
 #undef HYPRE_ParCSRCOGMRESGetResidual
@@ -489,6 +492,7 @@
 #undef HYPRE_ParCSRFlexGMRESCreate
 #undef HYPRE_ParCSRFlexGMRESDestroy
 #undef HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRFlexGMRESGetFinalResidualNorm
 #undef HYPRE_ParCSRFlexGMRESGetNumIterations
 #undef HYPRE_ParCSRFlexGMRESGetPrecond
 #undef HYPRE_ParCSRFlexGMRESGetResidual
@@ -506,6 +510,7 @@
 #undef HYPRE_ParCSRGMRESCreate
 #undef HYPRE_ParCSRGMRESDestroy
 #undef HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRGMRESGetFinalResidualNorm
 #undef HYPRE_ParCSRGMRESGetNumIterations
 #undef HYPRE_ParCSRGMRESGetPrecond
 #undef HYPRE_ParCSRGMRESGetRefSolution
@@ -593,6 +598,7 @@
 #undef HYPRE_ParCSRLGMRESCreate
 #undef HYPRE_ParCSRLGMRESDestroy
 #undef HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRLGMRESGetFinalResidualNorm
 #undef HYPRE_ParCSRLGMRESGetNumIterations
 #undef HYPRE_ParCSRLGMRESGetPrecond
 #undef HYPRE_ParCSRLGMRESGetResidual
@@ -2050,6 +2056,7 @@
 #undef hypre_parcsrbicgstabcreate
 #undef hypre_parcsrbicgstabdestroy
 #undef hypre_parcsrbicgstabgetfinalrel
+#undef hypre_parcsrbicgstabgetfinalres
 #undef hypre_parcsrbicgstabgetnumiter
 #undef hypre_parcsrbicgstabgetprecond
 #undef hypre_parcsrbicgstabsetatol
@@ -2065,6 +2072,7 @@
 #undef hypre_parcsrcgnrcreate
 #undef hypre_parcsrcgnrdestroy
 #undef hypre_parcsrcgnrgetfinalrelativ
+#undef hypre_parcsrcgnrgetfinalres
 #undef hypre_parcsrcgnrgetnumiteration
 #undef hypre_parcsrcgnrgetprecond
 #undef hypre_parcsrcgnrsetlogging
@@ -2078,6 +2086,7 @@
 #undef hypre_parcsrcogmrescreate
 #undef hypre_parcsrcogmresdestroy
 #undef hypre_parcsrcogmresgetfinalrela
+#undef hypre_parcsrcogmresgetfinalres
 #undef hypre_parcsrcogmresgetnumiterat
 #undef hypre_parcsrcogmresgetprecond
 #undef hypre_parcsrcogmressetabsolutet
@@ -2097,6 +2106,7 @@
 #undef hypre_parcsrflexgmrescreate
 #undef hypre_parcsrflexgmresdestroy
 #undef hypre_parcsrflexgmresgetfinalrelati
+#undef hypre_parcsrflexgmresgetfinalres
 #undef hypre_parcsrflexgmresgetnumiteratio
 #undef hypre_parcsrflexgmresgetprecond
 #undef hypre_parcsrflexgmressetabsolutetol
@@ -2112,6 +2122,7 @@
 #undef hypre_parcsrgmrescreate
 #undef hypre_parcsrgmresdestroy
 #undef hypre_parcsrgmresgetfinalrelati
+#undef hypre_parcsrgmresgetfinalres
 #undef hypre_parcsrgmresgetnumiteratio
 #undef hypre_parcsrgmresgetprecond
 #undef hypre_parcsrgmressetabsolutetol
@@ -2129,6 +2140,7 @@
 #undef hypre_parcsrhybriddestroy
 #undef hypre_parcsrhybridgetdscgnumite
 #undef hypre_parcsrhybridgetfinalrelat
+#undef hypre_parcsrhybridgetfinalresid
 #undef hypre_parcsrhybridgetnumiterati
 #undef hypre_parcsrhybridgetpcgnumiter
 #undef hypre_parcsrhybridsetaggnumlev
@@ -2178,6 +2190,7 @@
 #undef hypre_parcsrlgmrescreate
 #undef hypre_parcsrlgmresdestroy
 #undef hypre_parcsrlgmresgetfinalrelati
+#undef hypre_parcsrlgmresgetfinalres
 #undef hypre_parcsrlgmresgetnumiteratio
 #undef hypre_parcsrlgmresgetprecond
 #undef hypre_parcsrlgmressetabsolutetol
@@ -2195,6 +2208,7 @@
 #undef hypre_parcsrpcgcreate
 #undef hypre_parcsrpcgdestroy
 #undef hypre_parcsrpcggetfinalrelative
+#undef hypre_parcsrpcggetfinalresidual
 #undef hypre_parcsrpcggetnumiterations
 #undef hypre_parcsrpcggetprecond
 #undef hypre_parcsrpcgsetatol

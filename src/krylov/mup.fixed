@@ -25,6 +25,7 @@ hypre_CGNRCreate
 hypre_CGNRDestroy
 hypre_CGNRFunctionsCreate
 hypre_CGNRGetFinalRelativeResidualNorm
+hypre_CGNRGetFinalResidualNorm
 hypre_CGNRGetNumIterations
 hypre_CGNRGetPrecond
 hypre_CGNRSetLogging
@@ -43,6 +44,7 @@ hypre_COGMRESGetCGS
 hypre_COGMRESGetConverged
 hypre_COGMRESGetConvergenceFactorTol
 hypre_COGMRESGetFinalRelativeResidualNorm
+hypre_COGMRESGetFinalResidualNorm
 hypre_COGMRESGetKDim
 hypre_COGMRESGetLogging
 hypre_COGMRESGetMaxIter
@@ -78,6 +80,7 @@ hypre_FlexGMRESGetAbsoluteTol
 hypre_FlexGMRESGetConverged
 hypre_FlexGMRESGetConvergenceFactorTol
 hypre_FlexGMRESGetFinalRelativeResidualNorm
+hypre_FlexGMRESGetFinalResidualNorm
 hypre_FlexGMRESGetKDim
 hypre_FlexGMRESGetLogging
 hypre_FlexGMRESGetMaxIter
@@ -151,6 +154,7 @@ hypre_LGMRESGetAugDim
 hypre_LGMRESGetConverged
 hypre_LGMRESGetConvergenceFactorTol
 hypre_LGMRESGetFinalRelativeResidualNorm
+hypre_LGMRESGetFinalResidualNorm
 hypre_LGMRESGetKDim
 hypre_LGMRESGetLogging
 hypre_LGMRESGetMaxIter

@@ -772,6 +772,13 @@ HYPRE_Int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPCGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                       HYPRE_Real         *norm);
 
+/**
+ * Returns the norm of the final residual.
+ * The norm is preconditioned unless the two-norm is selected.
+ **/
+HYPRE_Int HYPRE_StructPCGGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                              HYPRE_Real         *norm);
+
 HYPRE_Int HYPRE_StructPCGGetResidual(HYPRE_StructSolver   solver,
                                      void               **residual);
 
@@ -856,6 +863,12 @@ HYPRE_Int HYPRE_StructGMRESGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructGMRESGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                         HYPRE_Real         *norm);
 
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_StructGMRESGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                                HYPRE_Real         *norm);
+
 HYPRE_Int HYPRE_StructGMRESGetResidual(HYPRE_StructSolver   solver,
                                        void               **residual);
 /**@}*/
@@ -921,6 +934,12 @@ HYPRE_Int HYPRE_StructFlexGMRESGetNumIterations(HYPRE_StructSolver  solver,
 
 HYPRE_Int HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                             HYPRE_Real         *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_StructFlexGMRESGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                                    HYPRE_Real         *norm);
 
 HYPRE_Int HYPRE_StructFlexGMRESGetResidual(HYPRE_StructSolver   solver,
                                            void               **residual);
@@ -995,6 +1014,12 @@ HYPRE_Int HYPRE_StructLGMRESGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructLGMRESGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                          HYPRE_Real         *norm);
 
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_StructLGMRESGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                                 HYPRE_Real         *norm);
+
 HYPRE_Int HYPRE_StructLGMRESGetResidual(HYPRE_StructSolver   solver,
                                         void               **residual);
 /**@}*/
@@ -1057,6 +1082,12 @@ HYPRE_Int HYPRE_StructBiCGSTABGetNumIterations(HYPRE_StructSolver  solver,
 
 HYPRE_Int HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                            HYPRE_Real         *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_StructBiCGSTABGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                                   HYPRE_Real         *norm);
 
 HYPRE_Int HYPRE_StructBiCGSTABGetResidual( HYPRE_StructSolver   solver,
                                            void               **residual);
@@ -1234,6 +1265,12 @@ HYPRE_Int HYPRE_StructHybridGetPCGNumIterations(HYPRE_StructSolver  solver,
  **/
 HYPRE_Int HYPRE_StructHybridGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                          HYPRE_Real         *norm);
+
+/**
+ * Returns the norm of the final residual.
+ **/
+HYPRE_Int HYPRE_StructHybridGetFinalResidualNorm(HYPRE_StructSolver  solver,
+                                                 HYPRE_Real         *norm);
 
 HYPRE_Int HYPRE_StructHybridSetPCGAbsoluteTolFactor(HYPRE_StructSolver solver,
                                                     HYPRE_Real pcg_atolf );

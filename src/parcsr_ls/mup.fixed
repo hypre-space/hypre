@@ -1327,6 +1327,7 @@ hypre_parasailssolve
 hypre_parcsrbicgstabcreate
 hypre_parcsrbicgstabdestroy
 hypre_parcsrbicgstabgetfinalrel
+hypre_parcsrbicgstabgetfinalres
 hypre_parcsrbicgstabgetnumiter
 hypre_parcsrbicgstabgetprecond
 hypre_parcsrbicgstabsetatol
@@ -1342,6 +1343,7 @@ hypre_parcsrbicgstabsolve
 hypre_parcsrcgnrcreate
 hypre_parcsrcgnrdestroy
 hypre_parcsrcgnrgetfinalrelativ
+hypre_parcsrcgnrgetfinalres
 hypre_parcsrcgnrgetnumiteration
 hypre_parcsrcgnrgetprecond
 hypre_parcsrcgnrsetlogging
@@ -1355,6 +1357,7 @@ hypre_parcsrcgnrsolve
 hypre_parcsrcogmrescreate
 hypre_parcsrcogmresdestroy
 hypre_parcsrcogmresgetfinalrela
+hypre_parcsrcogmresgetfinalres
 hypre_parcsrcogmresgetnumiterat
 hypre_parcsrcogmresgetprecond
 hypre_parcsrcogmressetabsolutet
@@ -1374,6 +1377,7 @@ hypre_parcsrdiagscalesetup
 hypre_parcsrflexgmrescreate
 hypre_parcsrflexgmresdestroy
 hypre_parcsrflexgmresgetfinalrelati
+hypre_parcsrflexgmresgetfinalres
 hypre_parcsrflexgmresgetnumiteratio
 hypre_parcsrflexgmresgetprecond
 hypre_parcsrflexgmressetabsolutetol
@@ -1389,6 +1393,7 @@ hypre_parcsrflexgmressolve
 hypre_parcsrgmrescreate
 hypre_parcsrgmresdestroy
 hypre_parcsrgmresgetfinalrelati
+hypre_parcsrgmresgetfinalres
 hypre_parcsrgmresgetnumiteratio
 hypre_parcsrgmresgetprecond
 hypre_parcsrgmressetabsolutetol
@@ -1406,6 +1411,7 @@ hypre_parcsrhybridcreate
 hypre_parcsrhybriddestroy
 hypre_parcsrhybridgetdscgnumite
 hypre_parcsrhybridgetfinalrelat
+hypre_parcsrhybridgetfinalresid
 hypre_parcsrhybridgetnumiterati
 hypre_parcsrhybridgetpcgnumiter
 hypre_parcsrhybridsetaggnumlev
@@ -1455,6 +1461,7 @@ hypre_parcsrhybridsolve
 hypre_parcsrlgmrescreate
 hypre_parcsrlgmresdestroy
 hypre_parcsrlgmresgetfinalrelati
+hypre_parcsrlgmresgetfinalres
 hypre_parcsrlgmresgetnumiteratio
 hypre_parcsrlgmresgetprecond
 hypre_parcsrlgmressetabsolutetol
@@ -1472,6 +1479,7 @@ hypre_parcsrmultivectorread
 hypre_parcsrpcgcreate
 hypre_parcsrpcgdestroy
 hypre_parcsrpcggetfinalrelative
+hypre_parcsrpcggetfinalresidual
 hypre_parcsrpcggetnumiterations
 hypre_parcsrpcggetprecond
 hypre_parcsrpcgsetatol

@@ -113,6 +113,14 @@ hypre_HybridGetFinalRelativeResidualNorm( void *hybrid_vdata, HYPRE_Real *final_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_HybridGetFinalResidualNorm( void *hybrid_vdata, HYPRE_Real *final_res_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_HybridGetFinalResidualNorm)( hybrid_vdata, final_res_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_HybridGetNumIterations( void *hybrid_vdata, HYPRE_Int *num_its )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_HybridGetNumIterations)( hybrid_vdata, num_its );

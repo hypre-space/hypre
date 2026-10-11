@@ -36,6 +36,7 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int             dscg_num_its;
    HYPRE_Int             krylov_num_its;
+   HYPRE_Real            final_res_norm;
    HYPRE_Real            final_rel_res_norm;
    HYPRE_Int             time_index;
 
@@ -414,6 +415,21 @@ hypre_HybridGetFinalRelativeResidualNorm( void        *hybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_HybridGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_HybridGetFinalResidualNorm( void        *hybrid_vdata,
+                                  HYPRE_Real  *final_res_norm )
+{
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
+
+   *final_res_norm = (hybrid_data -> final_res_norm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_HybridSetup
  *--------------------------------------------------------------------------*/
 
@@ -576,6 +592,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    HYPRE_Int          converged;
 
    HYPRE_Real         res_norm;
+   HYPRE_Real         rel_res_norm;
    HYPRE_Int          myid;
 
    if (solver_type == 1)
@@ -605,7 +622,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_PCGGetNumIterations(krylov_solver, &dscg_num_its);
       (hybrid_data -> dscg_num_its) = dscg_num_its;
-      hypre_PCGGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
+      hypre_PCGGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+      hypre_PCGGetFinalResidualNorm(krylov_solver, &res_norm);
 
       /*--------------------------------------------------------------------
        * Get additional information from PCG if logging on for hybrid solver.
@@ -649,7 +667,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_GMRESGetNumIterations(krylov_solver, &dscg_num_its);
       (hybrid_data -> dscg_num_its) = dscg_num_its;
-      hypre_GMRESGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
+      hypre_GMRESGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+      hypre_GMRESGetFinalResidualNorm(krylov_solver, &res_norm);
 
       /*--------------------------------------------------------------------
        * check if converged.
@@ -684,7 +703,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_BiCGSTABGetNumIterations(krylov_solver, &dscg_num_its);
       (hybrid_data -> dscg_num_its) = dscg_num_its;
-      hypre_BiCGSTABGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
+      hypre_BiCGSTABGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+      hypre_BiCGSTABGetFinalResidualNorm(krylov_solver, &res_norm);
 
       /*--------------------------------------------------------------------
        * check if converged.
@@ -697,7 +717,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
     *-----------------------------------------------------------------------*/
    if ( converged )
    {
-      (hybrid_data -> final_rel_res_norm) = res_norm;
+      (hybrid_data -> final_rel_res_norm) = rel_res_norm;
+      (hybrid_data -> final_res_norm) = res_norm;
       if (solver_type == 1)
       {
          hypre_PCGDestroy(krylov_solver);
@@ -779,8 +800,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
          /* Get information from PCG that is always logged in hybrid solver*/
          hypre_PCGGetNumIterations(krylov_solver, &krylov_num_its);
          (hybrid_data -> krylov_num_its)  = krylov_num_its;
-         hypre_PCGGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
-         (hybrid_data -> final_rel_res_norm) = res_norm;
+         hypre_PCGGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+         hypre_PCGGetFinalResidualNorm(krylov_solver, &res_norm);
+         (hybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (hybrid_data -> final_res_norm) = res_norm;
 
          /*-----------------------------------------------------------------
           * Get additional information from PCG if logging on for hybrid solver.
@@ -807,8 +830,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
          /* Get information from GMRES that is always logged in hybrid solver*/
          hypre_GMRESGetNumIterations(krylov_solver, &krylov_num_its);
          (hybrid_data -> krylov_num_its)  = krylov_num_its;
-         hypre_GMRESGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
-         (hybrid_data -> final_rel_res_norm) = res_norm;
+         hypre_GMRESGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+         hypre_GMRESGetFinalResidualNorm(krylov_solver, &res_norm);
+         (hybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (hybrid_data -> final_res_norm) = res_norm;
 
          /* Free GMRES and preconditioner */
          hypre_GMRESDestroy(krylov_solver);
@@ -825,8 +850,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
          /* Get information from BiCGSTAB that is always logged in hybrid solver*/
          hypre_BiCGSTABGetNumIterations(krylov_solver, &krylov_num_its);
          (hybrid_data -> krylov_num_its)  = krylov_num_its;
-         hypre_BiCGSTABGetFinalRelativeResidualNorm(krylov_solver, &res_norm);
-         (hybrid_data -> final_rel_res_norm) = res_norm;
+         hypre_BiCGSTABGetFinalRelativeResidualNorm(krylov_solver, &rel_res_norm);
+         hypre_BiCGSTABGetFinalResidualNorm(krylov_solver, &res_norm);
+         (hybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (hybrid_data -> final_res_norm) = res_norm;
 
          /* Free BiCGSTAB and preconditioner */
          hypre_BiCGSTABDestroy(krylov_solver);

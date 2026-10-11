@@ -125,6 +125,7 @@ hypre_SysPFMGZeroDiagonal
 hypre_sstructbicgstabcreate
 hypre_sstructbicgstabdestroy
 hypre_sstructbicgstabgetfinalre
+hypre_sstructbicgstabgetfinalres
 hypre_sstructbicgstabgetnumiter
 hypre_sstructbicgstabgetresidua
 hypre_sstructbicgstabsetabsolutetol
@@ -142,6 +143,7 @@ hypre_sstructdiagscalesetup
 hypre_sstructflexgmrescreate
 hypre_sstructflexgmresdestroy
 hypre_sstructflexgmresgetfinalrelat
+hypre_sstructflexgmresgetfinalres
 hypre_sstructflexgmresgetnumiterati
 hypre_sstructflexgmresgetresidual
 hypre_sstructflexgmressetabsolutetol
@@ -157,6 +159,7 @@ hypre_sstructflexgmressolve
 hypre_sstructgmrescreate
 hypre_sstructgmresdestroy
 hypre_sstructgmresgetfinalrelat
+hypre_sstructgmresgetfinalres
 hypre_sstructgmresgetnumiterati
 hypre_sstructgmresgetresidual
 hypre_sstructgmressetabsolutetol
@@ -173,6 +176,7 @@ hypre_sstructgmressolve
 hypre_sstructlgmrescreate
 hypre_sstructlgmresdestroy
 hypre_sstructlgmresgetfinalrelat
+hypre_sstructlgmresgetfinalres
 hypre_sstructlgmresgetnumiterati
 hypre_sstructlgmresgetresidual
 hypre_sstructlgmressetabsolutetol
@@ -189,6 +193,7 @@ hypre_sstructlgmressolve
 hypre_sstructpcgcreate
 hypre_sstructpcgdestroy
 hypre_sstructpcggetfinalrelativ
+hypre_sstructpcggetfinalres
 hypre_sstructpcggetnumiteration
 hypre_sstructpcggetresidual
 hypre_sstructpcgsetabsolutetol
