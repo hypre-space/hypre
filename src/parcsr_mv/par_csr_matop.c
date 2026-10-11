@@ -4313,12 +4313,12 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    HYPRE_BigInt block_start, block_end;
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Complex      *A_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real      *A_diag_a = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
    /* off-diag part of A */
    hypre_CSRMatrix *A_offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Complex      *A_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Real      *A_offd_a = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
@@ -4351,12 +4351,6 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_COMPLEX)
-   /* the dense block inversion below uses real-only LAPACK routines */
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Complex data type is not supported!");
-   return hypre_error_flag;
-#endif
-
    /* in block diagonals, row range of the blocks this proc span */
    HYPRE_BigInt first_row_block = first_row / (HYPRE_BigInt)blockSize * (HYPRE_BigInt)blockSize;
    HYPRE_BigInt end_row_block   = hypre_min( (last_row / (HYPRE_BigInt)blockSize + 1) *
@@ -4378,9 +4372,9 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_ext_i = NULL;
    HYPRE_BigInt    *A_ext_j = NULL;
 
-   HYPRE_Complex *dense_all = hypre_CTAlloc(HYPRE_Complex, num_blocks * blockSize * blockSize,
-                                            HYPRE_MEMORY_HOST);
-   HYPRE_Complex *dense = dense_all;
+   HYPRE_Real *dense_all = hypre_CTAlloc(HYPRE_Complex, num_blocks * blockSize * blockSize,
+                                         HYPRE_MEMORY_HOST);
+   HYPRE_Real *dense = dense_all;
    HYPRE_Int *IPIV  = hypre_TAlloc(HYPRE_Int, blockSize, HYPRE_MEMORY_HOST);
    HYPRE_Complex *dgetri_work = NULL;
    HYPRE_Int      dgetri_lwork = -1, lapack_info;
@@ -4570,8 +4564,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
          }
       }
 
-      /* 2. invert the dense matrix (real-only LAPACK; complex is rejected above) */
-#if !defined(HYPRE_COMPLEX)
+      /* 2. invert the dense matrix */
       hypre_dgetrf(&s, &s, dense, &blockSize, IPIV, &lapack_info);
 
       hypre_assert(lapack_info == 0);
@@ -4595,10 +4588,6 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
 
          hypre_assert(lapack_info == 0);
       }
-#else
-      HYPRE_UNUSED_VAR(dgetri_lwork);
-      HYPRE_UNUSED_VAR(lapack_info);
-#endif
 
       /* filter out *zeros* */
       HYPRE_Real Fnorm = 0.0;
@@ -4607,7 +4596,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
          for (j = 0; j < s; j++)
          {
             HYPRE_Complex t = dense[j + i * blockSize];
-            Fnorm += hypre_cabs(t) * hypre_cabs(t);
+            Fnorm += t * t;
          }
       }
 
