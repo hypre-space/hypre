@@ -3220,6 +3220,9 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *norm);
+
+HYPRE_Int HYPRE_ParCSRPCGGetFinalResidualNorm(HYPRE_Solver  solver,
+                                                 HYPRE_Real   *norm);
 /**
  * Returns the residual.
  **/
@@ -4282,6 +4285,12 @@ HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
+
+/**
+ * Returns the norm of the final residual. Requires logging to be enabled.
+ **/
+HYPRE_Int HYPRE_ParCSRHybridGetFinalResidualNorm(HYPRE_Solver solver,
+                                                    HYPRE_Real *norm);
 
 /* Is this a retired function? (RDF) */
 HYPRE_Int

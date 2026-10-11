@@ -40,6 +40,7 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int             dscg_num_its;
    HYPRE_Int             pcg_num_its;
+   HYPRE_Real            final_res_norm;
    HYPRE_Real            final_rel_res_norm;
    HYPRE_Int             time_index;
 
@@ -1887,6 +1888,26 @@ hypre_AMGHybridGetFinalRelativeResidualNorm( void   *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridGetFinalResidualNorm( void *AMGhybrid_vdata,
+                                     HYPRE_Real *final_res_norm )
+{
+   hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *) AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *final_res_norm = (AMGhybrid_data -> final_res_norm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridSetup
  *--------------------------------------------------------------------------*/
 
@@ -1999,6 +2020,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int          converged = 0;
    HYPRE_Int          num_variables = hypre_VectorSize(hypre_ParVectorLocalVector(b));
    HYPRE_Real         res_norm;
+   HYPRE_Real         rel_res_norm;
 
    HYPRE_Int          i, j;
    HYPRE_Int          sol_print_level; /* print_level for solver */
@@ -2171,7 +2193,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
           *---------------------------------------------------------------------*/
          hypre_PCGGetNumIterations(pcg_solver, &dscg_num_its);
          (AMGhybrid_data -> dscg_num_its) = dscg_num_its;
-         hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+         hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_PCGGetFinalResidualNorm(pcg_solver, &res_norm);
 
          hypre_PCGGetConverged(pcg_solver, &converged);
 
@@ -2236,7 +2259,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
           *---------------------------------------------------------------------*/
          hypre_GMRESGetNumIterations(pcg_solver, &dscg_num_its);
          (AMGhybrid_data -> dscg_num_its) = dscg_num_its;
-         hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+         hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_GMRESGetFinalResidualNorm(pcg_solver, &res_norm);
 
          hypre_GMRESGetConverged(pcg_solver, &converged);
 
@@ -2297,7 +2321,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
           *---------------------------------------------------------------------*/
          hypre_BiCGSTABGetNumIterations(pcg_solver, &dscg_num_its);
          (AMGhybrid_data -> dscg_num_its) = dscg_num_its;
-         hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+         hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+         hypre_BiCGSTABGetFinalResidualNorm(pcg_solver, &res_norm);
 
          hypre_BiCGSTABGetConverged(pcg_solver, &converged);
 
@@ -2313,7 +2338,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    {
       if (logging)
       {
-         (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+         (AMGhybrid_data -> final_res_norm) = res_norm;
       }
    }
    /*-----------------------------------------------------------------------
@@ -2531,8 +2557,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
          if (logging)
          {
-            hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+            hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+            hypre_PCGGetFinalResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+            (AMGhybrid_data -> final_res_norm) = res_norm;
          }
 
          tt2 = hypre_MPI_Wtime();
@@ -2560,8 +2588,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
          if (logging)
          {
-            hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+            hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+            hypre_GMRESGetFinalResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+            (AMGhybrid_data -> final_res_norm) = res_norm;
          }
 
          tt2 = hypre_MPI_Wtime();
@@ -2589,8 +2619,10 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
          if (logging)
          {
-            hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+            hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &rel_res_norm);
+            hypre_BiCGSTABGetFinalResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = rel_res_norm;
+            (AMGhybrid_data -> final_res_norm) = res_norm;
          }
 
          tt2 = hypre_MPI_Wtime();

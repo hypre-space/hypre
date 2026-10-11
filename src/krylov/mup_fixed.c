@@ -57,6 +57,14 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void *bicgstab_vdata, HYPRE_Real *re
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BiCGSTABGetFinalResidualNorm( void *bicgstab_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BiCGSTABGetFinalResidualNorm)( bicgstab_vdata, residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BiCGSTABGetNumIterations( void *bicgstab_vdata, HYPRE_Int *num_iterations )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BiCGSTABGetNumIterations)( bicgstab_vdata, num_iterations );
@@ -913,6 +921,14 @@ hypre_GMRESGetFinalRelativeResidualNorm( void *gmres_vdata, HYPRE_Real *relative
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_GMRESGetFinalResidualNorm( void *gmres_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_GMRESGetFinalResidualNorm)( gmres_vdata, residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_GMRESGetKDim( void *gmres_vdata, HYPRE_Int *k_dim )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_GMRESGetKDim)( gmres_vdata, k_dim );
@@ -1468,6 +1484,14 @@ HYPRE_Int
 hypre_PCGGetFinalRelativeResidualNorm( void *pcg_vdata, HYPRE_Real *relative_residual_norm )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_PCGGetFinalRelativeResidualNorm)( pcg_vdata, relative_residual_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGGetFinalResidualNorm( void *pcg_vdata, HYPRE_Real *residual_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_PCGGetFinalResidualNorm)( pcg_vdata, residual_norm );
 }
 
 /*--------------------------------------------------------------------------*/

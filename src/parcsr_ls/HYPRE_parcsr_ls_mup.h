@@ -4461,6 +4461,15 @@ HYPRE_Int
 HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm( HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_ParCSRHybridGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_its );
 HYPRE_Int
 HYPRE_ParCSRHybridGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_its );
@@ -5242,6 +5251,15 @@ HYPRE_Int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
 HYPRE_Int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
+HYPRE_ParCSRPCGGetFinalResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_ParCSRPCGGetFinalResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_ParCSRPCGGetFinalResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_ParCSRPCGGetFinalResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
@@ -7553,6 +7571,9 @@ HYPRE_Int
 HYPRE_ParCSRHybridGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_ParCSRHybridGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_its );
 
 HYPRE_Int
@@ -7812,6 +7833,9 @@ HYPRE_ParCSRPCGDestroy_pre( HYPRE_Precision precision, HYPRE_Solver solver );
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
+HYPRE_ParCSRPCGGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );

@@ -3,6 +3,7 @@ hypre_BiCGSTABDestroy
 hypre_BiCGSTABFunctionsCreate
 hypre_BiCGSTABGetConverged
 hypre_BiCGSTABGetFinalRelativeResidualNorm
+hypre_BiCGSTABGetFinalResidualNorm
 hypre_BiCGSTABGetNumIterations
 hypre_BiCGSTABGetPrecond
 hypre_BiCGSTABGetPrecondMatrix
@@ -110,6 +111,7 @@ hypre_GMRESGetAbsoluteTol
 hypre_GMRESGetConverged
 hypre_GMRESGetConvergenceFactorTol
 hypre_GMRESGetFinalRelativeResidualNorm
+hypre_GMRESGetFinalResidualNorm
 hypre_GMRESGetKDim
 hypre_GMRESGetLogging
 hypre_GMRESGetMaxIter
@@ -202,6 +204,7 @@ hypre_PCGGetAbsoluteTolFactor
 hypre_PCGGetConverged
 hypre_PCGGetConvergenceFactorTol
 hypre_PCGGetFinalRelativeResidualNorm
+hypre_PCGGetFinalResidualNorm
 hypre_PCGGetFlex
 hypre_PCGGetLogging
 hypre_PCGGetMaxIter

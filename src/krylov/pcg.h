@@ -139,6 +139,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int    num_iterations;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
 
    HYPRE_Int    print_level; /* printing when print_level>0 */

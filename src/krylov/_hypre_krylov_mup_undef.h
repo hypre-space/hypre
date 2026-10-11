@@ -14,6 +14,7 @@
 
 #undef HYPRE_BiCGSTABDestroy
 #undef HYPRE_BiCGSTABGetFinalRelativeResidualNorm
+#undef HYPRE_BiCGSTABGetFinalResidualNorm
 #undef HYPRE_BiCGSTABGetNumIterations
 #undef HYPRE_BiCGSTABGetPrecond
 #undef HYPRE_BiCGSTABGetPrecondMatrix
@@ -102,6 +103,7 @@
 #undef HYPRE_GMRESGetConverged
 #undef HYPRE_GMRESGetConvergenceFactorTol
 #undef HYPRE_GMRESGetFinalRelativeResidualNorm
+#undef HYPRE_GMRESGetFinalResidualNorm
 #undef HYPRE_GMRESGetKDim
 #undef HYPRE_GMRESGetLogging
 #undef HYPRE_GMRESGetMaxIter
@@ -180,6 +182,7 @@
 #undef HYPRE_PCGGetConverged
 #undef HYPRE_PCGGetConvergenceFactorTol
 #undef HYPRE_PCGGetFinalRelativeResidualNorm
+#undef HYPRE_PCGGetFinalResidualNorm
 #undef HYPRE_PCGGetFlex
 #undef HYPRE_PCGGetLogging
 #undef HYPRE_PCGGetMaxIter
@@ -221,6 +224,7 @@
 #undef hypre_BiCGSTABFunctionsCreate
 #undef hypre_BiCGSTABGetConverged
 #undef hypre_BiCGSTABGetFinalRelativeResidualNorm
+#undef hypre_BiCGSTABGetFinalResidualNorm
 #undef hypre_BiCGSTABGetNumIterations
 #undef hypre_BiCGSTABGetPrecond
 #undef hypre_BiCGSTABGetPrecondMatrix
@@ -328,6 +332,7 @@
 #undef hypre_GMRESGetConverged
 #undef hypre_GMRESGetConvergenceFactorTol
 #undef hypre_GMRESGetFinalRelativeResidualNorm
+#undef hypre_GMRESGetFinalResidualNorm
 #undef hypre_GMRESGetKDim
 #undef hypre_GMRESGetLogging
 #undef hypre_GMRESGetMaxIter
@@ -420,6 +425,7 @@
 #undef hypre_PCGGetConverged
 #undef hypre_PCGGetConvergenceFactorTol
 #undef hypre_PCGGetFinalRelativeResidualNorm
+#undef hypre_PCGGetFinalResidualNorm
 #undef hypre_PCGGetFlex
 #undef hypre_PCGGetLogging
 #undef hypre_PCGGetMaxIter

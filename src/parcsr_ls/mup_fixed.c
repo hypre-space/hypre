@@ -841,6 +841,14 @@ hypre_AMGHybridGetFinalRelativeResidualNorm( void *AMGhybrid_vdata, HYPRE_Real *
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_AMGHybridGetFinalResidualNorm( void *AMGhybrid_vdata, HYPRE_Real *final_res_norm )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridGetFinalResidualNorm)( AMGhybrid_vdata, final_res_norm );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_AMGHybridGetNumIterations( void *AMGhybrid_vdata, HYPRE_Int *num_its )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_AMGHybridGetNumIterations)( AMGhybrid_vdata, num_its );

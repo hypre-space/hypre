@@ -153,6 +153,7 @@ typedef struct
    HYPRE_Int      hybrid;
    HYPRE_Real     tol;
    HYPRE_Real     cf_tol;
+   HYPRE_Real     residual_norm;
    HYPRE_Real     rel_residual_norm;
    HYPRE_Real     a_tol;
 
@@ -468,6 +469,7 @@ typedef struct
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
 
    void  *A;
@@ -1167,6 +1169,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int    num_iterations;
+   HYPRE_Real   residual_norm;
    HYPRE_Real   rel_residual_norm;
 
    HYPRE_Int    print_level; /* printing when print_level>0 */
@@ -1260,6 +1263,8 @@ HYPRE_Int hypre_BiCGSTABGetConverged ( void *bicgstab_vdata, HYPRE_Int *converge
 HYPRE_Int hypre_BiCGSTABGetNumIterations ( void *bicgstab_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_BiCGSTABGetFinalRelativeResidualNorm ( void *bicgstab_vdata,
                                                        HYPRE_Real *relative_residual_norm );
+HYPRE_Int hypre_BiCGSTABGetFinalResidualNorm ( void *bicgstab_vdata,
+                                                       HYPRE_Real *residual_norm );
 HYPRE_Int hypre_BiCGSTABGetResidual ( void *bicgstab_vdata, void **residual );
 
 /* cgnr.c */
@@ -1326,6 +1331,8 @@ HYPRE_Int hypre_GMRESGetNumIterations ( void *gmres_vdata, HYPRE_Int *num_iterat
 HYPRE_Int hypre_GMRESGetConverged ( void *gmres_vdata, HYPRE_Int *converged );
 HYPRE_Int hypre_GMRESGetFinalRelativeResidualNorm ( void *gmres_vdata,
                                                     HYPRE_Real *relative_residual_norm );
+HYPRE_Int hypre_GMRESGetFinalResidualNorm ( void *gmres_vdata,
+                                                    HYPRE_Real *residual_norm );
 
 /* cogmres.c */
 void *hypre_COGMRESCreate ( hypre_COGMRESFunctions *gmres_functions );
@@ -1497,6 +1504,8 @@ HYPRE_Int hypre_PCGGetConverged ( void *pcg_vdata, HYPRE_Int *converged );
 HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata, HYPRE_Int myid );
 HYPRE_Int hypre_PCGGetFinalRelativeResidualNorm ( void *pcg_vdata,
                                                   HYPRE_Real *relative_residual_norm );
+HYPRE_Int hypre_PCGGetFinalResidualNorm ( void *pcg_vdata,
+                                                  HYPRE_Real *residual_norm );
 
 
 #ifdef __cplusplus

@@ -526,6 +526,7 @@
 #undef HYPRE_ParCSRHybridDestroy
 #undef HYPRE_ParCSRHybridGetDSCGNumIterations
 #undef HYPRE_ParCSRHybridGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRHybridGetFinalResidualNorm
 #undef HYPRE_ParCSRHybridGetNumIterations
 #undef HYPRE_ParCSRHybridGetPCGNumIterations
 #undef HYPRE_ParCSRHybridGetRecomputeResidual
@@ -613,6 +614,7 @@
 #undef HYPRE_ParCSRPCGCreate
 #undef HYPRE_ParCSRPCGDestroy
 #undef HYPRE_ParCSRPCGGetFinalRelativeResidualNorm
+#undef HYPRE_ParCSRPCGGetFinalResidualNorm
 #undef HYPRE_ParCSRPCGGetNumIterations
 #undef HYPRE_ParCSRPCGGetPrecond
 #undef HYPRE_ParCSRPCGGetResidual
@@ -823,6 +825,7 @@
 #undef hypre_AMGHybridDestroy
 #undef hypre_AMGHybridGetDSCGNumIterations
 #undef hypre_AMGHybridGetFinalRelativeResidualNorm
+#undef hypre_AMGHybridGetFinalResidualNorm
 #undef hypre_AMGHybridGetNumIterations
 #undef hypre_AMGHybridGetPCGNumIterations
 #undef hypre_AMGHybridGetRecomputeResidual

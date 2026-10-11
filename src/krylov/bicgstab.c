@@ -449,6 +449,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       }
    }
 
+   (bicgstab_data -> residual_norm) = r_norm;
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
    {
@@ -589,6 +590,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       (*(bicgstab_functions->Axpy))(1.0, r, p);
    } /* end while loop */
 
+   (bicgstab_data -> residual_norm) = r_norm;
    (bicgstab_data -> num_iterations) = iter;
    if (b_norm > 0.0)
    {
@@ -837,6 +839,21 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
    hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData  *)bicgstab_vdata;
 
    *relative_residual_norm = (bicgstab_data -> rel_residual_norm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BiCGSTABGetFinalResidualNorm( void *bicgstab_vdata,
+                                    HYPRE_Real *residual_norm )
+{
+   hypre_BiCGSTABData *bicgstab_data = (hypre_BiCGSTABData *)bicgstab_vdata;
+
+   *residual_norm = (bicgstab_data -> residual_norm);
 
    return hypre_error_flag;
 }

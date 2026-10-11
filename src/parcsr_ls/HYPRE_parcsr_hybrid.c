@@ -756,3 +756,14 @@ HYPRE_ParCSRHybridGetSetupSolveTime( HYPRE_Solver solver,
 {
    return ( hypre_AMGHybridGetSetupSolveTime( (void *) solver, time ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridGetFinalResidualNorm( HYPRE_Solver solver,
+                                        HYPRE_Real  *norm    )
+{
+   return( hypre_AMGHybridGetFinalResidualNorm( (void *) solver, norm ) );
+}

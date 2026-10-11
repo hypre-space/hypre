@@ -685,6 +685,13 @@ HYPRE_Int
 hypre_AMGHybridGetFinalRelativeResidualNorm_long_dbl( void *AMGhybrid_vdata, hypre_long_double *final_rel_res_norm );
 
 HYPRE_Int
+hypre_AMGHybridGetFinalResidualNorm_flt( void *AMGhybrid_vdata, hypre_float *final_res_norm );
+HYPRE_Int
+hypre_AMGHybridGetFinalResidualNorm_dbl( void *AMGhybrid_vdata, hypre_double *final_res_norm );
+HYPRE_Int
+hypre_AMGHybridGetFinalResidualNorm_long_dbl( void *AMGhybrid_vdata, hypre_long_double *final_res_norm );
+
+HYPRE_Int
 hypre_AMGHybridGetNumIterations_flt( void *AMGhybrid_vdata, HYPRE_Int *num_its );
 HYPRE_Int
 hypre_AMGHybridGetNumIterations_dbl( void *AMGhybrid_vdata, HYPRE_Int *num_its );

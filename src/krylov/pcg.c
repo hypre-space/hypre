@@ -476,6 +476,7 @@ hypre_PCGSolve( void *pcg_vdata,
    }
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
+      (pcg_data -> residual_norm) = 0.0;
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
       if (logging > 0 || print_level > 0)
@@ -1037,10 +1038,12 @@ hypre_PCGSolve( void *pcg_vdata,
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
    {
+      (pcg_data -> residual_norm) = hypre_sqrt(i_prod);
       (pcg_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
    }
    else /* actually, we'll never get here... */
    {
+      (pcg_data -> residual_norm) = 0.0;
       (pcg_data -> rel_residual_norm) = 0.0;
    }
 
@@ -1620,6 +1623,21 @@ hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
    HYPRE_Real     rel_residual_norm = (pcg_data -> rel_residual_norm);
 
    *relative_residual_norm = rel_residual_norm;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGGetFinalResidualNorm( void *pcg_vdata,
+                               HYPRE_Real *residual_norm )
+{
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+   *residual_norm = (pcg_data -> residual_norm);
 
    return hypre_error_flag;
 }

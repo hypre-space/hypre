@@ -40,6 +40,15 @@ HYPRE_Int
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_BiCGSTABGetFinalResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_BiCGSTABGetFinalResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_BiCGSTABGetFinalResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_BiCGSTABGetFinalResidualNorm( HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_BiCGSTABGetNumIterations_flt( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 HYPRE_Int
 HYPRE_BiCGSTABGetNumIterations_dbl( HYPRE_Solver solver, HYPRE_Int *num_iterations );
@@ -814,6 +823,15 @@ HYPRE_Int
 HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_GMRESGetFinalResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_GMRESGetFinalResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_GMRESGetFinalResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_GMRESGetFinalResidualNorm( HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_GMRESGetKDim_flt( HYPRE_Solver solver, HYPRE_Int *k_dim );
 HYPRE_Int
 HYPRE_GMRESGetKDim_dbl( HYPRE_Solver solver, HYPRE_Int *k_dim );
@@ -1345,6 +1363,15 @@ HYPRE_Int
 HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm_flt( HYPRE_Solver solver, hypre_float *norm );
+HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm_dbl( HYPRE_Solver solver, hypre_double *norm );
+HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm_long_dbl( HYPRE_Solver solver, hypre_long_double *norm );
+HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm( HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_PCGGetFlex_flt( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int
 HYPRE_PCGGetFlex_dbl( HYPRE_Solver solver, HYPRE_Int *flex );
@@ -1659,6 +1686,9 @@ HYPRE_Int
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_BiCGSTABGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_BiCGSTABGetNumIterations_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
 HYPRE_Int
@@ -1917,6 +1947,9 @@ HYPRE_Int
 HYPRE_GMRESGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
+HYPRE_GMRESGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
 HYPRE_GMRESGetKDim_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *k_dim );
 
 HYPRE_Int
@@ -2092,6 +2125,9 @@ HYPRE_PCGGetConvergenceFactorTol_pre( HYPRE_Precision precision, HYPRE_Solver so
 
 HYPRE_Int
 HYPRE_PCGGetFinalRelativeResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
+
+HYPRE_Int
+HYPRE_PCGGetFinalResidualNorm_pre( HYPRE_Precision precision, HYPRE_Solver solver, void *norm );
 
 HYPRE_Int
 HYPRE_PCGGetFlex_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *flex );

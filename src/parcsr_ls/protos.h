@@ -158,6 +158,8 @@ HYPRE_Int hypre_AMGHybridGetDSCGNumIterations ( void *AMGhybrid_vdata, HYPRE_Int
 HYPRE_Int hypre_AMGHybridGetPCGNumIterations ( void *AMGhybrid_vdata, HYPRE_Int *pcg_num_its );
 HYPRE_Int hypre_AMGHybridGetFinalRelativeResidualNorm ( void *AMGhybrid_vdata,
                                                         HYPRE_Real *final_rel_res_norm );
+HYPRE_Int hypre_AMGHybridGetFinalResidualNorm ( void *AMGhybrid_vdata,
+                                                        HYPRE_Real *final_res_norm );
 HYPRE_Int hypre_AMGHybridSetup ( void *AMGhybrid_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b,
                                  hypre_ParVector *x );
 HYPRE_Int hypre_AMGHybridSolve ( void *AMGhybrid_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b,

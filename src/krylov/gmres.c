@@ -573,6 +573,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
          hypre_TFreeF(hh, gmres_functions);
 
+         (gmres_data -> residual_norm) = r_norm;
          (gmres_data -> num_iterations) = iter;
          HYPRE_ANNOTATE_FUNC_END;
 
@@ -1050,6 +1051,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
       hypre_printf("\n");
    }
 
+   (gmres_data -> residual_norm) = r_norm;
    (gmres_data -> num_iterations) = iter;
 
    if (b_norm > 0.0)
@@ -1516,6 +1518,21 @@ hypre_GMRESGetFinalRelativeResidualNorm( void       *gmres_vdata,
 
 
    *relative_residual_norm = (gmres_data -> rel_residual_norm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESGetFinalResidualNorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESGetFinalResidualNorm( void *gmres_vdata,
+                                 HYPRE_Real *residual_norm )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+   *residual_norm = (gmres_data -> residual_norm);
 
    return hypre_error_flag;
 }
