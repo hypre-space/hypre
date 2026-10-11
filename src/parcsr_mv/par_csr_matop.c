@@ -1231,6 +1231,8 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
  * JSP: to allow communication overlapping, it returns comm_handle_idx and
  * comm_handle_data. Before accessing B, they should be destroyed (including
  * send_data contained in the comm_handle).
+ *
+ * TODO (VPM): revisit HYPRE_Complex implementation (diag_data and offd_data)
  *--------------------------------------------------------------------------*/
 
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
@@ -1255,8 +1257,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int * offd_i,
    HYPRE_Int * offd_j,
    HYPRE_BigInt * col_map_offd,
-   HYPRE_Complex * diag_data,
-   HYPRE_Complex * offd_data,
+   HYPRE_Real * diag_data,
+   HYPRE_Real * offd_data,
    hypre_ParCSRCommHandle **comm_handle_idx,
    hypre_ParCSRCommHandle **comm_handle_data,
    HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd,
@@ -1347,26 +1349,26 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                HYPRE_Int jrow = send_map_elmts[j];
                HYPRE_Int len = 0;
 
-               if (hypre_creal(diag_data[diag_i[jrow]]) >= 0)
+               if (diag_data[diag_i[jrow]] >= 0)
                {
                   for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
                   {
-                     if (hypre_creal(diag_data[k]) < 0 && CF_marker[diag_j[k]] >= 0) { len++; }
+                     if (diag_data[k] < 0 && CF_marker[diag_j[k]] >= 0) { len++; }
                   }
                   for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
                   {
-                     if (hypre_creal(offd_data[k]) < 0) { len++; }
+                     if (offd_data[k] < 0) { len++; }
                   }
                }
                else
                {
                   for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
                   {
-                     if (hypre_creal(diag_data[k]) > 0 && CF_marker[diag_j[k]] >= 0) { len++; }
+                     if (diag_data[k] > 0 && CF_marker[diag_j[k]] >= 0) { len++; }
                   }
                   for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
                   {
-                     if (hypre_creal(offd_data[k]) > 0) { len++; }
+                     if (offd_data[k] > 0) { len++; }
                   }
                }
 
@@ -1467,11 +1469,11 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                   HYPRE_Int jrow = send_map_elmts[j];
                   /*HYPRE_Int count_begin = count;*/
 
-                  if (hypre_creal(diag_data[diag_i[jrow]]) >= 0)
+                  if (diag_data[diag_i[jrow]] >= 0)
                   {
                      for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
                      {
-                        if (hypre_creal(diag_data[k]) < 0 && CF_marker[diag_j[k]] >= 0)
+                        if (diag_data[k] < 0 && CF_marker[diag_j[k]] >= 0)
                         {
                            B_int_j[count] = (HYPRE_BigInt)diag_j[k] + first_col_diag;
                            B_int_data[count] = diag_data[k];
@@ -1482,7 +1484,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                      {
                         HYPRE_Int c = offd_j[k];
                         HYPRE_BigInt c_global = col_map_offd[c];
-                        if (hypre_creal(offd_data[k]) < 0)
+                        if (offd_data[k] < 0)
                         {
                            B_int_j[count] = c_global;
                            B_int_data[count] = offd_data[k];
@@ -1494,7 +1496,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                   {
                      for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
                      {
-                        if (hypre_creal(diag_data[k]) > 0 && CF_marker[diag_j[k]] >= 0)
+                        if (diag_data[k] > 0 && CF_marker[diag_j[k]] >= 0)
                         {
                            B_int_j[count] = (HYPRE_BigInt)diag_j[k] + first_col_diag;
                            B_int_data[count] = diag_data[k];
@@ -1505,7 +1507,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                      {
                         HYPRE_Int c = offd_j[k];
                         HYPRE_BigInt c_global = col_map_offd[c];
-                        if (hypre_creal(offd_data[k]) > 0)
+                        if (offd_data[k] > 0)
                         {
                            B_int_j[count] = c_global;
                            B_int_data[count] = offd_data[k];
