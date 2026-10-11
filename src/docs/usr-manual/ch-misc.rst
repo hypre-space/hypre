@@ -448,7 +448,7 @@ build systems.
    * - | rocSPARSE Support
        | (default is on, **HIP** only)
      - ``--enable-rocsparse``
-     - ``-DHYPRE_ENABLE_ROCSOLVER=ON``
+     - ``-DHYPRE_ENABLE_ROCSPARSE=ON``
    * - | rocSOLVER Support
        | (default is on, **HIP** only)
      - ``--enable-rocsolver``
