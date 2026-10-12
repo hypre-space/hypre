@@ -1255,9 +1255,24 @@ endfunction()
 
 # Function to add an uninstall target
 function(add_hypre_target_uninstall)
+  set(UNINSTALL_SCRIPT "${PROJECT_BINARY_DIR}/UninstallScript.cmake")
+  file(WRITE "${UNINSTALL_SCRIPT}" "
+  if(NOT EXISTS \"${PROJECT_BINARY_DIR}/install_manifest.txt\")
+    message(FATAL_ERROR \"Install manifest not found. Install HYPRE before uninstalling.\")
+  endif()
+  file(STRINGS \"${PROJECT_BINARY_DIR}/install_manifest.txt\" installed_files)
+  foreach(installed_file IN LISTS installed_files)
+    set(installed_file \"\$ENV{DESTDIR}\${installed_file}\")
+    if(EXISTS \"\${installed_file}\" OR IS_SYMLINK \"\${installed_file}\")
+      file(REMOVE \"\${installed_file}\")
+      if(EXISTS \"\${installed_file}\" OR IS_SYMLINK \"\${installed_file}\")
+        message(FATAL_ERROR \"Could not remove installed file: \${installed_file}\")
+      endif()
+    endif()
+  endforeach()
+  ")
   add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}"
-    COMMAND ${CMAKE_COMMAND} -E echo "Removed installation directory: ${CMAKE_INSTALL_PREFIX}"
+    COMMAND ${CMAKE_COMMAND} -P "${UNINSTALL_SCRIPT}"
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     COMMENT "Uninstalling HYPRE"
     VERBATIM
