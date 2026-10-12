@@ -219,36 +219,10 @@ endfunction()
 
 # Function to configure MPI target
 function(configure_mpi_target)
-  find_package(MPI REQUIRED)
+  find_package(MPI REQUIRED COMPONENTS C)
+  # The imported target supplies MPI include paths and compile/link requirements.
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
 
-  # Determine the correct MPI include directory
-  if(MPI_CXX_INCLUDE_DIR)
-    set(MPI_INCLUDE_DIR ${MPI_CXX_INCLUDE_DIR})
-  elseif(MPI_CXX_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIR ${MPI_CXX_INCLUDE_PATH})
-  elseif(MPI_CXX_COMPILER_INCLUDE_DIR)
-    set(MPI_INCLUDE_DIR ${MPI_CXX_COMPILER_INCLUDE_DIR})
-  elseif(MPI_C_COMPILER_INCLUDE_DIR)
-    set(MPI_INCLUDE_DIR ${MPI_C_COMPILER_INCLUDE_DIR})
-  elseif(MPI_C_INCLUDE_DIR)
-    set(MPI_INCLUDE_DIR ${MPI_C_INCLUDE_DIR})
-  elseif(MPI_C_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIR ${MPI_C_INCLUDE_PATH})
-  elseif(MPI_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH})
-  elseif(MPICH_DIR)
-    set(MPI_INCLUDE_DIR ${MPICH_DIR}/include)
-  elseif(DEFINED ENV{MPICH_DIR})
-    set(MPI_INCLUDE_DIR $ENV{MPICH_DIR}/include)
-  else()
-    message(WARNING "MPI include directory not found. Please specify -DMPI_INCLUDE_DIR or the compilation may fail.")
-  endif()
-
-  if (HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
-    message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIR}")
-    target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIR})
-  endif ()
   message(STATUS "MPI execution command: ${MPIEXEC_EXECUTABLE}")
 
   set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
