@@ -86,6 +86,7 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
 # Set debug flags based on compiler
+set(HYPRE_DEBUG OFF CACHE INTERNAL "")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(HYPRE_DEBUG ON CACHE INTERNAL "")
   set(_hypre_fpe_trap_default ON CACHE INTERNAL "")
@@ -273,6 +274,14 @@ set_internal_hypre_option(USING SYCL)
 set_internal_hypre_option(USING MAGMA)
 set_internal_hypre_option(USING CALIPER)
 set_internal_hypre_option(USING FPE_TRAP)
+set_internal_hypre_option(USING SUPERLU)
+set_internal_hypre_option(USING DSUPERLU)
+set_internal_hypre_option(USING FEI)
+set_internal_hypre_option(USING UMPIRE)
+set_internal_hypre_option(USING UMPIRE_HOST)
+set_internal_hypre_option(USING UMPIRE_PINNED)
+set_internal_hypre_option(USING UMPIRE_DEVICE)
+set_internal_hypre_option(USING UMPIRE_UM)
 
 # Check for conflicting options
 ensure_options_differ(SINGLE LONG_DOUBLE)
@@ -293,14 +302,13 @@ if (HYPRE_BUILD_TESTS)
   enable_testing()
 endif()
 
-if (BUILD_SHARED_LIBS)
-  set(HYPRE_SHARED ON CACHE INTERNAL "")
-endif ()
+set(HYPRE_SHARED ${BUILD_SHARED_LIBS} CACHE INTERNAL "")
 
 if (HYPRE_ENABLE_MPI)
   set(HYPRE_HAVE_MPI ON CACHE INTERNAL "")
   set(HYPRE_SEQUENTIAL OFF CACHE INTERNAL "")
 else ()
+  set(HYPRE_HAVE_MPI OFF CACHE INTERNAL "")
   set(HYPRE_SEQUENTIAL ON CACHE INTERNAL "")
 endif ()
 
@@ -446,6 +454,12 @@ else ()
 endif ()
 
 # Setup GPU build options: CUDA, HIP, SYCL are mutually exclusive
+foreach(gpu_option IN ITEMS GPU UNIFIED_MEMORY DEVICE_MEMORY
+    CUSPARSE CUSOLVER CUBLAS CUBLASLT CURAND
+    ROCSPARSE ROCSOLVER ROCBLAS ROCRAND ROCTHRUST ROCPRIM
+    ONEMKLSPARSE ONEMKLBLAS ONEMKLRAND NVTX ROCTX)
+  set(HYPRE_USING_${gpu_option} OFF CACHE INTERNAL "")
+endforeach()
 if (HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
   include(HYPRE_SetupGPUToolkit)
 else ()
