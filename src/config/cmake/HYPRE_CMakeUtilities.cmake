@@ -79,7 +79,7 @@ endfunction()
 # Map public options to the feature names used by HYPRE_config.h.
 function(set_internal_hypre_options)
   foreach(option IN ITEMS BIGINT MIXEDINT SINGLE LONG_DOUBLE COMPLEX MIXED_PRECISION
-      TEST_USING_HOST PRINT_ERRORS)
+      TEST_USING_HOST PRINT_ERRORS TIMING)
     set_internal_hypre_option("" ${option})
   endforeach()
   foreach(option IN ITEMS MEMORY_TRACKER HYPRE_BLAS HYPRE_LAPACK HOPSCOTCH
