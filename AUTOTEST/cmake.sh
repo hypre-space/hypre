@@ -37,7 +37,7 @@ root_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
-copts="-DHYPRE_BUILD_TESTS=ON"
+copts="-DHYPRE_BUILD_TESTS=ON -DHYPRE_COPY_EXECUTABLES_TO_SOURCE=ON"
 mopts=""
 ropts=""
 eopts=""

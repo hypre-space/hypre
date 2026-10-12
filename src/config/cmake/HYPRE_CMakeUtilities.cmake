@@ -1073,6 +1073,8 @@ endfunction()
 
 # A function to add an executable to the build with the correct flags, includes, and linkage.
 function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
+  option(HYPRE_COPY_EXECUTABLES_TO_SOURCE "Copy executables to the source tree for legacy tests" OFF)
+
   # If CUDA is enabled, tag source files to be compiled with nvcc.
   if (HYPRE_USING_CUDA)
     set_source_files_properties(${SRC_FILE} PROPERTIES LANGUAGE CUDA)
@@ -1137,11 +1139,12 @@ function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
     endif ()
   endif ()
 
-  # Copy executable to original source directory
-  add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
-  )
+  if(HYPRE_COPY_EXECUTABLES_TO_SOURCE)
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+  endif()
 endfunction()
 
 # Function to process a list of executable source files
