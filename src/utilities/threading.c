@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include "_hypre_utilities.h"
 
-#ifdef HYPRE_USING_OPENMP
+/* Thread counts are shared by all floating-point precisions. */
+#if defined(HYPRE_USING_OPENMP) && \
+    (!defined(HYPRE_MIXED_PRECISION) || defined(MP_BUILD_DOUBLE))
 
 HYPRE_Int
 hypre_NumThreads( void )
