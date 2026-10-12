@@ -76,6 +76,30 @@ function(set_internal_hypre_option var_prefix var_name)
   endif()
 endfunction()
 
+# Map public options to the feature names used by HYPRE_config.h.
+function(set_internal_hypre_options)
+  foreach(option IN ITEMS BIGINT MIXEDINT SINGLE LONG_DOUBLE COMPLEX MIXED_PRECISION
+      TEST_USING_HOST PRINT_ERRORS)
+    set_internal_hypre_option("" ${option})
+  endforeach()
+  foreach(option IN ITEMS MEMORY_TRACKER HYPRE_BLAS HYPRE_LAPACK HOPSCOTCH
+      GPU_AWARE_MPI CUDA_STREAMS THRUST_NOSYNC OPENMP CUDA HIP SYCL
+      MAGMA CALIPER FPE_TRAP SUPERLU DSUPERLU FEI UMPIRE UMPIRE_HOST UMPIRE_PINNED
+      UMPIRE_DEVICE UMPIRE_UM)
+    set_internal_hypre_option(USING ${option})
+  endforeach()
+endfunction()
+
+# Clear backend-specific state before configuring the selected toolkit.
+function(reset_hypre_gpu_options)
+  foreach(option IN ITEMS GPU UNIFIED_MEMORY DEVICE_MEMORY
+      CUSPARSE CUSOLVER CUBLAS CUBLASLT CURAND
+      ROCSPARSE ROCSOLVER ROCBLAS ROCRAND ROCTHRUST ROCPRIM
+      ONEMKLSPARSE ONEMKLBLAS ONEMKLRAND NVTX ROCTX)
+    set(HYPRE_USING_${option} OFF CACHE INTERNAL "")
+  endforeach()
+endfunction()
+
 # Function to setup git version info
 function(setup_git_version_info HYPRE_GIT_DIR)
   set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
