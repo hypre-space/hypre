@@ -1397,9 +1397,10 @@ macro(setup_mixed_precision_compilation module_name)
         POSITION_INDEPENDENT_CODE ON
       )
     endif()
-    # Link to MPI if it's enabled
-    if(HYPRE_ENABLE_MPI)
-      target_link_libraries(${module_name}_${precision} PRIVATE MPI::MPI_C)
+    # Inherit dependency usage requirements, including MPI and OpenMP flags.
+    get_target_property(_hypre_link_libs ${PROJECT_NAME} LINK_LIBRARIES)
+    if(_hypre_link_libs)
+      target_link_libraries(${module_name}_${precision} PRIVATE ${_hypre_link_libs})
     endif()
   endforeach()
 
