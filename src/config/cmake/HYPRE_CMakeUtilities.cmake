@@ -697,7 +697,7 @@ function(check_bigint_external_lapack_abi)
     return()
   endif()
 
-  if(HYPRE_ENABLE_HYPRE_LAPACK)
+  if(HYPRE_USING_HYPRE_LAPACK)
     return()
   endif()
 
