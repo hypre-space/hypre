@@ -64,6 +64,14 @@ install(TARGETS ${HYPRE_TEST_DRIVER_TARGETS} RUNTIME DESTINATION bin)
 # Copy test input files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/sstruct.in.default
                ${CMAKE_CURRENT_BINARY_DIR}/sstruct.in.default COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/runcheck.sh
+               ${CMAKE_CURRENT_BINARY_DIR}/runcheck.sh COPYONLY)
+
+# Regression scripts write outputs beside their inputs.
+foreach(test_dir IN ITEMS TEST_ij TEST_struct TEST_sstruct TEST_unit)
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/${test_dir}
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 
 # Add check target
 find_program(BASH_PROGRAM bash)
@@ -108,31 +116,31 @@ add_custom_target(checkpar
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
           -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_ij/solvers.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
+          ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij/solvers.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij
   COMMAND echo ""
 
   COMMAND ${CMAKE_COMMAND} -E echo_append "Testing Struct... "
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
           -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
+          ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct/solvers.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct
   COMMAND echo ""
 
   COMMAND ${CMAKE_COMMAND} -E echo_append "Testing SStruct... "
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
           -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
+          ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct/solvers.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct
   COMMAND echo ""
 
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${TEST_SRCS}
+  DEPENDS ${HYPRE_TEST_DRIVER_TARGETS}
   COMMENT "Running parallel tests"
   VERBATIM
 )
@@ -147,14 +155,14 @@ if(BUILD_TESTING)
       ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
         -atol ${HYPRE_CHECK_TOL} \
         -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_ij/solvers.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+        ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_ij"
   )
   set_tests_properties(test_ij_solvers PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS ij
-    FAIL_REGULAR_EXPRESSION "Failed"
+    FAIL_REGULAR_EXPRESSION "FAILED;Failed;Cannot find executable;Read-only file system"
   )
 
   # Struct tests
@@ -163,14 +171,14 @@ if(BUILD_TESTING)
       ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
         -atol ${HYPRE_CHECK_TOL} \
         -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+        ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_struct"
   )
   set_tests_properties(test_struct_solvers PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS struct
-    FAIL_REGULAR_EXPRESSION "Failed"
+    FAIL_REGULAR_EXPRESSION "FAILED;Failed;Cannot find executable;Read-only file system"
   )
 
   # SStruct tests
@@ -179,14 +187,14 @@ if(BUILD_TESTING)
       ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
         -atol ${HYPRE_CHECK_TOL} \
         -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+        ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_sstruct"
   )
   set_tests_properties(test_sstruct_solvers PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS sstruct
-    FAIL_REGULAR_EXPRESSION "Failed"
+    FAIL_REGULAR_EXPRESSION "FAILED;Failed;Cannot find executable;Read-only file system"
   )
 
   # Unit tests
@@ -195,14 +203,14 @@ if(BUILD_TESTING)
       ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
         -atol ${HYPRE_CHECK_TOL} \
         -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_unit/unit.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+        ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit/unit.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit"
   )
   set_tests_properties(test_unit PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS "test_csr_overlap;test_matrix_stats"
-    FAIL_REGULAR_EXPRESSION "Failed"
+    FAIL_REGULAR_EXPRESSION "FAILED;Failed;Cannot find executable;Read-only file system"
   )
 endif()
 
@@ -212,9 +220,9 @@ add_custom_target(unit_tests
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
           -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-          ${CMAKE_CURRENT_SOURCE_DIR}/TEST_unit/unit.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
-  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
+          ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit/unit.sh
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh ${CMAKE_CURRENT_BINARY_DIR}/TEST_unit
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS test_csr_overlap test_matrix_stats
   COMMENT "Running unit tests"
