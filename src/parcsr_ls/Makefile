@@ -130,6 +130,7 @@ FILES =\
  par_lr_interp.c\
  par_mgr.c\
  par_mgr_coarsen.c\
+ par_mgr_pcd.c\
  par_mgr_interp.c\
  par_mgr_rap.c\
  par_mgr_setup.c\
