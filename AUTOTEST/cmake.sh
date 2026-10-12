@@ -6,7 +6,8 @@
 
 testname=`basename $0 .sh`
 
-drivers="ij sstruct struct ams_driver struct_migrate ij_assembly"
+drivers="ij sstruct struct structmat sstructmat ams_driver struct_migrate
+         ij_assembly test_csr_overlap test_matrix_stats ij_mp struct_mp"
 
 # Echo usage information
 case $1 in
@@ -37,7 +38,7 @@ root_dir=`cd $1; pwd`
 shift
 
 # Parse the rest of the command line
-copts="-DHYPRE_BUILD_TESTS=ON -DHYPRE_COPY_EXECUTABLES_TO_SOURCE=ON"
+copts="-DHYPRE_BUILD_TESTS=ON"
 mopts=""
 ropts=""
 eopts=""
@@ -89,6 +90,15 @@ cd $test_dir
 
 # Run
 if [ -n "$rset" ]; then
+   # The legacy run script expects drivers in the source test directory.
+   for driver in $drivers; do
+      for executable in "$root_dir/build/test/$driver" "$root_dir"/build/test/*/"$driver"; do
+         if [ -f "$executable" ] && [ -x "$executable" ]; then
+            cp "$executable" "$root_dir/src/test/"
+            break
+         fi
+      done
+   done
    ./test.sh run.sh $root_dir/src $ropts
    mv -f run.??? $output_dir
 fi
