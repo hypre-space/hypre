@@ -44,19 +44,21 @@
 
       integer             zero, one
       parameter           (zero = 0, one = 1)
+      integer             coarse_stage
+      parameter           (coarse_stage = 3)
       integer             maxiter, num_iterations
       integer             generate_matrix, generate_rhs
       character           matfile(32), vecfile(32)
       character*31        matfile_str, vecfile_str
 
-      double precision    tol, pc_tol, convtol
+      double precision    tol, pc_tol, convtol, relax_weight
       parameter           (pc_tol = 0.0)
       double precision    final_res_norm
 
 ! parameters for BoomerAMG
       integer             hybrid, coarsen_type, measure_type
       integer             cycle_type
-      integer             smooth_num_sweep
+      integer             smooth_num_sweep, relax_type
       integer*8           num_grid_sweeps
 !      integer*8           num_grid_sweeps2(4)
       integer*8           grid_relax_type
@@ -421,6 +423,8 @@
       convtol = 0.9
       debug_flag = 0
       ioutdat = 1
+      relax_type = 3
+      relax_weight = 1.0
 
       if (solver_id .eq. 0) then
 
@@ -554,24 +558,14 @@
      &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
-          call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                         grid_relax_type,
-     &                                         grid_relax_points,
-     &                                         coarsen_type,
-     &                                         relax_weights,
-     &                                         MAXLEVELS,ierr)
-          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
-     &                                         num_grid_sweeps, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxType(precond,
-     &                                         grid_relax_type, ierr)
-          call HYPRE_BoomerAMGSetRelaxWeight(precond,
-     &                                       relax_weights, ierr)
-!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-!    &                                        ierr)
-!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-!    &                                        ierr)
-          call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
-     &                                        grid_relax_points, ierr)
+! Use scalar setters rather than passing opaque C array pointers.
+          call HYPRE_BoomerAMGSetNumSweeps(precond,
+     &                                   smooth_num_sweep, ierr)
+          call HYPRE_BoomerAMGSetRelaxType(precond, relax_type, ierr)
+          call HYPRE_BoomerAMGSetCycleRelaxType(precond, relax_type,
+     &                                        coarse_stage, ierr)
+          call HYPRE_BoomerAMGSetRelaxOrder(precond, one, ierr)
+          call HYPRE_BoomerAMGSetRelaxWt(precond, relax_weight, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond,
      &                                     MAXLEVELS, ierr)
           call HYPRE_BoomerAMGSetMaxRowSum(precond, max_row_sum,
@@ -707,25 +701,14 @@
      &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
-          call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                         grid_relax_type,
-     &                                         grid_relax_points,
-     &                                         coarsen_type,
-     &                                         relax_weights,
-     &                                         MAXLEVELS, ierr)
-          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
-     &                                         num_grid_sweeps, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxType(precond,
-     &                                         grid_relax_type, ierr)
-          call HYPRE_BoomerAMGSetRelaxWeight(precond,
-     &                                       relax_weights, ierr)
-!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-!    &                                        ierr)
-!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond,
-!    &                                        smooth_num_sweep,
-!    &                                        ierr)
-          call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
-     &                                         grid_relax_points, ierr)
+! Use scalar setters rather than passing opaque C array pointers.
+          call HYPRE_BoomerAMGSetNumSweeps(precond,
+     &                                   smooth_num_sweep, ierr)
+          call HYPRE_BoomerAMGSetRelaxType(precond, relax_type, ierr)
+          call HYPRE_BoomerAMGSetCycleRelaxType(precond, relax_type,
+     &                                        coarse_stage, ierr)
+          call HYPRE_BoomerAMGSetRelaxOrder(precond, one, ierr)
+          call HYPRE_BoomerAMGSetRelaxWt(precond, relax_weight, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond, MAXLEVELS, ierr)
           call HYPRE_BoomerAMGSetMaxRowSum(precond, max_row_sum,
      &                                     ierr)
@@ -813,25 +796,14 @@
      &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
-          call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                         grid_relax_type,
-     &                                         grid_relax_points,
-     &                                         coarsen_type,
-     &                                         relax_weights,
-     &                                         MAXLEVELS,ierr)
-          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
-     &                                         num_grid_sweeps, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxType(precond,
-     &                                         grid_relax_type, ierr)
-          call HYPRE_BoomerAMGSetRelaxWeight(precond,
-     &                                       relax_weights, ierr)
-!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-!    &                                        ierr)
-!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-!    &                                        ierr)
-          call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
-     &                                         grid_relax_points,
-     &                                         ierr)
+! Use scalar setters rather than passing opaque C array pointers.
+          call HYPRE_BoomerAMGSetNumSweeps(precond,
+     &                                   smooth_num_sweep, ierr)
+          call HYPRE_BoomerAMGSetRelaxType(precond, relax_type, ierr)
+          call HYPRE_BoomerAMGSetCycleRelaxType(precond, relax_type,
+     &                                        coarse_stage, ierr)
+          call HYPRE_BoomerAMGSetRelaxOrder(precond, one, ierr)
+          call HYPRE_BoomerAMGSetRelaxWt(precond, relax_weight, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond, MAXLEVELS, ierr)
           call HYPRE_BoomerAMGSetMaxRowSum(precond, max_row_sum,
      &                                     ierr)
@@ -919,24 +891,14 @@
      &                                         ierr)
           call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
           call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
-          call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                         grid_relax_type,
-     &                                         grid_relax_points,
-     &                                         coarsen_type,
-     &                                         relax_weights,
-     &                                         MAXLEVELS, ierr)
-          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
-     &                                         num_grid_sweeps, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxType(precond,
-     &                                         grid_relax_type, ierr)
-          call HYPRE_BoomerAMGSetRelaxWeight(precond,
-     &                                       relax_weights, ierr)
-!         call HYPRE_BoomerAMGSetSmoothOption(precond, smooth_option,
-!    &                                        ierr)
-!         call HYPRE_BoomerAMGSetSmoothNumSwp(precond, smooth_num_sweep,
-!    &                                        ierr)
-          call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
-     &                                         grid_relax_points, ierr)
+! Use scalar setters rather than passing opaque C array pointers.
+          call HYPRE_BoomerAMGSetNumSweeps(precond,
+     &                                   smooth_num_sweep, ierr)
+          call HYPRE_BoomerAMGSetRelaxType(precond, relax_type, ierr)
+          call HYPRE_BoomerAMGSetCycleRelaxType(precond, relax_type,
+     &                                        coarse_stage, ierr)
+          call HYPRE_BoomerAMGSetRelaxOrder(precond, one, ierr)
+          call HYPRE_BoomerAMGSetRelaxWt(precond, relax_weight, ierr)
           call HYPRE_BoomerAMGSetMaxLevels(precond, MAXLEVELS, ierr)
           call HYPRE_BoomerAMGSetMaxRowSum(precond, max_row_sum,
      &                                     ierr)
