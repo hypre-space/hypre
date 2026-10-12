@@ -104,19 +104,20 @@ endfunction()
 function(setup_git_version_info HYPRE_GIT_DIR)
   set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
   if (EXISTS "${HYPRE_GIT_DIR}")
-    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9 --always
+    get_filename_component(HYPRE_GIT_WORK_TREE "${HYPRE_GIT_DIR}" DIRECTORY)
+    execute_process(COMMAND git -C "${HYPRE_GIT_WORK_TREE}" describe --match v* --long --abbrev=9 --always
                     OUTPUT_VARIABLE develop_string
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     RESULT_VARIABLE git_result)
     if (git_result EQUAL 0)
       set(GIT_VERSION_FOUND TRUE PARENT_SCOPE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0 --always
+      execute_process(COMMAND git -C "${HYPRE_GIT_WORK_TREE}" describe --match v* --abbrev=0 --always
                       OUTPUT_VARIABLE develop_lastag
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-list --count ${develop_lastag}..HEAD
+      execute_process(COMMAND git -C "${HYPRE_GIT_WORK_TREE}" rev-list --count ${develop_lastag}..HEAD
                       OUTPUT_VARIABLE develop_number
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-parse --abbrev-ref HEAD
+      execute_process(COMMAND git -C "${HYPRE_GIT_WORK_TREE}" rev-parse --abbrev-ref HEAD
                       OUTPUT_VARIABLE develop_branch
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       set(HYPRE_DEVELOP_STRING  ${develop_string} PARENT_SCOPE)
