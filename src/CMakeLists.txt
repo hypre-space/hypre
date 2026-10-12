@@ -63,6 +63,8 @@ if (NOT CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${HYPRE_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
 endif ()
 
+include(GNUInstallDirs)
+
 # Ensure RPATH/RUNPATH is set properly during the build
 set(CMAKE_SKIP_BUILD_RPATH FALSE CACHE BOOL "Include rpath in the binaries being built")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE CACHE BOOL "Use different paths for build and install")
@@ -536,7 +538,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Set file properties for MSVC
@@ -593,7 +595,6 @@ add_hypre_target_distclean()
 add_hypre_target_uninstall()
 
 # Installation
-include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
   EXPORT HYPRETargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
