@@ -210,6 +210,13 @@ function(process_fmangling_scheme varname description)
   set(HYPRE_${varname} 0 CACHE INTERNAL "Set the Fortran ${description} mangling scheme")
 endfunction()
 
+# Make the Unix math dependency available to library consumers.
+function(configure_math_target)
+  if(UNIX)
+    target_link_libraries(${PROJECT_NAME} PUBLIC m)
+  endif()
+endfunction()
+
 # Function to configure MPI target
 function(configure_mpi_target)
   find_package(MPI REQUIRED)

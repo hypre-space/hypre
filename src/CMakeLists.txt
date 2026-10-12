@@ -46,6 +46,7 @@ project(${PROJECT_NAME}
 
 # Create the HYPRE library object
 add_library(${PROJECT_NAME})
+configure_math_target()
 
 # We use C99 by default, but users are free to specify any newer standard version
 if (NOT CMAKE_C_STANDARD)
