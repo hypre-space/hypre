@@ -42,30 +42,10 @@ set(REGULAR_SRCS
   csr_spgemm_device_cusparse.c
   csr_spgemm_device_numblocks.c
   csr_spgemm_device_numer.c
-  csr_spgemm_device_numer1.c
-  csr_spgemm_device_numer2.c
-  csr_spgemm_device_numer3.c
-  csr_spgemm_device_numer4.c
-  csr_spgemm_device_numer5.c
-  csr_spgemm_device_numer6.c
-  csr_spgemm_device_numer7.c
-  csr_spgemm_device_numer8.c
-  csr_spgemm_device_numer9.c
-  csr_spgemm_device_numer10.c
   csr_spgemm_device_onemklsparse.c
   csr_spgemm_device_rocsparse.c
   csr_spgemm_device_rowest.c
   csr_spgemm_device_symbl.c
-  csr_spgemm_device_symbl1.c
-  csr_spgemm_device_symbl2.c
-  csr_spgemm_device_symbl3.c
-  csr_spgemm_device_symbl4.c
-  csr_spgemm_device_symbl5.c
-  csr_spgemm_device_symbl6.c
-  csr_spgemm_device_symbl7.c
-  csr_spgemm_device_symbl8.c
-  csr_spgemm_device_symbl9.c
-  csr_spgemm_device_symbl10.c
   csr_spgemm_device_util.c
   csr_spmv_device.c
   csr_sptrans_device.c
@@ -89,17 +69,16 @@ if(HYPRE_USING_GPU)
 endif()
 
 # Autogenerate csr_spgemm_device_numer$ and csr_spgemm_device_symbl$ files
-set(AUTOGEN_CLEAN_SRCS "")
+set(AUTOGEN_SRCS "")
 foreach(kind IN ITEMS numer symbl)
   foreach(number RANGE 1 10)
-    set(src_file "csr_spgemm_device_${kind}${number}.c")
+    set(src_file "${CMAKE_CURRENT_BINARY_DIR}/csr_spgemm_device_${kind}${number}.c")
     file(READ "${CMAKE_CURRENT_SOURCE_DIR}/csr_spgemm_device_${kind}.in" file_content)
-    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "${file_content}")
-    list(APPEND AUTOGEN_CLEAN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
+    file(WRITE "${src_file}" "#define HYPRE_SPGEMM_BIN ${number}${file_content}")
+    list(APPEND AUTOGEN_SRCS "${src_file}")
   endforeach()
 endforeach()
-set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES "${AUTOGEN_CLEAN_SRCS}")
+list(APPEND REGULAR_SRCS ${AUTOGEN_SRCS})
 
 if(HYPRE_ENABLE_MIXED_PRECISION)
   setup_mixed_precision_compilation("seq_mv" SRCS "${REGULAR_SRCS}")
@@ -118,30 +97,10 @@ if (HYPRE_USING_GPU)
     csr_spgemm_device_cusparse.c
     csr_spgemm_device_numblocks.c
     csr_spgemm_device_numer.c
-    csr_spgemm_device_numer1.c
-    csr_spgemm_device_numer2.c
-    csr_spgemm_device_numer3.c
-    csr_spgemm_device_numer4.c
-    csr_spgemm_device_numer5.c
-    csr_spgemm_device_numer6.c
-    csr_spgemm_device_numer7.c
-    csr_spgemm_device_numer8.c
-    csr_spgemm_device_numer9.c
-    csr_spgemm_device_numer10.c
     csr_spgemm_device_onemklsparse.c
     csr_spgemm_device_rocsparse.c
     csr_spgemm_device_rowest.c
     csr_spgemm_device_symbl.c
-    csr_spgemm_device_symbl1.c
-    csr_spgemm_device_symbl2.c
-    csr_spgemm_device_symbl3.c
-    csr_spgemm_device_symbl4.c
-    csr_spgemm_device_symbl5.c
-    csr_spgemm_device_symbl6.c
-    csr_spgemm_device_symbl7.c
-    csr_spgemm_device_symbl8.c
-    csr_spgemm_device_symbl9.c
-    csr_spgemm_device_symbl10.c
     csr_spgemm_device_util.c
     csr_spmv_device.c
     csr_sptrans_device.c
@@ -150,8 +109,9 @@ if (HYPRE_USING_GPU)
     mup_pre_gpu.c
     vector_device.c
   )
-  mark_hypre_gpu_sources(${GPU_SRCS})
+  mark_hypre_gpu_sources(${GPU_SRCS} ${AUTOGEN_SRCS})
   convert_filenames_to_full_paths(GPU_SRCS)
+  list(APPEND GPU_SRCS ${AUTOGEN_SRCS})
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
 
