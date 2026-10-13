@@ -2760,7 +2760,6 @@ main( hypre_int argc,
 #endif
 
    global_data.ndim = -1;
-   global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2994,6 +2993,7 @@ main( hypre_int argc,
    HYPRE_SetLogLevel(log_level);
 
    /* default memory location */
+   global_data.memory_location = memory_location;
    HYPRE_SetMemoryLocation(memory_location);
 
    /* default execution policy */
