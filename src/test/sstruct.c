@@ -3465,6 +3465,19 @@ main( hypre_int argc,
          arg_index++;
          precision_id = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 ||
+                strcmp(argv[arg_index], "-memory_device") == 0 ||
+                strcmp(argv[arg_index], "-exec_host") == 0 ||
+                strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         /* Backend options were handled before library initialization. */
+         arg_index++;
+      }
+      else if ( strcmp(argv[arg_index], "-device_id") == 0 ||
+                strcmp(argv[arg_index], "-lazy_device_init") == 0 )
+      {
+         arg_index += 2;
+      }
       else
       {
          if (!myid)

@@ -23,7 +23,7 @@ for driver in struct sstruct; do
    if [ "$driver" = struct ]; then
       grid+=(-n 8 8 8)
    fi
-   for option_order in memory_first execution_first memory_override execution_override; do
+   for option_order in memory_first execution_first memory_override execution_override device_options; do
       case "$option_order" in
          memory_first)
             options=(-memory_host -exec_host) ;;
@@ -33,6 +33,8 @@ for driver in struct sstruct; do
             options=(-memory_device -memory_host -exec_host) ;;
          execution_override)
             options=(-exec_device -exec_host -memory_host) ;;
+         device_options)
+            options=(-memory_host -lazy_device_init 1 -exec_host -device_id 0) ;;
       esac
 
       printf 'test=%s option_order=%s ranks=%s\n' "$driver" "$option_order" "$ranks"
