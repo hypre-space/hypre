@@ -25,6 +25,7 @@ set(TEST_SRCS
   ij_assembly.c
   unit/test_csr_overlap.c
   unit/test_matrix_stats.c
+  unit/test_w_cycle.c
 )
 
 # Collect targets derived from source file names
@@ -51,6 +52,8 @@ endif()
 
 # Build each executable
 add_hypre_executables("${TEST_SRCS}")
+add_test(NAME test_w_cycle COMMAND $<TARGET_FILE:test_w_cycle>)
+set_tests_properties(test_w_cycle PROPERTIES ENVIRONMENT "OMP_NUM_THREADS=1")
 
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
 add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
