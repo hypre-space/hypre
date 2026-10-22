@@ -221,6 +221,54 @@ static void factor_pivot_ownership(void)
    check(live_allocations() == before, "factorization recovery destruction returns allocations", 5, 0);
 }
 
+/* Failed RCM setup followed by another type and size must not reuse stale
+ * permutation coordinates. Check ownership before attempting an unsafe gather
+ * on old implementations, then exercise the complete transition numerically. */
+static void failed_ordering_transition(void)
+{
+   HYPRE_Solver solver;
+   double a[9] = {1, 1, 0, 1, 1, 0, 0, 0, 4};
+   int mask[9] = {1, 1, 0, 1, 1, 0, 0, 0, 1};
+   HYPRE_ILUCreate(&solver); HYPRE_ILUSetType(solver, 60);
+   HYPRE_ILUSetTol(solver, 0); HYPRE_ILUSetMaxIter(solver, 1);
+   run(solver, 3, a, mask, 1, 1, 75026);
+   hypre_ParILUData *data = (hypre_ParILUData *) solver;
+   int retired = !hypre_ParILUDataPerm(data) && !hypre_ParILUDataQPerm(data);
+   check(retired, "failed RCM setup retires permutation before a changed-type setup", 3, 75026);
+   if (!retired)
+   {
+      HYPRE_ILUDestroy(solver);
+      return; /* Do not attempt an out-of-bounds old-coordinate gather. */
+   }
+   if (retired)
+   {
+      double diagonal[25] = {0}; int pattern[25] = {0};
+      for (int i = 0; i < 5; i++) { diagonal[i * 5 + i] = i + 2; pattern[i * 5 + i] = 1; }
+      hypre_ParCSRMatrix *A = matrix(5, diagonal, pattern);
+      hypre_ParVector *b = vector(5), *u = vector(5);
+      HYPRE_Complex x[5];
+      hypre_ParVectorSetConstantValues(b, 1); hypre_ParVectorSetConstantValues(u, 0);
+      HYPRE_ILUSetType(solver, 0);
+      check(!HYPRE_ILUSetup(solver, (HYPRE_ParCSRMatrix) A, (HYPRE_ParVector) b,
+                            (HYPRE_ParVector) u), "type 0 setup after failed RCM with changed size", 5, 75027);
+      check(!HYPRE_ILUSolve(solver, (HYPRE_ParCSRMatrix) A, (HYPRE_ParVector) b,
+                            (HYPRE_ParVector) u), "type 0 solve after failed RCM with changed size", 5, 75027);
+      hypre_TMemcpy(x, hypre_VectorData(hypre_ParVectorLocalVector(u)), HYPRE_Complex, 5,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (int i = 0; i < 5; i++)
+      { numerical_check(x[i], 1.0 / (i + 2), ORACLE_TOL * 2, "changed-type diagonal correction", 5, 75027, i); }
+      hypre_ParCSRMatrixDestroy(A); hypre_ParVectorDestroy(b); hypre_ParVectorDestroy(u);
+      HYPRE_ILUSetType(solver, 60);
+      a[0] = a[4] = 4;
+      run(solver, 3, a, mask, 1, 0, 75028);
+   }
+   /* Default allocation policy may change independently of factor ownership. */
+   HYPRE_SetMemoryLocation(HYPRE_MEMORY_HOST);
+   check(!HYPRE_ILUDestroy(solver), "device permutation cleanup after changing default memory", 3,
+         75029);
+   HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
+}
+
 static void ownership(void)
 {
    HYPRE_Solver solver;
@@ -996,6 +1044,7 @@ static int test_main(int argc, char **argv)
    HYPRE_ILUDestroy(solver);
    ordered_diagonal();
    ownership();
+   failed_ordering_transition();
    factor_pivot_ownership();
    HYPRE_Finalize();
 #else

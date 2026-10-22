@@ -182,6 +182,12 @@ hypre_ILUDestroy( void *data )
       {
          memory_location = hypre_ParCSRMatrixMemoryLocation(hypre_ParILUDataMatL(ilu_data));
       }
+#if defined(HYPRE_USING_GPU)
+      else if (hypre_ParILUDataMatBILUDevice(ilu_data))
+      {
+         memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParILUDataMatBILUDevice(ilu_data));
+      }
+#endif
       else
       {
          /* Use default memory location */

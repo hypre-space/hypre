@@ -640,6 +640,13 @@ hypre_ILUSetup( void               *ilu_vdata,
          hypre_CSRMatrixDestroy(matBLU_d); matBLU_d = NULL;
          hypre_CSRMatrixDestroy(matE_d); matE_d = NULL;
          hypre_CSRMatrixDestroy(matF_d); matF_d = NULL;
+         /* A failed RCM setup must not leave a permutation for a later setup
+          * of another type or dimension. Type 60 creates device permutations. */
+         if (qperm != perm) { hypre_TFree(qperm, HYPRE_MEMORY_DEVICE); }
+         hypre_TFree(perm, HYPRE_MEMORY_DEVICE);
+         qperm = NULL;
+         hypre_ParILUDataPerm(ilu_data) = NULL;
+         hypre_ParILUDataQPerm(ilu_data) = NULL;
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 setup failed on a rank");
       }
    }
