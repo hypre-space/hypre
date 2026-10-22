@@ -2344,10 +2344,12 @@
 #undef hypre_ILUApplyLowerJacIterDevice
 #undef hypre_ILUApplyLowerUpperJacIterDevice
 #undef hypre_ILUApplyUpperJacIterDevice
+#undef hypre_ILULevelSetCleanup
 #undef hypre_ILUSetupDevice
 #undef hypre_ILUSetupIterativeILU0Device
 #undef hypre_ILUSolveLUDevice
 #undef hypre_ILUSolveLUIterDevice
+#undef hypre_ILUSolveLULevelSetDevice
 #undef hypre_ILUSolveRAPGMRESDevice
 #undef hypre_ILUSolveSchurGMRESDevice
 #undef hypre_ILUSolveSchurGMRESJacIterDevice

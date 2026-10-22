@@ -2503,3 +2503,98 @@ hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixComputeLevelSetsHost
+ *
+ * Computes lower and upper level sets for a CSR matrix A on the host.
+ * XXX_set_offsets are host arrays of length (num_levels+1) allocated inside
+ * this function; entry l is the start index into XXX_level_sets for level l.
+ * low/upp refer to the level sets induced by partitioning for a lower or
+ * upper triangular solve respectively.
+ *
+ * Column ordering within rows does NOT matter: the algorithm only tests
+ * col < row or col > row, so both the diagonal-first hypre storage convention
+ * and standard ascending-sorted CSR produce identical results.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
+                                    HYPRE_Int       **low_set_offsets_ptr,
+                                    HYPRE_Int       **low_level_sets_ptr,
+                                    HYPRE_Int       **upp_set_offsets_ptr,
+                                    HYPRE_Int       **upp_level_sets_ptr,
+                                    HYPRE_Int        *num_levels_low_ptr,
+                                    HYPRE_Int        *num_levels_upp_ptr,
+                                    HYPRE_Int        *max_level_set_size)
+{
+   HYPRE_Int   num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int  *A_i = hypre_CSRMatrixI(A), *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int  *row_level = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+
+   *max_level_set_size = 0;
+   /* Reuse the row-level buffer after emitting each schedule. Traversal order
+    * initializes every dependency before it is read, so zeroing is unnecessary.
+    * Keep ascending row order within levels, as in the original schedules. */
+   for (HYPRE_Int upper = 0; upper < 2; upper++)
+   {
+      HYPRE_Int num_levels = 1;
+      HYPRE_Int *offsets, *rows;
+      {
+         for (HYPRE_Int step = 0; step < num_rows; step++)
+         {
+            HYPRE_Int row = upper ? num_rows - 1 - step : step;
+            HYPRE_Int level = 0;
+            {
+               for (HYPRE_Int j = A_i[row]; j < A_i[row + 1]; j++)
+               {
+                  HYPRE_Int col = A_j[j];
+                  if (upper ? col > row : col < row)
+                  {
+                     level = hypre_max(level, row_level[col] + 1);
+                  }
+               }
+            }
+            row_level[row] = level;
+            num_levels = hypre_max(num_levels, level + 1);
+         }
+
+         HYPRE_Int *positions = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+         offsets = hypre_TAlloc(HYPRE_Int, num_levels + 1, HYPRE_MEMORY_HOST);
+         rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+         for (HYPRE_Int row = 0; row < num_rows; row++)
+         {
+            positions[row_level[row]]++;
+         }
+         offsets[0] = 0;
+         for (HYPRE_Int level = 0; level < num_levels; level++)
+         {
+            HYPRE_Int width = positions[level];
+            offsets[level + 1] = offsets[level] + width;
+            *max_level_set_size = hypre_max(*max_level_set_size, width);
+            /* The histogram is no longer needed; reuse it as insertion cursors. */
+            positions[level] = offsets[level];
+         }
+         for (HYPRE_Int row = 0; row < num_rows; row++)
+         {
+            rows[positions[row_level[row]]++] = row;
+         }
+         hypre_TFree(positions, HYPRE_MEMORY_HOST);
+      }
+
+      if (upper)
+      {
+         *num_levels_upp_ptr = num_levels;
+         *upp_set_offsets_ptr = offsets;
+         *upp_level_sets_ptr = rows;
+      }
+      else
+      {
+         *num_levels_low_ptr = num_levels;
+         *low_set_offsets_ptr = offsets;
+         *low_level_sets_ptr = rows;
+      }
+   }
+   hypre_TFree(row_level, HYPRE_MEMORY_HOST);
+   return hypre_error_flag;
+}

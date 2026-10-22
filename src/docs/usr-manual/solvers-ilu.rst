@@ -47,7 +47,7 @@ the last case, other Krylov methods can be chosen. We refer the reader to
  HYPRE_ILUCreate(&ilu_solver);
 
  /* (Recommended) General solver options */
- HYPRE_ILUSetType(ilu_solver, ilu_type); /* 0, 1, 10, 11, 20, 21, 30, 31, 40, 41, 50 */
+ HYPRE_ILUSetType(ilu_solver, ilu_type); /* 0, 1, 10, 11, 20, 21, 30, 31, 40, 41, 50, 60 */
  HYPRE_ILUSetMaxIter(ilu_solver, max_iter);
  HYPRE_ILUSetTol(ilu_solver, tol);
  HYPRE_ILUSetLocalReordering(ilu_solver, reordering); /* 0: none, 1: RCM */
@@ -97,6 +97,7 @@ A short explanation for each of those functions and its parameters is given next
   * 40: ddPQ-GMRES with ILUK (ddPQ-GMRES-ILUK).
   * 41: ddPQ-GMRES with ILUT (ddPQ-GMRES-ILUT).
   * 50: GMRES with RAP-ILU0 with modified ILU0 (GMRES-RAP-ILU0).
+  * 60: Block-Jacobi device level-set ILU0 (CUDA/HIP only).
 * ``HYPRE_ILUSetMaxIter`` Set the maximum number of ILU iterations. We recommend setting
   this value to one when ILU is used as a preconditioner or smoother.
 * ``HYPRE_ILUSetTol`` Set the convergence tolerance for ILU. We recommend setting
@@ -136,6 +137,42 @@ A short explanation for each of those functions and its parameters is given next
 .. note::
    For more details about ILU options and parameters, including their default
    values, we refer the reader to hypre's reference manual or section :ref:`sec-ParCSR-Solvers`.
+
+Device level-set ILU0 (type 60)
+------------------------------------------------------------------------------
+
+Type 60 complements type 0 for large sparse local blocks with short rows and
+broad dependency levels. It uses one GPU thread per row; type 0 remains
+available for other sparsity patterns. There is no automatic selection between
+the two implementations.
+
+Type 60 factors each local diagonal block and applies direct triangular solves
+using dependency levels. It supports CUDA and HIP device execution; it does not
+support CPU or SYCL execution. Configure it with zero fill, direct triangular
+solves, and noniterative setup:
+
+.. code-block:: c
+
+ HYPRE_ILUSetType(ilu_solver, 60);
+ HYPRE_ILUSetLevelOfFill(ilu_solver, 0);
+ HYPRE_ILUSetTriSolve(ilu_solver, 1);
+ HYPRE_ILUSetIterativeSetupType(ilu_solver, 0);
+
+Both identity and RCM local reordering are supported. The local diagonal block
+must be square, with column indices within its local bounds, no duplicate
+column indices, and exactly one stored diagonal per row. Unsorted rows are
+accepted. Stored zeros count as structural entries. Empty local blocks are
+supported, including MPI ranks with no local rows.
+
+Factors retain the initial identity/RCM ordering for both symmetric and
+asymmetric sparsity. Lower and upper schedules are constructed independently. A zero or nonfinite factorization pivot causes setup to fail. Small
+finite nonzero pivots are accepted without a magnitude threshold, so callers
+should still assess numerical conditioning and the final residual.
+
+Input validation and level scheduling add setup cost. The benefit of this
+method depends on the matrix, dependency levels, and number of preconditioner
+applications. Compare complete setup and converged solve times, iteration
+counts, and independently recomputed residuals for the intended workload.
 
 .. _ilu-amg-smoother:
 
@@ -204,6 +241,10 @@ time, the triangular factors are stored in a memory space that is accessible fro
      - Setup and Solve
      - Setup and Solve
      - UVM-Setup and Solve
+   * - **BJ level-set ILU0 (type 60)**
+     - Setup and Solve
+     - Setup and Solve
+     - Not supported
    * - **BJ-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve

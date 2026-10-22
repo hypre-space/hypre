@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_ILUCreate
@@ -150,6 +151,24 @@ hypre_ILUCreate( void )
  * hypre_ILUDestroy
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_GPU)
+/* Called before factors and scratch vectors are freed. Synchronization is paid
+ * only at rebuild/destruction, never during steady-state application. */
+HYPRE_Int
+hypre_ILULevelSetCleanup(hypre_ParILUData *ilu_data)
+{
+   if (ilu_data->combined_perm_d) { hypre_SyncDevice(); }
+   hypre_TFree(ilu_data->low_level_set_offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(ilu_data->upp_level_set_offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(ilu_data->d_low_level_set_rows, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ilu_data->d_upp_level_set_rows, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ilu_data->combined_perm_d, HYPRE_MEMORY_DEVICE);
+   ilu_data->num_low_levels = ilu_data->num_upp_levels = 0;
+   ilu_data->ls_ready = 0;
+   return hypre_error_flag;
+}
+#endif
+
 HYPRE_Int
 hypre_ILUDestroy( void *data )
 {
@@ -171,6 +190,7 @@ hypre_ILUDestroy( void *data )
 
       /* GPU additional data */
 #if defined(HYPRE_USING_GPU)
+      hypre_ILULevelSetCleanup(ilu_data);
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
@@ -295,6 +315,7 @@ hypre_ILUGetName(void *ilu_vdata)
       case 40: return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0"  : "ddPQ-GMRES-ILUK";
       case 41: return "ddPQ-GMRES-ILUT";
       case 50: return "RAP-modILU0";
+      case 60: return "BJ-LS_ILU0";
       default: return "Unknown";
    }
 }
@@ -428,6 +449,9 @@ hypre_ILUSetType( void      *ilu_vdata,
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (ilu_type == 60 || hypre_ParILUDataIluType(ilu_data) == 60) { ilu_data->ls_ready = 0; }
+#endif
    hypre_ParILUDataIluType(ilu_data) = ilu_type;
 
    /* reset default value, not a large cost
@@ -1245,6 +1269,12 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
 
       case 50:
          hypre_printf("RAP-Modified-ILU with ILU(%d) \n", hypre_ParILUDataLfil(ilu_data));
+         hypre_printf("Operator Complexity (Fill factor) = %f \n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+         break;
+
+      case 60:
+         hypre_printf("Level-set BJ with ILU0 \n");
          hypre_printf("Operator Complexity (Fill factor) = %f \n",
                       hypre_ParILUDataOperatorComplexity(ilu_data));
          break;
