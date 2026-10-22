@@ -189,6 +189,9 @@
 #undef hypre_SeqVectorSumElts
 #undef hypre_SeqVectorSumEltsHost
 #undef hypre_CSRMatrixSpMVAnalysisDevice
+#undef hypreGPUKernel_CSRMatrixILU0LevelSetFactorize
+#undef hypreGPUKernel_CSRMatrixILU0LevelSetSolve
+#undef hypreGPUKernel_CSRMoveDiagFirstOrdered
 #undef hypre_CSRMatrixAddDevice
 #undef hypre_CSRMatrixAddPartialDevice
 #undef hypre_CSRMatrixCheckDiagFirstDevice
