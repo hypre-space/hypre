@@ -4528,13 +4528,15 @@ hypre_ILU60FactorRow(HYPRE_Int row, HYPRE_Int *A_i, HYPRE_Int *A_j,
       const HYPRE_Int k_end   = A_i[k + 1];
 
       /* A[k,k] is at k_start (diagonal-first); compute L multiplier */
-      if (A_data[k_start] == 0 || !isfinite(A_data[k_start]))
+      /* Validate exactly the pivot used by the division. */
+      const HYPRE_Complex pivot = A_data[k_start];
+      if (pivot == 0 || !isfinite(pivot))
       {
          atomicMin(error_row, row);
          A_data[row_start] = 0;
          return;
       }
-      A_data[k_pos] /= A_data[k_start];
+      A_data[k_pos] /= pivot;
       const HYPRE_Complex mult = A_data[k_pos];
 
       /*

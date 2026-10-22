@@ -221,6 +221,29 @@ static void factor_pivot_ownership(void)
    check(live_allocations() == before, "factorization recovery destruction returns allocations", 5, 0);
 }
 
+/* Stored zeros are structural dependencies and must remain finite under
+ * elimination, including when a zero multiplier updates its diagonal. */
+static void stored_zero_pattern(HYPRE_Solver solver)
+{
+   double a[49] = {0}; int mask[49] = {0};
+   const struct { int row, col; double value; } entries[] = {
+      {0,0,2.1469999999999998}, {0,2,-.041999999999999996}, {0,3,-.105}, {1,1,2},
+      {2,0,-.059999999999999998}, {2,2,2.1319999999999997}, {2,4,0},
+      {2,5,.029999999999999999}, {2,6,-.041999999999999996},
+      {3,0,-.14999999999999999}, {3,3,2.2969999999999997}, {3,5,-.14699999999999999},
+      {4,2,0}, {4,4,2.0840000000000001}, {4,6,-.083999999999999991},
+      {5,2,.020999999999999998}, {5,3,-.20999999999999999}, {5,5,2.399}, {5,6,-.16799999999999998},
+      {6,2,-.059999999999999998}, {6,4,-.12}, {6,5,-.23999999999999999}, {6,6,2.4199999999999999}
+   };
+   for (size_t i = 0; i < sizeof(entries)/sizeof(entries[0]); i++)
+   {
+      int p = entries[i].row * 7 + entries[i].col;
+      a[p] = entries[i].value; mask[p] = 1;
+   }
+   run(solver, 7, a, mask, 0, 0, 62031);
+   run(solver, 7, a, mask, 1, 0, 62031);
+}
+
 /* Failed RCM setup followed by another type and size must not reuse stale
  * permutation coordinates. Check ownership before attempting an unsafe gather
  * on old implementations, then exercise the complete transition numerically. */
@@ -834,6 +857,12 @@ static int test_main(int argc, char **argv)
    }
    HYPRE_ILUCreate(&solver);
    HYPRE_ILUSetType(solver, 60); HYPRE_ILUSetMaxIter(solver, 1); HYPRE_ILUSetTol(solver, 0);
+   if (argc > 1 && !strcmp(argv[1], "--stored-zero"))
+   {
+      stored_zero_pattern(solver);
+      HYPRE_ILUDestroy(solver); HYPRE_Finalize(); hypre_MPI_Finalize();
+      return failures ? 1 : 0;
+   }
    if (argc > 1 && !strcmp(argv[1], "--diagonal"))
    {
       double a[4] = {2, 0, 0, 2}; int mask[4] = {1, 0, 0, 1};
@@ -907,6 +936,7 @@ static int test_main(int argc, char **argv)
          free(a); free(mask);
       }
    }
+   stored_zero_pattern(solver);
    {
       /* Long-row correctness: 65 independent rows
        * followed by 65 dependent rows exercise partial blocks and batches.
