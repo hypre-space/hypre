@@ -6,10 +6,102 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_ILUSetup
  *--------------------------------------------------------------------------*/
+
+#if defined(HYPRE_DEBUG) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+static int
+hypre_ILU60CompareColumn(const void *a, const void *b)
+{
+   HYPRE_Int x = *(const HYPRE_Int *) a, y = *(const HYPRE_Int *) b;
+   return (x > y) - (x < y);
+}
+
+/* Bounds and uniqueness must be checked before any device permutation uses
+ * column indices as addresses. A host copy is already required by scheduling. */
+static HYPRE_Int
+hypre_ILU60ValidateInput(hypre_CSRMatrix *A)
+{
+   HYPRE_Int n = hypre_CSRMatrixNumRows(A), nnz = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+   if (n < 0 || nnz < 0 || n != hypre_CSRMatrixNumCols(A) ||
+       !hypre_CSRMatrixI(A) || (nnz && (!hypre_CSRMatrixJ(A) || !hypre_CSRMatrixData(A))))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU60 requires square valid local CSR");
+      return 1;
+   }
+   /* Validation reads only row offsets and columns. Clone_v2(copy_data=0)
+    * also allocates and zeroes an unused nnz-sized numeric array, then zeroes
+    * the structure arrays that the following copies immediately overwrite. */
+   HYPRE_Int *ia = hypre_TAlloc(HYPRE_Int, (size_t) n + 1, HYPRE_MEMORY_HOST);
+   HYPRE_Int *ja = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
+   if (!ia || (nnz && !ja))
+   {
+      hypre_TFree(ia, HYPRE_MEMORY_HOST);
+      hypre_TFree(ja, HYPRE_MEMORY_HOST);
+      hypre_error_w_msg(HYPRE_ERROR_MEMORY, "ILU60 input validation structure allocation failed");
+      return 1;
+   }
+   hypre_TMemcpy(ia, hypre_CSRMatrixI(A), HYPRE_Int, (size_t) n + 1,
+                 HYPRE_MEMORY_HOST, memory_location);
+   if (nnz)
+   {
+      hypre_TMemcpy(ja, hypre_CSRMatrixJ(A), HYPRE_Int, nnz,
+                    HYPRE_MEMORY_HOST, memory_location);
+   }
+   HYPRE_Int bad = ia[0] != 0 || ia[n] != nnz;
+   HYPRE_Int *columns = NULL;
+   HYPRE_Int columns_capacity = 0;
+   for (HYPRE_Int row = 0; row < n && !bad; row++)
+   {
+      HYPRE_Int diag = 0, size;
+      /* Bound both offsets before subtracting: a negative interior endpoint
+       * can otherwise overflow even after a valid positive row prefix. */
+      if (ia[row] < 0 || ia[row + 1] <= ia[row] || ia[row + 1] > nnz) { bad = 1; break; }
+      size = ia[row + 1] - ia[row];
+      for (HYPRE_Int p = ia[row]; p < ia[row + 1]; p++)
+      {
+         bad |= ja[p] < 0 || ja[p] >= n;
+         diag += ja[p] == row;
+      }
+      bad |= diag != 1;
+      if (!bad)
+      {
+         /* Scratch is row-sized, even if only one row in a large sparse
+          * matrix is unordered. Reuse it until a wider unordered row appears. */
+         if (size > columns_capacity)
+         {
+            hypre_TFree(columns, HYPRE_MEMORY_HOST);
+            columns = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+            if (!columns)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_MEMORY, "ILU60 input validation column allocation failed");
+               bad = 1;
+               break;
+            }
+            columns_capacity = size;
+         }
+         for (HYPRE_Int p = 0; p < size; p++) { columns[p] = ja[ia[row] + p]; }
+         qsort(columns, size, sizeof(HYPRE_Int), hypre_ILU60CompareColumn);
+         for (HYPRE_Int p = 1; p < size; p++) { bad |= columns[p - 1] == columns[p]; }
+      }
+      if (bad)
+      {
+         char msg[160];
+         hypre_sprintf(msg,
+                       "ILU60 invalid CSR, duplicate/out-of-range column or missing diagonal at local row %d", row);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      }
+   }
+   hypre_TFree(columns, HYPRE_MEMORY_HOST);
+   hypre_TFree(ia, HYPRE_MEMORY_HOST);
+   hypre_TFree(ja, HYPRE_MEMORY_HOST);
+   return bad;
+}
+#endif
 
 HYPRE_Int
 hypre_ILUSetup( void               *ilu_vdata,
@@ -108,6 +200,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 
 #if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_MemoryLocation perm_memory_location = matBLU_d ? hypre_CSRMatrixMemoryLocation(matBLU_d) :
+                                               (matL ? hypre_ParCSRMatrixMemoryLocation(matL) : memory_location);
 
    /* TODO (VPM): Placeholder check to avoid -Wunused-variable warning. Remove this! */
    if (exec != HYPRE_EXEC_DEVICE && exec != HYPRE_EXEC_HOST)
@@ -116,6 +210,48 @@ hypre_ILUSetup( void               *ilu_vdata,
       return hypre_error_flag;
    }
 #endif
+
+   /* Type 60 has an exact ILU0 CUDA/HIP contract. */
+   if (ilu_type == 60)
+   {
+#if defined(HYPRE_USING_GPU)
+      hypre_ILULevelSetCleanup(ilu_data);
+      /* An unsuccessful setup must not leave an automatically generated
+       * permutation available for a later setup with a different size/type. */
+      if (qperm != perm) { hypre_TFree(qperm, perm_memory_location); }
+      hypre_TFree(perm, perm_memory_location);
+      qperm = NULL;
+      hypre_ParILUDataPerm(ilu_data) = NULL;
+      hypre_ParILUDataQPerm(ilu_data) = NULL;
+#endif
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 requires CUDA/HIP device execution");
+      return hypre_error_flag;
+#else
+      HYPRE_Int unsupported = exec != HYPRE_EXEC_DEVICE || fill_level != 0 || !tri_solve ||
+                              hypre_ParILUDataIterativeSetupType(ilu_data);
+      HYPRE_Int any_unsupported;
+      hypre_MPI_Allreduce(&unsupported, &any_unsupported, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+      if (any_unsupported)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ILU type 60 requires device execution, fill=0, direct solves and noniterative setup");
+         return hypre_error_flag;
+      }
+#if defined(HYPRE_DEBUG)
+      /* TODO: can we assume in release that we get a well-formed CSRMatrix here? */
+      HYPRE_ANNOTATE_REGION_BEGIN("ILU60ValidateInput");
+      HYPRE_Int invalid = hypre_ILU60ValidateInput(hypre_ParCSRMatrixDiag(A)), any_invalid;
+      HYPRE_ANNOTATE_REGION_END("ILU60ValidateInput");
+      hypre_MPI_Allreduce(&invalid, &any_invalid, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+      if (any_invalid)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU60 invalid local factor structure on a rank");
+         return hypre_error_flag;
+      }
+#endif
+#endif
+   }
 
    /* Sanity checks */
 #if defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_CUSPARSE)
@@ -143,6 +279,15 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_MPI_Comm_rank(comm, &my_id);
 
 #if defined(HYPRE_USING_GPU)
+   if (ilu_type == 60 || ilu_data->combined_perm_d)
+   {
+      if (qperm != perm) { hypre_TFree(qperm, perm_memory_location); }
+      hypre_TFree(perm, perm_memory_location);
+      qperm = NULL;
+      hypre_ParILUDataPerm(ilu_data) = NULL;
+      hypre_ParILUDataQPerm(ilu_data) = NULL;
+   }
+   hypre_ILULevelSetCleanup(ilu_data);
    hypre_CSRMatrixDestroy(matALU_d); matALU_d = NULL;
    hypre_CSRMatrixDestroy(matSLU_d); matSLU_d = NULL;
    hypre_CSRMatrixDestroy(matBLU_d); matBLU_d = NULL;
@@ -167,6 +312,10 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataZTemp(ilu_data)      = NULL;
    hypre_ParILUDataADiagDiag(ilu_data)  = NULL;
    hypre_ParILUDataSDiagDiag(ilu_data)  = NULL;
+   hypre_ParILUDataLowLevelSetOffsets(ilu_data) = NULL;
+   hypre_ParILUDataDLowLevelSetRows(ilu_data)   = NULL;
+   hypre_ParILUDataUppLevelSetOffsets(ilu_data) = NULL;
+   hypre_ParILUDataDUppLevelSetRows(ilu_data)   = NULL;
 #endif
 
    /* Free previously allocated data, if any not destroyed */
@@ -452,6 +601,21 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
          break;
 
+      case 60: /* BJ + level-set device_ilu0 */
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, n,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
+         }
+         else
+#endif
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Level-set based ILU0 setup on host is not supported!");
+            return hypre_error_flag;
+         }
+         break;
+
       default: /* BJ + device_ilu0() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
@@ -468,6 +632,29 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (ilu_type == 60)
+   {
+      HYPRE_Int failed = hypre_error_flag != 0, any_failed;
+      hypre_MPI_Allreduce(&failed, &any_failed, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+      if (any_failed)
+      {
+         hypre_ILULevelSetCleanup(ilu_data);
+         hypre_CSRMatrixDestroy(matBLU_d); matBLU_d = NULL;
+         hypre_CSRMatrixDestroy(matE_d); matE_d = NULL;
+         hypre_CSRMatrixDestroy(matF_d); matF_d = NULL;
+         /* A failed RCM setup must not leave a permutation for a later setup
+          * of another type or dimension. Type 60 creates device permutations. */
+         if (qperm != perm) { hypre_TFree(qperm, HYPRE_MEMORY_DEVICE); }
+         hypre_TFree(perm, HYPRE_MEMORY_DEVICE);
+         qperm = NULL;
+         hypre_ParILUDataPerm(ilu_data) = NULL;
+         hypre_ParILUDataQPerm(ilu_data) = NULL;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 setup failed on a rank");
+      }
+   }
+#endif
+
    /* Create additional temporary vector for iterative triangular solve */
    if (!tri_solve)
    {
@@ -480,7 +667,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* setup Schur solver - TODO (VPM): merge host and device paths below */
    switch (ilu_type)
    {
-      case 0: case 1:
+      case 0: case 1: case 60:
       default:
          break;
 
@@ -1089,7 +1276,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int nnzBEF = 0;
    HYPRE_Int nnzG; /* Global nnz */
 
-   if (ilu_type == 0 && fill_level == 0)
+   if ((ilu_type == 0 || ilu_type == 60) && fill_level == 0)
    {
       /* The nnz is for sure 1.0 in this case */
       hypre_ParILUDataOperatorComplexity(ilu_data) =  1.0;
@@ -1297,6 +1484,16 @@ hypre_ILUSetup( void               *ilu_vdata,
                                  HYPRE_MEMORY_HOST);
    hypre_ParILUDataRelResNorms(ilu_data) = rel_res_norms;
 
+#if defined(HYPRE_USING_GPU)
+   if (ilu_type == 60)
+   {
+      ilu_data->ls_ready = !hypre_error_flag;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      ilu_data->ls_device = hypre_HandleDevice(hypre_handle());
+      ilu_data->ls_last_stream = (void *) hypre_HandleComputeStream(hypre_handle());
+#endif
+   }
+#endif
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1978,7 +2175,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
          break;
       }
 
-      case 0:
+      case 0: case 60:
       default:
       {
          /* RAP where we save EU^{-1}, L^{-1}F as sparse matrices */

@@ -299,6 +299,14 @@ hypre_ILUApplyUpperJacIterDevice( hypre_CSRMatrix *A, hypre_Vector *input, hypre
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ILULevelSetCleanup( hypre_ParILUData *ilu_data )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILULevelSetCleanup)( ilu_data );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ILUSetupDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A, HYPRE_Int *perm_data, HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSetupDevice)( ilu_data, A, perm_data, qperm_data, n, nLU, BLUptr, matSptr, Eptr, Fptr );
@@ -326,6 +334,14 @@ HYPRE_Int
 hypre_ILUSolveLUIterDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_Vector **diag_ptr, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSolveLUIterDevice)( A, matLU, f, u, perm, ftemp, utemp, xtemp, diag_ptr, lower_jacobi_iters, upper_jacobi_iters );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSolveLULevelSetDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets, HYPRE_Int *d_low_set_rows, HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets, HYPRE_Int *d_upp_set_rows, hypre_ParVector *ftemp, hypre_ParVector *utemp )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ILUSolveLULevelSetDevice)( A, matLU_d, f, u, perm, num_low_levels, low_set_offsets, d_low_set_rows, num_upp_levels, upp_set_offsets, d_upp_set_rows, ftemp, utemp );
 }
 
 /*--------------------------------------------------------------------------*/

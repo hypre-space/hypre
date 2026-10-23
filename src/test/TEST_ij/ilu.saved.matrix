@@ -102,3 +102,15 @@ Final Relative Residual Norm = 3.641398e-09
 BoomerAMG Iterations = 9
 Final Relative Residual Norm = 3.551558e-09
 
+# Output file: ilu.out.326
+GMRES Iterations = 17
+Final GMRES Relative Residual Norm = 6.284591e-09
+
+# Output file: ilu.out.327
+GMRES Iterations = 17
+Final GMRES Relative Residual Norm = 6.284591e-09
+
+# Output file: ilu.out.328
+hypre_ILU Iterations = 85
+Final Relative Residual Norm = 9.266244e-09
+
