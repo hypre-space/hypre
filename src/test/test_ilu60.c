@@ -43,7 +43,7 @@ static void numerical_check(double actual, double expected, double tolerance,
       printf("  ordering=%d path=%s rhs=%d stream=%d row=%d "
              "actual=%.17g expected=%.17g error=%.17g limit=%.17g\n",
              case_ordering, case_path < 0 ? "setup" :
-             (case_path ? "single-block" : "graph"), case_rhs,
+             (case_path ? "single-block" : "level-set"), case_rhs,
              hypre_HandleComputeStreamNum(hypre_handle()),
              row, actual, expected, error, tolerance);
    }
@@ -999,9 +999,9 @@ static int test_main(int argc, char **argv)
       }
    }
    {
-      /* Both schedules have widths 1,1,w,1,1. Scalar factor and graph solve
-       * batches must cover levels wider than 128 threads through the legal
-       * single-block limit; an oversized level separates narrower batches. */
+      /* Both schedules have widths 1,1,w,1,1. Scalar factorization and
+       * level solves must cover widths above 128 and an oversized level
+       * between narrower levels. */
       int widths[] = {128, 129, 256, 512, 1023, 1024, 1025}, w;
       for (w = 0; w < 7; w++)
       {
