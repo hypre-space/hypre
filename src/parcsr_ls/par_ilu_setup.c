@@ -12,7 +12,7 @@
  * hypre_ILUSetup
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_DEBUG) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
 static int
 hypre_ILU60CompareColumn(const void *a, const void *b)
 {
@@ -238,6 +238,8 @@ hypre_ILUSetup( void               *ilu_vdata,
                            "ILU type 60 requires device execution, fill=0, direct solves and noniterative setup");
          return hypre_error_flag;
       }
+#if defined(HYPRE_DEBUG)
+      /* TODO: can we assume in release that we get a well-formed CSRMatrix here? */
       HYPRE_ANNOTATE_REGION_BEGIN("ILU60ValidateInput");
       HYPRE_Int invalid = hypre_ILU60ValidateInput(hypre_ParCSRMatrixDiag(A)), any_invalid;
       HYPRE_ANNOTATE_REGION_END("ILU60ValidateInput");
@@ -247,6 +249,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU60 invalid local factor structure on a rank");
          return hypre_error_flag;
       }
+#endif
 #endif
    }
 

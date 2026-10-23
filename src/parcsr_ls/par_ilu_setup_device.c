@@ -10,6 +10,26 @@
 
 #if defined(HYPRE_USING_GPU)
 
+/* The input permutation storage belongs to the caller, not these wrappers. */
+static void
+hypre_ILUSetupDeviceDestroyPermutations(hypre_IntArray *perm,
+                                       hypre_IntArray *qperm,
+                                       hypre_IntArray *rperm,
+                                       hypre_IntArray *rqperm,
+                                       hypre_IntArray *h_perm,
+                                       hypre_IntArray *h_rperm)
+{
+   if (perm)  { hypre_IntArrayData(perm) = NULL; }
+   if (qperm) { hypre_IntArrayData(qperm) = NULL; }
+
+   hypre_IntArrayDestroy(perm);
+   hypre_IntArrayDestroy(qperm);
+   hypre_IntArrayDestroy(rperm);
+   hypre_IntArrayDestroy(rqperm);
+   hypre_IntArrayDestroy(h_perm);
+   hypre_IntArrayDestroy(h_rperm);
+}
+
 /*--------------------------------------------------------------------------
  * hypre_ILUSetupDevice
  *
@@ -237,7 +257,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
             hypre_TFree(d_low_level_set_rows, HYPRE_MEMORY_DEVICE);
             hypre_TFree(d_upp_level_set_rows, HYPRE_MEMORY_DEVICE);
             hypre_CSRMatrixDestroy(A_diag);
-            goto ilu_device_cleanup;
+            hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+            return hypre_error_flag;
          }
 
          HYPRE_Int *d_combined_perm = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
@@ -281,7 +302,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          HYPRE_ANNOTATE_REGION_END("ILU60StoreFactor");
 #else
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 requires CUDA/HIP device execution");
-         goto ilu_device_cleanup;
+         hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+         return hypre_error_flag;
 #endif
       }
       else
@@ -369,7 +391,8 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    {
       hypre_CSRMatrixDestroy(SLU);
       *matSptr = NULL;
-      goto ilu_device_cleanup;
+      hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+      return hypre_error_flag;
    }
 
    /* Compute total rows in Schur block */
@@ -528,24 +551,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    /* Set output pointer */
    *matSptr = matS;
 
-ilu_device_cleanup:
-   /* Do not free perm_data/qperm_data */
-   if (perm)
-   {
-      hypre_IntArrayData(perm)  = NULL;
-   }
-   if (qperm)
-   {
-      hypre_IntArrayData(qperm) = NULL;
-   }
-
-   /* Free memory */
-   hypre_IntArrayDestroy(perm);
-   hypre_IntArrayDestroy(qperm);
-   hypre_IntArrayDestroy(rperm);
-   hypre_IntArrayDestroy(rqperm);
-   hypre_IntArrayDestroy(h_perm);
-   hypre_IntArrayDestroy(h_rperm);
+   hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
 
    return hypre_error_flag;
 }

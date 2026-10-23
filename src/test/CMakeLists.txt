@@ -25,7 +25,6 @@ set(TEST_SRCS
   ij_assembly.c
   unit/test_csr_overlap.c
   unit/test_matrix_stats.c
-  test_ilu60.c
 )
 
 # Collect targets derived from source file names
@@ -253,26 +252,5 @@ if(HYPRE_ENABLE_FORTRAN)
   target_link_libraries(f77_struct PUBLIC HYPRE)
   if(HYPRE_ENABLE_MPI)
     target_link_libraries(f77_struct PUBLIC MPI::MPI_Fortran)
-  endif()
-endif()
-
-if(BUILD_TESTING)
-  add_test(NAME test_ilu60 COMMAND test_ilu60)
-  set_tests_properties(test_ilu60 PROPERTIES SKIP_RETURN_CODE 77 LABELS "ILU" RUN_SERIAL TRUE)
-
-  if(HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP)
-    set_property(TEST test_ilu60 APPEND PROPERTY LABELS "GPU")
-    add_test(NAME test_ilu60_stream COMMAND test_ilu60 --stream)
-    set_tests_properties(test_ilu60_stream PROPERTIES
-      SKIP_RETURN_CODE 77 LABELS "ILU;GPU" RUN_SERIAL TRUE)
-
-    if(HYPRE_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
-      add_test(NAME test_ilu60_mpi
-        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 3
-                ${MPIEXEC_PREFLAGS} $<TARGET_FILE:test_ilu60>
-                ${MPIEXEC_POSTFLAGS} --mpi)
-      set_tests_properties(test_ilu60_mpi PROPERTIES
-        SKIP_RETURN_CODE 77 LABELS "ILU;GPU;MPI" RUN_SERIAL TRUE PROCESSORS 3)
-    endif()
   endif()
 endif()

@@ -141,38 +141,11 @@ A short explanation for each of those functions and its parameters is given next
 Device level-set ILU0 (type 60)
 ------------------------------------------------------------------------------
 
-Type 60 complements type 0 for large sparse local blocks with short rows and
-broad dependency levels. It uses one GPU thread per row; type 0 remains
-available for other sparsity patterns. There is no automatic selection between
-the two implementations.
-
-Type 60 factors each local diagonal block and applies direct triangular solves
-using dependency levels. It supports CUDA and HIP device execution; it does not
-support CPU or SYCL execution. Configure it with zero fill, direct triangular
-solves, and noniterative setup:
-
-.. code-block:: c
-
- HYPRE_ILUSetType(ilu_solver, 60);
- HYPRE_ILUSetLevelOfFill(ilu_solver, 0);
- HYPRE_ILUSetTriSolve(ilu_solver, 1);
- HYPRE_ILUSetIterativeSetupType(ilu_solver, 0);
-
-Both identity and RCM local reordering are supported. The local diagonal block
-must be square, with column indices within its local bounds, no duplicate
-column indices, and exactly one stored diagonal per row. Unsorted rows are
-accepted. Stored zeros count as structural entries. Empty local blocks are
-supported, including MPI ranks with no local rows.
-
-Factors retain the initial identity/RCM ordering for both symmetric and
-asymmetric sparsity. Lower and upper schedules are constructed independently. A zero or nonfinite factorization pivot causes setup to fail. Small
-finite nonzero pivots are accepted without a magnitude threshold, so callers
-should still assess numerical conditioning and the final residual.
-
-Input validation and level scheduling add setup cost. The benefit of this
-method depends on the matrix, dependency levels, and number of preconditioner
-applications. Compare complete setup and converged solve times, iteration
-counts, and independently recomputed residuals for the intended workload.
+Type 60 complements type 0 for large and highly parallelizable sparse systems.
+The sparsity pattern determins explicit level-sets that are internally fully
+parallel. Type 60 is supported on CUDA and HIP devices, and not CPU or SYCL.
+The preconditioners requires a system with a diagonal entry on each row. RCM
+reordering is also supported.
 
 .. _ilu-amg-smoother:
 
