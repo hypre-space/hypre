@@ -433,6 +433,14 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixCompressUToSDirect( hypre_SStructMatrix *A, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToSDirect)( A, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixComputeL1Norms( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixComputeL1Norms)( A, option, l1_norms_ptr );

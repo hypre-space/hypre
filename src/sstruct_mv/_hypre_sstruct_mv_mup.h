@@ -384,6 +384,13 @@ HYPRE_Int
 hypre_SStructMatrixCompressUToS_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 
 HYPRE_Int
+hypre_SStructMatrixCompressUToSDirect_flt( hypre_SStructMatrix *A, HYPRE_Int action );
+HYPRE_Int
+hypre_SStructMatrixCompressUToSDirect_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
+HYPRE_Int
+hypre_SStructMatrixCompressUToSDirect_long_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
+
+HYPRE_Int
 hypre_SStructMatrixComputeL1Norms_flt( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr );
 HYPRE_Int
 hypre_SStructMatrixComputeL1Norms_dbl( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr );

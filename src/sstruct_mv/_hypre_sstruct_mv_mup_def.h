@@ -165,6 +165,7 @@
 #define hypre_SStructMatmultInitialize HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatmultInitialize )
 #define hypre_SStructMatrixBoxesToUMatrix HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixBoxesToUMatrix )
 #define hypre_SStructMatrixCompressUToS HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixCompressUToS )
+#define hypre_SStructMatrixCompressUToSDirect HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixCompressUToSDirect )
 #define hypre_SStructMatrixComputeL1Norms HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixComputeL1Norms )
 #define hypre_SStructMatrixComputeRowSum HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixComputeRowSum )
 #define hypre_SStructMatrixGetDiagonal HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixGetDiagonal )

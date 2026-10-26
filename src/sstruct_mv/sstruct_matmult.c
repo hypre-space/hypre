@@ -1051,6 +1051,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
    HYPRE_Int special_case_PTAP = 0;
+   HYPRE_Int compress_action = 1;  /* Add uM to sM where the pattern permits */
    HYPRE_Int is_PTAP = (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
                         trans[0] && !trans[1] && !trans[2]);
 
@@ -1119,7 +1120,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
                                                        M, &parcsr_uM))
    {
       /* Specialization for PtAP when both A and P have unstructured components.
-       * uM is computed by the call above, which fails for unsupported layouts. */
+       * uM, computed by the call above, holds complete rows, so these rows
+       * of sM are overwritten instead of added to. */
+      compress_action = 0;
    }
    else
    {
@@ -1288,14 +1291,23 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
-   /* Add to entries in S with entries from U where the sparsity pattern permits. */
-#if defined(HYPRE_USING_GPU)
-   if (exec == HYPRE_EXEC_HOST)
-#endif
+   /* Add to (or set) entries in S with entries from U where the sparsity pattern
+    * permits. Other layouts are compressed on host only. hypre_SStructMatrixPtAPBoundary
+    * accepts only layouts supported by the direct implementation. */
+   if (!hypre_SStructMatrixCompressUToSDirect(M, compress_action))
    {
-      hypre_SStructMatrixCompressUToS(M, 1);
-      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+      if (!compress_action)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported layout in boundary PtAP\n");
+      }
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_HOST)
+#endif
+      {
+         hypre_SStructMatrixCompressUToS(M, compress_action);
+      }
    }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
 
