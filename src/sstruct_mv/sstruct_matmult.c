@@ -491,23 +491,18 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
    HYPRE_Int                 **smmsz   = (pmmdata -> smmsz);
    HYPRE_Int                   nvars   = (pmmdata -> nvars);
 
-   hypre_StructMatrix         *sM, *sMk;
-   HYPRE_Int                   vi, vj, k;
+   HYPRE_Int                   vi, vj;
+
+   HYPRE_UNUSED_VAR(pM);
 
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
       {
-         /* This computes the coefficients of the (vi,vj)-block of the PMatrix */
-         sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
-         for (k = 0; k < smmsz[vi][vj]; k++)
+         /* The (vi,vj)-block of the PMatrix is the matrix of its only product */
+         if (smmsz[vi][vj] > 0)
          {
-            hypre_StructMatmultCompute(smmdata, smmid[vi][vj][k]);
-            hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &sMk);
-            if (sM != sMk)
-            {
-               hypre_StructMatrixAddMat(sM, 1.0, sMk);
-            }
+            hypre_StructMatmultCompute(smmdata, smmid[vi][vj][0]);
          }
       }
    }
@@ -1056,7 +1051,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
    HYPRE_Int special_case_PTAP = 0;
-   HYPRE_Int boundary_PTAP = 0;
+   HYPRE_Int is_PTAP = (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
+                        trans[0] && !trans[1] && !trans[2]);
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(matrices[0]);
@@ -1066,8 +1062,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
 
-   if (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
-       trans[0] && !trans[1] && !trans[2])
+   if (is_PTAP)
    {
       m = terms[2];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
@@ -1120,12 +1115,11 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
       HYPRE_IJMatrixDestroy(ij_tmp);
    }
-   else if (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
-            trans[0] && !trans[1] && !trans[2] &&
-            hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
-                                            M, &parcsr_uM))
+   else if (is_PTAP && hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
+                                                       M, &parcsr_uM))
    {
-      boundary_PTAP = 1;
+      /* Specialization for PtAP when both A and P have unstructured components.
+       * uM is computed by the call above, which fails for unsupported layouts. */
    }
    else
    {
@@ -1296,9 +1290,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    /* Add to entries in S with entries from U where the sparsity pattern permits. */
 #if defined(HYPRE_USING_GPU)
-   if (!boundary_PTAP && exec == HYPRE_EXEC_HOST)
-#else
-   if (!boundary_PTAP)
+   if (exec == HYPRE_EXEC_HOST)
 #endif
    {
       hypre_SStructMatrixCompressUToS(M, 1);

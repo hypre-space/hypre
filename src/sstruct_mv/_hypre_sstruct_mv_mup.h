@@ -433,6 +433,13 @@ HYPRE_Int
 hypre_SStructMatrixPtAP_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );
 
 HYPRE_Int
+hypre_SStructMatrixPtAPBoundary_flt( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+HYPRE_Int
+hypre_SStructMatrixPtAPBoundary_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+HYPRE_Int
+hypre_SStructMatrixPtAPBoundary_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+
+HYPRE_Int
 hypre_SStructMatrixRAP_flt( hypre_SStructMatrix *R, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );
 HYPRE_Int
 hypre_SStructMatrixRAP_dbl( hypre_SStructMatrix *R, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );

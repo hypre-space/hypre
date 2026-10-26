@@ -57,6 +57,7 @@ hypre_SStructMatrixHaloToUMatrix
 hypre_SStructMatrixMapDataBox
 hypre_SStructMatrixMemoryLocation
 hypre_SStructMatrixPtAP
+hypre_SStructMatrixPtAPBoundary
 hypre_SStructMatrixRAP
 hypre_SStructMatrixRTtAP
 hypre_SStructMatrixRef

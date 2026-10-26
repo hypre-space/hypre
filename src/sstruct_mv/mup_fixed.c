@@ -489,6 +489,14 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_S
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixPtAPBoundary)( A, P, M, result );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixRAP( hypre_SStructMatrix *R, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixRAP)( R, A, P, M_ptr );

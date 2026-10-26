@@ -169,6 +169,7 @@
 #undef hypre_SStructMatrixMapDataBox
 #undef hypre_SStructMatrixMemoryLocation
 #undef hypre_SStructMatrixPtAP
+#undef hypre_SStructMatrixPtAPBoundary
 #undef hypre_SStructMatrixRAP
 #undef hypre_SStructMatrixRTtAP
 #undef hypre_SStructMatrixRef

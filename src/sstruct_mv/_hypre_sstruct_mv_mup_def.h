@@ -172,6 +172,7 @@
 #define hypre_SStructMatrixMapDataBox HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixMapDataBox )
 #define hypre_SStructMatrixMemoryLocation HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixMemoryLocation )
 #define hypre_SStructMatrixPtAP HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixPtAP )
+#define hypre_SStructMatrixPtAPBoundary HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixPtAPBoundary )
 #define hypre_SStructMatrixRAP HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRAP )
 #define hypre_SStructMatrixRTtAP HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRTtAP )
 #define hypre_SStructMatrixRef HYPRE_FIXEDPRECISION_FUNC ( hypre_SStructMatrixRef )
