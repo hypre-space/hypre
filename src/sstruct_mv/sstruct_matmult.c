@@ -818,6 +818,7 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* Create temporary stencil data structure */
    for (part = 0; part < nparts; part++)
    {
+      nvars = hypre_SStructPGridNVars(hypre_SStructGridPGrid(Mgrid, part));
       for (vi = 0; vi < nvars; vi++)
       {
          HYPRE_SStructStencilCreate(ndim, 0, &stencil);
@@ -1042,8 +1043,6 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrix          *ij_M;
 
    /* Temporary variables */
-   hypre_SStructGraph      *graph;
-   hypre_SStructGrid       *grid;
    hypre_ParCSRMatrix     **parcsr_tmp;
    hypre_ParCSRMatrix      *parcsr_sA;
    hypre_ParCSRMatrix      *parcsr_uA;
@@ -1064,23 +1063,20 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_Int special_case_PTAP = 0;
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation     memory_location;
-   HYPRE_ExecutionPolicy    exec;
+   HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(matrices[0]);
+   HYPRE_ExecutionPolicy    exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
 
-   if (nterms == 3)
+   if (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
+       trans[0] && !trans[1] && !trans[2])
    {
       m = terms[2];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
       num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
-#if defined(HYPRE_USING_GPU)
-      memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
-      exec  = hypre_GetExecPolicy1(memory_location);
-#endif
 
       /* The following ensures that NumNonzeros is initialized (a negative value
        * means uninitialized).  RDF: Not sure if this is needed for anything other
@@ -1098,19 +1094,14 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    if (special_case_PTAP)
    {
-      /* Specialization for RAP when P has only the structured component.
-       *
-       * RDF: This assumes that we are computing PtAP so it probably should be
-       * moved to the PtAP routine instead of being here. */
+      /* Specialization for PtAP when P has only the structured component. */
       m = terms[1];
-      graph = hypre_SStructMatrixGraph(matrices[m]);
-      grid  = hypre_SStructGraphGrid(graph);
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
 
+      /* Convert only the rows of sP that multiply entries of uA */
       m = terms[2];
-      hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_tmp, 2);
-      //ij_tmp = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+      hypre_SStructMatrixHaloToUMatrix(matrices[m], parcsr_uA, &ij_tmp);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -1122,11 +1113,11 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       if (!urap2)
       {
          /* Note: this call does NOT add structural zeros to the diagonal */
-         parcsr_uM = hypre_ParCSRMatrixRAPKT(parcsr_sP, parcsr_sA, parcsr_sP, 1, 0);
+         parcsr_uM = hypre_ParCSRMatrixRAPKT(parcsr_sP, parcsr_uA, parcsr_sP, 1, 0);
       }
       else
       {
-         hypre_ParCSRMatrix *Q = hypre_ParCSRMatMat(parcsr_sA, parcsr_sP);
+         hypre_ParCSRMatrix *Q = hypre_ParCSRMatMat(parcsr_uA, parcsr_sP);
          parcsr_uM = hypre_ParCSRTMatMatKT(parcsr_sP, Q, 1);
          hypre_MatvecCommPkgCreate(parcsr_uM);
       }
@@ -1144,15 +1135,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       }
 
       /* Set initial data */
-      m = terms[nterms - 2];
-      graph = hypre_SStructMatrixGraph(matrices[m]);
-      grid  = hypre_SStructGraphGrid(graph);
-
       m = terms[nterms - 1];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-      /* WM: todo - converting the whole matrix for now to be safe... */
-      /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
+      /* General products convert the whole structured component */
       ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
 
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
@@ -1172,13 +1158,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* Convert sA_n to IJMatrix */
          if (ij_sA[m] == NULL)
          {
-            graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
-            grid  = hypre_SStructGraphGrid(graph);
-
-            /* WM: todo - converting the whole matrix for now to be safe... */
-            /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
             ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
-
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)

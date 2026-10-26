@@ -457,9 +457,9 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix *matrix, hypre_SStructVector
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size )
+hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixHaloToUMatrix)( A, grid, ij_Ahat_ptr, halo_size );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixHaloToUMatrix)( A, B, ij_Ahat_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

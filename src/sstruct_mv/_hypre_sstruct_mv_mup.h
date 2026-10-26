@@ -405,11 +405,11 @@ HYPRE_Int
 hypre_SStructMatrixGetDiagonal_long_dbl( hypre_SStructMatrix *matrix, hypre_SStructVector **diag_ptr );
 
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_flt( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
+hypre_SStructMatrixHaloToUMatrix_flt( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_dbl( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
+hypre_SStructMatrixHaloToUMatrix_dbl( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_long_dbl( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
+hypre_SStructMatrixHaloToUMatrix_long_dbl( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 
 HYPRE_Int
 hypre_SStructMatrixMapDataBox_flt( hypre_SStructMatrix *matrix, HYPRE_Int part, HYPRE_Int vi, HYPRE_Int vj, hypre_Box *map_vbox );
