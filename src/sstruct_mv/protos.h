@@ -33,6 +33,11 @@ HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_I
                                               HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 /* sstruct_grid.c */
+hypre_SStructGridNeighbors *hypre_SStructGridNeighborsCreate ( hypre_SStructGrid *grid,
+                                                               HYPRE_Int *halo );
+HYPRE_Int hypre_SStructGridNeighborsDestroy ( hypre_SStructGridNeighbors *nbrs );
+HYPRE_Int hypre_SStructGridNeighborsShare ( hypre_SStructGrid *grid,
+                                            hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
 HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_Int ndim,
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,

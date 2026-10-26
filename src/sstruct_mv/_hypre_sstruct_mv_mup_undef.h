@@ -142,6 +142,9 @@
 #undef hypre_SStructGridGlobalRanksToIndexes
 #undef hypre_SStructGridIndexesToGlobalRanks
 #undef hypre_SStructGridIntersect
+#undef hypre_SStructGridNeighborsCreate
+#undef hypre_SStructGridNeighborsDestroy
+#undef hypre_SStructGridNeighborsShare
 #undef hypre_SStructGridPrint
 #undef hypre_SStructGridPrintGLVis
 #undef hypre_SStructGridRead

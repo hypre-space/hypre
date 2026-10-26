@@ -272,6 +272,30 @@ hypre_SStructGridIntersect( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int v
 
 /*--------------------------------------------------------------------------*/
 
+hypre_SStructGridNeighbors *
+hypre_SStructGridNeighborsCreate( hypre_SStructGrid *grid, HYPRE_Int *halo )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsCreate)( grid, halo );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridNeighborsDestroy( hypre_SStructGridNeighbors *nbrs )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsDestroy)( nbrs );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridNeighborsShare( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsShare)( grid, nbrs, boxes );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructGridPrint( FILE *file, hypre_SStructGrid *grid )
 {

@@ -243,6 +243,27 @@ hypre_SStructGridIntersect_dbl( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_I
 HYPRE_Int
 hypre_SStructGridIntersect_long_dbl( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
 
+hypre_SStructGridNeighbors *
+hypre_SStructGridNeighborsCreate_flt( hypre_SStructGrid *grid, HYPRE_Int *halo );
+hypre_SStructGridNeighbors *
+hypre_SStructGridNeighborsCreate_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
+hypre_SStructGridNeighbors *
+hypre_SStructGridNeighborsCreate_long_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
+
+HYPRE_Int
+hypre_SStructGridNeighborsDestroy_flt( hypre_SStructGridNeighbors *nbrs );
+HYPRE_Int
+hypre_SStructGridNeighborsDestroy_dbl( hypre_SStructGridNeighbors *nbrs );
+HYPRE_Int
+hypre_SStructGridNeighborsDestroy_long_dbl( hypre_SStructGridNeighbors *nbrs );
+
+HYPRE_Int
+hypre_SStructGridNeighborsShare_flt( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructGridNeighborsShare_dbl( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructGridNeighborsShare_long_dbl( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
+
 HYPRE_Int
 hypre_SStructGridPrint_flt( FILE *file, hypre_SStructGrid *grid );
 HYPRE_Int

@@ -109,6 +109,17 @@ typedef struct
 
 } hypre_SStructNeighbor;
 
+/* Remote rank boxes near local boxes, grouped by rank and tagged by part.
+ * This is separate from the part-neighbor mappings in hypre_SStructNeighbor. */
+typedef struct
+{
+   HYPRE_Int        nprocs;
+   HYPRE_Int       *procs;   /* neighbor ranks */
+   HYPRE_Int       *starts;  /* boxes of procs[i] are [starts[i], starts[i + 1]) */
+   HYPRE_Int       *parts;   /* part of each box */
+   hypre_BoxArray  *boxes;
+} hypre_SStructGridNeighbors;
+
 enum hypre_SStructBoxManInfoType
 {
    hypre_SSTRUCT_BOXMAN_INFO_DEFAULT  = 0,
@@ -912,6 +923,11 @@ HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_I
                                               HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 /* sstruct_grid.c */
+hypre_SStructGridNeighbors *hypre_SStructGridNeighborsCreate ( hypre_SStructGrid *grid,
+                                                               HYPRE_Int *halo );
+HYPRE_Int hypre_SStructGridNeighborsDestroy ( hypre_SStructGridNeighbors *nbrs );
+HYPRE_Int hypre_SStructGridNeighborsShare ( hypre_SStructGrid *grid,
+                                            hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
 HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_Int ndim,
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,

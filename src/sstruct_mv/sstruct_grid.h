@@ -85,6 +85,17 @@ typedef struct
 
 } hypre_SStructNeighbor;
 
+/* Remote rank boxes near local boxes, grouped by rank and tagged by part.
+ * This is separate from the part-neighbor mappings in hypre_SStructNeighbor. */
+typedef struct
+{
+   HYPRE_Int        nprocs;
+   HYPRE_Int       *procs;   /* neighbor ranks */
+   HYPRE_Int       *starts;  /* boxes of procs[i] are [starts[i], starts[i + 1]) */
+   HYPRE_Int       *parts;   /* part of each box */
+   hypre_BoxArray  *boxes;
+} hypre_SStructGridNeighbors;
+
 enum hypre_SStructBoxManInfoType
 {
    hypre_SSTRUCT_BOXMAN_INFO_DEFAULT  = 0,
