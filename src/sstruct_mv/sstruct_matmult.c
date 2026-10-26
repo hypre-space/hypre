@@ -283,7 +283,7 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
    HYPRE_Int                  **smaps;
    HYPRE_Int                   *sentries;
 
-   HYPRE_Int                    vi, vj, e, cnt, k;
+   HYPRE_Int                    vi, vj, e, cnt;
    HYPRE_Int                    pstencil_size;
    HYPRE_Int                    max_stencil_size;
 
@@ -351,21 +351,14 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
 
          if (smmsz[vi][vj] > 0)
          {
-            hypre_StructMatrix  **smatrices;
-
             /* Destroy the default struct matrix for the (vi,vj)-block of the PMatrix */
             sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
             hypre_StructMatrixDestroy(sM);
 
-            /* Replace the default struct matrix for the (vi,vj)-block of the PMatrix */
-            smatrices = hypre_CTAlloc(hypre_StructMatrix *, smmsz[vi][vj], HYPRE_MEMORY_HOST);
-            for (k = 0; k < smmsz[vi][vj]; k++)
-            {
-               hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &smatrices[k]);
-            }
-            hypre_StructMatrixAddInit(smmsz[vi][vj], smatrices, &sM);
+            /* There is exactly one product in this block. Transfer its caller
+             * reference to pM instead of allocating and adding into a copy. */
+            hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][0], &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
-            hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
 
             /* Replace the struct stencil for the (vi,vj)-block with actual stencils */
             stencil = hypre_StructMatrixStencil(sM);
@@ -511,8 +504,10 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
          {
             hypre_StructMatmultCompute(smmdata, smmid[vi][vj][k]);
             hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &sMk);
-            hypre_StructMatrixAddMat(sM, 1.0, sMk);  /* Compute sM += alpha * sMk */
-            hypre_StructMatrixDestroy(sMk);
+            if (sM != sMk)
+            {
+               hypre_StructMatrixAddMat(sM, 1.0, sMk);
+            }
          }
       }
    }
@@ -1061,6 +1056,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
    HYPRE_Int special_case_PTAP = 0;
+   HYPRE_Int boundary_PTAP = 0;
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(matrices[0]);
@@ -1123,6 +1119,13 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       }
 
       HYPRE_IJMatrixDestroy(ij_tmp);
+   }
+   else if (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
+            trans[0] && !trans[1] && !trans[2] &&
+            hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
+                                            M, &parcsr_uM))
+   {
+      boundary_PTAP = 1;
    }
    else
    {
@@ -1241,19 +1244,24 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
          hypre_ParCSRMatrixDestroy(parcsr_tmp[2]);
 
-         /* 6) Compute sA_n*sMold */
-         if (trans[t])
+         /* Intermediate structured products feed the next U update. The final
+          * structured product has already been computed by ComputeS. */
+         parcsr_sM = NULL;
+         if (t > 0)
          {
-            parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
-         }
-         else
-         {
-            parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
-         }
+            if (trans[t])
+            {
+               parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+            }
+            else
+            {
+               parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+            }
 #if defined(DEBUG_MATMULT)
-         hypre_sprintf(matname, "parcsr_sM_%d", t);
-         hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
+            hypre_sprintf(matname, "parcsr_sM_%d", t);
+            hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
 #endif
+         }
 
          if (t < (nterms - 2))
          {
@@ -1288,7 +1296,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    /* Add to entries in S with entries from U where the sparsity pattern permits. */
 #if defined(HYPRE_USING_GPU)
-   if (exec == HYPRE_EXEC_HOST)
+   if (!boundary_PTAP && exec == HYPRE_EXEC_HOST)
+#else
+   if (!boundary_PTAP)
 #endif
    {
       hypre_SStructMatrixCompressUToS(M, 1);

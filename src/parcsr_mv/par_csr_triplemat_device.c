@@ -725,7 +725,19 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_ConcatDiagOffdAndExtDevice(P, Pext, &Pbar, &num_cols_offd, &col_map_offd);
       hypre_CSRMatrixDestroy(Pext);
 
-      Cbar = hypre_CSRMatrixTripleMultiplyDevice(RbarT, Abar, Pbar);
+      /* A boundary-restricted R can be much sparser than P. Multiplying it
+       * first avoids building A*P over rows that cannot reach the output. */
+      if (R != P && (HYPRE_Real) hypre_CSRMatrixNumNonzeros(RbarT) <
+          0.75 * (HYPRE_Real) hypre_CSRMatrixNumNonzeros(Pbar))
+      {
+         hypre_CSRMatrix *RA = hypre_CSRMatrixMultiplyDevice(RbarT, Abar);
+         Cbar = hypre_CSRMatrixMultiplyDevice(RA, Pbar);
+         hypre_CSRMatrixDestroy(RA);
+      }
+      else
+      {
+         Cbar = hypre_CSRMatrixTripleMultiplyDevice(RbarT, Abar, Pbar);
+      }
 
       hypre_CSRMatrixDestroy(RbarT);
       hypre_CSRMatrixDestroy(Abar);

@@ -1084,6 +1084,8 @@ hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
 HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B,
                                              hypre_IJMatrix **ij_Ahat_ptr );
+HYPRE_Int hypre_SStructMatrixPtAPBoundary ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,
+                                            hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
                                            hypre_SStructVector **diag_ptr );
 HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);
