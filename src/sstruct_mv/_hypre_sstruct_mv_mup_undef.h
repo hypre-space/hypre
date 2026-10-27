@@ -142,13 +142,13 @@
 #undef hypre_SStructGridGlobalRanksToIndexes
 #undef hypre_SStructGridIndexesToGlobalRanks
 #undef hypre_SStructGridIntersect
-#undef hypre_SStructGridNeighborsCreate
-#undef hypre_SStructGridNeighborsDestroy
-#undef hypre_SStructGridNeighborsShare
 #undef hypre_SStructGridPrint
 #undef hypre_SStructGridPrintGLVis
 #undef hypre_SStructGridRead
 #undef hypre_SStructGridRef
+#undef hypre_SStructGridRemoteBoxesCreate
+#undef hypre_SStructGridRemoteBoxesDestroy
+#undef hypre_SStructGridRemoteBoxesShare
 #undef hypre_SStructGridSetActiveParts
 #undef hypre_SStructGridSetAllPartsActive
 #undef hypre_SStructGridSetNumGhost
@@ -165,7 +165,6 @@
 #undef hypre_SStructMatmultInitialize
 #undef hypre_SStructMatrixBoxesToUMatrix
 #undef hypre_SStructMatrixCompressUToS
-#undef hypre_SStructMatrixCompressUToSDirect
 #undef hypre_SStructMatrixComputeL1Norms
 #undef hypre_SStructMatrixComputeRowSum
 #undef hypre_SStructMatrixGetDiagonal

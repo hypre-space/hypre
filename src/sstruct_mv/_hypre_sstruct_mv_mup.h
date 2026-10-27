@@ -243,27 +243,6 @@ hypre_SStructGridIntersect_dbl( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_I
 HYPRE_Int
 hypre_SStructGridIntersect_long_dbl( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
 
-hypre_SStructGridNeighbors *
-hypre_SStructGridNeighborsCreate_flt( hypre_SStructGrid *grid, HYPRE_Int *halo );
-hypre_SStructGridNeighbors *
-hypre_SStructGridNeighborsCreate_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
-hypre_SStructGridNeighbors *
-hypre_SStructGridNeighborsCreate_long_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
-
-HYPRE_Int
-hypre_SStructGridNeighborsDestroy_flt( hypre_SStructGridNeighbors *nbrs );
-HYPRE_Int
-hypre_SStructGridNeighborsDestroy_dbl( hypre_SStructGridNeighbors *nbrs );
-HYPRE_Int
-hypre_SStructGridNeighborsDestroy_long_dbl( hypre_SStructGridNeighbors *nbrs );
-
-HYPRE_Int
-hypre_SStructGridNeighborsShare_flt( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
-HYPRE_Int
-hypre_SStructGridNeighborsShare_dbl( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
-HYPRE_Int
-hypre_SStructGridNeighborsShare_long_dbl( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
-
 HYPRE_Int
 hypre_SStructGridPrint_flt( FILE *file, hypre_SStructGrid *grid );
 HYPRE_Int
@@ -291,6 +270,27 @@ HYPRE_Int
 hypre_SStructGridRef_dbl( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref );
 HYPRE_Int
 hypre_SStructGridRef_long_dbl( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref );
+
+hypre_SStructGridRemoteBoxes *
+hypre_SStructGridRemoteBoxesCreate_flt( hypre_SStructGrid *grid, HYPRE_Int *halo );
+hypre_SStructGridRemoteBoxes *
+hypre_SStructGridRemoteBoxesCreate_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
+hypre_SStructGridRemoteBoxes *
+hypre_SStructGridRemoteBoxesCreate_long_dbl( hypre_SStructGrid *grid, HYPRE_Int *halo );
+
+HYPRE_Int
+hypre_SStructGridRemoteBoxesDestroy_flt( hypre_SStructGridRemoteBoxes *rboxes );
+HYPRE_Int
+hypre_SStructGridRemoteBoxesDestroy_dbl( hypre_SStructGridRemoteBoxes *rboxes );
+HYPRE_Int
+hypre_SStructGridRemoteBoxesDestroy_long_dbl( hypre_SStructGridRemoteBoxes *rboxes );
+
+HYPRE_Int
+hypre_SStructGridRemoteBoxesShare_flt( hypre_SStructGrid *grid, hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructGridRemoteBoxesShare_dbl( hypre_SStructGrid *grid, hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructGridRemoteBoxesShare_long_dbl( hypre_SStructGrid *grid, hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
 
 HYPRE_Int
 hypre_SStructGridSetActiveParts_flt( hypre_SStructGrid *grid, HYPRE_Int *active );
@@ -405,13 +405,6 @@ HYPRE_Int
 hypre_SStructMatrixCompressUToS_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 
 HYPRE_Int
-hypre_SStructMatrixCompressUToSDirect_flt( hypre_SStructMatrix *A, HYPRE_Int action );
-HYPRE_Int
-hypre_SStructMatrixCompressUToSDirect_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
-HYPRE_Int
-hypre_SStructMatrixCompressUToSDirect_long_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
-
-HYPRE_Int
 hypre_SStructMatrixComputeL1Norms_flt( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr );
 HYPRE_Int
 hypre_SStructMatrixComputeL1Norms_dbl( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr );
@@ -433,11 +426,11 @@ HYPRE_Int
 hypre_SStructMatrixGetDiagonal_long_dbl( hypre_SStructMatrix *matrix, hypre_SStructVector **diag_ptr );
 
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_flt( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
+hypre_SStructMatrixHaloToUMatrix_flt( hypre_SStructMatrix *A, hypre_SStructMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_dbl( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
+hypre_SStructMatrixHaloToUMatrix_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix_long_dbl( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
+hypre_SStructMatrixHaloToUMatrix_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *B, hypre_IJMatrix **ij_Ahat_ptr );
 
 HYPRE_Int
 hypre_SStructMatrixMapDataBox_flt( hypre_SStructMatrix *matrix, HYPRE_Int part, HYPRE_Int vi, HYPRE_Int vj, hypre_Box *map_vbox );

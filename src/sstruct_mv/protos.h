@@ -33,11 +33,11 @@ HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_I
                                               HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 /* sstruct_grid.c */
-hypre_SStructGridNeighbors *hypre_SStructGridNeighborsCreate ( hypre_SStructGrid *grid,
-                                                               HYPRE_Int *halo );
-HYPRE_Int hypre_SStructGridNeighborsDestroy ( hypre_SStructGridNeighbors *nbrs );
-HYPRE_Int hypre_SStructGridNeighborsShare ( hypre_SStructGrid *grid,
-                                            hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes );
+hypre_SStructGridRemoteBoxes *hypre_SStructGridRemoteBoxesCreate ( hypre_SStructGrid *grid,
+                                                                  HYPRE_Int *halo );
+HYPRE_Int hypre_SStructGridRemoteBoxesDestroy ( hypre_SStructGridRemoteBoxes *rboxes );
+HYPRE_Int hypre_SStructGridRemoteBoxesShare ( hypre_SStructGrid *grid,
+                                              hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
 HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_Int ndim,
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,
@@ -204,12 +204,11 @@ HYPRE_Int hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix 
                                                             HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
                                                             HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action );
-HYPRE_Int hypre_SStructMatrixCompressUToSDirect ( hypre_SStructMatrix *A, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
                                              hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa);
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
-HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B,
+HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_SStructMatrix *B,
                                              hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatrixPtAPBoundary ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,
                                             hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );

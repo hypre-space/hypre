@@ -1050,15 +1050,12 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
-   HYPRE_Int special_case_PTAP = 0;
-   HYPRE_Int compress_action = 1;  /* Add uM to sM where the pattern permits */
-   HYPRE_Int is_PTAP = (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
-                        trans[0] && !trans[1] && !trans[2]);
+   HYPRE_Int                special_case_PTAP = 0;
+   HYPRE_Int                compress_action   = 1; /* Add uM to sM where the pattern permits */
+   HYPRE_Int                is_PTAP;
 
-#if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation     memory_location = hypre_SStructMatrixMemoryLocation(matrices[0]);
-   HYPRE_ExecutionPolicy    exec = hypre_GetExecPolicy1(memory_location);
-#endif
+   is_PTAP = (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
+              trans[0] && !trans[1] && !trans[2]);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1093,7 +1090,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
       /* Convert only the rows of sP that multiply entries of uA */
       m = terms[2];
-      hypre_SStructMatrixHaloToUMatrix(matrices[m], parcsr_uA, &ij_tmp);
+      hypre_SStructMatrixHaloToUMatrix(matrices[m], matrices[terms[1]], &ij_tmp);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -1122,7 +1119,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       /* Specialization for PtAP when both A and P have unstructured components.
        * uM, computed by the call above, holds complete rows, so these rows
        * of sM are overwritten instead of added to. */
-      compress_action = 0;
+      compress_action = -1;  /* Sparse overwrite: retain S at entries absent from U */
    }
    else
    {
@@ -1291,22 +1288,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
-   /* Add to (or set) entries in S with entries from U where the sparsity pattern
-    * permits. Other layouts are compressed on host only. hypre_SStructMatrixPtAPBoundary
-    * accepts only layouts supported by the direct implementation. */
-   if (!hypre_SStructMatrixCompressUToSDirect(M, compress_action))
-   {
-      if (!compress_action)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported layout in boundary PtAP\n");
-      }
-#if defined(HYPRE_USING_GPU)
-      if (exec == HYPRE_EXEC_HOST)
-#endif
-      {
-         hypre_SStructMatrixCompressUToS(M, compress_action);
-      }
-   }
+   /* Sparse overwrite has the same meaning in either compression backend. */
+   hypre_SStructMatrixCompressUToS(M, compress_action);
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
