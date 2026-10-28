@@ -221,6 +221,7 @@
 #undef hypre_CSRMatrixSortRow
 #undef hypre_CSRMatrixSortRowOutOfPlace
 #undef hypre_CSRMatrixSpMVDevice
+#undef hypre_CSRMatrixSpMVDeviceOutOfPlace
 #undef hypre_CSRMatrixSplitDevice
 #undef hypre_CSRMatrixSplitDevice_core
 #undef hypre_CSRMatrixStack2Device

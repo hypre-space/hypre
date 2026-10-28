@@ -1211,12 +1211,8 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 #endif
 
    /*-----------------------------------------------------------------
-    * Copy f into temporary vector.
-    *-----------------------------------------------------------------*/
-   hypre_ParVectorCopy(f, Vtemp);
-
-   /*-----------------------------------------------------------------
-    * Perform Matvec Vtemp = w * (f - Au)
+    * Perform Matvec Vtemp = w * (f - Au). The out-of-place matvec reads f
+    * directly, so f is copied into Vtemp only when the matvec is skipped.
     *-----------------------------------------------------------------*/
    if (hypre_ParVectorAllZeros(u))
    {
@@ -1224,11 +1220,12 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
       hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
       /*hypre_ParPrintf(hypre_ParCSRMatrixComm(A), "A %d: skip a matvec\n", hypre_ParCSRMatrixGlobalNumRows(A));*/
 #endif
+      hypre_ParVectorCopy(f, Vtemp);
       hypre_ParVectorScale(relax_weight, Vtemp);
    }
    else
    {
-      hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
+      hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, Vtemp);
    }
 
    /*-----------------------------------------------------------------

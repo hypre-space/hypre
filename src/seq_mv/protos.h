@@ -312,6 +312,10 @@ HYPRE_Int hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A, HYPRE_Int use_sorted);
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,
                                      hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
+HYPRE_Int hypre_CSRMatrixSpMVDeviceOutOfPlace( HYPRE_Int trans, HYPRE_Complex alpha,
+                                               hypre_CSRMatrix *A, hypre_Vector *x,
+                                               HYPRE_Complex beta, hypre_Vector *b,
+                                               hypre_Vector *y, HYPRE_Int fill );
 HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzeros,
                                         HYPRE_Int alpha, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
                                         HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta,
