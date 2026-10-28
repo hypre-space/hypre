@@ -1461,11 +1461,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* 1) Compute sA_n*uMold */
          if (trans[t])
          {
-            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_sA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_sA);
+               }
+               parcsr_tmp[0] = hypre_ParCSRTMatMat(parcsr_sA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+            }
          }
          else
          {
-            parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[0] = hypre_ParCSRMatMat(parcsr_sA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_0a_%d", t);
@@ -1481,11 +1507,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 #endif
          if (trans[t])
          {
-            parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_uA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_uA);
+               }
+               parcsr_tmp[1] = hypre_ParCSRTMatMat(parcsr_uA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+            }
          }
          else
          {
-            parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[1] = hypre_ParCSRMatMat(parcsr_uA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_1_%d", t);
@@ -1511,11 +1563,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* 4) Compute uA_n*sMold */
          if (trans[t])
          {
-            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_uA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_uA);
+               }
+               parcsr_tmp[0] = hypre_ParCSRTMatMat(parcsr_uA, parcsr_sMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+            }
          }
          else
          {
-            parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[0] = hypre_ParCSRMatMat(parcsr_uA, parcsr_sMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_0b_%d", t);
@@ -1540,11 +1618,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          {
             if (trans[t])
             {
-               parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+               if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                        hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                   HYPRE_EXEC_DEVICE)
+               {
+                  if (!hypre_ParCSRMatrixCommPkg(parcsr_sA))
+                  {
+                     hypre_MatvecCommPkgCreate(parcsr_sA);
+                  }
+                  parcsr_sM = hypre_ParCSRTMatMat(parcsr_sA, parcsr_sMold);
+               }
+               else
+#endif
+               {
+                  parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+               }
             }
             else
             {
-               parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+               if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                        hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                   HYPRE_EXEC_DEVICE)
+               {
+                  parcsr_sM = hypre_ParCSRMatMat(parcsr_sA, parcsr_sMold);
+               }
+               else
+#endif
+               {
+                  parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+               }
             }
 #if defined(DEBUG_MATMULT)
             hypre_sprintf(matname, "parcsr_sM_%d", t);
