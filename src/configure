@@ -3683,10 +3683,9 @@ then :
     no)  hypre_using_thread_local=no ;;
     *)   as_fn_error $? "Bad value ${enableval} for --enable-thread-local" "$LINENO" 5 ;;
  esac
-else case e in #(
-  e) hypre_using_thread_local=no
- ;;
-esac
+else $as_nop
+  hypre_using_thread_local=no
+
 fi
 
 
