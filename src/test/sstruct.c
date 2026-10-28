@@ -2760,7 +2760,6 @@ main( hypre_int argc,
 #endif
 
    global_data.ndim = -1;
-   global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2787,22 +2786,18 @@ main( hypre_int argc,
       }
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
-         arg_index++;
          memory_location = HYPRE_MEMORY_HOST;
       }
       else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
       {
-         arg_index++;
          memory_location = HYPRE_MEMORY_DEVICE;
       }
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
-         arg_index++;
          default_exec_policy = HYPRE_EXEC_HOST;
       }
       else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
       {
-         arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
    }
@@ -2998,6 +2993,7 @@ main( hypre_int argc,
    HYPRE_SetLogLevel(log_level);
 
    /* default memory location */
+   global_data.memory_location = memory_location;
    HYPRE_SetMemoryLocation(memory_location);
 
    /* default execution policy */
@@ -3468,6 +3464,19 @@ main( hypre_int argc,
          /* runtime precision */
          arg_index++;
          precision_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 ||
+                strcmp(argv[arg_index], "-memory_device") == 0 ||
+                strcmp(argv[arg_index], "-exec_host") == 0 ||
+                strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         /* Backend options were handled before library initialization. */
+         arg_index++;
+      }
+      else if ( strcmp(argv[arg_index], "-device_id") == 0 ||
+                strcmp(argv[arg_index], "-lazy_device_init") == 0 )
+      {
+         arg_index += 2;
       }
       else
       {
