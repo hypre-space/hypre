@@ -813,6 +813,7 @@ enable_mixed_precision
 enable_maxdim
 enable_persistent
 enable_hopscotch
+enable_thread_local
 enable_fpe_trap
 enable_fortran
 enable_unified_memory
@@ -1567,6 +1568,9 @@ Optional Features:
   --enable-persistent     Uses persistent communication (default is NO).
   --enable-hopscotch      Uses hopscotch hashing if configured with OpenMP and
                           atomic capability available(default is NO).
+  --enable-thread-local   Use thread-local storage for global state so that
+                          several threads can call hypre independently;
+                          incompatible with OpenMP (default is NO).
   --enable-fpe-trap       Enable floating-point exception trap (default is YES
                           in debug mode, NO otherwise).
   --enable-fortran        Require a working Fortran compiler (default is YES).
@@ -3670,6 +3674,21 @@ then
 printf "%s\n" "#define HYPRE_USING_HOPSCOTCH 1" >>confdefs.h
 
 fi
+
+# Check whether --enable-thread-local was given.
+if test ${enable_thread_local+y}
+then :
+  enableval=$enable_thread_local; case "${enableval}" in
+    yes) hypre_using_thread_local=yes ;;
+    no)  hypre_using_thread_local=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-thread-local" "$LINENO" 5 ;;
+ esac
+else case e in #(
+  e) hypre_using_thread_local=no
+ ;;
+esac
+fi
+
 
 # Check whether --enable-fpe-trap was given.
 if test ${enable_fpe_trap+y}
@@ -11195,6 +11214,17 @@ if test "$hypre_using_openmp" = "yes"
 then
 
 printf "%s\n" "#define HYPRE_USING_OPENMP 1" >>confdefs.h
+
+fi
+
+if test "$hypre_using_thread_local" = "yes"
+then
+   if test "$hypre_using_openmp" = "yes"
+   then
+      as_fn_error $? "--enable-thread-local cannot be combined with --with-openmp" "$LINENO" 5
+   fi
+
+printf "%s\n" "#define HYPRE_USING_THREAD_LOCAL 1" >>confdefs.h
 
 fi
 

@@ -88,7 +88,7 @@ typedef struct
 
 } hypre_TimingType;
 
-extern hypre_TimingType *hypre_global_timing;
+extern HYPRE_THREAD_LOCAL hypre_TimingType *hypre_global_timing;
 
 /*-------------------------------------------------------
  * Accessor functions
