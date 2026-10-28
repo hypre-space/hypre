@@ -40,6 +40,7 @@ set(REGULAR_SRCS
   sstruct_matop.c
   sstruct_scale.c
   sstruct_stencil.c
+  sstruct_matcopy.c
   sstruct_matrix.c
   sstruct_vector.c
 )
@@ -61,6 +62,7 @@ endif()
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     sstruct_grid.c
+    sstruct_matcopy.c
     sstruct_matrix.c
     sstruct_vector.c
   )

@@ -2082,6 +2082,8 @@ HYPRE_Int hypre_DeleteBox ( hypre_BoxArray *box_array, HYPRE_Int index );
 HYPRE_Int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array, HYPRE_Int *indices,
                                       HYPRE_Int num );
 HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
+HYPRE_Int hypre_AppendBoxMerge ( hypre_Box *box, hypre_BoxArray *box_array );
+HYPRE_Int hypre_MergeBoxes ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayVolume ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayInBoxArray ( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
 HYPRE_Int hypre_BoxArraysEqual ( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );

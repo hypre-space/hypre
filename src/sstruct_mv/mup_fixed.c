@@ -273,6 +273,22 @@ hypre_SStructGridIntersect( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int v
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructGridMarkerBoxes( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMarkerBoxes)( grid, marker, nrows, memory_location, boxes_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridMatch( hypre_SStructGrid *a, hypre_SStructGrid *b )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMatch)( a, b );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructGridPrint( FILE *file, hypre_SStructGrid *grid )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridPrint)( file, grid );
@@ -449,9 +465,33 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *gr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixBoxesWithU( hypre_SStructMatrix *A, hypre_BoxArray ***boxes, hypre_IJMatrix **result )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixBoxesWithU)( A, boxes, result );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixCollectSupport( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B, HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr, hypre_BoxArray ****row_support )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCollectSupport)( grid, B, include_columns, boxes_ptr, row_support );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToS)( matrix, action );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixCompressUToSBox( hypre_SStructMatrix *A, HYPRE_Int action )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToSBox)( A, action );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -468,6 +508,14 @@ HYPRE_Int
 hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix *A, HYPRE_Int type, hypre_SStructVector **rowsum_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixComputeRowSum)( A, type, rowsum_ptr );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixFreeSupport( hypre_SStructGrid *grid, hypre_BoxArray ***boxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixFreeSupport)( grid, boxes );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1185,6 +1233,14 @@ hypre_SStructScale( HYPRE_Complex alpha, hypre_SStructVector *y )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructStencilAppendCoupledBoxes( hypre_SStructStencil *stencil, hypre_BoxArray *src, hypre_BoxArray *dst )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructStencilAppendCoupledBoxes)( stencil, src, dst );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructStencilRef( hypre_SStructStencil *stencil, hypre_SStructStencil **stencil_ref )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructStencilRef)( stencil, stencil_ref );
@@ -1196,6 +1252,14 @@ HYPRE_Int
 hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixAssemble)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixExtractValues( hypre_SStructMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols, HYPRE_BigInt *rows, HYPRE_Int *row_indexes, HYPRE_BigInt *cols, HYPRE_Complex *values )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixExtractValues)( matrix, nrows, ncols, rows, row_indexes, cols, values );
 }
 
 /*--------------------------------------------------------------------------*/

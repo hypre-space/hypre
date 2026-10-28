@@ -244,6 +244,20 @@ HYPRE_Int
 hypre_SStructGridIntersect_long_dbl( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var, hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
 
 HYPRE_Int
+hypre_SStructGridMarkerBoxes_flt( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
+HYPRE_Int
+hypre_SStructGridMarkerBoxes_dbl( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
+HYPRE_Int
+hypre_SStructGridMarkerBoxes_long_dbl( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
+
+HYPRE_Int
+hypre_SStructGridMatch_flt( hypre_SStructGrid *a, hypre_SStructGrid *b );
+HYPRE_Int
+hypre_SStructGridMatch_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b );
+HYPRE_Int
+hypre_SStructGridMatch_long_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b );
+
+HYPRE_Int
 hypre_SStructGridPrint_flt( FILE *file, hypre_SStructGrid *grid );
 HYPRE_Int
 hypre_SStructGridPrint_dbl( FILE *file, hypre_SStructGrid *grid );
@@ -398,11 +412,32 @@ HYPRE_Int
 hypre_SStructMatrixBoxesToUMatrix_long_dbl( hypre_SStructMatrix *A, hypre_SStructGrid *grid, hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa );
 
 HYPRE_Int
+hypre_SStructMatrixBoxesWithU_flt( hypre_SStructMatrix *A, hypre_BoxArray ***boxes, hypre_IJMatrix **result );
+HYPRE_Int
+hypre_SStructMatrixBoxesWithU_dbl( hypre_SStructMatrix *A, hypre_BoxArray ***boxes, hypre_IJMatrix **result );
+HYPRE_Int
+hypre_SStructMatrixBoxesWithU_long_dbl( hypre_SStructMatrix *A, hypre_BoxArray ***boxes, hypre_IJMatrix **result );
+
+HYPRE_Int
+hypre_SStructMatrixCollectSupport_flt( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B, HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr, hypre_BoxArray ****row_support );
+HYPRE_Int
+hypre_SStructMatrixCollectSupport_dbl( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B, HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr, hypre_BoxArray ****row_support );
+HYPRE_Int
+hypre_SStructMatrixCollectSupport_long_dbl( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B, HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr, hypre_BoxArray ****row_support );
+
+HYPRE_Int
 hypre_SStructMatrixCompressUToS_flt( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 HYPRE_Int
 hypre_SStructMatrixCompressUToS_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int action );
 HYPRE_Int
 hypre_SStructMatrixCompressUToS_long_dbl( HYPRE_SStructMatrix matrix, HYPRE_Int action );
+
+HYPRE_Int
+hypre_SStructMatrixCompressUToSBox_flt( hypre_SStructMatrix *A, HYPRE_Int action );
+HYPRE_Int
+hypre_SStructMatrixCompressUToSBox_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
+HYPRE_Int
+hypre_SStructMatrixCompressUToSBox_long_dbl( hypre_SStructMatrix *A, HYPRE_Int action );
 
 HYPRE_Int
 hypre_SStructMatrixComputeL1Norms_flt( hypre_SStructMatrix *A, HYPRE_Int option, hypre_SStructVector **l1_norms_ptr );
@@ -417,6 +452,13 @@ HYPRE_Int
 hypre_SStructMatrixComputeRowSum_dbl( hypre_SStructMatrix *A, HYPRE_Int type, hypre_SStructVector **rowsum_ptr );
 HYPRE_Int
 hypre_SStructMatrixComputeRowSum_long_dbl( hypre_SStructMatrix *A, HYPRE_Int type, hypre_SStructVector **rowsum_ptr );
+
+HYPRE_Int
+hypre_SStructMatrixFreeSupport_flt( hypre_SStructGrid *grid, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructMatrixFreeSupport_dbl( hypre_SStructGrid *grid, hypre_BoxArray ***boxes );
+HYPRE_Int
+hypre_SStructMatrixFreeSupport_long_dbl( hypre_SStructGrid *grid, hypre_BoxArray ***boxes );
 
 HYPRE_Int
 hypre_SStructMatrixGetDiagonal_flt( hypre_SStructMatrix *matrix, hypre_SStructVector **diag_ptr );
@@ -1042,6 +1084,13 @@ HYPRE_Int
 hypre_SStructScale_long_dbl( hypre_long_double alpha, hypre_SStructVector *y );
 
 HYPRE_Int
+hypre_SStructStencilAppendCoupledBoxes_flt( hypre_SStructStencil *stencil, hypre_BoxArray *src, hypre_BoxArray *dst );
+HYPRE_Int
+hypre_SStructStencilAppendCoupledBoxes_dbl( hypre_SStructStencil *stencil, hypre_BoxArray *src, hypre_BoxArray *dst );
+HYPRE_Int
+hypre_SStructStencilAppendCoupledBoxes_long_dbl( hypre_SStructStencil *stencil, hypre_BoxArray *src, hypre_BoxArray *dst );
+
+HYPRE_Int
 hypre_SStructStencilRef_flt( hypre_SStructStencil *stencil, hypre_SStructStencil **stencil_ref );
 HYPRE_Int
 hypre_SStructStencilRef_dbl( hypre_SStructStencil *stencil, hypre_SStructStencil **stencil_ref );
@@ -1054,6 +1103,13 @@ HYPRE_Int
 hypre_SStructUMatrixAssemble_dbl( hypre_SStructMatrix *matrix );
 HYPRE_Int
 hypre_SStructUMatrixAssemble_long_dbl( hypre_SStructMatrix *matrix );
+
+HYPRE_Int
+hypre_SStructUMatrixExtractValues_flt( hypre_SStructMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols, HYPRE_BigInt *rows, HYPRE_Int *row_indexes, HYPRE_BigInt *cols, hypre_float *values );
+HYPRE_Int
+hypre_SStructUMatrixExtractValues_dbl( hypre_SStructMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols, HYPRE_BigInt *rows, HYPRE_Int *row_indexes, HYPRE_BigInt *cols, hypre_double *values );
+HYPRE_Int
+hypre_SStructUMatrixExtractValues_long_dbl( hypre_SStructMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols, HYPRE_BigInt *rows, HYPRE_Int *row_indexes, HYPRE_BigInt *cols, hypre_long_double *values );
 
 HYPRE_Int
 hypre_SStructUMatrixInitialize_flt( hypre_SStructMatrix *matrix, HYPRE_MemoryLocation memory_location );

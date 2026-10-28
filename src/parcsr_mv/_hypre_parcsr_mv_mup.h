@@ -846,6 +846,13 @@ HYPRE_Int
 hypre_ParCSRMatrixLocalTranspose_long_dbl( hypre_ParCSRMatrix *A );
 
 HYPRE_Int
+hypre_ParCSRMatrixMarkColumns_flt( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumns_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumns_long_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+
+HYPRE_Int
 hypre_ParCSRMatrixMatvec_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *y );
 HYPRE_Int
 hypre_ParCSRMatrixMatvec_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *y );
@@ -956,6 +963,13 @@ HYPRE_Int
 hypre_ParCSRMatrixRestoreRow_dbl( hypre_ParCSRMatrix *matrix, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, hypre_double **values );
 HYPRE_Int
 hypre_ParCSRMatrixRestoreRow_long_dbl( hypre_ParCSRMatrix *matrix, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, hypre_long_double **values );
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns_flt( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns_long_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
 
 HYPRE_Int
 hypre_ParCSRMatrixScale_flt( hypre_ParCSRMatrix *A, hypre_float scalar );

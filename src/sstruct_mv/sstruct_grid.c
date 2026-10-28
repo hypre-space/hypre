@@ -3106,6 +3106,268 @@ hypre_SStructGridRemoteBoxesShare( hypre_SStructGrid            *grid,
 }
 
 /*--------------------------------------------------------------------------
+ * Returns 1 if the grids a and b have the same parts, with a single
+ * cell-centered variable per part, nonperiodic, at most one box per part, and
+ * the same box extents and ghost layers. Returns 0 otherwise. This is a local
+ * check; callers needing agreement across ranks must reduce the result.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridMatch( hypre_SStructGrid *a,
+                        hypre_SStructGrid *b )
+{
+   HYPRE_Int           ndim   = hypre_SStructGridNDim(a);
+   HYPRE_Int           nparts = hypre_SStructGridNParts(a);
+
+   hypre_SStructPGrid *apgrid;
+   hypre_SStructPGrid *bpgrid;
+   hypre_StructGrid   *asgrid;
+   hypre_StructGrid   *bsgrid;
+   hypre_BoxArray     *aboxes;
+   hypre_BoxArray     *bboxes;
+   hypre_Box          *abox;
+   hypre_Box          *bbox;
+   HYPRE_Int           part, d;
+
+   if (nparts != hypre_SStructGridNParts(b) || ndim != hypre_SStructGridNDim(b))
+   {
+      return 0;
+   }
+
+   for (part = 0; part < nparts; part++)
+   {
+      apgrid = hypre_SStructGridPGrid(a, part);
+      bpgrid = hypre_SStructGridPGrid(b, part);
+      if (hypre_SStructPGridNVars(apgrid) != 1 ||
+          hypre_SStructPGridNVars(bpgrid) != 1 ||
+          hypre_SStructPGridVarType(apgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL ||
+          hypre_SStructPGridVarType(bpgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL)
+      {
+         return 0;
+      }
+
+      asgrid = hypre_SStructPGridSGrid(apgrid, 0);
+      bsgrid = hypre_SStructPGridSGrid(bpgrid, 0);
+      aboxes = hypre_StructGridBoxes(asgrid);
+      bboxes = hypre_StructGridBoxes(bsgrid);
+      if (hypre_BoxArraySize(aboxes) > 1 ||
+          hypre_BoxArraySize(aboxes) != hypre_BoxArraySize(bboxes))
+      {
+         return 0;
+      }
+
+      abox = hypre_BoxArraySize(aboxes) ? hypre_BoxArrayBox(aboxes, 0) : NULL;
+      bbox = hypre_BoxArraySize(bboxes) ? hypre_BoxArrayBox(bboxes, 0) : NULL;
+      for (d = 0; d < ndim; d++)
+      {
+         if (hypre_StructGridPeriodic(asgrid)[d] ||
+             hypre_StructGridPeriodic(bsgrid)[d] ||
+             hypre_StructGridNumGhost(asgrid)[2 * d] != hypre_StructGridNumGhost(bsgrid)[2 * d] ||
+             hypre_StructGridNumGhost(asgrid)[2 * d + 1] != hypre_StructGridNumGhost(bsgrid)[2 * d + 1])
+         {
+            return 0;
+         }
+
+         if (abox &&
+             (hypre_BoxIMinD(abox, d) != hypre_BoxIMinD(bbox, d) ||
+              hypre_BoxIMaxD(abox, d) != hypre_BoxIMaxD(bbox, d)))
+         {
+            return 0;
+         }
+      }
+   }
+
+   return 1;
+}
+
+#if defined(HYPRE_USING_GPU)
+/*--------------------------------------------------------------------------
+ * Functor that selects the indices i where the marker changes value, that is,
+ * the endpoints of the runs of marked rows
+ *--------------------------------------------------------------------------*/
+
+struct hypre_SStructRunBoundary
+{
+   HYPRE_Int *marker;
+   HYPRE_Int  nrows;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   __host__ __device__
+#endif
+   bool operator()(HYPRE_Int i) const
+   {
+      return (i < nrows ? marker[i] : 0) != (i > 0 ? marker[i - 1] : 0);
+   }
+};
+#endif
+
+/*--------------------------------------------------------------------------
+ * Finds the boxes of the rows marked in marker (an array of nrows 0/1 values
+ * in memory_location) and returns them in boxes_ptr[part][var]. The local
+ * numbering of the rows is ordered by part, variable and ghost box. Only the
+ * endpoints of the runs of marked rows are transferred to the host, and each
+ * run is tiled with aligned boxes, without visiting every marked row.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridMarkerBoxes( hypre_SStructGrid     *grid,
+                              HYPRE_Int             *marker,
+                              HYPRE_Int              nrows,
+                              HYPRE_MemoryLocation   memory_location,
+                              hypre_BoxArray      ****boxes_ptr )
+{
+   HYPRE_Int             ndim   = hypre_SStructGridNDim(grid);
+   HYPRE_Int             nparts = hypre_SStructGridNParts(grid);
+
+   hypre_SStructPGrid   *pgrid;
+   hypre_StructGrid     *sgrid;
+   hypre_BoxArray     ***boxes;
+   hypre_BoxArray       *grid_boxes;
+   hypre_BoxArray       *run_boxa;
+   hypre_Box            *ghost_box;
+   hypre_Box            *run_box;
+   hypre_Index           index, extent;
+   HYPRE_Int            *rows;
+   HYPRE_Int             num_rows = 0;
+   HYPRE_Int             part, var, nvars, b, d, i, k, m, r;
+   HYPRE_Int             volume, end, linear, span;
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int            *device_rows;
+   HYPRE_Int            *device_end;
+#else
+   HYPRE_UNUSED_VAR(memory_location);
+#endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Find the endpoints of the runs of marked rows */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      device_rows = hypre_TAlloc(HYPRE_Int, nrows + 1, memory_location);
+#if defined(HYPRE_USING_SYCL)
+      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+      device_end = HYPRE_ONEDPL_CALL(std::copy_if, count, count + nrows + 1, device_rows,
+                                     (hypre_SStructRunBoundary {marker, nrows}));
+#else
+      device_end = HYPRE_THRUST_CALL(copy_if, thrust::make_counting_iterator(0),
+                                     thrust::make_counting_iterator(nrows + 1), device_rows,
+                                     (hypre_SStructRunBoundary {marker, nrows}));
+#endif
+      num_rows = (HYPRE_Int) (device_end - device_rows);
+      rows     = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(rows, device_rows, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, memory_location);
+      hypre_TFree(device_rows, memory_location);
+   }
+   else
+#endif
+   {
+      rows = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
+      for (i = 0; i <= nrows; i++)
+      {
+         if ((i < nrows ? marker[i] : 0) != (i > 0 ? marker[i - 1] : 0))
+         {
+            rows[num_rows++] = i;
+         }
+      }
+   }
+
+   /* Tile each run with aligned boxes */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
+   ghost_box = hypre_BoxCreate(ndim);
+   run_box   = hypre_BoxCreate(ndim);
+   run_boxa  = hypre_BoxArrayCreate(0, ndim);
+   boxes     = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   hypre_SetIndex(index, 0);
+   m = r = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      boxes[part] = hypre_TAlloc(hypre_BoxArray *, nvars, HYPRE_MEMORY_HOST);
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid      = hypre_SStructPGridSGrid(pgrid, var);
+         grid_boxes = hypre_StructGridBoxes(sgrid);
+         boxes[part][var] = hypre_BoxArrayCreate(0, ndim);
+
+         hypre_ForBoxI(b, grid_boxes)
+         {
+            hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, b), ghost_box);
+            hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
+            volume = hypre_BoxVolume(ghost_box);
+
+            hypre_BoxArraySetSize(run_boxa, 0);
+            while (r < num_rows && rows[r] < m + volume)
+            {
+               end = hypre_min(rows[r + 1], m + volume) - m;
+               k   = hypre_max(rows[r], m) - m;
+               while (k < end)
+               {
+                  /* Index of the k-th row of this ghost box */
+                  linear = k;
+                  for (d = 0; d < ndim; d++)
+                  {
+                     hypre_IndexD(index, d) = hypre_BoxIMinD(ghost_box, d) +
+                                              linear % hypre_BoxSizeD(ghost_box, d);
+                     linear /= hypre_BoxSizeD(ghost_box, d);
+                  }
+
+                  /* Largest aligned box of marked rows starting at index */
+                  hypre_SetIndex(extent, 1);
+                  extent[0] = hypre_min(hypre_BoxIMaxD(ghost_box, 0) - index[0] + 1, end - k);
+                  span      = extent[0];
+                  for (d = 1; d < ndim; d++)
+                  {
+                     if (index[d - 1] != hypre_BoxIMinD(ghost_box, d - 1) ||
+                         extent[d - 1] != hypre_BoxSizeD(ghost_box, d - 1))
+                     {
+                        break;
+                     }
+                     extent[d] = hypre_min(hypre_BoxIMaxD(ghost_box, d) - index[d] + 1,
+                                           (end - k) / span);
+                     span     *= extent[d];
+                  }
+
+                  hypre_BoxSetExtents(run_box, index, index);
+                  for (d = 0; d < ndim; d++)
+                  {
+                     hypre_BoxIMaxD(run_box, d) += extent[d] - 1;
+                  }
+                  hypre_AppendBoxMerge(run_box, run_boxa);
+                  k += span;
+               }
+
+               if (rows[r + 1] > m + volume)
+               {
+                  break;
+               }
+               r += 2;
+            }
+            hypre_MergeBoxes(run_boxa);
+            hypre_AppendBoxArray(run_boxa, boxes[part][var]);
+            m += volume;
+         } /* loop over grid boxes */
+      } /* loop over vars */
+   } /* loop over parts */
+
+   /* Free memory */
+   hypre_BoxDestroy(ghost_box);
+   hypre_BoxDestroy(run_box);
+   hypre_BoxArrayDestroy(run_boxa);
+   hypre_TFree(rows, HYPRE_MEMORY_HOST);
+   HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
+
+   *boxes_ptr = boxes;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Save a GLVis mesh file with the given prefix corresponding to the input
  * SStruct grid assuming that the cells in each part are the same. The optional
  * trans and origin parameters specify the coordinate transformation for each

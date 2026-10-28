@@ -142,6 +142,8 @@
 #undef hypre_SStructGridGlobalRanksToIndexes
 #undef hypre_SStructGridIndexesToGlobalRanks
 #undef hypre_SStructGridIntersect
+#undef hypre_SStructGridMarkerBoxes
+#undef hypre_SStructGridMatch
 #undef hypre_SStructGridPrint
 #undef hypre_SStructGridPrintGLVis
 #undef hypre_SStructGridRead
@@ -164,9 +166,13 @@
 #undef hypre_SStructMatmultDestroy
 #undef hypre_SStructMatmultInitialize
 #undef hypre_SStructMatrixBoxesToUMatrix
+#undef hypre_SStructMatrixBoxesWithU
+#undef hypre_SStructMatrixCollectSupport
 #undef hypre_SStructMatrixCompressUToS
+#undef hypre_SStructMatrixCompressUToSBox
 #undef hypre_SStructMatrixComputeL1Norms
 #undef hypre_SStructMatrixComputeRowSum
+#undef hypre_SStructMatrixFreeSupport
 #undef hypre_SStructMatrixGetDiagonal
 #undef hypre_SStructMatrixHaloToUMatrix
 #undef hypre_SStructMatrixMapDataBox
@@ -256,8 +262,10 @@
 #undef hypre_SStructPVectorSetRandomValues
 #undef hypre_SStructPVectorSetValues
 #undef hypre_SStructScale
+#undef hypre_SStructStencilAppendCoupledBoxes
 #undef hypre_SStructStencilRef
 #undef hypre_SStructUMatrixAssemble
+#undef hypre_SStructUMatrixExtractValues
 #undef hypre_SStructUMatrixInitialize
 #undef hypre_SStructUMatrixSetBoxValues
 #undef hypre_SStructUMatrixSetBoxValuesHelper

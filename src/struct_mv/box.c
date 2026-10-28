@@ -1627,6 +1627,161 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
 }
 
 /*--------------------------------------------------------------------------
+ * Compares two boxes by their extents in z, then x, then y. Boxes with equal
+ * x spans in a plane end up next to each other, so that interleaved runs can
+ * be merged along y.
+ *--------------------------------------------------------------------------*/
+
+static hypre_int
+hypre_CompareBoxesRuns( const void *left,
+                        const void *right )
+{
+   const hypre_Box  *a    = (const hypre_Box *) left;
+   const hypre_Box  *b    = (const hypre_Box *) right;
+   HYPRE_Int         ndim = hypre_BoxNDim(a);
+   HYPRE_Int         keys_a[6];
+   HYPRE_Int         keys_b[6];
+   HYPRE_Int         k;
+
+   keys_a[0] = keys_b[0] = 0;
+   keys_a[1] = keys_b[1] = 0;
+   if (ndim > 2)
+   {
+      keys_a[0] = hypre_BoxIMinD(a, 2);
+      keys_a[1] = hypre_BoxIMaxD(a, 2);
+      keys_b[0] = hypre_BoxIMinD(b, 2);
+      keys_b[1] = hypre_BoxIMaxD(b, 2);
+   }
+   keys_a[2] = hypre_BoxIMinD(a, 0);
+   keys_a[3] = hypre_BoxIMaxD(a, 0);
+   keys_a[4] = hypre_BoxIMinD(a, 1);
+   keys_a[5] = hypre_BoxIMaxD(a, 1);
+   keys_b[2] = hypre_BoxIMinD(b, 0);
+   keys_b[3] = hypre_BoxIMaxD(b, 0);
+   keys_b[4] = hypre_BoxIMinD(b, 1);
+   keys_b[5] = hypre_BoxIMaxD(b, 1);
+
+   for (k = 0; k < 6; k++)
+   {
+      if (keys_a[k] < keys_b[k]) { return -1; }
+      if (keys_a[k] > keys_b[k]) { return 1; }
+   }
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * Compares two boxes by their extents in x, y and z (in this order, minimum
+ * before maximum), so that boxes with equal x and y spans end up next to each
+ * other, to be merged along z.
+ *--------------------------------------------------------------------------*/
+
+static hypre_int
+hypre_CompareBoxesPlanes( const void *left,
+                          const void *right )
+{
+   const hypre_Box  *a = (const hypre_Box *) left;
+   const hypre_Box  *b = (const hypre_Box *) right;
+   HYPRE_Int         d;
+
+   for (d = 0; d < 3; d++)
+   {
+      if (hypre_BoxIMinD(a, d) < hypre_BoxIMinD(b, d)) { return -1; }
+      if (hypre_BoxIMinD(a, d) > hypre_BoxIMinD(b, d)) { return 1; }
+      if (hypre_BoxIMaxD(a, d) < hypre_BoxIMaxD(b, d)) { return -1; }
+      if (hypre_BoxIMaxD(a, d) > hypre_BoxIMaxD(b, d)) { return 1; }
+   }
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * Appends box to box_array, merging it along y with one of the last few boxes
+ * of box_array when they are contiguous and share the same x (and z) extents.
+ * The box_array may be empty.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AppendBoxMerge( hypre_Box      *box,
+                      hypre_BoxArray *box_array )
+{
+   HYPRE_Int   ndim = hypre_BoxNDim(box);
+   HYPRE_Int   size = hypre_BoxArraySize(box_array);
+   hypre_Box  *prev;
+   HYPRE_Int   t;
+
+   for (t = size - 1; ndim > 1 && t >= hypre_max(0, size - 8); t--)
+   {
+      prev = hypre_BoxArrayBox(box_array, t);
+      if (hypre_BoxIMinD(box, 0) == hypre_BoxIMinD(prev, 0) &&
+          hypre_BoxIMaxD(box, 0) == hypre_BoxIMaxD(prev, 0) &&
+          hypre_BoxIMinD(box, 1) == hypre_BoxIMaxD(prev, 1) + 1 &&
+          (ndim < 3 || (hypre_BoxIMinD(box, 2) == hypre_BoxIMinD(prev, 2) &&
+                        hypre_BoxIMaxD(box, 2) == hypre_BoxIMaxD(prev, 2))))
+      {
+         hypre_BoxIMaxD(prev, 1) = hypre_BoxIMaxD(box, 1);
+         return hypre_error_flag;
+      }
+   }
+
+   return hypre_AppendBox(box, box_array);
+}
+
+/*--------------------------------------------------------------------------
+ * Merges contiguous boxes along each axis (y, then z), then eliminates the
+ * remaining duplicated boxes with hypre_UnionBoxes. The sorting makes it
+ * cheap for large lists of boxes made of many aligned runs.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MergeBoxes( hypre_BoxArray *box_array )
+{
+   HYPRE_Int   ndim = hypre_BoxArrayNDim(box_array);
+   hypre_Box  *box;
+   hypre_Box  *prev;
+   HYPRE_Int   axis, out, b, d, matches;
+
+   if (hypre_BoxArraySize(box_array) < 2)
+   {
+      return hypre_error_flag;
+   }
+
+   for (axis = 1; axis < ndim; axis++)
+   {
+      out = 0;
+      qsort(hypre_BoxArrayBoxes(box_array), hypre_BoxArraySize(box_array), sizeof(hypre_Box),
+            axis == 1 ? hypre_CompareBoxesRuns : hypre_CompareBoxesPlanes);
+
+      for (b = 0; b < hypre_BoxArraySize(box_array); b++)
+      {
+         box     = hypre_BoxArrayBox(box_array, b);
+         prev    = out ? hypre_BoxArrayBox(box_array, out - 1) : NULL;
+         matches = prev != NULL;
+         for (d = 0; matches && d < ndim; d++)
+         {
+            if (d != axis && (hypre_BoxIMinD(box, d) != hypre_BoxIMinD(prev, d) ||
+                              hypre_BoxIMaxD(box, d) != hypre_BoxIMaxD(prev, d)))
+            {
+               matches = 0;
+            }
+         }
+
+         if (matches && hypre_BoxIMinD(box, axis) == hypre_BoxIMaxD(prev, axis) + 1)
+         {
+            hypre_BoxIMaxD(prev, axis) = hypre_BoxIMaxD(box, axis);
+         }
+         else
+         {
+            hypre_CopyBox(box, hypre_BoxArrayBox(box_array, out++));
+         }
+      }
+      hypre_BoxArraySetSize(box_array, out);
+   }
+
+   return hypre_UnionBoxes(box_array);
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

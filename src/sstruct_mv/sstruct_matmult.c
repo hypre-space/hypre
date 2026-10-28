@@ -1016,6 +1016,301 @@ hypre_SStructMatmultComputeS( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
+ * Computes the unstructured component of a PtAP product when both uA and uP
+ * are nonzero, where sM = sP^T*sA*sP has already been computed natively.
+ * Only the rows J of M that differ from sM are formed: complete rows of
+ * P^T*A*P from the rows of A and P that reach J. They become uM, and the
+ * caller must then set the stencil entries of sM from them with
+ * hypre_SStructMatrixCompressUToS(M, -1). Support boxes are exchanged between
+ * neighboring ranks only.
+ *
+ * Returns zero on all ranks when the layout is not supported.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
+                                 hypre_SStructMatrix  *P,
+                                 hypre_SStructMatrix  *M,
+                                 hypre_ParCSRMatrix  **result )
+{
+   MPI_Comm                       comm   = hypre_SStructMatrixComm(A);
+   HYPRE_Int                      nparts = hypre_SStructMatrixNParts(A);
+   HYPRE_Int                      ndim   = hypre_SStructMatrixNDim(A);
+   hypre_SStructGrid             *fine   = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(A));
+   hypre_SStructGrid             *pgrid  = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(P));
+   hypre_SStructGrid             *coarse = hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(P));
+   hypre_SStructGrid             *mgrid  = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(M));
+   hypre_ParCSRMatrix            *uA     = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_ParCSRMatrix            *uP     = hypre_SStructMatrixParCSRMatrix(P);
+   HYPRE_MemoryLocation           location = hypre_ParCSRMatrixMemoryLocation(uP);
+
+   /* Per-part matrix data */
+   hypre_SStructPMatrix          *pa, *pp, *pm;
+   hypre_SStructStencil          *astencil, *pstencil, *mstencil;
+   hypre_StructMatrix            *sm;
+   hypre_StructGrid              *sgrid;
+   hypre_IndexRef                 stride;
+   hypre_BoxArray                *fboxes, *cboxes, *refined;
+   hypre_Box                     *box;
+   HYPRE_Int                     *msplit;
+
+   /* reach[0:6] is the stencil reach of A, reach[6:12] the distance from the
+      local fine boxes up to which support boxes can extend */
+   HYPRE_Int                      reach[12] = {0};
+   HYPRE_Int                      global_reach[12];
+   HYPRE_Int                     *global_halo = global_reach;
+   HYPRE_Int                     *nbr_halo    = global_reach + 6;
+   HYPRE_Int                      valid, all_valid, known, preach;
+
+   /* Support boxes and intermediate matrices */
+   hypre_SStructGridRemoteBoxes  *rboxes;
+   hypre_BoxArray              ***pu_rows, ***boxes, ***right, ***left, ***rows_J;
+   hypre_IJMatrix                *ij_s = NULL, *ij_a = NULL, *ij_p = NULL;
+   hypre_ParCSRMatrix            *a, *p, *restricted, *rap;
+   HYPRE_Int                     *marker;
+   HYPRE_Int                      ncols;
+   HYPRE_Int                      part, d, e, b;
+
+   if (A == P || ndim < 1 || ndim > 3 ||
+       nparts != hypre_SStructMatrixNParts(P) ||
+       ndim != hypre_SStructMatrixNDim(P) ||
+       hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(A)) != fine)
+   {
+      return 0;
+   }
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+   if (hypre_GetExecPolicy1(hypre_SStructMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
+   {
+      return 0;
+   }
+#endif
+
+   /*------------------------------------------------------
+    * Check the layout of A, P and M
+    *------------------------------------------------------*/
+
+   box   = hypre_BoxCreate(ndim);
+   valid = hypre_SStructGridMatch(fine, pgrid) &&
+           hypre_SStructGridMatch(coarse, mgrid);
+   if (hypre_ParCSRMatrixMemoryLocation(uA) != location ||
+       hypre_ParCSRMatrixNumRows(uA) != hypre_ParCSRMatrixNumRows(uP) ||
+       hypre_ParCSRMatrixFirstRowIndex(uA) != hypre_ParCSRMatrixFirstRowIndex(uP) ||
+       hypre_IJMatrixRowPartitioning(hypre_SStructMatrixIJMatrix(M))[0] !=
+       hypre_ParCSRMatrixFirstColDiag(uP))
+   {
+      valid = 0;
+   }
+
+   for (part = 0; valid && part < nparts; part++)
+   {
+      pa = hypre_SStructMatrixPMatrix(A, part);
+      pp = hypre_SStructMatrixPMatrix(P, part);
+      pm = hypre_SStructMatrixPMatrix(M, part);
+      if (hypre_SStructPMatrixNVars(pa) != 1 ||
+          hypre_SStructPMatrixNVars(pp) != 1 ||
+          hypre_SStructPMatrixNVars(pm) != 1)
+      {
+         valid = 0;
+         break;
+      }
+
+      stride   = hypre_SStructPMatrixDomainStride(pp);
+      sm       = hypre_SStructPMatrixSMatrix(pm, 0, 0);
+      astencil = hypre_SStructPMatrixStencil(pa, 0);
+      pstencil = hypre_SStructPMatrixStencil(pp, 0);
+      mstencil = hypre_SStructPMatrixStencil(pm, 0);
+      fboxes   = hypre_StructGridBoxes(hypre_SStructPGridSGrid(hypre_SStructGridPGrid(fine, part), 0));
+      cboxes   = hypre_StructGridBoxes(hypre_SStructPGridSGrid(hypre_SStructGridPGrid(coarse, part), 0));
+      msplit   = hypre_SStructMatrixSplit(M, part, 0);
+
+      /* Strides */
+      for (d = 0; d < ndim; d++)
+      {
+         if (hypre_SStructPMatrixDomainStride(pa)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pa)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pp)[d] != 1 || stride[d] < 1 ||
+             hypre_SStructPMatrixDomainStride(pm)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pm)[d] != 1 ||
+             hypre_StructMatrixDataStride(sm)[d] != 1)
+         {
+            valid = 0;
+         }
+      }
+
+      /* Stencil reach of A and P */
+      for (e = 0; e < hypre_SStructStencilSize(astencil); e++)
+      {
+         for (d = 0; d < ndim; d++)
+         {
+            reach[2 * d] = hypre_max(reach[2 * d],
+                                     hypre_abs(hypre_SStructStencilShape(astencil)[e][d]));
+         }
+      }
+      for (d = 0; d < ndim; d++)
+      {
+         preach = 0;
+         for (e = 0; e < hypre_SStructStencilSize(pstencil); e++)
+         {
+            preach = hypre_max(preach, hypre_abs(hypre_SStructStencilShape(pstencil)[e][d]));
+         }
+         reach[2 * d + 1] = reach[2 * d];
+         reach[6 + 2 * d] = reach[6 + 2 * d + 1] =
+                               hypre_max(reach[6 + 2 * d], stride[d] - 1 + preach + reach[2 * d]);
+      }
+
+      /* Rows J of sM are overwritten by hypre_SStructMatrixCompressUToS */
+      for (e = 0; e < hypre_StructStencilSize(hypre_StructMatrixStencil(sm)); e++)
+      {
+         if (hypre_StructMatrixConstEntry(sm, e) || hypre_StructMatrixSymmEntries(sm)[e] >= 0)
+         {
+            valid = 0;
+         }
+      }
+      for (e = 0; e < hypre_SStructStencilSize(mstencil); e++)
+      {
+         if (msplit[e] < 0 || hypre_SStructStencilVars(mstencil)[e])
+         {
+            valid = 0;
+         }
+      }
+
+      /* The fine rows of P with columns in the local coarse box must be near the local fine box */
+      if (hypre_BoxArraySize(cboxes))
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(cboxes, 0), box);
+         hypre_RefineBox(box, NULL, stride);
+         for (d = 0; valid && d < ndim; d++)
+         {
+            if (!hypre_BoxArraySize(fboxes) ||
+                hypre_BoxIMinD(box, d) < hypre_BoxIMinD(hypre_BoxArrayBox(fboxes, 0), d) - stride[d] + 1 ||
+                hypre_BoxIMaxD(box, d) > hypre_BoxIMaxD(hypre_BoxArrayBox(fboxes, 0), d) + stride[d] - 1)
+            {
+               valid = 0;
+            }
+         }
+      }
+   }
+   hypre_MPI_Allreduce(reach, global_reach, 12, hypre_MPI_INT, hypre_MPI_MAX, comm);
+
+   /* The box managers must know the boxes within nbr_halo of the local boxes.
+      They hold the remote boxes known to the box managers of the struct grids. */
+   for (part = 0; part < nparts; part++)
+   {
+      sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(fine, part), 0);
+      hypre_BoxManGetAllGlobalKnown(hypre_StructGridBoxMan(sgrid), &known);
+      for (d = 0; !known && d < ndim; d++)
+      {
+         if (nbr_halo[2 * d] > hypre_StructGridMaxDistance(sgrid)[d])
+         {
+            valid = 0;
+         }
+      }
+   }
+   hypre_MPI_Allreduce(&valid, &all_valid, 1, hypre_MPI_INT, hypre_MPI_MIN, comm);
+   if (!all_valid)
+   {
+      hypre_BoxDestroy(box);
+
+      return 0;
+   }
+
+   /*------------------------------------------------------
+    * Find the rows J of M that differ from sM
+    *
+    * uM has nonzero rows J: the columns of uP, and the columns of sP over the
+    * rows of uA and over the rows coupled by sA to the rows of uP
+    *------------------------------------------------------*/
+
+   rboxes = hypre_SStructGridRemoteBoxesCreate(fine, nbr_halo);
+   ncols  = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(uP));
+   marker = hypre_CTAlloc(HYPRE_Int, ncols, location);
+
+   /* Mark the rows of uA once, retaining both row-only and row/column support */
+   hypre_SStructMatrixCollectSupport(pgrid, uP, 0, &pu_rows, NULL);
+   hypre_SStructMatrixCollectSupport(fine, uA, 1, &right, &boxes);
+   for (part = 0; part < nparts; part++)
+   {
+      pa = hypre_SStructMatrixPMatrix(A, part);
+      hypre_SStructStencilAppendCoupledBoxes(hypre_SStructPMatrixStencil(pa, 0),
+                                             pu_rows[part][0], boxes[part][0]);
+   }
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, boxes);
+   hypre_SStructMatrixBoxesToUMatrix(P, pgrid, &ij_s, boxes);
+   hypre_SStructMatrixFreeSupport(fine, boxes);
+   hypre_ParCSRMatrixMarkColumns((hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_s), marker);
+   hypre_ParCSRMatrixMarkColumns(uP, marker);
+   HYPRE_IJMatrixDestroy(ij_s);
+   hypre_SStructGridMarkerBoxes(coarse, marker, ncols, location, &rows_J);
+
+   /*------------------------------------------------------
+    * Rows of P with columns in J (left), and rows of P reached from them
+    * by A (right)
+    *------------------------------------------------------*/
+
+   left = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   for (part = 0; part < nparts; part++)
+   {
+      pp      = hypre_SStructMatrixPMatrix(P, part);
+      refined = hypre_BoxArrayClone(rows_J[part][0]);
+      for (b = 0; b < hypre_BoxArraySize(refined); b++)
+      {
+         hypre_RefineBox(hypre_BoxArrayBox(refined, b), NULL,
+                         hypre_SStructPMatrixDomainStride(pp));
+      }
+      left[part]    = hypre_TAlloc(hypre_BoxArray *, 1, HYPRE_MEMORY_HOST);
+      left[part][0] = hypre_BoxArrayCreate(0, ndim);
+      hypre_SStructStencilAppendCoupledBoxes(hypre_SStructPMatrixStencil(pp, 0),
+                                             refined, left[part][0]);
+      hypre_AppendBoxArray(pu_rows[part][0], left[part][0]);
+      hypre_BoxArrayDestroy(refined);
+   }
+   hypre_SStructMatrixFreeSupport(fine, pu_rows);
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, left);
+
+   for (part = 0; part < nparts; part++)
+   {
+      for (b = 0; b < hypre_BoxArraySize(left[part][0]); b++)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(left[part][0], b), box);
+         hypre_BoxGrowByArray(box, global_halo);
+         hypre_AppendBox(box, right[part][0]);
+      }
+   }
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, right);
+
+   /*------------------------------------------------------
+    * Compute the complete rows J of P^T*A*P
+    *------------------------------------------------------*/
+
+   hypre_SStructMatrixBoxesWithU(A, left, &ij_a);
+   hypre_SStructMatrixBoxesWithU(P, right, &ij_p);
+   hypre_SStructMatrixFreeSupport(fine, left);
+   hypre_SStructMatrixFreeSupport(fine, right);
+
+   a = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_a);
+   p = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_p);
+   hypre_ParCSRMatrixRestrictColumns(p, marker, &restricted);
+   if (!hypre_ParCSRMatrixCommPkg(p))
+   {
+      hypre_MatvecCommPkgCreate(p);
+   }
+   rap = hypre_ParCSRMatrixRAPKT(restricted, a, p, 1, 0);
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(restricted);
+   HYPRE_IJMatrixDestroy(ij_a);
+   HYPRE_IJMatrixDestroy(ij_p);
+   hypre_TFree(marker, location);
+   hypre_SStructMatrixFreeSupport(coarse, rows_J);
+   hypre_SStructGridRemoteBoxesDestroy(rboxes);
+   hypre_BoxDestroy(box);
+
+   *result = rap;
+
+   return 1;
+}
+
+/*--------------------------------------------------------------------------
  * Computes the unstructured component of the product of SStructMatrices
  *--------------------------------------------------------------------------*/
 

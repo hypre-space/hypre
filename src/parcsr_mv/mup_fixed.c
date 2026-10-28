@@ -961,6 +961,14 @@ hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix *A )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixMarkColumns( hypre_ParCSRMatrix *P, HYPRE_Int *marker )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMarkColumns)( P, marker );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixMatvec( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvec)( alpha, A, x, beta, y );
@@ -1084,6 +1092,14 @@ HYPRE_Int
 hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRestoreRow)( matrix, row, size, col_ind, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRestrictColumns)( P, marker, Q_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
