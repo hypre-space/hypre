@@ -25,6 +25,7 @@ set(TEST_SRCS
   ij_assembly.c
   unit/test_csr_overlap.c
   unit/test_matrix_stats.c
+  unit/test_l1_gs_damping.c
 )
 
 # Collect targets derived from source file names
@@ -51,6 +52,7 @@ endif()
 
 # Build each executable
 add_hypre_executables("${TEST_SRCS}")
+add_test(NAME test_l1_gs_damping COMMAND $<TARGET_FILE:test_l1_gs_damping>)
 
 # Special treatment for sstructmat as it depends on sstruct_helpers (not an executable)
 add_hypre_executable("sstructmat.c" "sstruct_helpers.c")
@@ -75,26 +77,28 @@ set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 if (HYPRE_ENABLE_MPI)
   add_custom_target(check
     COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:test_l1_gs_damping>
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:ij> 2> ij.err
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:struct> 2> struct.err
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:sstruct> 2> sstruct.err
     COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
     COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ij struct sstruct
+    DEPENDS ij struct sstruct test_l1_gs_damping
     COMMENT "Running basic library check"
     VERBATIM
   )
 else ()
   add_custom_target(check
     COMMAND ${CMAKE_COMMAND} -E echo "Checking the library..."
+    COMMAND $<TARGET_FILE:test_l1_gs_damping>
     COMMAND $<TARGET_FILE:ij> 2> ij.err
     COMMAND $<TARGET_FILE:struct> 2> struct.err
     COMMAND $<TARGET_FILE:sstruct> 2> sstruct.err
     COMMAND ${CMAKE_COMMAND} -E echo "Test error files:"
     COMMAND ${CMAKE_COMMAND} -E cat ij.err struct.err sstruct.err
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ij struct sstruct
+    DEPENDS ij struct sstruct test_l1_gs_damping
     COMMENT "Running basic library check"
     VERBATIM
   )

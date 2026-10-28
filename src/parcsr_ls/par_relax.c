@@ -1271,7 +1271,8 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
                                    hypre_ParVector    *Vtemp,
                                    hypre_ParVector    *Ztemp )
 {
-   const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
+   /* The l1 denominator need not equal A_ii, so retain the diagonal residual. */
+   const HYPRE_Int skip_diag = 0;
 
    return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
                                         omega, l1_norms, u, Vtemp, Ztemp, 1, 1, skip_diag, 0);
@@ -1344,7 +1345,8 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
 {
-   const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
+   /* The l1 denominator need not equal A_ii, so retain the diagonal residual. */
+   const HYPRE_Int skip_diag = 0;
 
    return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
                                         omega, l1_norms, u, Vtemp, Ztemp,
@@ -1369,7 +1371,8 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
 {
-   const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
+   /* The l1 denominator need not equal A_ii, so retain the diagonal residual. */
+   const HYPRE_Int skip_diag = 0;
 
    return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
                                         omega, l1_norms, u, Vtemp, Ztemp,
