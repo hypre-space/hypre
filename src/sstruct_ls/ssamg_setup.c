@@ -841,6 +841,10 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
       coarse_flag = 0;
       for (part = 0; part < nparts; part++)
       {
+         /* Each level maps every part independently. A rejected part must keep
+          * an identity stride instead of inheriting the previous level's map. */
+         hypre_SetIndex(strides[part], 1);
+
          pgrid = hypre_SStructGridPGrid(grid_l[l], part);
 
          /* Initialize min_dxyz */
@@ -890,15 +894,15 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
 
          if ((cdir > -1) && (l < (max_levels - 1)))
          {
-            coarse_flag = 1;
-            cdir_l[l][part] = cdir;
-
             /* don't coarsen if a periodic direction and not divisible by 2 */
             if ((periodic[part][cdir]) && (periodic[part][cdir] % 2))
             {
                cdir_l[l][part] = -1;
                continue;
             }
+
+            coarse_flag = 1;
+            cdir_l[l][part] = cdir;
 
             if (hypre_IndexD(coarsen[part], cdir) != 0)
             {
