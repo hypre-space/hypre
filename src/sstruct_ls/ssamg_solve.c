@@ -397,6 +397,20 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_MGLEVEL_END(0);
    }
 
+   /* The residual checked inside the V-cycle loop is evaluated before the
+    * final post-relaxation.  If the iteration limit is exhausted, record the
+    * residual of the completed solve before reporting the final norm. */
+   if ((tol > 0.0) && (logging > 0) &&
+       (ssamg_data -> num_iterations == max_iter))
+   {
+      hypre_SStructMatvecCompute(matvec_data_l[0],
+                                 -1.0, A_l[0], x_l[0],
+                                 1.0,  b_l[0], r_l[0]);
+      hypre_SStructInnerProd(r_l[0], r_l[0], &r_dot_r);
+      norms[max_iter]     = sqrt(r_dot_r);
+      rel_norms[max_iter] = sqrt(r_dot_r / b_dot_b);
+   }
+
 #ifdef DEBUG_SOLVE
    HYPRE_Real b_dot_x;
 
