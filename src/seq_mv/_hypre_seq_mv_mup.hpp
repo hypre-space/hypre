@@ -252,6 +252,13 @@ HYPRE_Int
 hypre_CSRMatrixSpMVDevice_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *y, HYPRE_Int fill );
 
 HYPRE_Int
+hypre_CSRMatrixSpMVDeviceOutOfPlace_flt( HYPRE_Int trans, hypre_float alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_float beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int fill );
+HYPRE_Int
+hypre_CSRMatrixSpMVDeviceOutOfPlace_dbl( HYPRE_Int trans, hypre_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_double beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int fill );
+HYPRE_Int
+hypre_CSRMatrixSpMVDeviceOutOfPlace_long_dbl( HYPRE_Int trans, hypre_long_double alpha, hypre_CSRMatrix *A, hypre_Vector *x, hypre_long_double beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int fill );
+
+HYPRE_Int
 hypre_CSRMatrixSplitDevice_flt( hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr );
 HYPRE_Int
 hypre_CSRMatrixSplitDevice_dbl( hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr );
