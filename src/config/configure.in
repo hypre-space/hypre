@@ -426,6 +426,19 @@ then
    AC_DEFINE(HYPRE_USING_HOPSCOTCH, 1, [Define to 1 if using hopscotch hashing])
 fi
 
+AC_ARG_ENABLE(thread-local,
+AS_HELP_STRING([--enable-thread-local],
+               [Use thread-local storage for global state so that several
+                threads can call hypre independently; incompatible with
+                OpenMP (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_thread_local=yes ;;
+    no)  hypre_using_thread_local=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-thread-local]) ;;
+ esac],
+[hypre_using_thread_local=no]
+)
+
 AC_ARG_ENABLE(fpe-trap,
 AS_HELP_STRING([--enable-fpe-trap],
                [Enable floating-point exception trap (default is YES in debug mode, NO otherwise).]),
@@ -2934,6 +2947,18 @@ dnl *********************************************************************
 if test "$hypre_using_openmp" = "yes"
 then
    AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+fi
+
+dnl *********************************************************************
+dnl * Set thread-local storage options
+dnl *********************************************************************
+if test "$hypre_using_thread_local" = "yes"
+then
+   if test "$hypre_using_openmp" = "yes"
+   then
+      AC_MSG_ERROR([--enable-thread-local cannot be combined with --with-openmp])
+   fi
+   AC_DEFINE(HYPRE_USING_THREAD_LOCAL, 1, [Define to 1 if using thread-local storage for global state])
 fi
 
 dnl *********************************************************************

@@ -274,6 +274,11 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-hopscotch``
      - ``-DHYPRE_ENABLE_HOPSCOTCH=ON``
+   * - | Thread-local global state
+       | (re-entrant; not with OpenMP)
+       | (default is off)
+     - ``--enable-thread-local``
+     - ``-DHYPRE_ENABLE_THREAD_LOCAL=ON``
    * - | Fortran Support
        | (default is on)
      - ``--enable-fortran``
