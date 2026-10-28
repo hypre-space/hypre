@@ -152,6 +152,7 @@ set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communic
 set_hypre_option(BASE HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: Add this cmake feature
 set_hypre_option(BASE HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_OPENMP               "Use OpenMP" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_THREAD_LOCAL         "Use thread-local storage for global state (re-entrant library)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MPI                  "Use MPI" ON)
 set_hypre_option(BASE HYPRE_ENABLE_LTO                  "Use Link-Time Optimization (LTO)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
@@ -265,6 +266,7 @@ set_internal_hypre_option(USING GPU_AWARE_MPI)
 set_internal_hypre_option(USING CUDA_STREAMS)
 set_internal_hypre_option(USING THRUST_NOSYNC)
 set_internal_hypre_option(USING OPENMP)
+set_internal_hypre_option(USING THREAD_LOCAL)
 set_internal_hypre_option(USING CUDA)
 set_internal_hypre_option(USING HIP)
 set_internal_hypre_option(USING SYCL)
@@ -283,6 +285,7 @@ ensure_options_differ(SYCL   BIGINT)
 ensure_options_differ(SYCL   LONG_DOUBLE)
 ensure_options_differ(HIP    BIGINT)
 ensure_options_differ(HIP    LONG_DOUBLE)
+ensure_options_differ(OPENMP THREAD_LOCAL)
 ensure_options_differ(LTO    SYCL) # TODO: allow LTO with SYCL
 
 # Enable CTest support if tests are being built
