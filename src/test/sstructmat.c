@@ -456,7 +456,10 @@ test_SStructMatmult( HYPRE_Int            nmatrices,
    }
 
    /* Move diagonal coefficients to first positions */
-   hypre_ParCSRMatrixReorder(par_A[0]);
+   if (hypre_ParCSRMatrixGlobalNumRows(par_A[0]) == hypre_ParCSRMatrixGlobalNumCols(par_A[0]))
+   {
+      hypre_ParCSRMatrixReorder(par_A[0]);
+   }
 
    /* Compute error */
    HYPRE_IJMatrixGetObject(ij_M, (void **) &par_M);
