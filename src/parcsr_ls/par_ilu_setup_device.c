@@ -10,6 +10,26 @@
 
 #if defined(HYPRE_USING_GPU)
 
+/* The input permutation storage belongs to the caller, not these wrappers. */
+static void
+hypre_ILUSetupDeviceDestroyPermutations(hypre_IntArray *perm,
+                                       hypre_IntArray *qperm,
+                                       hypre_IntArray *rperm,
+                                       hypre_IntArray *rqperm,
+                                       hypre_IntArray *h_perm,
+                                       hypre_IntArray *h_rperm)
+{
+   if (perm)  { hypre_IntArrayData(perm) = NULL; }
+   if (qperm) { hypre_IntArrayData(qperm) = NULL; }
+
+   hypre_IntArrayDestroy(perm);
+   hypre_IntArrayDestroy(qperm);
+   hypre_IntArrayDestroy(rperm);
+   hypre_IntArrayDestroy(rqperm);
+   hypre_IntArrayDestroy(h_perm);
+   hypre_IntArrayDestroy(h_rperm);
+}
+
 /*--------------------------------------------------------------------------
  * hypre_ILUSetupDevice
  *
@@ -95,6 +115,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    HYPRE_Int               *uend                = NULL;
 
    /* Local variables */
+   HYPRE_BigInt             big_m               = (HYPRE_BigInt) m;
    HYPRE_BigInt            *send_buf            = NULL;
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_ParCSRCommHandle  *comm_handle;
@@ -158,71 +179,201 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
        * in a way different than HYPRE. Diagonal is not listed in the front
        */
 
-#if !defined(HYPRE_USING_SYCL)
-      if ((fill_level == 0) && !(ilu_type % 10))
+      if (ilu_type == 60)
       {
-         /* Copy diagonal matrix into a new place with permutation
-          * That is, A_diag = A_diag(perm,qperm); */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         /*
+          * Level-set ILU0 factorization on permuted matrix.
+          * The factorized matrix is kept in hypre's diagonal-first CSR format
+          * and the level-set row arrays are stored in ilu_data for the solve phase.
+          */
+
+         HYPRE_ANNOTATE_REGION_BEGIN("ILU60PrepareStructure");
+         /* Permute A_diag: A_diag = A_diag(perm, qperm) */
          hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rqperm_data, &A_diag);
 
-         /* Compute ILU0 on the device */
-         if (iter_setup_type)
+         hypre_CSRMatrixSortRow(A_diag);
+
+         /* Move diagonal to first position in each row (required by level-set kernels) */
+         hypre_CSRMatrixMoveDiagFirstOrderedDevice(A_diag);
+
+         HYPRE_ANNOTATE_REGION_END("ILU60PrepareStructure");
+         HYPRE_ANNOTATE_REGION_BEGIN("ILU60HostStructure");
+         /* Only the CSR structure is needed on the host. Clone_v2 would also
+          * allocate and zero an unused nnz-sized values array. */
+         HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
+         HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A_diag);
+         hypre_CSRMatrix *A_diag_h = hypre_CSRMatrixCreate(num_rows,
+                                                           hypre_CSRMatrixNumCols(A_diag), nnz);
+         hypre_CSRMatrixMemoryLocation(A_diag_h) = HYPRE_MEMORY_HOST;
+         hypre_CSRMatrixI(A_diag_h) = hypre_TAlloc(HYPRE_Int, num_rows + 1, HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixJ(A_diag_h) = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_CSRMatrixI(A_diag_h), hypre_CSRMatrixI(A_diag), HYPRE_Int,
+                       num_rows + 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(hypre_CSRMatrixJ(A_diag_h), hypre_CSRMatrixJ(A_diag), HYPRE_Int,
+                       nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         HYPRE_ANNOTATE_REGION_END("ILU60HostStructure");
+
+         /* Compute lower and upper level sets on the permuted sparsity structure */
+         HYPRE_Int *h_low_set_offsets = NULL;
+         HYPRE_Int *h_low_level_sets  = NULL;
+         HYPRE_Int *h_upp_set_offsets = NULL;
+         HYPRE_Int *h_upp_level_sets  = NULL;
+         HYPRE_Int  low_num_levels, upp_num_levels, max_level_set_size;
+
+         HYPRE_ANNOTATE_REGION_BEGIN("ILU60HostLevels");
+         hypre_CSRMatrixComputeLevelSetsHost(A_diag_h,
+                                             &h_low_set_offsets, &h_low_level_sets,
+                                             &h_upp_set_offsets, &h_upp_level_sets,
+                                             &low_num_levels,    &upp_num_levels,
+                                             &max_level_set_size);
+
+         HYPRE_ANNOTATE_REGION_END("ILU60HostLevels");
+         hypre_CSRMatrixDestroy(A_diag_h);
+
+         /* Copy level-set row arrays to device */
+         HYPRE_Int *d_low_level_set_rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+         HYPRE_Int *d_upp_level_set_rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+
+         hypre_TMemcpy(d_low_level_set_rows, h_low_level_sets, HYPRE_Int, num_rows,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_upp_level_set_rows, h_upp_level_sets, HYPRE_Int, num_rows,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+         hypre_TFree(h_low_level_sets, HYPRE_MEMORY_HOST);
+         hypre_TFree(h_upp_level_sets, HYPRE_MEMORY_HOST);
+
+         /* Run level-set ILU0 factorization on the permuted device matrix */
+         HYPRE_ANNOTATE_REGION_BEGIN("ILU60Factorization");
+         hypre_CSRMatrixILU0LevelSetFactorization(A_diag, low_num_levels,
+                                                  h_low_set_offsets,
+                                                  d_low_level_set_rows);
+         HYPRE_ANNOTATE_REGION_END("ILU60Factorization");
+
+         if (hypre_error_flag)
          {
-            hypre_ILUSetupIterativeILU0Device(A_diag, iter_setup_type, iter_setup_option,
-                                              iter_setup_max_iter, iter_setup_tol,
-                                              &hypre_ParILUDataIterativeSetupNumIter(ilu_data),
-                                              &hypre_ParILUDataIterativeSetupHistory(ilu_data));
+            hypre_TFree(h_low_set_offsets, HYPRE_MEMORY_HOST);
+            hypre_TFree(h_upp_set_offsets, HYPRE_MEMORY_HOST);
+            hypre_TFree(d_low_level_set_rows, HYPRE_MEMORY_DEVICE);
+            hypre_TFree(d_upp_level_set_rows, HYPRE_MEMORY_DEVICE);
+            hypre_CSRMatrixDestroy(A_diag);
+            hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+            return hypre_error_flag;
+         }
+
+         HYPRE_Int *d_combined_perm = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+         if (perm_data)
+         {
+            hypre_TMemcpy(d_combined_perm, perm_data, HYPRE_Int, num_rows,
+                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+         }
+         else if (num_rows)
+         {
+            HYPRE_THRUST_CALL(sequence, d_combined_perm, d_combined_perm + num_rows, 0);
+         }
+
+         /* Store level-set data in ilu_data for the solve phase */
+         hypre_ParILUDataNumLowLevels(ilu_data)       = low_num_levels;
+         hypre_ParILUDataLowLevelSetOffsets(ilu_data) = h_low_set_offsets;
+         hypre_ParILUDataDLowLevelSetRows(ilu_data)   = d_low_level_set_rows;
+         hypre_ParILUDataNumUppLevels(ilu_data)       = upp_num_levels;
+         hypre_ParILUDataUppLevelSetOffsets(ilu_data) = h_upp_set_offsets;
+         hypre_ParILUDataDUppLevelSetRows(ilu_data)   = d_upp_level_set_rows;
+         hypre_ParILUDataCombinedPermD(ilu_data)      = d_combined_perm;
+
+         /* Type 60 has no Schur complement. Transfer factor ownership instead
+          * of allocating/copying the entire CSR again just to destroy it below. */
+         HYPRE_ANNOTATE_REGION_BEGIN("ILU60StoreFactor");
+         if (nLU == num_rows)
+         {
+            *BLUptr = A_diag;
+            *Eptr = hypre_CSRMatrixCreate(0, 0, 0);
+            *Fptr = hypre_CSRMatrixCreate(0, 0, 0);
+            hypre_CSRMatrixInitialize_v2(*Eptr, 0, memory_location);
+            hypre_CSRMatrixInitialize_v2(*Fptr, 0, memory_location);
          }
          else
          {
-            hypre_CSRMatrixILU0(A_diag);
+            hypre_ParILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
          }
-
-         hypre_ParILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
-         hypre_CSRMatrixDestroy(A_diag);
+         /* Finish setup work before temporary storage can be retired. */
+         hypre_ForceSyncComputeStream();
+         if (A_diag != *BLUptr) { hypre_CSRMatrixDestroy(A_diag); }
+         HYPRE_ANNOTATE_REGION_END("ILU60StoreFactor");
+#else
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 requires CUDA/HIP device execution");
+         hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+         return hypre_error_flag;
+#endif
       }
       else
-#endif
       {
-         hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
-#if defined(HYPRE_USING_SYCL)
-         /* WM: note - ILU0 is not yet available in oneMKL sparse */
-         if (fill_level == 0 && !(ilu_type % 10))
+#if !defined(HYPRE_USING_SYCL)
+         if ((fill_level == 0) && !(ilu_type % 10))
          {
-            hypre_ILUSetupILU0(Apq, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
-         }
-#endif
-         if (fill_level != 0 && !(ilu_type % 10))
-         {
-            hypre_ILUSetupILUK(Apq, fill_level, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
-         }
-         else if ((ilu_type % 10) == 1)
-         {
-            hypre_ParCSRMatrixMigrate(Apq, HYPRE_MEMORY_HOST);
-            hypre_ILUSetupILUT(Apq, max_row_nnz, droptol, NULL, NULL, n, n,
-                               &parL, &parD, &parU, &parS, &uend);
-         }
+            /* Copy diagonal matrix into a new place with permutation
+             * That is, A_diag = A_diag(perm,qperm); */
+            hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rqperm_data, &A_diag);
 
-         hypre_ParCSRMatrixDestroy(Apq);
-         hypre_TFree(uend, HYPRE_MEMORY_HOST);
-         hypre_ParCSRMatrixDestroy(parS);
+            /* Compute ILU0 on the device */
+            if (iter_setup_type)
+            {
+               hypre_ILUSetupIterativeILU0Device(A_diag, iter_setup_type, iter_setup_option,
+                                                 iter_setup_max_iter, iter_setup_tol,
+                                                 &hypre_ParILUDataIterativeSetupNumIter(ilu_data),
+                                                 &hypre_ParILUDataIterativeSetupHistory(ilu_data));
+            }
+            else
+            {
+               hypre_CSRMatrixILU0(A_diag);
+            }
 
-         hypre_ILUSetupLDUtoVendor(parL, parD, parU, &ALU);
-         if ((ilu_type % 10) == 1)
-         {
-            hypre_TFree(parD, HYPRE_MEMORY_HOST);
+            hypre_ParILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
+            hypre_CSRMatrixDestroy(A_diag);
          }
          else
+#endif
          {
-            hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
-         }
-         hypre_ParCSRMatrixDestroy(parL);
-         hypre_ParCSRMatrixDestroy(parU);
+            hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
+#if defined(HYPRE_USING_SYCL)
+            /* WM: note - ILU0 is not yet available in oneMKL sparse */
+            if (fill_level == 0 && !(ilu_type % 10))
+            {
+               hypre_ILUSetupILU0(Apq, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
+            }
+#endif
+            if (fill_level != 0 && !(ilu_type % 10))
+            {
+               hypre_ILUSetupILUK(Apq, fill_level, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
+            }
+            else if ((ilu_type % 10) == 1)
+            {
+               hypre_ParCSRMatrixMigrate(Apq, HYPRE_MEMORY_HOST);
+               hypre_ILUSetupILUT(Apq, max_row_nnz, droptol, NULL, NULL, n, n,
+                                  &parL, &parD, &parU, &parS, &uend);
+            }
 
-         hypre_ParILUExtractEBFC(hypre_ParCSRMatrixDiag(ALU), nLU,
-                                 BLUptr, &SLU, Eptr, Fptr);
-         hypre_ParCSRMatrixDestroy(ALU);
-      }
+            hypre_ParCSRMatrixDestroy(Apq);
+            hypre_TFree(uend, HYPRE_MEMORY_HOST);
+            hypre_ParCSRMatrixDestroy(parS);
+
+            hypre_ILUSetupLDUtoVendor(parL, parD, parU, &ALU);
+            if ((ilu_type % 10) == 1)
+            {
+               hypre_TFree(parD, HYPRE_MEMORY_HOST);
+            }
+            else
+            {
+               hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
+            }
+            hypre_ParCSRMatrixDestroy(parL);
+            hypre_ParCSRMatrixDestroy(parU);
+
+            hypre_ParILUExtractEBFC(hypre_ParCSRMatrixDiag(ALU), nLU,
+                                    BLUptr, &SLU, Eptr, Fptr);
+            hypre_ParCSRMatrixDestroy(ALU);
+         }
+      } /* end else (ilu_type != 60) */
    }
    else
    {
@@ -232,8 +383,20 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
       SLU = NULL;
    }
 
+   /* Type 60 is block Jacobi (nLU == n) and never forms a Schur block.
+    * Both successful/empty ranks and rank-local factorization failures return
+    * to the same outer failure reduction; an extra Schur reduction here would
+    * mismatch that reduction when only one rank fails. */
+   if (ilu_type == 60)
+   {
+      hypre_CSRMatrixDestroy(SLU);
+      *matSptr = NULL;
+      hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
+      return hypre_error_flag;
+   }
+
    /* Compute total rows in Schur block */
-   HYPRE_BigInt big_m = (HYPRE_BigInt) m;
+
    hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    /* only form when total_rows > 0 */
@@ -388,23 +551,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    /* Set output pointer */
    *matSptr = matS;
 
-   /* Do not free perm_data/qperm_data */
-   if (perm)
-   {
-      hypre_IntArrayData(perm)  = NULL;
-   }
-   if (qperm)
-   {
-      hypre_IntArrayData(qperm) = NULL;
-   }
-
-   /* Free memory */
-   hypre_IntArrayDestroy(perm);
-   hypre_IntArrayDestroy(qperm);
-   hypre_IntArrayDestroy(rperm);
-   hypre_IntArrayDestroy(rqperm);
-   hypre_IntArrayDestroy(h_perm);
-   hypre_IntArrayDestroy(h_rperm);
+   hypre_ILUSetupDeviceDestroyPermutations(perm, qperm, rperm, rqperm, h_perm, h_rperm);
 
    return hypre_error_flag;
 }

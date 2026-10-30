@@ -281,6 +281,13 @@ function ExecuteJobs
    BatchFlag=0               # #BATCH option detected flag
    BatchCount=0              # different numbering for #Batch option
    PrevPid=0
+   CudaHipSection=0
+   CudaHipEnabled=0
+   if [ -r "$StartDir/../HYPRE_config.h" ] &&
+      grep -Eq '^#define HYPRE_USING_(CUDA|HIP) 1' "$StartDir/../HYPRE_config.h"; then
+      CudaHipEnabled=1
+   fi
+   export HYPRE_TEST_CUDA_HIP=$CudaHipEnabled
    SavePWD=`pwd`
 ##
 ##     move to specified directory
@@ -290,6 +297,12 @@ function ExecuteJobs
    while read InputLine
    do
       case $InputLine in
+         "#CUDA_HIP_BEGIN"*) CudaHipSection=1
+            ;;
+
+         "#CUDA_HIP_END"*) CudaHipSection=0
+            ;;
+
          "#BATCH"*) BatchFlag=1
             BatchFile=""
             ;;
@@ -312,6 +325,9 @@ function ExecuteJobs
             ;;
 
          *mpirun*)
+            if [ "$CudaHipSection" -eq 1 ] && [ "$CudaHipEnabled" -eq 0 ]; then
+               continue
+            fi
             RunCmd=`echo $InputLine| sed -e 's/^[[:space:]]*mpirun[[:space:]]*//'` # remove 'mpirun'
             RunCmd=`echo $RunCmd | sed -e 's/[[:space:]]*>.*$//'`            # remove output redirect
             OutFile=`echo $InputLine | sed -e 's/^.*>//'`           # set output file
@@ -400,6 +416,10 @@ function ExecuteTest
    WorkingDir=$2
    TestName=$3
    SaveName=$TestName.$SaveExt
+   # CUDA/HIP-only jobs may have a matching backend-specific baseline.
+   if [ "${HYPRE_TEST_CUDA_HIP:-0}" -eq 1 ] && [ -f "$WorkingDir/$SaveName.cuda_hip" ]; then
+      SaveName=$SaveName.cuda_hip
+   fi
    RTOL=$4
    ATOL=$5
    SavePWD=`pwd`
