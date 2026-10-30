@@ -272,26 +272,18 @@ hypre_SStructGridIntersect( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int v
 
 /*--------------------------------------------------------------------------*/
 
-hypre_SStructGridNeighbors *
-hypre_SStructGridNeighborsCreate( hypre_SStructGrid *grid, HYPRE_Int *halo )
+HYPRE_Int
+hypre_SStructGridMarkerBoxes( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsCreate)( grid, halo );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMarkerBoxes)( grid, marker, nrows, memory_location, boxes_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGridNeighborsDestroy( hypre_SStructGridNeighbors *nbrs )
+hypre_SStructGridMatch( hypre_SStructGrid *a, hypre_SStructGrid *b )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsDestroy)( nbrs );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructGridNeighborsShare( hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs, hypre_BoxArray ***boxes )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridNeighborsShare)( grid, nbrs, boxes );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMatch)( a, b );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -324,6 +316,30 @@ HYPRE_Int
 hypre_SStructGridRef( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRef)( grid, grid_ref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+hypre_SStructGridRemoteBoxes *
+hypre_SStructGridRemoteBoxesCreate( hypre_SStructGrid *grid, HYPRE_Int *halo )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRemoteBoxesCreate)( grid, halo );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridRemoteBoxesDestroy( hypre_SStructGridRemoteBoxes *rboxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRemoteBoxesDestroy)( rboxes );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridRemoteBoxesShare( hypre_SStructGrid *grid, hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridRemoteBoxesShare)( grid, rboxes, boxes );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -449,6 +465,22 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *gr
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixBoxesWithU( hypre_SStructMatrix *A, hypre_BoxArray ***boxes, hypre_IJMatrix **result )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixBoxesWithU)( A, boxes, result );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixCollectSupport( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B, HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr, hypre_BoxArray ****row_support )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCollectSupport)( grid, B, include_columns, boxes_ptr, row_support );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToS)( matrix, action );
@@ -457,9 +489,9 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatrixCompressUToSDirect( hypre_SStructMatrix *A, HYPRE_Int action )
+hypre_SStructMatrixCompressUToSBox( hypre_SStructMatrix *A, HYPRE_Int action )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToSDirect)( A, action );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixCompressUToSBox)( A, action );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -481,6 +513,14 @@ hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix *A, HYPRE_Int type, hypre_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructMatrixFreeSupport( hypre_SStructGrid *grid, hypre_BoxArray ***boxes )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixFreeSupport)( grid, boxes );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix *matrix, hypre_SStructVector **diag_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixGetDiagonal)( matrix, diag_ptr );
@@ -489,7 +529,7 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix *matrix, hypre_SStructVector
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix *A, hypre_ParCSRMatrix *B, hypre_IJMatrix **ij_Ahat_ptr )
+hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix *A, hypre_SStructMatrix *B, hypre_IJMatrix **ij_Ahat_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixHaloToUMatrix)( A, B, ij_Ahat_ptr );
 }
@@ -1193,6 +1233,14 @@ hypre_SStructScale( HYPRE_Complex alpha, hypre_SStructVector *y )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructStencilAppendCoupledBoxes( hypre_SStructStencil *stencil, hypre_BoxArray *src, hypre_BoxArray *dst )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructStencilAppendCoupledBoxes)( stencil, src, dst );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructStencilRef( hypre_SStructStencil *stencil, hypre_SStructStencil **stencil_ref )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructStencilRef)( stencil, stencil_ref );
@@ -1204,6 +1252,14 @@ HYPRE_Int
 hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixAssemble)( matrix );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructUMatrixExtractValues( hypre_SStructMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols, HYPRE_BigInt *rows, HYPRE_Int *row_indexes, HYPRE_BigInt *cols, HYPRE_Complex *values )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructUMatrixExtractValues)( matrix, nrows, ncols, rows, row_indexes, cols, values );
 }
 
 /*--------------------------------------------------------------------------*/

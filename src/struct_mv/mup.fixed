@@ -8,6 +8,7 @@ hypre_APSubdivideRegion
 hypre_AddIndexes
 hypre_AppendBox
 hypre_AppendBoxArray
+hypre_AppendBoxMerge
 hypre_BoxArrayArrayClone
 hypre_BoxArrayArrayCreate
 hypre_BoxArrayArrayDestroy
@@ -172,6 +173,7 @@ hypre_InitializeIndtComputations
 hypre_IntersectBoxes
 hypre_MapToCoarseIndex
 hypre_MapToFineIndex
+hypre_MergeBoxes
 hypre_MinUnionBoxes
 hypre_PrintBoxArrayData
 hypre_ProjectBox

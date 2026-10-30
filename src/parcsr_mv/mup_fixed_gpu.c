@@ -227,6 +227,14 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix *mat, HYPRE_BigInt row, HYPRE
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixMarkColumnsDevice( hypre_ParCSRMatrix *P, HYPRE_Int *marker )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMarkColumnsDevice)( P, marker );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *b, hypre_ParVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvecOutOfPlaceDevice)( alpha, A, x, beta, b, y );
@@ -254,6 +262,14 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRAPKTDevice)( R, A, P, keep_transpose, has_diagonal );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumnsDevice( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRestrictColumnsDevice)( P, marker, Q_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

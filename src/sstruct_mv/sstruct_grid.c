@@ -2157,14 +2157,15 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
  *    global_ranks_ptr = (pointer to array of global ranks)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
-                                                 HYPRE_Int              type,
-                                                 HYPRE_MemoryLocation   memory_location,
-                                                 HYPRE_Int              part,
-                                                 HYPRE_Int              var,
-                                                 HYPRE_Int              num_indexes,
-                                                 HYPRE_Int            **indexes,
-                                                 HYPRE_BigInt         **global_ranks_ptr)
+HYPRE_Int
+hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
+                                       HYPRE_Int              type,
+                                       HYPRE_MemoryLocation   memory_location,
+                                       HYPRE_Int              part,
+                                       HYPRE_Int              var,
+                                       HYPRE_Int              num_indexes,
+                                       HYPRE_Int            **indexes,
+                                       HYPRE_BigInt         **global_ranks_ptr)
 {
    HYPRE_Int            ndim = hypre_SStructGridNDim(grid);
    HYPRE_Int            i, d;
@@ -2242,14 +2243,15 @@ HYPRE_Int hypre_SStructGridIndexesToGlobalRanks( hypre_SStructGrid     *grid,
  *    indexes_ptr = (pointer to indexes[dim][i], the resulting indexes)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
-                                                 HYPRE_Int              type,
-                                                 HYPRE_MemoryLocation   memory_location,
-                                                 HYPRE_Int              part,
-                                                 HYPRE_Int              var,
-                                                 HYPRE_Int              num_ranks,
-                                                 HYPRE_BigInt          *global_ranks,
-                                                 HYPRE_Int           ***indexes_ptr )
+HYPRE_Int
+hypre_SStructGridGlobalRanksToIndexes( hypre_SStructGrid     *grid,
+                                       HYPRE_Int              type,
+                                       HYPRE_MemoryLocation   memory_location,
+                                       HYPRE_Int              part,
+                                       HYPRE_Int              var,
+                                       HYPRE_Int              num_ranks,
+                                       HYPRE_BigInt          *global_ranks,
+                                       HYPRE_Int           ***indexes_ptr )
 {
    hypre_BoxManEntry         *entry;
    hypre_SStructBoxManInfo   *entry_info;
@@ -2822,32 +2824,48 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
  * uses variable 0 of each part of a nonperiodic, cell-centered grid.
  *--------------------------------------------------------------------------*/
 
-hypre_SStructGridNeighbors *
-hypre_SStructGridNeighborsCreate(hypre_SStructGrid *grid, HYPRE_Int *halo)
+hypre_SStructGridRemoteBoxes *
+hypre_SStructGridRemoteBoxesCreate( hypre_SStructGrid *grid,
+                                    HYPRE_Int         *halo )
 {
-   HYPRE_Int ndim = hypre_SStructGridNDim(grid), nparts = hypre_SStructGridNParts(grid);
-   hypre_SStructGridNeighbors *nbrs = hypre_CTAlloc(hypre_SStructGridNeighbors, 1, HYPRE_MEMORY_HOST);
-   hypre_BoxArray *boxes = hypre_BoxArrayCreate(0, ndim);
-   HYPRE_Int *procs = NULL, *order = NULL, *parts = NULL, count = 0, capacity = 0;
-   HYPRE_Int myid, part, b, i, proc;
-   hypre_Box box = {0};
+   HYPRE_Int                     ndim   = hypre_SStructGridNDim(grid);
+   HYPRE_Int                     nparts = hypre_SStructGridNParts(grid);
+   hypre_SStructGridRemoteBoxes *rboxes;
+
+   /* Work variables */
+   hypre_StructGrid             *sgrid;
+   hypre_BoxManEntry           **entries;
+   hypre_BoxArray               *boxes;
+   hypre_Box                    *box;
+   HYPRE_Int                    *procs    = NULL;
+   HYPRE_Int                    *order    = NULL;
+   HYPRE_Int                    *parts    = NULL;
+   HYPRE_Int                     count    = 0;
+   HYPRE_Int                     capacity = 0;
+   HYPRE_Int                     nentries;
+   HYPRE_Int                     myid, part, b, i, proc, nprocs;
 
    hypre_MPI_Comm_rank(hypre_SStructGridComm(grid), &myid);
-   hypre_BoxInit(&box, ndim);
+
+   /* Allocate memory */
+   rboxes = hypre_CTAlloc(hypre_SStructGridRemoteBoxes, 1, HYPRE_MEMORY_HOST);
+   boxes  = hypre_BoxArrayCreate(0, ndim);
+   box    = hypre_BoxCreate(ndim);
+
+   /* Find box array */
    for (part = 0; part < nparts; part++)
    {
-      hypre_StructGrid *sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), 0);
+      sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), 0);
       hypre_ForBoxI(b, hypre_StructGridBoxes(sgrid))
       {
-         hypre_BoxManEntry **entries;
-         HYPRE_Int nentries;
-         hypre_CopyBox(hypre_BoxArrayBox(hypre_StructGridBoxes(sgrid), b), &box);
-         hypre_BoxGrowByArray(&box, halo);
-         hypre_SStructGridIntersect(grid, part, 0, &box, 0, &entries, &nentries);
+         hypre_CopyBox(hypre_BoxArrayBox(hypre_StructGridBoxes(sgrid), b), box);
+         hypre_BoxGrowByArray(box, halo);
+         hypre_SStructGridIntersect(grid, part, 0, box, 0, &entries, &nentries);
          for (i = 0; i < nentries; i++)
          {
             hypre_SStructBoxManEntryGetProcess(entries[i], &proc);
             if (proc == myid) { continue; }
+
             if (count == capacity)
             {
                capacity = capacity ? 2 * capacity : 16;
@@ -2855,8 +2873,8 @@ hypre_SStructGridNeighborsCreate(hypre_SStructGrid *grid, HYPRE_Int *halo)
                order = hypre_TReAlloc(order, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
                parts = hypre_TReAlloc(parts, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
             }
-            hypre_BoxManEntryGetExtents(entries[i], hypre_BoxIMin(&box), hypre_BoxIMax(&box));
-            hypre_AppendBox(&box, boxes);
+            hypre_BoxManEntryGetExtents(entries[i], hypre_BoxIMin(box), hypre_BoxIMax(box));
+            hypre_AppendBox(box, boxes);
             procs[count] = proc;
             order[count] = count;
             parts[count++] = part;
@@ -2870,92 +2888,128 @@ hypre_SStructGridNeighborsCreate(hypre_SStructGrid *grid, HYPRE_Int *halo)
    {
       hypre_qsort2i(procs, order, 0, count - 1);
    }
-   nbrs->procs  = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
-   nbrs->starts = hypre_TAlloc(HYPRE_Int, count + 1, HYPRE_MEMORY_HOST);
-   nbrs->parts  = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
-   nbrs->boxes  = hypre_BoxArrayCreate(count, ndim);
+   hypre_SStructGridRemoteBoxesProcs(rboxes)  = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
+   hypre_SStructGridRemoteBoxesStarts(rboxes) = hypre_TAlloc(HYPRE_Int, count + 1, HYPRE_MEMORY_HOST);
+   hypre_SStructGridRemoteBoxesParts(rboxes)  = hypre_TAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
+   hypre_SStructGridRemoteBoxesBoxes(rboxes)  = hypre_BoxArrayCreate(count, ndim);
+   nprocs = 0;
    for (i = 0; i < count; i++)
    {
       if (!i || procs[i] != procs[i - 1])
       {
-         nbrs->procs[nbrs->nprocs] = procs[i];
-         nbrs->starts[nbrs->nprocs++] = i;
+         hypre_SStructGridRemoteBoxesProc(rboxes, nprocs)  = procs[i];
+         hypre_SStructGridRemoteBoxesStart(rboxes, nprocs) = i;
+         nprocs++;
       }
-      nbrs->parts[i] = parts[order[i]];
-      hypre_CopyBox(hypre_BoxArrayBox(boxes, order[i]), hypre_BoxArrayBox(nbrs->boxes, i));
+      hypre_SStructGridRemoteBoxesPart(rboxes, i) = parts[order[i]];
+      hypre_CopyBox(hypre_BoxArrayBox(boxes, order[i]),
+                    hypre_BoxArrayBox(hypre_SStructGridRemoteBoxesBoxes(rboxes), i));
    }
-   nbrs->starts[nbrs->nprocs] = count;
+   hypre_SStructGridRemoteBoxesNProcs(rboxes)      = nprocs;
+   hypre_SStructGridRemoteBoxesStart(rboxes, nprocs) = count;
 
    hypre_TFree(procs, HYPRE_MEMORY_HOST);
    hypre_TFree(order, HYPRE_MEMORY_HOST);
    hypre_TFree(parts, HYPRE_MEMORY_HOST);
    hypre_BoxArrayDestroy(boxes);
+   hypre_BoxDestroy(box);
 
-   return nbrs;
+   return rboxes;
 }
 
+/*--------------------------------------------------------------------------
+ * Frees the remote boxes data structure
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_SStructGridNeighborsDestroy(hypre_SStructGridNeighbors *nbrs)
+hypre_SStructGridRemoteBoxesDestroy( hypre_SStructGridRemoteBoxes *rboxes )
 {
-   hypre_TFree(nbrs->procs, HYPRE_MEMORY_HOST);
-   hypre_TFree(nbrs->starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(nbrs->parts, HYPRE_MEMORY_HOST);
-   hypre_BoxArrayDestroy(nbrs->boxes);
-   hypre_TFree(nbrs, HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_SStructGridRemoteBoxesProcs(rboxes), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_SStructGridRemoteBoxesStarts(rboxes), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_SStructGridRemoteBoxesParts(rboxes), HYPRE_MEMORY_HOST);
+   hypre_BoxArrayDestroy(hypre_SStructGridRemoteBoxesBoxes(rboxes));
+   hypre_TFree(rboxes, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
 
-/* Replaces the support boxes of each rank by the union of the support boxes of
+/*--------------------------------------------------------------------------
+ * Replaces the support boxes of each rank by the union of the support boxes of
  * all ranks, clipped to the local grid boxes. Only neighbors communicate.
  * boxes[part][0] holds the support for variable 0. The support must stay
- * within the halo used to create nbrs, and that halo must be the same on all
- * ranks and symmetric in each coordinate direction. */
-HYPRE_Int
-hypre_SStructGridNeighborsShare(hypre_SStructGrid *grid, hypre_SStructGridNeighbors *nbrs,
-                                hypre_BoxArray ***boxes)
-{
-   MPI_Comm comm = hypre_SStructGridComm(grid);
-   HYPRE_Int ndim = hypre_SStructGridNDim(grid), nparts = hypre_SStructGridNParts(grid);
-   HYPRE_Int width = 1 + 2 * ndim, nprocs = nbrs->nprocs;
-   HYPRE_Int *send_starts = hypre_CTAlloc(HYPRE_Int, nprocs + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int *recv_starts = hypre_CTAlloc(HYPRE_Int, nprocs + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int *sizes = hypre_CTAlloc(HYPRE_Int, 2 * nprocs, HYPRE_MEMORY_HOST);
-   hypre_MPI_Request *requests = hypre_CTAlloc(hypre_MPI_Request, 2 * nprocs, HYPRE_MEMORY_HOST);
-   hypre_MPI_Status *statuses = hypre_CTAlloc(hypre_MPI_Status, 2 * nprocs, HYPRE_MEMORY_HOST);
-   HYPRE_Int *send_buf, *recv_buf, pass, part, i, k, b, d, n;
-   hypre_BoxArray *clipped = hypre_BoxArrayCreate(0, ndim);
-   hypre_Box box = {0};
+ * within the halo used to create rboxes, and that halo must be the same on all
+ * ranks and symmetric in each coordinate direction.
+ *--------------------------------------------------------------------------*/
 
-   hypre_BoxInit(&box, ndim);
+HYPRE_Int
+hypre_SStructGridRemoteBoxesShare( hypre_SStructGrid            *grid,
+                                   hypre_SStructGridRemoteBoxes *rboxes,
+                                   hypre_BoxArray             ***boxes )
+{
+   MPI_Comm            comm   = hypre_SStructGridComm(grid);
+   HYPRE_Int           ndim   = hypre_SStructGridNDim(grid);
+   HYPRE_Int           nparts = hypre_SStructGridNParts(grid);
+   HYPRE_Int           nprocs = hypre_SStructGridRemoteBoxesNProcs(rboxes);
+   HYPRE_Int           width  = 1 + 2 * ndim;
+
+   /* Communication data */
+   HYPRE_Int          *send_starts;
+   HYPRE_Int          *recv_starts;
+   HYPRE_Int          *sizes;
+   HYPRE_Int          *send_buf = NULL;
+   HYPRE_Int          *recv_buf;
+   hypre_MPI_Request  *requests;
+   hypre_MPI_Status   *statuses;
+
+   /* Work variables */
+   hypre_StructGrid   *sgrid;
+   hypre_BoxArray     *clipped;
+   hypre_Box          *box;
+   HYPRE_Int           pass, part, i, k, b, d, n;
+
+   /* Allocate memory */
+   send_starts = hypre_CTAlloc(HYPRE_Int, nprocs + 1, HYPRE_MEMORY_HOST);
+   recv_starts = hypre_CTAlloc(HYPRE_Int, nprocs + 1, HYPRE_MEMORY_HOST);
+   sizes       = hypre_CTAlloc(HYPRE_Int, 2 * nprocs, HYPRE_MEMORY_HOST);
+   requests    = hypre_CTAlloc(hypre_MPI_Request, 2 * nprocs, HYPRE_MEMORY_HOST);
+   statuses    = hypre_CTAlloc(hypre_MPI_Status, 2 * nprocs, HYPRE_MEMORY_HOST);
+   clipped     = hypre_BoxArrayCreate(0, ndim);
+   box         = hypre_BoxCreate(ndim);
+
+   /* Eliminate duplicated boxes */
    for (part = 0; part < nparts; part++)
    {
       hypre_UnionBoxes(boxes[part][0]);
    }
 
    /* Pieces of the local support in the grid boxes of each neighbor: count
-    * them, then pack them */
-   send_buf = NULL;
+      them (pass = 0), then pack them (pass = 1) */
    for (pass = 0; pass < 2; pass++)
    {
       n = 0;
       for (i = 0; i < nprocs; i++)
       {
-         for (k = nbrs->starts[i]; k < nbrs->starts[i + 1]; k++)
+         for (k = hypre_SStructGridRemoteBoxesStart(rboxes, i);
+              k < hypre_SStructGridRemoteBoxesStart(rboxes, i + 1); k++)
          {
-            part = nbrs->parts[k];
+            part = hypre_SStructGridRemoteBoxesPart(rboxes, k);
             hypre_ForBoxI(b, boxes[part][0])
             {
                hypre_IntersectBoxes(hypre_BoxArrayBox(boxes[part][0], b),
-                                    hypre_BoxArrayBox(nbrs->boxes, k), &box);
-               if (!hypre_BoxVolume(&box)) { continue; }
+                                    hypre_BoxArrayBox(hypre_SStructGridRemoteBoxesBoxes(rboxes), k),
+                                    box);
+               if (!hypre_BoxVolume(box))
+               {
+                  continue;
+               }
+
                if (pass)
                {
                   send_buf[n] = part;
                   for (d = 0; d < ndim; d++)
                   {
-                     send_buf[n + 1 + d]        = hypre_BoxIMinD(&box, d);
-                     send_buf[n + 1 + ndim + d] = hypre_BoxIMaxD(&box, d);
+                     send_buf[n + 1 + d]        = hypre_BoxIMinD(box, d);
+                     send_buf[n + 1 + ndim + d] = hypre_BoxIMaxD(box, d);
                   }
                }
                n += width;
@@ -2963,67 +3017,83 @@ hypre_SStructGridNeighborsShare(hypre_SStructGrid *grid, hypre_SStructGridNeighb
          }
          send_starts[i + 1] = n;
       }
+
       if (!pass)
       {
          send_buf = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
       }
    }
 
-   /* Exchange the sizes, then the pieces */
+   /* Exchange the sizes */
    for (i = 0; i < nprocs; i++)
    {
       sizes[nprocs + i] = send_starts[i + 1] - send_starts[i];
-      hypre_MPI_Irecv(&sizes[i], 1, HYPRE_MPI_INT, nbrs->procs[i], 0, comm, &requests[i]);
-      hypre_MPI_Isend(&sizes[nprocs + i], 1, HYPRE_MPI_INT, nbrs->procs[i], 0, comm,
+      hypre_MPI_Irecv(&sizes[i], 1, HYPRE_MPI_INT,
+                      hypre_SStructGridRemoteBoxesProc(rboxes, i), 0, comm, &requests[i]);
+      hypre_MPI_Isend(&sizes[nprocs + i], 1, HYPRE_MPI_INT,
+                      hypre_SStructGridRemoteBoxesProc(rboxes, i), 0, comm,
                       &requests[nprocs + i]);
    }
    hypre_MPI_Waitall(2 * nprocs, requests, statuses);
+
    for (i = 0; i < nprocs; i++)
    {
       recv_starts[i + 1] = recv_starts[i] + sizes[i];
    }
    recv_buf = hypre_TAlloc(HYPRE_Int, recv_starts[nprocs], HYPRE_MEMORY_HOST);
+
+   /* Exchange the pieces */
    for (i = 0; i < nprocs; i++)
    {
-      hypre_MPI_Irecv(recv_buf + recv_starts[i], sizes[i], HYPRE_MPI_INT, nbrs->procs[i], 1,
-                      comm, &requests[i]);
+      hypre_MPI_Irecv(recv_buf + recv_starts[i], sizes[i], HYPRE_MPI_INT,
+                      hypre_SStructGridRemoteBoxesProc(rboxes, i), 1, comm, &requests[i]);
       hypre_MPI_Isend(send_buf + send_starts[i], sizes[nprocs + i], HYPRE_MPI_INT,
-                      nbrs->procs[i], 1, comm, &requests[nprocs + i]);
+                      hypre_SStructGridRemoteBoxesProc(rboxes, i), 1, comm,
+                      &requests[nprocs + i]);
    }
    hypre_MPI_Waitall(2 * nprocs, requests, statuses);
 
-   /* Clip the local support to the local grid boxes and add the received pieces */
+   /* Clip the local support to the local grid boxes */
    for (part = 0; part < nparts; part++)
    {
-      hypre_StructGrid *sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), 0);
+      sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), 0);
       hypre_BoxArraySetSize(clipped, 0);
       hypre_ForBoxI(b, boxes[part][0])
       {
          hypre_ForBoxI(k, hypre_StructGridBoxes(sgrid))
          {
             hypre_IntersectBoxes(hypre_BoxArrayBox(boxes[part][0], b),
-                                 hypre_BoxArrayBox(hypre_StructGridBoxes(sgrid), k), &box);
-            if (hypre_BoxVolume(&box)) { hypre_AppendBox(&box, clipped); }
+                                 hypre_BoxArrayBox(hypre_StructGridBoxes(sgrid), k), box);
+            if (hypre_BoxVolume(box))
+            {
+               hypre_AppendBox(box, clipped);
+            }
          }
       }
       hypre_BoxArraySetSize(boxes[part][0], 0);
       hypre_AppendBoxArray(clipped, boxes[part][0]);
    }
+
+   /* Add the received pieces */
    for (n = 0; n < recv_starts[nprocs]; n += width)
    {
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(&box, d) = recv_buf[n + 1 + d];
-         hypre_BoxIMaxD(&box, d) = recv_buf[n + 1 + ndim + d];
+         hypre_BoxIMinD(box, d) = recv_buf[n + 1 + d];
+         hypre_BoxIMaxD(box, d) = recv_buf[n + 1 + ndim + d];
       }
-      hypre_AppendBox(&box, boxes[recv_buf[n]][0]);
+      hypre_AppendBox(box, boxes[recv_buf[n]][0]);
    }
+
+   /* Eliminate duplicated boxes */
    for (part = 0; part < nparts; part++)
    {
       hypre_UnionBoxes(boxes[part][0]);
    }
 
+   /* Free memory */
    hypre_BoxArrayDestroy(clipped);
+   hypre_BoxDestroy(box);
    hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
    hypre_TFree(send_starts, HYPRE_MEMORY_HOST);
@@ -3031,6 +3101,268 @@ hypre_SStructGridNeighborsShare(hypre_SStructGrid *grid, hypre_SStructGridNeighb
    hypre_TFree(sizes, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(statuses, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Returns 1 if the grids a and b have the same parts, with a single
+ * cell-centered variable per part, nonperiodic, at most one box per part, and
+ * the same box extents and ghost layers. Returns 0 otherwise. This is a local
+ * check; callers needing agreement across ranks must reduce the result.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridMatch( hypre_SStructGrid *a,
+                        hypre_SStructGrid *b )
+{
+   HYPRE_Int           ndim   = hypre_SStructGridNDim(a);
+   HYPRE_Int           nparts = hypre_SStructGridNParts(a);
+
+   hypre_SStructPGrid *apgrid;
+   hypre_SStructPGrid *bpgrid;
+   hypre_StructGrid   *asgrid;
+   hypre_StructGrid   *bsgrid;
+   hypre_BoxArray     *aboxes;
+   hypre_BoxArray     *bboxes;
+   hypre_Box          *abox;
+   hypre_Box          *bbox;
+   HYPRE_Int           part, d;
+
+   if (nparts != hypre_SStructGridNParts(b) || ndim != hypre_SStructGridNDim(b))
+   {
+      return 0;
+   }
+
+   for (part = 0; part < nparts; part++)
+   {
+      apgrid = hypre_SStructGridPGrid(a, part);
+      bpgrid = hypre_SStructGridPGrid(b, part);
+      if (hypre_SStructPGridNVars(apgrid) != 1 ||
+          hypre_SStructPGridNVars(bpgrid) != 1 ||
+          hypre_SStructPGridVarType(apgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL ||
+          hypre_SStructPGridVarType(bpgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL)
+      {
+         return 0;
+      }
+
+      asgrid = hypre_SStructPGridSGrid(apgrid, 0);
+      bsgrid = hypre_SStructPGridSGrid(bpgrid, 0);
+      aboxes = hypre_StructGridBoxes(asgrid);
+      bboxes = hypre_StructGridBoxes(bsgrid);
+      if (hypre_BoxArraySize(aboxes) > 1 ||
+          hypre_BoxArraySize(aboxes) != hypre_BoxArraySize(bboxes))
+      {
+         return 0;
+      }
+
+      abox = hypre_BoxArraySize(aboxes) ? hypre_BoxArrayBox(aboxes, 0) : NULL;
+      bbox = hypre_BoxArraySize(bboxes) ? hypre_BoxArrayBox(bboxes, 0) : NULL;
+      for (d = 0; d < ndim; d++)
+      {
+         if (hypre_StructGridPeriodic(asgrid)[d] ||
+             hypre_StructGridPeriodic(bsgrid)[d] ||
+             hypre_StructGridNumGhost(asgrid)[2 * d] != hypre_StructGridNumGhost(bsgrid)[2 * d] ||
+             hypre_StructGridNumGhost(asgrid)[2 * d + 1] != hypre_StructGridNumGhost(bsgrid)[2 * d + 1])
+         {
+            return 0;
+         }
+
+         if (abox &&
+             (hypre_BoxIMinD(abox, d) != hypre_BoxIMinD(bbox, d) ||
+              hypre_BoxIMaxD(abox, d) != hypre_BoxIMaxD(bbox, d)))
+         {
+            return 0;
+         }
+      }
+   }
+
+   return 1;
+}
+
+#if defined(HYPRE_USING_GPU)
+/*--------------------------------------------------------------------------
+ * Functor that selects the indices i where the marker changes value, that is,
+ * the endpoints of the runs of marked rows
+ *--------------------------------------------------------------------------*/
+
+struct hypre_SStructRunBoundary
+{
+   HYPRE_Int *marker;
+   HYPRE_Int  nrows;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   __host__ __device__
+#endif
+   bool operator()(HYPRE_Int i) const
+   {
+      return (i < nrows ? marker[i] : 0) != (i > 0 ? marker[i - 1] : 0);
+   }
+};
+#endif
+
+/*--------------------------------------------------------------------------
+ * Finds the boxes of the rows marked in marker (an array of nrows 0/1 values
+ * in memory_location) and returns them in boxes_ptr[part][var]. The local
+ * numbering of the rows is ordered by part, variable and ghost box. Only the
+ * endpoints of the runs of marked rows are transferred to the host, and each
+ * run is tiled with aligned boxes, without visiting every marked row.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridMarkerBoxes( hypre_SStructGrid     *grid,
+                              HYPRE_Int             *marker,
+                              HYPRE_Int              nrows,
+                              HYPRE_MemoryLocation   memory_location,
+                              hypre_BoxArray      ****boxes_ptr )
+{
+   HYPRE_Int             ndim   = hypre_SStructGridNDim(grid);
+   HYPRE_Int             nparts = hypre_SStructGridNParts(grid);
+
+   hypre_SStructPGrid   *pgrid;
+   hypre_StructGrid     *sgrid;
+   hypre_BoxArray     ***boxes;
+   hypre_BoxArray       *grid_boxes;
+   hypre_BoxArray       *run_boxa;
+   hypre_Box            *ghost_box;
+   hypre_Box            *run_box;
+   hypre_Index           index, extent;
+   HYPRE_Int            *rows;
+   HYPRE_Int             num_rows = 0;
+   HYPRE_Int             part, var, nvars, b, d, i, k, m, r;
+   HYPRE_Int             volume, end, linear, span;
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int            *device_rows;
+   HYPRE_Int            *device_end;
+#else
+   HYPRE_UNUSED_VAR(memory_location);
+#endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Find the endpoints of the runs of marked rows */
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      device_rows = hypre_TAlloc(HYPRE_Int, nrows + 1, memory_location);
+#if defined(HYPRE_USING_SYCL)
+      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+      device_end = HYPRE_ONEDPL_CALL(std::copy_if, count, count + nrows + 1, device_rows,
+                                     (hypre_SStructRunBoundary {marker, nrows}));
+#else
+      device_end = HYPRE_THRUST_CALL(copy_if, thrust::make_counting_iterator(0),
+                                     thrust::make_counting_iterator(nrows + 1), device_rows,
+                                     (hypre_SStructRunBoundary {marker, nrows}));
+#endif
+      num_rows = (HYPRE_Int) (device_end - device_rows);
+      rows     = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(rows, device_rows, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, memory_location);
+      hypre_TFree(device_rows, memory_location);
+   }
+   else
+#endif
+   {
+      rows = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
+      for (i = 0; i <= nrows; i++)
+      {
+         if ((i < nrows ? marker[i] : 0) != (i > 0 ? marker[i - 1] : 0))
+         {
+            rows[num_rows++] = i;
+         }
+      }
+   }
+
+   /* Tile each run with aligned boxes */
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
+   ghost_box = hypre_BoxCreate(ndim);
+   run_box   = hypre_BoxCreate(ndim);
+   run_boxa  = hypre_BoxArrayCreate(0, ndim);
+   boxes     = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   hypre_SetIndex(index, 0);
+   m = r = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      boxes[part] = hypre_TAlloc(hypre_BoxArray *, nvars, HYPRE_MEMORY_HOST);
+      for (var = 0; var < nvars; var++)
+      {
+         sgrid      = hypre_SStructPGridSGrid(pgrid, var);
+         grid_boxes = hypre_StructGridBoxes(sgrid);
+         boxes[part][var] = hypre_BoxArrayCreate(0, ndim);
+
+         hypre_ForBoxI(b, grid_boxes)
+         {
+            hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, b), ghost_box);
+            hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
+            volume = hypre_BoxVolume(ghost_box);
+
+            hypre_BoxArraySetSize(run_boxa, 0);
+            while (r < num_rows && rows[r] < m + volume)
+            {
+               end = hypre_min(rows[r + 1], m + volume) - m;
+               k   = hypre_max(rows[r], m) - m;
+               while (k < end)
+               {
+                  /* Index of the k-th row of this ghost box */
+                  linear = k;
+                  for (d = 0; d < ndim; d++)
+                  {
+                     hypre_IndexD(index, d) = hypre_BoxIMinD(ghost_box, d) +
+                                              linear % hypre_BoxSizeD(ghost_box, d);
+                     linear /= hypre_BoxSizeD(ghost_box, d);
+                  }
+
+                  /* Largest aligned box of marked rows starting at index */
+                  hypre_SetIndex(extent, 1);
+                  extent[0] = hypre_min(hypre_BoxIMaxD(ghost_box, 0) - index[0] + 1, end - k);
+                  span      = extent[0];
+                  for (d = 1; d < ndim; d++)
+                  {
+                     if (index[d - 1] != hypre_BoxIMinD(ghost_box, d - 1) ||
+                         extent[d - 1] != hypre_BoxSizeD(ghost_box, d - 1))
+                     {
+                        break;
+                     }
+                     extent[d] = hypre_min(hypre_BoxIMaxD(ghost_box, d) - index[d] + 1,
+                                           (end - k) / span);
+                     span     *= extent[d];
+                  }
+
+                  hypre_BoxSetExtents(run_box, index, index);
+                  for (d = 0; d < ndim; d++)
+                  {
+                     hypre_BoxIMaxD(run_box, d) += extent[d] - 1;
+                  }
+                  hypre_AppendBoxMerge(run_box, run_boxa);
+                  k += span;
+               }
+
+               if (rows[r + 1] > m + volume)
+               {
+                  break;
+               }
+               r += 2;
+            }
+            hypre_MergeBoxes(run_boxa);
+            hypre_AppendBoxArray(run_boxa, boxes[part][var]);
+            m += volume;
+         } /* loop over grid boxes */
+      } /* loop over vars */
+   } /* loop over parts */
+
+   /* Free memory */
+   hypre_BoxDestroy(ghost_box);
+   hypre_BoxDestroy(run_box);
+   hypre_BoxArrayDestroy(run_boxa);
+   hypre_TFree(rows, HYPRE_MEMORY_HOST);
+   HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
+
+   *boxes_ptr = boxes;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
