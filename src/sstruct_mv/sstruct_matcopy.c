@@ -241,8 +241,8 @@ hypre_SStructRowAccumulate( HYPRE_BigInt    *cols,
 
 /*--------------------------------------------------------------------------
  * Adds one to the number of entries of the rows of a segment. The rows of
- * different entries of a segment are different, so no atomics are needed as
- * long as the segments are processed one after the other.
+ * different entries of a segment are different, so no atomics are needed
+ * when the segments are processed one after the other.
  *--------------------------------------------------------------------------*/
 
 struct hypre_SStructSegmentCountRows
