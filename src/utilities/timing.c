@@ -18,7 +18,7 @@
 /* Global variable for timing */
 /* guard definition of global variables to avoid linker errors for multiprecision build */
 #if defined (hypre_DEFINE_GLOBAL)
-hypre_TimingType *hypre_global_timing = NULL;
+HYPRE_THREAD_LOCAL hypre_TimingType *hypre_global_timing = NULL;
 #endif
 
 /*-------------------------------------------------------
