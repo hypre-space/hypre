@@ -1024,14 +1024,16 @@ hypre_SStructMatmultComputeS( hypre_SStructMatmultData *mmdata,
  * hypre_SStructMatrixCompressUToS(M, -1). Support boxes are exchanged between
  * neighboring ranks only.
  *
- * Returns zero on all ranks when the layout is not supported.
+ * Sets *supported to zero on all ranks when the layout is not supported,
+ * and to one when the result is computed.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
                                  hypre_SStructMatrix  *P,
                                  hypre_SStructMatrix  *M,
-                                 hypre_ParCSRMatrix  **result )
+                                 hypre_ParCSRMatrix  **result,
+                                 HYPRE_Int            *supported )
 {
    MPI_Comm                       comm   = hypre_SStructMatrixComm(A);
    HYPRE_Int                      nparts = hypre_SStructMatrixNParts(A);
@@ -1071,17 +1073,19 @@ hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
    HYPRE_Int                      ncols;
    HYPRE_Int                      part, d, e, b;
 
+   *supported = 0;
+
    if (A == P || ndim < 1 || ndim > 3 ||
        nparts != hypre_SStructMatrixNParts(P) ||
        ndim != hypre_SStructMatrixNDim(P) ||
        hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(A)) != fine)
    {
-      return 0;
+      return hypre_error_flag;
    }
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
    if (hypre_GetExecPolicy1(hypre_SStructMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
    {
-      return 0;
+      return hypre_error_flag;
    }
 #endif
 
@@ -1090,8 +1094,11 @@ hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
     *------------------------------------------------------*/
 
    box   = hypre_BoxCreate(ndim);
-   valid = hypre_SStructGridMatch(fine, pgrid) &&
-           hypre_SStructGridMatch(coarse, mgrid);
+   hypre_SStructGridMatch(fine, pgrid, &valid);
+   if (valid)
+   {
+      hypre_SStructGridMatch(coarse, mgrid, &valid);
+   }
    if (hypre_ParCSRMatrixMemoryLocation(uA) != location ||
        hypre_ParCSRMatrixNumRows(uA) != hypre_ParCSRMatrixNumRows(uP) ||
        hypre_ParCSRMatrixFirstRowIndex(uA) != hypre_ParCSRMatrixFirstRowIndex(uP) ||
@@ -1211,7 +1218,7 @@ hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
    {
       hypre_BoxDestroy(box);
 
-      return 0;
+      return hypre_error_flag;
    }
 
    /*------------------------------------------------------
@@ -1306,8 +1313,9 @@ hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
    hypre_BoxDestroy(box);
 
    *result = rap;
+   *supported = 1;
 
-   return 1;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1346,6 +1354,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
    HYPRE_Int                special_case_PTAP = 0;
+   HYPRE_Int                boundary_PTAP     = 0;
    HYPRE_Int                compress_action   = 1; /* Add uM to sM where the pattern permits */
    HYPRE_Int                is_PTAP;
 
@@ -1374,6 +1383,12 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       {
          special_case_PTAP = 1;
       }
+   }
+
+   if (is_PTAP && !special_case_PTAP)
+   {
+      hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
+                                      M, &parcsr_uM, &boundary_PTAP);
    }
 
    if (special_case_PTAP)
@@ -1408,8 +1423,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
       HYPRE_IJMatrixDestroy(ij_tmp);
    }
-   else if (is_PTAP && hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
-                                                       M, &parcsr_uM))
+   else if (boundary_PTAP)
    {
       /* Specialization for PtAP when both A and P have unstructured components.
        * uM, computed by the call above, holds complete rows, so these rows

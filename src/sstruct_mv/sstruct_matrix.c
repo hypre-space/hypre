@@ -3692,7 +3692,12 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix  *A,
    HYPRE_Int            valid, all_valid;
 
    /* SSAMG passes the same grid object; other grids must have the same boxes */
-   valid = (grid == bgrid || hypre_SStructGridMatch(grid, bgrid)) &&
+   valid = (grid == bgrid);
+   if (!valid)
+   {
+      hypre_SStructGridMatch(grid, bgrid, &valid);
+   }
+   valid = valid &&
            hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(B)) == bgrid &&
            hypre_ParCSRMatrixNumRows(U) == hypre_ParCSRMatrixNumRows(aU) &&
            hypre_ParCSRMatrixFirstRowIndex(U) == hypre_ParCSRMatrixFirstRowIndex(aU) &&

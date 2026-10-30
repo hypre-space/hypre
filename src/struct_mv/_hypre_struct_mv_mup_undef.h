@@ -97,7 +97,7 @@
 #undef hypre_AddIndexes
 #undef hypre_AppendBox
 #undef hypre_AppendBoxArray
-#undef hypre_AppendBoxMerge
+#undef hypre_BoxAppendMerge
 #undef hypre_BoxArrayArrayClone
 #undef hypre_BoxArrayArrayCreate
 #undef hypre_BoxArrayArrayDestroy
@@ -174,6 +174,7 @@
 #undef hypre_BoxManSetIsEntriesSort
 #undef hypre_BoxManSetNumGhost
 #undef hypre_BoxMaxSize
+#undef hypre_BoxMerge
 #undef hypre_BoxNnodes
 #undef hypre_BoxOffsetDistance
 #undef hypre_BoxPartialVolume
@@ -262,7 +263,6 @@
 #undef hypre_IntersectBoxes
 #undef hypre_MapToCoarseIndex
 #undef hypre_MapToFineIndex
-#undef hypre_MergeBoxes
 #undef hypre_MinUnionBoxes
 #undef hypre_PrintBoxArrayData
 #undef hypre_ProjectBox

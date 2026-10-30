@@ -38,7 +38,7 @@ hypre_SStructGridRemoteBoxes *hypre_SStructGridRemoteBoxesCreate ( hypre_SStruct
 HYPRE_Int hypre_SStructGridRemoteBoxesDestroy ( hypre_SStructGridRemoteBoxes *rboxes );
 HYPRE_Int hypre_SStructGridRemoteBoxesShare ( hypre_SStructGrid *grid,
                                               hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
-HYPRE_Int hypre_SStructGridMatch ( hypre_SStructGrid *a, hypre_SStructGrid *b );
+HYPRE_Int hypre_SStructGridMatch ( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match );
 HYPRE_Int hypre_SStructGridMarkerBoxes ( hypre_SStructGrid *grid, HYPRE_Int *marker,
                                          HYPRE_Int nrows,
                                          HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
@@ -348,7 +348,8 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
                           hypre_SStructMatrix  *P,
                           hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatrixPtAPBoundary ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,
-                                            hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+                                            hypre_SStructMatrix *M, hypre_ParCSRMatrix **result,
+                                            HYPRE_Int *supported );
 
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA, HYPRE_Int type,

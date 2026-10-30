@@ -281,9 +281,9 @@ hypre_SStructGridMarkerBoxes( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGridMatch( hypre_SStructGrid *a, hypre_SStructGrid *b )
+hypre_SStructGridMatch( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMatch)( a, b );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructGridMatch)( a, b, match );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -561,9 +561,9 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_S
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result )
+hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result, HYPRE_Int *supported )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixPtAPBoundary)( A, P, M, result );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_SStructMatrixPtAPBoundary)( A, P, M, result, supported );
 }
 
 /*--------------------------------------------------------------------------*/

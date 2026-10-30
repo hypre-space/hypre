@@ -3106,15 +3106,16 @@ hypre_SStructGridRemoteBoxesShare( hypre_SStructGrid            *grid,
 }
 
 /*--------------------------------------------------------------------------
- * Returns 1 if the grids a and b have the same parts, with a single
+ * Sets *match to 1 if the grids a and b have the same parts, with a single
  * cell-centered variable per part, nonperiodic, at most one box per part, and
- * the same box extents and ghost layers. Returns 0 otherwise. This is a local
- * check; callers needing agreement across ranks must reduce the result.
+ * the same box extents and ghost layers. Sets *match to 0 otherwise. This is a
+ * local check; callers needing agreement across ranks must reduce the result.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructGridMatch( hypre_SStructGrid *a,
-                        hypre_SStructGrid *b )
+                        hypre_SStructGrid *b,
+                        HYPRE_Int         *match )
 {
    HYPRE_Int           ndim   = hypre_SStructGridNDim(a);
    HYPRE_Int           nparts = hypre_SStructGridNParts(a);
@@ -3129,9 +3130,11 @@ hypre_SStructGridMatch( hypre_SStructGrid *a,
    hypre_Box          *bbox;
    HYPRE_Int           part, d;
 
+   *match = 0;
+
    if (nparts != hypre_SStructGridNParts(b) || ndim != hypre_SStructGridNDim(b))
    {
-      return 0;
+      return hypre_error_flag;
    }
 
    for (part = 0; part < nparts; part++)
@@ -3143,7 +3146,7 @@ hypre_SStructGridMatch( hypre_SStructGrid *a,
           hypre_SStructPGridVarType(apgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL ||
           hypre_SStructPGridVarType(bpgrid, 0) != HYPRE_SSTRUCT_VARIABLE_CELL)
       {
-         return 0;
+         return hypre_error_flag;
       }
 
       asgrid = hypre_SStructPGridSGrid(apgrid, 0);
@@ -3153,7 +3156,7 @@ hypre_SStructGridMatch( hypre_SStructGrid *a,
       if (hypre_BoxArraySize(aboxes) > 1 ||
           hypre_BoxArraySize(aboxes) != hypre_BoxArraySize(bboxes))
       {
-         return 0;
+         return hypre_error_flag;
       }
 
       abox = hypre_BoxArraySize(aboxes) ? hypre_BoxArrayBox(aboxes, 0) : NULL;
@@ -3165,19 +3168,21 @@ hypre_SStructGridMatch( hypre_SStructGrid *a,
              hypre_StructGridNumGhost(asgrid)[2 * d] != hypre_StructGridNumGhost(bsgrid)[2 * d] ||
              hypre_StructGridNumGhost(asgrid)[2 * d + 1] != hypre_StructGridNumGhost(bsgrid)[2 * d + 1])
          {
-            return 0;
+            return hypre_error_flag;
          }
 
          if (abox &&
              (hypre_BoxIMinD(abox, d) != hypre_BoxIMinD(bbox, d) ||
               hypre_BoxIMaxD(abox, d) != hypre_BoxIMaxD(bbox, d)))
          {
-            return 0;
+            return hypre_error_flag;
          }
       }
    }
 
-   return 1;
+   *match = 1;
+
+   return hypre_error_flag;
 }
 
 #if defined(HYPRE_USING_GPU)
@@ -3336,7 +3341,7 @@ hypre_SStructGridMarkerBoxes( hypre_SStructGrid     *grid,
                   {
                      hypre_BoxIMaxD(run_box, d) += extent[d] - 1;
                   }
-                  hypre_AppendBoxMerge(run_box, run_boxa);
+                  hypre_BoxAppendMerge(run_box, run_boxa);
                   k += span;
                }
 
@@ -3346,7 +3351,7 @@ hypre_SStructGridMarkerBoxes( hypre_SStructGrid     *grid,
                }
                r += 2;
             }
-            hypre_MergeBoxes(run_boxa);
+            hypre_BoxMerge(run_boxa);
             hypre_AppendBoxArray(run_boxa, boxes[part][var]);
             m += volume;
          } /* loop over grid boxes */

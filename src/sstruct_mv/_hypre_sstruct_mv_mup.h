@@ -251,11 +251,11 @@ HYPRE_Int
 hypre_SStructGridMarkerBoxes_long_dbl( hypre_SStructGrid *grid, HYPRE_Int *marker, HYPRE_Int nrows, HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
 
 HYPRE_Int
-hypre_SStructGridMatch_flt( hypre_SStructGrid *a, hypre_SStructGrid *b );
+hypre_SStructGridMatch_flt( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match );
 HYPRE_Int
-hypre_SStructGridMatch_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b );
+hypre_SStructGridMatch_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match );
 HYPRE_Int
-hypre_SStructGridMatch_long_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b );
+hypre_SStructGridMatch_long_dbl( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match );
 
 HYPRE_Int
 hypre_SStructGridPrint_flt( FILE *file, hypre_SStructGrid *grid );
@@ -496,11 +496,11 @@ HYPRE_Int
 hypre_SStructMatrixPtAP_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );
 
 HYPRE_Int
-hypre_SStructMatrixPtAPBoundary_flt( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+hypre_SStructMatrixPtAPBoundary_flt( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result, HYPRE_Int *supported );
 HYPRE_Int
-hypre_SStructMatrixPtAPBoundary_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+hypre_SStructMatrixPtAPBoundary_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result, HYPRE_Int *supported );
 HYPRE_Int
-hypre_SStructMatrixPtAPBoundary_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result );
+hypre_SStructMatrixPtAPBoundary_long_dbl( hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix *M, hypre_ParCSRMatrix **result, HYPRE_Int *supported );
 
 HYPRE_Int
 hypre_SStructMatrixRAP_flt( hypre_SStructMatrix *R, hypre_SStructMatrix *A, hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );

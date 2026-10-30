@@ -90,11 +90,11 @@ HYPRE_Int
 hypre_AppendBoxArray_long_dbl( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
 
 HYPRE_Int
-hypre_AppendBoxMerge_flt( hypre_Box *box, hypre_BoxArray *box_array );
+hypre_BoxAppendMerge_flt( hypre_Box *box, hypre_BoxArray *box_array );
 HYPRE_Int
-hypre_AppendBoxMerge_dbl( hypre_Box *box, hypre_BoxArray *box_array );
+hypre_BoxAppendMerge_dbl( hypre_Box *box, hypre_BoxArray *box_array );
 HYPRE_Int
-hypre_AppendBoxMerge_long_dbl( hypre_Box *box, hypre_BoxArray *box_array );
+hypre_BoxAppendMerge_long_dbl( hypre_Box *box, hypre_BoxArray *box_array );
 
 hypre_BoxArrayArray *
 hypre_BoxArrayArrayClone_flt( hypre_BoxArrayArray *box_array_array );
@@ -627,6 +627,13 @@ HYPRE_Int
 hypre_BoxMaxSize_dbl( hypre_Box *box );
 HYPRE_Int
 hypre_BoxMaxSize_long_dbl( hypre_Box *box );
+
+HYPRE_Int
+hypre_BoxMerge_flt( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxMerge_dbl( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxMerge_long_dbl( hypre_BoxArray *box_array );
 
 HYPRE_Int
 hypre_BoxNnodes_flt( hypre_Box *box );
@@ -1229,13 +1236,6 @@ HYPRE_Int
 hypre_MapToFineIndex_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
 HYPRE_Int
 hypre_MapToFineIndex_long_dbl( hypre_Index index, hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
-
-HYPRE_Int
-hypre_MergeBoxes_flt( hypre_BoxArray *box_array );
-HYPRE_Int
-hypre_MergeBoxes_dbl( hypre_BoxArray *box_array );
-HYPRE_Int
-hypre_MergeBoxes_long_dbl( hypre_BoxArray *box_array );
 
 HYPRE_Int
 hypre_MinUnionBoxes_flt( hypre_BoxArray *boxes );
