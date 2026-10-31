@@ -97,6 +97,7 @@
 #undef hypre_AddIndexes
 #undef hypre_AppendBox
 #undef hypre_AppendBoxArray
+#undef hypre_BoxAppendMerge
 #undef hypre_BoxArrayArrayClone
 #undef hypre_BoxArrayArrayCreate
 #undef hypre_BoxArrayArrayDestroy
@@ -173,6 +174,7 @@
 #undef hypre_BoxManSetIsEntriesSort
 #undef hypre_BoxManSetNumGhost
 #undef hypre_BoxMaxSize
+#undef hypre_BoxMerge
 #undef hypre_BoxNnodes
 #undef hypre_BoxOffsetDistance
 #undef hypre_BoxPartialVolume

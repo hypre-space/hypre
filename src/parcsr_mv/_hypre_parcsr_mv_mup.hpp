@@ -203,6 +203,13 @@ HYPRE_Int
 hypre_ParCSRMatrixGetRowDevice_long_dbl( hypre_ParCSRMatrix *mat, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, hypre_long_double **values );
 
 HYPRE_Int
+hypre_ParCSRMatrixMarkColumnsDevice_flt( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumnsDevice_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumnsDevice_long_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+
+HYPRE_Int
 hypre_ParCSRMatrixMatvecOutOfPlaceDevice_flt( hypre_float alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_float beta, hypre_ParVector *b, hypre_ParVector *y );
 HYPRE_Int
 hypre_ParCSRMatrixMatvecOutOfPlaceDevice_dbl( hypre_double alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, hypre_double beta, hypre_ParVector *b, hypre_ParVector *y );
@@ -229,6 +236,13 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice_long_dbl( hypre_ParCSRMatrix *R, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P, HYPRE_Int keep_transpose, HYPRE_Int has_diagonal );
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumnsDevice_flt( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumnsDevice_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumnsDevice_long_dbl( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr );
 
 HYPRE_Int
 hypre_ParCSRMatrixTransposeDevice_flt( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr, HYPRE_Int data );

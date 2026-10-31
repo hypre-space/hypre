@@ -33,6 +33,15 @@ HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph, HYPRE_I
                                               HYPRE_Int var, HYPRE_Int proc, HYPRE_Int endpt, HYPRE_BigInt *endpts );
 
 /* sstruct_grid.c */
+hypre_SStructGridRemoteBoxes *hypre_SStructGridRemoteBoxesCreate ( hypre_SStructGrid *grid,
+                                                                   HYPRE_Int *halo );
+HYPRE_Int hypre_SStructGridRemoteBoxesDestroy ( hypre_SStructGridRemoteBoxes *rboxes );
+HYPRE_Int hypre_SStructGridRemoteBoxesShare ( hypre_SStructGrid *grid,
+                                              hypre_SStructGridRemoteBoxes *rboxes, hypre_BoxArray ***boxes );
+HYPRE_Int hypre_SStructGridMatch ( hypre_SStructGrid *a, hypre_SStructGrid *b, HYPRE_Int *match );
+HYPRE_Int hypre_SStructGridMarkerBoxes ( hypre_SStructGrid *grid, HYPRE_Int *marker,
+                                         HYPRE_Int nrows,
+                                         HYPRE_MemoryLocation memory_location, hypre_BoxArray ****boxes_ptr );
 HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_Int ndim,
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,
@@ -199,15 +208,28 @@ HYPRE_Int hypre_SStructMatrixSetArrayInterPartValuesDevice( HYPRE_SStructMatrix 
                                                             HYPRE_Int part, HYPRE_Int var, HYPRE_Int nvalues,
                                                             HYPRE_Int *indexes, HYPRE_Int *entries, HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix, HYPRE_Int action );
-HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
-                                             hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa);
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
-HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
-                                             hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
+HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_SStructMatrix *B,
+                                             hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
                                            hypre_SStructVector **diag_ptr );
 HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);
+
+/* sstruct_matcopy.c */
+HYPRE_Int hypre_SStructUMatrixExtractValues ( hypre_SStructMatrix *matrix, HYPRE_Int nrows,
+                                              HYPRE_Int *ncols, HYPRE_BigInt *rows,
+                                              HYPRE_Int *row_indexes, HYPRE_BigInt *cols,
+                                              HYPRE_Complex *values );
+HYPRE_Int hypre_SStructMatrixBoxesToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
+                                              hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArray ***convert_boxa );
+HYPRE_Int hypre_SStructMatrixBoxesWithU ( hypre_SStructMatrix *A, hypre_BoxArray ***boxes,
+                                          hypre_IJMatrix **result );
+HYPRE_Int hypre_SStructMatrixCollectSupport ( hypre_SStructGrid *grid, hypre_ParCSRMatrix *B,
+                                              HYPRE_Int include_columns, hypre_BoxArray ****boxes_ptr,
+                                              hypre_BoxArray ****row_support );
+HYPRE_Int hypre_SStructMatrixFreeSupport ( hypre_SStructGrid *grid, hypre_BoxArray ***boxes );
+HYPRE_Int hypre_SStructMatrixCompressUToSBox ( hypre_SStructMatrix *A, HYPRE_Int action );
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );
@@ -325,6 +347,9 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
                           hypre_SStructMatrix  *A,
                           hypre_SStructMatrix  *P,
                           hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixPtAPBoundary ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,
+                                            hypre_SStructMatrix *M, hypre_ParCSRMatrix **result,
+                                            HYPRE_Int *supported );
 
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA, HYPRE_Int type,
@@ -343,6 +368,9 @@ HYPRE_Int hypre_SStructScale ( HYPRE_Complex alpha, hypre_SStructVector *y );
 /* sstruct_stencil.c */
 HYPRE_Int hypre_SStructStencilRef ( hypre_SStructStencil *stencil,
                                     hypre_SStructStencil **stencil_ref );
+HYPRE_Int hypre_SStructStencilAppendCoupledBoxes ( hypre_SStructStencil *stencil,
+                                                   hypre_BoxArray *src,
+                                                   hypre_BoxArray *dst );
 
 /* sstruct_vector.c */
 HYPRE_Int hypre_SStructPVectorRef ( hypre_SStructPVector *vector,
