@@ -283,7 +283,7 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
    HYPRE_Int                  **smaps;
    HYPRE_Int                   *sentries;
 
-   HYPRE_Int                    vi, vj, e, cnt, k;
+   HYPRE_Int                    vi, vj, e, cnt;
    HYPRE_Int                    pstencil_size;
    HYPRE_Int                    max_stencil_size;
 
@@ -351,21 +351,14 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
 
          if (smmsz[vi][vj] > 0)
          {
-            hypre_StructMatrix  **smatrices;
-
             /* Destroy the default struct matrix for the (vi,vj)-block of the PMatrix */
             sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
             hypre_StructMatrixDestroy(sM);
 
-            /* Replace the default struct matrix for the (vi,vj)-block of the PMatrix */
-            smatrices = hypre_CTAlloc(hypre_StructMatrix *, smmsz[vi][vj], HYPRE_MEMORY_HOST);
-            for (k = 0; k < smmsz[vi][vj]; k++)
-            {
-               hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &smatrices[k]);
-            }
-            hypre_StructMatrixAddInit(smmsz[vi][vj], smatrices, &sM);
+            /* There is exactly one product in this block. Transfer its caller
+             * reference to pM instead of allocating and adding into a copy. */
+            hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][0], &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
-            hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
 
             /* Replace the struct stencil for the (vi,vj)-block with actual stencils */
             stencil = hypre_StructMatrixStencil(sM);
@@ -498,21 +491,18 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
    HYPRE_Int                 **smmsz   = (pmmdata -> smmsz);
    HYPRE_Int                   nvars   = (pmmdata -> nvars);
 
-   hypre_StructMatrix         *sM, *sMk;
-   HYPRE_Int                   vi, vj, k;
+   HYPRE_Int                   vi, vj;
+
+   HYPRE_UNUSED_VAR(pM);
 
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
       {
-         /* This computes the coefficients of the (vi,vj)-block of the PMatrix */
-         sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
-         for (k = 0; k < smmsz[vi][vj]; k++)
+         /* The (vi,vj)-block of the PMatrix is the matrix of its only product */
+         if (smmsz[vi][vj] > 0)
          {
-            hypre_StructMatmultCompute(smmdata, smmid[vi][vj][k]);
-            hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &sMk);
-            hypre_StructMatrixAddMat(sM, 1.0, sMk);  /* Compute sM += alpha * sMk */
-            hypre_StructMatrixDestroy(sMk);
+            hypre_StructMatmultCompute(smmdata, smmid[vi][vj][0]);
          }
       }
    }
@@ -818,6 +808,7 @@ hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
    /* Create temporary stencil data structure */
    for (part = 0; part < nparts; part++)
    {
+      nvars = hypre_SStructPGridNVars(hypre_SStructGridPGrid(Mgrid, part));
       for (vi = 0; vi < nvars; vi++)
       {
          HYPRE_SStructStencilCreate(ndim, 0, &stencil);
@@ -1025,6 +1016,309 @@ hypre_SStructMatmultComputeS( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
+ * Computes the unstructured component of a PtAP product when both uA and uP
+ * are nonzero, where sM = sP^T*sA*sP has already been computed natively.
+ * Only the rows J of M that differ from sM are formed: complete rows of
+ * P^T*A*P from the rows of A and P that reach J. They become uM, and the
+ * caller must then set the stencil entries of sM from them with
+ * hypre_SStructMatrixCompressUToS(M, -1). Support boxes are exchanged between
+ * neighboring ranks only.
+ *
+ * Sets *supported to zero on all ranks when the layout is not supported,
+ * and to one when the result is computed.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructMatrixPtAPBoundary( hypre_SStructMatrix  *A,
+                                 hypre_SStructMatrix  *P,
+                                 hypre_SStructMatrix  *M,
+                                 hypre_ParCSRMatrix  **result,
+                                 HYPRE_Int            *supported )
+{
+   MPI_Comm                       comm   = hypre_SStructMatrixComm(A);
+   HYPRE_Int                      nparts = hypre_SStructMatrixNParts(A);
+   HYPRE_Int                      ndim   = hypre_SStructMatrixNDim(A);
+   hypre_SStructGrid             *fine   = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(A));
+   hypre_SStructGrid             *pgrid  = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(P));
+   hypre_SStructGrid             *coarse = hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(P));
+   hypre_SStructGrid             *mgrid  = hypre_SStructGraphGrid(hypre_SStructMatrixGraph(M));
+   hypre_ParCSRMatrix            *uA     = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_ParCSRMatrix            *uP     = hypre_SStructMatrixParCSRMatrix(P);
+   HYPRE_MemoryLocation           location = hypre_ParCSRMatrixMemoryLocation(uP);
+
+   /* Per-part matrix data */
+   hypre_SStructPMatrix          *pa, *pp, *pm;
+   hypre_SStructStencil          *astencil, *pstencil, *mstencil;
+   hypre_StructMatrix            *sm;
+   hypre_StructGrid              *sgrid;
+   hypre_IndexRef                 stride;
+   hypre_BoxArray                *fboxes, *cboxes, *refined;
+   hypre_Box                     *box;
+   HYPRE_Int                     *msplit;
+
+   /* reach[0:6] is the stencil reach of A, reach[6:12] the distance from the
+      local fine boxes up to which support boxes can extend */
+   HYPRE_Int                      reach[12] = {0};
+   HYPRE_Int                      global_reach[12];
+   HYPRE_Int                     *global_halo = global_reach;
+   HYPRE_Int                     *nbr_halo    = global_reach + 6;
+   HYPRE_Int                      valid, all_valid, known, preach;
+
+   /* Support boxes and intermediate matrices */
+   hypre_SStructGridRemoteBoxes  *rboxes;
+   hypre_BoxArray              ***pu_rows, ***boxes, ***right, ***left, ***rows_J;
+   hypre_IJMatrix                *ij_s = NULL, *ij_a = NULL, *ij_p = NULL;
+   hypre_ParCSRMatrix            *a, *p, *restricted, *rap;
+   HYPRE_Int                     *marker;
+   HYPRE_Int                      ncols;
+   HYPRE_Int                      part, d, e, b;
+
+   *supported = 0;
+
+   if (A == P || ndim < 1 || ndim > 3 ||
+       nparts != hypre_SStructMatrixNParts(P) ||
+       ndim != hypre_SStructMatrixNDim(P) ||
+       hypre_SStructGraphDomGrid(hypre_SStructMatrixGraph(A)) != fine)
+   {
+      return hypre_error_flag;
+   }
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+   if (hypre_GetExecPolicy1(hypre_SStructMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_error_flag;
+   }
+#endif
+
+   /*------------------------------------------------------
+    * Check the layout of A, P and M
+    *------------------------------------------------------*/
+
+   box   = hypre_BoxCreate(ndim);
+   hypre_SStructGridMatch(fine, pgrid, &valid);
+   if (valid)
+   {
+      hypre_SStructGridMatch(coarse, mgrid, &valid);
+   }
+   if (hypre_ParCSRMatrixMemoryLocation(uA) != location ||
+       hypre_ParCSRMatrixNumRows(uA) != hypre_ParCSRMatrixNumRows(uP) ||
+       hypre_ParCSRMatrixFirstRowIndex(uA) != hypre_ParCSRMatrixFirstRowIndex(uP) ||
+       hypre_IJMatrixRowPartitioning(hypre_SStructMatrixIJMatrix(M))[0] !=
+       hypre_ParCSRMatrixFirstColDiag(uP))
+   {
+      valid = 0;
+   }
+
+   for (part = 0; valid && part < nparts; part++)
+   {
+      pa = hypre_SStructMatrixPMatrix(A, part);
+      pp = hypre_SStructMatrixPMatrix(P, part);
+      pm = hypre_SStructMatrixPMatrix(M, part);
+      if (hypre_SStructPMatrixNVars(pa) != 1 ||
+          hypre_SStructPMatrixNVars(pp) != 1 ||
+          hypre_SStructPMatrixNVars(pm) != 1)
+      {
+         valid = 0;
+         break;
+      }
+
+      stride   = hypre_SStructPMatrixDomainStride(pp);
+      sm       = hypre_SStructPMatrixSMatrix(pm, 0, 0);
+      astencil = hypre_SStructPMatrixStencil(pa, 0);
+      pstencil = hypre_SStructPMatrixStencil(pp, 0);
+      mstencil = hypre_SStructPMatrixStencil(pm, 0);
+      fboxes   = hypre_StructGridBoxes(hypre_SStructPGridSGrid(hypre_SStructGridPGrid(fine, part), 0));
+      cboxes   = hypre_StructGridBoxes(hypre_SStructPGridSGrid(hypre_SStructGridPGrid(coarse, part), 0));
+      msplit   = hypre_SStructMatrixSplit(M, part, 0);
+
+      /* Strides */
+      for (d = 0; d < ndim; d++)
+      {
+         if (hypre_SStructPMatrixDomainStride(pa)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pa)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pp)[d] != 1 || stride[d] < 1 ||
+             hypre_SStructPMatrixDomainStride(pm)[d] != 1 ||
+             hypre_SStructPMatrixRangeStride(pm)[d] != 1 ||
+             hypre_StructMatrixDataStride(sm)[d] != 1)
+         {
+            valid = 0;
+         }
+      }
+
+      /* Stencil reach of A and P */
+      for (e = 0; e < hypre_SStructStencilSize(astencil); e++)
+      {
+         for (d = 0; d < ndim; d++)
+         {
+            reach[2 * d] = hypre_max(reach[2 * d],
+                                     hypre_abs(hypre_SStructStencilShape(astencil)[e][d]));
+         }
+      }
+      for (d = 0; d < ndim; d++)
+      {
+         preach = 0;
+         for (e = 0; e < hypre_SStructStencilSize(pstencil); e++)
+         {
+            preach = hypre_max(preach, hypre_abs(hypre_SStructStencilShape(pstencil)[e][d]));
+         }
+         reach[2 * d + 1] = reach[2 * d];
+         reach[6 + 2 * d] = reach[6 + 2 * d + 1] =
+                               hypre_max(reach[6 + 2 * d], stride[d] - 1 + preach + reach[2 * d]);
+      }
+
+      /* Rows J of sM are overwritten by hypre_SStructMatrixCompressUToS */
+      for (e = 0; e < hypre_StructStencilSize(hypre_StructMatrixStencil(sm)); e++)
+      {
+         if (hypre_StructMatrixConstEntry(sm, e) || hypre_StructMatrixSymmEntries(sm)[e] >= 0)
+         {
+            valid = 0;
+         }
+      }
+      for (e = 0; e < hypre_SStructStencilSize(mstencil); e++)
+      {
+         if (msplit[e] < 0 || hypre_SStructStencilVars(mstencil)[e])
+         {
+            valid = 0;
+         }
+      }
+
+      /* The fine rows of P with columns in the local coarse box must be near the local fine box */
+      if (hypre_BoxArraySize(cboxes))
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(cboxes, 0), box);
+         hypre_RefineBox(box, NULL, stride);
+         for (d = 0; valid && d < ndim; d++)
+         {
+            if (!hypre_BoxArraySize(fboxes) ||
+                hypre_BoxIMinD(box, d) < hypre_BoxIMinD(hypre_BoxArrayBox(fboxes, 0), d) - stride[d] + 1 ||
+                hypre_BoxIMaxD(box, d) > hypre_BoxIMaxD(hypre_BoxArrayBox(fboxes, 0), d) + stride[d] - 1)
+            {
+               valid = 0;
+            }
+         }
+      }
+   }
+   hypre_MPI_Allreduce(reach, global_reach, 12, hypre_MPI_INT, hypre_MPI_MAX, comm);
+
+   /* The box managers must know the boxes within nbr_halo of the local boxes.
+      They hold the remote boxes known to the box managers of the struct grids. */
+   for (part = 0; part < nparts; part++)
+   {
+      sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(fine, part), 0);
+      hypre_BoxManGetAllGlobalKnown(hypre_StructGridBoxMan(sgrid), &known);
+      for (d = 0; !known && d < ndim; d++)
+      {
+         if (nbr_halo[2 * d] > hypre_StructGridMaxDistance(sgrid)[d])
+         {
+            valid = 0;
+         }
+      }
+   }
+   hypre_MPI_Allreduce(&valid, &all_valid, 1, hypre_MPI_INT, hypre_MPI_MIN, comm);
+   if (!all_valid)
+   {
+      hypre_BoxDestroy(box);
+
+      return hypre_error_flag;
+   }
+
+   /*------------------------------------------------------
+    * Find the rows J of M that differ from sM
+    *
+    * uM has nonzero rows J: the columns of uP, and the columns of sP over the
+    * rows of uA and over the rows coupled by sA to the rows of uP
+    *------------------------------------------------------*/
+
+   rboxes = hypre_SStructGridRemoteBoxesCreate(fine, nbr_halo);
+   ncols  = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(uP));
+   marker = hypre_CTAlloc(HYPRE_Int, ncols, location);
+
+   /* Mark the rows of uA once, retaining both row-only and row/column support */
+   hypre_SStructMatrixCollectSupport(pgrid, uP, 0, &pu_rows, NULL);
+   hypre_SStructMatrixCollectSupport(fine, uA, 1, &right, &boxes);
+   for (part = 0; part < nparts; part++)
+   {
+      pa = hypre_SStructMatrixPMatrix(A, part);
+      hypre_SStructStencilAppendCoupledBoxes(hypre_SStructPMatrixStencil(pa, 0),
+                                             pu_rows[part][0], boxes[part][0]);
+   }
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, boxes);
+   hypre_SStructMatrixBoxesToUMatrix(P, pgrid, &ij_s, boxes);
+   hypre_SStructMatrixFreeSupport(fine, boxes);
+   hypre_ParCSRMatrixMarkColumns((hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_s), marker);
+   hypre_ParCSRMatrixMarkColumns(uP, marker);
+   HYPRE_IJMatrixDestroy(ij_s);
+   hypre_SStructGridMarkerBoxes(coarse, marker, ncols, location, &rows_J);
+
+   /*------------------------------------------------------
+    * Rows of P with columns in J (left), and rows of P reached from them
+    * by A (right)
+    *------------------------------------------------------*/
+
+   left = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   for (part = 0; part < nparts; part++)
+   {
+      pp      = hypre_SStructMatrixPMatrix(P, part);
+      refined = hypre_BoxArrayClone(rows_J[part][0]);
+      for (b = 0; b < hypre_BoxArraySize(refined); b++)
+      {
+         hypre_RefineBox(hypre_BoxArrayBox(refined, b), NULL,
+                         hypre_SStructPMatrixDomainStride(pp));
+      }
+      left[part]    = hypre_TAlloc(hypre_BoxArray *, 1, HYPRE_MEMORY_HOST);
+      left[part][0] = hypre_BoxArrayCreate(0, ndim);
+      hypre_SStructStencilAppendCoupledBoxes(hypre_SStructPMatrixStencil(pp, 0),
+                                             refined, left[part][0]);
+      hypre_AppendBoxArray(pu_rows[part][0], left[part][0]);
+      hypre_BoxArrayDestroy(refined);
+   }
+   hypre_SStructMatrixFreeSupport(fine, pu_rows);
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, left);
+
+   for (part = 0; part < nparts; part++)
+   {
+      for (b = 0; b < hypre_BoxArraySize(left[part][0]); b++)
+      {
+         hypre_CopyBox(hypre_BoxArrayBox(left[part][0], b), box);
+         hypre_BoxGrowByArray(box, global_halo);
+         hypre_AppendBox(box, right[part][0]);
+      }
+   }
+   hypre_SStructGridRemoteBoxesShare(fine, rboxes, right);
+
+   /*------------------------------------------------------
+    * Compute the complete rows J of P^T*A*P
+    *------------------------------------------------------*/
+
+   hypre_SStructMatrixBoxesWithU(A, left, &ij_a);
+   hypre_SStructMatrixBoxesWithU(P, right, &ij_p);
+   hypre_SStructMatrixFreeSupport(fine, left);
+   hypre_SStructMatrixFreeSupport(fine, right);
+
+   a = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_a);
+   p = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ij_p);
+   hypre_ParCSRMatrixRestrictColumns(p, marker, &restricted);
+   if (!hypre_ParCSRMatrixCommPkg(p))
+   {
+      hypre_MatvecCommPkgCreate(p);
+   }
+   rap = hypre_ParCSRMatrixRAPKT(restricted, a, p, 1, 0);
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(restricted);
+   HYPRE_IJMatrixDestroy(ij_a);
+   HYPRE_IJMatrixDestroy(ij_p);
+   hypre_TFree(marker, location);
+   hypre_SStructMatrixFreeSupport(coarse, rows_J);
+   hypre_SStructGridRemoteBoxesDestroy(rboxes);
+   hypre_BoxDestroy(box);
+
+   *result = rap;
+   *supported = 1;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Computes the unstructured component of the product of SStructMatrices
  *--------------------------------------------------------------------------*/
 
@@ -1042,8 +1336,6 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrix          *ij_M;
 
    /* Temporary variables */
-   hypre_SStructGraph      *graph;
-   hypre_SStructGrid       *grid;
    hypre_ParCSRMatrix     **parcsr_tmp;
    hypre_ParCSRMatrix      *parcsr_sA;
    hypre_ParCSRMatrix      *parcsr_uA;
@@ -1061,26 +1353,23 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_BigInt             num_nonzeros_uP;
    HYPRE_Int                urap2 = 0; /* Split unstructured RAP into 2 stages */
 
-   HYPRE_Int special_case_PTAP = 0;
+   HYPRE_Int                special_case_PTAP = 0;
+   HYPRE_Int                boundary_PTAP     = 0;
+   HYPRE_Int                compress_action   = 1; /* Add uM to sM where the pattern permits */
+   HYPRE_Int                is_PTAP;
 
-#if defined(HYPRE_USING_GPU)
-   HYPRE_MemoryLocation     memory_location;
-   HYPRE_ExecutionPolicy    exec;
-#endif
+   is_PTAP = (nterms == 3 && matrices[terms[0]] == matrices[terms[2]] &&
+              trans[0] && !trans[1] && !trans[2]);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
 
-   if (nterms == 3)
+   if (is_PTAP)
    {
       m = terms[2];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
       num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
-#if defined(HYPRE_USING_GPU)
-      memory_location = hypre_ParCSRMatrixMemoryLocation(parcsr_uP);
-      exec  = hypre_GetExecPolicy1(memory_location);
-#endif
 
       /* The following ensures that NumNonzeros is initialized (a negative value
        * means uninitialized).  RDF: Not sure if this is needed for anything other
@@ -1096,21 +1385,22 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       }
    }
 
+   if (is_PTAP && !special_case_PTAP)
+   {
+      hypre_SStructMatrixPtAPBoundary(matrices[terms[1]], matrices[terms[2]],
+                                      M, &parcsr_uM, &boundary_PTAP);
+   }
+
    if (special_case_PTAP)
    {
-      /* Specialization for RAP when P has only the structured component.
-       *
-       * RDF: This assumes that we are computing PtAP so it probably should be
-       * moved to the PtAP routine instead of being here. */
+      /* Specialization for PtAP when P has only the structured component. */
       m = terms[1];
-      graph = hypre_SStructMatrixGraph(matrices[m]);
-      grid  = hypre_SStructGraphGrid(graph);
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
 
+      /* Convert only the rows of sP that multiply entries of uA */
       m = terms[2];
-      hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_tmp, 2);
-      //ij_tmp = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+      hypre_SStructMatrixHaloToUMatrix(matrices[m], matrices[terms[1]], &ij_tmp);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -1122,16 +1412,23 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       if (!urap2)
       {
          /* Note: this call does NOT add structural zeros to the diagonal */
-         parcsr_uM = hypre_ParCSRMatrixRAPKT(parcsr_sP, parcsr_sA, parcsr_sP, 1, 0);
+         parcsr_uM = hypre_ParCSRMatrixRAPKT(parcsr_sP, parcsr_uA, parcsr_sP, 1, 0);
       }
       else
       {
-         hypre_ParCSRMatrix *Q = hypre_ParCSRMatMat(parcsr_sA, parcsr_sP);
+         hypre_ParCSRMatrix *Q = hypre_ParCSRMatMat(parcsr_uA, parcsr_sP);
          parcsr_uM = hypre_ParCSRTMatMatKT(parcsr_sP, Q, 1);
          hypre_MatvecCommPkgCreate(parcsr_uM);
       }
 
       HYPRE_IJMatrixDestroy(ij_tmp);
+   }
+   else if (boundary_PTAP)
+   {
+      /* Specialization for PtAP when both A and P have unstructured components.
+       * uM, computed by the call above, holds complete rows, so these rows
+       * of sM are overwritten instead of added to. */
+      compress_action = -1;  /* Sparse overwrite: retain S at entries absent from U */
    }
    else
    {
@@ -1144,15 +1441,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       }
 
       /* Set initial data */
-      m = terms[nterms - 2];
-      graph = hypre_SStructMatrixGraph(matrices[m]);
-      grid  = hypre_SStructGraphGrid(graph);
-
       m = terms[nterms - 1];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-      /* WM: todo - converting the whole matrix for now to be safe... */
-      /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
+      /* General products convert the whole structured component */
       ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
 
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
@@ -1172,13 +1464,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* Convert sA_n to IJMatrix */
          if (ij_sA[m] == NULL)
          {
-            graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
-            grid  = hypre_SStructGraphGrid(graph);
-
-            /* WM: todo - converting the whole matrix for now to be safe... */
-            /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
             ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
-
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)
@@ -1189,11 +1475,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* 1) Compute sA_n*uMold */
          if (trans[t])
          {
-            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_sA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_sA);
+               }
+               parcsr_tmp[0] = hypre_ParCSRTMatMat(parcsr_sA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+            }
          }
          else
          {
-            parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[0] = hypre_ParCSRMatMat(parcsr_sA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_0a_%d", t);
@@ -1209,11 +1521,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 #endif
          if (trans[t])
          {
-            parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_uA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_uA);
+               }
+               parcsr_tmp[1] = hypre_ParCSRTMatMat(parcsr_uA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+            }
          }
          else
          {
-            parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_uMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[1] = hypre_ParCSRMatMat(parcsr_uA, parcsr_uMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_1_%d", t);
@@ -1239,11 +1577,37 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          /* 4) Compute uA_n*sMold */
          if (trans[t])
          {
-            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               if (!hypre_ParCSRMatrixCommPkg(parcsr_uA))
+               {
+                  hypre_MatvecCommPkgCreate(parcsr_uA);
+               }
+               parcsr_tmp[0] = hypre_ParCSRTMatMat(parcsr_uA, parcsr_sMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+            }
          }
          else
          {
-            parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+#if defined(HYPRE_USING_GPU)
+            if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_uA),
+                                     hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                HYPRE_EXEC_DEVICE)
+            {
+               parcsr_tmp[0] = hypre_ParCSRMatMat(parcsr_uA, parcsr_sMold);
+            }
+            else
+#endif
+            {
+               parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+            }
          }
 #if defined(DEBUG_MATMULT)
          hypre_sprintf(matname, "parcsr_0b_%d", t);
@@ -1261,19 +1625,50 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
          hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
          hypre_ParCSRMatrixDestroy(parcsr_tmp[2]);
 
-         /* 6) Compute sA_n*sMold */
-         if (trans[t])
+         /* Intermediate structured products feed the next U update. The final
+          * structured product has already been computed by ComputeS. */
+         parcsr_sM = NULL;
+         if (t > 0)
          {
-            parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
-         }
-         else
-         {
-            parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
-         }
-#if defined(DEBUG_MATMULT)
-         hypre_sprintf(matname, "parcsr_sM_%d", t);
-         hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
+            if (trans[t])
+            {
+#if defined(HYPRE_USING_GPU)
+               if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                        hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                   HYPRE_EXEC_DEVICE)
+               {
+                  if (!hypre_ParCSRMatrixCommPkg(parcsr_sA))
+                  {
+                     hypre_MatvecCommPkgCreate(parcsr_sA);
+                  }
+                  parcsr_sM = hypre_ParCSRTMatMat(parcsr_sA, parcsr_sMold);
+               }
+               else
 #endif
+               {
+                  parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+               }
+            }
+            else
+            {
+#if defined(HYPRE_USING_GPU)
+               if (hypre_GetExecPolicy2(hypre_ParCSRMatrixMemoryLocation(parcsr_sA),
+                                        hypre_ParCSRMatrixMemoryLocation(parcsr_sMold)) ==
+                   HYPRE_EXEC_DEVICE)
+               {
+                  parcsr_sM = hypre_ParCSRMatMat(parcsr_sA, parcsr_sMold);
+               }
+               else
+#endif
+               {
+                  parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+               }
+            }
+#if defined(DEBUG_MATMULT)
+            hypre_sprintf(matname, "parcsr_sM_%d", t);
+            hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
+#endif
+         }
 
          if (t < (nterms - 2))
          {
@@ -1306,14 +1701,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
-   /* Add to entries in S with entries from U where the sparsity pattern permits. */
-#if defined(HYPRE_USING_GPU)
-   if (exec == HYPRE_EXEC_HOST)
-#endif
-   {
-      hypre_SStructMatrixCompressUToS(M, 1);
-      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
-   }
+   /* Sparse overwrite has the same meaning in either compression backend. */
+   hypre_SStructMatrixCompressUToS(M, compress_action);
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
 

@@ -85,6 +85,17 @@ typedef struct
 
 } hypre_SStructNeighbor;
 
+/* Remote rank boxes near local boxes, grouped by rank and tagged by part.
+ * This is separate from the part-neighbor mappings in hypre_SStructNeighbor. */
+typedef struct
+{
+   HYPRE_Int        nprocs;
+   HYPRE_Int       *procs;   /* neighbor ranks */
+   HYPRE_Int       *starts;  /* boxes of procs[i] are [starts[i], starts[i + 1]) */
+   HYPRE_Int       *parts;   /* part of each box */
+   hypre_BoxArray  *boxes;
+} hypre_SStructGridRemoteBoxes;
+
 enum hypre_SStructBoxManInfoType
 {
    hypre_SSTRUCT_BOXMAN_INFO_DEFAULT  = 0,
@@ -287,6 +298,19 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNeighborILower(neighbor)  ((neighbor) -> ilower)
 #define hypre_SStructNeighborCoord(neighbor)   ((neighbor) -> coord)
 #define hypre_SStructNeighborDir(neighbor)     ((neighbor) -> dir)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructGridRemoteBoxes
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SStructGridRemoteBoxesNProcs(nbrs)  ((nbrs) -> nprocs)
+#define hypre_SStructGridRemoteBoxesProcs(nbrs)   ((nbrs) -> procs)
+#define hypre_SStructGridRemoteBoxesProc(nbrs, i) ((nbrs) -> procs[i])
+#define hypre_SStructGridRemoteBoxesStarts(nbrs)  ((nbrs) -> starts)
+#define hypre_SStructGridRemoteBoxesStart(nbrs, i) ((nbrs) -> starts[i])
+#define hypre_SStructGridRemoteBoxesParts(nbrs)   ((nbrs) -> parts)
+#define hypre_SStructGridRemoteBoxesPart(nbrs, i) ((nbrs) -> parts[i])
+#define hypre_SStructGridRemoteBoxesBoxes(nbrs)   ((nbrs) -> boxes)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructCommInfo

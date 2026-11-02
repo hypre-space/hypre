@@ -8,6 +8,7 @@ hypre_APSubdivideRegion
 hypre_AddIndexes
 hypre_AppendBox
 hypre_AppendBoxArray
+hypre_BoxAppendMerge
 hypre_BoxArrayArrayClone
 hypre_BoxArrayArrayCreate
 hypre_BoxArrayArrayDestroy
@@ -84,6 +85,7 @@ hypre_BoxManSetBoundingBox
 hypre_BoxManSetIsEntriesSort
 hypre_BoxManSetNumGhost
 hypre_BoxMaxSize
+hypre_BoxMerge
 hypre_BoxNnodes
 hypre_BoxOffsetDistance
 hypre_BoxPartialVolume

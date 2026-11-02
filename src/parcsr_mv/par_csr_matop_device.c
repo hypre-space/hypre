@@ -2109,4 +2109,93 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_GPU)
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixMarkColumnsDevice
+ *
+ * Device version of hypre_ParCSRMatrixMarkColumns. The communication package
+ * of P must already exist.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumnsDevice( hypre_ParCSRMatrix *P,
+                                     HYPRE_Int          *marker )
+{
+   hypre_CSRMatrix      *diag = hypre_ParCSRMatrixDiag(P);
+   hypre_ParCSRCommPkg  *pkg  = hypre_ParCSRMatrixCommPkg(P);
+   HYPRE_Int             nnz  = hypre_CSRMatrixNumNonzeros(diag);
+   HYPRE_Int             sends;
+
+   sends = hypre_ParCSRCommPkgSendMapStart(pkg, hypre_ParCSRCommPkgNumSends(pkg));
+
+   hypre_ScatterConstantDevice(marker, nnz, hypre_CSRMatrixJ(diag), (HYPRE_Int) 1);
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(pkg);
+   hypre_ScatterConstantDevice(marker, sends, hypre_ParCSRCommPkgDeviceSendMapElmts(pkg),
+                               (HYPRE_Int) 1);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixRestrictColumnsDevice
+ *
+ * Device version of hypre_ParCSRMatrixRestrictColumns
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumnsDevice( hypre_ParCSRMatrix  *P,
+                                         HYPRE_Int           *marker,
+                                         hypre_ParCSRMatrix **Q_ptr )
+{
+   HYPRE_MemoryLocation  location = hypre_ParCSRMatrixMemoryLocation(P);
+   HYPRE_Int             ncols    = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(P));
+
+   hypre_ParCSRMatrix   *left;
+   hypre_ParVector      *diagonal;
+   hypre_CSRMatrix      *csr;
+   hypre_CSRMatrix      *trimmed;
+   HYPRE_Complex        *data;
+   HYPRE_Int             k;
+
+   /* Scale the columns of P by the marker */
+   diagonal = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(P),
+                                    hypre_ParCSRMatrixGlobalNumCols(P),
+                                    hypre_ParCSRMatrixColStarts(P));
+   hypre_ParVectorInitialize_v2(diagonal, location);
+   data = hypre_VectorData(hypre_ParVectorLocalVector(diagonal));
+   HYPRE_THRUST_CALL( copy, marker, marker + ncols, data );
+
+   left = hypre_ParCSRMatrixClone_v2(P, 1, location);
+   hypre_ParCSRMatrixDiagScale(left, NULL, diagonal);
+
+   /* Remove the zeros created by the scaling */
+   for (k = 0; k < 2; k++)
+   {
+      csr     = k ? hypre_ParCSRMatrixOffd(left) : hypre_ParCSRMatrixDiag(left);
+      trimmed = hypre_CSRMatrixDeleteZerosDevice(csr, 0.0);
+      if (trimmed)
+      {
+         hypre_CSRMatrixDestroy(csr);
+         if (k)
+         {
+            hypre_ParCSRMatrixOffd(left) = trimmed;
+         }
+         else
+         {
+            hypre_ParCSRMatrixDiag(left) = trimmed;
+         }
+         hypre_CSRMatrixSetRownnz(trimmed);
+      }
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(left);
+   hypre_ParVectorDestroy(diagonal);
+
+   *Q_ptr = left;
+
+   return hypre_error_flag;
+}
+
+#endif // #if defined(HYPRE_USING_GPU)
+
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

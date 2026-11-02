@@ -51,6 +51,7 @@ FILES =\
 
 CUFILES =\
  sstruct_grid.c\
+ sstruct_matcopy.c\
  sstruct_matrix.c\
  sstruct_vector.c
 
