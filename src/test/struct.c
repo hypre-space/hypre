@@ -1949,6 +1949,8 @@ main( hypre_int argc,
 
             HYPRE_StructPCGCreate(comm, &solver);
             HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, pcgIterations );
+            /* Inner PCG solves may reach their iteration limit as a preconditioner. */
+            hypre_PCGSetHybrid(solver, -1);
             HYPRE_PCGSetTol( (HYPRE_Solver)solver, pcgTol );
             HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
             HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );

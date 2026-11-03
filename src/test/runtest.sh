@@ -75,6 +75,7 @@ function usage
 function MpirunString
 {
    NumArgs1=$#
+   HYPRE_GPU_ENV=""
 
    case $HOST in
       *bgl*)
@@ -125,6 +126,10 @@ function MpirunString
       matrix*)
          shift
          RunString="srun -n$1 --time=1 --overlap"
+         HYPRE_GPU_MASK="${HYPRE_GPU_VISIBLE_DEVICES:-${SLURM_JOB_GPUS:-${CUDA_VISIBLE_DEVICES:-}}}"
+         if [ -n "$HYPRE_GPU_MASK" ]; then
+            HYPRE_GPU_ENV="env CUDA_VISIBLE_DEVICES=$HYPRE_GPU_MASK"
+         fi
          ;;
       node*)
          shift
@@ -142,7 +147,7 @@ function MpirunString
    NumArgs2=$(($#+1))
    if [ "$NumArgs1" -eq "$NumArgs2" ] ; then
       shift
-      RunString="$RunString $script $mpibind $gpumemcheck $Valgrind $*"
+      RunString="$RunString $mpibind $HYPRE_GPU_ENV $script $gpumemcheck $Valgrind $*"
       #echo $RunString
    fi
 }
@@ -530,7 +535,7 @@ do
          ;;
       -mpibind)
          shift
-         mpibind="--mpibind=verbose:1"
+         mpibind="--mpibind=on"
          ;;
       -script)
          shift

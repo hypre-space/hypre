@@ -607,7 +607,11 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
-   hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
+   /* A^T * B need not contain diagonal entries unless A and B are the same. */
+   if (A == B)
+   {
+      hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
+   }
 
    hypre_SyncComputeStream();
 
