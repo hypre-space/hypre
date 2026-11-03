@@ -245,7 +245,8 @@ typedef struct
 #define hypre_VECTOR_HEADER
 
 #if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE)
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_SYCL)
 struct hypre_GpuVecData;
 typedef struct hypre_GpuVecData hypre_GpuVecData;
 #endif
@@ -672,7 +673,8 @@ HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
 
 /* vector_device.c */
 #if defined(HYPRE_USING_CUSPARSE) ||\
-    defined(HYPRE_USING_ROCSPARSE)
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_SYCL)
 HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
 #endif
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
