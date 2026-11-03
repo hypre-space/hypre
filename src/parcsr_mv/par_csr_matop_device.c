@@ -2164,7 +2164,11 @@ hypre_ParCSRMatrixRestrictColumnsDevice( hypre_ParCSRMatrix  *P,
                                     hypre_ParCSRMatrixColStarts(P));
    hypre_ParVectorInitialize_v2(diagonal, location);
    data = hypre_VectorData(hypre_ParVectorLocalVector(diagonal));
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::copy, marker, marker + ncols, data );
+#else
    HYPRE_THRUST_CALL( copy, marker, marker + ncols, data );
+#endif
 
    left = hypre_ParCSRMatrixClone_v2(P, 1, location);
    hypre_ParCSRMatrixDiagScale(left, NULL, diagonal);

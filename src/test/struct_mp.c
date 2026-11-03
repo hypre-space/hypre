@@ -114,11 +114,8 @@ main( hypre_int argc,
    HYPRE_Int           ix, iy, iz, ib;
 
    HYPRE_Int           read_fromfile_param;
-   HYPRE_Int           read_fromfile_index;
    HYPRE_Int           read_rhsfromfile_param;
-   HYPRE_Int           read_rhsfromfile_index;
    HYPRE_Int           read_x0fromfile_param;
-   HYPRE_Int           read_x0fromfile_index;
    HYPRE_Int           periodx0[3] = {0, 0, 0};
    HYPRE_Int           sum;
 
@@ -288,11 +285,8 @@ main( hypre_int argc,
 
    /* setting defaults for the reading parameters    */
    read_fromfile_param = 0;
-   read_fromfile_index = argc;
    read_rhsfromfile_param = 0;
-   read_rhsfromfile_index = argc;
    read_x0fromfile_param = 0;
-   read_x0fromfile_index = argc;
    sum = 0;
 
    /* ghost defaults */
@@ -387,19 +381,16 @@ main( hypre_int argc,
       {
          arg_index++;
          read_fromfile_param = 1;
-         read_fromfile_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
       {
          arg_index++;
          read_rhsfromfile_param = 1;
-         read_rhsfromfile_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-x0fromfile") == 0 )
       {
          arg_index++;
          read_x0fromfile_param = 1;
-         read_x0fromfile_index = arg_index;
       }
       else if (strcmp(argv[arg_index], "-repeats") == 0 )
       {
@@ -616,12 +607,6 @@ main( hypre_int argc,
    HYPRE_SetUmpireHostPoolSize(umpire_host_pool_size);
    HYPRE_SetUmpirePinnedPoolSize(umpire_pinned_pool_size);
 #endif
-
-   /* Unused variables */
-   HYPRE_UNUSED_VAR(read_fromfile_index);
-   HYPRE_UNUSED_VAR(read_x0fromfile_index);
-   HYPRE_UNUSED_VAR(read_rhsfromfile_index);
-
 
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param;
 

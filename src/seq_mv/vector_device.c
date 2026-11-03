@@ -568,4 +568,14 @@ hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
 
 #endif /* vendor sparse */
 
+#if defined(HYPRE_USING_SYCL)
+/* SYCL vectors do not maintain the CUDA/ROCm sparse vector descriptor cache. */
+HYPRE_Int
+hypre_GpuVecDataDestroy(hypre_GpuVecData *data)
+{
+   HYPRE_UNUSED_VAR(data);
+   return hypre_error_flag;
+}
+#endif
+
 #endif
