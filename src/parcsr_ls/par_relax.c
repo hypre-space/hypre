@@ -747,12 +747,34 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_rank(comm, &my_id);
    num_threads = forced_seq ? 1 : hypre_NumThreads();
 
+   /* Multicomponent vectors (column-wise storage): one exchange for all components, then
+      the same sweeps as for a single vector on each component */
+   const HYPRE_Int num_vectors = hypre_VectorNumVectors(f_local);
+   const HYPRE_Int vecstride_f = hypre_VectorVectorStride(f_local);
+   const HYPRE_Int vecstride_u = hypre_VectorVectorStride(u_local);
+   const HYPRE_Int vecstride_v = Vtemp_local ? hypre_VectorVectorStride(Vtemp_local) : 0;
+   HYPRE_Complex  *v_ext_comp  = NULL;
+   HYPRE_Int       k;
+
    /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
+   if (num_vectors > 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Hybrid GS relaxation doesn't support multicomponent vectors");
-      return hypre_error_flag;
+      HYPRE_Int persistent = 0;
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+      persistent = 1;
+#endif
+      if (persistent || num_threads > 1 || Topo_order ||
+          hypre_VectorNumVectors(u_local) != num_vectors ||
+          hypre_VectorMultiVecStorageMethod(f_local) != 0 ||
+          hypre_VectorMultiVecStorageMethod(u_local) != 0 ||
+          (Vtemp_local && (hypre_VectorNumVectors(Vtemp_local) != num_vectors ||
+                           hypre_VectorMultiVecStorageMethod(Vtemp_local) != 0)))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Hybrid GS relaxation supports multicomponent vectors only with one "
+                           "thread and column-wise storage");
+         return hypre_error_flag;
+      }
    }
 
    /* GS order: forward or backward */
@@ -784,6 +806,9 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
          comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       }
 
+      /* The send map and receive offsets of the package hold one entry per component */
+      hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors, vecstride_u,
+                                         hypre_VectorIndexStride(u_local));
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
@@ -794,7 +819,11 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
       v_buf_data = hypre_CTAlloc(HYPRE_Real,
                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                  HYPRE_MEMORY_HOST);
-      v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+      v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd * num_vectors, HYPRE_MEMORY_HOST);
+      if (num_vectors > 1)
+      {
+         v_ext_comp = hypre_TAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+      }
 #endif
 
       if (hypre_ParVectorAllZeros(u))
@@ -873,12 +902,15 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 
    if ( (num_threads > 1 || !non_scale) && Vtemp_data )
    {
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
-#endif
-      for (j = 0; j < num_rows; j++)
+      for (k = 0; k < num_vectors; k++)
       {
-         Vtemp_data[j] = u_data[j];
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
+         for (j = 0; j < num_rows; j++)
+         {
+            Vtemp_data[j + k * vecstride_v] = u_data[j + k * vecstride_u];
+         }
       }
    }
 
@@ -915,35 +947,53 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    }
    else /* if (num_threads > 1) */
    {
-      HYPRE_Int sweep;
-      for (sweep = 0; sweep < num_sweeps; sweep++)
+      for (k = 0; k < num_vectors; k++)
       {
-         const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
-         const HYPRE_Int ibegin = iorder > 0 ? 0 : num_rows - 1;
-         const HYPRE_Int iend = iorder > 0 ? num_rows : -1;
+         HYPRE_Complex *f_k     = f_data + k * vecstride_f;
+         HYPRE_Complex *u_k     = u_data + k * vecstride_u;
+         HYPRE_Complex *Vtemp_k = Vtemp_data ? Vtemp_data + k * vecstride_v : NULL;
+         HYPRE_Complex *v_ext_k = v_ext_data;
+         HYPRE_Int      sweep;
 
-         if (Topo_order)
+         if (num_vectors > 1 && num_procs > 1)
          {
-            hypre_HybridGaussSeidelOrderedNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
-                                             f_data, cf_marker, relax_points, u_data, NULL, v_ext_data,
-                                             ibegin, iend, iorder, proc_ordering);
-         }
-         else
-         {
-            if (non_scale)
+            /* Received values are interleaved by component */
+            for (j = 0; j < num_cols_offd; j++)
             {
-               hypre_HybridGaussSeidelNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
-                                         f_data, cf_marker, relax_points, l1_norms, u_data, Vtemp_data, v_ext_data,
-                                         ibegin, iend, iorder, Skip_diag);
+               v_ext_comp[j] = v_ext_data[j * num_vectors + k];
+            }
+            v_ext_k = v_ext_comp;
+         }
+
+         for (sweep = 0; sweep < num_sweeps; sweep++)
+         {
+            const HYPRE_Int iorder = num_sweeps == 1 ? gs_order : sweep == 0 ? 1 : -1;
+            const HYPRE_Int ibegin = iorder > 0 ? 0 : num_rows - 1;
+            const HYPRE_Int iend = iorder > 0 ? num_rows : -1;
+
+            if (Topo_order)
+            {
+               hypre_HybridGaussSeidelOrderedNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                                f_k, cf_marker, relax_points, u_k, NULL, v_ext_k,
+                                                ibegin, iend, iorder, proc_ordering);
             }
             else
             {
-               hypre_HybridGaussSeidel(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
-                                       f_data, cf_marker, relax_points, relax_weight, omega, one_minus_omega,
-                                       prod, l1_norms, u_data, Vtemp_data, v_ext_data, ibegin, iend, iorder, Skip_diag);
+               if (non_scale)
+               {
+                  hypre_HybridGaussSeidelNS(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                            f_k, cf_marker, relax_points, l1_norms, u_k, Vtemp_k, v_ext_k,
+                                            ibegin, iend, iorder, Skip_diag);
+               }
+               else
+               {
+                  hypre_HybridGaussSeidel(A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_j, A_offd_data,
+                                          f_k, cf_marker, relax_points, relax_weight, omega, one_minus_omega,
+                                          prod, l1_norms, u_k, Vtemp_k, v_ext_k, ibegin, iend, iorder, Skip_diag);
+               }
             }
-         }
-      } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
+         } /* for (sweep = 0; sweep < num_sweeps; sweep++) */
+      } /* for (k = 0; k < num_vectors; k++) */
    } /* if (num_threads > 1) */
 
 #ifndef HYPRE_USING_PERSISTENT_COMM
@@ -951,6 +1001,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    {
       hypre_TFree(v_ext_data, HYPRE_MEMORY_HOST);
       hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(v_ext_comp, HYPRE_MEMORY_HOST);
    }
 #endif
 

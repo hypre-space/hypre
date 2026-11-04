@@ -453,10 +453,62 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
  * TODO (VPM): remove (u/f)_data_h. Communicate device buffers instead.
  *--------------------------------------------------------------------------*/
 
+static HYPRE_Int
+hypre_GaussElimSolveVector(hypre_ParAMGData *amg_data,
+                           HYPRE_Int         level,
+                           HYPRE_Int         solver_type);
+
+/*--------------------------------------------------------------------------
+ * hypre_GaussElimSolve
+ *
+ * Multicomponent vectors (column-wise storage) are solved one component at a time.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                      HYPRE_Int         level,
                      HYPRE_Int         solver_type)
+{
+   hypre_Vector  *f_local     = hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[level]);
+   hypre_Vector  *u_local     = hypre_ParVectorLocalVector(hypre_ParAMGDataUArray(amg_data)[level]);
+   HYPRE_Int      num_vectors = hypre_VectorNumVectors(f_local);
+   HYPRE_Complex *f_data      = hypre_VectorData(f_local);
+   HYPRE_Complex *u_data      = hypre_VectorData(u_local);
+   HYPRE_Int      k;
+
+   if (num_vectors == 1)
+   {
+      return hypre_GaussElimSolveVector(amg_data, level, solver_type);
+   }
+   if (hypre_VectorNumVectors(u_local) != num_vectors ||
+       hypre_VectorMultiVecStorageMethod(f_local) != 0 ||
+       hypre_VectorMultiVecStorageMethod(u_local) != 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Gaussian elimination supports multicomponent vectors only with "
+                        "column-wise storage");
+      return hypre_error_flag;
+   }
+   hypre_VectorNumVectors(f_local) = 1;
+   hypre_VectorNumVectors(u_local) = 1;
+   for (k = 0; k < num_vectors; k++)
+   {
+      hypre_VectorData(f_local) = f_data + k * hypre_VectorVectorStride(f_local);
+      hypre_VectorData(u_local) = u_data + k * hypre_VectorVectorStride(u_local);
+      hypre_GaussElimSolveVector(amg_data, level, solver_type);
+   }
+   hypre_VectorData(f_local)       = f_data;
+   hypre_VectorData(u_local)       = u_data;
+   hypre_VectorNumVectors(f_local) = num_vectors;
+   hypre_VectorNumVectors(u_local) = num_vectors;
+
+   return hypre_error_flag;
+}
+
+static HYPRE_Int
+hypre_GaussElimSolveVector(hypre_ParAMGData *amg_data,
+                           HYPRE_Int         level,
+                           HYPRE_Int         solver_type)
 {
    hypre_ParCSRMatrix   *A                  = hypre_ParAMGDataAArray(amg_data)[level];
    HYPRE_Int             first_row_index    = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
