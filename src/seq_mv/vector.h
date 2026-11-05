@@ -15,7 +15,8 @@
 #define hypre_VECTOR_HEADER
 
 #if defined(HYPRE_USING_CUSPARSE)  ||\
-    defined(HYPRE_USING_ROCSPARSE)
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_SYCL)
 struct hypre_GpuVecData;
 typedef struct hypre_GpuVecData hypre_GpuVecData;
 #endif

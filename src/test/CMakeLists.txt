@@ -17,6 +17,7 @@ endif()
 # Define list of executables
 set(TEST_SRCS
   ij.c
+  ij_mm.c
   sstruct.c
   struct.c
   structmat.c

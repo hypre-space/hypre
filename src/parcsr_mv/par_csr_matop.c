@@ -6403,6 +6403,123 @@ hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixMarkColumns
+ *
+ * Sets marker[j] = 1 for every column j of the diagonal block of P that has
+ * an entry, and for every column that is needed by other ranks to compute
+ * a matrix-vector product with P (the columns in the send map of its
+ * communication package). The array marker has num_cols_diag entries, lives
+ * in the memory location of P, and is not reset.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixMarkColumns( hypre_ParCSRMatrix *P,
+                               HYPRE_Int          *marker )
+{
+   hypre_CSRMatrix      *diag = hypre_ParCSRMatrixDiag(P);
+   HYPRE_Int            *cols = hypre_CSRMatrixJ(diag);
+   HYPRE_Int             nnz  = hypre_CSRMatrixNumNonzeros(diag);
+   hypre_ParCSRCommPkg  *pkg;
+   HYPRE_Int             sends, j;
+
+   if (!hypre_ParCSRMatrixCommPkg(P))
+   {
+      hypre_MatvecCommPkgCreate(P);
+   }
+   pkg   = hypre_ParCSRMatrixCommPkg(P);
+   sends = hypre_ParCSRCommPkgSendMapStart(pkg, hypre_ParCSRCommPkgNumSends(pkg));
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(P)) == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_ParCSRMatrixMarkColumnsDevice(P, marker);
+   }
+#endif
+
+   for (j = 0; j < nnz; j++)
+   {
+      marker[cols[j]] = 1;
+   }
+   for (j = 0; j < sends; j++)
+   {
+      marker[hypre_ParCSRCommPkgSendMapElmt(pkg, j)] = 1;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixRestrictColumns
+ *
+ * Returns in Q_ptr a copy of P in which the entries of the columns j of the
+ * diagonal block of P with marker[j] = 0 are removed. The array marker has
+ * num_cols_diag entries and lives in the memory location of P.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns( hypre_ParCSRMatrix  *P,
+                                   HYPRE_Int           *marker,
+                                   hypre_ParCSRMatrix **Q_ptr )
+{
+   HYPRE_MemoryLocation  location = hypre_ParCSRMatrixMemoryLocation(P);
+   HYPRE_Int             ncols    = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(P));
+
+   hypre_ParCSRMatrix   *left;
+   hypre_ParVector      *diagonal;
+   hypre_CSRMatrix      *csr;
+   hypre_CSRMatrix      *trimmed;
+   HYPRE_Complex        *data;
+   HYPRE_Int             i, k;
+
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(location) == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_ParCSRMatrixRestrictColumnsDevice(P, marker, Q_ptr);
+   }
+#endif
+
+   /* Scale the columns of P by the marker */
+   diagonal = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(P),
+                                    hypre_ParCSRMatrixGlobalNumCols(P),
+                                    hypre_ParCSRMatrixColStarts(P));
+   hypre_ParVectorInitialize_v2(diagonal, location);
+   data = hypre_VectorData(hypre_ParVectorLocalVector(diagonal));
+   for (i = 0; i < ncols; i++)
+   {
+      data[i] = (HYPRE_Complex) marker[i];
+   }
+
+   left = hypre_ParCSRMatrixClone_v2(P, 1, location);
+   hypre_ParCSRMatrixDiagScale(left, NULL, diagonal);
+
+   /* Remove the zeros created by the scaling */
+   for (k = 0; k < 2; k++)
+   {
+      csr     = k ? hypre_ParCSRMatrixOffd(left) : hypre_ParCSRMatrixDiag(left);
+      trimmed = hypre_CSRMatrixDeleteZeros(csr, 0.0);
+      if (trimmed)
+      {
+         hypre_CSRMatrixDestroy(csr);
+         if (k)
+         {
+            hypre_ParCSRMatrixOffd(left) = trimmed;
+         }
+         else
+         {
+            hypre_ParCSRMatrixDiag(left) = trimmed;
+         }
+         hypre_CSRMatrixSetRownnz(trimmed);
+      }
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(left);
+   hypre_ParVectorDestroy(diagonal);
+
+   *Q_ptr = left;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixReorder:
  *
  * Reorders the column and data arrays of a the diagonal component of a square

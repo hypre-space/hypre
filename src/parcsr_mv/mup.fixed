@@ -124,6 +124,7 @@ hypre_ParCSRMatrixInfNorm
 hypre_ParCSRMatrixInitialize
 hypre_ParCSRMatrixLocalSumElts
 hypre_ParCSRMatrixLocalTranspose
+hypre_ParCSRMatrixMarkColumns
 hypre_ParCSRMatrixMatvec
 hypre_ParCSRMatrixMatvecOutOfPlace
 hypre_ParCSRMatrixMatvecOutOfPlaceHost
@@ -142,6 +143,7 @@ hypre_ParCSRMatrixReadIJ
 hypre_ParCSRMatrixRef
 hypre_ParCSRMatrixReorder
 hypre_ParCSRMatrixRestoreRow
+hypre_ParCSRMatrixRestrictColumns
 hypre_ParCSRMatrixScale
 hypre_ParCSRMatrixSetConstantValues
 hypre_ParCSRMatrixSetDNumNonzeros

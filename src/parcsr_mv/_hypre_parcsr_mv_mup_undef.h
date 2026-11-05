@@ -185,6 +185,7 @@
 #undef hypre_ParCSRMatrixInitialize
 #undef hypre_ParCSRMatrixLocalSumElts
 #undef hypre_ParCSRMatrixLocalTranspose
+#undef hypre_ParCSRMatrixMarkColumns
 #undef hypre_ParCSRMatrixMatvec
 #undef hypre_ParCSRMatrixMatvecOutOfPlace
 #undef hypre_ParCSRMatrixMatvecOutOfPlaceHost
@@ -203,6 +204,7 @@
 #undef hypre_ParCSRMatrixRef
 #undef hypre_ParCSRMatrixReorder
 #undef hypre_ParCSRMatrixRestoreRow
+#undef hypre_ParCSRMatrixRestrictColumns
 #undef hypre_ParCSRMatrixScale
 #undef hypre_ParCSRMatrixSetConstantValues
 #undef hypre_ParCSRMatrixSetDNumNonzeros
@@ -362,10 +364,12 @@
 #undef hypre_ParCSRMatrixGenerateFFFCDevice
 #undef hypre_ParCSRMatrixGenerateFFFCDevice_core
 #undef hypre_ParCSRMatrixGetRowDevice
+#undef hypre_ParCSRMatrixMarkColumnsDevice
 #undef hypre_ParCSRMatrixMatvecOutOfPlaceDevice
 #undef hypre_ParCSRMatrixMatvecTDevice
 #undef hypre_ParCSRMatrixMatvecT_unpack
 #undef hypre_ParCSRMatrixRAPKTDevice
+#undef hypre_ParCSRMatrixRestrictColumnsDevice
 #undef hypre_ParCSRMatrixStatsComputePassOneLocalDevice
 #undef hypre_ParCSRMatrixStatsComputePassTwoLocalDevice
 #undef hypre_ParCSRMatrixTransposeDevice

@@ -96,6 +96,14 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_BoxAppendMerge( hypre_Box *box, hypre_BoxArray *box_array )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoxAppendMerge)( box, box_array );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_BoxArrayArray *
 hypre_BoxArrayArrayClone( hypre_BoxArrayArray *box_array_array )
 {
@@ -700,6 +708,14 @@ HYPRE_Int
 hypre_BoxMaxSize( hypre_Box *box )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoxMaxSize)( box );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxMerge( hypre_BoxArray *box_array )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoxMerge)( box_array );
 }
 
 /*--------------------------------------------------------------------------*/

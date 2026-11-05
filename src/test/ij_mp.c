@@ -309,9 +309,6 @@ main( hypre_int argc,
    float           final_res_norm_flt;
 
    void        *final_res_norm = &final_res_norm_dbl;
-   /* Size of solver and preconditioner data types */
-   size_t      slvr_size_t = sizeof(hypre_double);
-   size_t      pc_size_t = sizeof(hypre_float);
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    HYPRE_Int print_mem_tracker = 0;
@@ -976,17 +973,14 @@ main( hypre_int argc,
          {
             case 0:
                solver_precision = HYPRE_REAL_SINGLE;
-               slvr_size_t = sizeof(hypre_float);
                final_res_norm = &final_res_norm_flt;
                break;
             case 1:
                solver_precision = HYPRE_REAL_DOUBLE;
-               slvr_size_t = sizeof(hypre_double);
                final_res_norm = &final_res_norm_dbl;
                break;
             case 2:
                solver_precision = HYPRE_REAL_LONGDOUBLE;
-               slvr_size_t = sizeof(hypre_long_double);
                final_res_norm = &final_res_norm_ldbl;
                break;
             default:
@@ -1002,15 +996,12 @@ main( hypre_int argc,
          {
             case 0:
                precond_precision = HYPRE_REAL_SINGLE;
-               pc_size_t = sizeof(hypre_float);
                break;
             case 1:
                precond_precision = HYPRE_REAL_DOUBLE;
-               pc_size_t = sizeof(hypre_double);
                break;
             case 2:
                precond_precision = HYPRE_REAL_LONGDOUBLE;
-               pc_size_t = sizeof(hypre_long_double);
                break;
             default:
             { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown pc precision"); return value; }
@@ -1021,10 +1012,6 @@ main( hypre_int argc,
          arg_index++;
       }
    }
-
-   /* Unused variables */
-   HYPRE_UNUSED_VAR(slvr_size_t);
-   HYPRE_UNUSED_VAR(pc_size_t);
 
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22)
