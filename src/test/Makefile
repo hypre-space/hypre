@@ -77,6 +77,7 @@ HYPRE_UNIT_TESTS =\
  unit/test_csr_overlap.c\
  unit/test_matrix_stats.c\
  unit/test_ssamg_logging.c\
+ unit/test_multicomponent_relax.c\
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
@@ -237,6 +238,10 @@ test_matrix_stats: unit/test_matrix_stats.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_ssamg_logging: unit/test_ssamg_logging.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_multicomponent_relax: unit/test_multicomponent_relax.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
