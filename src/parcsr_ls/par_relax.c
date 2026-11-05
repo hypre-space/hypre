@@ -797,36 +797,53 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
       v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 #endif
 
-      HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-      HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
-      for (j = begin; j < end; j++)
+      if (hypre_ParVectorAllZeros(u))
       {
-         v_buf_data[j - begin] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+         /* The off-processor values of u = 0 are zero: skip the exchange. All processes
+            see the same flag, as in the zero initial guess of an AMG cycle level. */
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+         hypre_Memset(v_ext_data, 0, hypre_CSRMatrixNumCols(A_offd) * sizeof(HYPRE_Complex),
+                      HYPRE_MEMORY_HOST);
+#endif
+#ifdef HYPRE_PROFILE
+         hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
       }
+      else
+      {
+         HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+         HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+         for (j = begin; j < end; j++)
+         {
+            v_buf_data[j - begin] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+         }
 
 #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
-      hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+         hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+         hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-      hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, v_buf_data);
+         hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST,
+                                               v_buf_data);
 #else
-      comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
+         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
 #endif
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-      hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST, v_ext_data);
+         hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST,
+                                              v_ext_data);
 #else
-      hypre_ParCSRCommHandleDestroy(comm_handle);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
 
 #ifdef HYPRE_PROFILE
-      hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+         hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
+      }
    }
 
    if (Topo_order)
@@ -940,6 +957,10 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RELAX] += hypre_MPI_Wtime();
 #endif
+
+   /* u is no longer known to be zero, also for callers which do not go through
+      hypre_BoomerAMGRelax (for example hypre_ParCSRRelax in AMS) */
+   hypre_ParVectorAllZeros(u) = 0;
 
    return hypre_error_flag;
 }
