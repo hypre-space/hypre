@@ -2058,9 +2058,16 @@ dnl *********************************************************************
 if test "$hypre_using_distributed_ls" = "yes"
 then
    HYPRE_DISTRIBUTED_LS_DIR="$HYPRE_SRCDIR/distributed_ls"
-   HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
-   HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
-   HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+   if test "$hypre_using_mixed_precision" = "yes"
+   then
+      HYPRE_EUCLID_FILES="$HYPRE_DISTRIBUTED_LS_DIR/Euclid/*.o_flt $HYPRE_DISTRIBUTED_LS_DIR/Euclid/*.o_dbl $HYPRE_DISTRIBUTED_LS_DIR/Euclid/*.o_ldbl"
+      HYPRE_PARASAILS_FILES="$HYPRE_DISTRIBUTED_LS_DIR/ParaSails/*.o_flt $HYPRE_DISTRIBUTED_LS_DIR/ParaSails/*.o_dbl $HYPRE_DISTRIBUTED_LS_DIR/ParaSails/*.o_ldbl"
+      HYPRE_PILUT_FILES="$HYPRE_DISTRIBUTED_LS_DIR/pilut/*.o_flt $HYPRE_DISTRIBUTED_LS_DIR/pilut/*.o_dbl $HYPRE_DISTRIBUTED_LS_DIR/pilut/*.o_ldbl"
+   else
+      HYPRE_EUCLID_FILES="$HYPRE_SRCDIR/distributed_ls/Euclid/*.o"
+      HYPRE_PARASAILS_FILES="$HYPRE_SRCDIR/distributed_ls/ParaSails/*.o"
+      HYPRE_PILUT_FILES="$HYPRE_SRCDIR/distributed_ls/pilut/*.o"
+   fi
 else
    HYPRE_DISTRIBUTED_LS_DIR=
    HYPRE_EUCLID_FILES=
