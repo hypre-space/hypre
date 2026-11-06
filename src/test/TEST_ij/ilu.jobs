@@ -47,3 +47,10 @@ mpirun -np 2  ./ij -solver 82 -ilu_type 50 -ilu_lfil 0 > ilu.out.323
 ## ILU smoother for AMG
 mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > ilu.out.324
 mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > ilu.out.325
+
+#CUDA_HIP_BEGIN
+# Level-set block-Jacobi ILU0: GMRES and standalone solves, identity and RCM.
+mpirun -np 1  ./ij -solver 81 -ilu_type 60 -ilu_reordering 0 > ilu.out.326
+mpirun -np 1  ./ij -solver 81 -ilu_type 60 -ilu_reordering 1 > ilu.out.327
+mpirun -np 1  ./ij -solver 80 -ilu_type 60 -ilu_reordering 1 > ilu.out.328
+#CUDA_HIP_END

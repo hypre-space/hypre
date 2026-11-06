@@ -154,6 +154,30 @@ hypre_CSRMatrixILU0( hypre_CSRMatrix *A )
 
 /*--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetFactorization( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixILU0LevelSetFactorization)( A, num_levels, offsets, rows );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetLSolve( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, HYPRE_Complex *f )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixILU0LevelSetLSolve)( A, num_levels, offsets, rows, f );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetUSolve( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, HYPRE_Complex *f )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixILU0LevelSetUSolve)( A, num_levels, offsets, rows, f );
+}
+
+/*--------------------------------------------------------------------------*/
+
 hypre_CSRMatrix*
 hypre_CSRMatrixIdentityDevice( HYPRE_Int n, HYPRE_Complex alp )
 {
@@ -206,6 +230,14 @@ HYPRE_Int
 hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix *A )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMoveDiagFirstDevice)( A );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstOrderedDevice( hypre_CSRMatrix *A )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixMoveDiagFirstOrderedDevice)( A );
 }
 
 /*--------------------------------------------------------------------------*/

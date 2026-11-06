@@ -47,7 +47,7 @@ the last case, other Krylov methods can be chosen. We refer the reader to
  HYPRE_ILUCreate(&ilu_solver);
 
  /* (Recommended) General solver options */
- HYPRE_ILUSetType(ilu_solver, ilu_type); /* 0, 1, 10, 11, 20, 21, 30, 31, 40, 41, 50 */
+ HYPRE_ILUSetType(ilu_solver, ilu_type); /* 0, 1, 10, 11, 20, 21, 30, 31, 40, 41, 50, 60 */
  HYPRE_ILUSetMaxIter(ilu_solver, max_iter);
  HYPRE_ILUSetTol(ilu_solver, tol);
  HYPRE_ILUSetLocalReordering(ilu_solver, reordering); /* 0: none, 1: RCM */
@@ -97,6 +97,7 @@ A short explanation for each of those functions and its parameters is given next
   * 40: ddPQ-GMRES with ILUK (ddPQ-GMRES-ILUK).
   * 41: ddPQ-GMRES with ILUT (ddPQ-GMRES-ILUT).
   * 50: GMRES with RAP-ILU0 with modified ILU0 (GMRES-RAP-ILU0).
+  * 60: Block-Jacobi device level-set ILU0 (CUDA/HIP only).
 * ``HYPRE_ILUSetMaxIter`` Set the maximum number of ILU iterations. We recommend setting
   this value to one when ILU is used as a preconditioner or smoother.
 * ``HYPRE_ILUSetTol`` Set the convergence tolerance for ILU. We recommend setting
@@ -136,6 +137,15 @@ A short explanation for each of those functions and its parameters is given next
 .. note::
    For more details about ILU options and parameters, including their default
    values, we refer the reader to hypre's reference manual or section :ref:`sec-ParCSR-Solvers`.
+
+Device level-set ILU0 (type 60)
+------------------------------------------------------------------------------
+
+Type 60 complements type 0 for large and highly parallelizable sparse systems.
+The sparsity pattern determins explicit level-sets that are internally fully
+parallel. Type 60 is supported on CUDA and HIP devices, and not CPU or SYCL.
+The preconditioners requires a system with a diagonal entry on each row. RCM
+reordering is also supported.
 
 .. _ilu-amg-smoother:
 
@@ -204,6 +214,10 @@ time, the triangular factors are stored in a memory space that is accessible fro
      - Setup and Solve
      - Setup and Solve
      - UVM-Setup and Solve
+   * - **BJ level-set ILU0 (type 60)**
+     - Setup and Solve
+     - Setup and Solve
+     - Not supported
    * - **BJ-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve

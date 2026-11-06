@@ -5403,6 +5403,18 @@ HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
  *    - 40 : (nonsymmetric permutation) DDPQ-GMRES with ILU(k)
  *    - 41 : (nonsymmetric permutation) DDPQ-GMRES with ILUT
  *    - 50 : GMRES with RAP-ILU(0) using MILU(0) for P
+ *    - 60 : BJ with device level-set ILU(0) (CUDA/HIP only)
+ *
+ * Type 60 requires device execution, level of fill zero, direct triangular
+ * solves (HYPRE_ILUSetTriSolve with value 1), and noniterative setup
+ * (HYPRE_ILUSetIterativeSetupType with value 0). Local reordering may be
+ * disabled or set to RCM. Each local diagonal block must be square, with
+ * in-range, unique column indices and exactly one stored diagonal entry per
+ * row. Unsorted rows, stored zeros, asymmetric sparsity patterns, and empty
+ * local blocks are supported. A zero or nonfinite factorization pivot causes
+ * setup to fail; small finite nonzero pivots are not rejected by a threshold.
+ * Validation and level scheduling add setup cost; performance depends on the
+ * matrix and number of preconditioner applications.
  **/
 HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );

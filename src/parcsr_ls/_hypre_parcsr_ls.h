@@ -1316,6 +1316,23 @@ typedef struct hypre_ParILUData_struct
    hypre_Vector         *Utemp_lower;
    hypre_Vector         *Adiag_diag;
    hypre_Vector         *Sdiag_diag;
+
+   void                 *ls_last_stream;
+   HYPRE_Int             ls_device;
+   HYPRE_Int             ls_ready; /* complete successful type-60 setup */
+
+   /* Level-set data for ilu_type 60 triangular solves */
+   HYPRE_Int             num_low_levels;           /* number of lower triangular level sets */
+   HYPRE_Int            *low_level_set_offsets;    /* host array, length num_low_levels+1 */
+   HYPRE_Int            *d_low_level_set_rows;     /* device array, length n */
+   HYPRE_Int             num_upp_levels;           /* number of upper triangular level sets */
+   HYPRE_Int            *upp_level_set_offsets;    /* host array, length num_upp_levels+1 */
+   HYPRE_Int            *d_upp_level_set_rows;     /* device array, length n */
+
+   /* Initial factorization permutation for solve gather/scatter.
+    * combined_perm_d[i] maps factor coordinates to original coordinates. */
+   HYPRE_Int            *combined_perm_d;          /* device array, length n */
+
 #endif
 
    /* data structure sor solving Schur System */
@@ -1383,6 +1400,14 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataUTempLower(ilu_data)                   ((ilu_data) -> Utemp_lower)
 #define hypre_ParILUDataADiagDiag(ilu_data)                    ((ilu_data) -> Adiag_diag)
 #define hypre_ParILUDataSDiagDiag(ilu_data)                    ((ilu_data) -> Sdiag_diag)
+#define hypre_ParILUDataNumLowLevels(ilu_data)                 ((ilu_data) -> num_low_levels)
+#define hypre_ParILUDataLowLevelSetOffsets(ilu_data)           ((ilu_data) -> low_level_set_offsets)
+#define hypre_ParILUDataDLowLevelSetRows(ilu_data)             ((ilu_data) -> d_low_level_set_rows)
+#define hypre_ParILUDataNumUppLevels(ilu_data)                 ((ilu_data) -> num_upp_levels)
+#define hypre_ParILUDataUppLevelSetOffsets(ilu_data)           ((ilu_data) -> upp_level_set_offsets)
+#define hypre_ParILUDataDUppLevelSetRows(ilu_data)             ((ilu_data) -> d_upp_level_set_rows)
+#define hypre_ParILUDataCombinedPermD(ilu_data)                ((ilu_data) -> combined_perm_d)
+
 #endif
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
@@ -3975,6 +4000,15 @@ HYPRE_Int hypre_FSAIApply ( void *fsai_vdata, HYPRE_Complex alpha, hypre_ParVect
 /* par_fsai_device.c */
 HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
                                  hypre_ParVector *f, hypre_ParVector *u );
+
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_ILULevelSetCleanup(hypre_ParILUData *ilu_data);
+HYPRE_Int hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
+                                         hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm,
+                                         HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets, HYPRE_Int *d_low_set_rows,
+                                         HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets, HYPRE_Int *d_upp_set_rows,
+                                         hypre_ParVector *ftemp, hypre_ParVector *utemp);
+#endif
 
 #ifdef __cplusplus
 }
