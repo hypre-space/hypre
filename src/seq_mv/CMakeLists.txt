@@ -94,8 +94,10 @@ foreach(kind IN ITEMS numer symbl)
   foreach(number RANGE 1 10)
     set(src_file "csr_spgemm_device_${kind}${number}.c")
     file(READ "${CMAKE_CURRENT_SOURCE_DIR}/csr_spgemm_device_${kind}.in" file_content)
-    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "#define HYPRE_SPGEMM_BIN ${number}")
-    file(APPEND "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}" "${file_content}")
+    file(CONFIGURE
+      OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}"
+      CONTENT "#define HYPRE_SPGEMM_BIN ${number}${file_content}"
+      @ONLY)
     list(APPEND AUTOGEN_CLEAN_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${src_file}")
   endforeach()
 endforeach()
