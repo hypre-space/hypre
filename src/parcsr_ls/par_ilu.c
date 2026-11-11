@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
  * hypre_ILUCreate
@@ -150,6 +151,24 @@ hypre_ILUCreate( void )
  * hypre_ILUDestroy
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_GPU)
+/* Called before factors and scratch vectors are freed. Synchronization is paid
+ * only at rebuild/destruction, never during steady-state application. */
+HYPRE_Int
+hypre_ILULevelSetCleanup(hypre_ParILUData *ilu_data)
+{
+   if (ilu_data->combined_perm_d) { hypre_SyncDevice(); }
+   hypre_TFree(ilu_data->low_level_set_offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(ilu_data->upp_level_set_offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(ilu_data->d_low_level_set_rows, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ilu_data->d_upp_level_set_rows, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ilu_data->combined_perm_d, HYPRE_MEMORY_DEVICE);
+   ilu_data->num_low_levels = ilu_data->num_upp_levels = 0;
+   ilu_data->ls_ready = 0;
+   return hypre_error_flag;
+}
+#endif
+
 HYPRE_Int
 hypre_ILUDestroy( void *data )
 {
@@ -163,6 +182,12 @@ hypre_ILUDestroy( void *data )
       {
          memory_location = hypre_ParCSRMatrixMemoryLocation(hypre_ParILUDataMatL(ilu_data));
       }
+#if defined(HYPRE_USING_GPU)
+      else if (hypre_ParILUDataMatBILUDevice(ilu_data))
+      {
+         memory_location = hypre_CSRMatrixMemoryLocation(hypre_ParILUDataMatBILUDevice(ilu_data));
+      }
+#endif
       else
       {
          /* Use default memory location */
@@ -171,6 +196,7 @@ hypre_ILUDestroy( void *data )
 
       /* GPU additional data */
 #if defined(HYPRE_USING_GPU)
+      hypre_ILULevelSetCleanup(ilu_data);
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
@@ -184,11 +210,6 @@ hypre_ILUDestroy( void *data )
       hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataADiagDiag(ilu_data) );
       hypre_SeqVectorDestroy( hypre_ParILUDataSDiagDiag(ilu_data) );
-
-      hypre_TFree( hypre_ParILUDataLowLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
-      hypre_TFree( hypre_ParILUDataDLowLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
-      hypre_TFree( hypre_ParILUDataUppLevelSetOffsets(ilu_data), HYPRE_MEMORY_HOST );
-      hypre_TFree( hypre_ParILUDataDUppLevelSetRows(ilu_data),   HYPRE_MEMORY_DEVICE );
 #endif
 
       /* final residual vector */
@@ -434,6 +455,9 @@ hypre_ILUSetType( void      *ilu_vdata,
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
    }
 
+#if defined(HYPRE_USING_GPU)
+   if (ilu_type == 60 || hypre_ParILUDataIluType(ilu_data) == 60) { ilu_data->ls_ready = 0; }
+#endif
    hypre_ParILUDataIluType(ilu_data) = ilu_type;
 
    /* reset default value, not a large cost

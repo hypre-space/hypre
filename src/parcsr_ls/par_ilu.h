@@ -86,6 +86,10 @@ typedef struct hypre_ParILUData_struct
    hypre_Vector         *Adiag_diag;
    hypre_Vector         *Sdiag_diag;
 
+   void                 *ls_last_stream;
+   HYPRE_Int             ls_device;
+   HYPRE_Int             ls_ready; /* complete successful type-60 setup */
+
    /* Level-set data for ilu_type 60 triangular solves */
    HYPRE_Int             num_low_levels;           /* number of lower triangular level sets */
    HYPRE_Int            *low_level_set_offsets;    /* host array, length num_low_levels+1 */
@@ -93,6 +97,11 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             num_upp_levels;           /* number of upper triangular level sets */
    HYPRE_Int            *upp_level_set_offsets;    /* host array, length num_upp_levels+1 */
    HYPRE_Int            *d_upp_level_set_rows;     /* device array, length n */
+
+   /* Initial factorization permutation for solve gather/scatter.
+    * combined_perm_d[i] maps factor coordinates to original coordinates. */
+   HYPRE_Int            *combined_perm_d;          /* device array, length n */
+
 #endif
 
    /* data structure sor solving Schur System */
@@ -166,6 +175,8 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataNumUppLevels(ilu_data)                 ((ilu_data) -> num_upp_levels)
 #define hypre_ParILUDataUppLevelSetOffsets(ilu_data)           ((ilu_data) -> upp_level_set_offsets)
 #define hypre_ParILUDataDUppLevelSetRows(ilu_data)             ((ilu_data) -> d_upp_level_set_rows)
+#define hypre_ParILUDataCombinedPermD(ilu_data)                ((ilu_data) -> combined_perm_d)
+
 #endif
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)

@@ -105,9 +105,9 @@ hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A, HYPRE_Complex *col_sum, HYPRE_
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixComputeLevelSetsHost( hypre_CSRMatrix *A, HYPRE_Int **low_set_offsets, HYPRE_Int **low_level_sets, HYPRE_Int **upp_set_offsets, HYPRE_Int **upp_level_sets, HYPRE_Int *num_low_levels, HYPRE_Int *num_upp_levels )
+hypre_CSRMatrixComputeLevelSetsHost( hypre_CSRMatrix *A, HYPRE_Int **low_offsets, HYPRE_Int **low_rows, HYPRE_Int **upp_offsets, HYPRE_Int **upp_rows, HYPRE_Int *num_low, HYPRE_Int *num_upp, HYPRE_Int *max_width )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixComputeLevelSetsHost)( A, low_set_offsets, low_level_sets, upp_set_offsets, upp_level_sets, num_low_levels, num_upp_levels );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixComputeLevelSetsHost)( A, low_offsets, low_rows, upp_offsets, upp_rows, num_low, num_upp, max_width );
 }
 
 /*--------------------------------------------------------------------------*/

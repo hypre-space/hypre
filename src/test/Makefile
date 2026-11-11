@@ -75,7 +75,7 @@ HYPRE_DRIVERS =\
 
 HYPRE_UNIT_TESTS =\
  unit/test_csr_overlap.c\
- unit/test_matrix_stats.c\
+ unit/test_matrix_stats.c
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\

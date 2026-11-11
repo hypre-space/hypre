@@ -46,6 +46,31 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *F_array            = hypre_ParILUDataF(ilu_data);
    hypre_ParVector      *U_array            = hypre_ParILUDataU(ilu_data);
 
+   if (ilu_type == 60)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (!ilu_data->ls_ready || ilu_data->ls_device != hypre_HandleDevice(hypre_handle()) ||
+          hypre_ParILUDataLfil(ilu_data) != 0 || !hypre_ParILUDataTriSolve(ilu_data) ||
+          hypre_ParILUDataIterativeSetupType(ilu_data))
+#endif
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU type 60 solve requires successful CUDA/HIP setup");
+         return hypre_error_flag;
+      }
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (ilu_type == 60)
+   {
+      void *stream = (void *) hypre_HandleComputeStream(hypre_handle());
+      if (ilu_data->ls_last_stream != stream)
+      {
+         hypre_SyncDevice();
+         ilu_data->ls_last_stream = stream;
+      }
+   }
+#endif
+
    /* Device data */
 #if defined(HYPRE_USING_GPU)
    hypre_CSRMatrix      *matALU_d           = hypre_ParILUDataMatAILUDevice(ilu_data);
@@ -65,6 +90,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Int             num_upp_levels     = hypre_ParILUDataNumUppLevels(ilu_data);
    HYPRE_Int            *upp_set_offsets    = hypre_ParILUDataUppLevelSetOffsets(ilu_data);
    HYPRE_Int            *d_upp_set_rows     = hypre_ParILUDataDUppLevelSetRows(ilu_data);
+   HYPRE_Int            *combined_perm      = hypre_ParILUDataCombinedPermD(ilu_data);
 #endif
 
    /* Solver settings */
@@ -258,7 +284,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             if (exec == HYPRE_EXEC_DEVICE)
             {
                /* Level-set based LU solve for ilu_type 60 */
-               hypre_ILUSolveLULevelSetDevice(matA, matBLU_d, F_array, U_array, perm,
+               hypre_ILUSolveLULevelSetDevice(matA, matBLU_d, F_array, U_array, combined_perm,
                                               num_low_levels, low_set_offsets, d_low_set_rows,
                                               num_upp_levels, upp_set_offsets, d_upp_set_rows,
                                               Utemp, Ftemp);

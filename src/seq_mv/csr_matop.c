@@ -2525,181 +2525,76 @@ hypre_CSRMatrixComputeLevelSetsHost(hypre_CSRMatrix  *A,
                                     HYPRE_Int       **upp_set_offsets_ptr,
                                     HYPRE_Int       **upp_level_sets_ptr,
                                     HYPRE_Int        *num_levels_low_ptr,
-                                    HYPRE_Int        *num_levels_upp_ptr)
+                                    HYPRE_Int        *num_levels_upp_ptr,
+                                    HYPRE_Int        *max_level_set_size)
 {
-   /* Traverse matrix structure to verify index operations */
    HYPRE_Int   num_rows = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int  *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int  *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int  *A_i = hypre_CSRMatrixI(A), *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int  *row_level = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
-   /* Local variables */
-   HYPRE_Int  *row_level_low, *row_level_upp;
-   HYPRE_Int  *low_set_sizes, *upp_set_sizes;
-   HYPRE_Int  *low_set_offsets, *upp_set_offsets;
-   HYPRE_Int  *low_level_sets, *upp_level_sets;
-   HYPRE_Int  *fill_pos_low, *fill_pos_upp;
-   HYPRE_Int   num_levels_low, num_levels_upp;
-   HYPRE_Int   row_idx, col_idx;
-   HYPRE_Int   i, j, lvl;
-
-   /* Compute level sets for the lower triangular part of the matrix */
-   /* Each row starts in level set 0, then is assigned to max(level[dep]) + 1 */
-   row_level_low = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
-
-   /* Compute row_level_low which maps every row to a level-set */
-   num_levels_low = 1;
-   for (row_idx = 0; row_idx < num_rows; row_idx++)
+   *max_level_set_size = 0;
+   /* Reuse the row-level buffer after emitting each schedule. Traversal order
+    * initializes every dependency before it is read, so zeroing is unnecessary.
+    * Keep ascending row order within levels, as in the original schedules. */
+   for (HYPRE_Int upper = 0; upper < 2; upper++)
    {
-      for (j = A_i[row_idx]; j < A_i[row_idx + 1]; j++)
+      HYPRE_Int num_levels = 1;
+      HYPRE_Int *offsets, *rows;
       {
-         col_idx = A_j[j];
-
-         /* For now we only handle the lower triangular solve dependencies */
-         if (col_idx < row_idx)
+         for (HYPRE_Int step = 0; step < num_rows; step++)
          {
-            if (row_level_low[col_idx] + 1 > row_level_low[row_idx])
+            HYPRE_Int row = upper ? num_rows - 1 - step : step;
+            HYPRE_Int level = 0;
             {
-               row_level_low[row_idx] = row_level_low[col_idx] + 1;
-
-               /* Keep track of the amount of level sets */
-               if (row_level_low[row_idx] + 1 > num_levels_low)
+               for (HYPRE_Int j = A_i[row]; j < A_i[row + 1]; j++)
                {
-                  num_levels_low = row_level_low[row_idx] + 1;
+                  HYPRE_Int col = A_j[j];
+                  if (upper ? col > row : col < row)
+                  {
+                     level = hypre_max(level, row_level[col] + 1);
+                  }
                }
             }
+            row_level[row] = level;
+            num_levels = hypre_max(num_levels, level + 1);
          }
-      }
-   }
 
-   /* TODO: if this function ends up being slow then consider loop fusions on lower/upper and more buffer reuse */
-
-   /* Count the number of rows in each level set */
-   low_set_sizes = hypre_CTAlloc(HYPRE_Int, num_levels_low, HYPRE_MEMORY_HOST);
-   for (row_idx = 0; row_idx < num_rows; row_idx++)
-   {
-      low_set_sizes[row_level_low[row_idx]]++;
-   }
-
-   /* Compute offsets for each level set, this is just a prefix sum of level set sizes*/
-   low_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels_low + 1, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_levels_low; i++)
-   {
-      low_set_offsets[i + 1] = low_set_offsets[i] + low_set_sizes[i];
-   }
-
-   /* Fill in the row indices grouped by level set */
-   low_level_sets = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
-
-   /* Fill level sets in correct places by starting at offsets and incrementing from there*/
-   fill_pos_low = hypre_CTAlloc(HYPRE_Int, num_levels_low, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_levels_low; i++)
-   {
-      fill_pos_low[i] = low_set_offsets[i];
-   }
-   for (i = 0; i < num_rows; i++)
-   {
-      lvl = row_level_low[i];
-      low_level_sets[fill_pos_low[lvl]++] = i;
-   }
-
-   /* Compute level sets for the upper triangular part of the matrix */
-   /* Traverse rows in reverse: each row depends on rows with higher index */
-   row_level_upp  = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
-   num_levels_upp = 1;
-   for (row_idx = num_rows - 1; row_idx >= 0; row_idx--)
-   {
-      for (j = A_i[row_idx]; j < A_i[row_idx + 1]; j++)
-      {
-         col_idx = A_j[j];
-
-         /* Handle upper triangular solve dependencies */
-         if (col_idx > row_idx)
+         HYPRE_Int *positions = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+         offsets = hypre_TAlloc(HYPRE_Int, num_levels + 1, HYPRE_MEMORY_HOST);
+         rows = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+         for (HYPRE_Int row = 0; row < num_rows; row++)
          {
-            if (row_level_upp[col_idx] + 1 > row_level_upp[row_idx])
-            {
-               row_level_upp[row_idx] = row_level_upp[col_idx] + 1;
-
-               /* Keep track of the amount of level sets */
-               if (row_level_upp[row_idx] + 1 > num_levels_upp)
-               {
-                  num_levels_upp = row_level_upp[row_idx] + 1;
-               }
-            }
+            positions[row_level[row]]++;
          }
-      }
-   }
-
-   /* Count the number of rows in each upper level set */
-   upp_set_sizes = hypre_CTAlloc(HYPRE_Int, num_levels_upp, HYPRE_MEMORY_HOST);
-   for (row_idx = 0; row_idx < num_rows; row_idx++)
-   {
-      upp_set_sizes[row_level_upp[row_idx]]++;
-   }
-
-   /* Compute offsets for each upper level set */
-   upp_set_offsets = hypre_CTAlloc(HYPRE_Int, num_levels_upp + 1, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_levels_upp; i++)
-   {
-      upp_set_offsets[i + 1] = upp_set_offsets[i] + upp_set_sizes[i];
-   }
-
-   /* Fill in the row indices grouped by upper level set */
-   upp_level_sets = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
-   fill_pos_upp   = hypre_CTAlloc(HYPRE_Int, num_levels_upp, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_levels_upp; i++)
-   {
-      fill_pos_upp[i] = upp_set_offsets[i];
-   }
-   for (i = 0; i < num_rows; i++)
-   {
-      lvl = row_level_upp[i];
-      upp_level_sets[fill_pos_upp[lvl]++] = i;
-   }
-
-   /* Temporary to validate reasonable results. */
-#ifdef DEBUG_LVLSET
-   FILE *fp = fopen("level_sets.txt", "w");
-   if (fp)
-   {
-      fprintf(fp, "Number of lower levels: %d\n", num_levels_low);
-      for (i = 0; i < num_levels_low; i++)
-      {
-         fprintf(fp, "Lower level %d (size %d): ", i, low_set_sizes[i]);
-         for (j = low_set_offsets[i]; j < low_set_offsets[i + 1]; j++)
+         offsets[0] = 0;
+         for (HYPRE_Int level = 0; level < num_levels; level++)
          {
-            fprintf(fp, "%d ", low_level_sets[j]);
+            HYPRE_Int width = positions[level];
+            offsets[level + 1] = offsets[level] + width;
+            *max_level_set_size = hypre_max(*max_level_set_size, width);
+            /* The histogram is no longer needed; reuse it as insertion cursors. */
+            positions[level] = offsets[level];
          }
-         fprintf(fp, "\n");
-      }
-      fprintf(fp, "Number of upper levels: %d\n", num_levels_upp);
-      for (i = 0; i < num_levels_upp; i++)
-      {
-         fprintf(fp, "Upper level %d (size %d): ", i, upp_set_sizes[i]);
-         for (j = upp_set_offsets[i]; j < upp_set_offsets[i + 1]; j++)
+         for (HYPRE_Int row = 0; row < num_rows; row++)
          {
-            fprintf(fp, "%d ", upp_level_sets[j];
+            rows[positions[row_level[row]]++] = row;
          }
-         fprintf(fp, "\n");
+         hypre_TFree(positions, HYPRE_MEMORY_HOST);
       }
-      fclose(fp);
+
+      if (upper)
+      {
+         *num_levels_upp_ptr = num_levels;
+         *upp_set_offsets_ptr = offsets;
+         *upp_level_sets_ptr = rows;
+      }
+      else
+      {
+         *num_levels_low_ptr = num_levels;
+         *low_set_offsets_ptr = offsets;
+         *low_level_sets_ptr = rows;
+      }
    }
-#endif
-
-   /* Set output pointers */
-   *num_levels_low_ptr  = num_levels_low;
-   *num_levels_upp_ptr  = num_levels_upp;
-   *low_set_offsets_ptr = low_set_offsets;
-   *upp_set_offsets_ptr = upp_set_offsets;
-   *low_level_sets_ptr  = low_level_sets;
-   *upp_level_sets_ptr  = upp_level_sets;
-
-   /* Clean up */
-   hypre_TFree(fill_pos_low, HYPRE_MEMORY_HOST);
-   hypre_TFree(fill_pos_upp, HYPRE_MEMORY_HOST);
-   hypre_TFree(row_level_low, HYPRE_MEMORY_HOST);
-   hypre_TFree(row_level_upp, HYPRE_MEMORY_HOST);
-   hypre_TFree(low_set_sizes, HYPRE_MEMORY_HOST);
-   hypre_TFree(upp_set_sizes, HYPRE_MEMORY_HOST);
-
+   hypre_TFree(row_level, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
