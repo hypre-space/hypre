@@ -266,6 +266,13 @@ HYPRE_Int
 hypre_ILUApplyUpperJacIterDevice_long_dbl( hypre_CSRMatrix *A, hypre_Vector *input, hypre_Vector *work, hypre_Vector *output, hypre_Vector *diag, HYPRE_Int upper_jacobi_iters );
 
 HYPRE_Int
+hypre_ILULevelSetCleanup_flt( hypre_ParILUData *ilu_data );
+HYPRE_Int
+hypre_ILULevelSetCleanup_dbl( hypre_ParILUData *ilu_data );
+HYPRE_Int
+hypre_ILULevelSetCleanup_long_dbl( hypre_ParILUData *ilu_data );
+
+HYPRE_Int
 hypre_ILUSetupDevice_flt( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A, HYPRE_Int *perm_data, HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr );
 HYPRE_Int
 hypre_ILUSetupDevice_dbl( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A, HYPRE_Int *perm_data, HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr );
@@ -292,6 +299,13 @@ HYPRE_Int
 hypre_ILUSolveLUIterDevice_dbl( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_Vector **diag_ptr, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters );
 HYPRE_Int
 hypre_ILUSolveLUIterDevice_long_dbl( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_Vector **diag_ptr, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters );
+
+HYPRE_Int
+hypre_ILUSolveLULevelSetDevice_flt( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets, HYPRE_Int *d_low_set_rows, HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets, HYPRE_Int *d_upp_set_rows, hypre_ParVector *ftemp, hypre_ParVector *utemp );
+HYPRE_Int
+hypre_ILUSolveLULevelSetDevice_dbl( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets, HYPRE_Int *d_low_set_rows, HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets, HYPRE_Int *d_upp_set_rows, hypre_ParVector *ftemp, hypre_ParVector *utemp );
+HYPRE_Int
+hypre_ILUSolveLULevelSetDevice_long_dbl( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int num_low_levels, HYPRE_Int *low_set_offsets, HYPRE_Int *d_low_set_rows, HYPRE_Int num_upp_levels, HYPRE_Int *upp_set_offsets, HYPRE_Int *d_upp_set_rows, hypre_ParVector *ftemp, hypre_ParVector *utemp );
 
 HYPRE_Int
 hypre_ILUSolveRAPGMRESDevice_flt( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_ParVector *ytemp, HYPRE_Solver schur_solver, HYPRE_Solver schur_precond, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end, hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d, hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d, HYPRE_Int test_opt );

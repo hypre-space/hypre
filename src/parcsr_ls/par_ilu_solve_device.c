@@ -1223,14 +1223,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_ILUSolveLULevelSetDevice
- *
- * Level-set based incomplete LU solve for ilu_type == 60 (GPU).
- *
- * Follows similar structure as hypre_ILUSolveLUDevice
- *--------------------------------------------------------------------------*/
-
+/* Apply a correction in factor coordinates, one kernel per level. */
 HYPRE_Int
 hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix  *A,
                                hypre_CSRMatrix     *matLU_d,
@@ -1257,27 +1250,26 @@ hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex  alpha = -1.0;
    HYPRE_Complex  beta  =  1.0;
 
-   /* Sanity check */
-   if (num_rows == 0)
-   {
-      return hypre_error_flag;
-   }
-
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("ILUSolveLevelSet");
 
    /* Compute residual: ftemp = f - A*u */
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
 
+   /* Empty ranks still participate in residual communication. */
+   if (num_rows == 0)
+   {
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
+
    /* Apply permutation: the factorization was computed on the permuted matrix,
     * so we must permute the residual into the same ordering before the solves. */
    if (perm)
    {
-#if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather(perm, perm + num_rows, ftemp_data, utemp_data);
-#else
       HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
-#endif
    }
    else
    {
@@ -1285,34 +1277,41 @@ hypre_ILUSolveLULevelSetDevice(hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
-   /* Forward substitution: L * utemp = utemp  (in-place) */
    hypre_CSRMatrixILU0LevelSetLSolve(matLU_d, num_low_levels, low_set_offsets,
                                      d_low_set_rows, utemp_data);
+   if (!hypre_error_flag)
+   {
+      hypre_CSRMatrixILU0LevelSetUSolve(matLU_d, num_upp_levels, upp_set_offsets,
+                                        d_upp_set_rows, utemp_data);
+   }
 
-   /* Backward substitution: U * utemp = utemp  (in-place) */
-   hypre_CSRMatrixILU0LevelSetUSolve(matLU_d, num_upp_levels, upp_set_offsets,
-                                     d_upp_set_rows, utemp_data);
+   if (hypre_error_flag)
+   {
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
-   /* Apply reverse permutation: scatter correction back to original ordering */
    if (perm)
    {
-#if defined(HYPRE_USING_SYCL)
-      hypreSycl_scatter(utemp_data, utemp_data + num_rows, perm, ftemp_data);
-#else
       HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
-#endif
    }
    else
    {
       hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, num_rows,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
-
-   /* Update solution: u = u + ftemp */
-   hypre_ParVectorAxpy(beta, ftemp, u);
+   hypre_ParVectorAxpy(1.0, ftemp, u);
+   hypre_SyncComputeStream();
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                     "Error: hypre_ILUSolveLULevelSetDevice called without CUDA/HIP support.\n");
+   hypre_error_flag = HYPRE_ERROR_GENERIC;
+#endif
 
    return hypre_error_flag;
 }

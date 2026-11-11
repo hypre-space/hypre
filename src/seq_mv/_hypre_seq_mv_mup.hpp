@@ -139,6 +139,27 @@ hypre_CSRMatrixILU0_dbl( hypre_CSRMatrix *A );
 HYPRE_Int
 hypre_CSRMatrixILU0_long_dbl( hypre_CSRMatrix *A );
 
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetFactorization_flt( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetFactorization_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetFactorization_long_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows );
+
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetLSolve_flt( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_float *f );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetLSolve_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_double *f );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetLSolve_long_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_long_double *f );
+
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetUSolve_flt( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_float *f );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetUSolve_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_double *f );
+HYPRE_Int
+hypre_CSRMatrixILU0LevelSetUSolve_long_dbl( hypre_CSRMatrix *A, HYPRE_Int num_levels, HYPRE_Int *offsets, HYPRE_Int *rows, hypre_long_double *f );
+
 hypre_CSRMatrix*
 hypre_CSRMatrixIdentityDevice_flt( HYPRE_Int n, hypre_float alp );
 hypre_CSRMatrix*
@@ -187,6 +208,13 @@ HYPRE_Int
 hypre_CSRMatrixMoveDiagFirstDevice_dbl( hypre_CSRMatrix *A );
 HYPRE_Int
 hypre_CSRMatrixMoveDiagFirstDevice_long_dbl( hypre_CSRMatrix *A );
+
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstOrderedDevice_flt( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstOrderedDevice_dbl( hypre_CSRMatrix *A );
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstOrderedDevice_long_dbl( hypre_CSRMatrix *A );
 
 hypre_CSRMatrix *
 hypre_CSRMatrixMultiplyDevice_flt( hypre_CSRMatrix *A, hypre_CSRMatrix *B );

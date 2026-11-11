@@ -189,6 +189,9 @@
 #undef hypre_SeqVectorSumElts
 #undef hypre_SeqVectorSumEltsHost
 #undef hypre_CSRMatrixSpMVAnalysisDevice
+#undef hypreGPUKernel_CSRMatrixILU0LevelSetFactorize
+#undef hypreGPUKernel_CSRMatrixILU0LevelSetSolve
+#undef hypreGPUKernel_CSRMoveDiagFirstOrdered
 #undef hypre_CSRMatrixAddDevice
 #undef hypre_CSRMatrixAddPartialDevice
 #undef hypre_CSRMatrixCheckDiagFirstDevice
@@ -206,6 +209,9 @@
 #undef hypre_CSRMatrixFnormDevice
 #undef hypre_CSRMatrixGetGPUMatData
 #undef hypre_CSRMatrixILU0
+#undef hypre_CSRMatrixILU0LevelSetFactorization
+#undef hypre_CSRMatrixILU0LevelSetLSolve
+#undef hypre_CSRMatrixILU0LevelSetUSolve
 #undef hypre_CSRMatrixIdentityDevice
 #undef hypre_CSRMatrixIntSpMVDevice
 #undef hypre_CSRMatrixIntersectPattern
@@ -213,6 +219,7 @@
 #undef hypre_CSRMatrixMatvecVendor
 #undef hypre_CSRMatrixMergeColMapOffd
 #undef hypre_CSRMatrixMoveDiagFirstDevice
+#undef hypre_CSRMatrixMoveDiagFirstOrderedDevice
 #undef hypre_CSRMatrixMultiplyDevice
 #undef hypre_CSRMatrixPermuteDevice
 #undef hypre_CSRMatrixRemoveDiagonalDevice

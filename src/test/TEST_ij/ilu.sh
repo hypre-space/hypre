@@ -35,8 +35,11 @@ FILES="\
  ${TNAME}.out.323\
  ${TNAME}.out.324\
  ${TNAME}.out.325\
- ${TNAME}.out.326\
 "
+
+if [ "${HYPRE_TEST_CUDA_HIP:-0}" -eq 1 ]; then
+   FILES="$FILES ${TNAME}.out.326 ${TNAME}.out.327 ${TNAME}.out.328"
+fi
 
 for i in $FILES
 do
