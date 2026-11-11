@@ -45,7 +45,7 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
    xp = hypre_VectorData(x);
    yp = hypre_VectorData(y);
    /* copy data */
-   hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(y),
+   hypre_RealArrayCopy_mp(hypre_VectorPrecision (x), xp, hypre_VectorMemoryLocation(x),
                           hypre_VectorPrecision (y), yp, hypre_VectorMemoryLocation(y), size);
 
    return hypre_error_flag;
@@ -117,6 +117,32 @@ hypre_SeqVectorConvert_mp (hypre_Vector *v,
       hypre_VectorPrecision(v) = new_precision;
    }
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorClone
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector*
+hypre_SeqVectorClone_mp( hypre_Vector *x, HYPRE_Precision new_precision)
+{
+   HYPRE_Int      size          = hypre_VectorSize(x);
+   HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
+   HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation (x);
+
+   hypre_Vector  *y = hypre_SeqMultiVectorCreate_pre(new_precision, size, num_vectors);
+
+   hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
+   hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
+   hypre_VectorIndexStride(y)  = hypre_VectorIndexStride(x);
+
+   hypre_SeqVectorSetNumTags(y, hypre_VectorNumTags(x));
+   hypre_SeqVectorSetOwnsTags(y, 1);
+   hypre_SeqVectorInitialize_v2_pre(new_precision, y, memory_location);
+   hypre_SeqVectorCopy_mp(x, y);
+   hypre_SeqVectorCopyTags(x, y);
+
+   return y;
 }
 
 /*--------------------------------------------------------------------------

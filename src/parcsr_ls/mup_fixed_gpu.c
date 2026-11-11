@@ -19,14 +19,6 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypreDevice_extendWtoP)( P_nr_of_rows, W_nr_of_rows, W_nr_of_cols, CF_marker, W_diag_nnz, W_diag_i, W_diag_j, W_diag_data, P_diag_i, P_diag_j, P_diag_data, W_offd_i, P_offd_i );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_BlockDiagInvDevice( HYPRE_Complex *diag, HYPRE_Int N, HYPRE_Int blk_size )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BlockDiagInvDevice)( diag, N, blk_size );
@@ -478,6 +470,14 @@ HYPRE_Int
 hypre_ParILUSchurGMRESMatvecJacIterDevice( void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata, void *x, HYPRE_Complex beta, void *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParILUSchurGMRESMatvecJacIterDevice)( matvec_data, alpha, ilu_vdata, x, beta, y );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_extendWtoPDevice( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_extendWtoPDevice)( P_nr_of_rows, W_nr_of_rows, W_nr_of_cols, CF_marker, W_diag_nnz, W_diag_i, W_diag_j, W_diag_data, P_diag_i, P_diag_j, P_diag_data, W_offd_i, P_offd_i );
 }
 
 

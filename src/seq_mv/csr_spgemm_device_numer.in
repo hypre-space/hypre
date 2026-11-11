@@ -43,7 +43,7 @@ hypre_spgemm_numerical_max_num_blocks
 
 #if HYPRE_SPGEMM_BIN == 5
 template HYPRE_Int
-hypreDevice_CSRSpGemmNumerPostCopy<T_GROUP_SIZE[HYPRE_SPGEMM_BIN]>
+hypre_CSRSpGemmNumerPostCopyDevice<T_GROUP_SIZE[HYPRE_SPGEMM_BIN]>
 ( HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c );
 #endif
 

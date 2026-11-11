@@ -23,17 +23,9 @@ IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_flt
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_dbl
 IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_ldbl
 
-EUCLIDFILES         = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o_flt
-EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o_dbl
-EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o_ldbl
-
-PARASAILSFILES      = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_flt
-PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_dbl
-PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o_ldbl
-
-PILUTFILES          = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_flt
-PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_dbl
-PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o_ldbl
+EUCLIDFILES        = ${HYPRE_EUCLID_FILES}
+PARASAILSFILES     = ${HYPRE_PARASAILS_FILES}
+PILUTFILES         = ${HYPRE_PILUT_FILES}
 
 DISTMATRIXFILES     = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_flt
 DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o_dbl

@@ -761,14 +761,14 @@ hypre_spgemm_copy_from_Cext_into_C( hypre_DeviceItem    &item,
 
 template <HYPRE_Int GROUP_SIZE>
 HYPRE_Int
-hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
+hypre_CSRSpGemmNumerPostCopyDevice( HYPRE_Int       m,
                                     HYPRE_Int      *d_rc,
                                     HYPRE_Int      *nnzC,
                                     HYPRE_Int     **d_ic,
                                     HYPRE_Int     **d_jc,
                                     HYPRE_Complex **d_c)
 {
-   HYPRE_Int nnzC_new = hypreDevice_IntegerReduceSum(m, d_rc);
+   HYPRE_Int nnzC_new = hypre_IntegerReduceSumDevice(m, d_rc);
 
    hypre_assert(nnzC_new <= *nnzC && nnzC_new >= 0);
 

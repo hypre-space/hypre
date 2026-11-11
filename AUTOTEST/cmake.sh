@@ -82,7 +82,13 @@ rm -fr src/hypre
 # Configure
 cd $root_dir/build
 eval cmake $copts ../src
-eval cmake --build . -- $mopts
+# Build the normal targets before running requested build-tool targets.  In
+# particular, CMake's `test` target only runs CTest; it does not build the test
+# executables first.
+eval cmake --build . --parallel
+if [ -n "$mopts" ]; then
+   eval cmake --build . -- $mopts
+fi
 eval cmake --install .
 
 cd $test_dir

@@ -64,6 +64,8 @@ HYPRE_Int BuildParDifConv (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_I
                            HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParFromOneMMFile (MPI_Comm comm, HYPRE_Int argc, char *argv [],
+                                 HYPRE_Int arg_index, HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncTagsFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [],
@@ -336,6 +338,7 @@ main( hypre_int argc,
 #else
    HYPRE_Int  spmv_use_vendor = 1;
 #endif
+   HYPRE_Int  spmv_alg = -1; /* use hypre's backend-specific default */
    HYPRE_Int  use_curand = 1;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;
@@ -708,7 +711,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
-   build_matrix_type = 2;
+   build_matrix_type = 3;
    build_matrix_arg_index = argc;
    build_matrix_M = 0;
    build_matrix_M_arg_index = argc;
@@ -751,6 +754,13 @@ main( hypre_int argc,
       {
          arg_index++;
          build_matrix_type      = -1;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromMMfile") == 0 )
+      {
+         arg_index++;
+         /* Matrix Market format (MM) */
+         build_matrix_type      = -3;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-flexamg_cycle_struct") == 0 )
@@ -987,46 +997,52 @@ main( hypre_int argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
+      else if ( strcmp(argv[arg_index], "-fromoneMMfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = 2;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-9pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
       {
          arg_index++;
          build_matrix_type      = 3;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-27pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-9pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 4;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-125pt") == 0 )
+      else if ( strcmp(argv[arg_index], "-27pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 5;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-difconv") == 0 )
+      else if ( strcmp(argv[arg_index], "-125pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 6;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
+      else if ( strcmp(argv[arg_index], "-difconv") == 0 )
       {
          arg_index++;
          build_matrix_type      = 7;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
       {
          arg_index++;
          build_matrix_type      = 8;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 9;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-test_ij") == 0 )
@@ -1105,6 +1121,12 @@ main( hypre_int argc,
       {
          arg_index++;
          omp_flag = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "--threads") == 0 )
+      {
+         arg_index++;
+         ierr = HYPRE_SetNumThreads(atoi(argv[arg_index++]));
+         hypre_assert(ierr == 0);
       }
       else if ( strcmp(argv[arg_index], "-check_constant") == 0 )
       {
@@ -1861,6 +1883,11 @@ main( hypre_int argc,
       {
          arg_index++;
          spmv_use_vendor = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spmv_alg") == 0 )
+      {
+         arg_index++;
+         spmv_alg = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
       {
@@ -2624,15 +2651,20 @@ main( hypre_int argc,
          hypre_printf("      0 = (default) No messaging.\n");
          hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
          hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
+         hypre_printf("  --threads <N>             : use N OpenMP threads\n");
          hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
          hypre_printf("matrix read from multiple binary files (IJ format)\n");
+         hypre_printf("  -fromMMfile <filename>     : ");
+         hypre_printf("matrix read from a Matrix-Market file (MM format)\n");
          hypre_printf("  -fromparcsrfile <filename> : ");
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
          hypre_printf("  -fromonecsrfile <filename> : ");
          hypre_printf("matrix read from a single file (CSR format)\n");
+         hypre_printf("  -fromoneMMfile <filename> : ");
+         hypre_printf("matrix read from a single file (MatrixMarket format)\n");
          hypre_printf("\n");
          hypre_printf("  -laplacian             : build 5pt 2D laplacian problem (default) \n");
          hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
@@ -3048,6 +3080,7 @@ main( hypre_int argc,
          hypre_printf("  -exec2_device              : use device execution policy for the second setup/solve\n");
          hypre_printf("  -gpu_mpi <0/1>             : use GPU-aware MPI with device buffers (default 0)\n");
          hypre_printf("  -mv_vendor <0/1>           : use vendor SpMV implementation\n");
+         hypre_printf("  -spmv_alg <val>            : set rocSPARSE SpMV algorithm (0 = vendor default; omitted = hypre default)\n");
          hypre_printf("  -mm_vendor <0/1>           : use vendor SpGEMM implementation\n");
          hypre_printf("  -spgemm_alg <val>          : set SpGEMM algorithm (1-3)\n");
          hypre_printf("  -spgemm_binned <0/1>       : use binned SpGEMM kernels\n");
@@ -3137,6 +3170,10 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_TEST_USING_HOST)
    ierr = HYPRE_SetSpMVUseVendor(spmv_use_vendor); hypre_assert(ierr == 0);
+   if (spmv_alg >= 0)
+   {
+      ierr = HYPRE_SetSpMVAlgorithm(spmv_alg); hypre_assert(ierr == 0);
+   }
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
@@ -3181,6 +3218,16 @@ main( hypre_int argc,
          hypre_MPI_Abort(comm, 1);
       }
    }
+   else if ( build_matrix_type == -3 )
+   {
+      ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
+                                   HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix in MM format!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+   }
    else if ( build_matrix_type == 0 )
    {
       BuildParFromFile(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
@@ -3192,39 +3239,35 @@ main( hypre_int argc,
    }
    else if ( build_matrix_type == 2 )
    {
-      BuildParLaplacian(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
+      BuildParFromOneMMFile(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 3 )
    {
-      BuildParLaplacian9pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
+      BuildParLaplacian(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 4 )
    {
-      BuildParLaplacian27pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
-
-#if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
-#endif
+      BuildParLaplacian9pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 5 )
    {
-      BuildParLaplacian125pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
-
-#if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
-#endif
+      BuildParLaplacian27pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 6 )
    {
-      BuildParDifConv(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
+      BuildParLaplacian125pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 7 )
+   {
+      BuildParDifConv(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
+   else if ( build_matrix_type == 8 )
    {
       BuildParVarDifConv(comm, argc, argv, build_matrix_arg_index, &parcsr_A, &b);
       build_rhs_type      = 6;
       build_src_type      = 5;
    }
-   else if ( build_matrix_type == 8 )
+   else if ( build_matrix_type == 9 )
    {
       BuildParRotate7pt(comm, argc, argv, build_matrix_arg_index, &parcsr_A);
    }
@@ -3239,7 +3282,7 @@ main( hypre_int argc,
    /* BM Oct 23, 2006 */
    if (plot_grids)
    {
-      if (build_matrix_type > 1 &&  build_matrix_type < 9)
+      if (build_matrix_type > 2 &&  build_matrix_type < 10)
          BuildParCoordinates (comm, argc, argv, build_matrix_arg_index,
                               &coord_dim, &coordinates);
       else
@@ -3272,6 +3315,11 @@ main( hypre_int argc,
       local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
       local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
+#endif
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Generate Matrix", comm);
    hypre_FinalizeTiming(time_index);
@@ -3318,19 +3366,19 @@ main( hypre_int argc,
          size = 5;
          if (sparsity_known == 0)
          {
-            if (build_matrix_type == 2)
+            if (build_matrix_type == 3)
             {
                size = 7;
             }
-            else if (build_matrix_type == 3)
+            else if (build_matrix_type == 4)
             {
                size = 9;
             }
-            else if (build_matrix_type == 4)
+            else if (build_matrix_type == 5)
             {
                size = 27;
             }
-            else if (build_matrix_type == 5)
+            else if (build_matrix_type == 6)
             {
                size = 125;
             }
@@ -3342,19 +3390,19 @@ main( hypre_int argc,
          }
       }
       local_row = 0;
-      if (build_matrix_type == 2)
+      if (build_matrix_type == 3)
       {
          mx_size = 7;
       }
-      else if (build_matrix_type == 3)
+      else if (build_matrix_type == 4)
       {
          mx_size = 9;
       }
-      else if (build_matrix_type == 4)
+      else if (build_matrix_type == 5)
       {
          mx_size = 27;
       }
-      else if (build_matrix_type == 5)
+      else if (build_matrix_type == 6)
       {
          mx_size = 125;
       }
@@ -6379,19 +6427,19 @@ main( hypre_int argc,
             if (sparsity_known == 0) /* tries a more accurate estimate of the
                                         storage */
             {
-               if (build_matrix_type == 2)
+               if (build_matrix_type == 3)
                {
                   size = 7;
                }
-               else if (build_matrix_type == 3)
+               else if (build_matrix_type == 4)
                {
                   size = 9;
                }
-               else if (build_matrix_type == 4)
+               else if (build_matrix_type == 5)
                {
                   size = 27;
                }
-               else if (build_matrix_type == 5)
+               else if (build_matrix_type == 6)
                {
                   size = 125;
                }
@@ -10027,7 +10075,7 @@ final:
 
    HYPRE_ParVectorDestroy(x0_save);
 
-   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2)
+   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2 || build_matrix_type == -3)
    {
       if (ij_A)
       {
@@ -11165,6 +11213,82 @@ BuildParFromOneFile( MPI_Comm             comm,
    if (myid == 0)
    {
       HYPRE_CSRMatrixDestroy(A_CSR);
+   }
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build matrix from one Matrix Market file on Proc. 0. Distributes
+ * matrix across processors giving each about the same number of rows.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int BuildParFromOneMMFile( MPI_Comm comm,
+                                 HYPRE_Int argc,
+                                 char *argv [],
+                                 HYPRE_Int arg_index,
+                                 HYPRE_ParCSRMatrix *A_ptr )
+{
+   char               *filename;
+
+   hypre_CSRMatrix    *A_CSR = NULL;
+   HYPRE_IJMatrix      ij_A_self = NULL;
+
+   HYPRE_Int           myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      hypre_printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      hypre_printf("  FromOneMMFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix
+       *-----------------------------------------------------------*/
+
+      void *par_A_self;
+
+      if (HYPRE_IJMatrixReadMM(filename, hypre_MPI_COMM_SELF, HYPRE_PARCSR, &ij_A_self))
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+      HYPRE_IJMatrixGetObject(ij_A_self, &par_A_self);
+      A_CSR = hypre_ParCSRMatrixDiag((hypre_ParCSRMatrix *)par_A_self);
+   }
+
+   /*-----------------------------------------------------------
+    * Partition the matrix
+    *-----------------------------------------------------------*/
+
+   HYPRE_CSRMatrixToParCSRMatrix(comm, (HYPRE_CSRMatrix)A_CSR, NULL, NULL, A_ptr);
+
+   if (myid == 0)
+   {
+      HYPRE_IJMatrixDestroy(ij_A_self);
    }
 
    return (0);

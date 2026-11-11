@@ -809,7 +809,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, HYP
 /*--------------------------------------------------------------------------*/
 
 void
-hypre_ParCSRMatrixExtractBExt_Arrays( HYPRE_Int **pB_ext_i, HYPRE_BigInt **pB_ext_j, HYPRE_Complex **pB_ext_data, HYPRE_BigInt **pB_ext_row_map, HYPRE_Int *num_nonzeros, HYPRE_Int data, HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts, HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts, HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j, HYPRE_BigInt *col_map_offd, HYPRE_Real *diag_data, HYPRE_Real *offd_data )
+hypre_ParCSRMatrixExtractBExt_Arrays( HYPRE_Int **pB_ext_i, HYPRE_BigInt **pB_ext_j, HYPRE_Complex **pB_ext_data, HYPRE_BigInt **pB_ext_row_map, HYPRE_Int *num_nonzeros, HYPRE_Int data, HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts, HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts, HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j, HYPRE_BigInt *col_map_offd, HYPRE_Complex *diag_data, HYPRE_Complex *offd_data )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixExtractBExt_Arrays)( pB_ext_i, pB_ext_j, pB_ext_data, pB_ext_row_map, num_nonzeros, data, find_row_map, comm, comm_pkg, num_recvs, num_sends, first_col_diag, row_starts, recv_vec_starts, send_map_starts, send_map_elmts, diag_i, diag_j, offd_i, offd_j, col_map_offd, diag_data, offd_data );
 }
@@ -961,6 +961,14 @@ hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix *A )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_ParCSRMatrixMarkColumns( hypre_ParCSRMatrix *P, HYPRE_Int *marker )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMarkColumns)( P, marker );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_ParCSRMatrixMatvec( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixMatvec)( alpha, A, x, beta, y );
@@ -1084,6 +1092,14 @@ HYPRE_Int
 hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix, HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRestoreRow)( matrix, row, size, col_ind, values );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixRestrictColumns( hypre_ParCSRMatrix *P, HYPRE_Int *marker, hypre_ParCSRMatrix **Q_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParCSRMatrixRestrictColumns)( P, marker, Q_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1329,14 +1345,6 @@ hypre_ParVectorAxpyz( HYPRE_Complex alpha, hypre_ParVector *x, HYPRE_Complex bet
 /*--------------------------------------------------------------------------*/
 
 hypre_ParVector *
-hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCloneDeep_v2)( x, memory_location );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParVector *
 hypre_ParVectorCloneShallow( hypre_ParVector *x )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCloneShallow)( x );
@@ -1348,14 +1356,6 @@ HYPRE_Int
 hypre_ParVectorCopy( hypre_ParVector *x, hypre_ParVector *y )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCopy)( x, y );
-}
-
-/*--------------------------------------------------------------------------*/
-
-hypre_ParVector *
-hypre_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size, HYPRE_BigInt *partitioning_in )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_ParVectorCreate)( comm, global_size, partitioning_in );
 }
 
 /*--------------------------------------------------------------------------*/

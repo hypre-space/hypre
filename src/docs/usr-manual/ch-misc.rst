@@ -274,6 +274,11 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-hopscotch``
      - ``-DHYPRE_ENABLE_HOPSCOTCH=ON``
+   * - | Thread-local global state
+       | (re-entrant; not with OpenMP)
+       | (default is off)
+     - ``--enable-thread-local``
+     - ``-DHYPRE_ENABLE_THREAD_LOCAL=ON``
    * - | Fortran Support
        | (default is on)
      - ``--enable-fortran``
@@ -294,15 +299,17 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
      - ``--with-fmangle-lapack``
      - ``-DHYPRE_ENABLE_FMANGLE_LAPACK=0``
    * - | External BLAS
-       | (default is off)
+       | (if not provided, the internal BLAS is used)
      - | ``--with-blas-lib=<lib>``
        | ``--with-blas-lib-dirs=<path>``
-     - ``-DHYPRE_ENABLE_HYPRE_BLAS=OFF``
+     - | Disable internal BLAS with
+       | ``-DHYPRE_ENABLE_HYPRE_BLAS=OFF``
    * - | External LAPACK
-       | (default is off)
+       | (if not provided, the internal LAPACK is used)
      - | ``--with-lapack-lib=<lib>``
        | ``--with-lapack-lib-dirs=<path>``
-     - ``-DHYPRE_ENABLE_HYPRE_LAPACK=OFF``
+     - | Disable internal LAPACK with
+       | ``-DHYPRE_ENABLE_HYPRE_LAPACK=OFF``
    * - | SuperLU_DIST Support
        | (default is off)
      - ``--with-dsuperlu``
@@ -446,7 +453,7 @@ build systems.
    * - | rocSPARSE Support
        | (default is on, **HIP** only)
      - ``--enable-rocsparse``
-     - ``-DHYPRE_ENABLE_ROCSOLVER=ON``
+     - ``-DHYPRE_ENABLE_ROCSPARSE=ON``
    * - | rocSOLVER Support
        | (default is on, **HIP** only)
      - ``--enable-rocsolver``

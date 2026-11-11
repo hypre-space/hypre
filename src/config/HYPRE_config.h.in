@@ -277,6 +277,9 @@
 /* SYCL being used */
 #undef HYPRE_USING_SYCL
 
+/* Define to 1 if using thread-local storage for global state */
+#undef HYPRE_USING_THREAD_LOCAL
+
 /* Define to 1 if using thrust par_nosync policy */
 #undef HYPRE_USING_THRUST_NOSYNC
 

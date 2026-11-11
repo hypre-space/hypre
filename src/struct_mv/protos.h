@@ -122,6 +122,8 @@ HYPRE_Int hypre_DeleteBox ( hypre_BoxArray *box_array, HYPRE_Int index );
 HYPRE_Int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array, HYPRE_Int *indices,
                                       HYPRE_Int num );
 HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
+HYPRE_Int hypre_BoxAppendMerge ( hypre_Box *box, hypre_BoxArray *box_array );
+HYPRE_Int hypre_BoxMerge ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayVolume ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayInBoxArray ( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
 HYPRE_Int hypre_BoxArraysEqual ( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
@@ -245,6 +247,9 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
                                    hypre_BoxArrayArray  **new_boxaa_ptr );
 HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride,
                                 HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
+HYPRE_Int
+hypre_CoarsenStencil( hypre_StructStencil *stencil,
+                      hypre_Index          stride );
 
 /* communication_info.c */
 hypre_CommStencil *hypre_CommStencilCreate ( HYPRE_Int  ndim );
@@ -557,14 +562,6 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix  *A,
                          hypre_StructMatrix  *P,
                          hypre_StructMatrix **M_ptr);
-HYPRE_Int
-hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
-                           hypre_StructMatrix       **matrices,
-                           hypre_StructMatrix       **A_ptr );
-HYPRE_Int
-hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
-                          HYPRE_Complex             alpha,
-                          hypre_StructMatrix       *B );
 
 /* struct_matmult_core.c */
 HYPRE_Int
@@ -608,14 +605,42 @@ HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A, HYPRE_Int type,
                                             hypre_StructVector *rowsum );
 HYPRE_Int hypre_StructMatrixScale( hypre_StructMatrix *A, HYPRE_Complex scalar );
+HYPRE_Int
+hypre_StructMatrixAddInit( HYPRE_Int            nmatrices,
+                           hypre_StructMatrix **matrices,
+                           hypre_StructMatrix **A_ptr );
+HYPRE_Int
+hypre_StructMatrixAddMat( hypre_StructMatrix *A,
+                          HYPRE_Complex       beta,
+                          hypre_StructMatrix *B );
+HYPRE_Int
+hypre_StructMatrixAdd( HYPRE_Complex        alpha,
+                       hypre_StructMatrix  *A,
+                       HYPRE_Complex        beta,
+                       hypre_StructMatrix  *B,
+                       hypre_StructMatrix **C_ptr );
+HYPRE_Int
+hypre_StructMatrixPoly( hypre_StructMatrix       *A,
+                        HYPRE_Int                 order,
+                        HYPRE_Complex            *coeffs,
+                        hypre_StructMatrix      **polyA_ptr );
+HYPRE_Int
+hypre_StructMatrixGetDiagMat( hypre_StructMatrix  *A,
+                              HYPRE_Real           weight,
+                              HYPRE_Int            type,
+                              hypre_StructMatrix **D_ptr );
 
 /* struct_matrix.c */
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
-HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
-HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix, hypre_Index dstride );
+HYPRE_Int
+hypre_StructMatrixSyncConstToDevice( hypre_StructMatrix *matrix );
+HYPRE_Int
+hypre_StructMatrixSyncConstToHost( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix, HYPRE_Int entry,
                                            hypre_Index dindex, hypre_Index index );
 HYPRE_Int hypre_StructMatrixGetStencilStride ( hypre_StructMatrix *matrix, hypre_Index stride );
@@ -670,6 +695,15 @@ HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix, hypre_Index 
 HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix, hypre_Box *set_box,
                                            hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices,
                                            HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixSetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int clear_ghost );
+HYPRE_Int hypre_StructMatrixAddToArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes,
+                                                    HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int add_to_ghost );
+HYPRE_Int hypre_StructMatrixGetArrayValuesDevice( hypre_StructMatrix *matrix, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Int *stencil_indices, HYPRE_Complex *values );
 HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix,
                                                 HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values,
                                                 HYPRE_Int action );
@@ -697,6 +731,9 @@ HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix,
                                       hypre_StructMatrix *to_matrix );
 HYPRE_Int hypre_StructMatrixClearBoundary ( hypre_StructMatrix *matrix);
 HYPRE_Int hypre_StructMatrixGetDiagonal ( hypre_StructMatrix *matrix, hypre_StructVector *diag );
+hypre_StructMatrix *
+hypre_StructMatrixDiagonal( hypre_StructGrid  *grid,
+                            HYPRE_Complex      value );
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix,
@@ -765,6 +802,15 @@ HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector, hypre_Index 
 HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector, hypre_Box *set_box,
                                            hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum,
                                            HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorSetArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Complex *values, HYPRE_Int clear_ghost );
+HYPRE_Int hypre_StructVectorAddToArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                    HYPRE_Int *indexes,
+                                                    HYPRE_Complex *values, HYPRE_Int add_to_ghost );
+HYPRE_Int hypre_StructVectorGetArrayValuesDevice( hypre_StructVector *vector, HYPRE_Int nvalues,
+                                                  HYPRE_Int *indexes,
+                                                  HYPRE_Complex *values );
 HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector, hypre_Index grid_index,
                                           HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector, hypre_Box *clear_box,

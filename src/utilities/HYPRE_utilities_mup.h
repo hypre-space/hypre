@@ -247,6 +247,15 @@ HYPRE_Int
 HYPRE_SetMemoryLocation( HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
+HYPRE_SetNumThreads_flt( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads_dbl( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads_long_dbl( HYPRE_Int num_threads );
+HYPRE_Int
+HYPRE_SetNumThreads( HYPRE_Int num_threads );
+
+HYPRE_Int
 HYPRE_SetPrintErrorMode_flt( HYPRE_Int mode );
 HYPRE_Int
 HYPRE_SetPrintErrorMode_dbl( HYPRE_Int mode );
@@ -272,6 +281,15 @@ HYPRE_Int
 HYPRE_SetSpGemmUseVendor_long_dbl( HYPRE_Int use_vendor );
 HYPRE_Int
 HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
+
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_flt( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_dbl( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_long_dbl( HYPRE_Int algorithm );
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm( HYPRE_Int algorithm );
 
 HYPRE_Int
 HYPRE_SetSpMVUseVendor_flt( HYPRE_Int use_vendor );
@@ -423,6 +441,9 @@ HYPRE_Int
 HYPRE_SetMemoryLocation_pre( HYPRE_Precision precision, HYPRE_MemoryLocation memory_location );
 
 HYPRE_Int
+HYPRE_SetNumThreads_pre( HYPRE_Precision precision, HYPRE_Int num_threads );
+
+HYPRE_Int
 HYPRE_SetPrintErrorMode_pre( HYPRE_Precision precision, HYPRE_Int mode );
 
 HYPRE_Int
@@ -430,6 +451,9 @@ HYPRE_SetPrintErrorVerbosity_pre( HYPRE_Precision precision, HYPRE_Int code, HYP
 
 HYPRE_Int
 HYPRE_SetSpGemmUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor );
+
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_pre( HYPRE_Precision precision, HYPRE_Int algorithm );
 
 HYPRE_Int
 HYPRE_SetSpMVUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor );

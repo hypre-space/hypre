@@ -466,6 +466,24 @@ HYPRE_SetMemoryLocation_pre( HYPRE_Precision precision, HYPRE_MemoryLocation mem
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SetNumThreads_pre( HYPRE_Precision precision, HYPRE_Int num_threads )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SetNumThreads_flt( num_threads );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SetNumThreads_dbl( num_threads );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SetNumThreads_long_dbl( num_threads );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SetPrintErrorMode_pre( HYPRE_Precision precision, HYPRE_Int mode )
 {
    switch (precision)
@@ -512,6 +530,24 @@ HYPRE_SetSpGemmUseVendor_pre( HYPRE_Precision precision, HYPRE_Int use_vendor )
          return HYPRE_SetSpGemmUseVendor_dbl( use_vendor );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_SetSpGemmUseVendor_long_dbl( use_vendor );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetSpMVAlgorithm_pre( HYPRE_Precision precision, HYPRE_Int algorithm )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_SetSpMVAlgorithm_flt( algorithm );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_SetSpMVAlgorithm_dbl( algorithm );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_SetSpMVAlgorithm_long_dbl( algorithm );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

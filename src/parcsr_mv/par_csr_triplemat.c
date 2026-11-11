@@ -742,8 +742,9 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       }
       else
       {
-         C_tmp_offd = hypre_CSRMatrixClone(Q_offd, 1);
-         hypre_CSRMatrixNumRows(C_tmp_offd) = num_cols_diag_R;
+         /* Rectangular R can have more columns than Q has rows. */
+         C_tmp_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
+         hypre_CSRMatrixInitialize_v2(C_tmp_offd, 0, hypre_CSRMatrixMemoryLocation(Q_offd));
       }
 
       if (num_cols_offd_R)

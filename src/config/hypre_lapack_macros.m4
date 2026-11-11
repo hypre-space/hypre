@@ -81,7 +81,7 @@ AC_DEFUN([AC_HYPRE_FIND_LAPACK],
 #***************************************************************
 #   Set path to selected LAPACK library
 #***************************************************************
-  LAPACK_SEARCH_DIRS="/usr/lib /usr/local/lib /lib"
+  LAPACK_SEARCH_DIRS="/usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64 /lib /lib64"
 
   if test "$LAPACKLIBS" != "null"; then
      for dir in $LAPACK_SEARCH_DIRS; do

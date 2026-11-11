@@ -188,11 +188,11 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          mult = coefs[i];
 
          /* u = mult * r + v */
-         hypreDevice_ComplexAxpyn( r_data, num_rows, v_data, u_data, mult );
+         hypre_ComplexAxpynDevice( r_data, num_rows, v_data, u_data, mult );
       }
 
       /* u = o + u */
-      hypreDevice_ComplexAxpyn( orig_u, num_rows, u_data, u_data, 1.0);
+      hypre_ComplexAxpynDevice( orig_u, num_rows, u_data, u_data, 1.0);
    }
    else /* scaling! */
    {

@@ -975,6 +975,9 @@ HYPRE_Int hypre_ParCSRMatrixBlkFilter(hypre_ParCSRMatrix *A,
 
 /* par_csr_matop.c */
 HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Complex scalar);
+HYPRE_Int hypre_ParCSRMatrixRestrictColumns ( hypre_ParCSRMatrix *P, HYPRE_Int *marker,
+                                              hypre_ParCSRMatrix **Q_ptr );
+HYPRE_Int hypre_ParCSRMatrixMarkColumns ( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
 void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location, HYPRE_Int **C_diag_i,
                                 HYPRE_Int **C_offd_i, HYPRE_Int *rownnz_A, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
                                 HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Int *B_diag_i, HYPRE_Int *B_diag_j,
@@ -990,7 +993,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i, HYPRE_BigInt *
                                             HYPRE_Int num_recvs, HYPRE_Int num_sends, HYPRE_BigInt first_col_diag, HYPRE_BigInt *row_starts,
                                             HYPRE_Int *recv_vec_starts, HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                             HYPRE_Int *diag_i, HYPRE_Int *diag_j, HYPRE_Int *offd_i, HYPRE_Int *offd_j,
-                                            HYPRE_BigInt *col_map_offd, HYPRE_Real *diag_data, HYPRE_Real *offd_data );
+                                            HYPRE_BigInt *col_map_offd, HYPRE_Complex *diag_data, HYPRE_Complex *offd_data );
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap ( HYPRE_Int **pB_ext_i, HYPRE_BigInt **pB_ext_j,
                                                     HYPRE_Complex **pB_ext_data, HYPRE_BigInt **pB_ext_row_map, HYPRE_Int *num_nonzeros, HYPRE_Int data,
                                                     HYPRE_Int find_row_map, MPI_Comm comm, hypre_ParCSRCommPkg *comm_pkg,
@@ -1127,6 +1130,9 @@ HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int blo
                                             hypre_ParCSRMatrix **B_ptr);
 
 /* par_csr_matop_device.c */
+HYPRE_Int hypre_ParCSRMatrixMarkColumnsDevice ( hypre_ParCSRMatrix *P, HYPRE_Int *marker );
+HYPRE_Int hypre_ParCSRMatrixRestrictColumnsDevice ( hypre_ParCSRMatrix *P, HYPRE_Int *marker,
+                                                    hypre_ParCSRMatrix **Q_ptr );
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
                                               hypre_ParVector *par_rd );
 HYPRE_Int hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A);
@@ -1434,6 +1440,8 @@ HYPRE_Int
 hypre_ParCSRMatrixCopy_mp( hypre_ParCSRMatrix *A,
                            hypre_ParCSRMatrix *B );
 
+hypre_ParVector *
+hypre_ParVectorClone_mp(hypre_ParVector *v, HYPRE_Precision new_precision);
 #endif
 
 #ifdef __cplusplus

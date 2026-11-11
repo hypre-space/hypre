@@ -43,6 +43,7 @@ set(REGULAR_SRCS
   HYPRE_struct_hybrid.c
   HYPRE_struct_jacobi.c
   HYPRE_struct_lgmres.c
+  HYPRE_struct_matprec.c
   HYPRE_struct_pfmg.c
   HYPRE_struct_smg.c
   jacobi.c
@@ -90,6 +91,7 @@ set(REGULAR_SRCS
 
 # Mixed precision sources
 set(MUP_SRCS
+  HYPRE_struct_ls_mp.c
   mup_fixed.c
   mup_functions.c
   mup_pre.c

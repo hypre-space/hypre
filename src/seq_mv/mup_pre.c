@@ -646,6 +646,42 @@ hypre_CSRMatrixResetData_pre( HYPRE_Precision precision, hypre_CSRMatrix *matrix
 
 /*--------------------------------------------------------------------------*/
 
+hypre_Vector *
+hypre_SeqMultiVectorCreate_pre( HYPRE_Precision precision, HYPRE_Int size, HYPRE_Int num_vectors )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_SeqMultiVectorCreate_flt( size, num_vectors );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_SeqMultiVectorCreate_dbl( size, num_vectors );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_SeqMultiVectorCreate_long_dbl( size, num_vectors );
+      default:
+         { hypre_Vector * value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorInitialize_v2_pre( HYPRE_Precision precision, hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_SeqVectorInitialize_v2_flt( vector, memory_location );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_SeqVectorInitialize_v2_dbl( vector, memory_location );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_SeqVectorInitialize_v2_long_dbl( vector, memory_location );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SeqVectorSetData_pre( HYPRE_Precision precision, hypre_Vector *vector, void *data )
 {

@@ -17,7 +17,7 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*--------------------------------------------------------------------------
- * hyprePred_StridedAccess
+ * hypre_PredStridedAccess
  *
  * This struct defines a predicate for strided access in array-like data.
  *
@@ -27,11 +27,11 @@
  * is part of the strided subset.
  *--------------------------------------------------------------------------*/
 
-struct hyprePred_StridedAccess
+struct hypre_PredStridedAccess
 {
    HYPRE_Int  s_;
 
-   hyprePred_StridedAccess(HYPRE_Int s) : s_(s) {}
+   hypre_PredStridedAccess(HYPRE_Int s) : s_(s) {}
 
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int i) const
    {

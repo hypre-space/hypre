@@ -13,11 +13,11 @@
 #if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_IntArrayInverseMapping
+ * hypre_GPUKernelIntArrayInverseMapping
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
+hypre_GPUKernelIntArrayInverseMapping( hypre_DeviceItem  &item,
                                        HYPRE_Int          size,
                                        HYPRE_Int         *v_data,
                                        HYPRE_Int         *w_data )
@@ -46,7 +46,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    HYPRE_Int  size       = hypre_IntArraySize(v);
 
 #if defined(HYPRE_USING_GPU)
-   hypreDevice_IntFilln( array_data, size, value );
+   hypre_IntFillnDevice( array_data, size, value );
 
    hypre_SyncComputeStream();
 
@@ -78,7 +78,7 @@ hypre_IntArrayInverseMappingDevice( hypre_IntArray  *v,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelIntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
    hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -169,7 +169,7 @@ hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
                       hypre_IntArrayData(v),
                       hypre_IntArrayData(v) + hypre_IntArraySize(v),
                       hypre_IntArrayData(v),
-                      hypreFunctor_IndexCycle(cycle) );
+                      hypre_IndexCycleFunctor(cycle) );
 
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");

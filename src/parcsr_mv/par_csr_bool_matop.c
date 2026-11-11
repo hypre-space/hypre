@@ -659,7 +659,9 @@ hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
    HYPRE_Int              start_indexing = 0; /* start indexing for C_data at 0 */
    HYPRE_Int          count;
    HYPRE_BigInt          n_rows_A, n_cols_A;
+   HYPRE_Int             num_procs;
 
+   hypre_MPI_Comm_size(comm, &num_procs);
    n_rows_A = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(A);
    n_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);
 
@@ -673,13 +675,13 @@ hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
     *  and needed locally for A^T in the matrix matrix product A*A^T
     *-----------------------------------------------------------------------*/
 
-   if ((HYPRE_BigInt)num_rows_diag_A != n_rows_A)
+   if (num_procs > 1)
    {
       /*---------------------------------------------------------------------
       * If there exists no CommPkg for A, a CommPkg is generated using
       * equally load balanced partitionings
       *--------------------------------------------------------------------*/
-      if (!hypre_ParCSRBooleanMatrix_Get_CommPkg(A))
+      if (!hypre_ParCSRBooleanMatrix_Get_CommPkgT(A))
       {
          hypre_BooleanMatTCommPkgCreate(A);
       }
@@ -1080,13 +1082,10 @@ hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
     *  Free B_ext and marker array.
     *-----------------------------------------------------------------------*/
 
-   if (num_cols_offd_A)
-   {
-      hypre_CSRBooleanMatrixDestroy(A_ext);
-      A_ext = NULL;
-   }
+   hypre_CSRBooleanMatrixDestroy(A_ext);
+   A_ext = NULL;
    hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
-   if ( num_rows_diag_A != n_rows_A )
+   if (num_procs > 1)
    {
       hypre_TFree(A_ext_row_map, HYPRE_MEMORY_HOST);
    }

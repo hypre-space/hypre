@@ -99,6 +99,7 @@ HYPRE_Int hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_
                                               HYPRE_Complex scal, const char *set_or_add );
 HYPRE_Int hypre_CSRMatrixComputeColSumDevice( hypre_CSRMatrix *A,  HYPRE_Complex *col_sum,
                                               HYPRE_Int type, HYPRE_Complex scal );
+HYPRE_Real hypre_CSRMatrixFnormDevice( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixTaggedFnormDevice(hypre_CSRMatrix *A, HYPRE_Int num_tags,
                                            HYPRE_Int *tags, HYPRE_Real *tnorms);
 HYPRE_Int hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A, HYPRE_Complex *d,
@@ -300,14 +301,14 @@ HYPRE_Int hypre_SeqVectorPointwiseInverse( hypre_Vector *x, hypre_Vector **y_ptr
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
 /* csr_spadd_device.c */
-HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA,
+HYPRE_Int hypre_CSRSpAddDevice(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int nnzA,
                                HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa,
                                HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab,
                                HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
                                HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
 
 /* csr_sptrans_device.c */
-HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
+HYPRE_Int hypre_CSRSpTransDevice(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                  HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                  HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 HYPRE_Int hypre_CSRSpTransVendor(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
@@ -315,7 +316,7 @@ HYPRE_Int hypre_CSRSpTransVendor(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE
                                  HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
 /* csr_spgemm_device.c */
-HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
+HYPRE_Int hypre_CSRSpGemmDevice(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 HYPRE_Int hypre_CSRSpGemmVendor(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix *C,
                                 HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
 HYPRE_Int hypre_CSRMatrixSortDevice(hypre_CSRMatrix *A, HYPRE_Int use_sorted);
@@ -337,12 +338,29 @@ HYPRE_Int hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
 HYPRE_Int hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 HYPRE_Int hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
+HYPRE_Int hypre_GpuMatDataInvalidateSpMVCache(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
+
+#define hypre_CSRMatrixInvalidateSpMVCache(matrix) \
+   do \
+   { \
+      if (hypre_CSRMatrixGPUMatData(matrix)) \
+      { \
+         hypre_GpuMatDataInvalidateSpMVCache(hypre_CSRMatrixGPUMatData(matrix)); \
+      } \
+   } \
+   while (0)
 
 #define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDescr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
-#define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
+#else
+#define hypre_CSRMatrixInvalidateSpMVCache(matrix) \
+   do \
+   { \
+      HYPRE_UNUSED_VAR(matrix); \
+   } \
+   while (0)
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
@@ -363,6 +381,11 @@ HYPRE_Int hypre_CSRMatrixILU0LevelSetUSolve(hypre_CSRMatrix *A,
                                             HYPRE_Complex   *f);
 
 /* vector_device.c */
+#if defined(HYPRE_USING_CUSPARSE) ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_SYCL)
+HYPRE_Int hypre_GpuVecDataDestroy(hypre_GpuVecData *data);
+#endif
 HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector *vector, HYPRE_Complex *values );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );

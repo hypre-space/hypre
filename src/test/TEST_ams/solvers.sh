@@ -12,12 +12,13 @@ ATOL=$2
 # The outputs below should differ only in timings.
 #=============================================================================
 
-diff -bI"time" solvers.out.0 solvers.out.1 >&2
-diff -bI"time" solvers.out.2 solvers.out.3 >&2
-diff -bI"time" solvers.out.4 solvers.out.5 >&2
-diff -bI"time" solvers.out.6 solvers.out.7 >&2
-diff -bI"time" solvers.out.8 solvers.out.9 >&2
-diff -bI"time" solvers.out.10 solvers.out.11 >&2
+# GPU binding diagnostics can arrive in a different order across MPI ranks.
+diff -bI"time\|Proc \[global" solvers.out.0 solvers.out.1 >&2
+diff -bI"time\|Proc \[global" solvers.out.2 solvers.out.3 >&2
+diff -bI"time\|Proc \[global" solvers.out.4 solvers.out.5 >&2
+diff -bI"time\|Proc \[global" solvers.out.6 solvers.out.7 >&2
+diff -bI"time\|Proc \[global" solvers.out.8 solvers.out.9 >&2
+diff -bI"time\|Proc \[global" solvers.out.10 solvers.out.11 >&2
 
 #=============================================================================
 # compare with baseline case

@@ -23,9 +23,11 @@ HYPRE_SetExecutionPolicy
 HYPRE_SetGpuAwareMPI
 HYPRE_SetLogLevel
 HYPRE_SetMemoryLocation
+HYPRE_SetNumThreads
 HYPRE_SetPrintErrorMode
 HYPRE_SetPrintErrorVerbosity
 HYPRE_SetSpGemmUseVendor
+HYPRE_SetSpMVAlgorithm
 HYPRE_SetSpMVUseVendor
 HYPRE_SetSpTransUseVendor
 HYPRE_SetUseGpuRand

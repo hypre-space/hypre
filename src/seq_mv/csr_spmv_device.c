@@ -19,7 +19,7 @@
 #include "csr_spmv_device.h"
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatvecShuffleGT8
+ * hypre_GPUKernelCSRMatvecShuffleGT8
  *
  * Templated SpMV device kernel based of warp-shuffle reduction.
  * Uses groups of K threads per row.
@@ -27,14 +27,14 @@
  *
  * Template parameters:
  *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
- *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   2) F:  fill-mode. See hypre_CSRMatrixMatvecDevice for supported values
  *   3) NV: number of vectors (> 1 for multi-component vectors)
  *   4) T:  data type of matrix/vector coefficients
  *--------------------------------------------------------------------------*/
 
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
-hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
+hypre_GPUKernelCSRMatvecShuffleGT8(hypre_DeviceItem &item,
                                    HYPRE_Int         num_rows,
                                    HYPRE_Int         num_vectors,
                                    HYPRE_Int        *row_id,
@@ -134,14 +134,14 @@ hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatvecShuffle
+ * hypre_GPUKernelCSRMatvecShuffle
  *
  * Templated SpMV device kernel based of warp-shuffle reduction.
  * Uses groups of K threads per row
  *
  * Template parameters:
  *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
- *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   2) F:  fill-mode. See hypre_CSRMatrixMatvecDevice for supported values
  *   3) NV: number of vectors (> 1 for multi-component vectors)
  *   4) T:  data type of matrix/vector coefficients
  *--------------------------------------------------------------------------*/
@@ -149,7 +149,7 @@ hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
 //__launch_bounds__(512, 1)
-hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
+hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
                                 HYPRE_Int         num_rows,
                                 HYPRE_Int         num_vectors,
                                 HYPRE_Int        *row_id,
@@ -262,7 +262,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_CSRMatrixMatvec
+ * hypre_CSRMatrixMatvecDevice
  *
  * Templated host function for launching the device kernels for SpMV.
  *
@@ -277,7 +277,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
 
 template <HYPRE_Int F, typename T>
 HYPRE_Int
-hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
+hypre_CSRMatrixMatvecDevice( HYPRE_Int  num_vectors,
                              HYPRE_Int  num_rows,
                              HYPRE_Int *rowid,
                              HYPRE_Int  num_nonzeros,
@@ -320,39 +320,39 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
    switch (num_vectors)
    {
       case unroll_depth[1]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[1]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[1]);
          break;
 
       case unroll_depth[2]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[2]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[2]);
          break;
 
       case unroll_depth[3]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[3]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[3]);
          break;
 
       case unroll_depth[4]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[4]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[4]);
          break;
 
       case unroll_depth[5]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[5]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[5]);
          break;
 
       case unroll_depth[6]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[6]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[6]);
          break;
 
       case unroll_depth[7]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[7]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[7]);
          break;
 
       case unroll_depth[8]:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[8]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffle, unroll_depth[8]);
          break;
 
       default:
-         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffleGT8, unroll_depth[8]);
+         HYPRE_SPMV_GPU_LAUNCH(hypre_GPUKernelCSRMatvecShuffleGT8, unroll_depth[8]);
          break;
    }
 
@@ -451,7 +451,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    {
       case HYPRE_SPMV_FILL_STRICT_LOWER:
          /* Strict lower matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_LOWER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_STRICT_LOWER>(num_vectors_x,
                                                                    num_rows,
                                                                    d_rownnz_A,
                                                                    num_nonzeros,
@@ -470,7 +470,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_LOWER:
          /* Lower matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_LOWER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_LOWER>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -489,7 +489,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_WHOLE:
          /* Full matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_WHOLE>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -508,7 +508,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_UPPER:
          /* Upper matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_UPPER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_UPPER>(num_vectors_x,
                                                             num_rows,
                                                             d_rownnz_A,
                                                             num_nonzeros,
@@ -527,7 +527,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 
       case HYPRE_SPMV_FILL_STRICT_UPPER:
          /* Strict upper matrix */
-         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_UPPER>(num_vectors_x,
+         hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_STRICT_UPPER>(num_vectors_x,
                                                                    num_rows,
                                                                    d_rownnz_A,
                                                                    num_nonzeros,
@@ -585,7 +585,7 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
    HYPRE_Int        vecstride_y = 1;
    HYPRE_Int       *d_rownnz    = NULL;
 
-   hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE, HYPRE_Int>(num_vectors,
+   hypre_CSRMatrixMatvecDevice<HYPRE_SPMV_FILL_WHOLE, HYPRE_Int>(num_vectors,
                                                                  num_rows,
                                                                  d_rownnz,
                                                                  num_nonzeros,

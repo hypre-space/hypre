@@ -83,7 +83,7 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
 #***************************************************************
 #   Set path to selected BLAS library 
 #***************************************************************
-  BLAS_SEARCH_DIRS="/usr/lib /usr/local/lib /lib"
+  BLAS_SEARCH_DIRS="/usr/lib /usr/lib64 /usr/local/lib /usr/local/lib64 /lib /lib64"
 
   if test "$BLASLIBS" != "null"; then
      for dir in $BLAS_SEARCH_DIRS; do

@@ -16,6 +16,39 @@
 
 #include <HYPRE_config.h>
 
+/*--------------------------------------------------------------------------
+ * Thread-local storage for hypre's process-wide state, so that two threads
+ * can drive hypre independently. Enabled with HYPRE_ENABLE_THREAD_LOCAL
+ * (CMake) or --enable-thread-local (autotools); otherwise empty, and the
+ * state is shared by all threads as before.
+ *
+ * Incompatible with OpenMP: there, the threads inside a rank are hypre's own
+ * workers and must share that state. A few sites raise an error from inside
+ * a parallel region (par_fsai_setup.c, IJMatrix_parcsr.c), and per-thread
+ * error records would leave HYPRE_GetError() on the master thread unable to
+ * see them.
+ *
+ * The spelling differs between C11 and C++, and hypre's headers are included
+ * from both -- the GPU sources are compiled as C++ by nvcc.
+ *--------------------------------------------------------------------------*/
+#if defined(HYPRE_USING_THREAD_LOCAL)
+#if defined(HYPRE_USING_OPENMP)
+#error "HYPRE_USING_THREAD_LOCAL cannot be combined with HYPRE_USING_OPENMP"
+#elif defined(__cplusplus)
+#define HYPRE_THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#define HYPRE_THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__) || defined(__clang__)
+#define HYPRE_THREAD_LOCAL __thread
+#elif defined(_MSC_VER)
+#define HYPRE_THREAD_LOCAL __declspec(thread)
+#else
+#error "HYPRE_USING_THREAD_LOCAL: no thread-local storage keyword known for this compiler"
+#endif
+#else
+#define HYPRE_THREAD_LOCAL
+#endif
+
 #ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
 #endif
@@ -660,6 +693,52 @@ HYPRE_Int HYPRE_SetSpTransUseVendor(HYPRE_Int use_vendor);
 HYPRE_Int HYPRE_SetSpMVUseVendor(HYPRE_Int use_vendor);
 
 /**
+ * Selects the vendor algorithm used for device sparse matrix/vector
+ * multiplication.
+ *
+ * @warning The value of @p algorithm is a raw, backend-specific vendor enum
+ * value, not a portable hypre algorithm identifier. Its interpretation depends
+ * on the vendor sparse library selected when hypre was compiled. In particular,
+ * the same integer can select different algorithms in cuSPARSE and rocSPARSE.
+ * Applications that must run with multiple GPU backends should select the value
+ * conditionally for each backend.
+ *
+ * For CUDA Toolkit 11.0 and newer builds, @p algorithm is interpreted as a raw
+ * @c cusparseSpMVAlg_t value from the cuSPARSE generic API. Since hypre matrices
+ * use CSR storage, the accepted values are:
+ *
+ *    - 0: @c CUSPARSE_SPMV_ALG_DEFAULT
+ *    - 2: @c CUSPARSE_SPMV_CSR_ALG1
+ *    - 3: @c CUSPARSE_SPMV_CSR_ALG2
+ *
+ * cuSPARSE 11.0 through 11.4.0 headers use the older names
+ * @c CUSPARSE_MV_ALG_DEFAULT, @c CUSPARSE_CSRMV_ALG1, and
+ * @c CUSPARSE_CSRMV_ALG2 for the same raw values.
+ *
+ * If this routine is not called, hypre uses
+ * @c CUSPARSE_SPMV_CSR_ALG2 to preserve deterministic CUDA SpMV results.
+ * CUDA builds using the legacy cuSPARSE SpMV API accept only 0.
+ *
+ * For HIP builds, @p algorithm is interpreted as a
+ * @c rocsparse_spmv_alg value. The CSR algorithms accepted when provided by the
+ * compiled rocSPARSE version are:
+ *
+ *    - 0: @c rocsparse_spmv_alg_default
+ *    - 2: @c rocsparse_spmv_alg_csr_adaptive
+ *    - 3: @c rocsparse_spmv_alg_csr_rowsplit, or its former name
+ *         @c rocsparse_spmv_alg_csr_stream
+ *    - 7: @c rocsparse_spmv_alg_csr_lrb
+ *    - 8: @c rocsparse_spmv_alg_csr_nnzsplit
+ *
+ * oneMKL builds accept only 0. This setting applies to SpMV with a single
+ * vector; vendor SpMM algorithm selection for multivectors is separate.
+ *
+ * @param algorithm Raw algorithm enum value for the configured vendor backend.
+ * @return hypre global error code (0 = success)
+ */
+HYPRE_Int HYPRE_SetSpMVAlgorithm(HYPRE_Int algorithm);
+
+/**
  * Specifies the algorithm used for sparse matrix/matrix multiplication in device builds.
  *
  * The following options are available for \e use_vendor:
@@ -713,6 +792,19 @@ HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
  * @return Returns hypre's global error code, where 0 indicates success.
  **/
 HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
+
+/**
+ * Sets the number of threads to use in OpenMP parallel regions.
+ * Must be called from outside of a parallel region.
+ *
+ * @param num_threads The number of threads to use. This must be positive and
+ * no greater than the number of processors available to the OpenMP runtime or
+ * the OpenMP thread limit, whichever is smaller.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success and
+ * HYPRE_ERROR_ARG indicates that num_threads is outside the valid range.
+ **/
+HYPRE_Int HYPRE_SetNumThreads( HYPRE_Int num_threads );
 
 /**@}*/
 /**@}*/

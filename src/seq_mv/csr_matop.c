@@ -1840,6 +1840,13 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
    HYPRE_Int       i;
    HYPRE_Complex   sum = 0;
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_CSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_CSRMatrixFnormDevice(A);
+   }
+#endif
+
    hypre_assert(num_nonzeros == A_i[nrows]);
 
 #ifdef HYPRE_USING_OPENMP
@@ -2206,7 +2213,7 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexScalen(data, k, data, scalar);
+      hypre_ComplexScalenDevice(data, k, data, scalar);
    }
    else
 #endif
@@ -2386,7 +2393,7 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypreDevice_ComplexFilln(hypre_CSRMatrixData(A), nnz, value);
+      hypre_ComplexFillnDevice(hypre_CSRMatrixData(A), nnz, value);
    }
    else
 #endif

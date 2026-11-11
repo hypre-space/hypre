@@ -600,14 +600,6 @@ hypre_MultiblockMatrixSetSubmatrixType( hypre_MultiblockMatrix *matrix, HYPRE_In
 
 /*--------------------------------------------------------------------------*/
 
-hypre_Vector *
-hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqMultiVectorCreate)( size, num_vectors );
-}
-
-/*--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_SeqVectorAxpy( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y )
 {
@@ -700,14 +692,6 @@ HYPRE_Int
 hypre_SeqVectorInitializeShell( hypre_Vector *vector )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorInitializeShell)( vector );
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
-{
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_SeqVectorInitialize_v2)( vector, memory_location );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -11,13 +11,17 @@
 #if defined(HYPRE_USING_GPU)
 
 /* Need struct wrapper to pass hypre_Index as argument to GPU kernel */
+/* WM: todo - remove hypre_IndexDevice_struct and just pass the Box instead */
 typedef struct hypre_IndexDevice_struct
 {
    hypre_Index idx;
 } hypre_IndexDevice;
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 __global__ void
-hypreGPUKernel_BoxRanksToIndexes( hypre_DeviceItem  &item,
+hypre_GPUKernelBoxRanksToIndexes( hypre_DeviceItem  &item,
                                   HYPRE_Int          ndim,
                                   hypre_IndexDevice  box_imin,
                                   hypre_IndexDevice  box_size,
@@ -79,7 +83,7 @@ hypre_BoxRanksToIndexesDevice( hypre_Box   *box,
 
    hypre_CopyIndex(hypre_BoxIMin(box), box_imin_d.idx);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_BoxRanksToIndexes, gDim, bDim, ndim,
+   HYPRE_GPU_LAUNCH( hypre_GPUKernelBoxRanksToIndexes, gDim, bDim, ndim,
                      box_imin_d, box_size_d, box_volume, num_ranks, ranks, indexes_d);
 
    *indexes_ptr = indexes;

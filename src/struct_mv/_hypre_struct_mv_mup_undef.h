@@ -22,6 +22,7 @@
 #undef HYPRE_StructGridSetExtents
 #undef HYPRE_StructGridSetNumGhost
 #undef HYPRE_StructGridSetPeriodic
+#undef HYPRE_StructMatrixAddToArrayValues
 #undef HYPRE_StructMatrixAddToBoxValues
 #undef HYPRE_StructMatrixAddToBoxValues2
 #undef HYPRE_StructMatrixAddToConstantValues
@@ -30,6 +31,7 @@
 #undef HYPRE_StructMatrixClearBoundary
 #undef HYPRE_StructMatrixCreate
 #undef HYPRE_StructMatrixDestroy
+#undef HYPRE_StructMatrixGetArrayValues
 #undef HYPRE_StructMatrixGetBoxValues
 #undef HYPRE_StructMatrixGetBoxValues2
 #undef HYPRE_StructMatrixGetGrid
@@ -41,6 +43,7 @@
 #undef HYPRE_StructMatrixPrint
 #undef HYPRE_StructMatrixRead
 #undef HYPRE_StructMatrixScale
+#undef HYPRE_StructMatrixSetArrayValues
 #undef HYPRE_StructMatrixSetBoxValues
 #undef HYPRE_StructMatrixSetBoxValues2
 #undef HYPRE_StructMatrixSetConstantEntries
@@ -55,6 +58,7 @@
 #undef HYPRE_StructStencilDestroy
 #undef HYPRE_StructStencilSetElement
 #undef HYPRE_StructStencilSetEntry
+#undef HYPRE_StructVectorAddToArrayValues
 #undef HYPRE_StructVectorAddToBoxValues
 #undef HYPRE_StructVectorAddToBoxValues2
 #undef HYPRE_StructVectorAddToValues
@@ -64,6 +68,7 @@
 #undef HYPRE_StructVectorCopy
 #undef HYPRE_StructVectorCreate
 #undef HYPRE_StructVectorDestroy
+#undef HYPRE_StructVectorGetArrayValues
 #undef HYPRE_StructVectorGetBoxValues
 #undef HYPRE_StructVectorGetBoxValues2
 #undef HYPRE_StructVectorGetMigrateCommPkg
@@ -75,6 +80,7 @@
 #undef HYPRE_StructVectorRead
 #undef HYPRE_StructVectorScale
 #undef HYPRE_StructVectorScaleValues
+#undef HYPRE_StructVectorSetArrayValues
 #undef HYPRE_StructVectorSetBoxValues
 #undef HYPRE_StructVectorSetBoxValues2
 #undef HYPRE_StructVectorSetConstantValues
@@ -91,6 +97,7 @@
 #undef hypre_AddIndexes
 #undef hypre_AppendBox
 #undef hypre_AppendBoxArray
+#undef hypre_BoxAppendMerge
 #undef hypre_BoxArrayArrayClone
 #undef hypre_BoxArrayArrayCreate
 #undef hypre_BoxArrayArrayDestroy
@@ -167,6 +174,7 @@
 #undef hypre_BoxManSetIsEntriesSort
 #undef hypre_BoxManSetNumGhost
 #undef hypre_BoxMaxSize
+#undef hypre_BoxMerge
 #undef hypre_BoxNnodes
 #undef hypre_BoxOffsetDistance
 #undef hypre_BoxPartialVolume
@@ -185,6 +193,7 @@
 #undef hypre_CoarsenBoxArray
 #undef hypre_CoarsenBoxArrayArray
 #undef hypre_CoarsenBoxArrayArrayOutward
+#undef hypre_CoarsenStencil
 #undef hypre_CommBlockSetEntries
 #undef hypre_CommBlockSetEntry
 #undef hypre_CommInfoClone
@@ -280,9 +289,12 @@
 #undef hypre_StIndexShift
 #undef hypre_StMatrixClone
 #undef hypre_StMatrixCreate
+#undef hypre_StMatrixCreateFromStencil
 #undef hypre_StMatrixDestroy
+#undef hypre_StMatrixGetStencil
 #undef hypre_StMatrixMatmat
 #undef hypre_StMatrixMatmult
+#undef hypre_StMatrixNCoeffs
 #undef hypre_StMatrixNEntryCoeffs
 #undef hypre_StMatrixPrint
 #undef hypre_StMatrixTranspose
@@ -356,6 +368,7 @@
 #undef hypre_StructMatmultSetKernelType
 #undef hypre_StructMatmultSetProduct
 #undef hypre_StructMatmultSetup
+#undef hypre_StructMatrixAdd
 #undef hypre_StructMatrixAddInit
 #undef hypre_StructMatrixAddMat
 #undef hypre_StructMatrixAssemble
@@ -371,8 +384,10 @@
 #undef hypre_StructMatrixCreateCommPkg
 #undef hypre_StructMatrixCreateMask
 #undef hypre_StructMatrixDestroy
+#undef hypre_StructMatrixDiagonal
 #undef hypre_StructMatrixExtractPointerByIndex
 #undef hypre_StructMatrixForget
+#undef hypre_StructMatrixGetDiagMat
 #undef hypre_StructMatrixGetDiagonal
 #undef hypre_StructMatrixGetStSpaces
 #undef hypre_StructMatrixGetStencilSpace
@@ -388,6 +403,7 @@
 #undef hypre_StructMatrixMigrate
 #undef hypre_StructMatrixNeedResize
 #undef hypre_StructMatrixPlaceStencil
+#undef hypre_StructMatrixPoly
 #undef hypre_StructMatrixPrint
 #undef hypre_StructMatrixPrintData
 #undef hypre_StructMatrixPtAP
@@ -413,6 +429,8 @@
 #undef hypre_StructMatrixSetRangeStride
 #undef hypre_StructMatrixSetTranspose
 #undef hypre_StructMatrixSetValues
+#undef hypre_StructMatrixSyncConstToDevice
+#undef hypre_StructMatrixSyncConstToHost
 #undef hypre_StructMatrixUnMapDataBox
 #undef hypre_StructMatrixUnMapDataIndex
 #undef hypre_StructMatrixUnMapDataStride
@@ -530,3 +548,14 @@
 #undef hypre_structvectorsetnumghost
 #undef hypre_structvectorsetrandomvalu
 #undef hypre_structvectorsetvalues
+#undef hypre_BoxRanksToIndexesDevice
+#undef hypre_GPUKernelBoxRanksToIndexes
+#undef hypre_GPUKernelStructMatrixGetArrayValues
+#undef hypre_GPUKernelStructVectorAddToArrayValues
+#undef hypre_GPUKernelStructVectorGetArrayValues
+#undef hypre_StructMatrixAddToArrayValuesDevice
+#undef hypre_StructMatrixGetArrayValuesDevice
+#undef hypre_StructMatrixSetArrayValuesDevice
+#undef hypre_StructVectorAddToArrayValuesDevice
+#undef hypre_StructVectorGetArrayValuesDevice
+#undef hypre_StructVectorSetArrayValuesDevice

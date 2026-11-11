@@ -1222,6 +1222,24 @@ HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_FlexGMRESGetPrecondMatrix_flt( solver, precond_matrix_ptr );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_FlexGMRESGetPrecondMatrix_dbl( solver, precond_matrix_ptr );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_FlexGMRESGetPrecondMatrix_long_dbl( solver, precond_matrix_ptr );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level )
 {
    switch (precision)
@@ -1412,6 +1430,24 @@ HYPRE_FlexGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
          return HYPRE_FlexGMRESSetPrecond_dbl( solver, precond, precond_setup, precond_solver );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_FlexGMRESSetPrecond_long_dbl( solver, precond, precond_setup, precond_solver );
+      default:
+         { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_FlexGMRESSetPrecondMatrix_flt( solver, precond_matrix );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_FlexGMRESSetPrecondMatrix_dbl( solver, precond_matrix );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_FlexGMRESSetPrecondMatrix_long_dbl( solver, precond_matrix );
       default:
          { HYPRE_Int value = 0; hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown solver precision"); return value; }
    }

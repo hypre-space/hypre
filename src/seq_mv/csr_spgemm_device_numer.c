@@ -16,7 +16,7 @@
  * exact_rownnz: if d_rc is exact
  */
 HYPRE_Int
-hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
+hypre_CSRSpGemmNumerWithRownnzUpperboundNoBinDevice( HYPRE_Int       m,
                                                      HYPRE_Int       k,
                                                      HYPRE_Int       n,
                                                      HYPRE_Int      *d_ia,
@@ -69,7 +69,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypre_CSRSpGemmNumerPostCopyDevice<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -97,7 +97,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED2(BIN, BIN, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)
 
 HYPRE_Int
-hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
+hypre_CSRSpGemmNumerWithRownnzUpperboundBinnedDevice( HYPRE_Int       m,
                                                       HYPRE_Int       k,
                                                       HYPRE_Int       n,
                                                       HYPRE_Int      *d_ia,
@@ -160,7 +160,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypre_CSRSpGemmNumerPostCopyDevice<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -174,7 +174,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 }
 
 HYPRE_Int
-hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
+hypre_CSRSpGemmNumerWithRownnzUpperboundDevice( HYPRE_Int       m,
                                                 HYPRE_Int       k,
                                                 HYPRE_Int       n,
                                                 HYPRE_Int      *d_ia,
@@ -209,12 +209,12 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 
    if (binned)
    {
-      hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
+      hypre_CSRSpGemmNumerWithRownnzUpperboundBinnedDevice
       (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
    }
    else
    {
-      hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin
+      hypre_CSRSpGemmNumerWithRownnzUpperboundNoBinDevice
       (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
    }
 

@@ -1011,6 +1011,37 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Complex       *values);
 
 /**
+ * Set an arbitrary array of matrix values in a given part/var.
+ * The \e indexes array has length \e nvalues * \e ndim and lists the
+ * indexes where values will be set, where entry (\e i * \e ndim + \e j)
+ * in the passed \e indexes array describes the \e j'th component of the
+ * \e i'th index. The \e entries array has lenght \e nvalues and lists
+ * the entry numbers for each value to be set, and finally, the \e values
+ * array also has length \e nvalues and holds values to be set.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetArrayValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Complex       *values);
+
+/**
+ * Add to an arbitrary array of matrix values in a given part/var.
+ * See HYPRE_SStructMatrixSetArrayValues() for details on argument array formats.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAddToArrayValues(HYPRE_SStructMatrix  matrix,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
+                                    HYPRE_Int           *entries,
+                                    HYPRE_Complex       *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 HYPRE_Int
@@ -1060,6 +1091,19 @@ HYPRE_SStructMatrixGetFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values);
+
+/**
+ * Get an arbitrary array of matrix values in a given part/var.
+ * See HYPRE_SStructMatrixSetArrayValues() for details on argument array formats.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixGetArrayValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Int           *entries,
+                                  HYPRE_Complex       *values);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
@@ -1357,6 +1401,32 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
                                    HYPRE_Complex       *values);
 
 /**
+ * Set vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorSetArrayValues(HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Complex       *values);
+
+/**
+ * Add to vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAddToArrayValues(HYPRE_SStructVector  vector,
+                                    HYPRE_Int            part,
+                                    HYPRE_Int            var,
+                                    HYPRE_Int            nvalues,
+                                    HYPRE_Int           *indexes,
+                                    HYPRE_Complex       *values);
+
+/**
  * Finalize the construction of the vector before using.
  **/
 HYPRE_Int
@@ -1402,6 +1472,19 @@ HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values);
+
+/**
+ * Get vector coefficients at an arbitrary array of indexes in a given part/var,
+ * where entry (\e i * \e ndim + \e j) in the passed \e indexes array
+ * describes the \e j'th component of the \e i'th index.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorGetArrayValues(HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nvalues,
+                                  HYPRE_Int           *indexes,
+                                  HYPRE_Complex       *values);
 
 /**
  * Gather vector data so that efficient \c GetValues can be done.  This

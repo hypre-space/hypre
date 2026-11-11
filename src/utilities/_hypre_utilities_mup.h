@@ -1224,6 +1224,13 @@ HYPRE_Int
 hypre_SetSpGemmUseVendor_long_dbl( HYPRE_Int use_vendor );
 
 HYPRE_Int
+hypre_SetSpMVAlgorithm_flt( HYPRE_Int algorithm );
+HYPRE_Int
+hypre_SetSpMVAlgorithm_dbl( HYPRE_Int algorithm );
+HYPRE_Int
+hypre_SetSpMVAlgorithm_long_dbl( HYPRE_Int algorithm );
+
+HYPRE_Int
 hypre_SetSpMVUseVendor_flt( HYPRE_Int use_vendor );
 HYPRE_Int
 hypre_SetSpMVUseVendor_dbl( HYPRE_Int use_vendor );

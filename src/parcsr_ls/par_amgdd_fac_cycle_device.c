@@ -78,12 +78,12 @@ hypre_BoomerAMGDD_FAC_JacobiDevice( void     *amgdd_vdata,
 
    hypre_AMGDDCompGridMatvec(-relax_weight, A, u, relax_weight, hypre_AMGDDCompGridTemp2(compGrid));
 
-   hypreDevice_IVAXPY(hypre_AMGDDCompGridNumOwnedNodes(compGrid),
+   hypre_IVAXPYDevice(hypre_AMGDDCompGridNumOwnedNodes(compGrid),
                       hypre_AMGDDCompGridL1Norms(compGrid),
                       hypre_VectorData(hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid))),
                       hypre_VectorData(hypre_AMGDDCompGridVectorOwned(u)));
 
-   hypreDevice_IVAXPY(hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid),
+   hypre_IVAXPYDevice(hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid),
                       &(hypre_AMGDDCompGridL1Norms(compGrid)[hypre_AMGDDCompGridNumOwnedNodes(compGrid)]),
                       hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid))),
                       hypre_VectorData(hypre_AMGDDCompGridVectorNonOwned(u)));
@@ -132,14 +132,14 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    owned_tmp    = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridTemp2(compGrid));
    nonowned_tmp = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridTemp2(compGrid));
 
-   hypreDevice_IVAXPYMarked(num_owned,
+   hypre_IVAXPYMarkedDevice(num_owned,
                             hypre_AMGDDCompGridL1Norms(compGrid),
                             hypre_VectorData(owned_tmp),
                             hypre_VectorData(owned_u),
                             hypre_AMGDDCompGridCFMarkerArray(compGrid),
                             relax_set);
 
-   hypreDevice_IVAXPYMarked(num_nonowned_r,
+   hypre_IVAXPYMarkedDevice(num_nonowned_r,
                             &(hypre_AMGDDCompGridL1Norms(compGrid)[num_owned]),
                             hypre_VectorData(nonowned_tmp),
                             hypre_VectorData(nonowned_u),

@@ -17,7 +17,7 @@
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
 static __global__ void
-hypreGPUKernel_CompileFlagSafetyCheck(hypre_DeviceItem &item,
+hypre_GPUKernelCompileFlagSafetyCheck(hypre_DeviceItem &item,
                                       hypre_int        *cuda_arch_compile)
 {
    HYPRE_UNUSED_VAR(item);
@@ -45,7 +45,7 @@ cuda_compile_flag_check_local(void)
    HYPRE_CUDA_CALL(cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)));
    HYPRE_CUDA_CALL(cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
                               cudaMemcpyHostToDevice));
-   HYPRE_GPU_LAUNCH(hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d);
+   HYPRE_GPU_LAUNCH(hypre_GPUKernelCompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d);
    HYPRE_CUDA_CALL(cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
                               cudaMemcpyDeviceToHost));
    HYPRE_CUDA_CALL(cudaFree(cuda_arch_compile_d));
@@ -78,7 +78,7 @@ cuda_compile_flag_check_local(void)
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
 #if defined (hypre_DEFINE_GLOBAL)
-hypre_Handle *_hypre_handle = NULL;
+HYPRE_THREAD_LOCAL hypre_Handle *_hypre_handle = NULL;
 #endif
 
 /* accessor to the global ``_hypre_handle'' */
@@ -484,8 +484,8 @@ HYPRE_Initialize(void)
 HYPRE_Int
 HYPRE_Finalize(void)
 {
-   /* Return if the hypre library has already been finalized */
-   if (hypre_Finalized())
+   /* Return if the hypre library has already been finalized or was never initialized */
+   if (hypre_Finalized() || !_hypre_handle)
    {
       return hypre_error_flag;
    }

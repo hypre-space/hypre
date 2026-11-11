@@ -154,4 +154,19 @@ HYPRE_Int
 hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
                             HYPRE_Int       entry );
 
+HYPRE_Int
+hypre_StMatrixNCoeffs( hypre_StMatrix *matrix );
+
+HYPRE_Int
+hypre_StMatrixCreateFromStencil( hypre_StructStencil  *stencil,
+                                 hypre_Index           ran_stride,
+                                 hypre_Index           dom_stride,
+                                 HYPRE_Int             id,
+                                 hypre_StMatrix      **matrix_ptr );
+
+HYPRE_Int
+hypre_StMatrixGetStencil( hypre_StMatrix       *matrix,
+                          HYPRE_Int             ndim,
+                          hypre_StructStencil **stencil_ptr );
+
 #endif

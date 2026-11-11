@@ -625,6 +625,15 @@ HYPRE_Int
 HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+
+HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel_dbl( HYPRE_Solver solver, HYPRE_Int *level );
@@ -722,6 +731,15 @@ HYPRE_Int
 HYPRE_FlexGMRESSetPrecond_long_dbl( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int
 HYPRE_FlexGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
+
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 HYPRE_Int
 HYPRE_FlexGMRESSetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int level );
@@ -1836,6 +1854,9 @@ HYPRE_Int
 HYPRE_FlexGMRESGetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 
 HYPRE_Int
+HYPRE_FlexGMRESGetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix *precond_matrix_ptr );
+
+HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int *level );
 
 HYPRE_Int
@@ -1867,6 +1888,9 @@ HYPRE_FlexGMRESSetModifyPC_pre( HYPRE_Precision precision, HYPRE_Solver solver, 
 
 HYPRE_Int
 HYPRE_FlexGMRESSetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
+
+HYPRE_Int
+HYPRE_FlexGMRESSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 HYPRE_Int
 HYPRE_FlexGMRESSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int level );
