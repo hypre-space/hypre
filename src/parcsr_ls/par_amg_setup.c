@@ -322,6 +322,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "BoomerAMG: SeqThreshold/Redundant is not supported with device execution!\n");
+         HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
 
@@ -329,6 +330,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                            "BoomerAMG: Non-Galerkin coarse operators are not supported with device execution!\n");
+         HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
    }
