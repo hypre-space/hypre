@@ -13,13 +13,6 @@
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_DEBUG) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-static int
-hypre_ILU60CompareColumn(const void *a, const void *b)
-{
-   HYPRE_Int x = *(const HYPRE_Int *) a, y = *(const HYPRE_Int *) b;
-   return (x > y) - (x < y);
-}
-
 /* Bounds and uniqueness must be checked before any device permutation uses
  * column indices as addresses. A host copy is already required by scheduling. */
 static HYPRE_Int
@@ -85,7 +78,7 @@ hypre_ILU60ValidateInput(hypre_CSRMatrix *A)
             columns_capacity = size;
          }
          for (HYPRE_Int p = 0; p < size; p++) { columns[p] = ja[ia[row] + p]; }
-         qsort(columns, size, sizeof(HYPRE_Int), hypre_ILU60CompareColumn);
+         hypre_qsort0(columns, 0, size - 1);
          for (HYPRE_Int p = 1; p < size; p++) { bad |= columns[p - 1] == columns[p]; }
       }
       if (bad)
@@ -612,6 +605,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Level-set based ILU0 setup on host is not supported!");
+            HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
          }
          break;

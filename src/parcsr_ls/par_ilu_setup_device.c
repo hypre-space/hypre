@@ -13,11 +13,11 @@
 /* The input permutation storage belongs to the caller, not these wrappers. */
 static void
 hypre_ILUSetupDeviceDestroyPermutations(hypre_IntArray *perm,
-                                       hypre_IntArray *qperm,
-                                       hypre_IntArray *rperm,
-                                       hypre_IntArray *rqperm,
-                                       hypre_IntArray *h_perm,
-                                       hypre_IntArray *h_rperm)
+                                        hypre_IntArray *qperm,
+                                        hypre_IntArray *rperm,
+                                        hypre_IntArray *rqperm,
+                                        hypre_IntArray *h_perm,
+                                        hypre_IntArray *h_rperm)
 {
    if (perm)  { hypre_IntArrayData(perm) = NULL; }
    if (qperm) { hypre_IntArrayData(qperm) = NULL; }
