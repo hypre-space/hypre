@@ -48,6 +48,7 @@ hypre_GPUKernelCSRMatvecShuffleGT8(hypre_DeviceItem &item,
                                    T                *d_a,
                                    T                *d_x,
                                    T                 beta,
+                                   T                *d_b,
                                    T                *d_y )
 {
 #if defined (HYPRE_USING_SYCL)
@@ -119,7 +120,7 @@ hypre_GPUKernelCSRMatvecShuffleGT8(hypre_DeviceItem &item,
             {
                d_y[grid_row_id * idxstride_y + i * vecstride_y] =
                   alpha * sum[i] +
-                  beta * d_y[grid_row_id * idxstride_y + i * vecstride_y];
+                  beta * d_b[grid_row_id * idxstride_y + i * vecstride_y];
             }
          }
          else
@@ -163,6 +164,7 @@ hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
                                 T                *d_a,
                                 T                *d_x,
                                 T                 beta,
+                                T                *d_b,
                                 T                *d_y )
 {
    HYPRE_UNUSED_VAR(num_vectors);
@@ -247,7 +249,7 @@ hypre_GPUKernelCSRMatvecShuffle(hypre_DeviceItem &item,
             {
                d_y[grid_row_id * idxstride_y + i * vecstride_y] =
                   alpha * sum[i] +
-                  beta * d_y[grid_row_id * idxstride_y + i * vecstride_y];
+                  beta * d_b[grid_row_id * idxstride_y + i * vecstride_y];
             }
          }
          else
@@ -291,6 +293,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int  num_vectors,
                              T         *d_a,
                              T         *d_x,
                              T          beta,
+                             T         *d_b,
                              T         *d_y )
 {
    if (num_vectors > 64)
@@ -388,6 +391,30 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                            hypre_Vector    *y,
                            HYPRE_Int        fill )
 {
+   return hypre_CSRMatrixSpMVDeviceOutOfPlace(trans, alpha, B, x, beta, y, y, fill);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSpMVDeviceOutOfPlace
+ *
+ * Computes:  y = alpha*op(B)*x + beta*b
+ *
+ * The kernels read b and write y in one pass, so b is not copied into y first.
+ * b is read with the strides of y; when they differ, and in the cases that
+ * scale y before the kernel (no nonzeros, alpha = 0, rownnz), b is copied into y
+ * as before. b may be y.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixSpMVDeviceOutOfPlace( HYPRE_Int        trans,
+                                     HYPRE_Complex    alpha,
+                                     hypre_CSRMatrix *B,
+                                     hypre_Vector    *x,
+                                     HYPRE_Complex    beta,
+                                     hypre_Vector    *b,
+                                     hypre_Vector    *y,
+                                     HYPRE_Int        fill )
+{
    /* Input data variables */
    HYPRE_Int        num_rows      = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
    HYPRE_Int        num_nonzeros  = hypre_CSRMatrixNumNonzeros(B);
@@ -395,6 +422,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    HYPRE_Int        num_vectors_y = hypre_VectorNumVectors(y);
    HYPRE_Complex   *d_x           = hypre_VectorData(x);
    HYPRE_Complex   *d_y           = hypre_VectorData(y);
+   HYPRE_Complex   *d_b           = hypre_VectorData(b);
    HYPRE_Int        idxstride_x   = hypre_VectorIndexStride(x);
    HYPRE_Int        vecstride_x   = hypre_VectorVectorStride(x);
    HYPRE_Int        idxstride_y   = hypre_VectorIndexStride(y);
@@ -414,6 +442,17 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
       return hypre_error_flag;
    }
    hypre_assert(num_rows > 0);
+
+   if (d_b != d_y &&
+       (num_nonzeros <= 0 || alpha == 0.0 ||
+        hypre_VectorNumVectors(b) != num_vectors_y ||
+        hypre_VectorIndexStride(b) != idxstride_y ||
+        hypre_VectorVectorStride(b) != vecstride_y))
+   {
+      hypre_TMemcpy(d_y, d_b, HYPRE_Complex, num_rows * num_vectors_y,
+                    hypre_VectorMemoryLocation(y), hypre_VectorMemoryLocation(b));
+      d_b = d_y;
+   }
 
    /* Trivial case when alpha * op(B) * x = 0 */
    if (num_nonzeros <= 0 || alpha == 0.0)
@@ -442,6 +481,14 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
       num_rows   = hypre_CSRMatrixNumRownnz(A);
       d_rownnz_A = hypre_CSRMatrixRownnz(A);
 
+      if (d_b != d_y)
+      {
+         hypre_TMemcpy(d_y, d_b, HYPRE_Complex,
+                       (trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B)) *
+                       num_vectors_y,
+                       hypre_VectorMemoryLocation(y), hypre_VectorMemoryLocation(b));
+         d_b = d_y;
+      }
       hypre_SeqVectorScale(beta, y);
       beta = beta ? 1.0 : 0.0;
    }
@@ -465,6 +512,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                                                                    d_a,
                                                                    d_x,
                                                                    beta,
+                                                                   d_b,
                                                                    d_y);
          break;
 
@@ -484,6 +532,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                                                             d_a,
                                                             d_x,
                                                             beta,
+                                                            d_b,
                                                             d_y);
          break;
 
@@ -503,6 +552,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                                                             d_a,
                                                             d_x,
                                                             beta,
+                                                            d_b,
                                                             d_y);
          break;
 
@@ -522,6 +572,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                                                             d_a,
                                                             d_x,
                                                             beta,
+                                                            d_b,
                                                             d_y);
          break;
 
@@ -541,6 +592,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                                                                    d_a,
                                                                    d_x,
                                                                    beta,
+                                                                   d_b,
                                                                    d_y);
          break;
 
@@ -599,6 +651,7 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
                                                                  d_a,
                                                                  d_x,
                                                                  beta,
+                                                                 d_y,
                                                                  d_y);
 
    return hypre_error_flag;

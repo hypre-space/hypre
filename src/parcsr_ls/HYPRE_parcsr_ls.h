@@ -947,7 +947,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
  * Values for \e relax_weight are
  *    - > 0  : this assigns the given relaxation weight on all levels
  *    - = 0  : the weight is determined on each level with the estimate
- *             \f$3 \over {4\|D^{-1/2}AD^{-1/2}\|}\f$, where \f$D\f$ is the diagonal of \f$A\f$
+ *             \f$4 \over {3\|D^{-1/2}AD^{-1/2}\|_\infty}\f$, where \f$D\f$ is the diagonal of \f$A\f$
  *             (this should only be used with Jacobi)
  *    - = -k : the relaxation weight is determined with at most k CG steps on each level
  *             (this should only be used for symmetric positive definite problems)
@@ -4015,7 +4015,7 @@ HYPRE_ParCSRHybridSetRelaxOrder(HYPRE_Solver solver,
  * Values for \e relax_wt are
  *    - > 0  : this assigns the given relaxation weight on all levels
  *    - = 0  : the weight is determined on each level with the estimate
- *             \f$3 \over {4\|D^{-1/2}AD^{-1/2}\|}\f$, where \f$D\f$ is the diagonal of \f$A\f$
+ *             \f$4 \over {3\|D^{-1/2}AD^{-1/2}\|_\infty}\f$, where \f$D\f$ is the diagonal of \f$A\f$
  *             (this should only be used with Jacobi)
  *    - = -k : the relaxation weight is determined with at most k CG steps on each level
  *             (this should only be used for symmetric positive definite problems)

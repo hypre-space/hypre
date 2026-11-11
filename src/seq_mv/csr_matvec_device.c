@@ -60,7 +60,21 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_CSRMM_ALG1
 #endif
 
-/* y = alpha * A * x + beta * y
+static inline void
+hypre_CSRMatrixMatvecDeviceCopyB( hypre_Vector *b,
+                                  hypre_Vector *y,
+                                  HYPRE_Int     ny,
+                                  HYPRE_Int     offset )
+{
+   hypre_TMemcpy( hypre_VectorData(y) + offset,
+                  hypre_VectorData(b) + offset,
+                  HYPRE_Complex,
+                  (ny - offset) * hypre_VectorNumVectors(y),
+                  hypre_VectorMemoryLocation(y),
+                  hypre_VectorMemoryLocation(b) );
+}
+
+/* y = alpha * A * x + beta * b
  * This function is supposed to be only used inside the other functions in this file
  */
 static inline HYPRE_Int
@@ -69,9 +83,13 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
                               hypre_CSRMatrix *A,
                               hypre_Vector    *x,
                               HYPRE_Complex    beta,
+                              hypre_Vector    *b,
                               hypre_Vector    *y,
                               HYPRE_Int        offset )
 {
+   /* Only hypre's own SpMV reads b directly; the other paths need b in y first */
+   HYPRE_Int copy_b = hypre_VectorData(b) != hypre_VectorData(y);
+
    /* Sanity check */
    if (hypre_VectorData(x) == hypre_VectorData(y))
    {
@@ -110,15 +128,26 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 
    if (use_vendor)
    {
+      if (copy_b)
+      {
+         hypre_CSRMatrixMatvecDeviceCopyB(b, y, trans ? hypre_CSRMatrixNumCols(A) :
+                                          hypre_CSRMatrixNumRows(A), offset);
+      }
       hypre_CSRMatrixMatvecVendor(trans, alpha, A, x, beta, y, offset);
    }
    else
 #endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
    {
 #if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
+      HYPRE_UNUSED_VAR(copy_b);
+      hypre_CSRMatrixSpMVDeviceOutOfPlace(trans, alpha, A, x, beta, b, y, 0);
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
+      if (copy_b)
+      {
+         hypre_CSRMatrixMatvecDeviceCopyB(b, y, trans ? hypre_CSRMatrixNumCols(A) :
+                                          hypre_CSRMatrixNumRows(A), offset);
+      }
       hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
 #endif
    }
@@ -168,24 +197,17 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    //   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
    //}
 
-   if (hypre_VectorData(b) != hypre_VectorData(y))
-   {
-      hypre_TMemcpy( hypre_VectorData(y) + offset,
-                     hypre_VectorData(b) + offset,
-                     HYPRE_Complex,
-                     (ny - offset) * num_vectors,
-                     hypre_VectorMemoryLocation(y),
-                     hypre_VectorMemoryLocation(b) );
-
-   }
-
    if (hypre_CSRMatrixNumNonzeros(A) <= 0 || alpha == 0.0)
    {
+      if (hypre_VectorData(b) != hypre_VectorData(y))
+      {
+         hypre_CSRMatrixMatvecDeviceCopyB(b, y, ny, offset);
+      }
       hypre_SeqVectorScale(beta, y);
    }
    else
    {
-      hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
+      hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, b, y, offset);
    }
 
 #if defined(HYPRE_USING_GPU)

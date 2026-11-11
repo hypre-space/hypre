@@ -81,7 +81,7 @@
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[0], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
-                        d_ia, d_ja, d_a, d_x, beta, d_y );                                 \
+                        d_ia, d_ja, d_a, d_x, beta, d_b, d_y );                            \
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[1])                                      \
    {                                                                                       \
@@ -90,7 +90,7 @@
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[1], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
-                        d_ia, d_ja, d_a, d_x, beta, d_y );                                 \
+                        d_ia, d_ja, d_a, d_x, beta, d_b, d_y );                            \
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[2])                                      \
    {                                                                                       \
@@ -99,7 +99,7 @@
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[2], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
-                        d_ia, d_ja, d_a, d_x, beta, d_y );                                 \
+                        d_ia, d_ja, d_a, d_x, beta, d_b, d_y );                            \
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[3])                                      \
    {                                                                                       \
@@ -108,7 +108,7 @@
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[3], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
-                        d_ia, d_ja, d_a, d_x, beta, d_y );                                 \
+                        d_ia, d_ja, d_a, d_x, beta, d_b, d_y );                            \
    }                                                                                       \
    else                                                                                    \
    {                                                                                       \
@@ -117,7 +117,7 @@
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[4], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
-                        d_ia, d_ja, d_a, d_x, beta, d_y );                                 \
+                        d_ia, d_ja, d_a, d_x, beta, d_b, d_y );                            \
    }
 
 #endif

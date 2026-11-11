@@ -8,6 +8,65 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
+static HYPRE_Int
+hypre_SSAMGStencilIsPFMG( hypre_StructMatrix *A )
+{
+   hypre_StructStencil *stencil    = hypre_StructMatrixUserStencil(A);
+   HYPRE_Int            ndim       = hypre_StructStencilNDim(stencil);
+   HYPRE_Int            st_size    = hypre_StructStencilSize(stencil);
+   HYPRE_Int            axis[2 * HYPRE_MAXDIM] = {0};
+   HYPRE_Int            num_center = 0;
+   HYPRE_Int            s, d, offset, entry_dir, entry_side;
+
+   if (((ndim == 2) && (st_size != 5)) ||
+       ((ndim == 3) && (st_size != 7)))
+   {
+      return 0;
+   }
+
+   for (s = 0; s < st_size; s++)
+   {
+      entry_dir  = -1;
+      entry_side = -1;
+      for (d = 0; d < ndim; d++)
+      {
+         offset = hypre_IndexD(hypre_StructStencilOffset(stencil, s), d);
+         if (offset != 0)
+         {
+            if ((entry_dir > -1) || ((offset != -1) && (offset != 1)))
+            {
+               return 0;
+            }
+            entry_dir  = d;
+            entry_side = (offset > 0) ? 1 : 0;
+         }
+      }
+
+      if (entry_dir < 0)
+      {
+         num_center++;
+      }
+      else
+      {
+         axis[2 * entry_dir + entry_side]++;
+      }
+   }
+
+   if (num_center != 1)
+   {
+      return 0;
+   }
+   for (d = 0; d < ndim; d++)
+   {
+      if ((axis[2 * d] != 1) || (axis[2 * d + 1] != 1))
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_SSAMGComputeRAP
  *
@@ -57,8 +116,12 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix    *A,
  * hypre_SSAMGComputeRAPNonGlk
  *
  * Notes:
- *        1) Multivariable version not implemented.
- *        2) Needs debugging.
+ *        1) The PFMG formula is applied only to supported 5/7-point structured
+ *           diagonal blocks with a valid coarsening direction. Other structured
+ *           blocks retain the general SStruct product.
+ *        2) Multivariable off-diagonal blocks retain the general PtAP result.
+ *        3) The unstructured component is computed after replacing structured
+ *           blocks so overlapping entries are compressed into the final S part.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
@@ -66,150 +129,113 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
                              HYPRE_Int            *cdir_p,
                              hypre_SStructMatrix **Ac_ptr )
 {
-   MPI_Comm                 comm   = hypre_SStructMatrixComm(A);
-   HYPRE_Int                ndim   = hypre_SStructMatrixNDim(A);
-   hypre_SStructGraph      *graph  = hypre_SStructMatrixGraph(P);
-   HYPRE_Int                nparts = hypre_SStructGraphNParts(graph);
-   hypre_SStructGrid       *cgrid  = hypre_SStructGraphDomGrid(graph);
+   hypre_SStructMatmultData *mmdata;
+   hypre_SStructMatrix      *matrices[2] = {A, P};
+   HYPRE_Int                 terms[3]    = {1, 0, 1};
+   HYPRE_Int                 trans[3]    = {1, 0, 0};
+   hypre_SStructMatrix      *Ac;
+   hypre_SStructPMatrix     *pA, *pP, *pAc;
+   hypre_StructMatrix       *sA, *sP, *sAc, *sAc_old;
+   hypre_StructStencil      *stencil_Ac, *stencil_old;
+   hypre_SStructPGrid       *pcgrid;
+   hypre_StructGrid         *scgrid;
+   hypre_Index               cindex;
+   hypre_Index               cstride;
+   HYPRE_Int                 nparts, part, nvars, vi, cdir;
+   HYPRE_Int                 s, d, stencil_matches;
 
-   hypre_StructStencil     *stencil;
-   hypre_SStructGraph      *cgraph;
-   hypre_SStructPGrid      *pcgrid;
-   hypre_StructGrid        *scgrid;
-   hypre_StructMatrix   ****sAc;
-   hypre_SStructStencil    *st_Ac;
-   hypre_StructMatrix      *sA, *sP;
-   hypre_SStructPMatrix    *pA, *pP, *pAc;
-   hypre_SStructMatrix     *Ac;
-   hypre_IJMatrix          *ij_Ac;
-   //hypre_ParCSRMatrix      *parcsr_uAc;
+   /* Build the general structured product first. The U component is computed
+    * after the optimized blocks below are installed. */
+   hypre_SStructMatmultCreate(2, matrices, 3, terms, trans, &mmdata);
+   hypre_SStructMatmultInitialize(mmdata, &Ac);
+   hypre_SStructMatmultCommunicate(mmdata);
+   hypre_SStructMatmultComputeS(mmdata, Ac);
 
-   //hypre_SStructMatrix     *ssmatrices[3] = {A, P, P};
-   HYPRE_Int                terms[3] = {1, 0, 1};
-   HYPRE_Int                trans[3] = {1, 0, 0};
-
-   hypre_Index              cindex;
-   hypre_Index              cstride;
-   hypre_Index             *st_shape;
-   HYPRE_Int                cdir;
-   HYPRE_Int                nvars;
-   HYPRE_Int                st_size;
-   HYPRE_Int                part, s, vi, vj;
-
-   /* Allocate memory */
-   sAc = hypre_TAlloc(hypre_StructMatrix ***, nparts, HYPRE_MEMORY_HOST);
-   for (part = 0; part < nparts; part++)
-   {
-      pcgrid = hypre_SStructGridPGrid(cgrid, part);
-      nvars  = hypre_SStructPGridNVars(pcgrid);
-
-      sAc[part] = hypre_TAlloc(hypre_StructMatrix **, nvars, HYPRE_MEMORY_HOST);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         sAc[part][vi] = hypre_TAlloc(hypre_StructMatrix *, nvars, HYPRE_MEMORY_HOST);
-      }
-   }
-
-   /* Create SStructGraph of Ac */
-   HYPRE_SStructGraphCreate(comm, cgrid, &cgraph);
-   HYPRE_SStructGraphSetObjectType(cgraph, HYPRE_SSTRUCT);
-
-   /* Compute struct component of Ac */
    hypre_SetIndex(cindex, 0);
+   nparts = hypre_SStructMatrixNParts(A);
    for (part = 0; part < nparts; part++)
    {
-      cdir   = cdir_p[part];
-      pA     = hypre_SStructMatrixPMatrix(A, part);
-      pP     = hypre_SStructMatrixPMatrix(P, part);
-      nvars  = hypre_SStructPMatrixNVars(pA);
-      pcgrid = hypre_SStructGridPGrid(cgrid, part);
+      cdir = cdir_p[part];
+      if (cdir < 0)
+      {
+         continue;
+      }
+
+      pA    = hypre_SStructMatrixPMatrix(A, part);
+      pP    = hypre_SStructMatrixPMatrix(P, part);
+      pAc   = hypre_SStructMatrixPMatrix(Ac, part);
+      nvars = hypre_SStructPMatrixNVars(pA);
+      pcgrid = hypre_SStructPMatrixPGrid(pAc);
 
       hypre_SetIndex(cstride, 1);
       hypre_IndexD(cstride, cdir) = 2;
+
       for (vi = 0; vi < nvars; vi++)
       {
-         sA      = hypre_SStructPMatrixSMatrix(pA, vi, vi);
-         sP      = hypre_SStructPMatrixSMatrix(pP, vi, vi);
-         scgrid  = hypre_SStructPGridSGrid(pcgrid, vi);
-         stencil = hypre_StructMatrixUserStencil(sA);
-         st_size = hypre_StructStencilSize(stencil);
-
-         if (st_size == 5 || st_size == 7)
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sP = hypre_SStructPMatrixSMatrix(pP, vi, vi);
+         if (!hypre_SSAMGStencilIsPFMG(sA))
          {
-            sAc[part][vi][vi] = hypre_PFMGCreateRAPOp(sP, sA, sP, scgrid, cdir, 1);
-            hypre_StructMatrixInitialize(sAc[part][vi][vi]);
-            hypre_PFMGSetupRAPOp(sP, sA, sP, cdir, cindex, cstride, 1, sAc[part][vi][vi]);
+            continue;
+         }
+
+         scgrid = hypre_SStructPGridSGrid(pcgrid, vi);
+         sAc = hypre_PFMGCreateRAPOp(sP, sA, sP, scgrid, cdir, 1);
+         if (!sAc)
+         {
+            continue;
+         }
+         hypre_StructMatrixInitialize(sAc);
+         hypre_PFMGSetupRAPOp(sP, sA, sP, cdir, cindex, cstride, 1, sAc);
+
+         /* Keep the general product block if the optimized operator changes the
+          * coarse stencil layout. This should not happen for supported PFMG
+          * stencils, but avoids attaching an incompatible matrix. */
+         sAc_old = hypre_SStructPMatrixSMatrix(pAc, vi, vi);
+         stencil_Ac = hypre_StructMatrixStencil(sAc);
+         stencil_old = hypre_StructMatrixStencil(sAc_old);
+         stencil_matches =
+            (hypre_StructStencilSize(stencil_Ac) ==
+             hypre_StructStencilSize(stencil_old));
+         if (stencil_matches)
+         {
+            for (s = 0; s < hypre_StructStencilSize(stencil_Ac); s++)
+            {
+               for (d = 0; d < hypre_SStructMatrixNDim(A); d++)
+               {
+                  if (hypre_IndexD(hypre_StructStencilOffset(stencil_Ac, s), d) !=
+                      hypre_IndexD(hypre_StructStencilOffset(stencil_old, s), d))
+                  {
+                     stencil_matches = 0;
+                  }
+               }
+            }
+         }
+
+         if (stencil_matches)
+         {
+            hypre_StructMatrixDestroy(sAc_old);
+            hypre_SStructPMatrixSMatrix(pAc, vi, vi) = sAc;
+            hypre_SStructPMatrixAccumulated(pAc) = 0;
+            sAc = NULL;
          }
          else
          {
-            /* Use generic StructMatmult */
-            hypre_StructMatrix *smatrices[3] = {sA, sP, sP};
-
-            hypre_StructMatmult(-1, 3, smatrices, 3, terms, trans, &sAc[part][vi][vi]);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "PFMG RAP stencil differs from SStruct PtAP stencil");
          }
-
-         /* Create SStructStencil object for M */
-         stencil  = hypre_StructMatrixStencil(sAc[part][vi][vi]);
-         st_size  = hypre_StructStencilSize(stencil);
-         st_shape = hypre_StructStencilShape(stencil);
-
-         HYPRE_SStructStencilCreate(ndim, st_size, &st_Ac);
-         for (s = 0; s < st_size; s++)
+         if (sAc)
          {
-            HYPRE_SStructStencilSetEntry(st_Ac, s, st_shape[s], vi);
+            hypre_StructMatrixDestroy(sAc);
          }
-         HYPRE_SStructGraphSetStencil(cgraph, part, vi, st_Ac);
-         HYPRE_SStructStencilDestroy(st_Ac);
       }
    }
 
-   /* Compute unstructured component of Ac */
-   //call to hypre_SStructMatrixMultComputeU
-
-   /* Assemble SStructGraph */
-   HYPRE_SStructGraphAssemble(cgraph);
-
-   /* Create Ac */
-   HYPRE_SStructMatrixCreate(comm, cgraph, &Ac);
-   HYPRE_SStructMatrixInitialize(Ac);
-   for (part = 0; part < nparts; part++)
-   {
-      pAc = hypre_SStructMatrixPMatrix(Ac, part);
-      for (vi = 0; vi < nvars; vi++)
-      {
-         hypre_StructMatrixDestroy(hypre_SStructPMatrixSMatrix(pAc, vi, vi));
-         hypre_SStructPMatrixSMatrix(pAc, vi, vi) = hypre_StructMatrixRef(sAc[part][vi][vi]);
-      }
-   }
-   ij_Ac = hypre_SStructMatrixIJMatrix(Ac);
-   hypre_IJMatrixDestroyParCSR(ij_Ac);
-   hypre_IJMatrixObject(ij_Ac) = NULL;
-   hypre_IJMatrixTranslator(ij_Ac) = NULL;
-   hypre_IJMatrixAssembleFlag(ij_Ac) = 1;
-   //hypre_IJMatrixSetObject(ij_Ac, parcsr_uAc);
+   /* Move overlapping U entries into the final structured representation. */
+   hypre_SStructMatmultComputeU(mmdata, Ac);
+   hypre_SStructMatmultDestroy(mmdata);
    HYPRE_SStructMatrixAssemble(Ac);
-
-   /* Set pointer to Ac */
    *Ac_ptr = Ac;
-
-   /* Free memory */
-   HYPRE_SStructGraphDestroy(cgraph);
-   for (part = 0; part < nparts; part++)
-   {
-      pcgrid = hypre_SStructGridPGrid(cgrid, part);
-      nvars  = hypre_SStructPGridNVars(pcgrid);
-
-      for (vi = 0; vi < nvars; vi++)
-      {
-         for (vj = 0; vj < nvars; vj++)
-         {
-            hypre_StructMatrixDestroy(sAc[part][vi][vj]);
-         }
-         hypre_TFree(sAc[part][vi], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(sAc[part], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(sAc, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

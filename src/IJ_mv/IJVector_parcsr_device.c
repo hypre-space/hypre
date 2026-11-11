@@ -110,13 +110,11 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
-                                    N0),         /* input value begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) +
-                                    N0),          /* output value begin */
-      char(0),                                                                           /* init */
+      thrust::make_reverse_iterator(I0 + N0), /* key begin */
+      thrust::make_reverse_iterator(I0),      /* key end */
+      thrust::make_reverse_iterator(X0 + N0), /* input value begin */
+      thrust::make_reverse_iterator(X + N0),  /* output value begin */
+      char(0),                                /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -193,12 +191,10 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
-                                    N0),         /* input value begin */
-      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) +
-                                    N0),         /* output value begin */
+      thrust::make_reverse_iterator(I0 + N0), /* key begin */
+      thrust::make_reverse_iterator(I0),      /* key end */
+      thrust::make_reverse_iterator(X0 + N0), /* input value begin */
+      thrust::make_reverse_iterator(X0 + N0), /* output value begin */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 

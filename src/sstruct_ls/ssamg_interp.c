@@ -116,7 +116,6 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
       else
       {
          /* This part is not coarsened */
-         hypre_IndexD(strides[part], 0) = 2;
          stencil_size_P     = 1;
          st_shape[part]     = hypre_CTAlloc(hypre_Index, 1, HYPRE_MEMORY_HOST);
          num_centries[part] = stencil_size_P;

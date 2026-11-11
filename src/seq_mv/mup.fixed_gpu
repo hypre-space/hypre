@@ -31,6 +31,7 @@ hypre_CSRMatrixSortDevice
 hypre_CSRMatrixSortRow
 hypre_CSRMatrixSortRowOutOfPlace
 hypre_CSRMatrixSpMVDevice
+hypre_CSRMatrixSpMVDeviceOutOfPlace
 hypre_CSRMatrixSplitDevice
 hypre_CSRMatrixSplitDevice_core
 hypre_CSRMatrixStack2Device
