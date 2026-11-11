@@ -2666,7 +2666,7 @@ main( hypre_int argc,
          hypre_printf("  -fromoneMMfile <filename> : ");
          hypre_printf("matrix read from a single file (MatrixMarket format)\n");
          hypre_printf("\n");
-         hypre_printf("  -laplacian             : build 5pt 2D laplacian problem (default) \n");
+         hypre_printf("  -laplacian             : build 7pt 3D laplacian problem (default) \n");
          hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
          hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
          hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
