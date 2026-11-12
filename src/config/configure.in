@@ -2727,7 +2727,7 @@ then
 
    if test "$hypre_using_thrust_nosync" = "yes"
    then
-      AC_DEFINE(HYPRE_ENABLE_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
+      AC_DEFINE(HYPRE_USING_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
    fi
 
    if test "x$hypre_using_cuda_streams" = "xyes"
@@ -2746,7 +2746,7 @@ AS_IF([test x"$hypre_using_hip" = x"yes"],
 
         if test "$hypre_using_thrust_nosync" = "yes"
         then
-           AC_DEFINE(HYPRE_ENABLE_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
+           AC_DEFINE(HYPRE_USING_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
         fi
 
         dnl hipcc is just a perl script that wraps things like detection

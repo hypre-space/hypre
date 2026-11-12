@@ -498,7 +498,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          func1 );
 #endif
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
@@ -789,7 +789,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          func1 );
 #endif
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {

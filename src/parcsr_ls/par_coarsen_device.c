@@ -172,7 +172,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                             (HYPRE_Int *) send_buf );
 #endif
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
          /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
          if (hypre_GetGpuAwareMPI())
          {
@@ -414,7 +414,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                      real_send_buf);
 #endif
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
@@ -614,7 +614,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
                      real_send_buf);
 #endif
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
@@ -638,7 +638,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
                      CF_marker_diag,
                      int_send_buf);
 
-#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure int_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {

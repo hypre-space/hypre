@@ -83,9 +83,6 @@
 /* Define to 1 if strictly checking OpenMP offload directives */
 #undef HYPRE_DEVICE_OPENMP_CHECK
 
-/* Define to 1 if using thrust par_nosync policy */
-#undef HYPRE_ENABLE_THRUST_NOSYNC
-
 /* Define as follows to set the Fortran name mangling scheme: 0 = unspecified;
    1 = no underscores; 2 = one underscore; 3 = two underscores; 4 = caps, no
    underscores; 5 = one underscore before and after */
@@ -282,6 +279,9 @@
 
 /* Define to 1 if using thread-local storage for global state */
 #undef HYPRE_USING_THREAD_LOCAL
+
+/* Define to 1 if using thrust par_nosync policy */
+#undef HYPRE_USING_THRUST_NOSYNC
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE
