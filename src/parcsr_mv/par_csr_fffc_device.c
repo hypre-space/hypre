@@ -417,7 +417,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
@@ -1606,7 +1606,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {

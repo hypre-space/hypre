@@ -214,7 +214,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
       A nonempty synchronous CUDA/HIP Thrust gather already synchronizes the stream;
       an empty gather needs an explicit sync only when receiving into x_tmp_data. */
 #if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)) && \
-    !defined(HYPRE_USING_THRUST_NOSYNC)
+    !defined(HYPRE_ENABLE_THRUST_NOSYNC)
    if (hypre_GetGpuAwareMPI() && send_map_num_elmts == 0 && num_recvs > 0)
 #else
    if (hypre_GetGpuAwareMPI())

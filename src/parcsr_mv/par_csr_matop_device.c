@@ -1495,7 +1495,7 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
                          thrust::plus<HYPRE_BigInt>() );
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
       /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
@@ -2020,7 +2020,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
 #endif
 
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
    /* make sure send_rdbuf_data is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {

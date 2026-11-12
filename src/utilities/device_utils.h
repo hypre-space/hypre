@@ -117,7 +117,7 @@ using hypre_DeviceItem = void*;
 #endif
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
 #if CUDA_VERSION < CUDA_THRUST_NOSYNC_VERSION
 #error thrust::cuda::par_nosync needs CUDA 12
 #endif
@@ -202,7 +202,10 @@ typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #include <rocrand/rocrand.h>
 #endif
 
-#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_ENABLE_THRUST_NOSYNC)
+#if HIP_VERSION < 50300000
+#error thrust::hip::par_nosync needs ROCm 5.3
+#endif
 #define HYPRE_THRUST_EXECUTION thrust::hip::par_nosync
 #else
 #define HYPRE_THRUST_EXECUTION thrust::hip::par
