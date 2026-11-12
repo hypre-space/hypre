@@ -11,6 +11,21 @@
 
 #if defined(HYPRE_USING_HIP) && defined(HYPRE_USING_ROCSPARSE)
 
+struct hypre_CSRMatrixRowNNZFunctor
+{
+   const HYPRE_Int *row_ptr;
+
+   explicit hypre_CSRMatrixRowNNZFunctor(const HYPRE_Int *row_ptr_in)
+   {
+      row_ptr = row_ptr_in;
+   }
+
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int row) const
+   {
+      return row_ptr[row + 1] - row_ptr[row];
+   }
+};
+
 static HYPRE_Int
 hypre_CSRSpGemmSortDeviceCopy(hypre_CSRMatrix *A,
                               HYPRE_Int       *A_j_sorted,
@@ -54,39 +69,61 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
    HYPRE_Complex       *d_b    = hypre_CSRMatrixData(B);
    const HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
    const HYPRE_Int      nnzB   = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Int  *d_ic, *d_jc, baseC, nnzC;
-   HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
-   HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
 
-   d_a_sorted  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
-   d_b_sorted  = hypre_TAlloc(HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE);
-   d_ja_sorted = hypre_TAlloc(HYPRE_Int,     nnzA, HYPRE_MEMORY_DEVICE);
-   d_jb_sorted = hypre_TAlloc(HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int            max_row_nnz;
+   HYPRE_Int            sort_A, sort_B;
+   HYPRE_Int           *d_ic, *d_jc, baseC, nnzC;
+   HYPRE_Int           *d_ja_sorted, *d_jb_sorted;
+   HYPRE_Complex       *d_c, *d_a_sorted, *d_b_sorted;
+
+   d_ja_sorted = d_ja;
+   d_a_sorted  = d_a;
+   d_jb_sorted = d_jb;
+   d_b_sorted  = d_b;
 
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
 
    rocsparse_operation transA = rocsparse_operation_none;
    rocsparse_operation transB = rocsparse_operation_none;
 
-   /* Copy the unsorted over as the initial "sorted" */
-   hypre_TMemcpy(d_ja_sorted, d_ja, HYPRE_Int,     nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_a_sorted,  d_a,  HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(d_b_sorted,  d_b,  HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   /* For rocSPARSE, unsorted rows work when their nonzero count is below 4096. */
+   max_row_nnz = HYPRE_THRUST_CALL(transform_reduce,
+                                   thrust::make_counting_iterator<HYPRE_Int>(0),
+                                   thrust::make_counting_iterator<HYPRE_Int>(m),
+                                   hypre_CSRMatrixRowNNZFunctor(d_ia),
+                                   HYPRE_Int(0),
+                                   thrust::maximum<HYPRE_Int>());
+   sort_A = max_row_nnz >= 4096 || max_row_nnz <= 0;
+   if (sort_A)
+   {
+      d_a_sorted  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+      d_ja_sorted = hypre_TAlloc(HYPRE_Int,     nnzA, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_ja_sorted, d_ja, HYPRE_Int,     nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_a_sorted,  d_a,  HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CSRSpGemmSortDeviceCopy(A, d_ja_sorted, d_a_sorted);
+   }
 
-   /* For rocSPARSE, the CSR SpGEMM implementation does not require the columns to be sorted! */
-   /* RL: for matrices with long rows, it seemed that the sorting is still needed */
-   /* VPM: Adding sorting back since it is necessary for correctness in a few cases */
-#if 1
-   hypre_CSRSpGemmSortDeviceCopy(A, d_ja_sorted, d_a_sorted);
-   hypre_CSRSpGemmSortDeviceCopy(B, d_jb_sorted, d_b_sorted);
-#endif
+   max_row_nnz = HYPRE_THRUST_CALL(transform_reduce,
+                                   thrust::make_counting_iterator<HYPRE_Int>(0),
+                                   thrust::make_counting_iterator<HYPRE_Int>(k),
+                                   hypre_CSRMatrixRowNNZFunctor(d_ib),
+                                   HYPRE_Int(0),
+                                   thrust::maximum<HYPRE_Int>());
+   sort_B = max_row_nnz >= 4096 || max_row_nnz <= 0;
+   if (sort_B)
+   {
+      d_b_sorted  = hypre_TAlloc(HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE);
+      d_jb_sorted = hypre_TAlloc(HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_b_sorted,  d_b,  HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CSRSpGemmSortDeviceCopy(B, d_jb_sorted, d_b_sorted);
+   }
+
+   d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
    // nnzTotalDevHostPtr points to host memory
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
    HYPRE_ROCSPARSE_CALL( rocsparse_set_pointer_mode(handle, rocsparse_pointer_mode_host) );
-
-   d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
    // For rocsparse, we need an extra buffer for computing the
    // csrgemmnnz and the csrgemm
@@ -157,10 +194,16 @@ hypre_CSRSpGemmVendor(hypre_CSRMatrix  *A,
    *d_c_out  = d_c;
    *nnzC_out = nnzC;
 
-   hypre_TFree(d_a_sorted,  HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_jb_sorted, HYPRE_MEMORY_DEVICE);
+   if (sort_A)
+   {
+      hypre_TFree(d_a_sorted,  HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
+   }
+   if (sort_B)
+   {
+      hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_jb_sorted, HYPRE_MEMORY_DEVICE);
+   }
 
    return hypre_error_flag;
 }
