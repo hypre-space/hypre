@@ -527,6 +527,24 @@ build systems.
    See :ref:`ch-boomeramg-gpu` for details. Some solver options for BoomerAMG
    require unified (managed) memory.
 
+Thrust Execution Policy
+^^^^^^^^^^^^^^^^^^^^^^^
+
+CUDA and HIP builds use Thrust's synchronous ``par`` execution policy by default.
+To enable ``par_nosync``, use ``--enable-thrust-nosync`` with ``--with-cuda`` or
+``--with-hip`` in Autotools, or set ``-DHYPRE_ENABLE_THRUST_NOSYNC=ON`` with
+``-DHYPRE_ENABLE_CUDA=ON`` or ``-DHYPRE_ENABLE_HIP=ON`` in CMake. This requires
+CUDA 12 or newer for ``thrust::cuda::par_nosync``, or ROCm 5.3 or newer for
+``thrust::hip::par_nosync``. The option does not apply to SYCL builds.
+
+The ``par_nosync`` policy allows Thrust algorithms to omit optional host
+synchronization. Individual operations may still synchronize when required, so
+enabling this option does not guarantee that every Thrust call is nonblocking.
+
+To restore the default synchronous policy, use ``--disable-thrust-nosync`` in
+Autotools or ``-DHYPRE_ENABLE_THRUST_NOSYNC=OFF`` in CMake. When enabled, both
+build systems define ``HYPRE_ENABLE_THRUST_NOSYNC`` in ``HYPRE_config.h``.
+
 .. _umpire_build:
 
 Building Umpire
