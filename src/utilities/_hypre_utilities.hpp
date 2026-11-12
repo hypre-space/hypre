@@ -435,6 +435,12 @@ typedef rocsparse_dnvec_descr rocsparse_const_dnvec_descr;
 #include <rocrand/rocrand.h>
 #endif
 
+#if defined(HYPRE_USING_THRUST_NOSYNC)
+#define HYPRE_THRUST_EXECUTION thrust::hip::par_nosync
+#else
+#define HYPRE_THRUST_EXECUTION thrust::hip::par
+#endif
+
 #endif /* defined(HYPRE_USING_HIP) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1048,7 +1054,7 @@ struct hypre_DeviceGraphData
    thrust::func_name(HYPRE_THRUST_EXECUTION(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(HYPRE_THRUST_EXECUTION(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
 #elif defined(HYPRE_USING_SYCL)
 
