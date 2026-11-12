@@ -315,6 +315,27 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (num_procs == 1) { seq_threshold = 0; }
 
+#if defined(HYPRE_USING_GPU)
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      if (seq_threshold > 0)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "BoomerAMG: SeqThreshold/Redundant is not supported with device execution!\n");
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+
+      if (nongalerk_num_tol > 0 || nongal_tol_array)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "BoomerAMG: Non-Galerkin coarse operators are not supported with device execution!\n");
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+   }
+#endif
+
    S = NULL;
 
    A_array = hypre_ParAMGDataAArray(amg_data);
