@@ -2744,6 +2744,11 @@ AS_IF([test x"$hypre_using_hip" = x"yes"],
         AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_HIP, 1, [HIP being used])
 
+        if test "$hypre_using_thrust_nosync" = "yes"
+        then
+           AC_DEFINE(HYPRE_USING_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
+        fi
+
         dnl hipcc is just a perl script that wraps things like detection
         dnl of the AMD GPU and the actual invocation of the clang compiler
         dnl from ROCm that supports HIP and all the command line foo needed

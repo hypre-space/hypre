@@ -10979,6 +10979,13 @@ printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
 printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
 
 
+        if test "$hypre_using_thrust_nosync" = "yes"
+        then
+
+printf "%s\n" "#define HYPRE_USING_THRUST_NOSYNC 1" >>confdefs.h
+
+        fi
+
 
                                 LINK_CC=${LINK_CXX}
 

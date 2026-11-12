@@ -147,10 +147,17 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v6
 
-      - name: Install dependencies
+      - name: Install AStyle 3.1
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y astyle=3.1-3build1
+          curl --fail --location --retry 3 \
+            --output "$RUNNER_TEMP/astyle-3.1.tar.gz" \
+            https://deb.debian.org/debian/pool/main/a/astyle/astyle_3.1.orig.tar.gz
+          echo "cbcc4cf996294534bb56f025d6f199ebfde81aa4c271ccbd5ee1c1a3192745d7  $RUNNER_TEMP/astyle-3.1.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/astyle-3.1.tar.gz" -C "$RUNNER_TEMP"
+          make -C "$RUNNER_TEMP/astyle/build/gcc" -j2 release
+          test "$("$RUNNER_TEMP/astyle/build/gcc/bin/astyle" --version)" = "Artistic Style Version 3.1"
+          echo "$RUNNER_TEMP/astyle/build/gcc/bin" >> "$GITHUB_PATH"
 
       - name: Check code formatting
         working-directory: src
