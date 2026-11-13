@@ -83,9 +83,9 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix *A, HYPRE_Int 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr )
 {
-   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGBuildModPartialExtPEInterpDevice)( A, CF_marker, S, num_cpts_global, num_old_cpts_global, debug_flag, trunc_factor, max_elmts, P_ptr );
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGBuildModPartialExtPEInterpDevice)( A, CF_marker, S, num_cpts_global, num_old_cpts_global, num_functions, dof_func, debug_flag, trunc_factor, max_elmts, P_ptr );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -166,6 +166,14 @@ HYPRE_Int
 hypre_BoomerAMGDD_FAC_JacobiDevice( void *amgdd_vdata, HYPRE_Int level )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGDD_FAC_JacobiDevice)( amgdd_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetDofFuncOffdDevice( hypre_ParCSRMatrix *A, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd_ptr )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_BoomerAMGGetDofFuncOffdDevice)( A, num_functions, dof_func, dof_func_offd_ptr );
 }
 
 /*--------------------------------------------------------------------------*/

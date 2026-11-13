@@ -1344,6 +1344,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
    {
       ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global,
                                                              num_old_cpts_global,
+                                                             num_functions, dof_func,
                                                              debug_flag, trunc_factor, max_elmts, P_ptr);
    }
    else

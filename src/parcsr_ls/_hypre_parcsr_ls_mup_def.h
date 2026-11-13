@@ -2278,6 +2278,7 @@
 #define hypre_BoomerAMGCreateSabs_rowcount HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGCreateSabs_rowcount )
 #define hypre_BoomerAMGDD_FAC_CFL1JacobiDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGDD_FAC_CFL1JacobiDevice )
 #define hypre_BoomerAMGDD_FAC_JacobiDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGDD_FAC_JacobiDevice )
+#define hypre_BoomerAMGGetDofFuncOffdDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGGetDofFuncOffdDevice )
 #define hypre_BoomerAMGIndepSetDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGIndepSetDevice )
 #define hypre_BoomerAMGIndepSetInitDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGIndepSetInitDevice )
 #define hypre_BoomerAMGInitDofFuncDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_BoomerAMGInitDofFuncDevice )

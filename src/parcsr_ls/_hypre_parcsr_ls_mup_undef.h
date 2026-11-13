@@ -2275,6 +2275,7 @@
 #undef hypre_BoomerAMGCreateSabs_rowcount
 #undef hypre_BoomerAMGDD_FAC_CFL1JacobiDevice
 #undef hypre_BoomerAMGDD_FAC_JacobiDevice
+#undef hypre_BoomerAMGGetDofFuncOffdDevice
 #undef hypre_BoomerAMGIndepSetDevice
 #undef hypre_BoomerAMGIndepSetInitDevice
 #undef hypre_BoomerAMGInitDofFuncDevice
