@@ -19,6 +19,8 @@
 // S_*_j is the special j-array from device SoC
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
+// For systems of PDEs (num_functions > 1), only entries that couple
+// the same function as the row are added, as done in the host code
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
@@ -28,11 +30,16 @@ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem    &item,
                                         bool           has_offd,
                                         HYPRE_Int     *CF_marker,
                                         HYPRE_Int     *A_diag_i,
+                                        HYPRE_Int     *A_diag_j,
                                         HYPRE_Complex *A_diag_a,
                                         HYPRE_Int     *Soc_diag_j,
                                         HYPRE_Int     *A_offd_i,
+                                        HYPRE_Int     *A_offd_j,
                                         HYPRE_Complex *A_offd_a,
                                         HYPRE_Int     *Soc_offd_j,
+                                        HYPRE_Int      num_functions,
+                                        HYPRE_Int     *dof_func,
+                                        HYPRE_Int     *dof_func_offd,
                                         HYPRE_Real    *rs,
                                         HYPRE_Int      flag)
 {
@@ -44,7 +51,7 @@ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem    &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int ib = 0, ie;
+   HYPRE_Int ib = 0, ie, dof_func_row = 0;
 
    if (lane == 0)
    {
@@ -55,6 +62,15 @@ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem    &item,
    if (ib >= flag)
    {
       return;
+   }
+
+   if (num_functions > 1)
+   {
+      if (lane == 0)
+      {
+         dof_func_row = read_only_load(&dof_func[row]);
+      }
+      dof_func_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_row, 0);
    }
 
    if (lane < 2)
@@ -68,7 +84,12 @@ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem    &item,
 
    for (HYPRE_Int i = ib + lane; i < ie; i += HYPRE_WARP_SIZE)
    {
-      rl += read_only_load(&A_diag_a[i]) * (read_only_load(&Soc_diag_j[i]) < 0);
+      if ( read_only_load(&Soc_diag_j[i]) < 0 &&
+           (num_functions == 1 ||
+            read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) == dof_func_row) )
+      {
+         rl += read_only_load(&A_diag_a[i]);
+      }
    }
 
    if (has_offd)
@@ -82,7 +103,12 @@ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem    &item,
 
       for (HYPRE_Int i = ib + lane; i < ie; i += HYPRE_WARP_SIZE)
       {
-         rl += read_only_load(&A_offd_a[i]) * (read_only_load(&Soc_offd_j[i]) < 0);
+         if ( read_only_load(&Soc_offd_j[i]) < 0 &&
+              (num_functions == 1 ||
+               read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) == dof_func_row) )
+         {
+            rl += read_only_load(&A_offd_a[i]);
+         }
       }
    }
 
@@ -787,6 +813,72 @@ void hypre_GPUKernelComputeDlamDtmp( hypre_DeviceItem    &item,
 }
 
 /*---------------------------------------------------------------------
+ * Get dof_func of the off-processor columns of A (systems of PDEs only)
+ *---------------------------------------------------------------------*/
+HYPRE_Int
+hypre_BoomerAMGGetDofFuncOffdDevice(hypre_ParCSRMatrix  *A,
+                                    HYPRE_Int            num_functions,
+                                    HYPRE_Int           *dof_func,
+                                    HYPRE_Int          **dof_func_offd_ptr)
+{
+   hypre_ParCSRCommPkg    *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_Int               num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Int              *dof_func_offd = NULL;
+   HYPRE_Int              *int_buf_data;
+   HYPRE_Int               num_sends, num_elmts_send;
+   hypre_ParCSRCommHandle *comm_handle;
+
+   *dof_func_offd_ptr = NULL;
+
+   if (num_functions <= 1)
+   {
+      return hypre_error_flag;
+   }
+
+   if (!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   }
+
+   num_sends      = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   int_buf_data   = hypre_TAlloc(HYPRE_Int, num_elmts_send, HYPRE_MEMORY_DEVICE);
+   dof_func_offd  = hypre_TAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
+
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+#if defined(HYPRE_USING_SYCL)
+   hypre_GatherSycl( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     dof_func,
+                     int_buf_data );
+#else
+   HYPRE_THRUST_CALL( gather,
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                      dof_func,
+                      int_buf_data );
+#endif
+
+#if defined(HYPRE_USING_THRUST_NOSYNC)
+   /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
+#endif
+
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
+                                                 HYPRE_MEMORY_DEVICE, dof_func_offd);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
+
+   *dof_func_offd_ptr = dof_func_offd;
+
+   return hypre_error_flag;
+}
+
+/*---------------------------------------------------------------------
  * Extended Interpolation in the form of Mat-Mat
  *---------------------------------------------------------------------*/
 HYPRE_Int
@@ -801,17 +893,17 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            max_elmts,
                                     hypre_ParCSRMatrix **P_ptr)
 {
-   HYPRE_UNUSED_VAR(num_functions);
    HYPRE_UNUSED_VAR(debug_flag);
-   HYPRE_UNUSED_VAR(dof_func);
 
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int          *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix    *A_offd       = hypre_ParCSRMatrixOffd(A);
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
 
    hypre_ParCSRMatrix *AFF, *AFC;
@@ -820,11 +912,15 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *rsFC, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
    HYPRE_Complex      *P_diag_data;
+   HYPRE_Int          *dof_func_offd = NULL;
 
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
 
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
+
+   /* dof_func of the off-processor columns (systems of PDEs only) */
+   hypre_BoomerAMGGetDofFuncOffdDevice(A, num_functions, dof_func, &dof_func_offd);
 
    /* 0. Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
@@ -839,13 +935,19 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                      A_offd_nnz > 0,
                      CF_marker,
                      A_diag_i,
+                     A_diag_j,
                      A_diag_data,
                      Soc_diag_j,
                      A_offd_i,
+                     A_offd_j,
                      A_offd_data,
                      Soc_offd_j,
+                     num_functions,
+                     dof_func,
+                     dof_func_offd,
                      rsWA,
                      0 );
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_DEVICE);
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
@@ -1010,17 +1112,17 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrix **P_ptr)
 {
    HYPRE_UNUSED_VAR(num_cpts_global);
-   HYPRE_UNUSED_VAR(num_functions);
-   HYPRE_UNUSED_VAR(dof_func);
    HYPRE_UNUSED_VAR(debug_flag);
 
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int          *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix    *A_offd       = hypre_ParCSRMatrixOffd(A);
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
    hypre_CSRMatrix    *AFF_ext = NULL;
    hypre_ParCSRMatrix *AFF, *AFC;
@@ -1029,6 +1131,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *rsFC, *rsFC_offd, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i, num_procs;
    HYPRE_Complex      *P_diag_data;
+   HYPRE_Int          *dof_func_offd = NULL;
 
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
 
@@ -1036,6 +1139,9 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
+
+   /* dof_func of the off-processor columns (systems of PDEs only) */
+   hypre_BoomerAMGGetDofFuncOffdDevice(A, num_functions, dof_func, &dof_func_offd);
 
    /* 0.Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
@@ -1050,13 +1156,19 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                      A_offd_nnz > 0,
                      CF_marker,
                      A_diag_i,
+                     A_diag_j,
                      A_diag_data,
                      Soc_diag_j,
                      A_offd_i,
+                     A_offd_j,
                      A_offd_data,
                      Soc_offd_j,
+                     num_functions,
+                     dof_func,
+                     dof_func_offd,
                      rsWA,
                      0 );
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_DEVICE);
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
@@ -1290,17 +1402,17 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **P_ptr)
 {
    HYPRE_UNUSED_VAR(num_cpts_global);
-   HYPRE_UNUSED_VAR(num_functions);
-   HYPRE_UNUSED_VAR(dof_func);
    HYPRE_UNUSED_VAR(debug_flag);
 
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int          *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix    *A_offd       = hypre_ParCSRMatrixOffd(A);
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
 
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
@@ -1313,6 +1425,10 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *dlam, *dtmp, *dtmp_offd, *rsFC, *rsWA, *rsW;
    HYPRE_Int          *P_diag_i, *P_diag_j, *P_offd_i;
    HYPRE_Complex      *P_diag_data;
+   HYPRE_Int          *dof_func_offd = NULL;
+
+   /* dof_func of the off-processor columns (systems of PDEs only) */
+   hypre_BoomerAMGGetDofFuncOffdDevice(A, num_functions, dof_func, &dof_func_offd);
 
    /* 0. Find row sums of weak elements */
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_FF) in the notes, only for F-pts */
@@ -1327,13 +1443,19 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                      A_offd_nnz > 0,
                      CF_marker,
                      A_diag_i,
+                     A_diag_j,
                      A_diag_data,
                      Soc_diag_j,
                      A_offd_i,
+                     A_offd_j,
                      A_offd_data,
                      Soc_offd_j,
+                     num_functions,
+                     dof_func,
+                     dof_func_offd,
                      rsWA,
                      0 );
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_DEVICE);
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
