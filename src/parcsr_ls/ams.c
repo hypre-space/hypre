@@ -3766,7 +3766,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
 {
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
-   HYPRE_Int  i, my_id = -1;
+   HYPRE_Int  i, my_id = -1, compute_norms;
    HYPRE_Real r0_norm = 1.0;
    HYPRE_Real r_norm  = 1.0;
    HYPRE_Real b_norm  = 1.0;
@@ -3940,10 +3940,13 @@ HYPRE_Int hypre_AMSSolve(void *solver,
       }
    }
 
+   /* The residual norms are only needed for the stopping criterion and for printing */
+   compute_norms = ams_data -> maxit > 1 && (ams_data -> tol > 0.0 || ams_data -> print_level > 0);
+
    for (i = 0; i < ams_data -> maxit; i++)
    {
       /* Compute initial residual norms */
-      if (ams_data -> maxit > 1 && i == 0)
+      if (compute_norms && i == 0)
       {
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
@@ -3987,7 +3990,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                z);
 
       /* Compute new residual norms */
-      if (ams_data -> maxit > 1)
+      if (compute_norms)
       {
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ams_data -> r0);
