@@ -74,6 +74,9 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
                                  omega, l1_norms, u, v, z);
          }
       }
+
+      /* u has been updated, as at the end of hypre_BoomerAMGRelax */
+      hypre_ParVectorAllZeros(u) = 0;
    }
 
    return hypre_error_flag;
@@ -4147,11 +4150,13 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
             hypre_ParCSRMatrixMatvecT(1.0, P[i], g0, 0.0, r[i]);
          }
 
-         hypre_ParVectorSetConstantValues(g[i], 0.0);
+         /* start from a zero guess flagged as zero, as for the coarse levels of BoomerAMG */
+         hypre_ParVectorSetZeros(g[i]);
          (*HB[i]) (B[i], (HYPRE_Matrix)A[i],
                    (HYPRE_Vector)r[i], (HYPRE_Vector)g[i]);
          hypre_ParCSRMatrixMatvec(1.0, P[i], g[i], 0.0, g0);
          hypre_ParVectorAxpy(1.0, g0, y);
+         hypre_ParVectorAllZeros(y) = 0;
       }
    }
 
