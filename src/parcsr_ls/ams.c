@@ -59,7 +59,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       }
       else if (relax_type == 3) /* Kaczmarz */
       {
-         hypre_BoomerAMGRelax(A, f, NULL, 20, 0, relax_weight, omega, l1_norms, u, v, z);
+         hypre_BoomerAMGRelax(A, f, NULL, 30, 0, relax_weight, omega, l1_norms, u, v, z);
       }
       else /* call BoomerAMG relaxation */
       {
