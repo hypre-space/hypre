@@ -962,6 +962,13 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Exit early if the restriction operator could not be built */
       if (HYPRE_GetError())
       {
+         hypre_ParCSRMatrixDestroy(A_FF);
+         hypre_ParCSRMatrixDestroy(A_FC);
+         hypre_ParCSRMatrixDestroy(A_CF);
+         hypre_ParCSRMatrixDestroy(Wr);
+         hypre_ParCSRMatrixDestroy(Wp);
+         hypre_ParCSRMatrixDestroy(S);
+         hypre_IntArrayDestroy(FC_marker);
          hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", level_name);
