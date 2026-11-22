@@ -959,6 +959,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       R_array[lev]  = R;
       RT_array[lev] = RT;
 
+      /* Exit early if the restriction operator could not be built */
+      if (HYPRE_GetError())
+      {
+         hypre_GpuProfilingPopRange();
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", level_name);
+         HYPRE_ANNOTATE_FUNC_END;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during restriction setup!");
+         return hypre_error_flag;
+      }
+
       /* Use block Jacobi F-relaxation with block Jacobi interpolation */
       hypre_sprintf(region_name, "F-Relax");
       hypre_GpuProfilingPushRange(region_name);
