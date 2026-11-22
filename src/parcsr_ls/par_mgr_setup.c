@@ -1458,6 +1458,11 @@ hypre_MGRSetup( void               *mgr_vdata,
                             F_array[num_c_levels],
                             U_array[num_c_levels]);
       }
+      else if (mgr_data -> coarse_grid_solver_setup == (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_BoomerAMGSetup)
+      {
+         hypre_ParAMGDataAArray((hypre_ParAMGData*) (mgr_data -> coarse_grid_solver))[0] =
+            A_array[num_c_levels];
+      }
    }
 
    hypre_GpuProfilingPopRange();
