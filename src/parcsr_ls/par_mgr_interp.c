@@ -231,9 +231,9 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
          hypre_ParCSRMatrixTranspose(A_FF, &A_FFT, 1);
       }
 
-      if (A_FC)
+      if (A_CF)
       {
-         hypre_ParCSRMatrixTranspose(A_FC, &A_FCT, 1);
+         hypre_ParCSRMatrixTranspose(A_CF, &A_FCT, 1);
       }
    }
 
