@@ -371,7 +371,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    }
 
    /* Compute number of AMG sublevels at each MGR level */
-   max_levels = num_levels_total;
+   max_levels = num_levels_total + 1;
    for (i = 0; i < num_levels_mgr; i++)
    {
       if (Frelax_type[i] == 2)
