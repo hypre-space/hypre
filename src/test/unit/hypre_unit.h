@@ -87,7 +87,7 @@
    do                                                                     \
    {                                                                      \
       HYPRE_Real hypre_unit_diff = hypre_abs((got) - (expected));         \
-      if (hypre_unit_diff > (tol))                                        \
+      if (!(hypre_unit_diff <= (tol))) /* fails on NaN */                 \
       {                                                                   \
          hypre_printf("  %s mismatch: got %.17e expected %.17e\n",        \
                       (name), (HYPRE_Real) (got),                         \
