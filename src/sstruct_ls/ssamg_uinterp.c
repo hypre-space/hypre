@@ -438,6 +438,14 @@ hypre_SSAMGSetupUInterpOp( hypre_SStructMatrix  *A,
                hypre_SetIndex(grow_index, 1);
                hypre_BoxGrowByIndex(compute_box, grow_index);
 
+               /* Uncoarsened parts are identity-mapped and remain all C-points.
+                * Keep advancing the row offset for later parts and variables. */
+               if (cdir < 0)
+               {
+                  box_start_index += hypre_BoxVolume(compute_box);
+                  continue;
+               }
+
                /* Don't add ghosts to the shrink box in the coarseining direction */
                /* WM: is this right??? What if num_ghosts is not 1??? */
                /* num_ghost[2 * cdir] -= 1; */
