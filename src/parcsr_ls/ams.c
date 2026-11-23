@@ -59,7 +59,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       }
       else if (relax_type == 3) /* Kaczmarz */
       {
-         hypre_BoomerAMGRelax(A, f, NULL, 20, 0, relax_weight, omega, l1_norms, u, v, z);
+         hypre_BoomerAMGRelax(A, f, NULL, 30, 0, relax_weight, omega, l1_norms, u, v, z);
       }
       else /* call BoomerAMG relaxation */
       {
@@ -74,6 +74,9 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
                                  omega, l1_norms, u, v, z);
          }
       }
+
+      /* u has been updated, as at the end of hypre_BoomerAMGRelax */
+      hypre_ParVectorAllZeros(u) = 0;
    }
 
    return hypre_error_flag;
@@ -3766,7 +3769,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
 {
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
-   HYPRE_Int  i, my_id = -1;
+   HYPRE_Int  i, my_id = -1, compute_norms;
    HYPRE_Real r0_norm = 1.0;
    HYPRE_Real r_norm  = 1.0;
    HYPRE_Real b_norm  = 1.0;
@@ -3940,10 +3943,13 @@ HYPRE_Int hypre_AMSSolve(void *solver,
       }
    }
 
+   /* The residual norms are only needed for the stopping criterion and for printing */
+   compute_norms = ams_data -> maxit > 1 && (ams_data -> tol > 0.0 || ams_data -> print_level > 0);
+
    for (i = 0; i < ams_data -> maxit; i++)
    {
       /* Compute initial residual norms */
-      if (ams_data -> maxit > 1 && i == 0)
+      if (compute_norms && i == 0)
       {
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
@@ -3987,7 +3993,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                z);
 
       /* Compute new residual norms */
-      if (ams_data -> maxit > 1)
+      if (compute_norms)
       {
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ams_data -> r0);
@@ -4144,11 +4150,13 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
             hypre_ParCSRMatrixMatvecT(1.0, P[i], g0, 0.0, r[i]);
          }
 
-         hypre_ParVectorSetConstantValues(g[i], 0.0);
+         /* start from a zero guess flagged as zero, as for the coarse levels of BoomerAMG */
+         hypre_ParVectorSetZeros(g[i]);
          (*HB[i]) (B[i], (HYPRE_Matrix)A[i],
                    (HYPRE_Vector)r[i], (HYPRE_Vector)g[i]);
          hypre_ParCSRMatrixMatvec(1.0, P[i], g[i], 0.0, g0);
          hypre_ParVectorAxpy(1.0, g0, y);
+         hypre_ParVectorAllZeros(y) = 0;
       }
    }
 

@@ -430,10 +430,10 @@ build systems.
        | (default is off)
      - ``--enable-device-malloc-async``
      - ``-DHYPRE_ENABLE_DEVICE_MALLOC_ASYNC=ON``
-   * - | Thrust async execution
-       | (default is off)
-     - ``--enable-thrust-async``
-     - ``-DHYPRE_ENABLE_THRUST_ASYNC=ON``
+   * - | Thrust ``par_nosync`` policy
+       | (default is off, requires **CUDA** 12+ or **ROCm** 5.3+)
+     - ``--enable-thrust-nosync``
+     - ``-DHYPRE_ENABLE_THRUST_NOSYNC=ON``
    * - | cuSPARSE Support
        | (default is on, **CUDA** only)
      - ``--enable-cusparse``

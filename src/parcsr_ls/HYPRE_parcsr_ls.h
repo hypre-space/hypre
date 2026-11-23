@@ -2858,7 +2858,9 @@ HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver  solver,
                                     HYPRE_Int    *num_iterations);
 
 /**
- * Returns the norm of the final relative residual.
+ * Returns the norm of the final relative residual. The residual norms are
+ * only computed when the maximum number of iterations is larger than 1 and
+ * the tolerance or the print level is positive; otherwise this returns 0.
  **/
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 HYPRE_Real   *rel_resid_norm);
@@ -3118,7 +3120,9 @@ HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver  solver,
                                     HYPRE_Int    *num_iterations);
 
 /**
- * Returns the norm of the final relative residual.
+ * Returns the norm of the final relative residual. The residual norms are
+ * only computed when the maximum number of iterations is larger than 1 and
+ * the tolerance or the print level is positive; otherwise this returns 0.
  **/
 HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 HYPRE_Real   *rel_resid_norm);
