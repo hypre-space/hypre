@@ -29,8 +29,6 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
                                           hypre_ParVector    *b,
                                           hypre_ParVector    *y )
 {
-   hypre_GpuProfilingPushRange("Matvec");
-
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -65,6 +63,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    HYPRE_Int                num_procs;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Matvec");
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_GetSyncCudaCompute(&sync_stream);
@@ -273,9 +272,8 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
+   HYPRE_ANNOTATE_REGION_END("%s", "Matvec");
    HYPRE_ANNOTATE_FUNC_END;
-
-   hypre_GpuProfilingPopRange();
 
    return ierr;
 }
@@ -291,8 +289,6 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
                                  HYPRE_Complex       beta,
                                  hypre_ParVector    *y )
 {
-   hypre_GpuProfilingPushRange("MatvecT");
-
    hypre_ParCSRCommPkg     *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int                send_map_num_elmts;
@@ -324,6 +320,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    HYPRE_Int                sync_stream;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "MatvecT");
 
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(0);
@@ -528,9 +525,8 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
+   HYPRE_ANNOTATE_REGION_END("%s", "MatvecT");
    HYPRE_ANNOTATE_FUNC_END;
-
-   hypre_GpuProfilingPopRange();
 
    return ierr;
 }
