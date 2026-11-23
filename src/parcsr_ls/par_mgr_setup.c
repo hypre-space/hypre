@@ -1138,7 +1138,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                   /* Reuse explicitly requested by the application. Keep the
                    * existing child solver setup and only update A_FF above so
                    * the solve path has the current F-block matrix pointer. */
-                  if (Frelax_type[lev] == 2)
+                  if (hypre_SolverSetup(aff_base) == (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
                   {
                      hypre_ParAMGDataAArray((hypre_ParAMGData*) aff_solver[lev])[0] = A_FF;
                   }
