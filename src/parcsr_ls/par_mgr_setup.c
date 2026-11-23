@@ -927,7 +927,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          block_jacobi_bsize = level_blk_size - block_num_coarse_indexes[lev];
       }
 
-      if (block_jacobi_bsize == 1 && interp_type[lev] == 12)
+      if (block_jacobi_bsize <= 1 && interp_type[lev] == 12)
       {
          interp_type[lev] = 2;
       }
@@ -949,11 +949,13 @@ hypre_MGRSetup( void               *mgr_vdata,
       P_array[lev] = P;
 
       /* Build Restriction operator */
-      if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
+      if (block_jacobi_bsize <= 1 && restrict_type[lev] == 12)
       {
          restrict_type[lev] = 2;
       }
       err_prev = HYPRE_GetError();
+      R  = NULL;
+      RT = NULL;
       hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                              strong_threshold, max_row_sum, block_jacobi_bsize,
@@ -962,7 +964,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       RT_array[lev] = RT;
 
       /* Exit early if the restriction operator could not be built */
-      if (HYPRE_GetError() != err_prev)
+      if (HYPRE_GetError() != err_prev ||
+          (restrict_type[lev] == 14 || restrict_type[lev] == 15 ? !R : !RT))
       {
          hypre_ParCSRMatrixDestroy(A_FF);
          hypre_ParCSRMatrixDestroy(A_FC);

@@ -304,6 +304,14 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
+      if (blk_size < 1)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "CPR-like restriction requires a block size >= 1");
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+
       /* TODO: create a function with this block (VPM) */
       hypre_ParCSRMatrix   *A_CF_blk    = NULL;
       hypre_ParCSRMatrix   *A_CFT_blk   = NULL;
