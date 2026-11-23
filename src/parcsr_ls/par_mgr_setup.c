@@ -967,10 +967,18 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParCSRMatrixDestroy(A_FF);
          hypre_ParCSRMatrixDestroy(A_FC);
          hypre_ParCSRMatrixDestroy(A_CF);
+         hypre_ParCSRMatrixDestroy(A_CC);
          hypre_ParCSRMatrixDestroy(Wr);
          hypre_ParCSRMatrixDestroy(Wp);
          hypre_ParCSRMatrixDestroy(S);
          hypre_IntArrayDestroy(FC_marker);
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            hypre_TFree(level_coarse_indexes[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(level_coarse_indexes, HYPRE_MEMORY_HOST);
+         hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
+         (mgr_data -> num_coarse_levels) = lev + 1;
          hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", level_name);
