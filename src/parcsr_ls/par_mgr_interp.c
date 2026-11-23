@@ -2854,6 +2854,7 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
    HYPRE_Int                row_major = 0;
+   HYPRE_Real               fnorm;
 
    /* Sanity check */
    if (!Wp_ptr || !P_ptr)
@@ -2890,6 +2891,17 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
                                                            hypre_ParCSRMatrixRowStarts(A_FF),
                                                            hypre_ParCSRMatrixColStarts(A_FF),
                                                            b_FF);
+
+   /* A singular block (e.g., signed row sums that cancel) inverts to INF/NaN */
+   fnorm = hypre_ParCSRMatrixFnorm(A_FF_inv);
+   if (fnorm - fnorm != 0.0)
+   {
+      hypre_ParCSRMatrixDestroy(A_FF_inv);
+      hypre_DenseBlockMatrixDestroy(b_FF);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Singular block row sum in row-lumped prolongation");
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
    /* Multiply by A_FC */
    Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);

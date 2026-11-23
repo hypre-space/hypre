@@ -963,8 +963,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       R_array[lev]  = R;
       RT_array[lev] = RT;
 
-      /* Exit early if the restriction operator could not be built */
-      if (HYPRE_GetError() != err_prev ||
+      /* Exit early if the prolongation or restriction operator could not be built */
+      if (HYPRE_GetError() != err_prev || !P ||
           (restrict_type[lev] == 14 || restrict_type[lev] == 15 ? !R : !RT))
       {
          hypre_ParCSRMatrixDestroy(A_FF);
