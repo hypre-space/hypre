@@ -2648,21 +2648,14 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
       return hypre_error_flag;
    }
 
-   /* Each rank must own whole blocks: one C point per block_dim F points.
-      The decision is collective since the block column sums communicate. */
+   /* Every rank must own whole blocks (collective: the block column sums communicate) */
+   HYPRE_Int bad = (sizes[1] != sizes[0] * block_dim), bad_max;
+   hypre_MPI_Allreduce(&bad, &bad_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX,
+                       hypre_ParCSRMatrixComm(A_CF));
+   if (bad_max)
    {
-      HYPRE_Int bad_local  = (sizes[1] != sizes[0] * block_dim);
-      HYPRE_Int bad_global = 0;
-
-      hypre_MPI_Allreduce(&bad_local, &bad_global, 1, HYPRE_MPI_INT, hypre_MPI_MAX,
-                          hypre_ParCSRMatrixComm(A_CF));
-      if (bad_global)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "Block column-lumped restriction requires every rank to own "
-                           "whole blocks (one C point per block)");
-         return hypre_error_flag;
-      }
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Column-lumped restriction needs whole blocks per rank");
+      return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
