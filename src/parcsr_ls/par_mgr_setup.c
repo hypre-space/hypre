@@ -37,6 +37,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  *R  = NULL;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *S = NULL;
+   HYPRE_Int            err_prev = 0;
    hypre_ParCSRMatrix  *Wp = NULL;
    hypre_ParCSRMatrix  *Wr = NULL;
 
@@ -952,6 +953,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          restrict_type[lev] = 2;
       }
+      err_prev = HYPRE_GetError();
       hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                              strong_threshold, max_row_sum, block_jacobi_bsize,
@@ -960,7 +962,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       RT_array[lev] = RT;
 
       /* Exit early if the restriction operator could not be built */
-      if (HYPRE_GetError())
+      if (HYPRE_GetError() != err_prev)
       {
          hypre_ParCSRMatrixDestroy(A_FF);
          hypre_ParCSRMatrixDestroy(A_FC);
