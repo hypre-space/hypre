@@ -186,7 +186,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         hypre_ParCSRMatrix    *A_FF,
-                        hypre_ParCSRMatrix    *A_FC,
                         hypre_ParCSRMatrix    *A_CF,
                         hypre_IntArray        *CF_marker,
                         HYPRE_BigInt          *num_cpts_global,
@@ -210,8 +209,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
    /* Local variables */
    hypre_ParCSRMatrix    *AT    = NULL;
-   hypre_ParCSRMatrix    *A_FFT = NULL;
-   hypre_ParCSRMatrix    *A_FCT = NULL;
    hypre_ParCSRMatrix    *ST    = NULL;
 
 #if defined (HYPRE_USING_GPU)
@@ -225,16 +222,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    if (restrict_type > 0 && restrict_type != 14)
    {
       hypre_ParCSRMatrixTranspose(A, &AT, 1);
-
-      if (A_FF)
-      {
-         hypre_ParCSRMatrixTranspose(A_FF, &A_FFT, 1);
-      }
-
-      if (A_CF)
-      {
-         hypre_ParCSRMatrixTranspose(A_CF, &A_FCT, 1);
-      }
    }
 
    /* Restriction for each level */
@@ -300,7 +287,16 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
    else if (restrict_type == 12)
    {
-      hypre_MGRBuildBlockJacobiP(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker_data, &RT);
+      hypre_ParCSRMatrix *A_FFT = NULL;
+      hypre_ParCSRMatrix *A_CFT = NULL;
+
+      /* Build R^T as block-Jacobi interpolation on A^T. */
+      hypre_ParCSRMatrixTranspose(A_FF, &A_FFT, 1);
+      hypre_ParCSRMatrixTranspose(A_CF, &A_CFT, 1);
+      hypre_MGRBuildBlockJacobiP(AT, A_FFT, A_CFT, NULL, blk_size, CF_marker_data, &RT);
+
+      hypre_ParCSRMatrixDestroy(A_FFT);
+      hypre_ParCSRMatrixDestroy(A_CFT);
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
@@ -377,7 +373,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                                  trunc_factor, max_elmts, &RT);
    }
 
-   /* Compute R^T so it can be used in the solve phase */
+   /* Cache the local transposes of R^T for the solve phase. */
    if (RT)
    {
       hypre_ParCSRMatrixLocalTranspose(RT);
@@ -390,8 +386,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(AT);
-   hypre_ParCSRMatrixDestroy(A_FFT);
-   hypre_ParCSRMatrixDestroy(A_FCT);
    hypre_ParCSRMatrixDestroy(ST);
 
    hypre_GpuProfilingPopRange();

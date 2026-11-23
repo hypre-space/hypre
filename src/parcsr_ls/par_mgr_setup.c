@@ -956,7 +956,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       err_prev = HYPRE_GetError();
       R  = NULL;
       RT = NULL;
-      hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
+      hypre_MGRBuildRestrict(A_array[lev], A_FF, A_CF, CF_marker_array[lev],
                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                              strong_threshold, max_row_sum, block_jacobi_bsize,
                              restrict_type[lev], &Wr, &R, &RT);
