@@ -486,7 +486,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows
+ * option 1 = Compute the l1 norm of the rows (zero norms are set to inf)
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -627,6 +627,29 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       if (num_cols_offd)
       {
          hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
+      }
+
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
+         [] (const auto & x) {return !x;}, INFINITY );
+#else
+         HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
+                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), INFINITY );
+#endif
+      }
+      else
+#endif
+      {
+         for (i = 0; i < num_rows; i++)
+         {
+            if (l1_norm[i] == 0.0)
+            {
+               l1_norm[i] = INFINITY;
+            }
+         }
       }
    }
    else if (option == 2)
@@ -4516,7 +4539,7 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows
+ * option 1 = Compute the l1 norm of the rows (zero norms are set to inf)
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -4647,6 +4670,10 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                         l1_norm[i] += hypre_abs(A_offd_data[j]);
                      }
                }
+            }
+            if (l1_norm[i] == 0.0)
+            {
+               l1_norm[i] = INFINITY;
             }
          }
       }

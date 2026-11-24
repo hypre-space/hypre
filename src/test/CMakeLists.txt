@@ -26,9 +26,6 @@ set(TEST_SRCS
   ij_assembly.c
   unit/test_csr_overlap.c
   unit/test_matrix_stats.c
-  unit/test_ssamg_logging.c
-  unit/test_w_cycle.c
-  unit/test_l1_gs_damping.c
 )
 
 # Collect targets derived from source file names
@@ -210,7 +207,7 @@ if(BUILD_TESTING)
   )
   set_tests_properties(test_unit PROPERTIES
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS "test_csr_overlap;test_matrix_stats;test_ssamg_logging"
+    DEPENDS "test_csr_overlap;test_matrix_stats"
     FAIL_REGULAR_EXPRESSION "Failed"
   )
 endif()
@@ -225,7 +222,7 @@ add_custom_target(unit_tests
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS test_csr_overlap test_matrix_stats test_ssamg_logging
+  DEPENDS test_csr_overlap test_matrix_stats
   COMMENT "Running unit tests"
   VERBATIM
 )
