@@ -858,7 +858,7 @@ hypre_BoomerAMGDestroy( void *data )
          hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
       }
 
-      if (smooth_num_levels)
+      if (smooth_num_levels && smoother)
       {
          if ( hypre_ParAMGDataSmoothType(amg_data) == 7 ||
               hypre_ParAMGDataSmoothType(amg_data) == 17 )
