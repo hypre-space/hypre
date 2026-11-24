@@ -179,7 +179,11 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 #endif
                for (i = 0; i < num_rows; i++)
                {
-                  u_data[i] += v_data[i] / hypre_VectorData(l1_norms_lvl)[i];
+                  HYPRE_Real norm = hypre_VectorData(l1_norms_lvl)[i];
+                  if (norm != 0.0)
+                  {
+                     u_data[i] += v_data[i] / norm;
+                  }
                }
             }
          }
@@ -880,7 +884,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 #endif
          for (i = 0; i < num_rows_tmp; i++)
          {
-            D_data[i] = 1.0 / hypre_VectorData(l1_norms)[i];
+            HYPRE_Real norm = hypre_VectorData(l1_norms)[i];
+            D_data[i] = norm != 0.0 ? 1.0 / norm : 0.0;
             L_diag_i[cnt_row + i] = start_diag + A_tmp_diag_i[i + 1];
             L_offd_i[cnt_row + i] = start_offd + A_tmp_offd_i[i + 1];
          }
@@ -1146,7 +1151,8 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 #endif
          for (i = 0; i < num_rows_tmp; i++)
          {
-            D_inv[l1_start + i] = 1.0 / hypre_VectorData(l1_norms)[i];
+            HYPRE_Real norm = hypre_VectorData(l1_norms)[i];
+            D_inv[l1_start + i] = norm != 0.0 ? 1.0 / norm : 0.0;
          }
       }
       l1_start += num_rows_tmp;

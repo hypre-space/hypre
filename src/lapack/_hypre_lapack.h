@@ -72,7 +72,7 @@ extern "C" {
 #define hypre_dsygv   hypre_F90_NAME_LAPACK(ssygv ,SSYGV )
 #define hypre_dsytd2  hypre_F90_NAME_LAPACK(ssytd2,SSYTD2)
 #define hypre_dsytrd  hypre_F90_NAME_LAPACK(ssytrd,SSYTRD)
-#define hypre_dtrti2  hypre_F90_NAME_LAPACK(strtri,STRTI2)
+#define hypre_dtrti2  hypre_F90_NAME_LAPACK(strti2,STRTI2)
 #define hypre_dtrtri  hypre_F90_NAME_LAPACK(strtri,STRTRI)
 #else
 #define hypre_dbdsqr  hypre_F90_NAME_LAPACK(dbdsqr,DBDSQR)
@@ -115,7 +115,7 @@ extern "C" {
 #define hypre_dsygv   hypre_F90_NAME_LAPACK(dsygv ,DSYGV )
 #define hypre_dsytd2  hypre_F90_NAME_LAPACK(dsytd2,DSYTD2)
 #define hypre_dsytrd  hypre_F90_NAME_LAPACK(dsytrd,DSYTRD)
-#define hypre_dtrti2  hypre_F90_NAME_LAPACK(dtrtri,DTRTI2)
+#define hypre_dtrti2  hypre_F90_NAME_LAPACK(dtrti2,DTRTI2)
 #define hypre_dtrtri  hypre_F90_NAME_LAPACK(dtrtri,DTRTRI)
 #endif
 #endif

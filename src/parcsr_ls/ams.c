@@ -486,7 +486,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows (zero norms are set to inf)
+ * option 1 = Compute the l1 norm of the rows, allowing zero norms
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -628,29 +628,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       {
          hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, l1_norm, 1, 1.0, "add");
       }
-
-#if defined(HYPRE_USING_GPU)
-      if (exec == HYPRE_EXEC_DEVICE)
-      {
-#if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
-         [] (const auto & x) {return !x;}, INFINITY );
-#else
-         HYPRE_THRUST_CALL(replace_if, l1_norm, l1_norm + num_rows,
-                           HYPRE_THRUST_NOT(HYPRE_THRUST_IDENTITY(HYPRE_Complex)), INFINITY );
-#endif
-      }
-      else
-#endif
-      {
-         for (i = 0; i < num_rows; i++)
-         {
-            if (l1_norm[i] == 0.0)
-            {
-               l1_norm[i] = INFINITY;
-            }
-         }
-      }
    }
    else if (option == 2)
    {
@@ -786,18 +763,24 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       hypre_TransformIfSycl( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                              std::negate<HYPRE_Real>(),
                              is_negative<HYPRE_Real>() );
-      bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
-                                                oneapi::dpl::minimum<HYPRE_Real>() );
 #else
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                          thrust::negate<HYPRE_Real>(),
                          is_negative<HYPRE_Real>() );
-      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
-                                                thrust::minimum<HYPRE_Real>() );
 #endif
-      if ( any_zero )
+      if (option != 1)
       {
-         hypre_error_in_arg(1);
+#if defined(HYPRE_USING_SYCL)
+         bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
+                                                   oneapi::dpl::minimum<HYPRE_Real>() );
+#else
+         bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
+                                                   thrust::minimum<HYPRE_Real>() );
+#endif
+         if (any_zero)
+         {
+            hypre_error_in_arg(1);
+         }
       }
    }
    else
@@ -811,13 +794,15 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
       }
 
-      for (i = 0; i < num_rows; i++)
+      if (option != 1)
       {
-         /* if (hypre_abs(l1_norm[i]) < DBL_EPSILON) */
-         if (hypre_abs(l1_norm[i]) == 0.0)
+         for (i = 0; i < num_rows; i++)
          {
-            hypre_error_in_arg(1);
-            break;
+            if (l1_norm[i] == 0.0)
+            {
+               hypre_error_in_arg(1);
+               break;
+            }
          }
       }
    }
@@ -4539,7 +4524,7 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows (zero norms are set to inf)
+ * option 1 = Compute the l1 norm of the rows, allowing zero norms
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -4670,10 +4655,6 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                         l1_norm[i] += hypre_abs(A_offd_data[j]);
                      }
                }
-            }
-            if (l1_norm[i] == 0.0)
-            {
-               l1_norm[i] = INFINITY;
             }
          }
       }
@@ -4912,18 +4893,22 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       {
          /* Handle negative definite matrices */
          for (i = ns; i < ne; i++)
-            if (A_diag_data[A_diag_I[i]] < 0)
+            if (A_diag_I[i] < A_diag_I[i + 1] && A_diag_data[A_diag_I[i]] < 0.0)
             {
                l1_norm[i] = -l1_norm[i];
             }
 
-         for (i = ns; i < ne; i++)
-            /* if (hypre_abs(l1_norm[i]) < DBL_EPSILON) */
-            if (hypre_abs(l1_norm[i]) == 0.0)
+         if (option != 1)
+         {
+            for (i = ns; i < ne; i++)
             {
-               hypre_error_in_arg(1);
-               break;
+               if (l1_norm[i] == 0.0)
+               {
+                  hypre_error_in_arg(1);
+                  break;
+               }
             }
+         }
       }
 
    }

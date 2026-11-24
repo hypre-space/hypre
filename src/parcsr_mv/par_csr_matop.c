@@ -3168,7 +3168,8 @@ HYPRE_Complex hypre_ParCSRMatrixLocalSumElts( hypre_ParCSRMatrix * A )
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatAminvDB
- * computes C = (A - inv(D)B) where D is a diagonal matrix
+ * computes C = (A - inv(D)B) where D is a diagonal matrix.
+ * A zero diagonal entry contributes zero to inv(D)B.
  * Note: Data structure of A is expected to be a subset of data structure of B!
  *--------------------------------------------------------------------------*/
 
@@ -3310,7 +3311,7 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix  *A,
 
       for (i = ns; i < ne; i++)
       {
-         D_tmp[i] = 1.0 / d[i];
+         D_tmp[i] = d[i] != 0.0 ? 1.0 / d[i] : 0.0;
       }
 
       num_cols = C_diag_i[ns];
