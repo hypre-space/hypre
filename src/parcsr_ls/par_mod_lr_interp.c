@@ -560,8 +560,8 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildExtInterpDevice(A, CF_marker, S, num_cpts_global, 1, NULL,
-                                                 debug_flag, trunc_factor, max_elmts, P_ptr);
+      ierr = hypre_BoomerAMGBuildExtInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
+                                                 dof_func, debug_flag, trunc_factor, max_elmts, P_ptr);
    }
    else
 #endif
@@ -850,22 +850,30 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
 
          if (num_functions > 1)
          {
+            /* dof_func_offd is indexed by the columns of A_offd, so the
+               communication package of A must be used here (not As_FF's) */
+            hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
             HYPRE_Int *int_buf_data = NULL;
             HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+            if (!comm_pkg_A)
+            {
+               hypre_MatvecCommPkgCreate(A);
+               comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+            }
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;
-            num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+            num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
+            int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg_A, num_sends),
                                          HYPRE_MEMORY_HOST);
             for (i = 0; i < num_sends; i++)
             {
-               startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+               startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg_A, i);
+               for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_A, i + 1); j++)
                {
-                  int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+                  int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg_A, j)];
                }
             }
-            comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, dof_func_offd);
+            comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg_A, int_buf_data, dof_func_offd);
             hypre_ParCSRCommHandleDestroy(comm_handle);
             hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
          }
@@ -1236,8 +1244,8 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A, CF_marker, S, num_cpts_global, 1, NULL,
-                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
+      ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
+                                                   dof_func, debug_flag, trunc_factor, max_elmts, P_ptr);
    }
    else
 #endif
@@ -1875,8 +1883,8 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A, CF_marker, S, num_cpts_global, 1, NULL,
-                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
+      ierr = hypre_BoomerAMGBuildExtPEInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
+                                                   dof_func, debug_flag, trunc_factor, max_elmts, P_ptr);
    }
    else
 #endif

@@ -16,8 +16,10 @@ SYCL_EXTERNAL
 #endif
 __global__ void hypre_GPUKernelComputeWeakRowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                    bool has_offd,
-                                                   HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
-                                                   HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
+                                                   HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Complex *A_diag_a,
+                                                   HYPRE_Int *S_diag_j, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_a,
+                                                   HYPRE_Int *S_offd_j, HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                                   HYPRE_Int *dof_func_offd, HYPRE_Real *rs, HYPRE_Int flag );
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
@@ -386,11 +388,16 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                      A_offd_nnz > 0,
                      CF_marker,
                      A_diag_i,
+                     NULL,
                      A_diag_data,
                      Soc_diag_j,
                      A_offd_i,
+                     NULL,
                      A_offd_data,
                      Soc_offd_j,
+                     1,
+                     NULL,
+                     NULL,
                      rsWA,
                      -1 );
 
@@ -587,6 +594,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  hypre_ParCSRMatrix  *S,
                                                  HYPRE_BigInt        *num_cpts_global,     /* C2 */
                                                  HYPRE_BigInt        *num_old_cpts_global, /* C2 + F2 */
+                                                 HYPRE_Int            num_functions,
+                                                 HYPRE_Int           *dof_func,
                                                  HYPRE_Int            debug_flag,
                                                  HYPRE_Real           trunc_factor,
                                                  HYPRE_Int            max_elmts,
@@ -598,12 +607,15 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int          *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int          *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix    *A_offd       = hypre_ParCSRMatrixOffd(A);
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int          *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
    HYPRE_Complex      *Dbeta, *rsWA, *rsW, *dlam, *dlam_offd, *dtmp, *dtmp_offd;
    hypre_ParCSRMatrix *As_F2F, *As_FF, *As_FC, *W, *P;
+   HYPRE_Int          *dof_func_offd = NULL;
 
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
 
@@ -724,6 +736,9 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
+   /* dof_func of the off-processor columns (systems of PDEs only) */
+   hypre_BoomerAMGGetDofFuncOffdDevice(A, num_functions, dof_func, &dof_func_offd);
+
    /* weak row sum and diagonal, i.e., DFF + Dgamma */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_local, HYPRE_MEMORY_DEVICE);
 
@@ -736,13 +751,19 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                      A_offd_nnz > 0,
                      CF_marker,
                      A_diag_i,
+                     A_diag_j,
                      A_diag_data,
                      Soc_diag_j,
                      A_offd_i,
+                     A_offd_j,
                      A_offd_data,
                      Soc_offd_j,
+                     num_functions,
+                     dof_func,
+                     dof_func_offd,
                      rsWA,
                      -1 );
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_DEVICE);
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)

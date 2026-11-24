@@ -77,11 +77,11 @@ HYPRE_Int
 hypre_BoomerAMGBuildModPartialExtInterpDevice_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int debug_flag, hypre_long_double trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtPEInterpDevice_flt( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int debug_flag, hypre_float trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+hypre_BoomerAMGBuildModPartialExtPEInterpDevice_flt( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, hypre_float trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtPEInterpDevice_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int debug_flag, hypre_double trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+hypre_BoomerAMGBuildModPartialExtPEInterpDevice_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, hypre_double trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int
-hypre_BoomerAMGBuildModPartialExtPEInterpDevice_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int debug_flag, hypre_long_double trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+hypre_BoomerAMGBuildModPartialExtPEInterpDevice_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_BigInt *num_old_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, hypre_long_double trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrNeumannAIRDevice_flt( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int NeumannDeg, hypre_float strong_thresholdR, hypre_float filter_thresholdR, HYPRE_Int debug_flag, hypre_ParCSRMatrix **R_ptr );
@@ -152,6 +152,13 @@ HYPRE_Int
 hypre_BoomerAMGDD_FAC_JacobiDevice_dbl( void *amgdd_vdata, HYPRE_Int level );
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_JacobiDevice_long_dbl( void *amgdd_vdata, HYPRE_Int level );
+
+HYPRE_Int
+hypre_BoomerAMGGetDofFuncOffdDevice_flt( hypre_ParCSRMatrix *A, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd_ptr );
+HYPRE_Int
+hypre_BoomerAMGGetDofFuncOffdDevice_dbl( hypre_ParCSRMatrix *A, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd_ptr );
+HYPRE_Int
+hypre_BoomerAMGGetDofFuncOffdDevice_long_dbl( hypre_ParCSRMatrix *A, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int **dof_func_offd_ptr );
 
 HYPRE_Int
 hypre_BoomerAMGIndepSetDevice_flt( hypre_ParCSRMatrix *S, hypre_float *measure_diag, hypre_float *measure_offd, HYPRE_Int graph_diag_size, HYPRE_Int *graph_diag, HYPRE_Int *IS_marker_diag, HYPRE_Int *IS_marker_offd, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int *int_send_buf );
