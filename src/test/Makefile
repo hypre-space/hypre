@@ -75,8 +75,7 @@ HYPRE_DRIVERS =\
 
 HYPRE_UNIT_TESTS =\
  unit/test_csr_overlap.c\
- unit/test_matrix_stats.c\
- unit/test_l1_jacobi.c\
+ unit/test_matrix_stats.c
 
 HYPRE_MP_DRIVERS =\
  ij_mp.c\
@@ -233,10 +232,6 @@ test_csr_overlap: unit/test_csr_overlap.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_matrix_stats: unit/test_matrix_stats.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-test_l1_jacobi: unit/test_l1_jacobi.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

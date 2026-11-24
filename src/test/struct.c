@@ -243,22 +243,18 @@ main( hypre_int argc,
       }
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
-         arg_index++;
          memory_location = HYPRE_MEMORY_HOST;
       }
       else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
       {
-         arg_index++;
          memory_location = HYPRE_MEMORY_DEVICE;
       }
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
-         arg_index++;
          default_exec_policy = HYPRE_EXEC_HOST;
       }
       else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
       {
-         arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
    }
