@@ -37,6 +37,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  *R  = NULL;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *S = NULL;
+   HYPRE_Int            err_prev = 0;
    hypre_ParCSRMatrix  *Wp = NULL;
    hypre_ParCSRMatrix  *Wr = NULL;
 
@@ -926,7 +927,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          block_jacobi_bsize = level_blk_size - block_num_coarse_indexes[lev];
       }
 
-      if (block_jacobi_bsize == 1 && interp_type[lev] == 12)
+      if (block_jacobi_bsize <= 1 && interp_type[lev] == 12)
       {
          interp_type[lev] = 2;
       }
@@ -948,16 +949,46 @@ hypre_MGRSetup( void               *mgr_vdata,
       P_array[lev] = P;
 
       /* Build Restriction operator */
-      if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
+      if (block_jacobi_bsize <= 1 && restrict_type[lev] == 12)
       {
          restrict_type[lev] = 2;
       }
-      hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
+      err_prev = HYPRE_GetError();
+      R  = NULL;
+      RT = NULL;
+      hypre_MGRBuildRestrict(A_array[lev], A_FF, A_CF, CF_marker_array[lev],
                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                              strong_threshold, max_row_sum, block_jacobi_bsize,
                              restrict_type[lev], &Wr, &R, &RT);
       R_array[lev]  = R;
       RT_array[lev] = RT;
+
+      /* Exit early if the prolongation or restriction operator could not be built */
+      if (HYPRE_GetError() != err_prev || !P ||
+          (restrict_type[lev] == 14 || restrict_type[lev] == 15 ? !R : !RT))
+      {
+         hypre_ParCSRMatrixDestroy(A_FF);
+         hypre_ParCSRMatrixDestroy(A_FC);
+         hypre_ParCSRMatrixDestroy(A_CF);
+         hypre_ParCSRMatrixDestroy(A_CC);
+         hypre_ParCSRMatrixDestroy(Wr);
+         hypre_ParCSRMatrixDestroy(Wp);
+         hypre_ParCSRMatrixDestroy(S);
+         hypre_IntArrayDestroy(FC_marker);
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            hypre_TFree(level_coarse_indexes[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(level_coarse_indexes, HYPRE_MEMORY_HOST);
+         hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
+         (mgr_data -> num_coarse_levels) = lev + 1;
+         hypre_GpuProfilingPopRange();
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", level_name);
+         HYPRE_ANNOTATE_FUNC_END;
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected issue during restriction setup!");
+         return hypre_error_flag;
+      }
 
       /* Use block Jacobi F-relaxation with block Jacobi interpolation */
       hypre_sprintf(region_name, "F-Relax");
@@ -1107,6 +1138,10 @@ hypre_MGRSetup( void               *mgr_vdata,
                   /* Reuse explicitly requested by the application. Keep the
                    * existing child solver setup and only update A_FF above so
                    * the solve path has the current F-block matrix pointer. */
+                  if (hypre_SolverSetup(aff_base) == (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
+                  {
+                     hypre_ParAMGDataAArray((hypre_ParAMGData*) aff_solver[lev])[0] = A_FF;
+                  }
                }
                else if (legacy_fsolver)
                {
@@ -1453,6 +1488,12 @@ hypre_MGRSetup( void               *mgr_vdata,
                             A_array[num_c_levels],
                             F_array[num_c_levels],
                             U_array[num_c_levels]);
+      }
+      else if (mgr_data -> coarse_grid_solver_setup ==
+               (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_BoomerAMGSetup)
+      {
+         hypre_ParAMGDataAArray((hypre_ParAMGData*) (mgr_data -> coarse_grid_solver))[0] =
+            A_array[num_c_levels];
       }
    }
 

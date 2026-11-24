@@ -371,10 +371,12 @@ hypre_MGRSetupStats(void *mgr_vdata)
    }
 
    /* Compute number of AMG sublevels at each MGR level */
-   max_levels = num_levels_total;
+   max_levels = num_levels_total + 1;
    for (i = 0; i < num_levels_mgr; i++)
    {
-      if (Frelax_type[i] == 2)
+      if (Frelax_type[i] == 2 && A_FF_solver[i] &&
+          hypre_SolverSetup((hypre_Solver*) A_FF_solver[i]) ==
+          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
       {
          amg_solver = (hypre_ParAMGData *) A_FF_solver[i];
          num_sublevels_amg[i] = hypre_ParAMGDataNumLevels(amg_solver);

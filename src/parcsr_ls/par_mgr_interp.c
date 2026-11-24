@@ -186,7 +186,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         hypre_ParCSRMatrix    *A_FF,
-                        hypre_ParCSRMatrix    *A_FC,
                         hypre_ParCSRMatrix    *A_CF,
                         hypre_IntArray        *CF_marker,
                         HYPRE_BigInt          *num_cpts_global,
@@ -210,8 +209,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
    /* Local variables */
    hypre_ParCSRMatrix    *AT    = NULL;
-   hypre_ParCSRMatrix    *A_FFT = NULL;
-   hypre_ParCSRMatrix    *A_FCT = NULL;
    hypre_ParCSRMatrix    *ST    = NULL;
 
 #if defined (HYPRE_USING_GPU)
@@ -225,16 +222,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    if (restrict_type > 0 && restrict_type != 14)
    {
       hypre_ParCSRMatrixTranspose(A, &AT, 1);
-
-      if (A_FF)
-      {
-         hypre_ParCSRMatrixTranspose(A_FF, &A_FFT, 1);
-      }
-
-      if (A_FC)
-      {
-         hypre_ParCSRMatrixTranspose(A_FC, &A_FCT, 1);
-      }
    }
 
    /* Restriction for each level */
@@ -300,10 +287,27 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
    else if (restrict_type == 12)
    {
-      hypre_MGRBuildBlockJacobiP(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker_data, &RT);
+      hypre_ParCSRMatrix *A_FFT = NULL;
+      hypre_ParCSRMatrix *A_CFT = NULL;
+
+      /* Build R^T as block-Jacobi interpolation on A^T. */
+      hypre_ParCSRMatrixTranspose(A_FF, &A_FFT, 1);
+      hypre_ParCSRMatrixTranspose(A_CF, &A_CFT, 1);
+      hypre_MGRBuildBlockJacobiP(AT, A_FFT, A_CFT, NULL, blk_size, CF_marker_data, &RT);
+
+      hypre_ParCSRMatrixDestroy(A_FFT);
+      hypre_ParCSRMatrixDestroy(A_CFT);
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
+      if (blk_size < 1)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "CPR-like restriction requires a block size >= 1");
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+
       /* TODO: create a function with this block (VPM) */
       hypre_ParCSRMatrix   *A_CF_blk    = NULL;
       hypre_ParCSRMatrix   *A_CFT_blk   = NULL;
@@ -369,7 +373,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                                  trunc_factor, max_elmts, &RT);
    }
 
-   /* Compute R^T so it can be used in the solve phase */
+   /* Cache the local transposes of R^T for the solve phase. */
    if (RT)
    {
       hypre_ParCSRMatrixLocalTranspose(RT);
@@ -382,8 +386,6 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(AT);
-   hypre_ParCSRMatrixDestroy(A_FFT);
-   hypre_ParCSRMatrixDestroy(A_FCT);
    hypre_ParCSRMatrixDestroy(ST);
 
    hypre_GpuProfilingPopRange();
@@ -2640,6 +2642,16 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
       return hypre_error_flag;
    }
 
+   /* Every rank must own whole blocks (collective: the block column sums communicate) */
+   HYPRE_Int bad = (sizes[1] != sizes[0] * block_dim), bad_max;
+   hypre_MPI_Allreduce(&bad, &bad_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX,
+                       hypre_ParCSRMatrixComm(A_CF));
+   if (bad_max)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Column-lumped restriction needs whole blocks per rank");
+      return hypre_error_flag;
+   }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-------------------------------------------------------
@@ -2829,6 +2841,7 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrix      *A_FF_inv = NULL;
 
    HYPRE_Int                row_major = 0;
+   HYPRE_Real               fnorm;
 
    /* Sanity check */
    if (!Wp_ptr || !P_ptr)
@@ -2865,6 +2878,17 @@ hypre_MGRBuildBlockRowLumpedInterp(hypre_ParCSRMatrix  *A,
                                                            hypre_ParCSRMatrixRowStarts(A_FF),
                                                            hypre_ParCSRMatrixColStarts(A_FF),
                                                            b_FF);
+
+   /* A singular block (e.g., signed row sums that cancel) inverts to INF/NaN */
+   fnorm = hypre_ParCSRMatrixFnorm(A_FF_inv);
+   if (fnorm - fnorm != 0.0)
+   {
+      hypre_ParCSRMatrixDestroy(A_FF_inv);
+      hypre_DenseBlockMatrixDestroy(b_FF);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Singular block row sum in row-lumped prolongation");
+      HYPRE_ANNOTATE_FUNC_END;
+      return hypre_error_flag;
+   }
 
    /* Multiply by A_FC */
    Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
