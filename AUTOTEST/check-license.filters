@@ -11,7 +11,6 @@
 ./src/test/sstruct
 ./src/test/test_csr_overlap
 ./src/test/test_matrix_stats
-./src/test/test_l1_jacobi
 ./src/test/test_mp_pcg
 ./src/test/test_mp_pcg_3d
 ./AUTOTEST/machine-.*[.]dir/
