@@ -299,19 +299,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_GpuProfilingPushRange("Interpolation");
 
-            if (rel_change)
-            {
-               hypre_SStructMatvecCompute(interp_data_l[l],
-                                          1.0, P_l[l], x_l[l + 1],
-                                          0.0, e_l[l], e_l[l]);
-               hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
-            }
-            else
-            {
-               hypre_SStructMatvecCompute(interp_data_l[l],
-                                          1.0, P_l[l], x_l[l + 1],
-                                          1.0, x_l[l], x_l[l]);
-            }
+            hypre_SStructMatvecCompute(interp_data_l[l],
+                                       1.0, P_l[l], x_l[l + 1],
+                                       1.0, x_l[l], x_l[l]);
 
             hypre_GpuProfilingPopRange();
             hypre_GpuProfilingPopRange();
@@ -350,19 +340,9 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
 
-         if (rel_change)
-         {
-            hypre_SStructMatvecCompute(interp_data_l[0],
-                                       1.0, P_l[0], x_l[1],
-                                       0.0, e_l[0], e_l[0]);
-            hypre_SStructAxpy(1.0, e_l[0], x_l[0]);
-         }
-         else
-         {
-            hypre_SStructMatvecCompute(interp_data_l[0],
-                                       1.0, P_l[0], x_l[1],
-                                       1.0, x_l[0], x_l[0]);
-         }
+         hypre_SStructMatvecCompute(interp_data_l[0],
+                                    1.0, P_l[0], x_l[1],
+                                    1.0, x_l[0], x_l[0]);
 
          hypre_GpuProfilingPopRange();
          //hypre_GpuProfilingPopRange();
