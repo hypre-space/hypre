@@ -13,6 +13,9 @@
  *--------------------------------------------------------------------------*/
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver base;
+
    /* Space dimension (2 or 3) */
    HYPRE_Int dim;
 

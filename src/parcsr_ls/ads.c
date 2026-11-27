@@ -46,8 +46,15 @@ __global__ void hypre_GPUKernelAMSComputePixyzCopy(hypre_DeviceItem &item, HYPRE
 void * hypre_ADSCreate(void)
 {
    hypre_ADSData *ads_data;
+   hypre_Solver  *base;
 
    ads_data = hypre_CTAlloc(hypre_ADSData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) ads_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ADSSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ADSSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ADSDestroy;
 
    /* Default parameters */
 
@@ -1098,6 +1105,8 @@ hypre_ADSSetup(void *solver,
    hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    hypre_AMSData *ams_data;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    ads_data -> A = A;
 
    /* Make sure that the first entry in each row is the diagonal one. */
@@ -1453,6 +1462,11 @@ hypre_ADSSetup(void *solver,
    {
       ads_data -> r2 = hypre_ParVectorInDomainOf(ads_data -> Pi);
       ads_data -> g2 = hypre_ParVectorInDomainOf(ads_data -> Pi);
+   }
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
    }
 
    return hypre_error_flag;

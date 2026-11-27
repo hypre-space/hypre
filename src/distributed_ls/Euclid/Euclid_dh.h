@@ -95,6 +95,8 @@ enum{ NZA_STATS,       /* cumulative nonzeros for all systems solved */
    to calling Euclid_dhSetup(): m, n, beg_row, A
 */
 struct _mpi_interface_dh {
+  hypre_Solver base;  /* Base solver data structure (must be the first member) */
+
   bool isSetup;
 
   HYPRE_Real rho_init;

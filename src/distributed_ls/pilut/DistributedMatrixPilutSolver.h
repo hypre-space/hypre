@@ -120,6 +120,8 @@ HYPRE_Int Ul_timer;
 
 typedef struct
 {
+  /* Base solver data structure (must be the first member) */
+  hypre_Solver           base;
 
   /* Input parameters */
   MPI_Comm               comm;

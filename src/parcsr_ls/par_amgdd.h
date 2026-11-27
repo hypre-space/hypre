@@ -14,6 +14,9 @@
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver               base;
+
    /* The underlying AMG hierarchy */
    hypre_ParAMGData          *amg_data;
 

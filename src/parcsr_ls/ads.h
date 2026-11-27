@@ -13,6 +13,9 @@
  *--------------------------------------------------------------------------*/
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver base;
+
    /* Face element (RT0) stiffness matrix */
    hypre_ParCSRMatrix *A;
 

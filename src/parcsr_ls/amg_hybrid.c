@@ -18,6 +18,9 @@
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    HYPRE_Real            tol;
    HYPRE_Real            a_tol;
    HYPRE_Real            cf_tol;
@@ -99,8 +102,15 @@ void *
 hypre_AMGHybridCreate( void )
 {
    hypre_AMGHybridData *AMGhybrid_data;
+   hypre_Solver        *base;
 
    AMGhybrid_data = hypre_CTAlloc(hypre_AMGHybridData,  1, HYPRE_MEMORY_HOST);
+   base           = (hypre_Solver*) AMGhybrid_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRHybridSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRHybridSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ParCSRHybridDestroy;
 
    (AMGhybrid_data -> time_index)  = hypre_InitializeTiming("AMGHybrid");
 
@@ -1907,6 +1917,9 @@ hypre_AMGHybridSetup( void                *AMGhybrid_vdata,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
+   /* The hybrid solver builds its preconditioners on demand during the solve */
+   hypre_SolverSetIsSetup((hypre_Solver *) AMGhybrid_vdata);
 
    return hypre_error_flag;
 }

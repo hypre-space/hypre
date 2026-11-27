@@ -25,8 +25,15 @@ void *
 hypre_MGRCreate(void)
 {
    hypre_ParMGRData  *mgr_data;
+   hypre_Solver      *base;
 
    mgr_data = hypre_CTAlloc(hypre_ParMGRData,  1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) mgr_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_MGRSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_MGRSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_MGRDestroy;
 
    /* block data */
    (mgr_data -> block_size) = 1;
