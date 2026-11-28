@@ -82,8 +82,6 @@ hypre_MGRCreate(void)
 
    (mgr_data -> coarse_grid_solver) = NULL;
    (mgr_data -> coarse_grid_solver_owner) = HYPRE_MGR_SOLVER_OWNER_NONE;
-   (mgr_data -> coarse_grid_solver_setup) = NULL;
-   (mgr_data -> coarse_grid_solver_solve) = NULL;
 
    //(mgr_data -> global_smoother) = NULL;
 
@@ -173,8 +171,6 @@ hypre_MGRReleaseCoarseGridSolver( void *mgr_vdata )
    }
 
    (mgr_data -> coarse_grid_solver_owner) = HYPRE_MGR_SOLVER_OWNER_NONE;
-   (mgr_data -> coarse_grid_solver_setup) = NULL;
-   (mgr_data -> coarse_grid_solver_solve) = NULL;
 
    return hypre_error_flag;
 }
@@ -2779,9 +2775,23 @@ hypre_MGRSetCoarseSolver( void        *mgr_vdata,
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
+   /* The solver object is a hypre_Solver, which holds its own setup and solve
+    * functions. The callbacks are kept for backward compatibility of the API only. */
+   HYPRE_UNUSED_VAR(coarse_grid_solver_solve);
+   HYPRE_UNUSED_VAR(coarse_grid_solver_setup);
+
+   /* MGR can only drive an object that provides its own setup and solve */
+   if (!coarse_grid_solver ||
+       !hypre_SolverSetup((hypre_Solver *) coarse_grid_solver) ||
+       !hypre_SolverSolve((hypre_Solver *) coarse_grid_solver))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_ARG,
+                        "MGR coarse solver must be a hypre solver object; "
+                        "solvers without an object are not supported");
+      return hypre_error_flag;
+   }
+
    hypre_MGRReleaseCoarseGridSolver(mgr_data);
-   (mgr_data -> coarse_grid_solver_solve) = coarse_grid_solver_solve;
-   (mgr_data -> coarse_grid_solver_setup) = coarse_grid_solver_setup;
    (mgr_data -> coarse_grid_solver)       = (HYPRE_Solver) coarse_grid_solver;
    (mgr_data -> coarse_grid_solver_owner) = HYPRE_MGR_SOLVER_OWNER_USER;
    (mgr_data -> use_default_cgrid_solver) = 0;

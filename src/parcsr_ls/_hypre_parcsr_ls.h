@@ -1628,6 +1628,9 @@ typedef struct hypre_ParNSHData_struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver   base;
+
    /* Common parameters */
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;

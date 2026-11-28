@@ -279,6 +279,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    hypre_ParCSRMatrix        *A_coarsest      = hypre_ParMGRDataRAP(mgr_data);
    HYPRE_Int                  num_levels_mgr  = hypre_ParMGRDataNumCoarseLevels(mgr_data);
    HYPRE_Solver               coarse_solver   = hypre_ParMGRDataCoarseGridSolver(mgr_data);
+   HYPRE_PtrToSolverFcn       coarse_setup;
    HYPRE_Solver              *A_FF_solver     = hypre_ParMGRDataAFFsolver(mgr_data);
    HYPRE_Int                 *Frelax_type     = hypre_ParMGRDataFRelaxType(mgr_data);
    HYPRE_Int                  block_size      = hypre_ParMGRDataBlockSize(mgr_data);
@@ -333,24 +334,19 @@ hypre_MGRSetupStats(void *mgr_vdata)
    num_sublevels_amg  = hypre_CTAlloc(HYPRE_Int, num_levels_mgr + 1, HYPRE_MEMORY_HOST);
 
    /* Check MGR's coarse level solver */
-   if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-       HYPRE_BoomerAMGSetup)
+   coarse_setup = coarse_solver ? hypre_SolverSetup((hypre_Solver*) coarse_solver) : NULL;
+   if (coarse_setup == (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
    {
       coarse_amg_solver = (hypre_ParAMGData *) coarse_solver;
       num_sublevels_amg[coarsest_mgr_level] = hypre_ParAMGDataNumLevels(coarse_amg_solver);
    }
-   else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (HYPRE_PtrToParSolverFcn) hypre_ILUSetup ||
-            (HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (HYPRE_PtrToParSolverFcn) HYPRE_ILUSetup)
+   else if (coarse_setup == (HYPRE_PtrToSolverFcn) hypre_ILUSetup ||
+            coarse_setup == (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup)
    {
       num_sublevels_amg[coarsest_mgr_level] = 0;
    }
 #ifdef HYPRE_USING_DSUPERLU
-   else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (HYPRE_PtrToParSolverFcn) hypre_MGRDirectSolverSetup ||
-            (HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (HYPRE_PtrToParSolverFcn) HYPRE_MGRDirectSolverSetup)
+   else if (coarse_setup == (HYPRE_PtrToSolverFcn) hypre_SLUDistSetup)
    {
       /* TODO (VPM): Set SuperLU solver specifics */
       num_sublevels_amg[coarsest_mgr_level] = 0;

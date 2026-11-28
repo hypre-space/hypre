@@ -4927,12 +4927,19 @@ HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
 
 /**
  * (Optional) Set the coarse grid solver.
- * Currently uses BoomerAMG.
  * The default, if not set, is BoomerAMG with default options.
  *
+ * MGR calls the setup and solve functions that belong to the coarse grid solver
+ * object itself (e.g., HYPRE_BoomerAMGSetup and HYPRE_BoomerAMGSolve for a
+ * BoomerAMG object). The solve and setup arguments of this function are ignored,
+ * so passing different functions has no effect. Accepted objects are BoomerAMG,
+ * ILU, FSAI, Schwarz, the Krylov solvers, and the MGR direct solver. Solvers
+ * that have no object (e.g., HYPRE_ParCSRDiagScale with a NULL solver) are
+ * rejected with an error.
+ *
  * @param solver [IN] MGR solver/preconditioner object
- * @param coarse_grid_solver_solve [IN] solve routine for BoomerAMG
- * @param coarse_grid_solver_setup [IN] setup routine for BoomerAMG
+ * @param coarse_grid_solver_solve [IN] unused (kept for backward compatibility)
+ * @param coarse_grid_solver_setup [IN] unused (kept for backward compatibility)
  * @param coarse_grid_solver [IN] coarse grid solver object
  **/
 HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,

@@ -41,11 +41,14 @@ on the parameters and their defaults.
   points to be fixed as F points for intermediate levels. Setting this to 1 uses
   the user input to define the C/F splitting.  Otherwise, a BoomerAMG coarsening
   routine is used to determine the C/F splitting for intermediate levels.
-* (Optional) ``HYPRE_MGRSetCoarseSolver:`` This function sets the BoomerAMG
-  solver to be used for the solve on the coarse grid. The user can define their
-  own BoomerAMG solver with their preferred options and pass this to the MGR
-  solver. Otherwise, an internal BoomerAMG solver is used as the coarse grid
-  solver instead.
+* (Optional) ``HYPRE_MGRSetCoarseSolver:`` This function sets the solver to be
+  used for the solve on the coarse grid. The user can define their own solver
+  object (BoomerAMG, ILU, FSAI, Schwarz, a Krylov solver, or the MGR direct
+  solver) with their preferred options and pass this to the MGR solver.
+  Otherwise, an internal BoomerAMG solver is used as the coarse grid solver
+  instead. MGR calls the setup and solve functions that belong to the solver
+  object; the solve and setup function arguments are ignored, and solvers
+  without an object are rejected.
 * ``HYPRE_MGRSetup:`` Setup and MGR solver object.
 * ``HYPRE_MGRSolve:`` Solve the linear system.
 * ``HYPRE_MGRDestroy:`` Destroy the MGR solver object

@@ -83,8 +83,6 @@ typedef struct
 
    HYPRE_Solver          coarse_grid_solver;
    HYPRE_Int             coarse_grid_solver_owner;
-   HYPRE_Int           (*coarse_grid_solver_setup)(void*, void*, void*, void*);
-   HYPRE_Int           (*coarse_grid_solver_solve)(void*, void*, void*, void*);
 
    HYPRE_Int             use_default_cgrid_solver;
    HYPRE_Real            omega;
@@ -276,7 +274,6 @@ typedef struct
 #define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> coarse_grid_method)
 #define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> coarse_grid_method[i])
 #define hypre_ParMGRDataCoarseGridSolver(data)      ((data) -> coarse_grid_solver)
-#define hypre_ParMGRDataCoarseGridSolverSetup(data) ((data) -> coarse_grid_solver_setup)
 #define hypre_ParMGRDataCoarseGridSolverOwner(data) ((data) -> coarse_grid_solver_owner)
 
 #endif
