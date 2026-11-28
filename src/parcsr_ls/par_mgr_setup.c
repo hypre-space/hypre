@@ -38,6 +38,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *S = NULL;
    HYPRE_Int            err_prev = 0;
+   HYPRE_Int            aff_is_amg;
    hypre_ParCSRMatrix  *Wp = NULL;
    hypre_ParCSRMatrix  *Wr = NULL;
 
@@ -108,11 +109,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    // VPM: Do we need both frelax_diaginv and level_diaginv?
 
    HYPRE_Solver      default_cg_solver;
-   HYPRE_Int (*cgrid_solver_setup)(void*, void*, void*, void*) =
-      (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_setup);
-
-   HYPRE_Int (*cgrid_solver_solve)(void*, void*, void*, void*) =
-      (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_solve);
 
    HYPRE_Int    *level_smooth_type =  (mgr_data -> level_smooth_type);
    HYPRE_Int    *level_smooth_iters = (mgr_data -> level_smooth_iters);
@@ -232,25 +228,22 @@ hypre_MGRSetup( void               *mgr_vdata,
          default_cg_solver = (mgr_data -> coarse_grid_solver);
          hypre_BoomerAMGSetMaxIter(default_cg_solver, (mgr_data -> max_iter));
          hypre_BoomerAMGSetRelaxOrder(default_cg_solver, 1);
-         hypre_BoomerAMGSetPrintLevel(default_cg_solver, 3);
-
-         /* set setup and solve functions */
-         cgrid_solver_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
-         cgrid_solver_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
-         (mgr_data -> coarse_grid_solver_setup) = cgrid_solver_setup;
-         (mgr_data -> coarse_grid_solver_solve) = cgrid_solver_solve;
+         hypre_BoomerAMGSetPrintLevel(default_cg_solver, mgr_data -> cg_print_level);
          (mgr_data -> coarse_grid_solver) = default_cg_solver;
       }
 
       /* keep reserved coarse indexes to coarsest grid */
-      if (reserved_coarse_size > 0)
+      if (reserved_coarse_size > 0 &&
+          hypre_SolverSetup((hypre_Solver *)(mgr_data -> coarse_grid_solver)) ==
+          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
       {
          HYPRE_BoomerAMGSetCPoints((mgr_data ->coarse_grid_solver), 25, reserved_coarse_size,
                                    reserved_coarse_indexes);
       }
 
       /* setup coarse grid solver */
-      cgrid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
+      HYPRE_SolverSetup((mgr_data -> coarse_grid_solver),
+                        (HYPRE_Matrix) A, (HYPRE_Vector) f, (HYPRE_Vector) u);
       (mgr_data -> num_coarse_levels) = 0;
 
       hypre_GpuProfilingPopRange();
@@ -1133,12 +1126,18 @@ hypre_MGRSetup( void               *mgr_vdata,
 
                aff_base = (hypre_Solver*) aff_solver[lev];
 
-               if (hypre_SolverSetupReuseRequested(aff_base))
+               aff_is_amg = (hypre_SolverSetup(aff_base) ==
+                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup);
+
+               /* Reuse needs an existing setup: a BoomerAMG without a hierarchy
+                * falls through to a regular setup below. */
+               if (hypre_SolverSetupReuseRequested(aff_base) &&
+                   !(aff_is_amg && !hypre_ParAMGDataAArray((hypre_ParAMGData*) aff_solver[lev])))
                {
                   /* Reuse explicitly requested by the application. Keep the
                    * existing child solver setup and only update A_FF above so
                    * the solve path has the current F-block matrix pointer. */
-                  if (hypre_SolverSetup(aff_base) == (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
+                  if (aff_is_amg)
                   {
                      hypre_ParAMGDataAArray((hypre_ParAMGData*) aff_solver[lev])[0] = A_FF;
                   }
@@ -1453,17 +1452,13 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_BoomerAMGSetTol(default_cg_solver, 0.0);
       hypre_BoomerAMGSetRelaxOrder(default_cg_solver, 1);
       hypre_BoomerAMGSetPrintLevel(default_cg_solver, mgr_data -> cg_print_level);
-
-      /* set setup and solve functions */
-      cgrid_solver_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
-      cgrid_solver_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
-      (mgr_data -> coarse_grid_solver_setup) = cgrid_solver_setup;
-      (mgr_data -> coarse_grid_solver_solve) = cgrid_solver_solve;
       (mgr_data -> coarse_grid_solver) = default_cg_solver;
    }
 
    /* keep reserved coarse indexes to coarsest grid */
-   if (reserved_coarse_size > 0 && lvl_to_keep_cpoints == 0)
+   if (reserved_coarse_size > 0 && lvl_to_keep_cpoints == 0 &&
+       hypre_SolverSetup((hypre_Solver *)(mgr_data -> coarse_grid_solver)) ==
+       (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
    {
       ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[num_c_levels]);
       for (i = 0; i < reserved_coarse_size; i++)
@@ -1481,16 +1476,21 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
    {
+      hypre_Solver *cg_base   = (hypre_Solver *)(mgr_data -> coarse_grid_solver);
+      HYPRE_Int     cg_is_amg = (hypre_SolverSetup(cg_base) ==
+                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup);
+
+      /* Reuse needs an existing setup: a BoomerAMG without a hierarchy is set up */
       if (use_default_cgrid_solver ||
-          !hypre_SolverSetupReuseRequested((hypre_Solver *)(mgr_data -> coarse_grid_solver)))
+          !hypre_SolverSetupReuseRequested(cg_base) ||
+          (cg_is_amg && !hypre_ParAMGDataAArray((hypre_ParAMGData*) cg_base)))
       {
-         cgrid_solver_setup((mgr_data -> coarse_grid_solver),
-                            A_array[num_c_levels],
-                            F_array[num_c_levels],
-                            U_array[num_c_levels]);
+         HYPRE_SolverSetup((mgr_data -> coarse_grid_solver),
+                           (HYPRE_Matrix) A_array[num_c_levels],
+                           (HYPRE_Vector) F_array[num_c_levels],
+                           (HYPRE_Vector) U_array[num_c_levels]);
       }
-      else if (mgr_data -> coarse_grid_solver_setup ==
-               (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_BoomerAMGSetup)
+      else if (cg_is_amg)
       {
          hypre_ParAMGDataAArray((hypre_ParAMGData*) (mgr_data -> coarse_grid_solver))[0] =
             A_array[num_c_levels];

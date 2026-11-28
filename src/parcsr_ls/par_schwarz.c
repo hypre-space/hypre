@@ -1173,6 +1173,7 @@ void *
 hypre_SchwarzCreate( void )
 {
    hypre_SchwarzData *schwarz_data;
+   hypre_Solver      *base;
 
    HYPRE_Int      variant;
    HYPRE_Int      domain_type;
@@ -1194,6 +1195,12 @@ hypre_SchwarzCreate( void )
    relax_weight = 1.0;
 
    schwarz_data = hypre_CTAlloc(hypre_SchwarzData, 1, HYPRE_MEMORY_HOST);
+   base         = (hypre_Solver*) schwarz_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_SchwarzSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_SchwarzSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_SchwarzDestroy;
 
    hypre_SchwarzSetVariant(schwarz_data, variant);
    hypre_SchwarzSetDomainType(schwarz_data, domain_type);
@@ -1327,6 +1334,18 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
       HYPRE_UNUSED_VAR(u);
 
       dof_func = hypre_SchwarzDataDofFunc(schwarz_data);
+
+      /* Release the data of a previous setup */
+      hypre_TFree(hypre_SchwarzDataScale(schwarz_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_SchwarzDataPivots(schwarz_data), HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
+      hypre_SchwarzDataDomainStructure(schwarz_data) = NULL;
+      if (variant == 3)
+      {
+         hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
+         hypre_SchwarzDataABoundary(schwarz_data) = NULL;
+      }
+      hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 
       Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                     hypre_ParCSRMatrixGlobalNumRows(A),

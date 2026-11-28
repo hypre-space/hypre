@@ -53,8 +53,6 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            iter, num_procs, my_id;
 
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
-   HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*,
-                                                    void*) = (mgr_data -> coarse_grid_solver_solve);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    if (logging > 1)
@@ -67,9 +65,15 @@ hypre_MGRSolve( void               *mgr_vdata,
    if ((mgr_data -> num_coarse_levels) == 0)
    {
       /* Do scalar AMG solve when only one level */
-      coarse_grid_solver_solve(cg_solver, A, f, u);
-      HYPRE_BoomerAMGGetNumIterations(cg_solver, &iter);
-      HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &rel_resnorm);
+      HYPRE_SolverSolve(cg_solver, (HYPRE_Matrix) A, (HYPRE_Vector) f, (HYPRE_Vector) u);
+      iter        = 1;
+      rel_resnorm = 0.0;
+      if (hypre_SolverSetup((hypre_Solver *) cg_solver) ==
+          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup)
+      {
+         HYPRE_BoomerAMGGetNumIterations(cg_solver, &iter);
+         HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &rel_resnorm);
+      }
       (mgr_data -> num_iterations) = iter;
       (mgr_data -> final_rel_residual_norm) = rel_resnorm;
       HYPRE_ANNOTATE_FUNC_END;
@@ -887,8 +891,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParCSRMatrix    *RAP        = (mgr_data -> RAP);
    HYPRE_Int              use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
    HYPRE_Solver           cg_solver = (mgr_data -> coarse_grid_solver);
-   HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*, void*) =
-      (mgr_data -> coarse_grid_solver_solve);
 
    hypre_IntArray       **CF_marker = (mgr_data -> CF_marker_array);
    hypre_Vector         **l1_norms_array = (mgr_data -> l1_norms);
@@ -969,7 +971,8 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPushRange(level_name);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", level_name);
 
-         coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
+         HYPRE_SolverSolve(cg_solver, (HYPRE_Matrix) RAP,
+                           (HYPRE_Vector) F_array[level], (HYPRE_Vector) U_array[level]);
          if (use_default_cgrid_solver)
          {
             HYPRE_Real convergence_factor_cg;
