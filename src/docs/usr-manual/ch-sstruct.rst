@@ -195,7 +195,7 @@ for the ``SetNeighborPart()`` call are simply the lower and upper indices on par
 the corresponding indices on part 2.  The final two arguments to the routine indicate that
 the positive :math:`x`-direction on part 3 (i.e., the :math:`i` component of the tuple
 :math:`(i,j)`) corresponds to the positive :math:`y`-direction on part 2 and that the
-positive :math:`y`-direction on part 3 corresponds to the positive :math:`x`-direction on
+positive :math:`y`-direction on part 3 corresponds to the negative :math:`x`-direction on
 part 2.
 
 The ``Assemble()`` routine is a collective call (i.e., must be called on all processes

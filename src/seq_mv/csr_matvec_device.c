@@ -60,72 +60,6 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_CSRMM_ALG1
 #endif
 
-/* y = alpha * A * x + beta * y
- * This function is supposed to be only used inside the other functions in this file
- */
-static inline HYPRE_Int
-hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
-                              HYPRE_Complex    alpha,
-                              hypre_CSRMatrix *A,
-                              hypre_Vector    *x,
-                              HYPRE_Complex    beta,
-                              hypre_Vector    *y,
-                              HYPRE_Int        offset )
-{
-   /* Sanity check */
-   if (hypre_VectorData(x) == hypre_VectorData(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
-   }
-
-#if defined(HYPRE_USING_CUSPARSE)  || \
-    defined(HYPRE_USING_ROCSPARSE) || \
-    defined(HYPRE_USING_ONEMKLSPARSE)
-
-   /* Input variables */
-   HYPRE_Int  num_vectors_x      = hypre_VectorNumVectors(x);
-   HYPRE_Int  num_vectors_y      = hypre_VectorNumVectors(y);
-
-   /* Local variables */
-   HYPRE_Int  use_vendor = hypre_HandleSpMVUseVendor(hypre_handle());
-
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-   HYPRE_Int  multivec_storage_x = hypre_VectorMultiVecStorageMethod(x);
-   HYPRE_Int  multivec_storage_y = hypre_VectorMultiVecStorageMethod(y);
-
-   /* Force use of hypre's SpMV for row-wise multivectors */
-   if ((num_vectors_x > 1 && multivec_storage_x == 1) ||
-       (num_vectors_y > 1 && multivec_storage_y == 1))
-   {
-      use_vendor = 0;
-   }
-#else
-   /* TODO - enable cuda 10, rocsparse, and onemkle sparse support for multi-vectors */
-   if (num_vectors_x > 1 || num_vectors_y > 1)
-   {
-      use_vendor = 0;
-   }
-#endif
-
-   if (use_vendor)
-   {
-      hypre_CSRMatrixMatvecVendor(trans, alpha, A, x, beta, y, offset);
-   }
-   else
-#endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
-   {
-#if defined(HYPRE_USING_GPU)
-      hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
-#endif
-   }
-
-   return hypre_error_flag;
-}
-
 /* y = alpha * A * x + beta * b */
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
@@ -168,24 +102,67 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
    //   hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
    //}
 
-   if (hypre_VectorData(b) != hypre_VectorData(y))
-   {
-      hypre_TMemcpy( hypre_VectorData(y) + offset,
-                     hypre_VectorData(b) + offset,
-                     HYPRE_Complex,
-                     (ny - offset) * num_vectors,
-                     hypre_VectorMemoryLocation(y),
-                     hypre_VectorMemoryLocation(b) );
+   HYPRE_Int scale_only = hypre_CSRMatrixNumNonzeros(A) <= 0 || alpha == 0.0;
+   HYPRE_Int use_vendor = 0;
+   HYPRE_Int use_hypre_spmv = 0;
 
+   if (!scale_only)
+   {
+      if (hypre_VectorData(x) == hypre_VectorData(y))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice");
+      }
+
+#if defined(HYPRE_USING_CUSPARSE)  || \
+    defined(HYPRE_USING_ROCSPARSE) || \
+    defined(HYPRE_USING_ONEMKLSPARSE)
+      use_vendor = hypre_HandleSpMVUseVendor(hypre_handle());
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+      /* Use hypre's SpMV for row-wise multivectors. */
+      if ((num_vectors > 1 && hypre_VectorMultiVecStorageMethod(x) == 1) ||
+          (hypre_VectorNumVectors(y) > 1 && hypre_VectorMultiVecStorageMethod(y) == 1))
+      {
+         use_vendor = 0;
+      }
+#else
+      /* These vendor interfaces only support single vectors. */
+      if (num_vectors > 1 || hypre_VectorNumVectors(y) > 1)
+      {
+         use_vendor = 0;
+      }
+#endif
+#endif
+
+#if defined(HYPRE_USING_GPU)
+      use_hypre_spmv = !use_vendor;
+#endif
    }
 
-   if (hypre_CSRMatrixNumNonzeros(A) <= 0 || alpha == 0.0)
+   /* hypre's SpMV can read b directly. Other paths take b from y. */
+   if (!use_hypre_spmv && hypre_VectorData(b) != hypre_VectorData(y))
+   {
+      hypre_TMemcpy(hypre_VectorData(y), hypre_VectorData(b), HYPRE_Complex,
+                    ny * hypre_VectorNumVectors(y),
+                    hypre_VectorMemoryLocation(y), hypre_VectorMemoryLocation(b));
+   }
+
+   if (scale_only)
    {
       hypre_SeqVectorScale(beta, y);
    }
+   else if (use_vendor)
+   {
+      hypre_CSRMatrixMatvecVendor(trans, alpha, A, x, beta, y, offset);
+   }
    else
    {
-      hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
+#if defined(HYPRE_USING_GPU)
+      hypre_CSRMatrixSpMVDeviceOutOfPlace(trans, alpha, A, x, beta, b, y, 0);
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+      hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+#endif
    }
 
 #if defined(HYPRE_USING_GPU)

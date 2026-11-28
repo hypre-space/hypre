@@ -224,6 +224,7 @@
 #define hypre_CSRMatrixSortRow HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSortRow )
 #define hypre_CSRMatrixSortRowOutOfPlace HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSortRowOutOfPlace )
 #define hypre_CSRMatrixSpMVDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSpMVDevice )
+#define hypre_CSRMatrixSpMVDeviceOutOfPlace HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSpMVDeviceOutOfPlace )
 #define hypre_CSRMatrixSplitDevice HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSplitDevice )
 #define hypre_CSRMatrixSplitDevice_core HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixSplitDevice_core )
 #define hypre_CSRMatrixStack2Device HYPRE_FIXEDPRECISION_FUNC ( hypre_CSRMatrixStack2Device )

@@ -1083,6 +1083,7 @@ hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
  * hypre_SeqVectorPointwiseDivpyHost
  *
  * if marker != NULL: only for marker[i] == marker_val
+ * Leave y[i] unchanged when b[i] is zero.
  *
  * TODO:
  *        1) Change to hypre_SeqVectorPointwiseDivpyMarkedHost?
@@ -1118,7 +1119,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               if (marker[i] == marker_val)
+               if (b_data[i] != 0.0 && marker[i] == marker_val)
                {
                   y_data[i] += x_data[i] / b_data[i];
                }
@@ -1131,7 +1132,10 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               y_data[i] += x_data[i] / b_data[i];
+               if (b_data[i] != 0.0)
+               {
+                  y_data[i] += x_data[i] / b_data[i];
+               }
             }
          } /* if (marker) */
       }
@@ -1145,9 +1149,9 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               val = 1.0 / b_data[i];
-               if (marker[i] == marker_val)
+               if (b_data[i] != 0.0 && marker[i] == marker_val)
                {
+                  val = 1.0 / b_data[i];
                   y_data[i]        += x_data[i]        * val;
                   y_data[i + size] += x_data[i + size] * val;
                }
@@ -1160,10 +1164,12 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               val = 1.0 / b_data[i];
-
-               y_data[i]        += x_data[i]        * val;
-               y_data[i + size] += x_data[i + size] * val;
+               if (b_data[i] != 0.0)
+               {
+                  val = 1.0 / b_data[i];
+                  y_data[i]        += x_data[i]        * val;
+                  y_data[i + size] += x_data[i + size] * val;
+               }
             }
          } /* if (marker) */
       }
@@ -1176,9 +1182,9 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               val = 1.0 / b_data[i];
-               if (marker[i] == marker_val)
+               if (b_data[i] != 0.0 && marker[i] == marker_val)
                {
+                  val = 1.0 / b_data[i];
                   for (j = 0; j < num_vectors_x; j++)
                   {
                      y_data[i + size * j] += x_data[i + size * j] * val;
@@ -1193,10 +1199,13 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 #endif
             for (i = 0; i < size; i++)
             {
-               val = 1.0 / b_data[i];
-               for (j = 0; j < num_vectors_x; j++)
+               if (b_data[i] != 0.0)
                {
-                  y_data[i + size * j] += x_data[i + size * j] * val;
+                  val = 1.0 / b_data[i];
+                  for (j = 0; j < num_vectors_x; j++)
+                  {
+                     y_data[i + size * j] += x_data[i + size * j] * val;
+                  }
                }
             }
          } /* if (marker) */
@@ -1217,7 +1226,7 @@ hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorPointwiseDivpyMarked
  *
- * Computes: y[i] = y[i] + x[i] / b[i] for marker[i] = marker_val
+ * Computes: y[i] = y[i] + x[i] / b[i] for nonzero b[i] and matching markers.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1290,7 +1299,7 @@ hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorPointwiseDivpy
  *
- * Computes: y = y + x ./ b
+ * Computes: y = y + x ./ b at entries with nonzero b.
  *
  * Notes:
  *    1) x and b must have the same sizes

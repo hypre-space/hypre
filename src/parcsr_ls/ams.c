@@ -59,7 +59,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       }
       else if (relax_type == 3) /* Kaczmarz */
       {
-         hypre_BoomerAMGRelax(A, f, NULL, 20, 0, relax_weight, omega, l1_norms, u, v, z);
+         hypre_BoomerAMGRelax(A, f, NULL, 30, 0, relax_weight, omega, l1_norms, u, v, z);
       }
       else /* call BoomerAMG relaxation */
       {
@@ -74,6 +74,9 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
                                  omega, l1_norms, u, v, z);
          }
       }
+
+      /* u has been updated, as at the end of hypre_BoomerAMGRelax */
+      hypre_ParVectorAllZeros(u) = 0;
    }
 
    return hypre_error_flag;
@@ -483,7 +486,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows
+ * option 1 = Compute the l1 norm of the rows, allowing zero norms
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -760,18 +763,24 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       hypre_TransformIfSycl( l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                              std::negate<HYPRE_Real>(),
                              is_negative<HYPRE_Real>() );
-      bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
-                                                oneapi::dpl::minimum<HYPRE_Real>() );
 #else
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                          thrust::negate<HYPRE_Real>(),
                          is_negative<HYPRE_Real>() );
-      bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
-                                                thrust::minimum<HYPRE_Real>() );
 #endif
-      if ( any_zero )
+      if (option != 1)
       {
-         hypre_error_in_arg(1);
+#if defined(HYPRE_USING_SYCL)
+         bool any_zero = 0.0 == HYPRE_ONEDPL_CALL( std::reduce, l1_norm, l1_norm + num_rows, 1.0,
+                                                   oneapi::dpl::minimum<HYPRE_Real>() );
+#else
+         bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
+                                                   thrust::minimum<HYPRE_Real>() );
+#endif
+         if (any_zero)
+         {
+            hypre_error_in_arg(1);
+         }
       }
    }
    else
@@ -785,13 +794,15 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
       }
 
-      for (i = 0; i < num_rows; i++)
+      if (option != 1)
       {
-         /* if (hypre_abs(l1_norm[i]) < DBL_EPSILON) */
-         if (hypre_abs(l1_norm[i]) == 0.0)
+         for (i = 0; i < num_rows; i++)
          {
-            hypre_error_in_arg(1);
-            break;
+            if (l1_norm[i] == 0.0)
+            {
+               hypre_error_in_arg(1);
+               break;
+            }
          }
       }
    }
@@ -3780,7 +3791,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
 {
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
-   HYPRE_Int  i, my_id = -1;
+   HYPRE_Int  i, my_id = -1, compute_norms;
    HYPRE_Real r0_norm = 1.0;
    HYPRE_Real r_norm  = 1.0;
    HYPRE_Real b_norm  = 1.0;
@@ -3954,10 +3965,13 @@ HYPRE_Int hypre_AMSSolve(void *solver,
       }
    }
 
+   /* The residual norms are only needed for the stopping criterion and for printing */
+   compute_norms = ams_data -> maxit > 1 && (ams_data -> tol > 0.0 || ams_data -> print_level > 0);
+
    for (i = 0; i < ams_data -> maxit; i++)
    {
       /* Compute initial residual norms */
-      if (ams_data -> maxit > 1 && i == 0)
+      if (compute_norms && i == 0)
       {
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
@@ -4001,7 +4015,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                z);
 
       /* Compute new residual norms */
-      if (ams_data -> maxit > 1)
+      if (compute_norms)
       {
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ams_data -> r0);
@@ -4158,11 +4172,13 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
             hypre_ParCSRMatrixMatvecT(1.0, P[i], g0, 0.0, r[i]);
          }
 
-         hypre_ParVectorSetConstantValues(g[i], 0.0);
+         /* start from a zero guess flagged as zero, as for the coarse levels of BoomerAMG */
+         hypre_ParVectorSetZeros(g[i]);
          (*HB[i]) (B[i], (HYPRE_Matrix)A[i],
                    (HYPRE_Vector)r[i], (HYPRE_Vector)g[i]);
          hypre_ParCSRMatrixMatvec(1.0, P[i], g[i], 0.0, g0);
          hypre_ParVectorAxpy(1.0, g0, y);
+         hypre_ParVectorAllZeros(y) = 0;
       }
    }
 
@@ -4522,7 +4538,7 @@ HYPRE_Int hypre_AMSFEIDestroy(void *solver)
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
- * option 1 = Compute the l1 norm of the rows
+ * option 1 = Compute the l1 norm of the rows, allowing zero norms
  * option 2 = Compute the l1 norm of the (processor) off-diagonal
  *            part of the rows plus the diagonal of A
  * option 3 = Compute the l2 norm^2 of the rows
@@ -4891,18 +4907,22 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       {
          /* Handle negative definite matrices */
          for (i = ns; i < ne; i++)
-            if (A_diag_data[A_diag_I[i]] < 0)
+            if (A_diag_I[i] < A_diag_I[i + 1] && A_diag_data[A_diag_I[i]] < 0.0)
             {
                l1_norm[i] = -l1_norm[i];
             }
 
-         for (i = ns; i < ne; i++)
-            /* if (hypre_abs(l1_norm[i]) < DBL_EPSILON) */
-            if (hypre_abs(l1_norm[i]) == 0.0)
+         if (option != 1)
+         {
+            for (i = ns; i < ne; i++)
             {
-               hypre_error_in_arg(1);
-               break;
+               if (l1_norm[i] == 0.0)
+               {
+                  hypre_error_in_arg(1);
+                  break;
+               }
             }
+         }
       }
 
    }

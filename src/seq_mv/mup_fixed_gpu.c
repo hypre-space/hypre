@@ -283,6 +283,14 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CSRMatrixSpMVDeviceOutOfPlace( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int fill )
+{
+   return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixSpMVDeviceOutOfPlace)( trans, alpha, A, x, beta, b, y, fill );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CSRMatrixSplitDevice( hypre_CSRMatrix *B_ext, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int **map_B_to_C_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr, hypre_CSRMatrix **B_ext_diag_ptr, hypre_CSRMatrix **B_ext_offd_ptr )
 {
    return HYPRE_CURRENTPRECISION_FUNC(hypre_CSRMatrixSplitDevice)( B_ext, first_col_diag_B, last_col_diag_B, num_cols_offd_B, col_map_offd_B, map_B_to_C_ptr, num_cols_offd_C_ptr, col_map_offd_C_ptr, B_ext_diag_ptr, B_ext_offd_ptr );

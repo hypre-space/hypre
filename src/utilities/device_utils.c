@@ -640,7 +640,7 @@ hypre_GPUKernelIVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
                        HYPRE_Complex *y)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-   if (i < n)
+   if (i < n && a[i] != 0.0)
    {
       y[i] += x[i] / a[i];
    }
@@ -649,7 +649,7 @@ hypre_GPUKernelIVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
 /*--------------------------------------------------------------------
  * hypre_IVAXPYDevice
  *
- * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
+ * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] for nonzero a[i].
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -683,19 +683,16 @@ hypre_GPUKernelIVAXPYMarked( hypre_DeviceItem &item,
                              HYPRE_Int         marker_val)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-   if (i < n)
+   if (i < n && marker[i] == marker_val && a[i] != 0.0)
    {
-      if (marker[i] == marker_val)
-      {
-         y[i] += x[i] / a[i];
-      }
+      y[i] += x[i] / a[i];
    }
 }
 
 /*--------------------------------------------------------------------
  * hypre_IVAXPYMarkedDevice
  *
- * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
+ * Inverse Vector AXPY for nonzero a[i] and matching markers.
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -740,7 +737,7 @@ hypre_GPUKernelIVAMXPMY( hypre_DeviceItem &item,
    HYPRE_Int     j;
    HYPRE_Complex val;
 
-   if (i < n)
+   if (i < n && a[i] != 0.0)
    {
       val = 1.0 / a[i];
 
@@ -766,7 +763,7 @@ hypre_GPUKernelIVAMXPMY( hypre_DeviceItem &item,
 /*--------------------------------------------------------------------------
  * hypre_IVAMXPMYDevice
  *
- * Inverse Vector AXPY for m vectors x and y of size n stored column-wise:
+ * Inverse Vector AXPY for m column-wise vectors of size n, for nonzero a[i]:
  *
  *   y[i +       0] += x[i +       0] / a[i]
  *   y[i +       n] += x[i +       n] / a[i]
