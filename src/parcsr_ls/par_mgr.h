@@ -14,6 +14,9 @@
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    /* block data */
    HYPRE_Int             block_size;
    HYPRE_Int            *block_num_coarse_indexes;

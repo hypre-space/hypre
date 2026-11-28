@@ -49,8 +49,19 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
    return hypre_error_flag;
 #else
 
+   hypre_Solver *base;
+
    HYPRE_NewDistributedMatrixPilutSolver( comm, NULL,
                                           (HYPRE_DistributedMatrixPilutSolver *) solver);
+
+   /* Set base solver function pointers */
+   base = (hypre_Solver *) *solver;
+   if (base)
+   {
+      hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRPilutSetup;
+      hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRPilutSolve;
+      hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ParCSRPilutDestroy;
+   }
 
    HYPRE_DistributedMatrixPilutSolverInitialize(
       (HYPRE_DistributedMatrixPilutSolver) solver );
@@ -109,12 +120,19 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrixPilutSolver distributed_solver =
       (HYPRE_DistributedMatrixPilutSolver) solver;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    HYPRE_ConvertParCSRMatrixToDistributedMatrix(
       A, &matrix );
 
    HYPRE_DistributedMatrixPilutSolverSetMatrix( distributed_solver, matrix );
 
    HYPRE_DistributedMatrixPilutSolverSetup( distributed_solver );
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
+   }
 
    return hypre_error_flag;
 #endif

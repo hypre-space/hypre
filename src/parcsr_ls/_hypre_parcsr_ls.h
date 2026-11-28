@@ -809,6 +809,9 @@ typedef struct
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver               base;
+
    /* The underlying AMG hierarchy */
    hypre_ParAMGData          *amg_data;
 
@@ -953,6 +956,9 @@ typedef struct hypre_ParFSAIData_struct
  *--------------------------------------------------------------------------*/
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver base;
+
    /* Space dimension (2 or 3) */
    HYPRE_Int dim;
 

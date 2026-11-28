@@ -885,8 +885,15 @@ HYPRE_Int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, HYPRE_Real d)
 void * hypre_AMSCreate(void)
 {
    hypre_AMSData *ams_data;
+   hypre_Solver  *base;
 
    ams_data = hypre_CTAlloc(hypre_AMSData,  1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) ams_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_AMSSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_AMSSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_AMSDestroy;
 
    /* Default parameters */
 
@@ -2946,6 +2953,8 @@ hypre_AMSSetup(void *solver,
 
    HYPRE_Int input_info = 0;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    ams_data -> A = A;
 
    /* Modifications for problems with zero-conductivity regions */
@@ -3748,6 +3757,11 @@ hypre_AMSSetup(void *solver,
    {
       ams_data -> r2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
       ams_data -> g2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
+   }
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
    }
 
    return hypre_error_flag;

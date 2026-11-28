@@ -21,6 +21,12 @@ void *
 hypre_BoomerAMGDDCreate( void )
 {
    hypre_ParAMGDDData  *amgdd_data = hypre_CTAlloc(hypre_ParAMGDDData, 1, HYPRE_MEMORY_HOST);
+   hypre_Solver        *base       = (hypre_Solver*) amgdd_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGDDSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGDDSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_BoomerAMGDDDestroy;
 
    hypre_ParAMGDDDataAMG(amgdd_data) = (hypre_ParAMGData*) hypre_BoomerAMGCreate();
 

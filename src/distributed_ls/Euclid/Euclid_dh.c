@@ -35,6 +35,12 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
      (struct _mpi_interface_dh*)MALLOC_DH(sizeof(struct _mpi_interface_dh)); CHECK_V_ERROR;
   *ctxOUT = ctx;
 
+  /* The interface that creates this object sets the function pointers */
+  hypre_SolverSetup(&ctx->base)   = NULL;
+  hypre_SolverSolve(&ctx->base)   = NULL;
+  hypre_SolverDestroy(&ctx->base) = NULL;
+  hypre_SolverResetIsSetup(&ctx->base);
+
   ctx->isSetup = false;
 
   ctx->rho_init = 2.0;

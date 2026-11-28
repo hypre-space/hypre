@@ -63,6 +63,8 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int               num_requests;
    HYPRE_Int               request_counter;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) amgdd_vdata);
+
    /* Sanity check */
    if (hypre_ParVectorNumVectors(b) > 1)
    {
@@ -106,6 +108,11 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
       }
       hypre_AMGDDCompGridFinalize(amgdd_data);
       hypre_AMGDDCompGridSetupRelax(amgdd_data);
+
+      if (!hypre_error_flag)
+      {
+         hypre_SolverSetIsSetup((hypre_Solver *) amgdd_vdata);
+      }
 
       return hypre_error_flag;
    }
@@ -341,6 +348,11 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    hypre_TFree(nodes_added_on_level, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(status, HYPRE_MEMORY_HOST);
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) amgdd_vdata);
+   }
 
    return hypre_error_flag;
 }

@@ -1300,11 +1300,20 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    hypre_SchwarzData   *schwarz_data = (hypre_SchwarzData*) schwarz_vdata;
    HYPRE_Int variant = hypre_SchwarzDataVariant(schwarz_data);
 
+   hypre_SolverResetIsSetup((hypre_Solver *) schwarz_vdata);
+
    /* Dispatch to overlapping Schwarz if using new variant */
    if (HYPRE_SCHWARZ_IS_OVERLAPPING(variant))
    {
       /* Call overlapping Schwarz setup directly with unified structure */
-      return hypre_SchwarzOverlapSetup(schwarz_data, A, f, u);
+      hypre_SchwarzOverlapSetup(schwarz_data, A, f, u);
+
+      if (!hypre_error_flag)
+      {
+         hypre_SolverSetIsSetup((hypre_Solver *) schwarz_vdata);
+      }
+
+      return hypre_error_flag;
    }
 
    /* Original domain-based Schwarz setup code */
@@ -1384,6 +1393,11 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
 
       hypre_SchwarzDataDomainStructure(schwarz_data) = domain_structure;
       hypre_SchwarzDataPivots(schwarz_data) = pivots;
+   }
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) schwarz_vdata);
    }
 
    return hypre_error_flag;

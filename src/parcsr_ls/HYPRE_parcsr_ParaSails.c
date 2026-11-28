@@ -39,6 +39,9 @@
 /* If code is more mysterious, then it must be good */
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver    base;
+
    hypre_ParaSails obj;
    HYPRE_Int       sym;
    HYPRE_Real      thresh;
@@ -67,7 +70,8 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    return hypre_error_flag;
 #else
 
-   Secret *secret;
+   Secret       *secret;
+   hypre_Solver *base;
 
    secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
@@ -76,6 +80,13 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
       hypre_error(HYPRE_ERROR_MEMORY);
       return hypre_error_flag;
    }
+
+   /* Set base solver function pointers */
+   base = (hypre_Solver *) secret;
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRParaSailsSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParCSRParaSailsSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ParCSRParaSailsDestroy;
+   hypre_SolverResetIsSetup(base);
 
    secret->sym     = 1;
    secret->thresh  = 0.1;
@@ -144,6 +155,8 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    /* The following call will also create the distributed matrix */
 
    HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
@@ -166,6 +179,11 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    }
 
    HYPRE_DistributedMatrixDestroy(mat);
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
+   }
 
    return hypre_error_flag;
 #endif
@@ -417,7 +435,8 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    return hypre_error_flag;
 #else
 
-   Secret *secret;
+   Secret       *secret;
+   hypre_Solver *base;
 
    secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
@@ -426,6 +445,13 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
       hypre_error(HYPRE_ERROR_MEMORY);
       return hypre_error_flag;
    }
+
+   /* Set base solver function pointers */
+   base = (hypre_Solver *) secret;
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParaSailsSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ParaSailsSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ParaSailsDestroy;
+   hypre_SolverResetIsSetup(base);
 
    secret->sym     = 1;
    secret->thresh  = 0.1;
@@ -496,6 +522,8 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
    HYPRE_Int ierr;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
+
    /* The following call will also create the distributed matrix */
 
    ierr = HYPRE_GetError(); HYPRE_ClearAllErrors();
@@ -519,6 +547,11 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    }
 
    HYPRE_DistributedMatrixDestroy(mat);
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) solver);
+   }
 
    return hypre_error_flag;
 #endif

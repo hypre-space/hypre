@@ -147,6 +147,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    char        region_name[1024], level_name[1024];
    char        msg[2048];
 
+   hypre_SolverResetIsSetup((hypre_Solver *) mgr_vdata);
+
    /* Validate user-provided coarse operators before setup opens profiling
       ranges or allocates hierarchy data. */
    num_coarsening_levs = max_num_coarse_levels;
@@ -256,6 +258,11 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_GpuProfilingPopRange();
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
+
+      if (!hypre_error_flag)
+      {
+         hypre_SolverSetIsSetup((hypre_Solver *) mgr_vdata);
+      }
 
       return hypre_error_flag;
    }
@@ -1655,6 +1662,11 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "MGR setup end", 0);
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) mgr_vdata);
+   }
 
    return hypre_error_flag;
 }

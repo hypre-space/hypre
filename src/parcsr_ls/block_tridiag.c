@@ -24,7 +24,16 @@
 void *hypre_BlockTridiagCreate(void)
 {
    hypre_BlockTridiagData *b_data;
+   hypre_Solver           *base;
+
    b_data = hypre_CTAlloc(hypre_BlockTridiagData,  1, HYPRE_MEMORY_HOST);
+   base   = (hypre_Solver*) b_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BlockTridiagSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BlockTridiagSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_BlockTridiagDestroy;
+
    b_data->threshold = 0.0;
    b_data->num_sweeps = 1;
    b_data->relax_type = 6;
@@ -136,6 +145,8 @@ hypre_BlockTridiagSetup(void               *data,
    MPI_Comm                comm;
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) data);
+
    HYPRE_ParCSRMatrixGetComm((HYPRE_ParCSRMatrix) A, &comm);
    index_set1 = b_data->index_set1;
    nrows1 = index_set1[0];
@@ -230,6 +241,12 @@ hypre_BlockTridiagSetup(void               *data,
    b_data->A22 = submatrices[3];
 
    hypre_TFree(submatrices, HYPRE_MEMORY_HOST);
+
+   if (!hypre_error_flag)
+   {
+      hypre_SolverSetIsSetup((hypre_Solver *) data);
+   }
+
    return (0);
 }
 

@@ -135,6 +135,12 @@ HYPRE_EuclidCreate( MPI_Comm comm,
     * create and return a Euclid object
     *-----------------------------------------------------------*/
    Euclid_dhCreate(&eu); HYPRE_EUCLID_ERRCHKA;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup((hypre_Solver *) eu)   = (HYPRE_PtrToSolverFcn)  HYPRE_EuclidSetup;
+   hypre_SolverSolve((hypre_Solver *) eu)   = (HYPRE_PtrToSolverFcn)  HYPRE_EuclidSolve;
+   hypre_SolverDestroy((hypre_Solver *) eu) = (HYPRE_PtrToDestroyFcn) HYPRE_EuclidDestroy;
+
    *solver = (HYPRE_Solver) eu;
 
    END_FUNC_VAL(0)
@@ -283,6 +289,7 @@ HYPRE_EuclidSetup( HYPRE_Solver solver,
    START_FUNC_DH
    Euclid_dh eu = (Euclid_dh)solver;
 
+   hypre_SolverResetIsSetup((hypre_Solver *) solver);
 
 #if 0
 
@@ -310,6 +317,8 @@ HYPRE_EuclidSetup( HYPRE_Solver solver,
 
    Euclid_dhInputHypreMat(eu, A); HYPRE_EUCLID_ERRCHKA;
    Euclid_dhSetup(eu); HYPRE_EUCLID_ERRCHKA;
+
+   hypre_SolverSetIsSetup((hypre_Solver *) solver);
 
    END_FUNC_VAL(0)
 #endif

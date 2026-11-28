@@ -17,6 +17,9 @@
 
 typedef struct
 {
+   /* Base solver data structure */
+   hypre_Solver base;
+
    HYPRE_Int    num_sweeps;
    HYPRE_Int    relax_type;
    HYPRE_Int    *index_set1, *index_set2;
